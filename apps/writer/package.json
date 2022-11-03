@@ -1,0 +1,22 @@
+{
+  "name": "writer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "editor": "*"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.6.4",
+    "vite": "^3.0.0"
+  }
+}

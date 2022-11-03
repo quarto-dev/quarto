@@ -1,6 +1,6 @@
-// utils
-export { setupCounter } from "./utils/counter";
+// apply polyfills
+import polyfill from './polyfill/index';
+polyfill();
 
-// components
-export { Header } from "./components/header";
-export { Counter } from "./components/counter";
+// objects instantiated by the IDE
+export { Editor, UITools } from './editor/editor';

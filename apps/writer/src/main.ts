@@ -1,6 +1,11 @@
 import "./style.css";
 import typescriptLogo from "./typescript.svg";
-import { Header, Counter, setupCounter } from "editor";
+
+import { UITools } from "editor"
+
+const uiTools = new UITools();
+
+console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -10,11 +15,5 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <a href="https://www.typescriptlang.org/" target="_blank">
       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
     </a>
-    ${Header({ title: "Web" })}
-    <div class="card">
-      ${Counter()}
-    </div>
   </div>
 `;
-
-setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);

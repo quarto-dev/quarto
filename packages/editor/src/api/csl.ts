@@ -16,7 +16,6 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { parseYamlNodes } from './yaml';
 import { crossRefTypeToCSLType } from './crossref';
-import { EditorUI } from './ui';
 import { EditorUIImages } from './ui-images';
 
 export interface CSL {
@@ -243,7 +242,6 @@ export function imageForType(images: EditorUIImages, type: string): [string?, st
     case cslTypes.postWeblog:
     case cslTypes.webpage:
       return [images.citations?.web, images.citations?.web_dark];
-    case cslTypes.paperConference:
     case cslTypes.interview:
     case cslTypes.pamphlet:
     case cslTypes.personalCommunication:

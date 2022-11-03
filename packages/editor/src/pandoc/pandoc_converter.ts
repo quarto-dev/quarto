@@ -48,7 +48,7 @@ export interface PandocToProsemirrorResult {
   line_wrapping: PandocLineWrapping;
   unrecognized: string[];
   example_lists: boolean;
-  unparsed_meta: { [key: string]: any };
+  unparsed_meta: { [key: string]: unknown };
 }
 
 export class PandocConverter {

@@ -3,7 +3,6 @@
   "include": ["."],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "target": "ES5",
     "lib": ["ES2019"],
     "jsx": "react"
   }

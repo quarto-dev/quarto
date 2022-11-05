@@ -80,7 +80,8 @@ export class MathPopupPlugin extends Plugin {
                     this.updatePopup(view.state.doc.resolve(pos.pos));
                   }
                   return false;
-                }, kMathPopupInputDebuounceMs),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                }, kMathPopupInputDebuounceMs) as (view: EditorView, event: Event) => boolean,
               }
             : {}),
         },

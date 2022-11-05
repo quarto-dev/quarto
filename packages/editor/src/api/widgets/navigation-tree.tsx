@@ -81,6 +81,8 @@ export const NavigationTree: React.FC<NavigationTreeProps> = props => {
         if (value.key === selectedNode.key) {
           fixedList.current?.scrollToItem(index);
           return true;
+        } else {
+          return false;
         }
       });
     }

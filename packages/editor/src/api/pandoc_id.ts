@@ -22,7 +22,7 @@ export function pandocAutoIdentifier(text: string, asciify: boolean) {
   return (
     text
       // Remove all non-alphanumeric characters, except underscores, hyphens, and periods.
-      .replace(/[!"#$%&')*+,\/:;<=>?@\[\\\]^`{|}~]/g, '') // filterPunct
+      .replace(/[!"#$%&')*+,/:;<=>?@[\\\]^`{|}~]/g, '') // filterPunct
 
       // Replace all spaces with hyphens
       .replace(/\s/g, '-')
@@ -44,7 +44,7 @@ export function gfmAutoIdentifier(text: string, asciify: boolean) {
   }
 
   return text
-    .replace(/[!"#$%&')*+,\.\/:;<=>?@\[\\\]^`{|}~]/g, '') // filterPunct (all but underscore and hyphen)
+    .replace(/[!"#$%&')*+,./:;<=>?@[\\\]^`{|}~]/g, '') // filterPunct (all but underscore and hyphen)
     .replace(/\s/g, '-') // spaceToDash
     .toLowerCase(); // toLower
 }

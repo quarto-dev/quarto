@@ -16,7 +16,6 @@
 import { Node as ProsemirrorNode, Schema, NodeType } from 'prosemirror-model';
 
 import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import { setBlockType } from 'prosemirror-commands';
 
 import { findParentNode } from 'prosemirror-utils';
@@ -95,7 +94,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           tags: (node: ProsemirrorNode) => [node.attrs.format],
           editFn: rawAttribute
             ? () => editRawBlockCommand(ui, pandocCapabilities.output_formats)
-            : () => (state: EditorState) => false,
+            : () => () => false,
         }),
 
         pandoc: {
@@ -113,7 +112,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             });
           },
 
-          tokensFilter: (tokens: PandocToken[], writer: ProsemirrorWriter) => {
+          tokensFilter: (tokens: PandocToken[]) => {
             const filtered: PandocToken[] = [];
             for (let i=0; i<tokens.length; i++) {
               if (isSingleLineHtmlRawBlock(tokens[i]) && 
@@ -188,7 +187,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               embeddedTickRegEx.lastIndex = 0;
               let match: RegExpExecArray | null = null;
                // tslint:disable-next-line no-conditional-assignment
-              while (match = embeddedTickRegEx.exec(node.textContent)) {
+              while ((match = embeddedTickRegEx.exec(node.textContent))) {
                 matches.push(match);
               }
               embeddedTickRegEx.lastIndex = 0;
@@ -218,7 +217,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           group: OmniInsertGroup.Blocks,
           priority: 6,
           image: () =>
-            ui.prefs.darkMode() ? ui.images.omni_insert?.html_block_dark! : ui.images.omni_insert?.html_block!,
+            ui.prefs.darkMode() ? ui.images.omni_insert.html_block_dark : ui.images.omni_insert.html_block,
         }),
       );
 
@@ -230,7 +229,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             group: OmniInsertGroup.Blocks,
             priority: 5,
             image: () =>
-              ui.prefs.darkMode() ? ui.images.omni_insert?.tex_block_dark! : ui.images.omni_insert?.tex_block!,
+              ui.prefs.darkMode() ? ui.images.omni_insert.tex_block_dark : ui.images.omni_insert.tex_block,
           }),
         );
       }
@@ -339,7 +338,7 @@ class FormatRawBlockCommand extends ProsemirrorCommand {
     super(
       id,
       [],
-      (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+      (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         if (!this.isActive(state) && !setBlockType(this.nodeType, { format })(state)) {
           return false;
         }
@@ -374,7 +373,7 @@ class RawBlockCommand extends ProsemirrorCommand {
       description: ui.context.translateText('Raw content block'),
       group: OmniInsertGroup.Blocks,
       priority: 4,
-      image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.raw_block_dark! : ui.images.omni_insert?.raw_block!),
+      image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.raw_block_dark : ui.images.omni_insert.raw_block),
     });
   }
 }

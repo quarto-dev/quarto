@@ -138,7 +138,7 @@ function toCitationListEntry(
     journal: "",
     doi: "",
     image: imageForType(ui.images, cslTypes.book)[0],
-    authors: (_length: number) => {
+    authors: () => {
       return packageInfo.name || "";
     },
     toBibliographySource: async (finalId: string) => {
@@ -161,6 +161,8 @@ async function packageToCSL(packageInfo: RPackageInfo, server: EnvironmentServer
     // a book documenting it), but the first one is by convention the package itself
     const citeInfo = citeInfos[0];
     return packageCitationToCSL(citeInfo);
+  } else {
+    return undefined;
   }
 }
 
@@ -251,7 +253,7 @@ interface PackageSearch {
   search(searchTerm: string): RPackageInfo[];
 }
 
-const searchFields: Fuse.FuseOptionKeyObject[] = [
+const searchFields: Fuse.FuseOptionKeyObject<RPackageInfo>[] = [
   { name: 'name', weight: 30 },
   { name: 'desc', weight: 15 },
   { name: 'version', weight: 5 },

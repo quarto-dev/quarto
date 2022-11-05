@@ -16,7 +16,7 @@
 import React from 'react';
 
 import { createUniqueCiteId } from '../../../api/cite';
-import { CSL, imageForType } from '../../../api/csl';
+import { imageForType } from '../../../api/csl';
 import { DataCiteServer, DataCiteRecord, suggestCiteId, DataCiteCreator } from '../../../api/datacite';
 import { DOIServer } from '../../../api/doi';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
@@ -149,20 +149,20 @@ function toCitationListEntry(
     journal: record.publisher,
     image: imageForType(ui.images, record.type || '')[0],
     doi: record.doi,
-    authors: (length: number) => {
-      return formatAuthors(record.creators || [], length);
+    authors: () => {
+      return formatAuthors(record.creators || []);
     },
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
       const doiResult = await doiServer.fetchCSL(record.doi, -1);
 
-      const csl = doiResult.message as CSL;
+      const csl = doiResult.message!;
       return { ...csl, id: finalId, providerKey };
     },
     isSlowGeneratingBibliographySource: true,
   };
 }
 
-function formatAuthors(authors: DataCiteCreator[], length: number) {
+function formatAuthors(authors: DataCiteCreator[]) {
   return authors.map(creator => creator.fullName).join(',');
 }

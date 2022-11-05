@@ -21,7 +21,7 @@ export interface ZoteroResult {
     | 'notfound' // invalid api key
     | 'nohost' // no internet connectivity
     | 'error'; // unexpected error (details in 'error')
-  message: any | null;
+  message: ZoteroCollection[] | string | null;
   warning: string;
   error: string;
 }

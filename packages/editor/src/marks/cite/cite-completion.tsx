@@ -96,8 +96,8 @@ export function citationCompletionHandler(
 
     completions: citationCompletions(ui, completionProviders, searchIndex),
 
-    filter: (entries: CiteCompletionEntry[], state: EditorState, token: string) => {
-      return filterCitations(token, completionProviders, searchIndex, entries, ui, state.doc);
+    filter: (entries: CiteCompletionEntry[], _state: EditorState, token: string) => {
+      return filterCitations(token, completionProviders, searchIndex, entries);
     },
 
     replace(view: EditorView, pos: number, entry: CiteCompletionEntry | null) {
@@ -125,6 +125,8 @@ export function citationCompletionHandler(
             height: kHeaderHeight,
             message: warningProvider.warningMessage(),
           };
+        } else {
+          return undefined;
         }
       },
       component: CiteCompletionItemView,
@@ -137,14 +139,14 @@ export function citationCompletionHandler(
   };
 }
 
-function filterCitations(token: string, completionProviders: CiteCompletionProvider[], citeSearch: CiteCompletionSearch, entries: CiteCompletionEntry[], ui: EditorUI, doc: ProsemirrorNode) {
+function filterCitations(token: string, _completionProviders: CiteCompletionProvider[], citeSearch: CiteCompletionSearch, entries: CiteCompletionEntry[]) {
   // Empty query or DOI
   if (token.trim().length === 0 || hasDOI(token)) {
     return entries;
   }
   // Filter an exact match - if its exact match to an entry in the bibliography already, skip completion
   // Ignore any punctuation at the end of the token
-  const tokenWithoutEndPunctuation = token.match(/.*[^\,\!\?\.\:]/);
+  const tokenWithoutEndPunctuation = token.match(/.*[^,!?.:]/);
   const completionId = tokenWithoutEndPunctuation ? tokenWithoutEndPunctuation[0] : token;
   if (citeSearch.exactMatch(completionId)) {
     return [];
@@ -184,7 +186,7 @@ function citationCompletions(ui: EditorUI, completionProviders: CiteCompletionPr
         token: parsed.token,
         pos: parsed.pos,
         offset: parsed.offset,
-        completions: async (_state: EditorState) => {
+        completions: async () => {
 
           // If all providers have entries already loaded, we can use those and stream any updates
           const hasCurrentEntries = completionProviders.every(provider => provider.currentEntries());

@@ -135,7 +135,7 @@ export function fixupTableWidths(view: EditorView) {
         const colWidths = colpercents.map(pct => Math.floor(pct * containerWidth));
 
         // for each row
-        table.node.forEach((rowNode, rowOffset, r) => {
+        table.node.forEach((rowNode, rowOffset) => {
           // for each cell
           rowNode.forEach((cellNode, cellOffset, c) => {
             const cellPos = table.pos + 1 + rowOffset + 1 + cellOffset;

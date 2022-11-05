@@ -53,7 +53,7 @@ export function xrefCompletionHandler(ui: EditorUI, server: XRefServer): Complet
       }
     },
 
-    replacement(schema: Schema, xref: XRef | null): string | ProsemirrorNode | null {
+    replacement(_schema: Schema, xref: XRef | null): string | ProsemirrorNode | null {
       if (xref) {
         return xrefKey(xref);
       } else {
@@ -75,7 +75,7 @@ export function xrefCompletionHandler(ui: EditorUI, server: XRefServer): Complet
 class FuseIndex {
   private fuse: Fuse<XRef>;
 
-  private keys: Fuse.FuseOptionKeyObject[] = [
+  private keys: Fuse.FuseOptionKeyObject<void>[] = [
     { name: 'id', weight: 20 },
     { name: 'type', weight: 1 },
     { name: 'title', weight: 1 },
@@ -96,7 +96,7 @@ class FuseIndex {
     const colonLoc = query.indexOf(':');
     if (colonLoc !== -1) {
       const prefix = query.slice(0, colonLoc);
-      if (kXRefTypes.hasOwnProperty(prefix)) {
+      if (Object.prototype.hasOwnProperty.call(kXRefTypes,prefix)) {
         type = prefix;
         if (query.length > type.length + 1) {
           typeQuery = query.slice(colonLoc + 1);
@@ -171,7 +171,7 @@ function xrefCompletions(ui: EditorUI, server: XRefServer, index: FuseIndex) {
 function xrefView(ui: EditorUI): React.FC<XRef> {
   return (xref: XRef) => {
     const type = kXRefTypes[xref.type];
-    const image = type?.image(ui) || ui.images.omni_insert?.generic!;
+    const image = type?.image(ui) || ui.images.omni_insert.generic;
 
     return (
       <CompletionItemView
@@ -187,7 +187,7 @@ function xrefView(ui: EditorUI): React.FC<XRef> {
 }
 
 const kGenericType = {
-  image: (ui: EditorUI) => ui.images.omni_insert?.generic!,
+  image: (ui: EditorUI) => ui.images.omni_insert.generic,
 };
 
 const kEqType = {

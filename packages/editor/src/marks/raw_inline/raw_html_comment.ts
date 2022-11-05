@@ -62,7 +62,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             },
           ],
           toDOM(mark: Mark) {
-            const attr: any = {
+            const attr: Record<string,unknown> = {
               class:
                 'raw-html-comment pm-fixedwidth-font ' +
                 (mark.attrs.editing ? 'pm-comment-color pm-comment-background-color' : 'pm-light-text-color') +
@@ -185,7 +185,7 @@ export class InsertHTMLCommentCommand extends ProsemirrorCommand {
         description: ui.context.translateText('Editing comment'),
         group: OmniInsertGroup.Content,
         priority: 3,
-        image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.comment_dark! : ui.images.omni_insert?.comment!),
+        image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.comment_dark : ui.images.omni_insert.comment),
       },
     );
   }

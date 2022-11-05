@@ -100,7 +100,7 @@ const extension = (context: ExtensionContext): Extension => {
               tag: 'li',
               getAttrs: (dom: Node | string) => {
                 const el = dom as Element;
-                const attrs: any = {};
+                const attrs: Record<string,unknown> = {};
                 if (capabilities.tasks && el.hasAttribute('data-checked')) {
                   attrs.checked = el.getAttribute('data-checked') === 'true';
                 }
@@ -109,7 +109,7 @@ const extension = (context: ExtensionContext): Extension => {
             },
           ],
           toDOM(node) {
-            const attrs: any = {
+            const attrs: Record<string,unknown> = {
               class: 'pm-list-item',
             };
             if (capabilities.tasks && node.attrs.checked !== null) {
@@ -133,7 +133,7 @@ const extension = (context: ExtensionContext): Extension => {
               tag: 'ul',
               getAttrs: (dom: Node | string) => {
                 const el = dom as Element;
-                const attrs: any = {};
+                const attrs: Record<string,unknown> = {};
                 if (el.hasAttribute('data-tight')) {
                   attrs.tight = true;
                 }
@@ -179,7 +179,7 @@ const extension = (context: ExtensionContext): Extension => {
               getAttrs(dom: Node | string) {
                 const el = dom as Element;
 
-                const attrs: any = {};
+                const attrs: Record<string,unknown> = {};
                 attrs.tight = el.hasAttribute('data-tight');
 
                 if (capabilities.order) {
@@ -245,7 +245,7 @@ const extension = (context: ExtensionContext): Extension => {
       },
     ],
 
-    plugins: (schema: Schema) => {
+    plugins: () => {
       const plugins: Plugin[] = [];
       if (capabilities.tasks) {
         plugins.push(
@@ -393,7 +393,7 @@ function bulletListOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('List using bullets for items'),
     group: OmniInsertGroup.Common,
     priority: 4,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.bullet_list_dark! : ui.images.omni_insert?.bullet_list!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.bullet_list_dark : ui.images.omni_insert.bullet_list),
   };
 }
 
@@ -404,7 +404,7 @@ function orderedListOmniInsert(ui: EditorUI) {
     group: OmniInsertGroup.Common,
     priority: 3,
     image: () =>
-      ui.prefs.darkMode() ? ui.images.omni_insert?.ordered_list_dark! : ui.images.omni_insert?.ordered_list!,
+      ui.prefs.darkMode() ? ui.images.omni_insert.ordered_list_dark : ui.images.omni_insert.ordered_list,
   };
 }
 

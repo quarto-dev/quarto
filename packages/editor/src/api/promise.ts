@@ -16,7 +16,7 @@
 interface PendingPromise<T> {
   promise: () => Promise<T>;
   resolve: (result: T) => void;
-  reject: (reason: any) => void;
+  reject: (reason: unknown) => void;
 }
 
 export class PromiseQueue<T = unknown> {

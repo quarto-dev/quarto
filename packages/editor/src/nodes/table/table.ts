@@ -90,7 +90,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       tableRowNode,
     ],
 
-    commands: (_schema: Schema) => {
+    commands: () => {
       const commands = [
         new ProsemirrorCommand(
           EditorCommandId.Table,
@@ -160,7 +160,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       return [fixupTableWidths(view)];
     },
 
-    appendTransaction: (_schema: Schema) => {
+    appendTransaction: () => {
       return [
         {
           name: 'table-repair',

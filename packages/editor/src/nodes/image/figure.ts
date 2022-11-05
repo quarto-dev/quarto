@@ -85,7 +85,7 @@ const extension = (context: ExtensionContext): Extension => {
           },
         },
         pandoc: {
-          writer: imagePandocOutputWriter(true, ui),
+          writer: imagePandocOutputWriter(true),
 
           // intercept  paragraphs with a single image and process them as figures
           blockReader: (schema: Schema, tok: PandocToken, writer: ProsemirrorWriter) => {
@@ -93,8 +93,7 @@ const extension = (context: ExtensionContext): Extension => {
             const handleHTMLImage = (html: string) => {
               const attrs = imageAttrsFromHTML(html);
               if (attrs) {
-                attrs.raw = true;
-                writer.addNode(schema.nodes.figure, attrs, []);
+                writer.addNode(schema.nodes.figure, { ...attrs, raw: true }, []);
                 return true;
               } else {
                 return false;
@@ -128,7 +127,7 @@ const extension = (context: ExtensionContext): Extension => {
       },
     ],
 
-    fixups: (_schema: Schema) => {
+    fixups: () => {
       return [
         (tr: Transaction, fixupContext: FixupContext) => {
           if (fixupContext === FixupContext.Load) {
@@ -152,7 +151,7 @@ const extension = (context: ExtensionContext): Extension => {
 
     baseKeys: figureKeys,
 
-    plugins: (schema: Schema) => {
+    plugins: () => {
       return [...imageNodeViewPlugins('figure', ui, format, events, pandocExtensions)];
     },
   };
@@ -195,7 +194,7 @@ function imagesToFiguresTransform(tr: Transform) {
         !posHasProhibitedFigureParent(schema, imagePos)
       ) {
         // figure attributes
-        const attrs = image.node.attrs;
+        let attrs = image.node.attrs;
 
         // extract linkTo from link mark (if any)
         if (schema.marks.link.isInSet(image.node.marks)) {
@@ -205,7 +204,7 @@ function imagesToFiguresTransform(tr: Transform) {
             schema.marks.link,
           );
           if (linkAttrs && linkAttrs.href) {
-            attrs.linkTo = linkAttrs.href;
+            attrs = { ...attrs, linkTo: linkAttrs.href };
           }
         }
 

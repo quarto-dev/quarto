@@ -13,9 +13,9 @@
  *
  */
 
-import { Mark, Schema, Fragment, Node as ProsemirrorNode, Slice, ResolvedPos } from 'prosemirror-model';
+import { Mark, Schema, Fragment, Node as ProsemirrorNode, Slice } from 'prosemirror-model';
 import { InputRule } from 'prosemirror-inputrules';
-import { EditorState, Transaction, Plugin, PluginKey, Selection } from 'prosemirror-state';
+import { EditorState, Transaction, Plugin, PluginKey } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
 import uniqby from 'lodash.uniqby';
@@ -129,8 +129,9 @@ const extension = (context: ExtensionContext): Extension | null => {
               priority: 5
             },
           ],
-          toDOM(mark: Mark) {
-            return { '0': 'span', '1': { class: 'cite' } };
+          toDOM() {
+            return ['span', { class: 'cite' } ]
+         
           },
         },
         pandoc: {
@@ -227,7 +228,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               priority: 10
             },
           ],
-          toDOM(mark: Mark) {
+          toDOM() {
             return ['span', { class: 'cite-id pm-link-text-color pm-fixedwidth-font' }];
           },
         },
@@ -260,7 +261,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       },
     ],
 
-    commands: (_schema: Schema) => {
+    commands: () => {
       return [new InsertCitationCommand(ui, context.events, bibliographyManager, context.server)];
     },
 
@@ -311,13 +312,15 @@ const extension = (context: ExtensionContext): Extension | null => {
           // 'break' cite marks if they are no longer valid. note that this will still preserve
           // the mark up to the length that it is valid. 
           name: 'cite-marks',
-          filter: (node: ProsemirrorNode, transactions: Transaction[]) => {
+          filter: (node: ProsemirrorNode, transactions: readonly Transaction[]) => {
 
             // if the transaction added any cite id marks then we need to lay off
             // (mostly so that input rules can be reversed)
             if (transactions.some(trans => trans.steps.some(step => {
               if (step instanceof AddMarkStep) {
-                return (step as any).mark.type === schema.marks.cite_id;
+                return step.mark.type === schema.marks.cite_id;
+              } else {
+                return false;
               }
             }))) {
               return false;
@@ -430,14 +433,14 @@ function handlePaste(ui: EditorUI, bibManager: BibliographyManager, server: Pand
 
 // create a cite_id within a citation when the @ sign is typed
 function citeIdInputRule(schema: Schema) {
-  return new InputRule(/@$/, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(/@$/, (state: EditorState, match: string[], start: number) => {
     if (!markIsActive(state, schema.marks.cite_id)) {
       const { parent, parentOffset } = state.selection.$head;
       const text = match[0] + parent.textContent.slice(parentOffset);
       const textBefore = parent.textContent.slice(0, parentOffset);
 
       // reject unless the right prefix is there
-      if (textBefore.length && !textBefore.match(/[\xA0 \t\-\[]$/)) {
+      if (textBefore.length && !textBefore.match(/[\xA0 \t\-[]$/)) {
         return null;
       }
 
@@ -808,7 +811,7 @@ export async function ensureSourcesInBibliography(
 
   if (proceedWithInsert) {
     await Promise.all(
-      sources.map(async (source, i) => {
+      sources.map(async (source) => {
         if (source.id) {
           // Crossref sometimes provides invalid json for some entries. Sanitize it for citeproc
           const cslToWrite = sanitizeForCiteproc(source);
@@ -827,7 +830,7 @@ export async function ensureSourcesInBibliography(
           }
 
           if (!bibliographyFile.isProject) {
-            ensureBibliographyFileForDoc(tr, bibliographyFile.displayPath, ui);
+            ensureBibliographyFileForDoc(tr, bibliographyFile.displayPath);
           }
         }
       }),

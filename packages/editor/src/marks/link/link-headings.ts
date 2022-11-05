@@ -43,12 +43,14 @@ export function linkHeadingsPostprocessor(doc: ProsemirrorNode) {
         doc.nodesBetween(markRange.from, markRange.to, node => {
           const linkMark = node.marks.find(m => m.type === schema.marks.link);
           if (linkMark) {
-            linkMark.attrs.heading = matchedHeading.node.textContent;
+            // TURBO: this never worked anyway? violates setting of readonly
+            // linkMark.attrs.heading = matchedHeading.node.textContent;
           }
         });
 
         // update the heading to indicate it has a named link to it
-        matchedHeading.node.attrs.link = linkText;
+        // TURBO: this never worked anyway? violates setting of readonly
+        // matchedHeading.node.attrs.link = linkText;
       }
     }
   });
@@ -61,7 +63,7 @@ export function syncHeadingLinksAppendTransaction() {
   return {
     name: 'sync-heading-links',
     nodeFilter: (node: ProsemirrorNode) =>
-      node.type === node.type.schema.nodes.heading || node.type.schema.marks.link.isInSet(node.marks),
+      (node.type === node.type.schema.nodes.heading) || !!node.type.schema.marks.link.isInSet(node.marks),
     append: (tr: Transaction) => {
       // alias schema
       const schema = tr.doc.type.schema;

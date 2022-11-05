@@ -13,7 +13,7 @@
  *
  */
 
-import { Mark, Fragment, Schema, DOMOutputSpec } from 'prosemirror-model';
+import { Mark, Fragment, DOMOutputSpec, Attrs } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
@@ -28,7 +28,7 @@ import {
   pandocAttrParseDom,
   pandocAttrToDomAttr,
   kSpanAttr,
-  kSpanChildren,
+  kSpanChildren
 } from '../api/pandoc_attr';
 
 const extension = (context: ExtensionContext) => {
@@ -49,7 +49,7 @@ const extension = (context: ExtensionContext) => {
             {
               tag: 'span[data-span="1"]',
               getAttrs(dom: Node | string) {
-                const attrs: {} = { 'data-span': 1 };
+                const attrs: Attrs = { 'data-span': 1 };
                 return {
                   ...attrs,
                   ...pandocAttrParseDom(dom as Element, attrs),
@@ -94,7 +94,7 @@ const extension = (context: ExtensionContext) => {
       },
     ],
 
-    commands: (_schema: Schema) => {
+    commands: () => {
       return [new SpanCommand(ui)];
     },
   };
@@ -118,7 +118,7 @@ class SpanCommand extends ProsemirrorCommand {
 
       async function asyncEditSpan() {
         if (dispatch) {
-          let attr: { [key: string]: any } = { id: null, classes: [], keyvalue: [] };
+          let attr: Attrs = { id: null, classes: [], keyvalue: [] };
           if (markIsActive(state, schema.marks.span)) {
             attr = getMarkAttrs(state.doc, state.selection, schema.marks.span);
           }

@@ -59,7 +59,7 @@ export function crossrefSourcePanel(
     search: async (searchTerm: string, _selectedNode: NavigationTreeNode, existingCitationIds: string[]) => {
       try {
         const works = await server.works(searchTerm);
-        const existingSources = bibliographyManager.localSources();
+        bibliographyManager.localSources();
 
         const dedupeCitationIds = existingCitationIds;
         const citationEntries = works.items.map(work => {
@@ -139,7 +139,7 @@ function toCitationListEntry(
       // Generate CSL using the DOI
       const doiResult = await doiServer.fetchCSL(crossrefWork.DOI, -1);
 
-      const csl = doiResult.message as CSL;
+      const csl = doiResult.message!;
       return { ...csl, id: finalId, providerKey };
     },
     isSlowGeneratingBibliographySource: true,

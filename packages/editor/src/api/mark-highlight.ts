@@ -13,7 +13,7 @@
  *
  */
 
-import { PluginKey, Plugin, EditorState, Transaction } from 'prosemirror-state';
+import { PluginKey, Plugin, EditorState, Transaction, EditorStateConfig } from 'prosemirror-state';
 import { DecorationSet, Decoration } from 'prosemirror-view';
 import { Node as ProsemirrorNode, MarkType } from 'prosemirror-model';
 import { findChildrenByMark } from 'prosemirror-utils';
@@ -24,7 +24,7 @@ import { forChangedNodes } from './transaction';
 
 export type MarkHighligher = (
   text: string,
-  attrs: { [key: string]: any },
+  attrs: { [key: string]: unknown },
   range: { from: number; to: number },
 ) => Decoration[];
 
@@ -60,7 +60,7 @@ export function markHighlightPlugin(key: PluginKey<DecorationSet>, markType: Mar
     key,
     state: {
       // initialize by highlighting the entire document
-      init(_config: { [key: string]: any }, instance: EditorState) {
+      init(_config: EditorStateConfig, instance: EditorState) {
         return decorationsForDoc(instance.doc);
       },
 
@@ -75,8 +75,8 @@ export function markHighlightPlugin(key: PluginKey<DecorationSet>, markType: Mar
         if (
           tr.steps.some(
             step =>
-              (step instanceof AddMarkStep && (step as any).mark.type === markType) ||
-              (step instanceof RemoveMarkStep && (step as any).mark.type === markType),
+              (step instanceof AddMarkStep && step.mark.type === markType) ||
+              (step instanceof RemoveMarkStep && step.mark.type === markType),
           )
         ) {
           // rehighlight entire doc

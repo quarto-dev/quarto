@@ -54,7 +54,7 @@ function imagePaste(ui: EditorUI) {
           return true;
         }
         // raw image paste (e.g. from an office doc)
-      } else if (clipboardEvent.clipboardData.types.includes('application/x-qt-image')) {
+      } else if (clipboardEvent.clipboardData.types.includes(kApplicationQtImage)) {
 
         // don't process excel sheets (we want to use their html representation)
         const kTextHtml = "text/html";
@@ -118,7 +118,7 @@ function imageDrop(ui: EditorUI) {
   };
 }
 
-function handleImageUris(view: EditorView, pos: number, event: Event, uris: string[], ui: EditorUI): boolean {
+function handleImageUris(view: EditorView, pos: number, _event: Event, uris: string[], ui: EditorUI): boolean {
   // filter out images
   const imageUris = uris.filter(uri => {
     // get extension and check it it's an image

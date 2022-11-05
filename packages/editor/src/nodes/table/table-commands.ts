@@ -106,7 +106,7 @@ export function insertTableOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Content in rows and columns'),
     group: OmniInsertGroup.Lists,
     priority: 1,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.table_dark! : ui.images.omni_insert?.table!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.table_dark : ui.images.omni_insert.table),
   };
 }
 
@@ -229,7 +229,7 @@ export class TableToggleCaptionCommand extends ProsemirrorCommand {
     super(
       EditorCommandId.TableToggleCaption,
       [],
-      (state: EditorState, dispatch?: (tr: Transaction<any>, view?: EditorView) => void) => {
+      (state: EditorState, dispatch?: (tr: Transaction, view?: EditorView) => void) => {
         if (!isInTable(state)) {
           return false;
         }
@@ -315,7 +315,7 @@ export class TableColumnAlignmentCommand extends ProsemirrorCommand {
   private readonly align: CssAlignment | null;
 
   constructor(id: EditorCommandId, align: CssAlignment | null) {
-    super(id, [], (state: EditorState, dispatch?: (tr: Transaction<any>) => void) => {
+    super(id, [], (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       if (!isInTable(state)) {
         return false;
       }

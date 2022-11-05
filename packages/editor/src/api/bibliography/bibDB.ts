@@ -12,10 +12,12 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
+
+
 import {
   BibFieldTypes,
-  NameDictObject,
   NodeArray,
+  NameDictObject,
   RangeArray,
   BibField,
   BibLatexExporter,
@@ -35,10 +37,10 @@ export interface EntryObject {
   csl_type?: string;
   bib_type: string;
   entry_key: string;
-  fields: Record<string, any>;
+  fields: Record<string, unknown>;
   incomplete?: boolean;
-  unexpected_fields?: Record<string, any>;
-  unknown_fields?: Record<string, any>;
+  unexpected_fields?: Record<string, unknown>;
+  unknown_fields?: Record<string, unknown>;
 }
 
 // This is our wrapper of a typescript BibLaTeX exporter
@@ -94,9 +96,9 @@ function cslToBibDB(id: string, csl: CSL): BibDB | undefined {
     fields: {},
   };
 
-  const enumerableCSL = csl as any;
+  const enumerableCSL = csl as Record<string,string | unknown>;
   sortedKeys(csl).forEach(key => {
-    const value: any = enumerableCSL[key];
+    const value: unknown = enumerableCSL[key];
 
     const bibFieldDatas = bibFieldForValue(key, csl.type);
 
@@ -105,9 +107,9 @@ function cslToBibDB(id: string, csl: CSL): BibDB | undefined {
         const bibFieldKey = bibFieldData[0];
         const bibField = bibFieldData[1];
         const type = bibField.type;
-        let nodeValue: any;
+        let nodeValue: unknown;
         switch (type) {
-          case 'f_date':
+          case 'f_date': {
             // f_date = // EDTF 1.0 level 0/1 compliant string. (2000-12-31)
             const cslDate = value as CSLDate;
             if (cslDate) {
@@ -117,19 +119,20 @@ function cslToBibDB(id: string, csl: CSL): BibDB | undefined {
               }
             }
             break;
+          }
           case 'f_integer':
           case 'f_literal':
           case 'f_long_literal':
           case 'f_title':
             // f_integer, f_literal, f_long_literal, f_title = [nodeValue]
             // l_literal = [nodeValue]
-            if (value && value.length > 0) {
+            if (typeof(value) === "string" && value.length > 0) {
               nodeValue = textNodes(value);
             }
             break;
           case 'l_literal':
             // l_literal = [NodeArray]
-            if (value && value.length > 0) {
+            if (typeof(value) === "string" && value.length > 0) {
               nodeValue = [textNodes(value)];
             }
             break;
@@ -137,17 +140,20 @@ function cslToBibDB(id: string, csl: CSL): BibDB | undefined {
             // f_key: string | NodeArray (string points to another key
             // name in BibObject whose value is used for this key)
             if (bibField.options) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const options = bibField.options as any;
               Object.keys(options).find(optionKey => {
-                const optionValue: any = options[optionKey];
+                const optionValue = options[optionKey] as Record<string,unknown>;
                 if (optionValue.csl === value) {
                   nodeValue = optionKey;
                   return true;
+                } else {
+                  return false;
                 }
               });
 
               if (!nodeValue) {
-                nodeValue = textNodes(value);
+                nodeValue = textNodes(String(value));
               }
             }
 
@@ -155,47 +161,52 @@ function cslToBibDB(id: string, csl: CSL): BibDB | undefined {
           case 'l_key':
             // l_key, list of [string | NodeArray]
             if (bibField.options) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const options = bibField.options as any;
               Object.keys(options).find(optionKey => {
-                const optionValue: any = options[optionKey];
+                const optionValue = options[optionKey];
                 if (optionValue.csl === value) {
                   nodeValue = [optionKey];
                   return true;
+                } else {
+                  return false;
                 }
               });
 
-              if (!nodeValue && value && value.length > 0) {
+              if (!nodeValue && typeof(value) === "string" && value.length > 0) {
                 nodeValue = textNodes(value);
               }
             }
             break;
-          case 'l_range':
-            // l_range Array<RangeArray>
-            const valueStr = value as string;
-            const parts = valueStr.split('-');
-            const range = rangeArray(parts);
-            if (range) {
-              nodeValue = [range];
+          case 'l_range': {
+              // l_range Array<RangeArray>
+              const valueStr = value as string;
+              const parts = valueStr.split('-');
+              const range = rangeArray(parts);
+              if (range) {
+                nodeValue = [range];
+              }
+              break;
             }
-            break;
           case 'f_uri':
           case 'f_verbatim':
             // f_uri, f_verbatim: string
             nodeValue = value;
             break;
-          case 'l_name':
-            // l_name Array<NameDictObject>
-            const names = value as CSLName[];
-            nodeValue = names.map(name => {
-              const nameDict: NameDictObject = {
-                family: name.family ? textNodes(name.family) : undefined,
-                given: name.given ? textNodes(name.given) : undefined,
-                literal: name.literal ? textNodes(name.literal) : undefined,
-              };
-              return nameDict;
-            });
+          case 'l_name': {
+              // l_name Array<NameDictObject>
+              const names = value as CSLName[];
+              nodeValue = names.map(name => {
+                const nameDict: NameDictObject = {
+                  family: name.family ? textNodes(name.family) : undefined,
+                  given: name.given ? textNodes(name.given) : undefined,
+                  literal: name.literal ? textNodes(name.literal) : undefined,
+                };
+                return nameDict;
+              });
 
-            break;
+              break;
+            }
           case 'l_tag':
             // l_tag: string[]
             nodeValue = [value];
@@ -267,6 +278,8 @@ function rangeArray(parts: string[]): RangeArray | undefined {
     return [textNodes(parts[0])];
   } else if (parts.length === 2) {
     return [textNodes(parts[0]), textNodes(parts[1])];
+  } else {
+    return undefined;
   }
 }
 
@@ -274,9 +287,7 @@ function rangeArray(parts: string[]): RangeArray | undefined {
 function bibTypeForCSL(cslType: string): [string, BibType] {
   const key = Object.keys(BibTypes).find(bibTypeKey => {
     const bibType = BibTypes[bibTypeKey];
-    if (bibType.csl === cslType) {
-      return bibTypeKey;
-    }
+    return bibType.csl === cslType;
   });
 
   if (key) {
@@ -312,9 +323,7 @@ function bibFieldForValue(cslKey: string, cslType: string): Array<[string, BibFi
   const keys = Object.keys(BibFieldTypes).filter(bibFieldKey => {
     const bibField = BibFieldTypes[bibFieldKey];
     const cslFieldName = bibField.csl;
-    if (cslFieldName && cslFieldName === cslKey) {
-      return bibField;
-    }
+    return cslFieldName && cslFieldName === cslKey;
   });
 
   // Get the field and return
@@ -323,6 +332,8 @@ function bibFieldForValue(cslKey: string, cslType: string): Array<[string, BibFi
       const bibField = BibFieldTypes[key];
       return [key, bibField];
     });
+  } else {
+    return undefined;
   }
 }
 
@@ -351,7 +362,7 @@ function sortedKeys(csl: CSL) {
   keySortOrder.page = pos++;
   keySortOrder.publisher = pos++;
 
-  const enumerableCSL = csl as any;
+  const enumerableCSL = csl as Record<string,unknown>;
   const keys = Object.keys(enumerableCSL);
   const sorted = keys.sort((a, b) => {
     const aOrder = keySortOrder[a.toLowerCase()];

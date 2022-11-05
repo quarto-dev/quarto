@@ -15,7 +15,6 @@
 
 import { Node as ProsemirrorNode, NodeType } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import { GapCursor } from 'prosemirror-gapcursor';
 
 import {
@@ -63,7 +62,7 @@ export function canInsertRmdChunk(state: EditorState) {
 }
 
 export function insertRmdChunk(chunkPlaceholder: string) {
-  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const schema = state.schema;
 
     if (
@@ -150,7 +149,7 @@ export function previousRmdChunks(state: EditorState, pos: number, filter?: (chu
 export function rmdChunk(code: string): EditorRmdChunk | null {
   let lines = code.trimLeft().split('\n');
   if (lines.length > 0) {
-    const meta = lines[0].replace(/^[\s`\{]*(.*?)\}?\s*$/, '$1');
+    const meta = lines[0].replace(/^[\s`{]*(.*?)\}?\s*$/, '$1');
     const matchLang = meta.match(/\w+/);
     const lang = matchLang ? matchLang[0] : '';
 
@@ -245,7 +244,7 @@ export function rmdChunkEngineAndLabel(text: string) {
     // ```{r}
     // #| label: label
     // 
-    for (var line of text.split("\n")) {
+    for (const line of text.split("\n")) {
       const labelMatch = line.match(/^#\|\s*label:\s+(.*)$/);
       if (labelMatch) {
         return {

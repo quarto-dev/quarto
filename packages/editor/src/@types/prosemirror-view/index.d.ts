@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Note that we embedded the prosemirror-view types b/c the prosemirror-inputrules types
 // are still pointing at an older set or prosemirror-view types that use the Event rather
 // than ClipboardEvent type in handlePaste. This file is copied from:

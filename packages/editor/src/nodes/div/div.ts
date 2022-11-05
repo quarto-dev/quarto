@@ -70,7 +70,7 @@ const extension = (context: ExtensionContext) : Extension | null => {
             {
               tag: 'div[data-div="1"]',
               getAttrs(dom: Node | string) {
-                const attrs: {} = { 'data-div': 1 };
+                const attrs: { [key: string]: string | null } = { 'data-div': '1' };
                 return {
                   ...attrs,
                   ...pandocAttrParseDom(dom as Element, attrs),
@@ -139,7 +139,7 @@ const extension = (context: ExtensionContext) : Extension | null => {
           description: ui.context.translateText('Block containing other content'),
           group: OmniInsertGroup.Common,
           priority: 6,
-          image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.div_dark! : ui.images.omni_insert?.div!),
+          image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.div_dark : ui.images.omni_insert.div),
         }),
       ];
 
@@ -158,9 +158,9 @@ const extension = (context: ExtensionContext) : Extension | null => {
       return [
         new Plugin({
           key: new PluginKey("div-selection"),
-          appendTransaction: (_transactions: Transaction[], _oldState: EditorState, newState: EditorState) => {
+          appendTransaction: (_transactions: readonly Transaction[], _oldState: EditorState, newState: EditorState) => {
             if (newState.selection.empty) {
-              return;
+              return undefined;
             }
             const divNode = findParentNodeOfType(schema.nodes.div)(newState.selection);
             if (divNode && 
@@ -170,6 +170,8 @@ const extension = (context: ExtensionContext) : Extension | null => {
               const sel = TextSelection.create(tr.doc, divNode.start, divNode.start + divNode.node.nodeSize - 1);
               tr.setSelection(sel);
               return tr;
+            } else {
+              return undefined;
             }
           }
         }),

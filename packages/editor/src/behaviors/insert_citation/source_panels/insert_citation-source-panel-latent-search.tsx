@@ -89,7 +89,7 @@ export const CitationSourceLatentSearchPanel = React.forwardRef<HTMLDivElement, 
       performSearch(props.searchTerm);
     };
 
-    const onPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const onPaste = () => {
       pasted.current = true;
     };
 

@@ -116,7 +116,7 @@ export interface BibliographySourceWithCollections extends BibliographySource {
 
 // The fields and weights that will indexed and searched
 // when searching bibliographic sources
-const kFields: Fuse.FuseOptionKeyObject[] = [
+const kFields: Fuse.FuseOptionKeyObject<void>[] = [
   { name: 'id', weight: 30 },
   { name: 'author.family', weight: 15 },
   { name: 'author.literal', weight: 15 },
@@ -265,6 +265,8 @@ export class BibliographyManager {
     const warningProvider = this.providers.find(provider => provider.warningMessage());
     if (warningProvider) {
       return warningProvider.warningMessage();
+    } else {
+      return undefined;
     }
   }
 
@@ -273,7 +275,11 @@ export class BibliographyManager {
       const warningProvider = this.providers.find(prov => prov.key === providerKey);
       if (warningProvider) {
         return warningProvider.warningMessage();
+      } else {
+        return undefined;
       }
+    } else {
+      return undefined;
     }
   }
 
@@ -336,7 +342,7 @@ export class BibliographyManager {
       // grow to 270ms to search for 20 character string
       // grow to 1060ms to search for 40 character string
       const searchResults = this.searchIndex.search(query, { ...kSearchOptions, limit });
-      const items = searchResults.map((result: { item: any }) => result.item);
+      const items = searchResults.map((result: { item: BibliographySourceWithCollections }) => result.item);
 
       // Filter out any non local items if this isn't a writable bibliography
       const filteredItems = this.allowsWrites()
@@ -371,7 +377,7 @@ export class BibliographyManager {
 
     if (this.searchIndex) {
       const searchResults = this.searchIndex.search(q, { limit });
-      return searchResults.map((result: { item: any }) => result.item);
+      return searchResults.map((result: { item: BibliographySourceWithCollections }) => result.item);
     } else {
       return [];
     }
@@ -410,7 +416,7 @@ export class BibliographyManager {
 
     if (this.searchIndex) {
       const searchResults = this.searchIndex.search(q, { limit });
-      return searchResults.map((result: { item: any }) => result.item);
+      return searchResults.map((result: { item: BibliographySourceWithCollections }) => result.item);
     } else {
       return [];
     }

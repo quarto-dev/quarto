@@ -13,7 +13,7 @@
  *
  */
 
-import { ResolvedPos } from 'prosemirror-model';
+
 import { EditorView } from 'prosemirror-view';
 
 import { editingRootNodeClosestToPos } from '../node';
@@ -89,10 +89,4 @@ export function textRangePopupDecorationPosition(
     style,
     key,
   };
-}
-
-function getEditingBox(view: EditorView, pos$: ResolvedPos) {
-  const editingNode = editingRootNodeClosestToPos(pos$);
-  const editingEl = view.domAtPos(editingNode!.pos + 1).node as HTMLElement;
-  return editingEl.getBoundingClientRect();
 }

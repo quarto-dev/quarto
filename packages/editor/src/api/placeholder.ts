@@ -15,7 +15,7 @@
 
 import { Node as ProsemirrorNode, NodeType } from 'prosemirror-model';
 import { EditorState, Transaction, Plugin, PluginKey } from 'prosemirror-state';
-import { DecorationSet, Decoration, EditorView } from 'prosemirror-view';
+import { DecorationSet, Decoration } from 'prosemirror-view';
 
 import { findParentNode } from 'prosemirror-utils';
 
@@ -27,10 +27,10 @@ export function emptyNodePlaceholderPlugin(nodeType: NodeType, placeholder: (nod
   return new Plugin<DecorationSet>({
     key: pluginKey,
     state: {
-      init(_config: { [key: string]: any }, instance: EditorState) {
+      init() {
         return DecorationSet.empty;
       },
-      apply(tr: Transaction, set: DecorationSet, oldState: EditorState, newState: EditorState) {
+      apply(tr: Transaction) {
         // check for empty parent of our type
         const emptyNode = findParentNode(node => node.type === nodeType && node.childCount === 0)(tr.selection);
         if (emptyNode && (!filter || filter(tr))) {
@@ -50,7 +50,7 @@ export function emptyNodePlaceholderPlugin(nodeType: NodeType, placeholder: (nod
 }
 
 export function placeholderDecoration(pos: number, text: string) {
-  return Decoration.widget(pos, (_view: EditorView, _getPos: () => number) => {
+  return Decoration.widget(pos, () => {
     const placeholder = window.document.createElement('span');
     placeholder.classList.add('pm-placeholder-text-color');
     placeholder.innerText = text;
@@ -59,7 +59,7 @@ export function placeholderDecoration(pos: number, text: string) {
 }
 
 export function iconAndTextPlaceholderDecoration(pos: number, icon: string, text: string) {
-  return Decoration.widget(pos, (_view: EditorView, _getPos: () => number) => {
+  return Decoration.widget(pos, () => {
     const container = window.document.createElement('span');
 
     const iconImg = window.document.createElement('img');

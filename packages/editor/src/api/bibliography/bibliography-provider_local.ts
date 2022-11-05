@@ -46,16 +46,16 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
     this.server = server;
     this.etag = '';
   }
-  public name: string = 'Bibliography';
+  public name = 'Bibliography';
   public key: string = kLocalBibliographyProviderKey;
-  public requiresWritable: boolean = false;
+  public requiresWritable = false;
 
   // Always enabled;
   public isEnabled(): boolean {
     return true;
   }
 
-  public prime(): Promise<any> {
+  public prime(): Promise<void> {
     return Promise.resolve();
   }
 
@@ -128,7 +128,7 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
     }));
   }
 
-  public itemsForCollection(collectionKey: string): BibliographySourceWithCollections[] {
+  public itemsForCollection(): BibliographySourceWithCollections[] {
     // NOTE: IF we add support, need to filter by biblio file
     return [];
   }
@@ -158,7 +158,7 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
       });
     }
     return (
-      bibliographyFilesFromDocument(doc, ui)?.map(path => {
+      bibliographyFilesFromDocument(doc)?.map(path => {
         return {
           displayPath: path,
           fullPath: isAbsolute(path, ui.context.isWindowsDesktop()) ? path : joinPaths(ui.context.getDefaultResourceDir(), path),
@@ -170,7 +170,7 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
   }
 }
 
-function bibliographyFilesFromDocument(doc: ProsemirrorNode, ui: EditorUI): string[] | undefined {
+function bibliographyFilesFromDocument(doc: ProsemirrorNode): string[] | undefined {
   // Gather the files from the document
   return bibliographyFilesFromDoc(parseYamlNodes(doc));
 }
@@ -228,7 +228,7 @@ function bibliographyLine(bibliographyFile: string): string {
   }
 }
 
-export function ensureBibliographyFileForDoc(tr: Transaction, bibliographyFile: string, ui: EditorUI) {
+export function ensureBibliographyFileForDoc(tr: Transaction, bibliographyFile: string) {
   // read the Yaml blocks from the document
   const parsedYamlNodes = parseYamlNodes(tr.doc);
 

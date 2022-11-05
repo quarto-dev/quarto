@@ -14,7 +14,7 @@
  */
 
 import { EditorState, Transaction } from 'prosemirror-state';
-import { Schema, ResolvedPos, Fragment } from 'prosemirror-model';
+import { Schema, ResolvedPos, Fragment, Node as ProsemirrorNode } from 'prosemirror-model';
 import { InputRule } from 'prosemirror-inputrules';
 import { setTextSelection } from 'prosemirror-utils';
 
@@ -41,7 +41,7 @@ const extension = (context: ExtensionContext): Extension => {
     inputRules: () => {
       if (fencedAttributes) {
         return [
-          new InputRule(/^```+{$/, (state: EditorState, match: string[], start: number, end: number) => {
+          new InputRule(/^```+{$/, (state: EditorState, match: string[], start: number) => {
             if (!canApplyCodeBlockInputRule(state)) {
               return null;
             }
@@ -116,7 +116,7 @@ function codeBlockInputRuleEnter(pandocExtensions: PandocExtensions, fencedAttri
       // see if this should go into a preceding list item
       const prevListItemPos = precedingListItemInsertPos(state.doc, state.selection);
       if (prevListItemPos) {
-        const block = type.createAndFill(attrs, content);
+        const block = type.createAndFill(attrs, content) as ProsemirrorNode;
         precedingListItemInsert(tr, prevListItemPos, block);
       } else {
         tr.insert(start, content);

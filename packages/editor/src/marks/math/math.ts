@@ -14,7 +14,7 @@
  */
 
 import { Node as ProsemirrorNode, Schema, Mark, Fragment, Slice } from 'prosemirror-model';
-import { Plugin, PluginKey, EditorState, Transaction } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { InputRule } from 'prosemirror-inputrules';
 
@@ -251,7 +251,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       },
     ],
 
-    baseKeys: (_schema: Schema) => {
+    baseKeys: () => {
       const keys: BaseKeyBinding[] = [
         { key: BaseKey.Home, command: inlineMathNav(true) },
         { key: BaseKey.End, command: inlineMathNav(false) }
@@ -281,7 +281,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             }
           },
         ),
-        new InputRule(/(?:^|[^`])\$$/, (state: EditorState, match: string[], start: number, end: number) => {
+        new InputRule(/(?:^|[^`])\$$/, (state: EditorState, _match: string[], start: number) => {
           if (!markIsActive(state, schema.marks.math)) {
             const { parent, parentOffset } = state.selection.$head;
             const text = '$' + parent.textContent.slice(parentOffset);
@@ -302,7 +302,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           return null;
         }),
         // display math
-        new InputRule(/^\$\$$/, (state: EditorState, match: string[], start: number, end: number) => {
+        new InputRule(/^\$\$$/, (state: EditorState, _match: string[], start: number, end: number) => {
           if (filter(state, start, end)) {
             const tr = state.tr;
             tr.delete(start, end);
@@ -315,11 +315,11 @@ const extension = (context: ExtensionContext): Extension | null => {
       ];
     },
 
-    commands: (_schema: Schema) => {
+    commands: () => {
       return [new InsertInlineMathCommand(ui), new InsertDisplayMathCommand(ui, !singleLineDisplayMath)];
     },
 
-    appendMarkTransaction: (_schema: Schema) => {
+    appendMarkTransaction: () => {
       return [mathAppendMarkTransaction()];
     },
 

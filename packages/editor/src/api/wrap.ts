@@ -66,7 +66,7 @@ function wrapSentencesTransform(tr: Transform) {
     }, 0);
 
     // don't break bookdown text references
-    if (/^\(ref\:[^\s]+\)\s+[^\s]/.test(textContent)) {
+    if (/^\(ref:[^\s]+\)\s+[^\s]/.test(textContent)) {
       return;
     }
 

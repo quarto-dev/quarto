@@ -71,7 +71,7 @@ export class AceNodeViews {
           // check for a click between the two nodes
           const mouseY = mouseEvent.clientY;
           if (mouseY > prevNodeRect.top + prevNodeRect.height && mouseY < nodeViewRect.top) {
-            gapCursor = new GapCursor($pos, $pos);
+            gapCursor = new GapCursor($pos);
           }
         }
 
@@ -83,7 +83,7 @@ export class AceNodeViews {
         mouseEvent.clientY < nodeView.dom.getBoundingClientRect().top &&
         Math.abs(mouseEvent.clientX - nodeView.dom.getBoundingClientRect().left) < 150
       ) {
-        gapCursor = new GapCursor($pos, $pos);
+        gapCursor = new GapCursor($pos);
       }
 
       // return gapCursor if we found one

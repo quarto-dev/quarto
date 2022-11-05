@@ -22,7 +22,7 @@ import { SymbolPreferencesProps } from './insert_symbol-dataprovider';
 
 import './insert_symbol-emoji-skintone.css';
 
-export const SymbolEmojiPreferencesPanel = React.forwardRef<any, SymbolPreferencesProps>((props, ref) => {
+export const SymbolEmojiPreferencesPanel = React.forwardRef<HTMLDivElement, SymbolPreferencesProps>((props, ref) => {
   // The currently selected skin tone
   const [selectedSkinTone, setSelectedSkinTone] = React.useState<SkinTone>(props.prefs.emojiSkinTone());
 
@@ -68,7 +68,7 @@ export const SymbolEmojiPreferencesPanel = React.forwardRef<any, SymbolPreferenc
   };
 
   const handleClick = (skinTone: SkinTone) => {
-    return (event: React.MouseEvent<HTMLElement>) => {
+    return () => {
       commitSkinTonePreference(skinTone);
       setSelectSkinTone(false);
     };

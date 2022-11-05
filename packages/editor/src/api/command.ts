@@ -14,7 +14,7 @@
  */
 
 import { lift, setBlockType, toggleMark, wrapIn } from 'prosemirror-commands';
-import { MarkType, Node as ProsemirrorNode, NodeType } from 'prosemirror-model';
+import { Attrs, MarkType, Node as ProsemirrorNode, NodeType } from 'prosemirror-model';
 import { wrapInList, liftListItem } from 'prosemirror-schema-list';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { findParentNode, findParentNodeOfType, setTextSelection } from 'prosemirror-utils';
@@ -187,11 +187,13 @@ export class ProsemirrorCommand {
     return this.execute(state);
   }
 
-  public isActive(state: EditorState): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public isActive(_state: EditorState): boolean {
     return false;
   }
 
-  public plural(state: EditorState): number {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public plural(_state: EditorState): number {
     return 1;
   }
 }
@@ -254,7 +256,7 @@ export class WrapCommand extends NodeCommand {
 
 export class InsertCharacterCommand extends ProsemirrorCommand {
   constructor(id: EditorCommandId, ch: string, keymap: string[]) {
-    super(id, keymap, (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+    super(id, keymap, (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       // enable/disable command
       const schema = state.schema;
       if (!canInsertNode(state, schema.nodes.text)) {
@@ -273,7 +275,7 @@ export class InsertCharacterCommand extends ProsemirrorCommand {
 
 export type CommandFn = (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => boolean;
 
-export function toggleMarkType(markType: MarkType, attrs?: { [key: string]: any }) {
+export function toggleMarkType(markType: MarkType, attrs?: Attrs) {
   const defaultToggleMark = toggleMark(markType, attrs);
 
   return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
@@ -300,7 +302,7 @@ export function toggleMarkType(markType: MarkType, attrs?: { [key: string]: any 
 }
 
 export function toggleList(listType: NodeType, itemType: NodeType, prefs: EditorUIPrefs): CommandFn {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const { selection } = state;
     const { $from, $to } = selection;
     const range = $from.blockRange($to);
@@ -316,7 +318,7 @@ export function toggleList(listType: NodeType, itemType: NodeType, prefs: Editor
         if (parentList.node.type !== listType) {
           if (dispatch) {
             const tr: Transaction = state.tr;
-            const attrs: { [key: string]: any } = {};
+            const attrs: { tight?: boolean } = {};
             if (parentList.node.attrs.tight) {
               attrs.tight = true;
             }
@@ -343,13 +345,13 @@ export function toggleList(listType: NodeType, itemType: NodeType, prefs: Editor
 }
 
 export function toggleBlockType(type: NodeType, toggletype: NodeType, attrs = {}): CommandFn {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     if (!dispatch) {
       return type === toggletype || setBlockType(type, { ...attrs })(state, dispatch);
     }
 
     // if the type has pandoc attrs then see if we can transfer from the existing node
-    let pandocAttr: any = {};
+    let pandocAttr: Attrs = {};
     if (pandocAttrInSpec(type.spec)) {
       const parentNode = state.selection.$anchor.node();
       if (parentNode && pandocAttrAvailable(parentNode.attrs)) {
@@ -361,8 +363,8 @@ export function toggleBlockType(type: NodeType, toggletype: NodeType, attrs = {}
   };
 }
 
-export function toggleWrap(type: NodeType, attrs?: { [key: string]: any }): CommandFn {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+export function toggleWrap(type: NodeType, attrs?: Attrs): CommandFn {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const isActive = nodeIsActive(state, type, attrs);
 
     if (isActive) {
@@ -374,7 +376,7 @@ export function toggleWrap(type: NodeType, attrs?: { [key: string]: any }): Comm
 }
 
 export function insertNode(nodeType: NodeType, attrs = {}, selectAfter = false): CommandFn {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     if (!canInsertNode(state, nodeType)) {
       return false;
     }
@@ -399,7 +401,7 @@ export function exitNode(
   nodeType: NodeType,
   depth: number,
   allowKey: boolean,
-  filter = (_node: ProsemirrorNode) => true,
+  filter: (node: ProsemirrorNode) => boolean = () => true,
 ) {
   return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     // must be within the node type and pass the filter

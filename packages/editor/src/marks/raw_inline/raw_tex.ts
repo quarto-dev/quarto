@@ -56,8 +56,8 @@ const extension = (context: ExtensionContext): Extension | null => {
               tag: "span[class*='raw-tex']",
             },
           ],
-          toDOM(_mark: Mark) {
-            const attr: any = {
+          toDOM() {
+            const attr = {
               class: 'raw-tex pm-fixedwidth-font pm-light-text-color',
             };
             return ['span', attr];
@@ -124,7 +124,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       plugins.push(
         inputRules({
           rules: [
-            new InputRule(/(^|[^^\\])([{[])$/, (state: EditorState, match: string[], start: number, end: number) => {
+            new InputRule(/(^|[^^\\])([{[])$/, (state: EditorState, match: string[], start: number) => {
               if (markIsActive(state, schema.marks.raw_tex)) {
                 const tr = state.tr;
                 tr.insertText(match[2] + braces.get(match[2]));
@@ -145,7 +145,7 @@ const extension = (context: ExtensionContext): Extension | null => {
 };
 
 function texInputRule(schema: Schema, filter: MarkInputRuleFilter) {
-  return new InputRule(/(^| )\\$/, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(/(^| )\\$/, (state: EditorState) => {
     const rawTexMark = schema.marks.raw_tex;
 
     if (state.selection.empty && toggleMarkType(rawTexMark)(state)) {

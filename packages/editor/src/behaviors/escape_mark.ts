@@ -14,13 +14,12 @@
  */
 
 import { EditorState, Transaction } from 'prosemirror-state';
-import { Schema } from 'prosemirror-model';
 
 import { BaseKey } from '../api/basekeys';
 import { Extension } from '../api/extension';
 
 const extension: Extension = {
-  baseKeys: (_schema: Schema) => {
+  baseKeys: () => {
     return [
       {
         key: BaseKey.ArrowRight,

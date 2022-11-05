@@ -46,7 +46,6 @@ const extension = (context: ExtensionContext): Extension => {
   };
   const linkAttr = pandocExtensions.link_attributes;
   const autoLink = pandocExtensions.autolink_bare_uris;
-  const headingLink = hasShortcutHeadingLinks(pandocExtensions);
   const citations = pandocExtensions.citations;
 
   const excludes = citations ? { excludes: 'cite_id' } : {};
@@ -84,7 +83,7 @@ const extension = (context: ExtensionContext): Extension => {
           toDOM(mark: Mark) {
             const linkClasses = 'pm-link pm-link-text-color';
 
-            let extraAttr: any = {};
+            let extraAttr: Record<string,unknown> = {};
             if (linkAttr) {
               extraAttr = pandocAttrToDomAttr({
                 ...mark.attrs,
@@ -159,9 +158,9 @@ const extension = (context: ExtensionContext): Extension => {
       ];
     },
 
-    inputRules: linkInputRules(autoLink, headingLink),
+    inputRules: linkInputRules(autoLink),
 
-    appendTransaction: (schema: Schema) =>
+    appendTransaction: () =>
       pandocExtensions.implicit_header_references ? [syncHeadingLinksAppendTransaction()] : [],
 
     plugins: (schema: Schema) => {

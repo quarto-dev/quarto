@@ -97,6 +97,8 @@ export function firstNode(parent: NodeWithPos, predicate: (node: ProsemirrorNode
           pos: parent.pos + 1 + pos,
         };
         return false;
+      } else {
+        return true;
       }
     } else {
       return false;

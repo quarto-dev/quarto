@@ -58,7 +58,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               preserveWhitespace: 'full',
             },
           ],
-          toDOM(node: ProsemirrorNode) {
+          toDOM() {
             return ['div', { class: 'shortcode-block pm-fixedwidth-font pm-code-block pm-markup-text-color' }, 0];
           },
         },
@@ -109,7 +109,7 @@ const extension = (context: ExtensionContext): Extension | null => {
         new ProsemirrorCommand(
           EditorCommandId.Shortcode,
           [],
-          (state: EditorState, dispatch?: (tr: Transaction<any>) => void) => {
+          (state: EditorState, dispatch?: (tr: Transaction) => void) => {
             // enable/disable command
             if (!canInsertNode(state, schema.nodes.shortcode_block)) {
               return false;
@@ -167,7 +167,7 @@ export function shortcodeBlockCapsuleFilter(): PandocBlockCapsuleFilter {
     // textually enclose the capsule so that pandoc parses it as the type of block we want it to
     // (in this case we don't do anything because pandoc would have written this table as a
     // semantically standalone block)
-    enclose: (capsuleText: string, capsule: PandocBlockCapsule) => {
+    enclose: (capsuleText: string) => {
       return capsuleText;
     },
 

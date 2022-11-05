@@ -13,7 +13,7 @@
  *
  */
 
-import { Schema, Mark, Fragment, MarkType } from 'prosemirror-model';
+import { Mark, Fragment, MarkType } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
@@ -64,7 +64,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             },
           ],
           toDOM(mark: Mark) {
-            const attr: any = {
+            const attr = {
               class: 'raw-inline pm-fixedwidth-font pm-markup-text-color',
               'data-format': mark.attrs.format,
             };
@@ -104,7 +104,7 @@ const extension = (context: ExtensionContext): Extension | null => {
     ],
 
     // insert command
-    commands: (_schema: Schema) => {
+    commands: () => {
       if (pandocExtensions.raw_attribute) {
         return [new RawInlineCommand(EditorCommandId.RawInline, '', ui, pandocCapabilities.output_formats)];
       } else {
@@ -223,7 +223,7 @@ export class RawInlineCommand extends ProsemirrorCommand {
         group: OmniInsertGroup.Content,
         priority: 0,
         image: () =>
-          ui.prefs.darkMode() ? ui.images.omni_insert?.raw_inline_dark! : ui.images.omni_insert?.raw_inline!,
+          ui.prefs.darkMode() ? ui.images.omni_insert.raw_inline_dark : ui.images.omni_insert.raw_inline,
       },
     );
   }

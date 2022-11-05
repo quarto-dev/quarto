@@ -14,7 +14,7 @@
  */
 
 import { Transaction } from 'prosemirror-state';
-import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';
+import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { Step, AddMarkStep } from 'prosemirror-transform';
 import { findChildren } from 'prosemirror-utils';
 
@@ -23,7 +23,7 @@ import { getMarkAttrs, getMarkRange } from '../api/mark';
 import { extensionIfPandocAttrEnabled } from '../api/pandoc_attr';
 
 const extension: Extension = {
-  appendTransaction: (_schema: Schema) => {
+  appendTransaction: () => {
     // detect changes in content with ids
     const hasAttrId = (node: ProsemirrorNode) => {
       return !!node.attrs.id || node.marks.some(mark => !!mark.attrs.id);
@@ -31,13 +31,13 @@ const extension: Extension = {
 
     // detect mark steps with new ids
     const attrMarkStep = (step: Step) => {
-      return step instanceof AddMarkStep && !!(step as any).mark.attrs.id;
+      return step instanceof AddMarkStep && !!step.mark.attrs.id;
     };
 
     return [
       {
         name: 'attr_duplicate_id',
-        filter: (transactions: Transaction[]) => transactions.some(transaction => transaction.steps.some(attrMarkStep)),
+        filter: (transactions: readonly Transaction[]) => transactions.some(transaction => transaction.steps.some(attrMarkStep)),
         nodeFilter: hasAttrId,
         append: (tr: Transaction) => {
           const usedIds = new Set<string>();

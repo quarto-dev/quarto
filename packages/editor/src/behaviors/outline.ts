@@ -14,7 +14,7 @@
  */
 
 import { Plugin, PluginKey, EditorState, Transaction } from 'prosemirror-state';
-import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';
+import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 
 import { NodeWithPos } from 'prosemirror-utils';
@@ -28,7 +28,6 @@ import {
   EditorOutlineItemType,
   EditorOutline,
   isOutlineNode,
-  getEditingOutlineLocation,
   getDocumentOutline,
 } from '../api/outline';
 import { navigateToPos } from '../api/navigation';
@@ -40,7 +39,7 @@ const kOutlineIdsTransaction = 'OutlineIds';
 const plugin = new PluginKey<EditorOutline>('outline');
 
 const extension: Extension = {
-  appendTransaction: (schema: Schema) => {
+  appendTransaction: () => {
     return [
       {
         name: 'outline',
@@ -84,7 +83,7 @@ const extension: Extension = {
     ];
   },
 
-  plugins: (schema: Schema) => {
+  plugins: () => {
     return [
       new Plugin<EditorOutline>({
         key: plugin,
@@ -211,11 +210,11 @@ function editorOutline(state: EditorState): EditorOutline {
   return rootOutlineItem.children;
 }
 
-function hasOutlineIdsTransaction(transactions: Transaction[]) {
+function hasOutlineIdsTransaction(transactions: readonly Transaction[]) {
   return transactions.some(tr => tr.getMeta(kOutlineIdsTransaction));
 }
 
-function transactionsAffectOutline(transactions: Transaction[], oldState: EditorState, newState: EditorState) {
+function transactionsAffectOutline(transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) {
   return (
     transactions.some(tr => tr.getMeta(kSetMarkdownTransaction)) ||
     hasOutlineIdsTransaction(transactions) ||

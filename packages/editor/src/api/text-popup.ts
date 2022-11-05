@@ -26,11 +26,13 @@ import { textRangePopupDecorationPosition } from './widgets/decoration';
 import { kPlatformMac } from './platform';
 import { MarkType } from 'prosemirror-model';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TextPopupTarget<AttrsType = any> {
   attrs: AttrsType;
   text: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TextPopupDecoration<AttrsType = any> {
   key: PluginKey<DecorationSet>;
   markType: MarkType;
@@ -69,10 +71,10 @@ export function textPopupDecorationPlugin(deco: TextPopupDecoration): Plugin<Dec
       return {};
     },
     state: {
-      init: (_config: { [key: string]: any }) => {
+      init: () => {
         return DecorationSet.empty;
       },
-      apply: (tr: Transaction, old: DecorationSet, _oldState: EditorState, newState: EditorState) => {
+      apply: (tr: Transaction, _old: DecorationSet, _oldState: EditorState, newState: EditorState) => {
         // if this a restore location or navigation then return empty
         if (tr.getMeta(kRestoreLocationTransaction) || tr.getMeta(kNavigationTransaction)) {
           return DecorationSet.empty;
@@ -118,7 +120,7 @@ export function textPopupDecorationPlugin(deco: TextPopupDecoration): Plugin<Dec
           const decorationPosition = textRangePopupDecorationPosition(editorView, range, maxWidth);
 
           // key if one was provided
-          let decoratorSpec: { [key: string]: any } | undefined;
+          let decoratorSpec: Record<string,unknown> | undefined;
           if (specKey) {
             decoratorSpec = {
               key: decorationPosition.key + specKey(target),
@@ -133,7 +135,7 @@ export function textPopupDecorationPlugin(deco: TextPopupDecoration): Plugin<Dec
           const textPopupDecorator = Decoration.widget(
             decorationPosition.pos,
 
-            (view: EditorView, getPos: () => number) => {
+            (view: EditorView) => {
               // create decorator and render popup into it
               const decorationEl = window.document.createElement('div');
               decorationEl.style.visibility = 'hidden';

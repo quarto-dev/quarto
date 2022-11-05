@@ -43,19 +43,22 @@ export interface AttrEditDecorationOptions {
 export function attrEditDecorationWidget(options: AttrEditDecorationOptions) {
   return Decoration.widget(
     options.pos,
-    (view: EditorView, getPos: () => number) => {
+    (view: EditorView, getPos: () => number | undefined) => {
       // does the offsetParent have any right padding we need to offset for?
       // we normally use right: 5px for positioning but that is relative to
       // the edge of the offsetParent. However, some offset parents (e.g. a
       // td or a nested div) have their own internal padding to account for
       // so we look for it here
       let rightPaddingOffset = 0;
-      const attrsNode = view.nodeDOM(getPos());
-      if (attrsNode) {
-        const attrsEl = attrsNode as HTMLElement;
-        if (attrsEl.offsetParent) {
-          const offsetParentStyle = window.getComputedStyle(attrsEl.offsetParent);
-          rightPaddingOffset = -parseInt(offsetParentStyle.paddingRight!, 10) || 0;
+      const pos = getPos();
+      if (pos !== undefined) {
+        const attrsNode = view.nodeDOM(pos);
+        if (attrsNode) {
+          const attrsEl = attrsNode as HTMLElement;
+          if (attrsEl.offsetParent) {
+            const offsetParentStyle = window.getComputedStyle(attrsEl.offsetParent);
+            rightPaddingOffset = -parseInt(offsetParentStyle.paddingRight!, 10) || 0;
+          }
         }
       }
 
@@ -99,7 +102,7 @@ export function attrEditDecorationWidget(options: AttrEditDecorationOptions) {
 interface AttrEditDecorationProps extends WidgetProps {
   tags: string[];
   editFn: CommandFn;
-  getPos: () => number;
+  getPos: () => number | undefined;
   view: EditorView;
   ui: EditorUI;
   noSelectOnClick?: boolean;
@@ -112,19 +115,22 @@ const AttrEditDecoration: React.FC<AttrEditDecorationProps> = props => {
     // set selection before invoking function
     if (props.view.dispatch && !props.noSelectOnClick) {
       const pos = props.getPos();
-      const node = props.view.state.doc.nodeAt(pos);
-      if (node) {
-        const tr = props.view.state.tr;
-        if (node.type.spec.selectable) {
-          tr.setSelection(new NodeSelection(tr.doc.resolve(pos)));
-        } else if (!selectionIsWithinRange(tr.selection, { from: pos, to: pos + node.nodeSize })) {
-          setTextSelection(pos + 1)(tr);
-        } else if (tr.selection instanceof NodeSelection) {
-          const cursor = new GapCursor(tr.doc.resolve(pos+1), tr.doc.resolve(pos+1));
-          tr.setSelection(cursor);
+      if (pos !== undefined) {
+        const node = props.view.state.doc.nodeAt(pos);
+        if (node) {
+          const tr = props.view.state.tr;
+          if (node.type.spec.selectable) {
+            tr.setSelection(new NodeSelection(tr.doc.resolve(pos)));
+          } else if (!selectionIsWithinRange(tr.selection, { from: pos, to: pos + node.nodeSize })) {
+            setTextSelection(pos + 1)(tr);
+          } else if (tr.selection instanceof NodeSelection) {
+            const cursor = new GapCursor(tr.doc.resolve(pos+1));
+            tr.setSelection(cursor);
+          }
+          props.view.dispatch(tr);
         }
-        props.view.dispatch(tr);
       }
+     
     }
     
     // perform edit

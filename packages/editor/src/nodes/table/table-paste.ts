@@ -47,7 +47,7 @@ export function tablePaste() {
         }
       },
     },
-    appendTransaction: (transactions: Transaction[], oldState: EditorState, newState: EditorState) => {
+    appendTransaction: (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => {
       // alias schema
       const schema = newState.schema;
 
@@ -115,6 +115,8 @@ export function tablePaste() {
 
       if (tr.docChanged) {
         return tr;
+      } else {
+        return null;
       }
     },
   });

@@ -39,7 +39,7 @@ interface CharacterGridProps extends WidgetProps {
 
 const selectedItemClassName = 'pm-grid-item-selected';
 
-const SymbolCharacterGrid = React.forwardRef<any, CharacterGridProps>((props, ref) => {
+const SymbolCharacterGrid = React.forwardRef<HTMLDivElement, CharacterGridProps>((props, ref) => {
   const columnWidth = Math.floor(props.width / props.numberOfColumns);
   const characterCellData: CharacterGridCellItemData = {
     symbolCharacters: props.symbolCharacters,
@@ -89,15 +89,15 @@ const SymbolCharacterGrid = React.forwardRef<any, CharacterGridProps>((props, re
   );
 });
 
-function previous(currentIndex: number, numberOfColumns: number, numberOfCells: number): number {
+function previous(currentIndex: number): number {
   const newIndex = currentIndex - 1;
   return Math.max(0, newIndex);
 }
-function next(currentIndex: number, numberOfColumns: number, numberOfCells: number): number {
+function next(currentIndex: number, _numberOfColumns: number, numberOfCells: number): number {
   const newIndex = currentIndex + 1;
   return Math.min(numberOfCells - 1, newIndex);
 }
-function prevRow(currentIndex: number, numberOfColumns: number, numberOfCells: number): number {
+function prevRow(currentIndex: number, numberOfColumns: number): number {
   const newIndex = currentIndex - numberOfColumns;
   return newIndex >= 0 ? newIndex : currentIndex;
 }
@@ -109,7 +109,7 @@ function nextPage(currentIndex: number, numberOfColumns: number, numberOfCells: 
   const newIndex = currentIndex + 6 * numberOfColumns;
   return Math.min(numberOfCells - 1, newIndex);
 }
-function prevPage(currentIndex: number, numberOfColumns: number, numberOfCells: number): number {
+function prevPage(currentIndex: number, numberOfColumns: number): number {
   const newIndex = currentIndex - 6 * numberOfColumns;
   return Math.max(0, newIndex);
 }
@@ -122,10 +122,10 @@ export const newIndexForKeyboardEvent = (
 ): number | undefined => {
   switch (event.key) {
     case 'ArrowLeft': // left
-      return previous(selectedIndex, numberOfColumns, numberOfCells);
+      return previous(selectedIndex);
 
     case 'ArrowUp': // up
-      return prevRow(selectedIndex, numberOfColumns, numberOfCells);
+      return prevRow(selectedIndex, numberOfColumns);
 
     case 'ArrowRight': // right
       return next(selectedIndex, numberOfColumns, numberOfCells);
@@ -137,7 +137,7 @@ export const newIndexForKeyboardEvent = (
       return nextPage(selectedIndex, numberOfColumns, numberOfCells);
 
     case 'PageUp':
-      return prevPage(selectedIndex, numberOfColumns, numberOfCells);
+      return prevPage(selectedIndex, numberOfColumns);
 
     case 'Home':
       return 0;

@@ -29,11 +29,11 @@ const extension: Extension = {
     return [
       new Plugin({
         key: new PluginKey('remove-section'),
-        appendTransaction: (transactions: Transaction[], oldState: EditorState, newState: EditorState) => {
+        appendTransaction: (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => {
           
           // skip for selection-only changes
           if (!transactionsDocChanged(transactions)) {
-            return;
+            return undefined;
           }
 
           if (isSectionRemoval(transactions, oldState)) {
@@ -60,10 +60,12 @@ const extension: Extension = {
               const end = start + 2;
               tr.deleteRange(start, end);
               return tr;
+            } else {
+              return undefined;
             }
+          } else {
+            return undefined;
           }
-
-
         }
       })
     ];
@@ -71,7 +73,7 @@ const extension: Extension = {
 };
 
 
-function isSectionRemoval(transactions: Transaction[], oldState: EditorState) {
+function isSectionRemoval(transactions: readonly Transaction[], oldState: EditorState) {
   // was this the removal of a section?
   let isRemoval = false;
   if (transactions.length === 1 && transactions[0].steps.length === 1) {
@@ -79,29 +81,32 @@ function isSectionRemoval(transactions: Transaction[], oldState: EditorState) {
     let isDeleteStep = false;
     const step = transactions[0].steps[0];
     if (step instanceof ReplaceStep) {
-      isDeleteStep = (step as any).slice.content.size === 0;
+      isDeleteStep = step.slice.content.size === 0;
     } else if (step instanceof ReplaceAroundStep) {
-      const { gapFrom, gapTo } = step as any;
+      const { gapFrom, gapTo } = step;
       isDeleteStep = gapFrom === gapTo;
     }
-
-    // if it's a delete step then see if we removed multiple text blocks
-    let numBlocks = 0;
-    const { from, to } = step as any;
-    oldState.doc.nodesBetween(from, to, node => {
-      if (isRemoval) {
-        return false;
-      }
-      if (isList(node)) {
-        isRemoval = true;
-        return false;
-      } else if (node.isTextblock) {
-        if (numBlocks++ >= 1) {
-          isRemoval = true;
+   
+    if (isDeleteStep) {
+      let numBlocks = 0;
+      const { from, to } = step as ReplaceStep;
+      oldState.doc.nodesBetween(from, to, node => {
+        if (isRemoval) {
           return false;
         }
-      }
-    });
+        if (isList(node)) {
+          isRemoval = true;
+          return false;
+        } else if (node.isTextblock) {
+          if (numBlocks++ >= 1) {
+            isRemoval = true;
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+   
   }
 
   return isRemoval;

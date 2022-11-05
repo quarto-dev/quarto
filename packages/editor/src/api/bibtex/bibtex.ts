@@ -13,7 +13,7 @@
  *
  */
 
-import { NodeArray, RangeArray, NameDictObject, TextNodeObject } from 'biblatex-csl-converter';
+import { NodeArray, RangeArray, NameDictObject, TextNodeObject, NodeObject, MarkObject } from 'biblatex-csl-converter';
 import { FieldMap } from './fields';
 import { typeMapping } from './types';
 import { FormattingTags } from './formatting';
@@ -31,12 +31,7 @@ export interface Entry {
   values?: { [key: string]: string };
 }
 
-interface Warning {
-  type: string;
-  variable: string;
-}
-
-export function bibDbToBibTeX(bibDB: BibDB, config: Config = {}) {
+export function bibDbToBibTeX(bibDB: BibDB) {
   // Keys of items to export
   const keysToExport = Object.keys(bibDB);
 
@@ -60,7 +55,7 @@ export function bibDbToBibTeX(bibDB: BibDB, config: Config = {}) {
     const outputFields: { [key: string]: string } = {};
 
     // All the fields for this entry
-    const fieldsForExport: Record<string, any> = entryObject.fields;
+    const fieldsForExport: Record<string, unknown> = entryObject.fields;
     Object.keys(fieldsForExport).forEach(fieldKey => {
       // Lookup the field information in the mapping
       // (maps CSL fields names to their peer BibTeX types)
@@ -76,55 +71,55 @@ export function bibDbToBibTeX(bibDB: BibDB, config: Config = {}) {
         const bibtexValue = fieldsForExport[fieldKey];
 
         switch (type) {
-          case 'f_date':
-            // Output the raw date value
-            outputFields[bibtexKey] = bibtexValue;
+          case 'f_date': {
+              // Output the raw date value
+              outputFields[bibtexKey] = String(bibtexValue);
 
-            // Also output the year and month, if possible
-            // The value being parsed is a EDTF 1.0 level 0/1 compliant string. (2000-12-31)
-            const parts: string[] = bibtexValue.split('-');
-            if (parts.length > 0) {
-              outputFields.year = parts[0];
-              if (parts.length > 1) {
-                outputFields.month = parts[1];
+              // Also output the year and month, if possible
+              // The value being parsed is a EDTF 1.0 level 0/1 compliant string. (2000-12-31)
+              const parts: string[] = String(bibtexValue).split('-');
+              if (parts.length > 0) {
+                outputFields.year = parts[0];
+                if (parts.length > 1) {
+                  outputFields.month = parts[1];
+                }
               }
             }
-
             break;
           case 'f_integer':
-            outputFields[bibtexKey] = formatText(bibtexValue);
+            outputFields[bibtexKey] = formatText(bibtexValue as NodeArray);
             break;
           case 'f_key':
-            outputFields[bibtexKey] = formatKey(bibtexValue, bibtexKey);
+            outputFields[bibtexKey] = formatKey(bibtexValue as string | NodeArray, bibtexKey);
             break;
           case 'f_literal':
           case 'f_long_literal':
-            outputFields[bibtexKey] = formatText(bibtexValue);
+            outputFields[bibtexKey] = formatText(bibtexValue as NodeArray);
             break;
           case 'l_range':
-            outputFields[bibtexKey] = formatRange(bibtexValue);
+            outputFields[bibtexKey] = formatRange(bibtexValue as RangeArray[]);
             break;
           case 'f_title':
-            outputFields[bibtexKey] = formatText(bibtexValue);
+            outputFields[bibtexKey] = formatText(bibtexValue as NodeArray);
             break;
           case 'f_uri':
           case 'f_verbatim':
             // Strip any braces from verbatims
-            outputFields[bibtexKey] = bibtexValue.replace(/{|}/g, '');
+            outputFields[bibtexKey] = (bibtexValue as string).replace(/{|}/g, '');
             break;
           case 'l_key':
             outputFields[bibtexKey] = escapeNonAscii(
-              bibtexValue.map((k: string) => formatKey(k, bibtexKey)).join(' and '),
+              (bibtexValue as string[]).map((k: string) => formatKey(k, bibtexKey)).join(' and '),
             );
             break;
           case 'l_literal':
-            outputFields[bibtexKey] = bibtexValue.map((text: NodeArray) => formatText(text)).join(' and ');
+            outputFields[bibtexKey] = (bibtexValue as NodeArray[]).map((text: NodeArray) => formatText(text)).join(' and ');
             break;
           case 'l_name':
-            outputFields[bibtexKey] = formatNames(bibtexValue);
+            outputFields[bibtexKey] = formatNames(bibtexValue as NameDictObject[]);
             break;
           case 'l_tag':
-            outputFields[bibtexKey] = escapeNonAscii(bibtexValue.join(', '));
+            outputFields[bibtexKey] = escapeNonAscii((bibtexValue as string[]).join(', '));
             break;
           default:
             // This is a field type that we don't understand, skip it
@@ -272,7 +267,7 @@ const formatText = (nodes: NodeArray): string => {
   // after the last 'real' node and close out any open marks.
   const textNodes = nodes.concat({ type: 'text', text: '' });
 
-  textNodes.forEach(node => {
+  textNodes.forEach((node: NodeObject) => {
     /*
     // TODO: Do we need to deal with this (and if so, we need to re-add that escape routine)
     if (node.type === 'variable') {
@@ -293,7 +288,7 @@ const formatText = (nodes: NodeArray): string => {
       // Figure out the new marks for this node
       // TODO: Do we need to re-enable math mode for these low level sup/sub nodes?
       // let mathEnabled = false;
-      node.marks.forEach(mark => {
+      node.marks.forEach((mark: MarkObject) => {
         // We need to activate mathmode for the lowest level sub/sup node.
         // Don't activate math mode for the lowest level node
         /*
@@ -367,7 +362,7 @@ const formatText = (nodes: NodeArray): string => {
 // Formats ranges
 const formatRange = (value: RangeArray[]): string => {
   // The correct symbol for a range of numbers is an en-dash, which in LaTeX is usually input as --.
-  return value.map(range => range.map(text => formatText(text)).join('--')).join(',');
+  return value.map(range => range.map((text: NodeArray) => formatText(text)).join('--')).join(',');
 };
 
 // Formats author values

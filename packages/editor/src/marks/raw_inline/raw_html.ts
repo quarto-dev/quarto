@@ -41,13 +41,13 @@ const extension = (context: ExtensionContext): Extension | null => {
           parseDOM: [
             {
               tag: "span[class*='raw-html']",
-              getAttrs(dom: Node | string) {
+              getAttrs() {
                 return {};
               },
             },
           ],
-          toDOM(mark: Mark) {
-            const attr: any = {
+          toDOM() {
+            const attr = {
               class: 'raw-html pm-fixedwidth-font pm-markup-text-color',
             };
             return ['span', attr];
@@ -111,7 +111,7 @@ function writeInlneHTML(schema: Schema, html: string, writer: ProsemirrorWriter)
 }
 
 export function rawHtmlInputRule(schema: Schema, filter: MarkInputRuleFilter) {
-  return new InputRule(/>$/, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(/>$/, (state: EditorState, _match: string[], start: number, end: number) => {
     const rawhtmlMark = state.schema.marks.raw_html;
 
     // ensure we pass all conditions for html input

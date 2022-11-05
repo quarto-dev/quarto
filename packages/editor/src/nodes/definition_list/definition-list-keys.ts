@@ -13,12 +13,11 @@
  *
  */
 
-import { EditorState, Transaction, TextSelection } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 import {
   findParentNodeOfType,
   findParentNodeOfTypeClosestToPos,
   setTextSelection,
-  hasParentNodeOfType,
   ContentNodeWithPos,
 } from 'prosemirror-utils';
 
@@ -255,10 +254,3 @@ function isTrailingEmptyParagraph(state: EditorState) {
   return isParagraph && isEmpty && isLastChild($head);
 }
 
-// eslint-disable-next-line
-function selectionCrossesListBoundary(state: EditorState) {
-  const { $head, $anchor } = state.selection;
-  const headInDL = hasParentNodeOfType(state.schema.nodes.definition_list)(TextSelection.near($head));
-  const anchorInDL = hasParentNodeOfType(state.schema.nodes.definition_list)(TextSelection.near($anchor));
-  return headInDL !== anchorInDL;
-}

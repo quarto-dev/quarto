@@ -70,7 +70,7 @@ function blockquoteOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Section quoted from another source'),
     group: OmniInsertGroup.Blocks,
     priority: 8,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.blockquote_dark! : ui.images.omni_insert?.blockquote!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.blockquote_dark : ui.images.omni_insert.blockquote),
   };
 }
 

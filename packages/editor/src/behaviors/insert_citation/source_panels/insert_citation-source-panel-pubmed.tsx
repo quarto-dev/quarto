@@ -16,7 +16,7 @@ import React from 'react';
 
 import { BibliographyManager } from '../../../api/bibliography/bibliography';
 import { createUniqueCiteId } from '../../../api/cite';
-import { CSL, sanitizeForCiteproc } from '../../../api/csl';
+import { sanitizeForCiteproc } from '../../../api/csl';
 import { DOIServer } from '../../../api/doi';
 import { logException } from '../../../api/log';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
@@ -156,14 +156,14 @@ function toCitationListEntry(
     type: '',
     date: doc.pubDate || '',
     journal: doc.source,
-    authors: (length: number) => {
-      return formatAuthors(doc.authors || [], length);
+    authors: () => {
+      return formatAuthors(doc.authors || []);
     },
     image: imageForType(ui, doc.pubTypes)[0],
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
       const doiResult = await doiServer.fetchCSL(doc.doi, -1);
-      const csl = doiResult.message as CSL;
+      const csl = doiResult.message!;
       const sanitizedCSL = sanitizeForCiteproc(csl);
       return { ...sanitizedCSL, id: finalId, providerKey };
     },
@@ -171,6 +171,6 @@ function toCitationListEntry(
   };
 }
 
-function formatAuthors(authors: string[], length: number) {
+function formatAuthors(authors: string[]) {
   return authors.join(',');
 }

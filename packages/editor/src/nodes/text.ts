@@ -35,6 +35,7 @@ const extension = (context: ExtensionContext) => {
         name: 'text',
         spec: {
           group: 'inline',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           toDOM(node: ProsemirrorNode): any {
             return node.text;
           },

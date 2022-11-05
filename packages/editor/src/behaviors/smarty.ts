@@ -15,7 +15,6 @@
 
 import { ellipsis, InputRule } from 'prosemirror-inputrules';
 import { Plugin, PluginKey, EditorState } from 'prosemirror-state';
-import { Schema } from 'prosemirror-model';
 
 import { Extension, extensionIfEnabled } from '../api/extension';
 import { fancyQuotesToSimple } from '../api/quote';
@@ -23,7 +22,7 @@ import { fancyQuotesToSimple } from '../api/quote';
 const plugin = new PluginKey('smartypaste');
 
 // match enDash but only for lines that aren't an html comment
-const enDash = new InputRule(/[^!-`]--$/, (state: EditorState, match: string[], start: number, end: number) => {
+const enDash = new InputRule(/[^!-`]--$/, (state: EditorState, _match: string[], _start: number, end: number) => {
   const { parent, parentOffset } = state.selection.$head;
   const precedingText = parent.textBetween(0, parentOffset);
   if (precedingText.indexOf('<!--') === -1) {
@@ -35,7 +34,7 @@ const enDash = new InputRule(/[^!-`]--$/, (state: EditorState, match: string[], 
   }
 });
 
-const emDash = new InputRule(/(^|[^`])–-$/, (state: EditorState, match: string[], start: number, end: number) => {
+const emDash = new InputRule(/(^|[^`])–-$/, (state: EditorState, _match: string[], _start: number, end: number) => {
   const tr = state.tr;
   tr.insertText('—', end - 1, end);
   return tr;
@@ -46,7 +45,7 @@ const extension: Extension = {
     return [ellipsis, enDash, emDash];
   },
 
-  plugins: (schema: Schema) => {
+  plugins: () => {
     return [
       // apply smarty rules to plain text pastes
       new Plugin({

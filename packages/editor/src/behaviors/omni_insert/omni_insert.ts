@@ -12,13 +12,12 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-import { DOMOutputSpecArray, Mark, Fragment } from 'prosemirror-model';
+import { Mark, Fragment, DOMOutputSpec } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 
 import { PandocOutput } from '../../api/pandoc';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { selectionAllowsCompletions } from '../../api/completion';
+import { CompletionHandler, selectionAllowsCompletions } from '../../api/completion';
 import { OmniInserter } from '../../api/omni_insert';
 import { MarkInputRuleFilter } from '../../api/input_rule';
 import { EditorUI } from '../../api/ui';
@@ -36,7 +35,7 @@ export function markOmniInsert() {
           inclusive: true,
           noInputRules: true,
           parseDOM: [{ tag: "span[class*='omni_insert']" }],
-          toDOM(): DOMOutputSpecArray {
+          toDOM() : DOMOutputSpec {
             return ['span', { class: 'omni_insert' }];
           },
         },
@@ -61,7 +60,7 @@ export function omniInsertExtension(
 ): Extension {
   return {
     commands: () => [new OmniInsertCommand(inputRuleFilter)],
-    completionHandlers: () => [omniInsertCompletionHandler(omniInserters, ui)],
+    completionHandlers: () : CompletionHandler<OmniInserter>[] => [omniInsertCompletionHandler(omniInserters, ui)],
   };
 }
 
@@ -70,7 +69,7 @@ class OmniInsertCommand extends ProsemirrorCommand {
     super(
       EditorCommandId.OmniInsert,
       ['Mod-/'],
-      (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+      (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         // check whether selection allows completions
         if (!selectionAllowsCompletions(state.selection)) {
           return false;

@@ -72,6 +72,8 @@ export interface CSL {
   subject?: string;
   archive?: string;
   license?: [];
+
+  [key: string]: unknown;
 }
 
 export interface CSLName {
@@ -105,6 +107,7 @@ export function sanitizeForCiteproc(csl: CSL): CSL {
     'short-container-title',
     'license'
   ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cslAny: { [key: string]: any } = {
     ...csl,
   };
@@ -197,6 +200,8 @@ export function cslDateToEDTFDate(date: CSLDate) {
       return partStr;
     });
     return paddedParts.join('-');
+  } else {
+    return undefined;
   }
 }
 

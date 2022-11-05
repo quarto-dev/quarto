@@ -23,10 +23,10 @@ export function imageTextSelectionPlugin() {
   return new Plugin<DecorationSet>({
     key: pluginKey,
     state: {
-      init(_config: { [key: string]: any }, instance: EditorState) {
+      init() {
         return DecorationSet.empty;
       },
-      apply(tr: Transaction, set: DecorationSet, oldState: EditorState, newState: EditorState) {
+      apply(tr: Transaction, _value: DecorationSet, _oldState: EditorState, newState: EditorState) {
         // no decorations for empty or node selection
         if (tr.selection.empty || tr.selection instanceof NodeSelection) {
           return DecorationSet.empty;

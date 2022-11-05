@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Type definitions for prosemirror-changeset 2.0
 // Project: https://github.com/ProseMirror/prosemirror-changeset
 // Definitions by: Bradley Ayers <https://github.com/bradleyayers>

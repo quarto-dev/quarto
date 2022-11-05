@@ -27,7 +27,8 @@ function pasteTextPlugin(schema: Schema) {
     key: new PluginKey('paste-text'),
 
     props: {
-      clipboardTextParser: (text: string, $context: ResolvedPos): any => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clipboardTextParser: (text: string, $context: ResolvedPos) : any => {
         // if it's a single line then create a slice w/ marks from the context active
         if (text.indexOf('\n') === -1) {
           const marks = $context.marks();

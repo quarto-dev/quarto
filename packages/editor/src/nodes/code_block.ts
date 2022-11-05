@@ -139,7 +139,7 @@ class CodeBlockFormatCommand extends ProsemirrorCommand {
         group: OmniInsertGroup.Blocks,
         priority: 7,
         image: () =>
-          ui.prefs.darkMode() ? ui.images.omni_insert?.code_block_dark! : ui.images.omni_insert?.code_block!,
+          ui.prefs.darkMode() ? ui.images.omni_insert.code_block_dark : ui.images.omni_insert.code_block,
       },
     );
   }

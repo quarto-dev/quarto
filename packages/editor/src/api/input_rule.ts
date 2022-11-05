@@ -139,15 +139,17 @@ export function conditionalWrappingInputRule(
   regexp: RegExp,
   nodeType: NodeType,
   predicate: (state: EditorState) => boolean,
-  getAttrs?: { [key: string]: any } | ((p: string[]) => { [key: string]: any } | null | undefined),
+  getAttrs?: { [key: string]: unknown } | ((p: string[]) => { [key: string]: unknown } | null | undefined),
   joinPredicate?: (p1: string[], p2: ProsemirrorNode) => boolean,
 ): InputRule {
-  const wrappingRule: any = wrappingInputRule(regexp, nodeType, getAttrs, joinPredicate);
+  const wrappingRule = wrappingInputRule(regexp, nodeType, getAttrs, joinPredicate);
   return new InputRule(regexp, (state: EditorState, match: string[], start: number, end: number) => {
     if (!predicate(state)) {
       return null;
     }
-    return wrappingRule.handler(state, match, start, end);
+    // we know that the input rule has a handler even though the interface doesn't declare it
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (wrappingRule as any).handler(state, match, start, end);
   });
 }
 

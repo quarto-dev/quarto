@@ -17,7 +17,7 @@ import Fuse from 'fuse.js';
 
 import { CiteCompletionEntry } from "./cite-completion";
 
-const searchFields: Fuse.FuseOptionKeyObject[] = [
+const searchFields: Fuse.FuseOptionKeyObject<CiteCompletionEntry>[] = [
   { name: 'id', weight: 30 },
   { name: 'index.secondary', weight: 30 },
   { name: 'index.tertiary', weight: 5 },

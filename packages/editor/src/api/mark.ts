@@ -184,13 +184,13 @@ export function detectAndApplyMarks(
   pos: number,
   re: RegExp,
   markType: MarkType,
-  attrs: (match: RegExpMatchArray) => {},
+  attrs: (match: RegExpMatchArray) => Record<string,unknown>,
   filter?: (from: number, to: number) => boolean,
   text?: (match: RegExpMatchArray) => string,
 ) {
   re.lastIndex = 0;
-  const textNodes = mergedTextNodes(node, (_node: ProsemirrorNode, _pos: number, parentNode: ProsemirrorNode) =>
-    parentNode.type.allowsMarkType(markType),
+  const textNodes = mergedTextNodes(node, (_node: ProsemirrorNode, _pos: number, parentNode: ProsemirrorNode | null) =>
+    !!(parentNode && parentNode.type.allowsMarkType(markType))
   );
   textNodes.forEach(textNode => {
     re.lastIndex = 0;

@@ -56,7 +56,7 @@ export function getSpellingDoc(
       return spellingDocPlugin(view.state).createAnchor(pos);
     },
 
-    shouldCheck: (_wordRange: EditorWordRange): boolean => {
+    shouldCheck: (): boolean => {
       return true;
     },
 
@@ -133,7 +133,7 @@ export class SpellingDocPlugin extends Plugin<DecorationSet> {
         init: () => {
           return DecorationSet.empty;
         },
-        apply: (tr: Transaction, old: DecorationSet, oldState: EditorState, newState: EditorState) => {
+        apply: (tr: Transaction) => {
           if (this.checking) {
             // map anchors
             this.anchors.forEach(anchor => {

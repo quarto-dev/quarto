@@ -144,6 +144,7 @@ declare module 'prosemirror-utils' {
     moveCursorToLastCell?: boolean,
   ): (tr: Transaction) => Transaction;
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   export function setCellAttrs(cell: ContentNodeWithPos, attrs: Object): (tr: Transaction) => Transaction;
 
   export function findCellClosestToPos($pos: ResolvedPos): ContentNodeWithPos | undefined;
@@ -202,6 +203,7 @@ declare module 'prosemirror-utils' {
   export function setParentNodeMarkup(
     nodeType: NodeType | NodeType[],
     type?: NodeType | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     attrs?: { [key: string]: any } | null,
     marks?: Mark[],
   ): (tr: Transaction) => Transaction;

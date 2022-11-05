@@ -65,7 +65,7 @@ const extension = (context: ExtensionContext): Extension => {
           ],
           toDOM(node) {
             const attr = headingAttr ? pandocAttrToDomAttr(node.attrs) : {};
-            attr.class = (attr.class || '').concat(' pm-heading');
+            attr.class = (attr.class as string || '').concat(' pm-heading');
             return [
               'h' + node.attrs.level,
               {
@@ -206,28 +206,28 @@ class HeadingCommand extends ProsemirrorCommand {
 
 function heading1OmniInsert(ui: EditorUI) {
   return headingOmniInsert(ui, 1, ui.context.translateText('Part heading'), [
-    ui.images.omni_insert?.heading1!,
-    ui.images.omni_insert?.heading1_dark!,
+    ui.images.omni_insert.heading1,
+    ui.images.omni_insert.heading1_dark,
   ]);
 }
 
 function heading2OmniInsert(ui: EditorUI) {
   return headingOmniInsert(ui, 2, ui.context.translateText('Section heading'), [
-    ui.images.omni_insert?.heading2!,
-    ui.images.omni_insert?.heading2_dark!,
+    ui.images.omni_insert.heading2,
+    ui.images.omni_insert.heading2_dark,
   ]);
 }
 function heading3OmniInsert(ui: EditorUI) {
   return headingOmniInsert(ui, 3, ui.context.translateText('Sub-section heading'), [
-    ui.images.omni_insert?.heading3!,
-    ui.images.omni_insert?.heading3_dark!,
+    ui.images.omni_insert.heading3,
+    ui.images.omni_insert.heading3_dark,
   ]);
 }
 
 function heading4OmniInsert(ui: EditorUI) {
   return headingOmniInsert(ui, 4, ui.context.translateText('Small heading'), [
-    ui.images.omni_insert?.heading4!,
-    ui.images.omni_insert?.heading4_dark!,
+    ui.images.omni_insert.heading4,
+    ui.images.omni_insert.heading4_dark,
   ]);
 }
 

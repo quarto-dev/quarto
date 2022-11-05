@@ -23,17 +23,17 @@ import { ScrollEvent, UpdateEvent } from '../../api/event-types';
 export class AceRenderQueue {
   private readonly renderQueue: AceNodeView[] = [];
 
-  private renderCompleted: boolean = false;
-  private renderTimer: number = 0;
-  private updateTimer: number = 0;
+  private renderCompleted = false;
+  private renderTimer = 0;
+  private updateTimer = 0;
   private container?: HTMLElement;
-  private needsSort: boolean = true;
-  private bypass: number = 5;
+  private needsSort = true;
+  private bypass = 5;
   private observer?: IntersectionObserver;
-  private visible: boolean = true;
+  private visible = true;
   private readonly subscriptions: VoidFunction[] = [];
 
-  constructor(private events: EditorEvents) {
+  constructor(events: EditorEvents) {
     // Begin listening for scroll and update events so we can manage the queue
     // accordingly
     this.subscriptions.push(

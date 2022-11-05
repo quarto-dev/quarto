@@ -13,12 +13,12 @@
  *
  */
 
-import { Schema, Mark, Fragment, Node as ProsemirrorNode } from 'prosemirror-model';
+import { Schema, Mark, Fragment, Node as ProsemirrorNode, Attrs } from 'prosemirror-model';
 import { InputRule } from 'prosemirror-inputrules';
 import { EditorState, Transaction } from 'prosemirror-state';
 
 import { Extension, ExtensionContext } from '../../api/extension';
-import { PandocOutput, PandocToken, PandocTokenType, ProsemirrorWriter, PandocExtensions } from '../../api/pandoc';
+import { PandocOutput, PandocToken, PandocTokenType, ProsemirrorWriter } from '../../api/pandoc';
 import { pandocAttrReadAST } from '../../api/pandoc_attr';
 import { fragmentText } from '../../api/fragment';
 
@@ -159,8 +159,8 @@ const extension = (context: ExtensionContext): Extension | null => {
 
           const textNodes = mergedTextNodes(
             markTr.doc,
-            (_node: ProsemirrorNode, _pos: number, parentNode: ProsemirrorNode) =>
-              parentNode.type.allowsMarkType(schema.marks.emoji),
+            (_node: ProsemirrorNode, _pos: number, parentNode: ProsemirrorNode | null) =>
+              !!(parentNode && parentNode.type.allowsMarkType(schema.marks.emoji))
           );
 
           textNodes.forEach(textNode => {
@@ -190,7 +190,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               const emoji = orderedEmojis[0].emoji;
 
               // remove any existing mark (preserving attribues if we do )
-              let existingAttrs: { [key: string]: any } | null = null;
+              let existingAttrs: Attrs | null = null;
               if (markTr.doc.rangeHasMark(markFrom, to, schema.marks.emoji)) {
                 existingAttrs = getMarkAttrs(markTr.doc, { from: markFrom, to }, schema.marks.emoji);
                 markTr.removeMark(markFrom, to, schema.marks.emoji);

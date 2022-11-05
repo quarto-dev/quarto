@@ -13,7 +13,7 @@
  *
  */
 
-import { Node as ProsemirrorNode, Fragment, MarkType, Mark } from 'prosemirror-model';
+import { Node as ProsemirrorNode, Fragment, MarkType } from 'prosemirror-model';
 
 import {
   PandocAst,
@@ -55,7 +55,7 @@ class PandocWriter implements PandocOutput {
   private readonly nodeWriters: { [key: string]: PandocNodeWriterFn };
   private readonly markWriters: { [key: string]: PandocMarkWriter };
   private readonly notes: { [key: string]: ProsemirrorNode };
-  private readonly containers: any[][];
+  private readonly containers: unknown[][];
   private readonly activeMarks: MarkType[];
   private options: { [key: string]: boolean };
 
@@ -110,19 +110,19 @@ class PandocWriter implements PandocOutput {
     };
   }
 
-  public write(value: any) {
+  public write(value: unknown) {
     const container = this.containers[this.containers.length - 1];
     container.push(value);
   }
 
-  public writeToken(type: PandocTokenType, content?: (() => void) | any) {
+  public writeToken(type: PandocTokenType, content?: VoidFunction | unknown) {
     const token: PandocToken = {
       t: type,
     };
     if (content !== undefined) {
       if (typeof content === 'function') {
         token.c = [];
-        this.fill(token.c, content);
+        this.fill(token.c, content as VoidFunction);
       } else {
         token.c = content;
       }
@@ -142,7 +142,7 @@ class PandocWriter implements PandocOutput {
 
       // if we see leading or trailing spaces we need to output them as tokens
       // and substitute text nodes
-      parent.forEach((node: ProsemirrorNode, offset: number, index: number) => {
+      parent.forEach((node: ProsemirrorNode, _offset: number, index: number) => {
         // check for leading/trailing space in first/last nodes
         if (node.isText) {
           let outputText = node.textContent;
@@ -200,7 +200,7 @@ class PandocWriter implements PandocOutput {
   }
 
   public writeArray(content: () => void) {
-    const arr: any[] = [];
+    const arr: unknown[] = [];
     this.fill(arr, content);
     this.write(arr);
   }
@@ -396,7 +396,7 @@ class PandocWriter implements PandocOutput {
     this.options[option] = previousValue;
   }
 
-  private fill(container: any[], content: () => void) {
+  private fill(container: unknown[], content: () => void) {
     this.containers.push(container);
     content();
     this.containers.pop();

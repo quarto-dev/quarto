@@ -13,10 +13,10 @@
  *
  */
 
-import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';
+import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { findChildren } from 'prosemirror-utils';
-import { Plugin, PluginKey, Transaction, EditorState, Selection } from 'prosemirror-state';
-import { DecorationSet, Decoration, WidgetDecorationSpec } from 'prosemirror-view';
+import { Plugin, PluginKey, Transaction, EditorState, Selection, EditorStateConfig } from 'prosemirror-state';
+import { DecorationSet, Decoration } from 'prosemirror-view';
 
 import { EditorUI } from '../../api/ui';
 import { pandocAttrEnabled, pandocAttrAvailable } from '../../api/pandoc_attr';
@@ -42,7 +42,7 @@ export function attrEditExtension(
   const hasAttr = pandocAttrEnabled(pandocExtensions) || hasFencedCodeBlocks(pandocExtensions);
 
   return {
-    commands: (_schema: Schema) => {
+    commands: () => {
       if (hasAttr) {
         return [new AttrEditCommand(ui, format, pandocExtensions, editors)];
       } else {
@@ -50,7 +50,7 @@ export function attrEditExtension(
       }
     },
 
-    plugins: (_schema: Schema) => {
+    plugins: () => {
       if (hasAttr) {
         return [new AttrEditDecorationPlugin(ui, pandocExtensions, editors)];
       } else {
@@ -136,7 +136,7 @@ class AttrEditDecorationPlugin extends Plugin<DecorationSet> {
     super({
       key,
       state: {
-        init: (_config: { [key: string]: any }, state: EditorState) => {
+        init: (_config: EditorStateConfig, state: EditorState) => {
           return decoratorsForDoc(state);
         },
         apply: (tr: Transaction, set: DecorationSet, oldState: EditorState, newState: EditorState) => {

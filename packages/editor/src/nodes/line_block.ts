@@ -84,7 +84,7 @@ const extension = (context: ExtensionContext) => {
             group: OmniInsertGroup.Blocks,
             priority: 2,
             image: () =>
-              ui.prefs.darkMode() ? ui.images.omni_insert?.line_block_dark! : ui.images.omni_insert?.line_block!,
+              ui.prefs.darkMode() ? ui.images.omni_insert.line_block_dark : ui.images.omni_insert.line_block,
           },
         ),
       ];

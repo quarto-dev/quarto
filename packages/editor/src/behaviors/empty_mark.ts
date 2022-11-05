@@ -13,7 +13,6 @@
  *
  */
 
-import { Schema } from 'prosemirror-model';
 import { Transaction, EditorState } from 'prosemirror-state';
 import { ReplaceStep } from 'prosemirror-transform';
 
@@ -21,17 +20,17 @@ import { Extension } from '../api/extension';
 import { getMarkRange } from '../api/mark';
 
 const extension: Extension = {
-  appendTransaction: (schema: Schema) => {
+  appendTransaction: () => {
     return [
       {
         name: 'clear_empty_mark',
-        append: (tr: Transaction, transactions: Transaction[], _oldState: EditorState, newState: EditorState) => {
+        append: (tr: Transaction, transactions: readonly Transaction[], _oldState: EditorState, newState: EditorState) => {
           // if we have an empty selection
           if (newState.selection.empty) {
             // if the last change removed text
             const removedText = transactions.some(transaction =>
               transaction.steps.some(step => {
-                return step instanceof ReplaceStep && (step as any).slice.content.size === 0;
+                return step instanceof ReplaceStep && step.slice.content.size === 0;
               }),
             );
             if (removedText) {

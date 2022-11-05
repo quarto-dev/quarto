@@ -13,7 +13,7 @@
  *
  */
 
-import { Mark, Node as ProsemirrorNode, NodeType, Schema } from 'prosemirror-model';
+import { Attrs, Mark, Node as ProsemirrorNode, NodeType, Schema } from 'prosemirror-model';
 
 import {
   PandocTokenReader,
@@ -102,6 +102,7 @@ class Parser {
     // create state
     const state: ParserState = new ParserState(this.schema);
     // create writer (compose state w/ writeTokens function)
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const parser = this;
     const writer: ProsemirrorWriter = {
       openNode: state.openNode.bind(state),
@@ -224,7 +225,7 @@ class Parser {
       const getChildren = reader.getChildren || ((tok: PandocToken) => tok.c);
 
       // resolve getAttrs (provide default imple)
-      const getAttrs = reader.getAttrs ? reader.getAttrs : (tok: PandocToken) => ({});
+      const getAttrs = reader.getAttrs ? reader.getAttrs : () => ({});
 
       let handler: ParserTokenHandler;
 
@@ -299,7 +300,7 @@ class Parser {
         handler = (writer: ProsemirrorWriter, tok: PandocToken) => {
           // type/attr/text
           const nodeType = this.schema.nodes.code_block;
-          const attr: {} = pandocAttrReadAST(tok, kCodeBlockAttr);
+          const attr = pandocAttrReadAST(tok, kCodeBlockAttr);
           const text = tok.c[kCodeBlockText] as string;
 
           // write node
@@ -327,7 +328,7 @@ class ParserState {
   private readonly schema: Schema;
   private readonly stack: ParserStackElement[];
   private readonly notes: ProsemirrorNode[];
-  private marks: Mark[];
+  private marks: readonly Mark[];
   private footnoteNumber: number;
   private unrecognizedTokens: string[];
   private exampleLists: boolean;
@@ -372,7 +373,7 @@ class ParserState {
     }
   }
 
-  public addNode(type: NodeType, attrs: {}, content: ProsemirrorNode[]) {
+  public addNode(type: NodeType, attrs: Attrs, content: ProsemirrorNode[]) {
     const node: ProsemirrorNode | null | undefined = type.createAndFill(attrs, content, this.marks);
     if (!node) {
       return null;
@@ -387,7 +388,7 @@ class ParserState {
     return node;
   }
 
-  public openNode(type: NodeType, attrs: {}) {
+  public openNode(type: NodeType, attrs: Attrs) {
     this.stack.push({ type, attrs, content: [] });
   }
 
@@ -549,7 +550,7 @@ function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
 
 interface ParserStackElement {
   type: NodeType;
-  attrs: {};
+  attrs: Record<string,unknown>;
   content: ProsemirrorNode[];
 }
 

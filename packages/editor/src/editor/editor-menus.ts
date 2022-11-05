@@ -203,15 +203,6 @@ function insertMenu(ui: EditorUI, commands: EditorCommand[]) {
   ];
 }
 
-
-function haveReferenceMenu(commands: EditorCommand[]) {
-  return haveAnyOf(commands, 
-    EditorCommandId.Citation,
-    EditorCommandId.CrossReference,
-    EditorCommandId.Footnote
-  );
-}
-
 function haveAnyOf(commands: EditorCommand[], ...ids: EditorCommandId[]) {
   for (const command of commands) {
     if (ids.includes(command.id)) {

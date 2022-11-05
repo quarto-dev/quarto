@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * table-pandoc.ts
  *
@@ -21,11 +22,11 @@ import { CssAlignment } from './table-commands';
 import { tableColumnAlignments, tableColumnWidths } from './table-columns';
 
 // attributes
-const kTableAttr = 0;
+// const kTableAttr = 0;
 
 // caption
 const kTableCaption = 1;
-const kTableCaptionShort = 0; // [Inline]
+// const kTableCaptionShort = 0; // [Inline]
 const kTableCaptionFull = 1;  // [Block]
 
 // columdefs
@@ -35,30 +36,30 @@ const kTableColSpecWidth = 1;
 
 // table head
 const kTableHead = 3;
-const kTableHeadAttr = 0;
+// const kTableHeadAttr = 0;
 const kTableHeadRows = 1; // [Row]
 
 // table body
 const kTableBody = 4;
-const kTableBodyAttr = 0;
-const kTableBodyRowHeadNumColumns = 1;
-const kTableBodyRowHead = 2;
+// const kTableBodyAttr = 0;
+// const kTableBodyRowHeadNumColumns = 1;
+// const kTableBodyRowHead = 2;
 const kTableBodyRows = 3; // [Row]
 
 // table foot
-const kTableFoot = 5;
-const kTableFootAttr = 0;
-const kTableFootRows = 1; // [Row]
+// const kTableFoot = 5;
+// const kTableFootAttr = 0;
+// const kTableFootRows = 1; // [Row]
 
 // table row
-const kTableRowAttr = 0;
+// const kTableRowAttr = 0;
 const kTableRowCells = 1; // [Cell]
 
 // table cell
-const kTableCellAttr = 0;
-const kTableCellAlignments = 1;
-const kTableCellRowSpan = 2;
-const kTableCellColSpan = 3;
+// const kTableCellAttr = 0;
+// const kTableCellAlignments = 1;
+// const kTableCellRowSpan = 2;
+// const kTableCellColSpan = 3;
 const KTableCellContents = 4; // [Block]
 
 

@@ -13,7 +13,7 @@
  *
  */
 
-import { Plugin, PluginKey, EditorState, Transaction, Selection } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, Transaction, Selection, EditorStateConfig } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 import { DecorationSet, EditorView, Decoration } from 'prosemirror-view';
 import { keymap } from 'prosemirror-keymap';
@@ -67,26 +67,28 @@ function mathViewPlugin(schema: Schema, format: EditorFormat, ui: EditorUI, math
         decorations.push(
           Decoration.widget(
             range.from,
-            (view: EditorView, getPos: () => number) => {
+            (view: EditorView, getPos: () => number | undefined) => {
               const mathjaxDiv = window.document.createElement('div');
               mathjaxDiv.classList.add('pm-math-mathjax');
               // text selection 'within' code for clicks on the preview image
               mathjaxDiv.onclick = () => {
                 const tr = view.state.tr;
                 let pos = getPos();
-                if (attrs.type === MathType.Display) {
-                  // set position to first non $, non whitespace character
-                  const match = mathText.match(/^[$\s]+/);
-                  if (match) {
-                    pos += match[0].length;
+                if (pos !== undefined) {
+                  if (attrs.type === MathType.Display) {
+                    // set position to first non $, non whitespace character
+                    const match = mathText.match(/^[$\s]+/);
+                    if (match) {
+                      pos += match[0].length;
+                    }
+                  } else {
+                    // set position to the middle of the equation
+                    pos = pos + mathText.length / 2;
                   }
-                } else {
-                  // set position to the middle of the equation
-                  pos = pos + mathText.length / 2;
+                  setTextSelection(pos)(tr);
+                  view.dispatch(tr);
+                  view.focus();
                 }
-                setTextSelection(pos)(tr);
-                view.dispatch(tr);
-                view.focus();
               };
               math.typeset(mathjaxDiv, mathText, ui.context.isActiveTab());
               return mathjaxDiv;
@@ -115,7 +117,7 @@ function mathViewPlugin(schema: Schema, format: EditorFormat, ui: EditorUI, math
     key,
 
     state: {
-      init(_config: { [key: string]: any }, instance: EditorState) {
+      init(_config: EditorStateConfig, instance: EditorState) {
         return decorationsForDoc(instance);
       },
 
@@ -128,8 +130,8 @@ function mathViewPlugin(schema: Schema, format: EditorFormat, ui: EditorUI, math
         } else if (
           tr.steps.some(
             step =>
-              (step instanceof AddMarkStep && (step as any).mark.type === schema.marks.math) ||
-              (step instanceof RemoveMarkStep && (step as any).mark.type === schema.marks.math),
+              (step instanceof AddMarkStep && step.mark.type === schema.marks.math) ||
+              (step instanceof RemoveMarkStep && step.mark.type === schema.marks.math),
           )
         ) {
           return decorationsForDoc(newState);
@@ -150,7 +152,7 @@ function mathViewPlugin(schema: Schema, format: EditorFormat, ui: EditorUI, math
       },
     },
 
-    appendTransaction: (_transactions: Transaction[], oldState: EditorState, newState: EditorState) => {
+    appendTransaction: (_transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => {
       // not currently in math
       if (!getMarkRange(newState.selection.$from, schema.marks.math) && newState.selection.from > 0) {
         // did we end up just to the right of math? if so check for navigation from a distance
@@ -183,7 +185,7 @@ function mathViewPlugin(schema: Schema, format: EditorFormat, ui: EditorUI, math
 }
 
 function verticalArrowHandler(dir: 'up' | 'down') {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     if (!view) {
       return false;
     }

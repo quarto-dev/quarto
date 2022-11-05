@@ -40,7 +40,7 @@ export function tableBlockCapsuleFilter(): PandocBlockCapsuleFilter {
     // textually enclose the capsule so that pandoc parses it as the type of block we want it to
     // (in this case we don't do anything because pandoc would have written this table as a
     // semantically standalone block)
-    enclose: (capsuleText: string, capsule: PandocBlockCapsule) => {
+    enclose: (capsuleText: string) => {
       return capsuleText;
     },
 

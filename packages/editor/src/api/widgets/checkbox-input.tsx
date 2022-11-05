@@ -13,7 +13,7 @@
  *
  */
 
-import React, { ChangeEventHandler, KeyboardEventHandler, FocusEventHandler, ClipboardEventHandler } from 'react';
+import React, { ChangeEventHandler } from 'react';
 
 import { WidgetProps } from './react';
 
@@ -41,6 +41,7 @@ export const CheckboxInput= React.forwardRef<HTMLInputElement, CheckboxInputProp
           pm-text-color 
           pm-background-color 
           ${props.className}`}
+        style={style}
         checked={props.checked}
         onChange={props.onChange}
         tabIndex={props.tabIndex}

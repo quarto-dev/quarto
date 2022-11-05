@@ -15,7 +15,6 @@
 
 import { Node as ProsemirrorNode, Schema, Fragment, NodeType, DOMOutputSpec } from 'prosemirror-model';
 import { Plugin, PluginKey, EditorState, Transaction, TextSelection, Selection } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import {
   findChildrenByType,
   findParentNodeOfType,
@@ -101,11 +100,11 @@ const extension = (context: ExtensionContext) => {
       },
     ],
 
-    appendTransaction: (_schema: Schema) => {
+    appendTransaction: () => {
       return [footnoteAppendTransaction()];
     },
 
-    plugins: (_schema: Schema) => {
+    plugins: () => {
       return [
         footnoteEditorActivationPlugin(),
 
@@ -154,7 +153,7 @@ function writePandocNote(schema: Schema) {
 }
 
 function footnoteCommandFn() {
-  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     if (!canInsertFootnote(state)) {
       return false;
     }
@@ -173,7 +172,7 @@ function footnoteOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Note placed at the bottom of the page'),
     group: OmniInsertGroup.References,
     priority: 2,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.footnote_dark! : ui.images.omni_insert?.footnote!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.footnote_dark : ui.images.omni_insert.footnote),
   };
 }
 

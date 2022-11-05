@@ -14,7 +14,7 @@
  */
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
-import { Plugin, PluginKey, Transaction, EditorState } from 'prosemirror-state';
+import { Plugin, PluginKey, Transaction, EditorState, EditorStateConfig } from 'prosemirror-state';
 import { DecorationSet, Decoration, EditorView } from 'prosemirror-view';
 
 import { findChildrenByType, setTextSelection } from 'prosemirror-utils';
@@ -31,7 +31,7 @@ export class RmdChunkImagePreviewPlugin extends Plugin<DecorationSet> {
     super({
       key,
       state: {
-        init: (_config: { [key: string]: any }, state: EditorState) => {
+        init: (_config: EditorStateConfig, state: EditorState) => {
           return imagePreviewDecorations(state, uiContext);
         },
         apply: (tr: Transaction, old: DecorationSet, oldState: EditorState, newState: EditorState) => {
@@ -90,7 +90,7 @@ function imagePreviewDecorations(state: EditorState, uiContext: EditorUIContext)
       const imagePath = match[3];
       const decoration = Decoration.widget(
         rmdChunk.pos + rmdChunk.node.nodeSize,
-        (view: EditorView, getPos: () => number) => {
+        (view: EditorView, getPos: () => number | undefined) => {
           const container = window.document.createElement('div');
           container.style.marginTop = '-1.5em'; // to bridge back to the codemirror block
           // which has a margin-block-end of 1em
@@ -122,9 +122,12 @@ function imagePreviewDecorations(state: EditorState, uiContext: EditorUIContext)
           };
           // select rmd_chunk for clicks on the preview image
           img.onclick = () => {
-            const tr = view.state.tr;
-            setTextSelection(getPos() - 1)(tr);
-            view.dispatch(tr);
+            const pos = getPos();
+            if (pos !== undefined) {
+              const tr = view.state.tr;
+              setTextSelection(pos - 1)(tr);
+              view.dispatch(tr);
+            }
           };
           container.append(img);
           return container;

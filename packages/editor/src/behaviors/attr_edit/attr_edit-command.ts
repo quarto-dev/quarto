@@ -44,7 +44,7 @@ export function attrEditCommandFn(
   pandocExtensions: PandocExtensions, 
   editors: AttrEditOptions[]
 ) {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     
     // give math attributes first crack (in case it's inside a node with attributes)
     if (editMathAttributesEnabled(format, state)) {
@@ -56,7 +56,7 @@ export function attrEditCommandFn(
     const mark = marks.find((m: Mark) => pandocAttrInSpec(m.type.spec));
 
     let node: ProsemirrorNode | null = null;
-    let pos: number = 0;
+    let pos = 0;
     // node selection of node with attributes
     if (state.selection instanceof NodeSelection && pandocAttrInSpec(state.selection.node.type.spec)) {
       node = state.selection.node;
@@ -109,7 +109,7 @@ export function attrEditNodeCommandFn(nodeWithPos: NodeWithPos,
                                       pandocExtensions: PandocExtensions, 
                                       editors: AttrEditOptions[]) {
   
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
 
     // alias
     const { node, pos } = nodeWithPos;
@@ -139,7 +139,7 @@ export function attrEditNodeCommandFn(nodeWithPos: NodeWithPos,
 async function editMarkAttrs(
   mark: Mark,
   state: EditorState,
-  dispatch: (tr: Transaction<any>) => void,
+  dispatch: (tr: Transaction) => void,
   ui: EditorUI,
 ): Promise<void> {
   const attrs = mark.attrs;
@@ -165,7 +165,7 @@ async function editNodeAttrs(
   pos: number,
   node: ProsemirrorNode | null,
   state: EditorState,
-  dispatch: (tr: Transaction<any>) => void,
+  dispatch: (tr: Transaction) => void,
   ui: EditorUI,
   pandocExtensions: PandocExtensions,
 ): Promise<void> {

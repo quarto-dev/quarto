@@ -30,7 +30,7 @@ export function rmdChunkBlockCapsuleFilter() {
 
     match: /^([\t >]*)((```+)\s*\{[a-zA-Z0-9_]+(?: *[ ,].*?)?\}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
 
-    extract: (match: string, p1: string, p2: string, p3: string, p4: string) => {
+    extract: (_match: string, p1: string, p2: string, _p3: string, p4: string) => {
       return {
         prefix: p1,
         source: p2,

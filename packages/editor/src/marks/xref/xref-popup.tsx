@@ -37,7 +37,7 @@ export function xrefPopupPlugin(schema: Schema, ui: EditorUI, server: EditorServ
     markType: schema.marks.xref,
     maxWidth: kMaxWidth,
     dismissOnEdit: true,
-    createPopup: async (view: EditorView, target: TextPopupTarget, style: React.CSSProperties) => {
+    createPopup: async (_view: EditorView, target: TextPopupTarget, style: React.CSSProperties) => {
       // lookup xref on server
       const docPath = ui.context.getDocumentPath();
       if (docPath) {

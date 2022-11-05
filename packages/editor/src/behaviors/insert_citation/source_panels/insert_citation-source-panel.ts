@@ -33,6 +33,7 @@ export interface CitationSourcePanelProps extends WidgetProps {
 
   warningMessage: string;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ref: React.Ref<any>;
 }
 
@@ -101,12 +102,12 @@ export function matchExistingSourceCitationListEntry(doi: string, existingIds: s
 
   const localSources = bibliographyManager.localSources();
   const existingSource = localSources.find(source => {
-    if (source.DOI?.toLowerCase() === doi.toLowerCase()) {
-      return source;
-    }
+    return source.DOI?.toLowerCase() === doi.toLowerCase();
   });
   if (existingSource) {
     return existingSourceToCitationListEntry(existingSource, existingIds, ui);
+  } else {
+    return undefined;
   }
 }
 

@@ -139,7 +139,7 @@ export interface EditorSetMarkdownResult {
   example_lists: boolean;
 
   // unparsed meta
-  unparsed_meta: { [key: string]: any };
+  unparsed_meta: { [key: string]: unknown };
 
   // updated outline 
   location: EditingOutlineLocation;
@@ -714,7 +714,7 @@ export class Editor {
 
   public insertChunk(chunkPlaceholder: string) {
     const insertCmd = insertRmdChunk(chunkPlaceholder);
-    insertCmd(this.view.state, this.view.dispatch, this.view);
+    insertCmd(this.view.state, this.view.dispatch);
     this.focus();
   }
 
@@ -737,7 +737,7 @@ export class Editor {
     this.emitEvent(ResizeEvent);
   }
 
-  public enableDevTools(initFn: (view: EditorView, stateClass: any) => void) {
+  public enableDevTools(initFn: (view: EditorView, stateClass: unknown) => void) {
     initFn(this.view, { EditorState });
   }
 
@@ -785,7 +785,6 @@ export class Editor {
 
     this.keybindings = keyBindings;
     this.state = this.state.reconfigure({
-      schema: this.state.schema,
       plugins: this.createPlugins(),
     });
   }
@@ -911,16 +910,21 @@ export class Editor {
 
     // create the defautl inputRules plugin
     const plugin = inputRules({ rules: this.extensions.inputRules(this.schema) });
-    const handleTextInput = plugin.props.handleTextInput!;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleTextInput = plugin.props.handleTextInput!.bind(plugin);
 
     // override to disable input rules as requested
     // https://github.com/ProseMirror/prosemirror-inputrules/commit/b4bf67623aa4c4c1e096c20aa649c0e63751f337
-    plugin.props.handleTextInput = (view: EditorView, from: number, to: number, text: string) => {
+    const customHandleTextInput = (view: EditorView, from: number, to: number, text: string) => {
       if (!markFilter(view.state)) {
         return false;
       }
       return handleTextInput(view, from, to, text);
     };
+
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    plugin.props.handleTextInput = customHandleTextInput;
     return plugin;
   }
 
@@ -929,15 +933,15 @@ export class Editor {
       key: new PluginKey('domevents'),
       props: {
         handleDOMEvents: {
-          blur: (view: EditorView, event: Event) => {
+          blur: () => {
             this.emitEvent(BlurEvent);
             return false;
           },
-          focus: (view: EditorView, event: Event) => {
+          focus: (view: EditorView) => {
             this.emitEvent(FocusEvent, view.state.doc);
             return false;
           },
-          keydown: (view: EditorView, event: Event) => {
+          keydown: (_view: EditorView, event: Event) => {
             const kbEvent = event as KeyboardEvent;
             if (kbEvent.key === 'Tab' && this.context.ui.prefs.tabKeyMoveFocus()) {
               return true;

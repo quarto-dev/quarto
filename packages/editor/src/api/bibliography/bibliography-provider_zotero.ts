@@ -12,7 +12,6 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { ZoteroCollection, ZoteroServer, kZoteroBibTeXTranslator, ZoteroCollectionSpec, ZoteroCSL } from '../zotero';
 
@@ -28,7 +27,6 @@ import {
 import { EditorUI } from '../ui';
 import { CSL } from '../csl';
 import { toBibTeX } from './bibDB';
-import { Editor } from '../../editor/editor';
 
 export const kZoteroProviderKey = '2509FBBE-5BB0-44C4-B119-6083A81ED673';
 
@@ -46,9 +44,9 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
     this.server = server;
   }
 
-  public name: string = 'Zotero';
+  public name = 'Zotero';
   public key: string = kZoteroProviderKey;
-  public requiresWritable: boolean = true;
+  public requiresWritable = true;
 
   public async load(
     _ui: EditorUI,
@@ -65,7 +63,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
       this.enabled = true;
       try {
         // Don't send the items back through to the server
-        const collectionSpecs = this.allCollections.map(({ items, ...rest }) => rest);
+        const collectionSpecs = this.allCollections.map(({ ...rest }) => rest);
 
         // If there is a warning, stop using the cache and force a fresh trip
         // through the whole pipeline to be sure we're trying to clear that warning
@@ -104,7 +102,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
           Array.isArray(this.zoteroConfig) ? this.zoteroConfig : [],
         );
         if (specResult && specResult.status === 'ok') {
-          this.allCollectionSpecs = specResult.message.map((spec: ZoteroCollectionSpec) =>
+          this.allCollectionSpecs = (specResult.message as ZoteroCollection[]).map((spec: ZoteroCollectionSpec) =>
             this.toBibliographyCollection(spec),
           );
         } else {
@@ -153,7 +151,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
       return this.items();
     }
 
-    return this.items().filter((item: any) => {
+    return this.items().filter((item: { collectionKeys?: string[] }) => {
       if (item.collectionKeys) {
         return item.collectionKeys.includes(collectionKey);
       }
@@ -161,7 +159,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
     });
   }
 
-  public bibliographyPaths(doc: ProsemirrorNode, ui: EditorUI): BibliographyFile[] {
+  public bibliographyPaths(): BibliographyFile[] {
     return [];
   }
 
@@ -173,7 +171,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
         parseInt((csl as ZoteroCSL).libraryID, 10),
       );
       if (bibTeX) {
-        return Promise.resolve(bibTeX.message);
+        return Promise.resolve(bibTeX.message as string);
       }
     }
     return Promise.resolve(toBibTeX(id, csl));

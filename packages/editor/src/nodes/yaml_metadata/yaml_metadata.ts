@@ -15,7 +15,6 @@
 
 import { Node as ProsemirrorNode, DOMOutputSpec, ParseRule } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import { setTextSelection } from 'prosemirror-utils';
 
 import { ExtensionContext, Extension } from '../../api/extension';
@@ -50,7 +49,7 @@ const extension = (context: ExtensionContext): Extension => {
               preserveWhitespace: 'full',
             } as ParseRule,
           ],
-          toDOM(node: ProsemirrorNode): DOMOutputSpec {
+          toDOM(): DOMOutputSpec {
             return ['div', { class: 'yaml-block pm-code-block' }, 0];
           },
         },
@@ -86,7 +85,7 @@ class YamlMetadataCommand extends ProsemirrorCommand {
     super(
       EditorCommandId.YamlMetadata,
       [],
-      (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+      (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         const schema = state.schema;
 
         if (!canInsertNode(state, schema.nodes.yaml_metadata)) {
@@ -119,7 +118,7 @@ class YamlMetadataCommand extends ProsemirrorCommand {
         priority: 3,
         selectionOffset: -4,
         image: () =>
-          ui.prefs.darkMode() ? ui.images.omni_insert?.yaml_block_dark! : ui.images.omni_insert?.yaml_block!,
+          ui.prefs.darkMode() ? ui.images.omni_insert.yaml_block_dark : ui.images.omni_insert.yaml_block,
       },
     );
   }

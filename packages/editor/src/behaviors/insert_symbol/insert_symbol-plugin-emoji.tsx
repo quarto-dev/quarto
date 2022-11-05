@@ -13,7 +13,6 @@
  *
  */
 
-import { Schema } from 'prosemirror-model';
 import { PluginKey, EditorState } from 'prosemirror-state';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 
@@ -37,7 +36,7 @@ const extension = (context: ExtensionContext): Extension => {
     commands: () => {
       return [new ProsemirrorCommand(EditorCommandId.Emoji, [], performInsertSymbol(key), emojiOmniInsert(ui))];
     },
-    plugins: (_schema: Schema) => {
+    plugins: () => {
       return [new InsertSymbolPlugin(key, new EmojiSymbolDataProvider(ui), ui, events)];
     },
   };
@@ -49,7 +48,7 @@ function emojiOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Image expressing idea, emotion, etc.'),
     group: OmniInsertGroup.Content,
     priority: 6,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.emoji_dark! : ui.images.omni_insert?.emoji!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.emoji_dark : ui.images.omni_insert.emoji),
   };
 }
 

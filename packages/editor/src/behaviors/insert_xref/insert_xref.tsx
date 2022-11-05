@@ -78,11 +78,6 @@ interface XRefStyle {
   fn: (key: string) => string;
 }
 
-interface XRefType {
-  type: string;
-  prefix: string[];
-}
-
 // Types (prefixes + display) for xrefs
 const kTheoremTypes = ["thm", "lem", "cor", "prp", "cnj", "def", "exm", "exr"];
 const kSecType = "sec";
@@ -157,9 +152,7 @@ export async function insertXref(
       containerWidth: number,
       containerHeight: number,
       confirm: VoidFunction,
-      cancel: VoidFunction,
-      _showProgress: (message: string) => void,
-      _hideProgress: VoidFunction,
+      cancel: VoidFunction
     ) => {
       const kMaxHeight = 400;
       const kMaxWidth = 650;
@@ -422,6 +415,7 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
       case 'Enter':
         acceptSelected();
         event.preventDefault();
+        break;
       case 'Escape':
         props.onCancel();
         event.preventDefault();
@@ -581,7 +575,7 @@ const XRefItem = (props: XRefItemProps) => {
   const detailText = thisXref.title || "";
 
   // The image and adornment
-  const image = type?.image(props.data.ui) || props.data.ui.images.omni_insert?.generic!;
+  const image = type?.image(props.data.ui) || props.data.ui.images.omni_insert.generic;
 
   // Click handlers
   const onItemClick = () => {

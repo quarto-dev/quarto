@@ -51,7 +51,7 @@ const nodes = tableNodes({
       getFromDOM(dom: Element) {
         return (dom as HTMLElement).className;
       },
-      setDOMAttr(value, attrs) {
+      setDOMAttr(_value, attrs) {
         attrs.class = kDefaultCellClasses;
       },
     },
@@ -64,7 +64,7 @@ export const tableContainerNode = {
     content: 'table table_caption',
     group: 'block',
     parseDOM: [{ tag: "div[class*='table-container']" }],
-    toDOM(node: ProsemirrorNode): DOMOutputSpec {
+    toDOM(): DOMOutputSpec {
       return ['div', { class: 'table-container pm-table-container' }, 0];
     },
   },
@@ -145,7 +145,7 @@ export const tableNode = {
       },
     ],
     toDOM(node: ProsemirrorNode): DOMOutputSpec {
-      const attrs: any = {};
+      const attrs: Record<string,unknown> = {};
       if (node.attrs.width) {
         attrs['data-width'] = node.attrs.width.toString();
       }

@@ -86,9 +86,11 @@ export function setTitle(state: EditorState, title: string) {
     if (titleMatch) {
       const updatedMetadata = yaml.node.textContent.replace(kYamlMetadataTitleRegex, titleLine);
       const updatedNode = schema.nodes.yaml_metadata.createAndFill({}, schema.text(updatedMetadata));
-      tr.replaceRangeWith(yaml.pos, yaml.pos + yaml.node.nodeSize, updatedNode);
-      foundTitle = true;
-      break;
+      if (updatedNode) {
+        tr.replaceRangeWith(yaml.pos, yaml.pos + yaml.node.nodeSize, updatedNode);
+        foundTitle = true;
+        break;
+      }
     }
   }
 

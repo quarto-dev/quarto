@@ -23,7 +23,6 @@ import {
   CompletionHandler,
   CompletionResult,
   performCompletionReplacement,
-  CompletionContext,
 } from '../../api/completion';
 import { formatAuthors, formatIssuedDate } from '../../api/cite';
 import { CSL, imageForType } from '../../api/csl';
@@ -77,9 +76,8 @@ export function citationDoiCompletionHandler(
   };
 }
 
-const kPRogressDelay = 350;
 
-function citationDOICompletions(ui: EditorUI, server: DOIServer, bibliographyManager: BibliographyManager) {
+function citationDOICompletions(ui: EditorUI, _server: DOIServer, bibliographyManager: BibliographyManager) {
   return (_text: string, context: EditorState | Transaction): CompletionResult<CSLEntry> | null => {
     const parsedDOI = doiFromEditingContext(context);
     if (parsedDOI) {
@@ -87,7 +85,7 @@ function citationDOICompletions(ui: EditorUI, server: DOIServer, bibliographyMan
         token: parsedDOI.token,
         pos: parsedDOI.pos,
         offset: parsedDOI.offset,
-        completions: async (_state: EditorState, completionContext: CompletionContext) => {
+        completions: async () => {
           // If we have a local source that matches this DOI, just show the
           // completion for the entry
           await bibliographyManager.load(ui, context.doc);

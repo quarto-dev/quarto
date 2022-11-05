@@ -32,7 +32,7 @@ export const SymbolCharacterCell = (props: GridChildComponentProps) => {
   const symbolCharacters = characterGridCellItemData.symbolCharacters;
   const itemIndex = props.rowIndex * characterGridCellItemData.numberOfColumns + props.columnIndex;
 
-  const handleMouseEnter = (event: React.MouseEvent) => {
+  const handleMouseEnter = () => {
     characterGridCellItemData.onSelectionChanged(itemIndex);
   };
 

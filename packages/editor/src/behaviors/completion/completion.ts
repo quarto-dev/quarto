@@ -26,7 +26,6 @@ import {
   completionsShareScope,
   performCompletionReplacement,
   CompletionResult,
-  Completions,
   CompletionsStream,
 } from '../../api/completion';
 import { EditorEvents } from '../../api/events';
@@ -75,8 +74,8 @@ class CompletionPlugin extends Plugin<CompletionState> {
   // used to invalidate async completion requests that are fulfilled after
   // an update has occurred
   private version = 0;
-  private allCompletions: any[] = [];
-  private completions: any[] = [];
+  private allCompletions: unknown[] = [];
+  private completions: unknown[] = [];
   private horizontal = false;
   private selectedIndex = 0;
 
@@ -283,7 +282,7 @@ class CompletionPlugin extends Plugin<CompletionState> {
         }
 
         // function to update completions
-        const updateCompletions = (updatedCompletions: any[]) => {
+        const updateCompletions = (updatedCompletions: unknown[]) => {
           // save completions
           this.setAllCompletions(updatedCompletions, !!state.handler?.view.horizontal, resetSelection);
 
@@ -456,12 +455,12 @@ class CompletionPlugin extends Plugin<CompletionState> {
     return !!this.completionPopup;
   }
 
-  private setAllCompletions(completions: any[], horizontal: boolean, resetSelection: boolean) {
+  private setAllCompletions(completions: unknown[], horizontal: boolean, resetSelection: boolean) {
     this.allCompletions = completions;
     this.setDisplayedCompletions(completions, horizontal, resetSelection);
   }
 
-  private setDisplayedCompletions(completions: any[], horizontal: boolean, resetSelection: boolean) {
+  private setDisplayedCompletions(completions: unknown[], horizontal: boolean, resetSelection: boolean) {
     this.completions = completions;
     this.horizontal = !!horizontal;
 

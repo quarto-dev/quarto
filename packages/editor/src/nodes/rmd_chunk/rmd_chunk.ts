@@ -13,7 +13,7 @@
  *
  */
 
-import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
+import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { Extension, ExtensionContext } from '../../api/extension';
 import { PandocOutput, PandocTokenType } from '../../api/pandoc';
@@ -31,7 +31,6 @@ import { rmdChunkBlockCapsuleFilter } from './rmd_chunk-capsule';
 
 import './rmd_chunk-styles.css';
 import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 
 const extension = (context: ExtensionContext): Extension | null => {
   const { ui, options, format } = context;
@@ -56,7 +55,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               preserveWhitespace: 'full',
             },
           ],
-          toDOM(node: ProsemirrorNode) {
+          toDOM() {
             return ['div', { class: 'rmd-chunk pm-code-block' }, 0];
           },
         },
@@ -64,7 +63,7 @@ const extension = (context: ExtensionContext): Extension | null => {
         code_view: {
           firstLineMeta: true,
           lineNumbers: true,
-          lineNumberFormatter: (lineNumber: number, lineCount?: number, line?: string) => {
+          lineNumberFormatter: (lineNumber: number) => {
             if (lineNumber === 1) {
               return '';
             } else {
@@ -99,7 +98,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       },
     ],
 
-    commands: (_schema: Schema) => {
+    commands: () => {
       const commands = [
         new RChunkCommand(ui),
         new PythonChunkCommand(ui),
@@ -114,7 +113,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       return commands;
     },
 
-    plugins: (_schema: Schema) => {
+    plugins: () => {
       if (options.rmdImagePreview) {
         return [new RmdChunkImagePreviewPlugin(ui.context)];
       } else {
@@ -228,7 +227,7 @@ class ChunkExpansionCommand extends ProsemirrorCommand {
     keymap: string[],
     expand: boolean
   ) {
-    super(id, keymap, (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => 
+    super(id, keymap, (_state: EditorState, dispatch?: (tr: Transaction) => void) => 
     {
       if (dispatch) {
         ui.chunks.setChunksExpanded(expand);

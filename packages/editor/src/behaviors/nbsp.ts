@@ -14,7 +14,7 @@
  */
 
 import { DecorationSet, Decoration } from 'prosemirror-view';
-import { Plugin, PluginKey, EditorState, Transaction } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, Transaction, EditorStateConfig } from 'prosemirror-state';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { EditorCommandId, InsertCharacterCommand } from '../api/command';
@@ -43,6 +43,7 @@ function nonBreakingSpacePastePlugin() {
       transformPastedHTML: (html: string) => {
         // strips spans that contain a single non-breaking space (chrome/webkit seem to
         // do this for spaces surrounding marked html)
+        // eslint-disable-next-line no-irregular-whitespace
         return html.replace(/<span> <\/span>/g, ' ');
       },
     },
@@ -55,7 +56,7 @@ function nonBreakingSpaceHighlightPlugin() {
   return new Plugin<DecorationSet>({
     key: highlightPluginKey,
     state: {
-      init(_config: { [key: string]: any }, instance: EditorState) {
+      init(_config: EditorStateConfig, instance: EditorState) {
         return DecorationSet.create(instance.doc, highlightNode(instance.doc));
       },
       apply(tr: Transaction, set: DecorationSet, oldState: EditorState, newState: EditorState) {

@@ -13,7 +13,7 @@
  *
  */
 
-import { Node as ProsemirrorNode, NodeType, Fragment } from 'prosemirror-model';
+import { Node as ProsemirrorNode, NodeType, Fragment, Attrs } from 'prosemirror-model';
 
 import { PandocOutput, PandocToken, ProsemirrorWriter, PandocTokenType } from '../../api/pandoc';
 
@@ -44,10 +44,11 @@ export function readPandocList(nodeType: NodeType, capabilities: ListCapabilitie
 
   // default extraction functions
   let getChildren = (tok: PandocToken) => tok.c;
-  let getAttrs = (tok: PandocToken): { [key: string]: any } => ({});
+  let getAttrs: (tok: PandocToken) => Attrs = () => ({});
 
   // function to read the number style (convert example to default if we
   // don't support example lists)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const readNumberStyle = (attribs: any) => {
     if (capabilities.fancy) {
       const style = attribs[LIST_ATTRIB_NUMBER_STYLE].t;
@@ -86,8 +87,9 @@ export function readPandocList(nodeType: NodeType, capabilities: ListCapabilitie
     }
     
     const children = getChildren(tok);
-    const attrs = getAttrs(tok);
-    attrs.tight = children.length && children[0].length && children[0][0].t === 'Plain';
+    const attrs = { ...getAttrs(tok), 
+                    tight: children.length && children[0].length && children[0][0].t === 'Plain'
+                  };
     writer.openNode(nodeType, attrs);
     children.forEach((child: PandocToken[]) => {
       // setup tokens/attribs for output

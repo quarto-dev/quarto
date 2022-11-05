@@ -162,7 +162,7 @@ export function getOutlineNodes(doc: ProsemirrorNode) {
 
 export function isOutlineNode(node: ProsemirrorNode) {
   if (node.type.spec.attrs) {
-    return node.type.spec.attrs.hasOwnProperty('navigation_id');
+    return Object.prototype.hasOwnProperty.call(node.type.spec.attrs,'navigation_id');
   } else {
     return false;
   }

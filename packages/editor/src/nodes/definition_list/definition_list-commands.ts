@@ -16,7 +16,6 @@
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorState, Transaction, TextSelection } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 import { findParentNodeOfType, setTextSelection } from 'prosemirror-utils';
 
 import { canInsertNode } from '../../api/node';
@@ -29,7 +28,7 @@ export class InsertDefinitionList extends ProsemirrorCommand {
     super(
       EditorCommandId.DefinitionList,
       [],
-      (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+      (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         const schema = state.schema;
 
         if (
@@ -47,7 +46,7 @@ export class InsertDefinitionList extends ProsemirrorCommand {
           const termText = insertTermText(ui);
           const term = schema.text(termText);
           insertDefinitionList(tr, [
-            schema.nodes.definition_list_term.createAndFill({}, term),
+            schema.nodes.definition_list_term.createAndFill(null, term) as ProsemirrorNode,
             createDefinitionDescription(schema),
           ]);
           const start = state.selection.from;
@@ -63,7 +62,7 @@ export class InsertDefinitionList extends ProsemirrorCommand {
         group: OmniInsertGroup.Lists,
         priority: 3,
         image: () =>
-          ui.prefs.darkMode() ? ui.images.omni_insert?.definition_list_dark! : ui.images.omni_insert?.definition_list!,
+          ui.prefs.darkMode() ? ui.images.omni_insert.definition_list_dark : ui.images.omni_insert.definition_list,
       },
     );
   }
@@ -71,7 +70,7 @@ export class InsertDefinitionList extends ProsemirrorCommand {
 
 class InsertDefinitionListItemCommand extends ProsemirrorCommand {
   constructor(id: EditorCommandId, createFn: () => ProsemirrorNode) {
-    super(id, [], (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+    super(id, [], (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       const schema = state.schema;
 
       if (!findParentNodeOfType(schema.nodes.definition_list)(state.selection)) {

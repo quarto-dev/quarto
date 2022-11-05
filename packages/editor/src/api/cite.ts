@@ -20,7 +20,7 @@ import { urlForDOI } from './doi';
 import pinyin from 'pinyin';
 import { transliterate } from 'transliteration';
 
-export const kInvalidCiteKeyChars = /[\]\[\s@',\\\#}{~%&\$\^_]/g;
+export const kInvalidCiteKeyChars = /[\][\s@',\\#}{~%&$^_]/g;
 const kCiteIdLeadingLength = 8;
 
 export function createUniqueCiteId(existingIds: string[], baseId: string): string {
@@ -136,6 +136,8 @@ export function urlForCitation(csl: CSL): string | undefined {
     return csl.URL;
   } else if (csl.DOI) {
     return urlForDOI(csl.DOI);
+  } else {
+    return undefined;
   }
 }
 
@@ -164,7 +166,7 @@ export function formatForPreview(csl: CSL): CiteField[] {
     pairs.push({ name: 'Page(s)', value: page });
   }
 
-  const cslAny = csl as { [key: string]: any };
+  const cslAny = csl as { [key: string]: string | unknown };
   Object.keys(csl).forEach(key => {
     if (!kFilteredFields.includes(key)) {
       const value = cslAny[key];
@@ -290,12 +292,13 @@ export function formatIssuedDate(date: CSLDate | undefined): string {
       case 2:
         return `${dateParts[0][0]}-${dateParts[1][0]}`;
       // Only a single date
-      case 1:
-        // Note that it is possible to receive an entry with a single null entry
-        // For examples:
-        // 10.1163/1874-6772_seg_a44_588
-        const singleDatePart = dateParts[0][0];
-        return `${singleDatePart ? singleDatePart : ''}`;
+      case 1: {
+          // Note that it is possible to receive an entry with a single null entry
+          // For examples:
+          // 10.1163/1874-6772_seg_a44_588
+          const singleDatePart = dateParts[0][0];
+          return `${singleDatePart ? singleDatePart : ''}`;
+        }
 
       // Seems like a malformed date :(
       case 0:

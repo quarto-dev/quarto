@@ -22,7 +22,7 @@ export interface TextWithPos {
 
 export function mergedTextNodes(
   doc: ProsemirrorNode,
-  filter?: (node: ProsemirrorNode, pos: number, parentNode: ProsemirrorNode) => boolean,
+  filter?: (node: ProsemirrorNode, pos: number, parentNode: ProsemirrorNode | null) => boolean,
 ): TextWithPos[] {
   const textNodes: TextWithPos[] = [];
   let nodeIndex = 0;
@@ -48,6 +48,7 @@ export function mergedTextNodes(
     } else {
       nodeIndex += 1;
     }
+    return true;
   });
   return textNodes;
 }

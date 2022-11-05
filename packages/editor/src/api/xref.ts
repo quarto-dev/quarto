@@ -105,7 +105,7 @@ function xrefPositionLocate(doc: ProsemirrorNode, xref: string, locators: Record
         markedNodes.forEach(markedNode => {
           // bail if we already found it
           if (xrefPos !== -1) {
-            return false;
+            return;
           }
           // see if we can locate the xref
           if (locator.hasXRef(markedNode.node, id, markType)) {
@@ -125,6 +125,7 @@ function xrefPositionLocate(doc: ProsemirrorNode, xref: string, locators: Record
             xrefPos = pos;
             return false;
           }
+          return false;
         });
       }
     }
@@ -172,14 +173,14 @@ const quartoXrefPositionLocators: { [key: string]: XRefPositionLocator } = {
 function quartoMathLocator() {
   return {
     nodeTypes: ['paragraph'],
-    hasXRef: (node: ProsemirrorNode, id: string) => {
+    hasXRef: (node: ProsemirrorNode) => {
       const mathType = node.type.schema.marks.math;
       let prevNodeMath = false;
       for (let i = 0; i < node.childCount; i++) {
         const childNode = node.child(i);
         if (prevNodeMath) {
           const text = childNode.textContent;
-          if (!!text.match(/^\s*\{\#eq\-.*\}/)) {
+          if (text.match(/^\s*\{#eq-.*\}/)) {
             return true;
           }
         }
@@ -213,11 +214,11 @@ function quartoHeadingLocator() {
 function quartoTableLocator() {
   return {
     nodeTypes: ['table_container'],
-    hasXRef: (node: ProsemirrorNode, id: string) => {
+    hasXRef: (node: ProsemirrorNode) => {
       // Look for a table which has a table caption that contains the id
       const captions = findChildrenByType(node, node.type.schema.nodes.table_caption);
       if (captions.length) {
-        return !!captions[0].node.textContent.match(/\{\#tbl\-.*\}/);
+        return !!captions[0].node.textContent.match(/\{#tbl-.*\}/);
       }
       return false;
     },
@@ -261,7 +262,7 @@ const bookdownXrefPositionLocators: { [key: string]: XRefPositionLocator } = {
         return rmdChunkHasXRef(node, 'r', id, /kable\s*\([\s\S]*caption/);
       } else if (node.type.name === 'table_container') {
         const caption = node.child(1);
-        const match = caption.textContent.match(/^\s*\(#tab\:([a-zA-Z0-9\/-]+)\)\s*(.*)$/);
+        const match = caption.textContent.match(/^\s*\(#tab:([a-zA-Z0-9/-]+)\)\s*(.*)$/);
         return !!match && match[1].localeCompare(id, undefined, { sensitivity: 'accent' }) === 0;
       } else {
         return false;
@@ -276,7 +277,7 @@ const bookdownXrefPositionLocators: { [key: string]: XRefPositionLocator } = {
       if (!markType && (node.attrs.format !== kTexFormat)) {
         return false;
       }
-      const match = node.textContent.match(/^.*\(\\#eq:([a-zA-Z0-9\/-]+)\).*$/m);
+      const match = node.textContent.match(/^.*\(\\#eq:([a-zA-Z0-9/-]+)\).*$/m);
       return !!match && match[1].localeCompare(id, undefined, { sensitivity: 'accent' }) === 0;
     },
   },
@@ -291,7 +292,6 @@ const bookdownXrefPositionLocators: { [key: string]: XRefPositionLocator } = {
 
 function rmdChunkHasXRef(node: ProsemirrorNode, engine: string, label: string, pattern?: RegExp) {
   const chunk = rmdChunkEngineAndLabel(node.textContent);
-  const match = node.textContent.match(/^\{([a-zA-Z0-9_]+)[\s,]+([a-zA-Z0-9/-]+)/);
   if (chunk) {
     return (
       chunk.engine.localeCompare(engine, undefined, { sensitivity: 'accent' }) === 0 &&

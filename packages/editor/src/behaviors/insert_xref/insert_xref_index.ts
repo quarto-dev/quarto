@@ -17,7 +17,7 @@ import Fuse from 'fuse.js';
 import { XRef, xrefKey } from '../../api/xref';
 
 
-const searchFields: Fuse.FuseOptionKeyObject[] = [
+const searchFields: Fuse.FuseOptionKeyObject<XRef>[] = [
   { name: 'key', weight: 50 },
   { name: 'title', weight: 30 },
 ];

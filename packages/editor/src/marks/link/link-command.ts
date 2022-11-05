@@ -27,7 +27,7 @@ import { OmniInsertGroup } from '../../api/omni_insert';
 import { equalsIgnoreCase } from '../../api/text';
 
 export function linkCommand(markType: MarkType, onEditLink: LinkEditorFn, capabilities: LinkCapabilities) {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     // if the current node doesn't allow this mark return false
     if (!state.selection.$from.node().type.allowsMarkType(markType)) {
       return false;
@@ -42,7 +42,7 @@ export function linkCommand(markType: MarkType, onEditLink: LinkEditorFn, capabi
         const range = getSelectionMarkRange(state.selection, markType);
 
         // get link attributes if we have them
-        let link: { [key: string]: any } = {};
+        let link: { type?: LinkType, text?: string, href?: string, heading?: string } = {};
 
         // only get text if this is a text selection
         if (state.selection instanceof TextSelection) {
@@ -131,12 +131,12 @@ export function linkOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Link to another location'),
     group: OmniInsertGroup.Content,
     priority: 8,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.link_dark! : ui.images.omni_insert?.link!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.link_dark : ui.images.omni_insert.link),
   };
 }
 
 export function removeLinkCommand(markType: MarkType) {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const range = getMarkRange(state.selection.$from, markType);
     if (!range) {
       return false;

@@ -23,7 +23,7 @@ import { EditorCommandId, ProsemirrorCommand, toggleWrap } from "../../api/comma
 import { EditorUI } from "../../api/ui";
 import { OmniInsertGroup } from "../../api/omni_insert";
 import { pandocAttrEnsureClass, pandocAttrSetKeyvalue, pandocAttrGetKeyvalue, 
-         pandocAttrRemoveKeyvalue, pandocAttrRemoveClass, pandocAttrFrom } from "../../api/pandoc_attr";
+         pandocAttrRemoveKeyvalue, pandocAttrRemoveClass, pandocAttrFrom, PandocAttr } from "../../api/pandoc_attr";
 import { CalloutProps } from "../../api/ui-dialogs";
 import { removeDiv } from "./div";
 
@@ -33,7 +33,7 @@ export function insertCalloutCommand(ui: EditorUI) {
     description: ui.context.translateText('Content framed for special emphasis'),
     group: OmniInsertGroup.Content,
     priority: 2,
-    image: () => ui.images.omni_insert?.generic!,
+    image: () => ui.images.omni_insert.generic,
   });
 }
 
@@ -93,14 +93,14 @@ export async function editCalloutDiv(ui: EditorUI, state: EditorState, dispatch:
           if (result.callout?.caption) {
             tr.replaceRangeWith(
               div.start, 
-              div.start + div.node.firstChild?.nodeSize!, 
+              div.start + div.node.firstChild?.nodeSize || 0, 
               state.schema.nodes.heading.create(
                 { level: 2 },
                 state.schema.text(result.callout?.caption)
               )
             );
           } else {
-            tr.deleteRange(div.start, div.start + div.node.firstChild?.nodeSize!);
+            tr.deleteRange(div.start, div.start + div.node.firstChild?.nodeSize || 0);
           }
         } else if (result.callout?.caption) {
           tr.insert(
@@ -144,14 +144,14 @@ function insertCalloutCommandFn(ui: EditorUI) {
 
 async function createCalloutDiv(ui: EditorUI, state: EditorState, dispatch: (tr: Transaction) => void) {
   const props = {
-    attr: {},
+    attr: { id: "", classes: [], keyvalue: []},
     callout: defaultCallout()
   };
   const result = await ui.dialogs.editCallout(props, false);
   if (result) {
     wrapIn(state.schema.nodes.div)(state, (tr: Transaction) => {
       // set div props from callout
-      const attr = result.attr as any;
+      const attr = result.attr as PandocAttr;
       pandocAttrEnsureClass(attr, `callout-${result.callout.type}`);
       attr.keyvalue = attr.keyvalue || [];
       if (result.callout?.appearance !== "default") {

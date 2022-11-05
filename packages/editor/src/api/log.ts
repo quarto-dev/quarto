@@ -13,8 +13,11 @@
  *
  */
 
-export function logException(e: Error) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function logException(e: unknown) {
   // TODO: log exceptions (we don't want to use console.log in production code, so this would
   // utilize some sort of external logging facility)
-  // console.log(e);
+  if (e instanceof Error) {
+     // console.log(e);
+  }
 }

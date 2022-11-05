@@ -51,7 +51,7 @@ export function emojiCompletionHandler(ui: EditorUI): CompletionHandler<Emoji> {
 }
 
 const kMaxEmojiCompletions = 20;
-const kEmojiCompletionRegEx = /(^|[^`\:]):(\w{2,})$/;
+const kEmojiCompletionRegEx = /(^|[^`:]):(\w{2,})$/;
 
 function emojiCompletions(ui: EditorUI) {
   return (text: string, context: EditorState | Transaction): CompletionResult<Emoji> | null => {
@@ -140,7 +140,7 @@ const kCellWidth = 40;
 const kHeaderHeight = 20;
 
 function emojiSkintonePreferenceCompletions(ui: EditorUI) {
-  return (text: string, context: EditorState | Transaction): CompletionResult<Emoji> | null => {
+  return (_text: string, context: EditorState | Transaction): CompletionResult<Emoji> | null => {
     // The user has set a preference for skin tone
     if (ui.prefs.emojiSkinTone() !== SkinTone.None) {
       return null;

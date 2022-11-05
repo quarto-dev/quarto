@@ -27,15 +27,8 @@ export class CheckedListItemNodeView implements NodeView {
   public readonly dom: HTMLElement;
   public readonly contentDOM: HTMLElement;
 
-  private readonly node: ProsemirrorNode;
-  private readonly view: EditorView;
-  private readonly getPos: () => number;
-
   constructor(node: ProsemirrorNode, view: EditorView, getPos: () => number) {
-    this.node = node;
-    this.view = view;
-    this.getPos = getPos;
-
+    
     // create root li element
     this.dom = window.document.createElement('li');
     if (node.attrs.tight) {
@@ -56,7 +49,7 @@ export class CheckedListItemNodeView implements NodeView {
       input.setAttribute('type', 'checkbox');
       input.checked = node.attrs.checked;
       input.contentEditable = 'false';
-      input.disabled = !(view as any).editable;
+      input.disabled = !view.editable;
       input.addEventListener('mousedown', (ev: Event) => {
         ev.preventDefault(); // don't steal focus
       });
@@ -173,13 +166,17 @@ export function checkedListItemInputRule() {
   });
 }
 
+export interface InputRuleWithHandler extends InputRule {
+  handler: (state: EditorState, match: RegExpMatchArray, start: number, end: number) => Transaction
+}
+
 // allow users to begin a new checked list by typing [x] or [ ] at the beginning of a line
 export function checkedListInputRule(schema: Schema) {
   // regex to match checked list at the beginning of a line
   const regex = /^\s*\[([ x])\]\s$/;
 
   // we are going to steal the handler from the base bullet list wrapping input rule
-  const baseInputRule: any = wrappingInputRule(regex, schema.nodes.bullet_list);
+  const baseInputRule = wrappingInputRule(regex, schema.nodes.bullet_list) as InputRuleWithHandler;
 
   return new InputRule(regex, (state: EditorState, match: string[], start: number, end: number) => {
     // call the base handler to create the bullet list

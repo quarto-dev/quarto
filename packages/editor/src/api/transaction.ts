@@ -29,12 +29,12 @@ export const kNavigationTransaction = 'navigationTransaction';
 export const kInsertSymbolTransaction = 'insertSymbol';
 export const kInsertCompletionTransaction = 'insertCompletion';
 
-export type TransactionsFilter = (transactions: Transaction[], oldState: EditorState, newState: EditorState) => boolean;
+export type TransactionsFilter = (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => boolean;
 
 export type TransactionNodeFilter = (
-  node: ProsemirrorNode<any>,
+  node: ProsemirrorNode,
   pos: number,
-  parent: ProsemirrorNode<any>,
+  parent: ProsemirrorNode | null,
   index: number,
 ) => boolean;
 
@@ -42,7 +42,7 @@ export interface AppendTransactionHandler {
   name: string;
   filter?: TransactionsFilter;
   nodeFilter?: TransactionNodeFilter;
-  append: (tr: Transaction, transactions: Transaction[], oldState: EditorState, newState: EditorState) => void;
+  append: (tr: Transaction, transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => void;
 }
 
 // wrapper for transaction that is guaranteed not to modify the position of any
@@ -80,7 +80,7 @@ export class MarkTransaction {
 
 export interface AppendMarkTransactionHandler {
   name: string;
-  filter: (node: ProsemirrorNode, transactions: Transaction[]) => boolean;
+  filter: (node: ProsemirrorNode, transactions: readonly Transaction[]) => boolean;
   append: (tr: MarkTransaction, node: ProsemirrorNode, pos: number, state: EditorState) => void;
 }
 
@@ -88,7 +88,7 @@ export function appendMarkTransactionsPlugin(handlers: readonly AppendMarkTransa
   return new Plugin({
     key: new PluginKey('appendMarkTransactions'),
 
-    appendTransaction: (transactions: Transaction[], oldState: EditorState, newState: EditorState) => {
+    appendTransaction: (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => {
       // skip for selection-only changes
       if (!transactionsDocChanged(transactions)) {
         return;
@@ -103,7 +103,7 @@ export function appendMarkTransactionsPlugin(handlers: readonly AppendMarkTransa
       forChangedNodes(
         oldState,
         newState,
-        node => true,
+        () => true,
         (node: ProsemirrorNode, pos: number) => {
           for (const handler of handlers) {
             // get a fresh view of the node
@@ -120,6 +120,8 @@ export function appendMarkTransactionsPlugin(handlers: readonly AppendMarkTransa
       // return transaction
       if (tr.docChanged || tr.selectionSet || tr.storedMarksSet) {
         return tr;
+      } else {
+        return undefined;
       }
     },
   });
@@ -129,7 +131,7 @@ export function appendTransactionsPlugin(handlers: readonly AppendTransactionHan
   return new Plugin({
     key: new PluginKey('appendTransactions'),
 
-    appendTransaction: (transactions: Transaction[], oldState: EditorState, newState: EditorState) => {
+    appendTransaction: (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => {
       // skip for selection-only changes
       if (!transactionsDocChanged(transactions)) {
         return;
@@ -157,14 +159,16 @@ export function appendTransactionsPlugin(handlers: readonly AppendTransactionHan
             // if that doesn't detect a change then try the nodeFilter if we have one
             if (!haveChange && handler.nodeFilter) {
               const checkForChange = (
-                node: ProsemirrorNode<any>,
+                node: ProsemirrorNode,
                 pos: number,
-                parent: ProsemirrorNode<any>,
+                parent: ProsemirrorNode | null,
                 index: number,
               ) => {
                 if (handler.nodeFilter!(node, pos, parent, index)) {
                   haveChange = true;
                   return false;
+                } else {
+                  return true;
                 }
               };
 
@@ -193,19 +197,21 @@ export function appendTransactionsPlugin(handlers: readonly AppendTransactionHan
       // return transaction
       if (tr.docChanged || tr.selectionSet || tr.storedMarksSet) {
         return tr;
+      } else {
+        return undefined;
       }
     },
   });
 }
 
-export function transactionsDocChanged(transactions: Transaction[]) {
+export function transactionsDocChanged(transactions: readonly Transaction[]) {
   return transactions.some(transaction => transaction.docChanged);
 }
 
-export function transactionsChangeSet(transactions: Transaction[], oldState: EditorState, newState: EditorState) {
+export function transactionsChangeSet(transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) {
   let changeSet = ChangeSet.create(oldState.doc);
   for (const transaction of transactions) {
-    changeSet = changeSet.addSteps(newState.doc, transaction.mapping.maps);
+    changeSet = changeSet.addSteps(newState.doc, transaction.mapping.maps, {});
   }
   return changeSet;
 }
@@ -229,10 +235,10 @@ export function trTransform(tr: Transaction, f: (transform: Transform) => void):
 }
 
 export function transactionsHaveChange(
-  transactions: Transaction[],
+  transactions: readonly Transaction[],
   oldState: EditorState,
   newState: EditorState,
-  predicate: (node: ProsemirrorNode<any>, pos: number, parent: ProsemirrorNode<any>, index: number) => boolean,
+  predicate: (node: ProsemirrorNode, pos: number, parent: ProsemirrorNode | null, index: number) => boolean,
 ) {
   // screen out transactions with no doc changes
   if (!transactionsDocChanged(transactions)) {
@@ -241,10 +247,12 @@ export function transactionsHaveChange(
 
   // function to check for whether we have a change and set a flag if we do
   let haveChange = false;
-  const checkForChange = (node: ProsemirrorNode<any>, pos: number, parent: ProsemirrorNode<any>, index: number) => {
+  const checkForChange = (node: ProsemirrorNode, pos: number, parent: ProsemirrorNode | null, index: number) => {
     if (predicate(node, pos, parent, index)) {
       haveChange = true;
       return false;
+    } else {
+      return true;
     }
   };
 
@@ -319,14 +327,14 @@ function changedDescendants(
   }
 }
 
-export function transactionsAreTypingChange(transactions: Transaction[]) {
+export function transactionsAreTypingChange(transactions: readonly Transaction[]) {
   if (
     transactions.length === 1 &&
     transactions[0].steps.length === 1 &&
     transactions[0].steps[0] instanceof ReplaceStep
   ) {
     // step to examine
-    const step: any = transactions[0].steps[0];
+    const step: SliceStep = transactions[0].steps[0];
 
     // insert single chraracter or new empty slice (e.g. from enter after a paragraph)
     if (step.from === step.to && sliceContentLength(step.slice) <= 1) {

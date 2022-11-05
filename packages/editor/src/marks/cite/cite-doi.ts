@@ -31,6 +31,8 @@ export function doiFromEditingContext(context: EditorState | Transaction): Parse
       return parsedCitation;
     }
     return undefined;
+  } else {
+    return undefined
   }
 }
 
@@ -48,6 +50,8 @@ export function doiFromSlice(context: EditorState | Transaction, slice: Slice): 
         return { ...parsedCitation, token: doi };
       }
     }
+    return undefined;
+  } else {
     return undefined;
   }
 }

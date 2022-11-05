@@ -18,7 +18,7 @@ import { setTextSelection, findParentNodeOfType } from "prosemirror-utils";
 
 import { ExtensionContext } from "../api/extension";
 import { kPresentationDocType } from "../api/format";
-import { canInsertNode, editingRootNode } from "../api/node";
+import { canInsertNode } from "../api/node";
 import { ProsemirrorCommand, EditorCommandId } from "../api/command";
 import { OmniInsertGroup } from "../api/omni_insert";
 import { wrapIn } from "prosemirror-commands";
@@ -107,12 +107,15 @@ export function insertSlidePause(state: EditorState, dispatch?: (tr: Transaction
     return false;
   }
   if (dispatch) {
-    const tr = state.tr;
-    tr.replaceSelectionWith(schema.nodes.paragraph.createAndFill({}, schema.text('. . .')));
-    setTextSelection(tr.selection.from - 1, -1)(tr);
-    tr.replaceSelectionWith(schema.nodes.paragraph.create());
-    setTextSelection(tr.selection.from - 1, -1)(tr);
-    dispatch(tr);
+    const node = schema.nodes.paragraph.createAndFill(null, schema.text('. . .'));
+    if (node) {
+      const tr = state.tr;
+      tr.replaceSelectionWith(node);
+      setTextSelection(tr.selection.from - 1, -1)(tr);
+      tr.replaceSelectionWith(schema.nodes.paragraph.create());
+      setTextSelection(tr.selection.from - 1, -1)(tr);
+      dispatch(tr);
+    }
   }
   return true;
 }
@@ -123,10 +126,13 @@ export function insertSlideNotes(state: EditorState, dispatch?: (tr: Transaction
     return false;
   }
   if (dispatch) {
-    const tr = state.tr;
-    tr.replaceSelectionWith(schema.nodes.div.createAndFill({ classes: ['notes']}, schema.nodes.paragraph.create()));
-    setTextSelection(state.selection.from + 1, 1)(tr);
-    dispatch(tr);
+    const node = schema.nodes.div.createAndFill({ classes: ['notes']}, schema.nodes.paragraph.create());
+    if (node) {
+      const tr = state.tr;
+      tr.replaceSelectionWith(node);
+      setTextSelection(state.selection.from + 1, 1)(tr);
+      dispatch(tr);
+    }
   }
   return true;
 }

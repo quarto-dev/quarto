@@ -16,7 +16,7 @@
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { NodeWithPos } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
-import { EditorState } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 
 import yaml from 'js-yaml';
 
@@ -40,14 +40,16 @@ export function applyYamlFrontMatter(view: EditorView, yamlText: string) {
   const schema = view.state.schema;
   const updatedYaml = `---\n${yamlText}---`;
   const updatedYamlNode = schema.nodes.yaml_metadata.createAndFill({}, schema.text(updatedYaml));
-  const tr = view.state.tr;
-  const firstYaml = firstYamlNode(view.state.doc);
-  if (firstYaml) {
-    tr.replaceRangeWith(firstYaml.pos, firstYaml.pos + firstYaml.node.nodeSize, updatedYamlNode);
-  } else {
-    tr.insert(1, updatedYamlNode);
+  if (updatedYamlNode) {
+    const tr = view.state.tr as Transaction;
+    const firstYaml = firstYamlNode(view.state.doc);
+    if (firstYaml) {
+      tr.replaceRangeWith(firstYaml.pos, firstYaml.pos + firstYaml.node.nodeSize, updatedYamlNode);
+    } else {
+      tr.insert(1, updatedYamlNode);
+    }
+    view.dispatch(tr);
   }
-  view.dispatch(tr);
 }
 
 export function yamlMetadataNodes(doc: ProsemirrorNode) {
@@ -102,7 +104,8 @@ export function valueFromYamlText(name: string, yamlText: string) {
 
 const kFirstYamlBlockRegex = /\s*---[ \t]*\n(?![ \t]*\n)([\W\w]*?)\n[\t >]*(?:---|\.\.\.)[ \t]*/m;
 
-export function firstYamlBlock(code: string): { [key: string]: any } | null {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function firstYamlBlock(code: string): Record<string,any> | null {
   const match = code.match(kFirstYamlBlockRegex);
   if (match && match.index === 0) {
     const yamlCode = match[1];
@@ -130,7 +133,7 @@ export function parseYaml(yamlCode: string) : unknown {
   }
 }
 
-export function toYamlCode(obj: any): string | null {
+export function toYamlCode(obj: unknown): string | null {
   try {
     const yamlCode = yaml.dump(obj);
     return yamlCode;
@@ -141,11 +144,12 @@ export function toYamlCode(obj: any): string | null {
 }
 
 export function stripYamlDelimeters(yamlCode: string) {
-  return yamlCode.replace(/^[ \t-]+\n/, '').replace(/\n[ \t-\.]+$/, '');
+  return yamlCode.replace(/^[ \t-]+\n/, '').replace(/\n[ \t-.]+$/, '');
 }
 
 export interface ParsedYaml {
   yamlCode: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   yaml: any;
   node: NodeWithPos;
 }

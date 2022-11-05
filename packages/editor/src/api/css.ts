@@ -98,8 +98,12 @@ export function replaceClassWithStyle(el: HTMLElement, className: string, style:
       el.style.setProperty(name, style[name]);
     });
   }
-  const children: any = el.children;
-  for (const child of children) {
-    replaceClassWithStyle(child, className, style);
+  const children = el.children;
+  for (let i = 0; i<children.length; i++) {
+    const child = children.item(i);
+    if (child instanceof HTMLElement) {
+      replaceClassWithStyle(child, className, style);
+    }
+   
   }
 }

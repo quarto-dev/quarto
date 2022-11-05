@@ -109,7 +109,7 @@ const extension = (context: ExtensionContext) => {
       ];
     },
 
-    baseKeys: (_schema: Schema) => {
+    baseKeys: () => {
       return [
         { key: BaseKey.Enter, command: definitionListEnter() },
         { key: BaseKey.Backspace, command: definitionListBackspace() },
@@ -118,11 +118,11 @@ const extension = (context: ExtensionContext) => {
       ];
     },
 
-    inputRules: (_schema: Schema) => {
+    inputRules: () => {
       return [definitionInputRule()];
     },
 
-    appendTransaction: (_schema: Schema) => {
+    appendTransaction: () => {
       return [insertDefinitionListAppendTransaction()];
     },
 

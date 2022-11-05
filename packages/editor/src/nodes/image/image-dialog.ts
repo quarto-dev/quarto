@@ -44,7 +44,7 @@ export async function imageDialog(
   let content = Fragment.empty;
   let image: ImageProps = { src: null };
   let linkMark: Mark | undefined;
-  let marks: Mark[] = [];
+  let marks: readonly Mark[] = [];
   if (node && dims && node.type === nodeType) {
     // base attributess
     image = {

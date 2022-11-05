@@ -14,7 +14,6 @@
  */
 
 import { Transaction } from 'prosemirror-state';
-import { Schema } from 'prosemirror-model';
 import { Extension } from '../api/extension';
 import { FixupContext } from '../api/fixup';
 import { requiresTrailingP, insertTrailingP } from '../api/trailing_p';
@@ -33,7 +32,7 @@ const extension: Extension = {
     ];
   },
 
-  appendTransaction: (schema: Schema) => {
+  appendTransaction: () => {
     return [
       {
         name: 'trailing_p',

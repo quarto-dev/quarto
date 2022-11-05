@@ -43,7 +43,7 @@ import './insert_citation-source-panel-bibliography.css';
 const kAllLocalSourcesRootNodeType = 'All Local Sources';
 
 export function bibliographySourcePanel(
-  doc: ProsemirrorNode,
+  _doc: ProsemirrorNode,
   ui: EditorUI,
   bibliographyManager: BibliographyManager,
 ): CitationSourcePanelProvider {
@@ -154,6 +154,8 @@ function rootImageForProvider(providerKey: string, ui: EditorUI) {
       return ui.images.citations?.zotero_root;
     case kLocalBibliographyProviderKey:
       return ui.images.citations?.bibligraphy;
+    default:
+      return undefined;
   }
 }
 
@@ -167,6 +169,8 @@ function folderImageForProvider(providerKey: string, hasParent: boolean, ui: Edi
       }
     case kLocalBibliographyProviderKey:
       return ui.images.citations?.bibligraphy_folder;
+    default:
+      return undefined;
   }
 }
 

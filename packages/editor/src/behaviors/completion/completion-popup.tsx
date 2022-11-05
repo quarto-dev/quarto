@@ -34,10 +34,10 @@ import { EditorUI } from '../../api/ui';
 
 const kNoResultsHeight = 22;
 
-export interface CompletionListProps {
-  handler: CompletionHandler;
+export interface CompletionListProps<T = unknown>{
+  handler: CompletionHandler<T>;
   pos: number;
-  completions: any[];
+  completions: T[];
   selectedIndex: number;
   noResults: string;
   onHover: (index: number) => void;
@@ -52,7 +52,7 @@ export function createCompletionPopup(): HTMLElement {
   return popup;
 }
 
-export function renderCompletionPopup(view: EditorView, props: CompletionListProps, popup: HTMLElement) {
+export function renderCompletionPopup(view: EditorView, props: CompletionListProps<unknown>, popup: HTMLElement) {
   // position popup
   const size = completionPopupSize(props);
   const positionStyles = completionPopupPositionStyles(view, props.pos, size.width, size.height);
@@ -67,7 +67,7 @@ export function destroyCompletionPopup(popup: HTMLElement) {
   popup.remove();
 }
 
-const CompletionPopup: React.FC<CompletionListProps> = props => {
+const CompletionPopup: React.FC<CompletionListProps<unknown>> = props => {
   // main completion popup + class + dark mode if appropriate
   const classes = ['pm-completion-popup'].concat(props.ui.prefs.darkMode() ? ['pm-dark-mode'] : []);
   return (
@@ -77,7 +77,7 @@ const CompletionPopup: React.FC<CompletionListProps> = props => {
   );
 };
 
-const CompletionList: React.FC<CompletionListProps> = props => {
+const CompletionList: React.FC<CompletionListProps<unknown>> = props => {
   const size = completionPopupSize(props);
   const itemHeight = props.handler.view.height || kCompletionDefaultItemHeight;
 
@@ -186,6 +186,7 @@ function horizontalCompletions(props: CompletionListProps, itemHeight: number, i
 
 function completionItemCell(
   props: CompletionListProps,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   completion: any,
   index: number,
   width?: number,
@@ -193,8 +194,9 @@ function completionItemCell(
 ) {
   // need to provide key for both wrapper and item
   // https://stackoverflow.com/questions/28329382/understanding-unique-keys-for-array-children-in-react-js#answer-28329550
-  const key = props.handler.view.key(completion);
-  const item = React.createElement(props.handler.view.component, { ...completion, key });
+  const key = props.handler.view.key(completion) as React.Key;
+  const itemProps = typeof(completion) === "object" ? completion : {};
+  const item = React.createElement(props.handler.view.component, { ...itemProps, key });
   const className = 'pm-completion-list-item' + (index === props.selectedIndex ? ' pm-selected-list-item' : '');
   const cell = (
     <td

@@ -13,9 +13,7 @@
  *
  */
 
-import { Schema } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 
 import { Extension } from '../api/extension';
 import { BaseKey } from '../api/basekeys';
@@ -48,7 +46,7 @@ const extension: Extension = {
     },
   ],
 
-  baseKeys: (_schema: Schema) => {
+  baseKeys: () => {
     return [
       { key: BaseKey.ModEnter, command: hardBreakCommandFn() },
       { key: BaseKey.ShiftEnter, command: hardBreakCommandFn() },
@@ -57,7 +55,7 @@ const extension: Extension = {
 };
 
 export function hardBreakCommandFn() {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const br = state.schema.nodes.hard_break;
     if (dispatch) {
       dispatch(state.tr.replaceSelectionWith(br.create()).scrollIntoView());

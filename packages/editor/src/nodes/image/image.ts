@@ -90,7 +90,7 @@ const extension = (context: ExtensionContext): Extension => {
             },
           ],
           inlineHTMLReader: pandocExtensions.raw_html ? imageInlineHTMLReader : undefined,
-          writer: imagePandocOutputWriter(false, ui),
+          writer: imagePandocOutputWriter(false),
         },
 
         attr_edit: () => ({
@@ -101,7 +101,7 @@ const extension = (context: ExtensionContext): Extension => {
       },
     ],
 
-    commands: (_schema: Schema) => {
+    commands: () => {
       return [
         new ProsemirrorCommand(
           EditorCommandId.Image,
@@ -112,7 +112,7 @@ const extension = (context: ExtensionContext): Extension => {
       ];
     },
 
-    plugins: (schema: Schema) => {
+    plugins: () => {
       return [
         imageTextSelectionPlugin(),
         imageEventsPlugin(ui),
@@ -147,7 +147,7 @@ export function pandocImageHandler(figure: boolean, imageAttributes: boolean) {
   };
 }
 
-export function imagePandocOutputWriter(figure: boolean, ui: EditorUI) {
+export function imagePandocOutputWriter(figure: boolean) {
   return (output: PandocOutput, node: ProsemirrorNode) => {
     // default writer for markdown images
     let writer = () => {
@@ -208,8 +208,7 @@ function imageInlineHTMLReader(schema: Schema, html: string, writer?: Prosemirro
   if (writer) {
     const attrs = imageAttrsFromHTML(html);
     if (attrs) {
-      attrs.raw = true;
-      writer.addNode(schema.nodes.image, attrs, []);
+      writer.addNode(schema.nodes.image, { ...attrs, raw: true }, []);
     } else {
       return false;
     }
@@ -226,7 +225,7 @@ export function imageDOMAttributes(
   node: ProsemirrorNode,
   imageAttributes: boolean,
   marker = true,
-): { [key: string]: string } {
+): { [key: string]: unknown } {
   const attr: { [key: string]: string } = {
     src: node.attrs.src,
   };
@@ -279,7 +278,7 @@ export function imageAttrsFromHTML(html: string) {
 }
 
 export function imageCommand(editorUI: EditorUI, editorFormat: EditorFormat, imageAttributes: boolean) {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     const schema = state.schema;
 
     if (!canInsertNode(state, schema.nodes.image) && !canInsertNode(state, schema.nodes.figure)) {
@@ -330,7 +329,7 @@ function imageOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Figure or inline image'),
     group: OmniInsertGroup.Content,
     priority: 10,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.image_dark! : ui.images.omni_insert?.image!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.image_dark : ui.images.omni_insert.image),
   };
 }
 

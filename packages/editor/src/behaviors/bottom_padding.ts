@@ -13,7 +13,7 @@
  *
  */
 
-import { Selection, Plugin, PluginKey, EditorState } from 'prosemirror-state';
+import { Plugin, PluginKey } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 
 import zenscroll from 'zenscroll';
@@ -33,7 +33,7 @@ const extension: Extension = {
       new Plugin({
         key: new PluginKey('bottom_padding'),
         view: () => ({
-          update: (view: EditorView, prevState: EditorState) => {
+          update: (view: EditorView) => {
             const selection = view.state.selection;
             if (selectionWithinLastBodyParagraph(selection)) {
               const paragraphNode = findParentNodeOfType(schema.nodes.paragraph)(selection);

@@ -73,7 +73,7 @@ export class DOMEditorEvents implements EditorEvents {
   }
 
   public subscribe<TDetail>(eventType: EventType<TDetail>, handler: EventHandler<TDetail>) {
-    const listener = function(this: any, evt: Event) {
+    const listener = function(this: unknown, evt: Event) {
       const detail: TDetail | undefined = (evt as CustomEvent).detail;
       handler.call(this, detail);
     };

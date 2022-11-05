@@ -58,7 +58,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               tag: "span[class*='xref']",
             },
           ],
-          toDOM(_mark: Mark) {
+          toDOM() {
             return ['span', { class: 'xref pm-link-text-color pm-fixedwidth-font' }];
           },
         },
@@ -124,7 +124,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       ];
     },
 
-    appendMarkTransaction: (schema: Schema) => {
+    appendMarkTransaction: () => {
       return [
         {
           name: 'xref-marks',
@@ -146,7 +146,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       ];
     },
 
-    inputRules: (_schema: Schema) => {
+    inputRules: () => {
       return [atRefInputRule(), ...(format.rmdExtensions.bookdownXRefUI ? [refPrefixInputRule()] : [])];
     },
 
@@ -160,7 +160,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           new ProsemirrorCommand(
             EditorCommandId.CrossReference,
             [],
-            (state: EditorState, dispatch?: (tr: Transaction<any>) => void) => {
+            (state: EditorState, dispatch?: (tr: Transaction) => void) => {
               // enable/disable command
               if (!canInsertNode(state, schema.nodes.text) || !toggleMarkType(schema.marks.xref)(state)) {
                 return false;
@@ -189,7 +189,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           new ProsemirrorCommand(
             EditorCommandId.CrossReference,
             ['Shift-Mod-F10'],
-            (state: EditorState, dispatch?: (tr: Transaction<any>) => void) => {
+            (state: EditorState, dispatch?: (tr: Transaction) => void) => {
               // enable/disable command
               if (!canInsertNode(state, schema.nodes.text) || !toggleMarkType(schema.marks.cite_id)(state)) {
                 return false;
@@ -280,7 +280,7 @@ function atRefInputRule() {
 function refPrefixInputRule() {
   return new InputRule(
     /(^|[^`])(Chapter|Chapters|Appendix|Section|Figure|Table|Equation) $/,
-    (state: EditorState, match: string[], start: number, end: number) => {
+    (state: EditorState, match: string[]) => {
       const tr = state.tr;
       tr.insertText(' ');
       let prefix = '';
@@ -302,7 +302,7 @@ function insertRef(tr: Transaction, prefix = '') {
   const schema = tr.doc.type.schema;
   const selection = tr.selection;
   const refText = `@ref(${prefix})`;
-  tr.replaceSelectionWith(schema.text(refText, schema.marks.xref.create()), false);
+  tr.replaceSelectionWith(schema.text(refText, [schema.marks.xref.create()]), false);
   setTextSelection(tr.mapping.map(selection.head) - 1)(tr);
 }
 

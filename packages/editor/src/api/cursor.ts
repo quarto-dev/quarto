@@ -20,7 +20,7 @@ export function handleArrowToAdjacentNode(
   nodePos: number,
   dir: number,
   state: EditorState,
-  dispatch?: (tr: Transaction<any>) => void,
+  dispatch?: (tr: Transaction) => void,
 ): boolean {
   // resolve the node and position
   const node = state.doc.nodeAt(nodePos);
@@ -58,12 +58,12 @@ export function handleArrowToAdjacentNode(
 
   // if we are going backwards and there is no previous position, then return a gap cursor
   if (dir < 0 && !$pos.nodeBefore) {
-    selection = new GapCursor(tr.doc.resolve(nodePos), tr.doc.resolve(nodePos));
+    selection = new GapCursor(tr.doc.resolve(nodePos));
 
     // if we are going forwards and there is no next position, then return a gap cursor
   } else if (dir > 0 && !$pos.nodeAfter) {
     const cursorPos = nodePos + node.nodeSize;
-    selection = new GapCursor(tr.doc.resolve(cursorPos), tr.doc.resolve(cursorPos));
+    selection = new GapCursor(tr.doc.resolve(cursorPos));
 
     // if we are going backwards and the previous node can take node selections then select it
   } else if (dir < 0 && prevNodeSelectable()) {
@@ -77,12 +77,12 @@ export function handleArrowToAdjacentNode(
 
     // if we are going backwards and the previous node is not a text block then create a gap cursor
   } else if (dir < 0 && (!prevNodeTextBlock() || prevNodeCode())) {
-    selection = new GapCursor(tr.doc.resolve(nodePos), tr.doc.resolve(nodePos));
+    selection = new GapCursor(tr.doc.resolve(nodePos));
 
     // if we are going forwards and the next node is not a text block then create a gap cursor
   } else if (dir >= 0 && (!nextNodeTextBlock() || nextNodeCode())) {
     const endPos = nodePos + node.nodeSize;
-    selection = new GapCursor(tr.doc.resolve(endPos), tr.doc.resolve(endPos));
+    selection = new GapCursor(tr.doc.resolve(endPos));
 
     // otherwise use text selection handling (handles forward/backward text selections)
   } else {

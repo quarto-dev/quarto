@@ -50,14 +50,20 @@ export const pandocAttrSpec = {
   keyvalue: { default: [] },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrAvailable(attrs: any, keyvalue = true) {
   return !!attrs.id || 
          (attrs.classes && attrs.classes.length > 0) || 
          (keyvalue && attrs.keyvalue && attrs.keyvalue.length > 0);
 }
 
-export function pandocAttrFrom(attrs: any) {
-  const pandocAttr: any = {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function pandocAttrFrom(attrs: any) : PandocAttr {
+  const pandocAttr: PandocAttr = {
+    id: "",
+    classes: [],
+    keyvalue: []
+  };
   if (attrs.id) {
     pandocAttr.id = attrs.id;
   }
@@ -71,10 +77,12 @@ export function pandocAttrFrom(attrs: any) {
   return pandocAttr;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrEnsureClass(attr: any, name: string) {
   attr.classes = [name].concat((attr.classes || []).filter((clz: string) => clz !== name));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrRemoveClass(attr: any, predicate: (str: string) => boolean) : string | undefined {
   let foundClass: string | undefined;
   if (Array.isArray(attr.classes)) {
@@ -94,6 +102,7 @@ export function pandocAttrRemoveClass(attr: any, predicate: (str: string) => boo
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrHasClass(attrs: any, predicate: (str: string) => boolean) {
   if (Array.isArray(attrs.classes)) {
     const classes = attrs.classes as string[];
@@ -103,6 +112,7 @@ export function pandocAttrHasClass(attrs: any, predicate: (str: string) => boole
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrGetKeyvalue(attr: any, key: string) {
   if (attr.keyvalue) {
     const entry = attr.keyvalue.find((keyval: string[]) => keyval[0] === key);
@@ -116,6 +126,7 @@ export function pandocAttrGetKeyvalue(attr: any, key: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrSetKeyvalue(attr: any, key: string, value: string) {
   const keyvalue = [...(attr.keyvalue || [])] as string[][];
   let add = true;
@@ -132,6 +143,7 @@ export function pandocAttrSetKeyvalue(attr: any, key: string, value: string) {
   attr.keyvalue = keyvalue;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrRemoveKeyvalue(attr: any, key: string) {
   if (attr.keyvalue) {
     attr.keyvalue = attr.keyvalue.filter((entry: string[]) => entry[0] !== key);
@@ -152,9 +164,10 @@ export function pandocAttrReadAST(tok: PandocToken, index: number) : PandocAttr 
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function pandocAttrToDomAttr(attrs: any, marker = true) {
   // id and class
-  const domAttr: any = {};
+  const domAttr: Record<string,unknown> = {};
   if (attrs.id) {
     domAttr.id = attrs.id;
   }
@@ -186,9 +199,11 @@ export function pandocAttrParseDom(el: Element, attrs: { [key: string]: string |
   }
 
   // read attributes
-  const attr: any = {};
-  attr.classes = [];
-  attr.keyvalue = [];
+  const attr: PandocAttr = {
+    id: "",
+    classes: [],
+    keyvalue: []
+  };
   el.getAttributeNames().forEach(name => {
     const value: string = el.getAttribute(name) as string;
     // exclude attributes already parsed and prosemirror internal attributes

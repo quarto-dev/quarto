@@ -37,7 +37,7 @@ export function citeXrefPopupPlugin(schema: Schema, ui: EditorUI, server: Editor
     markType: schema.marks.cite_id,
     maxWidth: kMaxWidth,
     dismissOnEdit: false,
-    createPopup: async (view: EditorView, target: TextPopupTarget, style: React.CSSProperties) => {
+    createPopup: async (_view: EditorView, target: TextPopupTarget, style: React.CSSProperties) => {
 
       // lookup xref on server
       const docPath = ui.context.getDocumentPath();

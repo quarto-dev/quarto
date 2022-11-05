@@ -13,7 +13,7 @@
  *
  */
 
-import { Fragment, Mark, Node as ProsemirrorNode, Schema, NodeType } from 'prosemirror-model';
+import { Fragment, Mark, Node as ProsemirrorNode, Schema, NodeType, Attrs } from 'prosemirror-model';
 
 import { PandocAttr, pandocAttrReadAST, kSpanChildren, kSpanAttr } from './pandoc_attr';
 import { PandocCapabilitiesResult } from './pandoc_capabilities';
@@ -147,7 +147,7 @@ export function parsePandocListOutput(output: string) {
 export interface PandocAst {
   blocks: PandocToken[];
   'pandoc-api-version': PandocApiVersion;
-  meta: any;
+  meta: Record<string,unknown>;
   heading_ids?: string[]; // used only for reading not writing
 }
 
@@ -155,6 +155,7 @@ export type PandocApiVersion = number[];
 
 export interface PandocToken {
   t: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   c?: any;
 }
 
@@ -220,8 +221,8 @@ export interface PandocTokenReader {
   readonly code_block?: boolean;
 
   // functions for getting attributes and children
-  getAttrs?: (tok: PandocToken) => any;
-  getChildren?: (tok: PandocToken) => any[];
+  getAttrs?: (tok: PandocToken) => Attrs;
+  getChildren?: (tok: PandocToken) => unknown[];
   getText?: (tok: PandocToken) => string;
 
   // lower-level handler function that overrides the above handler attributes
@@ -248,14 +249,14 @@ export type PandocInlineHTMLReaderFn = (schema: Schema, html: string, writer?: P
 
 export interface ProsemirrorWriter {
   // open (then close) a node container
-  openNode(type: NodeType, attrs: {}): void;
+  openNode(type: NodeType, attrs: Attrs): void;
   closeNode(): ProsemirrorNode;
 
   // special open call for note node containers
   openNoteNode(ref: string): void;
 
   // add a node to the current container
-  addNode(type: NodeType, attrs: {}, content: ProsemirrorNode[]): ProsemirrorNode | null;
+  addNode(type: NodeType, attrs: Attrs, content: ProsemirrorNode[]): ProsemirrorNode | null;
 
   // open and close marks
   openMark(mark: Mark): void;
@@ -318,8 +319,8 @@ export type PandocOutputOption = typeof kWriteSpaces | typeof kPreventBracketEsc
 
 export interface PandocOutput {
   extensions: PandocExtensions;
-  write(value: any): void;
-  writeToken(type: PandocTokenType, content?: (() => void) | any): void;
+  write(value: unknown): void;
+  writeToken(type: PandocTokenType, content?: (() => void) | unknown): void;
   writeMark(type: PandocTokenType, parent: Fragment, expelEnclosingWhitespace?: boolean): void;
   writeArray(content: () => void): void;
   writeAttr(id?: string, classes?: string[], keyvalue?: [[string, string]]): void;
@@ -383,9 +384,9 @@ export function forEachToken(tokens: PandocToken[], f: (tok: PandocToken) => voi
 }
 
 export function mapTokens(tokens: PandocToken[], f: (tok: PandocToken) => PandocToken) {
-  function isToken(val: any) {
+  function isToken(val: unknown) {
     if (val !== null && typeof val === 'object') {
-      return val.hasOwnProperty('t');
+      return Object.prototype.hasOwnProperty.call(val, 't');
     } else {
       return false;
     }
@@ -395,9 +396,9 @@ export function mapTokens(tokens: PandocToken[], f: (tok: PandocToken) => Pandoc
     return tok !== null && typeof tok === 'object' && Array.isArray(tok.c);
   }
 
-  function mapValue(val: any): any {
+  function mapValue(val: unknown): unknown {
     if (isToken(val)) {
-      return mapToken(val);
+      return mapToken(val as PandocToken);
     } else if (Array.isArray(val)) {
       return val.map(mapValue);
     } else {
@@ -421,8 +422,8 @@ export function tokenTextEscaped(t: PandocToken) {
 }
 
 // sort marks by priority (in descending order)
-export function marksByPriority(marks: Mark[], markWriters: { [key: string]: PandocMarkWriter }) {
-  return marks.sort((a: Mark, b: Mark) => {
+export function marksByPriority(marks: readonly Mark[], markWriters: { [key: string]: PandocMarkWriter }) {
+  return Array.prototype.sort.call(marks, (a: Mark, b: Mark) => {
     const aPriority = markWriters[a.type.name].priority;
     const bPriority = markWriters[b.type.name].priority;
     if (aPriority < bPriority) {
@@ -432,5 +433,5 @@ export function marksByPriority(marks: Mark[], markWriters: { [key: string]: Pan
     } else {
       return 0;
     }
-  });
+  }) as readonly Mark[];
 }

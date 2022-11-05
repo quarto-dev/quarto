@@ -100,7 +100,7 @@ export function pandocMarkdownWithBlockCapsules(
   capsuleFilter: PandocBlockCapsuleFilter,
 ) {
   // default extractor
-  const defaultExtractor = (match: string, p1: string, p2: string, p3: string) => {
+  const defaultExtractor = (_match: string, p1: string, p2: string, p3: string) => {
     return {
       prefix: p1,
       source: p2,

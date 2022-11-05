@@ -27,13 +27,13 @@ export function isSingleLineHTML(html: string) {
 
 export function asHTMLTag(
   tag: string,
-  attribs: { [key: string]: string },
+  attribs: { [key: string]: unknown },
   selfClosing = false,
   noEmptyAttribs = false,
 ) {
   const attribsHTML = Object.keys(attribs)
     .filter(name => !noEmptyAttribs || attribs[name])
-    .map(name => `${name}="${escapeHTMLAttribute(attribs[name])}"`)
+    .map(name => `${name}="${escapeHTMLAttribute(String(attribs[name]))}"`)
     .join(' ');
   return `<${tag} ${attribsHTML}${selfClosing ? '/' : ''}>`;
 }

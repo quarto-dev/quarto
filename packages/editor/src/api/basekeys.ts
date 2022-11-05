@@ -158,7 +158,7 @@ interface Coords {
   bottom: number;
 }
 
-function ignoreKey(state: EditorState, dispatch?: (tr: Transaction) => void) {
+function ignoreKey() {
   return true;
 }
 
@@ -218,7 +218,7 @@ function isOnPreviousLine(head: Coords, pos: Coords) {
 }
 
 function arrowBodyNodeBoundary(dir: 'up' | 'down' | 'left' | 'right') {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, _dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     if (view && view.endOfTextblock(dir) && selectionIsBodyTopLevel(state.selection)) {
       const side = dir === 'left' || dir === 'up' ? -1 : 1;
       const $head = state.selection.$head;
@@ -233,7 +233,7 @@ function arrowBodyNodeBoundary(dir: 'up' | 'down' | 'left' | 'right') {
 }
 
 function endTopLevelBodyNodeBoundary() {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
     const editingNode = editingRootNode(state.selection);
     if (editingNode && selectionIsBodyTopLevel(state.selection)) {
       if (dispatch) {

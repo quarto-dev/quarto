@@ -13,6 +13,7 @@
  *
  */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function findValue(key: string, object?: { [key: string]: any }) {
   if (!object) {
     return undefined;

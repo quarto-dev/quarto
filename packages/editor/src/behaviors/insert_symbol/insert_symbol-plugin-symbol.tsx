@@ -13,7 +13,6 @@
  *
  */
 
-import { Schema } from 'prosemirror-model';
 import { PluginKey, Transaction, EditorState } from 'prosemirror-state';
 
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
@@ -35,7 +34,7 @@ const extension = (context: ExtensionContext): Extension => {
     commands: () => {
       return [new ProsemirrorCommand(EditorCommandId.Symbol, [], performInsertSymbol(key), symbolOmniInsert(ui))];
     },
-    plugins: (_schema: Schema) => {
+    plugins: () => {
       return [new InsertSymbolPlugin(key, new UnicodeSymbolDataProvider(), ui, events)];
     },
   };
@@ -48,7 +47,7 @@ function symbolOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Unicode symbol / special character'),
     group: OmniInsertGroup.Content,
     priority: 6,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.symbol_dark! : ui.images.omni_insert?.symbol!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.symbol_dark : ui.images.omni_insert?.symbol),
   };
 }
 
@@ -60,7 +59,7 @@ class UnicodeSymbolDataProvider implements SymbolDataProvider {
 
   public insertSymbolTransaction(
     symbolCharacter: SymbolCharacter,
-    searchTerm: string,
+    _searchTerm: string,
     state: EditorState,
   ): Transaction {
     const tr = state.tr;

@@ -77,7 +77,6 @@ export function typeMapping(cslType: string): Type {
     case cslTypes.legalCase:
     case cslTypes.legislation:
     case cslTypes.motionPicture:
-    case cslTypes.report:
     case cslTypes.song:
     default:
       return {

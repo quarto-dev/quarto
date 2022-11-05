@@ -14,7 +14,7 @@
  */
 
 import { Schema } from 'prosemirror-model';
-import { PluginKey, Selection } from 'prosemirror-state';
+import { PluginKey } from 'prosemirror-state';
 import { DecorationSet, EditorView } from 'prosemirror-view';
 
 import React from 'react';
@@ -24,7 +24,6 @@ import { textPopupDecorationPlugin, TextPopupTarget } from '../../api/text-popup
 import { WidgetProps } from '../../api/widgets/react';
 import { Popup } from '../../api/widgets/popup';
 import { BibliographyManager } from '../../api/bibliography/bibliography';
-import { PandocServer } from '../../api/pandoc';
 
 import './cite-popup.css';
 import { urlForCitation } from '../../api/cite';
@@ -70,6 +69,8 @@ export function citePopupPlugin(schema: Schema, ui: EditorUI, bibMgr: Bibliograp
                 text: ui.context.translateText('[Link]'),
                 url,
               };
+            } else {
+              return undefined;
             }
           });
 

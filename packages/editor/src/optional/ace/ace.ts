@@ -20,11 +20,10 @@ import {
   EditorState,
   Transaction,
   Selection,
-  NodeSelection,
 } from 'prosemirror-state';
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
-import { EditorView, NodeView, Decoration } from 'prosemirror-view';
+import { EditorView, NodeView } from 'prosemirror-view';
 import { undo, redo } from 'prosemirror-history';
 import { exitCode } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
@@ -34,7 +33,6 @@ import { GapCursor } from 'prosemirror-gapcursor';
 import { CodeViewOptions, editingRootNode } from '../../api/node';
 import { insertParagraph } from '../../api/paragraph';
 import { EditorUI, ChunkEditor } from '../../api/ui';
-import { EditorOptions } from '../../api/options';
 import { EditorEvents } from '../../api/events';
 import { ExtensionContext, ExtensionFn } from '../../api/extension';
 import { DispatchEvent, ResizeEvent, ScrollEvent } from '../../api/event-types';
@@ -52,7 +50,6 @@ import zenscroll from 'zenscroll';
 
 import './ace.css';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { setTextSelection } from 'prosemirror-utils';
 
 const plugin = new PluginKey('ace');
 
@@ -66,7 +63,7 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
     // build nodeViews
     const nodeTypes = Object.keys(codeViews);
     const nodeViews: {
-      [name: string]: (node: ProsemirrorNode<any>, view: EditorView<any>, getPos: boolean | (() => number)) => NodeView;
+      [name: string]: (node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) => NodeView;
     } = {};
     nodeTypes.forEach(name => {
       nodeViews[name] = (node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) => {
@@ -83,7 +80,7 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
     });
 
     const activeAceNodeViewCommand = (fn: (view: AceNodeView) => void) => {
-      return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+      return (_state: EditorState, dispatch?: (tr: Transaction) => void) => {
         const activeView = aceNodeViews.activeNodeView();
         if (!activeView) {
           return false;
@@ -144,9 +141,10 @@ export class AceNodeView implements NodeView {
   private readonly nodeViews: AceNodeViews;
   private readonly renderQueue: AceRenderQueue;
   private chunk?: ChunkEditor;
-  private aceEditor?: AceAjax.Editor;
-  private editSession?: AceAjax.IEditSession;
-  private readonly editorOptions: EditorOptions;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private aceEditor?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private editSession?: any;
   private readonly options: CodeViewOptions;
   private readonly events: EditorEvents;
 
@@ -174,10 +172,6 @@ export class AceNodeView implements NodeView {
     renderQueue: AceRenderQueue,
     nodeViews: AceNodeViews,
   ) {
-    // context
-    const ui = context.ui;
-    const editorOptions = context.options;
-
     // Store for later
     this.node = node;
     this.view = view;
@@ -202,7 +196,6 @@ export class AceNodeView implements NodeView {
     this.mouseDown = false;
 
     // options
-    this.editorOptions = editorOptions;
     this.options = options;
 
     // The editor's outer node is our DOM representation
@@ -267,7 +260,7 @@ export class AceNodeView implements NodeView {
     this.nodeViews.remove(this);
   }
 
-  public update(node: ProsemirrorNode, _decos: Decoration[]) {
+  public update(node: ProsemirrorNode) {
     if (node.type !== this.node.type) {
       return false;
     }
@@ -277,7 +270,10 @@ export class AceNodeView implements NodeView {
     this.node = node;
     this.updateMode();
 
-    const AceRange = window.require('ace/range').Range;
+    // assumes that ace is available via global require (true in rstudio
+    // which is where ace is utilized)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AceRange = (window as any).require('ace/range').Range;
     const doc = this.editSession.getDocument();
 
     const change = computeChange(this.editSession.getValue(), node.textContent);
@@ -303,6 +299,7 @@ export class AceNodeView implements NodeView {
 
       // If we got results, render them
       if (decos) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         decos.forEach((deco: any) => {
           if (!this.editSession) {
             return;
@@ -342,7 +339,8 @@ export class AceNodeView implements NodeView {
     }
     this.updating = true;
     const doc = this.editSession.getDocument();
-    const AceRange = window.require('ace/range').Range;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AceRange = (window as any).require('ace/range').Range;
     const range = AceRange.fromPoints(doc.indexToPosition(anchor, 0), doc.indexToPosition(head, 0));
     this.editSession.getSelection().setSelectionRange(range);
     this.updating = false;
@@ -380,7 +378,7 @@ export class AceNodeView implements NodeView {
     return true;
   }
 
-  public ignoreMutation(_mutation: MutationRecord | { type: 'selection'; target: Element }) {
+  public ignoreMutation() {
     return true;
   }
 
@@ -432,7 +430,8 @@ export class AceNodeView implements NodeView {
     const pos = this.getPos();
     if (selection.from < pos && selection.to > pos + this.node.nodeSize) {
       const doc = this.editSession.getDocument();
-      const AceRange = window.require('ace/range').Range;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const AceRange = (window as any).require('ace/range').Range;
       const range = AceRange.fromPoints(doc.indexToPosition(0, 0), doc.indexToPosition(this.node.nodeSize - 1, 0));
       this.selectionMarker = this.editSession.addMarker(range, 'pm-selected-text', 'selection', true);
     }
@@ -525,7 +524,7 @@ export class AceNodeView implements NodeView {
     });
 
     // populate initial contents
-    this.aceEditor = this.chunk.editor as AceAjax.Editor;
+    this.aceEditor = this.chunk.editor;
     this.updating = true;
     this.aceEditor.setValue(this.node.textContent);
     this.updating = false;
@@ -742,6 +741,7 @@ export class AceNodeView implements NodeView {
     }
 
     // Disconnect font metrics system after render loop
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.aceEditor.renderer as any).on('afterRender', () => {
       // Update known rendered width
       if (this.chunk) {
@@ -750,6 +750,7 @@ export class AceNodeView implements NodeView {
 
       window.setTimeout(() => {
         if (this.aceEditor) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const metrics = (this.aceEditor.renderer as any).$fontMetrics;
           if (metrics && metrics.$observer) {
             metrics.$observer.disconnect();
@@ -791,13 +792,13 @@ export class AceNodeView implements NodeView {
 
     // Keep track of mouse state so we can avoid e.g., autoscrolling while the
     // mouse is down
-    this.dom.addEventListener("mousedown", (evt) => {
+    this.dom.addEventListener("mousedown", () => {
       this.mouseDown = true;
     });
-    this.dom.addEventListener("mouseup", (evt) => {
+    this.dom.addEventListener("mouseup", () => {
       this.mouseDown = false;
     });
-    this.dom.addEventListener("mouseleave", (evt) => {
+    this.dom.addEventListener("mouseleave", () => {
       // Treat mouse exit as an up since it will cause us to miss the up event
       this.mouseDown = false;
     });
@@ -975,7 +976,7 @@ function computeChange(oldVal: string, newVal: string) {
 }
 
 function arrowHandler(dir: 'up' | 'down' | 'left' | 'right', nodeTypes: string[]) {
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     if (state.selection.empty && !(state.selection instanceof GapCursor) && view && view.endOfTextblock(dir)) {
       const side = dir === 'left' || dir === 'up' ? -1 : 1;
       const $head = state.selection.$head;

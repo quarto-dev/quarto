@@ -65,9 +65,9 @@ const extension = (context: ExtensionContext) => {
       ];
     },
 
-    inputRules: (_schema: Schema) => {
+    inputRules: () => {
       return [
-        new InputRule(/^\*{3}$/, (state: EditorState, match: string[], start: number, end: number) => {
+        new InputRule(/^\*{3}$/, (state: EditorState, _match: string[], start: number, end: number) => {
           const schema = state.schema;
           const paraNode = findParentNodeOfType(schema.nodes.paragraph)(state.selection);
           if (paraNode && state.selection.$anchor.depth === 2) {
@@ -90,7 +90,7 @@ function hrOmniInsert(ui: EditorUI) {
     group: OmniInsertGroup.Content,
     priority: 1,
     image: () =>
-      ui.prefs.darkMode() ? ui.images.omni_insert?.horizontal_rule_dark! : ui.images.omni_insert?.horizontal_rule!,
+      ui.prefs.darkMode() ? ui.images.omni_insert.horizontal_rule_dark : ui.images.omni_insert.horizontal_rule,
   };
 }
 

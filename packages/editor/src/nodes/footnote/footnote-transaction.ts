@@ -81,7 +81,7 @@ function footnoteFixupTransform(activeNote: ContentNodeWithPos | undefined) {
       let { ref, content } = footnote.node.attrs;
 
       // we may be creating a new note to append
-      let newNote: any;
+      let newNote: ProsemirrorNode | null | undefined;
 
       // get reference to note (if any)
       const note = allNotes.find(noteWithPos => noteWithPos.node.attrs.ref === ref);
@@ -156,7 +156,7 @@ function footnoteFixupTransform(activeNote: ContentNodeWithPos | undefined) {
 }
 
 export function footnoteSelectNoteAppendTransaction() {
-  return (_transactions: Transaction[], _oldState: EditorState, newState: EditorState) => {
+  return (_transactions: readonly Transaction[], _oldState: EditorState, newState: EditorState) => {
     const schema = newState.schema;
     const footnoteNode: NodeWithPos | undefined = findSelectedNodeOfType(schema.nodes.footnote)(newState.selection);
     if (footnoteNode) {
@@ -167,6 +167,8 @@ export function footnoteSelectNoteAppendTransaction() {
         tr.setSelection(TextSelection.near(tr.doc.resolve(noteNode.pos)));
       }
       return tr;
+    } else {
+      return undefined;
     }
   };
 }

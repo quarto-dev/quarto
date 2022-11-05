@@ -19,7 +19,7 @@ import { ListCapabilities, ListType } from './list';
 import { TableCapabilities } from './table';
 import { CSL } from './csl';
 import { CiteField } from './cite';
-import { kStyleAttrib, attrPartitionKeyvalue, pandocAttrKeyvalueFromText } from './pandoc_attr';
+import { kStyleAttrib, attrPartitionKeyvalue, pandocAttrKeyvalueFromText, PandocAttr } from './pandoc_attr';
 
 export interface EditorDialogs {
   alert: AlertFn;
@@ -123,7 +123,7 @@ export interface AttrEditResult {
 }
 
 export interface CalloutEditProps {
-  attr: AttrProps;
+  attr: PandocAttr;
   callout: CalloutProps;
 }
 
@@ -193,7 +193,7 @@ export interface InsertTableResult {
 
 export interface InsertTabsetResult {
   tabs: string[];
-  attr: AttrProps;
+  attr: PandocAttr;
 }
 
 export interface InsertCiteProps {

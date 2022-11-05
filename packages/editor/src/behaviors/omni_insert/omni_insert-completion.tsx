@@ -134,7 +134,7 @@ function omniInsertCompletions(omniInserters: OmniInserter[], ui: EditorUI) {
         token: query,
 
         // return all omniInserters (will refine via filter)
-        completions: (state: EditorState) => {
+        completions: () => {
           return Promise.resolve(omniInserters);
         },
 

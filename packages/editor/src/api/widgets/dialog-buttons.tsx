@@ -15,8 +15,6 @@
 
 import { WidgetProps } from './react';
 
-import { EditorUI } from '../ui';
-
 import { TextButton } from './button';
 import React from 'react';
 

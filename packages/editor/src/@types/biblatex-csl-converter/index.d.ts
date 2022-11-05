@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module 'biblatex-csl-converter' {
   export class BibLatexExporter {
     constructor(bibDb: BibDB, pks?: string[] | boolean, options?: ConfigObject);
@@ -13,7 +14,7 @@ declare module 'biblatex-csl-converter' {
     entry_key: string;
     fields: Record<string, any>;
     incomplete?: boolean;
-    unexpected_fields?: Object;
+    unexpected_fields?: Record<string,unknown>;
     unknown_fields?: UnknownFieldsObject;
   }
 
@@ -24,14 +25,14 @@ declare module 'biblatex-csl-converter' {
   type OtherNodeObject = {
     type: string;
     marks?: Array<MarkObject>;
-    attrs?: Object;
+    attrs?: Record<string,unknown>;
   };
 
   export type TextNodeObject = {
     type: 'text';
     text: string;
     marks?: Array<MarkObject>;
-    attrs?: Object;
+    attrs?: Record<string,unknown>;
   };
 
   export type NodeObject = OtherNodeObject | TextNodeObject;

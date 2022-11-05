@@ -46,7 +46,7 @@ export function getPresentationEditorLocation(state: EditorState) : Presentation
 
   // get top level headings and horizontal rules
   const schema = state.schema;
-  const bodyNodes = findTopLevelBodyNodes(state.doc, node => true);
+  const bodyNodes = findTopLevelBodyNodes(state.doc, () => true);
 
   // bail if empty
   if (bodyNodes.length === 0) {

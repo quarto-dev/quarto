@@ -25,7 +25,7 @@ const key = new PluginKey<DecorationSet>('math-highlight');
 export function mathHighlightPlugin(schema: Schema) {
   return markHighlightPlugin(key, schema.marks.math, (_text, attrs, markRange) => {
     const kDelimClass = 'pm-markup-text-color';
-    const delim = delimiterForType(attrs.type);
+    const delim = delimiterForType(String(attrs.type));
     if (markRange.to - markRange.from === delim.length * 2) {
       return [Decoration.inline(markRange.from, markRange.to, { class: kDelimClass })];
     } else {

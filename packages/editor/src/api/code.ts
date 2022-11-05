@@ -36,7 +36,8 @@ export function codeViewClipboardPlugin(codeViews: { [key: string]: CodeViewOpti
   return new Plugin({
     key: new PluginKey('code-view-clipboard'),
     props: {
-      clipboardTextParser: (text: string, $context: ResolvedPos): any => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clipboardTextParser: (text: string, $context: ResolvedPos) : any => {
         // see if any of the code views want to handle this text
         for (const codeViewType of Object.keys(codeViews)) {
           const codeView = codeViews[codeViewType];

@@ -25,9 +25,9 @@ import zenscroll from 'zenscroll';
 const key = new PluginKey<DecorationSet>('find-plugin');
 
 class FindPlugin extends Plugin<DecorationSet> {
-  private term: string = '';
+  private term = '';
   private options: FindOptions = {};
-  private updating: boolean = false;
+  private updating = false;
 
   // The HTML element containing the last known selected search result
   private resultElement: HTMLElement|null = null;
@@ -36,16 +36,16 @@ class FindPlugin extends Plugin<DecorationSet> {
   private resultObserver: MutationObserver|null = null;
 
   // The ID for a timer that ensures the resultObserver completes quickly
-  private resultObserverTimer: number = 0;
+  private resultObserverTimer = 0;
 
   constructor() {
     super({
       key,
       state: {
-        init: (_config: { [key: string]: any }, instance: EditorState) => {
+        init: () => {
           return DecorationSet.empty;
         },
-        apply: (tr: Transaction, old: DecorationSet, oldState: EditorState, newState: EditorState) => {
+        apply: (tr: Transaction) => {
           if (this.updating) {
             return this.resultDecorations(tr);
           } else {
@@ -54,7 +54,7 @@ class FindPlugin extends Plugin<DecorationSet> {
         },
       },
       view: () => ({
-        update: (view: EditorView, prevState: EditorState) => {
+        update: (view: EditorView) => {
           // Clear any previous search result observer
           this.clearResultObserver();
 
@@ -73,7 +73,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public find(term: string, options: FindOptions) {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       if (dispatch) {
         this.term = !options.regex ? term.replace(/[-/\\^$*+?.()|[\]{}]/g, (escape: string) => {
           return '\\u' + ('0000' + escape.charCodeAt(0).toString(16)).slice(-4);
@@ -90,7 +90,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public selectFirst() {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       const decorations: Decoration[] = key.getState(state)!.find(0);
       if (decorations.length === 0) {
         return false;
@@ -113,7 +113,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public selectNext(afterSelection = true) {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
       const searchFrom = afterSelection
         ? this.matchesTerm(selectedText)
@@ -149,7 +149,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public selectPrevious() {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       // sort out where we are searching up to
       const selectedText = state.doc.textBetween(state.selection.from, state.selection.to);
       const searchTo = this.matchesTerm(selectedText) ? state.selection.from - 1 : state.selection.from;
@@ -193,7 +193,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public replace(text: string) {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       if (!this.isResultSelected(state)) {
         return false;
       }
@@ -217,7 +217,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public replaceAll(text: string) {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       
       let replaced = 0;
 
@@ -247,7 +247,7 @@ class FindPlugin extends Plugin<DecorationSet> {
   }
 
   public clear() {
-    return (state: EditorState<any>, dispatch?: (tr: Transaction<any>) => void) => {
+    return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
       if (dispatch) {
         this.term = '';
         this.options = {};
@@ -257,7 +257,7 @@ class FindPlugin extends Plugin<DecorationSet> {
     };
   }
 
-  private updateResults(state: EditorState, dispatch: (tr: Transaction<any>) => void) {
+  private updateResults(state: EditorState, dispatch: (tr: Transaction) => void) {
     this.withResultUpdates(() => {
       const tr = state.tr;
       tr.setMeta(kAddToHistoryTransaction, false);
@@ -334,7 +334,7 @@ class FindPlugin extends Plugin<DecorationSet> {
     this.clearResultObserver();
 
     // Create a new result observer to watch for results to be rendered
-    this.resultObserver = new MutationObserver((records: MutationRecord[], observer: MutationObserver) => {
+    this.resultObserver = new MutationObserver((records: MutationRecord[]) => {
       let resultElement:HTMLElement|null = null;
 
       // Predicate for testing a node to see if it looks like the active search result

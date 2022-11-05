@@ -26,7 +26,7 @@ import { kQuartoXRefTypes } from '../xref/xref-completion';
 export const kCiteCompletionTypeXref = "xref";
 
 export function quartoXrefCiteCompletionProvider(ui: EditorUI, server: EditorServer): CiteCompletionProvider {
-  const referenceEntryForXref = (xref: XRef, forceLightMode?: boolean): CiteCompletionEntry => {
+  const referenceEntryForXref = (xref: XRef): CiteCompletionEntry => {
 
     // The type (e.g. fig)
     const type = kQuartoXRefTypes[xref.type];
@@ -36,17 +36,17 @@ export function quartoXrefCiteCompletionProvider(ui: EditorUI, server: EditorSer
 
     // The display text for the entry
     const primaryText = id;
-    const secondaryText = (len: number) => {
+    const secondaryText = () => {
       return xref.file;
     };
     const detailText = xref.title || "";
 
     // The image and adornment
-    const image = type?.image(ui) || ui.images.omni_insert?.generic!;
+    const image = type?.image(ui) || ui.images.omni_insert.generic;
     const imageAdornment = undefined;
 
     // Insert item
-    const replace = (view: EditorView, pos: number, _server: EditorServer) => {
+    const replace = (view: EditorView, pos: number) => {
       // It's already in the bibliography, just write the id
       const tr = view.state.tr;
       const schema = view.state.schema;
@@ -73,7 +73,7 @@ export function quartoXrefCiteCompletionProvider(ui: EditorUI, server: EditorSer
     currentEntries: () => {
       return loadedEntries;
     },
-    streamEntries: (doc: ProsemirrorNode, onStreamReady: (entries: CiteCompletionEntry[]) => void) => {
+    streamEntries: (_doc: ProsemirrorNode, onStreamReady: (entries: CiteCompletionEntry[]) => void) => {
       const docPath = ui.context.getDocumentPath();
       if (docPath) {
         ui.context.withSavedDocument().then(() => {
@@ -84,7 +84,7 @@ export function quartoXrefCiteCompletionProvider(ui: EditorUI, server: EditorSer
         });
       }
     },
-    awaitEntries: async (doc: ProsemirrorNode) => {
+    awaitEntries: async () => {
       const docPath = ui.context.getDocumentPath();
       if (docPath) {
         await ui.context.withSavedDocument();

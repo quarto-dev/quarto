@@ -24,7 +24,8 @@ function cslSchema() {
     },
     text: {
       group: 'inline',
-      toDOM(node: ProsemirrorNode): any {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toDOM(node: ProsemirrorNode) : any {
         return node.text;
       },
     },

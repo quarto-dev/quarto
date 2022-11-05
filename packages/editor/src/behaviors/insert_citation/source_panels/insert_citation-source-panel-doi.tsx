@@ -65,7 +65,7 @@ export function doiSourcePanel(
           // Form the entry
           const doi = searchTerm;
           const csl = result.message;
-          const citation = matchExistingSourceCitationListEntry(doi, existingCitationIds, ui, bibliographyManager) || toCitationListEntry(csl, existingCitationIds, ui);
+          const citation = matchExistingSourceCitationListEntry(doi, existingCitationIds, ui, bibliographyManager) || toCitationListEntry(csl!, existingCitationIds, ui);
 
           return Promise.resolve({
             citations: citation ? [citation] : [],

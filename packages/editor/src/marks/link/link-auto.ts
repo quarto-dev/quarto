@@ -21,7 +21,7 @@ import { setTextSelection } from 'prosemirror-utils';
 import { markInputRule, MarkInputRuleFilter } from '../../api/input_rule';
 import { markPasteHandler } from '../../api/clipboard';
 
-export function linkInputRules(autoLink: boolean, headingLink: boolean) {
+export function linkInputRules(autoLink: boolean) {
   return (schema: Schema, filter: MarkInputRuleFilter) => {
     const rules = [
       // <link> style link
@@ -63,7 +63,7 @@ export function linkInputRules(autoLink: boolean, headingLink: boolean) {
       // plain link
       rules.push(
         new InputRule(
-          /(^|[^`])(https?:\/\/[^\s]+\w)[\.\?!\,)]* $/,
+          /(^|[^`])(https?:\/\/[^\s]+\w)[.?!,)]* $/,
           (state: EditorState, match: string[], start: number, end: number) => {
             const tr = state.tr;
             start = start + match[1].length;

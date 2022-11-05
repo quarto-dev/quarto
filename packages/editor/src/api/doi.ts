@@ -13,9 +13,11 @@
  *
  */
 
+import { CSL } from "./csl";
+
 export interface DOIResult {
   status: 'ok' | 'notfound' | 'nohost' | 'error';
-  message: any | null;
+  message: CSL | null;
   error: string;
 }
 
@@ -29,7 +31,7 @@ const kModernCrossrefDOIRegex = /10.\d{4,9}\/[-._;()/:A-Z0-9]+$/i;
 const kEarlyWileyCrossrefDOIRegex = /10.1002\/[^\s]+$/i;
 const kOtherCrossrefDOIRegex1 = /10.\\d{4}\/\d+-\d+X?(\d+)\d+<[\d\w]+:[\d\w]*>\d+.\d+.\w+;\d$/i;
 const kOtherCrossrefDOIRegex2 = /10.1021\/\w\w\d+$/i;
-const kOtherCrossrefDOIRegex3 = /10.1207\/[\w\d]+\&\d+_\d+$/i;
+const kOtherCrossrefDOIRegex3 = /10.1207\/[\w\d]+&\d+_\d+$/i;
 
 const kCrossrefMatches = [
   kModernCrossrefDOIRegex,

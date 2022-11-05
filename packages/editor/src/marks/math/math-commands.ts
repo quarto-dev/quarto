@@ -66,7 +66,7 @@ function inlineMathOmniInsert(ui: EditorUI): OmniInsert {
     description: ui.context.translateText('Math within a line or paragraph'),
     group: OmniInsertGroup.Math,
     priority: 2,
-    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert?.math_inline_dark! : ui.images.omni_insert?.math_inline!),
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.math_inline_dark : ui.images.omni_insert.math_inline),
   };
 }
 
@@ -78,7 +78,7 @@ function displayMathOmniInsert(ui: EditorUI): OmniInsert {
     group: OmniInsertGroup.Math,
     priority: 1,
     image: () =>
-      ui.prefs.darkMode() ? ui.images.omni_insert?.math_display_dark! : ui.images.omni_insert?.math_display!,
+      ui.prefs.darkMode() ? ui.images.omni_insert.math_display_dark : ui.images.omni_insert.math_display,
   };
 }
 
@@ -125,7 +125,7 @@ export function editMathAttributesEnabled(
 
 export function editMathAttributes(ui: EditorUI) {
   
-  return (state: EditorState, dispatch?: (tr: Transaction<any>) => void, view?: EditorView) => {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     
     // look one position ahead in case this resulted from a click on the edit attributes button
     const mathRange = getMarkRange(

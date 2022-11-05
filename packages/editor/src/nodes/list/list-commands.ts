@@ -13,7 +13,7 @@
  *
  */
 
-import { NodeType, Node as ProsemirrorNode, NodeRange, Schema } from 'prosemirror-model';
+import { NodeType, Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import { EditorState, Transaction, Selection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { autoJoin } from 'prosemirror-commands';
@@ -46,7 +46,7 @@ export class TightListCommand extends ProsemirrorCommand {
     super(
       EditorCommandId.TightList,
       ['Mod-Alt-9'],
-      (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+      (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         const parentList = findParentNode(isList)(state.selection);
         if (!parentList) {
           return false;
@@ -81,7 +81,7 @@ export function editListPropertiesCommandFn(ui: EditorUI, capabilities: ListCapa
   return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     // see if a parent node is a list
     let node: ProsemirrorNode | null = null;
-    let pos: number = 0;
+    let pos = 0;
     const nodeWithPos = findParentNode(isList)(state.selection);
     if (nodeWithPos) {
       node = nodeWithPos.node;
@@ -122,7 +122,7 @@ async function editList(
   node: ProsemirrorNode,
   pos: number,
   state: EditorState,
-  dispatch: (tr: Transaction<any>) => void,
+  dispatch: (tr: Transaction) => void,
   ui: EditorUI,
   capabilities: ListCapabilities,
 ): Promise<void> {
@@ -166,7 +166,7 @@ async function editList(
         }
       // edit existing wrapping
       } else if (incrementalDiv) {
-        const divAttrs = { ...incrementalDiv.node.attrs };
+        const divAttrs = { id: "", classes: [], keyvalue: [], ...incrementalDiv.node.attrs };
         pandocAttrRemoveClass(divAttrs, isIncrementalClass);
         pandocAttrEnsureClass(divAttrs, result.incremental);
         tr.setNodeMarkup(incrementalDiv.pos, schema.nodes.div, divAttrs);

@@ -31,7 +31,7 @@ export function footnoteEditorActivationPlugin() {
   return new Plugin<DecorationSet>({
     key,
     state: {
-      init(_config: { [key: string]: any }, instance: EditorState) {
+      init() {
         return DecorationSet.empty;
       },
 
@@ -128,8 +128,8 @@ function footnoteEditorDecorations(state: EditorState) {
 // node view that display the note number alongside the note content
 export function footnoteEditorNodeViews() {
   return {
-    note(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
-      return new NoteEditorView(node, view, getPos as () => number);
+    note(node: ProsemirrorNode) {
+      return new NoteEditorView(node);
     },
   };
 }
@@ -139,14 +139,11 @@ class NoteEditorView implements NodeView {
   public readonly contentDOM: HTMLElement;
 
   private readonly node: ProsemirrorNode;
-  private readonly view: EditorView;
-  private readonly getPos: () => number;
 
-  constructor(node: ProsemirrorNode, view: EditorView, getPos: () => number) {
+
+  constructor(node: ProsemirrorNode) {
     this.node = node;
-    this.view = view;
-    this.getPos = getPos;
-
+  
     this.dom = window.document.createElement('div');
     this.dom.setAttribute('data-ref', this.node.attrs.ref);
     this.dom.classList.add('note');

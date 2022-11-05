@@ -16,7 +16,7 @@
 import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 
 import { PandocOutput, PandocTokenType, ProsemirrorWriter } from '../api/pandoc';
-import { Extension, ExtensionContext } from '../api/extension';
+import { Extension } from '../api/extension';
 import { codeNodeSpec } from '../api/code';
 
 import {
@@ -28,8 +28,7 @@ import {
   blockCapsuleSourceWithoutPrefix,
 } from '../api/pandoc_capsule';
 
-const extension = (context: ExtensionContext): Extension | null => {
-  const { format } = context;
+const extension = (): Extension | null => {
 
   return {
     nodes: [
@@ -45,7 +44,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               preserveWhitespace: 'full',
             },
           ],
-          toDOM(node: ProsemirrorNode) {
+          toDOM() {
             return ['div', { class: 'pm-html-preserve pm-fixedwidth-font pm-code-block pm-markup-text-color' }, 0];
           },
         },
@@ -96,7 +95,7 @@ export function htmlPreserveBlockCapsuleFilter(): PandocBlockCapsuleFilter {
     // textually enclose the capsule so that pandoc parses it as the type of block we want it to
     // (in this case we don't do anything because pandoc would have written this as a
     // semantically standalone block)
-    enclose: (capsuleText: string, capsule: PandocBlockCapsule) => {
+    enclose: (capsuleText: string) => {
       return capsuleText;
     },
 

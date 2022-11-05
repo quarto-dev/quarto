@@ -33,7 +33,7 @@ import { markIsActive, getMarkRange } from '../../api/mark';
 export class InsertCitationCommand extends ProsemirrorCommand {
   private initialSelectionKey: string | undefined;
 
-  constructor(ui: EditorUI, events: EditorEvents, bibliographyManager: BibliographyManager, server: EditorServer) {
+  constructor(ui: EditorUI, _events: EditorEvents, bibliographyManager: BibliographyManager, server: EditorServer) {
     super(
       EditorCommandId.Citation,
       ['Shift-Mod-F8'],
@@ -150,7 +150,7 @@ export class InsertCitationCommand extends ProsemirrorCommand {
         description: ui.context.translateText('Reference to a source'),
         group: OmniInsertGroup.References,
         priority: 1,
-        image: () => (ui.prefs.darkMode() ? ui.images.omni_insert!.citation_dark! : ui.images.omni_insert!.citation!),
+        image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.citation_dark : ui.images.omni_insert.citation),
       },
       // false
     );

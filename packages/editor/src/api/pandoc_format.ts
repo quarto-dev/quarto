@@ -73,7 +73,7 @@ function pandocFormatConfigFromYamlInCode(code: string, isRmd: boolean): PandocF
   // did we find yaml?
   if (yaml) {
     // see if we have any md_extensions defined
-    let mdExtensions : string | undefined = isRmd ? findValue('md_extensions', yaml?.output) : undefined;
+    let mdExtensions : string | undefined = isRmd ? findValue('md_extensions', yaml?.output as Record<string,unknown>) : undefined;
     if (!mdExtensions) {
       // look for quarto 'from'
       const from = findValue('from', yaml);
@@ -91,6 +91,7 @@ function pandocFormatConfigFromYamlInCode(code: string, isRmd: boolean): PandocF
 
     // first check 'editor' then check 'editor_options'
     const yamlEditor = yaml?.editor;
+
     if (yamlEditor && (yamlEditor instanceof Object) && 
         yamlEditor.markdown && (yamlEditor.markdown instanceof Object)) {
       yamlFormatConfig = readPandocFormatConfig(yamlEditor.markdown);
@@ -148,7 +149,7 @@ function pandocFormatConfigFromCommentInCode(code: string): PandocFormatConfig |
 function pandocFormatConfigFromCommentInDoc(doc: ProsemirrorNode): PandocFormatConfig | null {
   let config: PandocFormatConfig | null = null;
   let foundFirstRawInline = false;
-  doc.descendants((node, pos) => {
+  doc.descendants((node) => {
     // don't search once we've found our target
     if (foundFirstRawInline) {
       return false;
@@ -172,8 +173,9 @@ function pandocFormatConfigFromCommentInDoc(doc: ProsemirrorNode): PandocFormatC
   return config;
 }
 
-function readPandocFormatConfig(source: { [key: string]: any }) {
-  const asString = (obj: any): string => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function readPandocFormatConfig(source: Record<string,any>) {
+  const asString = (obj: unknown): string => {
     if (typeof obj === 'string') {
       return obj;
     } else if (obj) {
@@ -183,7 +185,7 @@ function readPandocFormatConfig(source: { [key: string]: any }) {
     }
   };
 
-  const asBoolean = (obj: any) => {
+  const asBoolean = (obj: unknown) => {
     if (typeof obj === 'boolean') {
       return obj;
     } else {
@@ -267,9 +269,6 @@ export async function resolvePandocFormat(pandoc: PandocServer, format: EditorFo
     baseName = 'markdown';
   }
 
-  // format options we will be building
-  let formatOptions: string;
-
   // if we are using a variant then get it's base options and merge with user options
   if (kMarkdownVariants[baseName]) {
     const variant = kMarkdownVariants[baseName];
@@ -278,7 +277,7 @@ export async function resolvePandocFormat(pandoc: PandocServer, format: EditorFo
   }
 
   // query for format options
-  formatOptions = await pandoc.listExtensions(baseName);
+  const formatOptions = await pandoc.listExtensions(baseName);
 
   // active pandoc extensions
   const pandocExtensions: { [key: string]: boolean } = {};

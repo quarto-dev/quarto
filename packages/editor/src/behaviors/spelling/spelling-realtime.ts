@@ -75,7 +75,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
         return {};
       },
       state: {
-        init: (_config, state: EditorState) => {
+        init: () => {
           return DecorationSet.empty;
         },
         apply: (tr: Transaction, old: DecorationSet, oldState: EditorState, newState: EditorState) => {
@@ -112,14 +112,13 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
 
             // create change set from transaction
             let changeSet = ChangeSet.create(oldState.doc);
-            changeSet = changeSet.addSteps(newState.doc, tr.mapping.maps);
+            changeSet = changeSet.addSteps(newState.doc, tr.mapping.maps, {});
 
             // collect ranges that had mark changes
             const markRanges: Array<{ from: number; to: number }> = [];
             for (const step of tr.steps) {
               if (step instanceof AddMarkStep || step instanceof RemoveMarkStep) {
-                const markStep = step as any;
-                markRanges.push({ from: markStep.from, to: markStep.to });
+                markRanges.push({ from: step.from, to: step.to });
               }
             }
 
@@ -251,10 +250,10 @@ function spellingDecorations(
   for (const incorrectWord of incorrectWords) {
     const ranges: EditorWordRange[] | undefined = rangeMap.get(incorrectWord);
 
-    if (!!ranges) {
+    if (ranges) {
       for (const range of ranges) {
         const attrs: DecorationAttrs = {};
-        const spec: { [key: string]: any } = {
+        const spec: Record<string,unknown> = {
           word: incorrectWord,
         };
         if (excludeCursor && state.selection.head > range.start && state.selection.head <= range.end) {
@@ -361,7 +360,7 @@ function spellingSuggestionContextMenuHandler(ui: EditorUI) {
             event.preventDefault();
 
             showContextMenu([
-              menuAction(`${ui.context.translateText('Unignore')} \'${word}\'`, () => ui.spelling.unignoreWord(word)),
+              menuAction(`${ui.context.translateText('Unignore')} '${word}'`, () => ui.spelling.unignoreWord(word)),
             ]);
             return true;
           }

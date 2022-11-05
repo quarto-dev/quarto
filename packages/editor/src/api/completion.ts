@@ -29,18 +29,18 @@ export interface CompletionContext {
   isPaste: boolean;
 }
 
-export interface CompletionsStream<T = any> {
+export interface CompletionsStream<T = unknown> {
   items: T[];
   stream: () => T[] | null;
 }
 
-export type Completions<T = any> = T[] | CompletionsStream<T>;
+export type Completions<T> = T[] | CompletionsStream<T>;
 
-export interface CompletionResult<T = any> {
+export interface CompletionResult<T = unknown> {
   pos: number;
   offset?: number;
   token: string;
-  completions: (state: EditorState, context: CompletionContext) => Promise<Completions>;
+  completions: (state: EditorState, context: CompletionContext) => Promise<Completions<T>>;
   decorations?: DecorationSet;
 }
 
@@ -49,6 +49,7 @@ export interface CompletionHeaderProps {
   message?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface CompletionHandler<T = any> {
   // unique id
   id: string;
@@ -66,7 +67,7 @@ export interface CompletionHandler<T = any> {
 
   // return a set of completions for the given context. text is the text before
   // before the cursor in the current node (but no more than 500 characters)
-  completions(text: string, context: EditorState | Transaction): CompletionResult | null;
+  completions(text: string, context: EditorState | Transaction): CompletionResult<T> | null;
 
   // filter a previously returned set of completions
   filter?: (completions: T[], state: EditorState, token: string, prevToken?: string) => T[] | null;
@@ -75,7 +76,7 @@ export interface CompletionHandler<T = any> {
   replacement?(schema: Schema, completion: T | null): string | ProsemirrorNode | null;
 
   // lower level replacement handler (can be passed null if the popup was dismissed)
-  replace?(view: EditorView, pos: number, completion: T | null): Promise<any>;
+  replace?(view: EditorView, pos: number, completion: T | null): Promise<unknown>;
 
   // completion view
   view: {
@@ -91,7 +92,7 @@ export interface CompletionHandler<T = any> {
     // react compontent type for viewing the item
     component: React.FC<T> | React.ComponentClass<T>;
 
-    key: (completion: T) => any;
+    key: (completion: T) => unknown;
 
     // width of completion item (defaults to 180).
     width?: number;

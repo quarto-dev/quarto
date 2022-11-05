@@ -29,6 +29,8 @@ export function sliceHasNode(slice: Slice, predicate: (node: ProsemirrorNode) =>
     if (predicate(node)) {
       hasNode = true;
       return false;
+    } else {
+      return true;
     }
   });
   return hasNode;

@@ -47,7 +47,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               tag: "span[class*='shortcode']",
             },
           ],
-          toDOM(_mark: Mark) {
+          toDOM() {
             return ['span', { class: 'shortcode pm-markup-text-color pm-fixedwidth-font' }];
           },
         },
@@ -83,7 +83,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       ];
     },
 
-    appendMarkTransaction: (schema: Schema) => {
+    appendMarkTransaction: () => {
       return [
         {
           name: 'shortcode-marks',

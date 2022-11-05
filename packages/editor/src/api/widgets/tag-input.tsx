@@ -99,7 +99,7 @@ const Tag: React.FC<TagProps> = props => {
   }, [editing]);
 
   // Click the delete icon
-  const onDeleteClick = (e: React.MouseEvent) => {
+  const onDeleteClick = () => {
     props.onTagDeleted(props.tag);
   };
 
@@ -116,7 +116,7 @@ const Tag: React.FC<TagProps> = props => {
   };
 
   // Click on the edit icon
-  const onEditClick = (e: React.MouseEvent) => {
+  const onEditClick = () => {
     if (props.tag.isEditable) {
       setEditing(true);
     }

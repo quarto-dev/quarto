@@ -61,7 +61,7 @@ function gapArrowHandler(dir: 'up' | 'left') {
     // function to create a gap cursor
     const createGapCursor = ($pos: ResolvedPos) => {
       if (dispatch) {
-        const cursor = new GapCursor($pos, $pos);
+        const cursor = new GapCursor($pos);
         const tr = state.tr;
         tr.setSelection(cursor);
         dispatch(tr);
@@ -138,7 +138,7 @@ function gapClickHandler(view: EditorView, event: Event): boolean {
         
       // create the gap cursor
       const tr = view.state.tr;
-      const cursor = new GapCursor($clickPos, $clickPos); 
+      const cursor = new GapCursor($clickPos); 
       tr.setSelection(cursor);
       view.dispatch(tr);
       

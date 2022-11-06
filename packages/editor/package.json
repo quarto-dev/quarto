@@ -18,8 +18,8 @@
   "license": "agpl-3.0",
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts\"",
-    "build": "vite build",
-    "dev": "vite build --watch"
+    "build": "tsc --noEmit && vite build",
+    "dev": "tsc --noEmit && vite"
   },
   "dependencies": {
     "@types/ace": "^0.0.43",

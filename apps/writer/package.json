@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "tsc --noEmit && vite",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },

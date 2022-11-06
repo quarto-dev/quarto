@@ -406,7 +406,8 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
           refreshSearchCallback.current();
         }
       }
-    }, 200);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }, 200) as any;
 
     // Set the default state to initialize the first search
     if (selectedPanelProvider.typeAheadSearch) {

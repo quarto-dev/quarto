@@ -2,18 +2,20 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 
 export default defineConfig({
-  plugins: [dts()],
+  plugins: [dts(), cssInjectedByJsPlugin()],
   build: {
     lib: {
-      // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'editor',
-      fileName: 'editor'
+      name: 'Panmirror',
+      fileName: 'panmirror'
     },
     rollupOptions: {
-      
+      output: {
+        assetFileNames: "panmirror.[ext]",
+      },
     },
     emptyOutDir: false,
   }

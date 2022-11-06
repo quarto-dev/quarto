@@ -5,13 +5,13 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/editor.umd.cjs",
-  "module": "./dist/editor.js",
+  "main": "./dist/panmirror.umd.cjs",
+  "module": "./dist/panmirror.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/editor.js",
-      "require": "./dist/editor.umd.cjs"
+      "import": "./dist/panmirror.js",
+      "require": "./dist/panmirror.umd.cjs"
     }
   },
   "private": true,
@@ -84,6 +84,7 @@
     "eslint-config-custom": "*",
     "prosemirror-dev-tools": "^3.1.0",
     "tsconfig": "*",
+    "vite-plugin-css-injected-by-js": "^2.1.1",
     "vite-plugin-dts": "^1.6.6"
   }
 }

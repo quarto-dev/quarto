@@ -1,17 +1,16 @@
 {
   "name": "editor",
   "version": "0.0.0",
-  "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/panmirror.umd.cjs",
-  "module": "./dist/panmirror.js",
+  "main": "./dist/panmirror.js",
+  "module": "./dist/panmirror.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/panmirror.js",
-      "require": "./dist/panmirror.umd.cjs"
+      "import": "./dist/panmirror.mjs",
+      "require": "./dist/panmirror.js"
     }
   },
   "private": true,

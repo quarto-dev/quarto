@@ -1,3 +1,6 @@
 
-// objects instantiated by the IDE
-export { Editor, UITools } from './editor/editor';
+
+
+import { Editor, UITools } from './editor/editor';
+export default { Editor, UITools };
+

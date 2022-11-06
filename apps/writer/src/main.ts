@@ -1,9 +1,9 @@
 import "./style.css";
 import typescriptLogo from "./typescript.svg";
 
-import { UITools } from "editor"
+import editor from "editor"
 
-const uiTools = new UITools();
+const uiTools = new editor.UITools();
 
 console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
 

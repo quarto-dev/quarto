@@ -17,6 +17,7 @@ export default defineConfig({
         assetFileNames: "panmirror.[ext]",
       },
     },
+    sourcemap: true,
     emptyOutDir: false,
   }
 })

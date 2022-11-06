@@ -19,7 +19,7 @@
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts\"",
     "build": "tsc --noEmit && vite build",
-    "dev": "tsc --noEmit && vite"
+    "dev": "tsc --noEmit && vite build --watch"
   },
   "dependencies": {
     "@types/ace": "^0.0.43",

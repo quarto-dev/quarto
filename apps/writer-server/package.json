@@ -13,7 +13,6 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "logger": "*",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
@@ -26,6 +25,8 @@
     "eslint-config-custom-server": "*",
     "tsconfig": "*",
     "tsup": "^6.2.3",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "editor-types": "*",
+    "editor-server": "*"
   }
 }

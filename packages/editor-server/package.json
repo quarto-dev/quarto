@@ -1,10 +1,11 @@
 {
-  "name": "editor-types",
+  "name": "editor-server",
   "version": "0.1.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
     "typescript": "^4.5.2",
-    "tsconfig": "*"
+    "tsconfig": "*",
+    "editor-types": "*"
   }
 }

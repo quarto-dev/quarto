@@ -3,6 +3,8 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
+import { EditorDataCiteServer } from 'editor-server'
+
 export const createServer = () => {
   const app = express();
   app
@@ -11,10 +13,14 @@ export const createServer = () => {
     .use(urlencoded({ extended: true }))
     .use(json())
     .use(cors())
+    .get("/datacite", async (_req, res) => {
+      const server = new EditorDataCiteServer();
+      return res.json(await server.search(''));
+    })
     .get("/message/:name", (req, res) => {
       return res.json({ message: `hello ${req.params.name}` });
     })
-    .get("/healthz", (req, res) => {
+    .get("/healthz", (_req, res) => {
       return res.json({ ok: true });
     });
 

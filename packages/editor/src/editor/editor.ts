@@ -433,7 +433,7 @@ export class Editor {
 
     // focus editor immediately if requested
     if (this.options.autoFocus) {
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.focus();
       }, 10);
     }

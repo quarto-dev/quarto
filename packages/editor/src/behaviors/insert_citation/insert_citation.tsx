@@ -380,7 +380,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
   React.useEffect(() => {
     // Set initial focus
     if (panelRef.current) {
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (panelRef.current) {
           panelRef.current.focus();
         }
@@ -390,7 +390,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
     // Poll the configuration stream for updates
     // We need to keep the Timeout to clear around as ref so
     // it survives any renders
-    streamTimerId.current = setInterval(() => {
+    streamTimerId.current = window.setInterval(() => {
       const result = props.configuration.stream();
       if (result !== null) {
         if (streamTimerId.current) {

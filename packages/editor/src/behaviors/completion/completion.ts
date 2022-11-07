@@ -306,7 +306,7 @@ class CompletionPlugin extends Plugin<CompletionState> {
         } else {
           const completionStream = completions as CompletionsStream;
           updateCompletions(completionStream.items);
-          const pollingInterval = setInterval(() => {
+          const pollingInterval = window.setInterval(() => {
             // if the document has been updated then invalidate
             if (this.version !== requestVersion) {
               clearInterval(pollingInterval);

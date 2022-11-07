@@ -45,7 +45,7 @@ export function editorMath(ui: EditorUI): EditorMath {
           ui.math.typeset!(el, math, priority).then(resolve);
         } else {
           // otherwise wait 100ms then retry
-          const timerId = setInterval(() => {
+          const timerId = window.setInterval(() => {
             if (el.isConnected) {
               clearInterval(timerId);
               ui.math.typeset!(el, math, priority).then(resolve);

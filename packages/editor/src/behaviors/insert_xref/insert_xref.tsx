@@ -267,7 +267,7 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
       setXrefs(unique);
     });
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       textRef.current?.focus();
       if (styleSelectRef.current) {
         styleSelectRef.current.selectedIndex = lastSelectedStyleIndex;

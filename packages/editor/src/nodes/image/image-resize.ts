@@ -251,7 +251,7 @@ function resizeShelf(
   }
 
   // update position every 50ms (cleanup drag/drop copy/paste mispositioning)
-  const positionTimer = setInterval(updatePosition, 50);
+  const positionTimer = window.setInterval(updatePosition, 50);
 
   // main panel that holds the controls
   const panel = createHorizontalPanel();
@@ -320,7 +320,7 @@ function resizeShelf(
 
   // run onInit (wait for image to load if necessary)
   if (img.complete) {
-    setTimeout(onInit, 0);
+    window.setTimeout(onInit, 0);
   } else {
     img.onload = onInit;
   }

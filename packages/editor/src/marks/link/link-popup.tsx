@@ -126,7 +126,7 @@ const LinkPopup: React.FC<LinkPopupProps> = props => {
   const onRemoveClicked = () => {
     // in rstudio (w/ webkit) removing the link during the click results
     // in a page-navigation! defer to next event cycle to avoid this
-    setTimeout(() => {
+    window.setTimeout(() => {
       props.removeLinkCmd(props.view.state, props.view.dispatch, props.view);
       props.view.focus();
     }, 0);

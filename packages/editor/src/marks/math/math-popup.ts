@@ -96,7 +96,7 @@ export class MathPopupPlugin extends Plugin {
     // of the document as a result of latex math being shown/hidden (will effectively
     // be a no-op if the math text and  document layout / scroll position hasn't changed)
     this.updatePopup = this.updatePopup.bind(this);
-    this.updatePopupTimer = setInterval(this.updatePopup, 100);
+    this.updatePopupTimer = window.setInterval(this.updatePopup, 100);
     this.scrollUnsubscribe = events.subscribe(ScrollEvent, () => this.updatePopup());
     this.resizeUnsubscribe = events.subscribe(ResizeEvent, () => this.updatePopup());
   }

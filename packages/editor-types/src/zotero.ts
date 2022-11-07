@@ -1,3 +1,4 @@
+
 /*
  * zotero.ts
  *
@@ -41,9 +42,6 @@ export interface ZoteroCSL extends CSL {
   libraryID: string;
   collectionKeys: string[];
 }
-
-// https://github.com/retorquere/zotero-better-bibtex/blob/master/translators/Better%20BibTeX.json
-export const kZoteroBibTeXTranslator = 'ca65189f-8815-4afe-8c8b-8c7c15f0edca';
 
 export interface ZoteroServer {
   validateWebAPIKey: (key: string) => Promise<boolean>;

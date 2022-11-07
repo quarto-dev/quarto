@@ -34,7 +34,7 @@ import { MarkInputRuleFilter } from './input_rule';
 import { CompletionHandler } from './completion';
 import { EditorNavigation } from './navigation';
 import { EditorMath } from './math';
-import { EditorServer } from './server';
+import { EditorServer } from 'editor-types';
 
 export interface Extension {
   marks?: PandocMark[];

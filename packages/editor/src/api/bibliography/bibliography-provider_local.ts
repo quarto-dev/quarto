@@ -22,7 +22,6 @@ import { EditorUI } from '../ui';
 
 import {
   BibliographyDataProvider,
-  Bibliography,
   BibliographyFile,
   BibliographyCollection,
   BibliographySourceWithCollections,
@@ -30,11 +29,9 @@ import {
 import { ParsedYaml, parseYamlNodes, valueFromYamlText } from '../yaml';
 import { toBibTeX } from './bibDB';
 import { CSL } from '../csl';
+import { Bibliography } from 'editor-types';
 
-export interface BibliographyResult {
-  etag: string;
-  bibliography: Bibliography;
-}
+
 export const kLocalBibliographyProviderKey = 'E06068FE-45DA-4D88-ABDA-0DF290624950';
 
 export class BibliographyDataProviderLocal implements BibliographyDataProvider {

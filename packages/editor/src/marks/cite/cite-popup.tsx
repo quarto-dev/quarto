@@ -28,7 +28,7 @@ import { BibliographyManager } from '../../api/bibliography/bibliography';
 import './cite-popup.css';
 import { urlForCitation } from '../../api/cite';
 import { cslFromDoc } from '../../api/csl';
-import { EditorServer } from '../../api/server';
+import { EditorServer } from 'editor-types';
 
 const kMaxWidth = 400; // also in cite-popup.css
 

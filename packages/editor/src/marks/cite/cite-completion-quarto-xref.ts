@@ -19,9 +19,9 @@ import { EditorUI } from '../../api/ui';
 
 import { performCiteCompletionReplacement } from './cite';
 import { CiteCompletionEntry, CiteCompletionProvider } from './cite-completion';
-import { EditorServer } from '../../api/server';
-import { XRef, xrefKey } from '../../api/xref';
+import { xrefKey } from '../../api/xref';
 import { kQuartoXRefTypes } from '../xref/xref-completion';
+import { EditorServer, XRef } from 'editor-types';
 
 export const kCiteCompletionTypeXref = "xref";
 

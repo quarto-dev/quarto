@@ -13,17 +13,8 @@
  *
  */
 
-import { CSL } from "./csl";
-
-export interface DOIResult {
-  status: 'ok' | 'notfound' | 'nohost' | 'error';
-  message: CSL | null;
-  error: string;
-}
-
-export interface DOIServer {
-  fetchCSL: (doi: string, progressDelay: number) => Promise<DOIResult>;
-}
+import { DOIServer } from "editor-types";
+export type { DOIServer }
 
 // ^10.\d{4,9}/[-._;()/:A-Z0-9]+$
 // Core regexes come from https://www.crossref.org/blog/dois-and-matching-regular-expressions/

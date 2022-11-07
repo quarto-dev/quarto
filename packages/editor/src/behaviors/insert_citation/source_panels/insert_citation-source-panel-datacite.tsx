@@ -15,12 +15,16 @@
 
 import React from 'react';
 
-import { DataCiteServer, DataCiteRecord, DataCiteCreator } from 'editor-types';
+import { 
+  DOIServer, 
+  DataCiteServer, 
+  DataCiteRecord, 
+  DataCiteCreator 
+} from 'editor-types';
 
 import { createUniqueCiteId } from '../../../api/cite';
 import { imageForType } from '../../../api/csl';
 import { suggestCiteId } from '../../../api/datacite';
-import { DOIServer } from '../../../api/doi';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { logException } from '../../../api/log';
 import { EditorUI } from '../../../api/ui';

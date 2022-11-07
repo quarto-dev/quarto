@@ -14,78 +14,13 @@
  */
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
+import { CSL, CSLDate, CSLName } from 'editor-types';
+export type { CSL, CSLDate, CSLName } from 'editor-types';
+
 import { parseYamlNodes } from './yaml';
 import { crossRefTypeToCSLType } from './crossref';
 import { EditorUIImages } from './ui-images';
 
-export interface CSL {
-  // The id. This is technically required, but some providers (like crossref) don't provide
-  // one
-  id?: string;
-
-  // Enumeration, one of the type ids from https://api.crossref.org/v1/types
-  type: string;
-
-  // An item key that may be used to identify this item
-  key?: string;
-
-  // Name of work's publisher
-  publisher?: string;
-
-  // Title
-  title?: string;
-
-  // DOI of the work
-  DOI?: string;
-
-  // URL form of the work's DOI
-  URL?: string;
-
-  // Array of Contributors
-  author?: CSLName[];
-
-  // Earliest of published-print and published-online
-  issued?: CSLDate;
-
-  // Full titles of the containing work (usually a book or journal)
-  'container-title'?: string;
-
-  // Short titles of the containing work (usually a book or journal)
-  'short-container-title'?: string;
-
-  // Issue number of an article's journal
-  issue?: string;
-
-  // Volume number of an article's journal
-  volume?: string;
-
-  // Pages numbers of an article within its journal
-  page?: string;
-
-  // These properties are often not included in CSL entries and are here
-  // primarily because they may need to be sanitized
-  ISSN?: string;
-  ISBN?: string;
-  'original-title'?: string;
-  'short-title'?: string;
-  subtitle?: string;
-  subject?: string;
-  archive?: string;
-  license?: [];
-
-  [key: string]: unknown;
-}
-
-export interface CSLName {
-  family: string;
-  given: string;
-  literal?: string;
-}
-
-export interface CSLDate {
-  'date-parts'?: Array<[number, number?, number?]>;
-  raw?: string;
-}
 
 // Crossref sends some items back with invalid data types in the CSL JSON
 // This appears to tend to happen the most frequently with fields that CrossRef
@@ -203,6 +138,20 @@ export function cslDateToEDTFDate(date: CSLDate) {
   } else {
     return undefined;
   }
+}
+
+export function joinAuthorNames(cslName: CSLName) {
+  const names: string[] = [];
+  if (cslName.family) {
+    names.push(cslName.family);
+  }
+  if (cslName.given) {
+    names.push(cslName.given);
+  }
+  if (cslName.literal) {
+    names.push(cslName.literal);
+  }
+  return names.join(" ");
 }
 
 export function imageForType(images: EditorUIImages, type: string): [string?, string?] {

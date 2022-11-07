@@ -27,7 +27,6 @@ import {
 } from '../../api/bibliography/bibliography';
 import { kInvalidCiteKeyChars } from '../../api/cite';
 import { changeExtension } from '../../api/path';
-import { EditorServer } from '../../api/server';
 import { EditorUI } from '../../api/ui';
 import { WidgetProps } from '../../api/widgets/react';
 import { TagInput, TagItem } from '../../api/widgets/tag-input';
@@ -53,6 +52,7 @@ import { packageSourcePanel } from './source_panels/insert_citation-source-panel
 import './insert_citation.css';
 import debounce from 'lodash.debounce';
 import { CheckboxInput } from '../../api/widgets/checkbox-input';
+import { EditorServer } from 'editor-types';
 
 
 // When the dialog has completed, it will return this result

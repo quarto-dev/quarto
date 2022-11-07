@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * doi.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,13 +13,16 @@
  *
  */
 
-export * from './csl';
-export * from './doi';
-export * from './datacite';
-export * from './pandoc';
-export * from './crossref'
-export * from './pubmed'
-export * from './zotero'
-export * from './xref'
-export * from './environment'
-export * from './server'
+import { CSL } from "./csl";
+
+export interface DOIResult {
+    status: 'ok' | 'notfound' | 'nohost' | 'error';
+    message: CSL | null;
+    error: string;
+}
+
+export interface DOIServer {
+    fetchCSL: (doi: string, progressDelay: number) => Promise<DOIResult>;
+}
+
+

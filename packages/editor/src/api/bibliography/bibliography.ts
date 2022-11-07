@@ -21,11 +21,11 @@ import { PandocServer } from '../pandoc';
 import { EditorUI } from '../ui';
 import { ParsedYaml, parseYamlNodes } from '../yaml';
 import { CSL } from '../csl';
-import { ZoteroServer } from '../zotero';
 import { BibliographyDataProviderLocal, kLocalBibliographyProviderKey } from './bibliography-provider_local';
 import { BibliographyDataProviderZotero } from './bibliography-provider_zotero';
 import { toBibTeX } from './bibDB';
 import { joinPaths, isAbsolute } from '../path';
+import { ZoteroServer } from 'editor-types';
 
 export interface BibliographyFile {
   displayPath: string;
@@ -99,10 +99,6 @@ export interface BibliographyCollection {
   parentKey?: string;
 }
 
-export interface Bibliography {
-  sources: CSL[];
-  project_biblios: string[];
-}
 
 // The individual bibliographic source
 export interface BibliographySource extends CSL {

@@ -15,13 +15,6 @@
 
 import { PandocServer, parsePandocListOutput, PandocApiVersion } from './pandoc';
 
-export interface PandocCapabilitiesResult {
-  version: string;
-  api_version: PandocApiVersion;
-  output_formats: string;
-  highlight_languages: string;
-}
-
 export interface PandocCapabilities {
   version: string;
   api_version: PandocApiVersion;

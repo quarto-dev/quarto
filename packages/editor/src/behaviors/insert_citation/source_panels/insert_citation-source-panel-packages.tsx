@@ -18,7 +18,6 @@ import React from 'react';
 import { EditorUI } from '../../../api/ui';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { imageForType, CSL, cslTypes, CSLDate } from '../../../api/csl';
-import { EnvironmentServer, RPackageInfo, RPackageCitationPerson, RPackageCitation } from '../../../api/environment';
 import { bibtextTypeToCSLType } from '../../../api/bibtex/types';
 
 import {
@@ -33,6 +32,7 @@ import { CitationSourceTypeheadSearchPanel } from './insert_citation-source-pane
 import Fuse from 'fuse.js';
 import uniqBy from 'lodash.uniqby';
 import orderBy from 'lodash.orderby';
+import { EnvironmentServer, RPackageCitation, RPackageCitationPerson, RPackageInfo } from 'editor-types';
 
 const kPackageType = 'Packages';
 

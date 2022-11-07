@@ -13,8 +13,9 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
+import { XRef } from 'editor-types';
 import Fuse from 'fuse.js';
-import { XRef, xrefKey } from '../../api/xref';
+import { xrefKey } from '../../api/xref';
 
 
 const searchFields: Fuse.FuseOptionKeyObject<XRef>[] = [

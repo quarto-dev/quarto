@@ -24,12 +24,13 @@ import uniqby from 'lodash.uniqby';
 
 import { EditorUI } from '../../api/ui';
 import { CompletionHandler, CompletionResult } from '../../api/completion';
-import { XRef, XRefServer, xrefKey } from '../../api/xref';
+import { xrefKey } from '../../api/xref';
 import { markIsActive } from '../../api/mark';
 import { searchPlaceholderDecoration } from '../../api/placeholder';
 import { CompletionItemView } from '../../api/widgets/completion';
 
 import './xref-completion.css';
+import { XRef, XRefServer } from 'editor-types';
 
 const kMaxResults = 20;
 

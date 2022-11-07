@@ -23,11 +23,11 @@ import { EditorUI } from '../../api/ui';
 import { textPopupDecorationPlugin, TextPopupTarget } from '../../api/text-popup';
 import { WidgetProps } from '../../api/widgets/react';
 import { Popup } from '../../api/widgets/popup';
-import { EditorServer } from '../../api/server';
-import { XRef, xrefKey, parseQuartoXRef } from '../../api/xref';
+import { xrefKey, parseQuartoXRef } from '../../api/xref';
 import { LinkButton } from '../../api/widgets/button';
 
 import './cite-popup-xref.css';
+import { EditorServer, XRef } from 'editor-types';
 
 const kMaxWidth = 350;
 

@@ -12,18 +12,18 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
+import { EditorServer } from 'editor-types';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 
 import { BibliographySource, BibliographyManager } from '../../api/bibliography/bibliography';
 import { kZoteroProviderKey } from '../../api/bibliography/bibliography-provider_zotero';
 import { formatAuthors, formatIssuedDate } from '../../api/cite';
-import { imageForType, CSLName } from '../../api/csl';
+import { imageForType, joinAuthorNames } from '../../api/csl';
 import { EditorUI } from '../../api/ui';
 
 import { insertCitation as insertSingleCitation, performCiteCompletionReplacement } from './cite';
 import { CiteCompletionEntry, CiteCompletionProvider } from './cite-completion';
-import { EditorServer } from '../../api/server';
 
 export const kCiteCompletionTypeBibliography = "bibl";
 
@@ -45,20 +45,7 @@ export function bibliographyCiteCompletionProvider(ui: EditorUI, bibliographyMan
       const detail = `${authorStr} ${date}`;
       return detail;
     };
-    const authorIndexStr = (cslName: CSLName) => {
-      const names: string[] = [];
-      if (cslName.family) {
-        names.push(cslName.family);
-      }
-      if (cslName.given) {
-        names.push(cslName.given);
-      }
-      if (cslName.literal) {
-        names.push(cslName.literal);
-      }
-      return names.join(" ");
-    }
-    const secondaryIndex = source.author?.map(authorIndexStr).join(" ");
+    const secondaryIndex = source.author?.map(joinAuthorNames).join(" ");
 
     // The function to insert this entry
     const replace = (view: EditorView, pos: number, server: EditorServer) => {

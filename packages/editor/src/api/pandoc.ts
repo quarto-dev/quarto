@@ -16,34 +16,15 @@
 import { Fragment, Mark, Node as ProsemirrorNode, Schema, NodeType, Attrs } from 'prosemirror-model';
 
 import { PandocAttr, pandocAttrReadAST, kSpanChildren, kSpanAttr } from './pandoc_attr';
-import { PandocCapabilitiesResult } from './pandoc_capabilities';
 import { kQuoteType, kQuoteChildren, QuoteType } from './quote';
-import { BibliographyResult } from './bibliography/bibliography-provider_local';
 
 import { stringifyMath } from './math';
 import { kCodeText } from './code';
 import { kLinkChildren } from './link';
 
-export interface PandocServer {
-  getCapabilities(): Promise<PandocCapabilitiesResult>;
-  markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst>;
-  astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string>;
-  listExtensions(format: string): Promise<string>;
-  getBibliography(
-    file: string | null,
-    bibliography: string[],
-    refBlock: string | null,
-    etag: string | null,
-  ): Promise<BibliographyResult>;
-  addToBibliography(
-    bibliography: string,
-    project: boolean,
-    id: string,
-    sourceAsJson: string,
-    sourceAsBibTeX: string,
-  ): Promise<boolean>;
-  citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string>;
-}
+import { BibliographyResult, PandocServer, PandocApiVersion, PandocAst, PandocToken } from 'editor-types';
+export type { BibliographyResult, PandocServer,PandocApiVersion, PandocAst, PandocToken };
+
 
 export interface PandocWriterReferencesOptions {
   location?: string; // block | section | document
@@ -144,20 +125,6 @@ export function parsePandocListOutput(output: string) {
   return output.split(/\r?\n/).filter(entry => entry.length);
 }
 
-export interface PandocAst {
-  blocks: PandocToken[];
-  'pandoc-api-version': PandocApiVersion;
-  meta: Record<string,unknown>;
-  heading_ids?: string[]; // used only for reading not writing
-}
-
-export type PandocApiVersion = number[];
-
-export interface PandocToken {
-  t: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  c?: any;
-}
 
 // https://github.com/jgm/pandoc-types/blob/master/Text/Pandoc/Definition.hs
 export enum PandocTokenType {

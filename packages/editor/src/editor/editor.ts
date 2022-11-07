@@ -79,7 +79,6 @@ import { markInputRuleFilter } from '../api/input_rule';
 import { editorMath } from '../api/math';
 import { EditorEvents } from '../api/events';
 import { insertRmdChunk } from '../api/rmd';
-import { EditorServer } from '../api/server';
 import { pandocAutoIdentifier } from '../api/pandoc_id';
 import { wrapSentences } from '../api/wrap';
 import { yamlFrontMatter, applyYamlFrontMatter } from '../api/yaml';
@@ -118,6 +117,7 @@ import { editorSchema } from './editor-schema';
 import './styles/frame.css';
 import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
+import { EditorServer } from 'editor-types';
 
 export interface EditorCode {
   code: string;

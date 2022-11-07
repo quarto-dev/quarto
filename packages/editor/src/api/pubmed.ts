@@ -13,29 +13,9 @@
  *
  */
 
+import { PubMedDocument } from 'editor-types';
 import { EditorUI } from './ui';
 
-export interface PubMedResult {
-  status: 'ok' | 'notfound' | 'nohost' | 'error';
-  message: PubMedDocument[] | null;
-  error: string;
-}
-
-export interface PubMedDocument {
-  doi: string;
-  pubTypes?: string[];
-  authors?: string[];
-  sortFirstAuthor?: string;
-  title?: string;
-  source?: string;
-  volume?: string;
-  issue?: string;
-  pubDate?: string;
-}
-
-export interface PubMedServer {
-  search: (query: string) => Promise<PubMedResult>;
-}
 
 export function suggestCiteId(doc: PubMedDocument): string {
   // Try to get the last name. Prefer the sort first author,

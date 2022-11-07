@@ -21,28 +21,8 @@ import { pandocAutoIdentifier } from './pandoc_id';
 import { rmdChunkEngineAndLabel } from './rmd';
 import { kTexFormat } from './raw';
 import { findChildrenByType } from 'prosemirror-utils';
+import { XRef, XRefType } from 'editor-types';
 
-export interface XRefServer {
-  indexForFile: (file: string) => Promise<XRefs>;
-  xrefForId: (file: string, id: string) => Promise<XRefs>;
-  quartoIndexForFile: (file: string) => Promise<XRefs>;
-  quartoXrefForId: (file: string, id: string) => Promise<XRefs>;
-}
-
-export interface XRefs {
-  baseDir: string;
-  refs: XRef[];
-}
-
-export interface XRef {
-  file: string;
-  type: string;
-  id: string;
-  suffix: string;
-  title?: string;
-}
-
-export type XRefType = "quarto" | "bookdown";
 
 export function xrefKey(xref: XRef, xrefType?: XRefType) {
   if (xrefType === "quarto") {

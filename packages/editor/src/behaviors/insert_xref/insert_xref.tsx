@@ -20,10 +20,9 @@ import uniqBy from 'lodash.uniqby';
 import debounce from 'lodash.debounce';
 
 import { EditorUI } from "../../api/ui";
-import { EditorServer } from "../../api/server";
 import { WidgetProps } from '../../api/widgets/react';
 import { DialogButtons } from '../../api/widgets/dialog-buttons';
-import { XRef, xrefKey } from '../../api/xref';
+import { xrefKey } from '../../api/xref';
 import { TextInput } from '../../api/widgets/text';
 import { SelectInput } from '../../api/widgets/select';
 import { NavigationTree, NavigationTreeNode } from '../../api/widgets/navigation-tree';
@@ -32,6 +31,7 @@ import { kQuartoXRefTypes } from '../../marks/xref/xref-completion';
 import { xrefIndex } from './insert_xref_index';
 import './insert_xref-styles.css';
 import { kAlertTypeError } from '../../api/ui-dialogs';
+import { EditorServer, XRef } from 'editor-types';
 
 // Keep the most recently used selected style around
 let lastSelectedStyleIndex = 0;

@@ -16,7 +16,7 @@
 import React from 'react';
 
 import { suggestCiteId, formatAuthors, formatIssuedDate } from '../../../api/cite';
-import { CrossrefWork, imageForCrossrefType, CrossrefServer, prettyType } from '../../../api/crossref';
+import { imageForCrossrefType, prettyType } from '../../../api/crossref';
 import { sanitizeForCiteproc, CSL } from '../../../api/csl';
 import { DOIServer } from '../../../api/doi';
 import { logException } from '../../../api/log';
@@ -33,6 +33,7 @@ import {
 } from './insert_citation-source-panel';
 import { CitationSourceLatentSearchPanel } from './insert_citation-source-panel-latent-search';
 import { BibliographyManager } from '../../../api/bibliography/bibliography';
+import { CrossrefServer, CrossrefWork } from 'editor-types';
 
 export function crossrefSourcePanel(
   ui: EditorUI,

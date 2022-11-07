@@ -13,14 +13,15 @@
  *
  */
 
-import { PandocServer } from './pandoc';
-import { CrossrefServer } from './crossref';
-import { ZoteroServer } from './zotero';
-import { XRefServer } from './xref';
-import { DOIServer } from './doi';
-import { PubMedServer } from './pubmed';
-import { DataCiteServer } from 'editor-types';
-import { EnvironmentServer } from './environment';
+import { CrossrefServer } from "./crossref";
+import { DataCiteServer } from "./datacite";
+import { DOIServer } from "./doi";
+import { EnvironmentServer } from "./environment";
+import { PandocServer } from "./pandoc";
+import { PubMedServer } from "./pubmed";
+import { XRefServer } from "./xref";
+import { ZoteroServer } from "./zotero";
+
 
 export interface EditorServer {
   readonly pandoc: PandocServer;

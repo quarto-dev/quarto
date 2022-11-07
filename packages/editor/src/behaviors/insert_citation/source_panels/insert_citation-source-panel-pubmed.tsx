@@ -20,7 +20,7 @@ import { sanitizeForCiteproc } from '../../../api/csl';
 import { DOIServer } from '../../../api/doi';
 import { logException } from '../../../api/log';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
-import { PubMedServer, PubMedDocument, suggestCiteId, imageForType } from '../../../api/pubmed';
+import { suggestCiteId, imageForType } from '../../../api/pubmed';
 import { EditorUI } from '../../../api/ui';
 
 import {
@@ -32,6 +32,7 @@ import {
   matchExistingSourceCitationListEntry,
 } from './insert_citation-source-panel';
 import { CitationSourceLatentSearchPanel } from './insert_citation-source-panel-latent-search';
+import { PubMedDocument, PubMedServer } from 'editor-types';
 
 export function pubmedSourcePanel(
   ui: EditorUI,

@@ -14,11 +14,11 @@
  */
 
 import { SkinTone } from './emoji';
-import { XRef } from './xref';
 
 import { EditorUIImages } from './ui-images';
 import { EditorDialogs } from './ui-dialogs';
 import { EditorUISpelling } from './spelling';
+import { XRef } from 'editor-types';
 
 export interface EditorUI {
   dialogs: EditorDialogs;

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * pubmed.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,13 +13,25 @@
  *
  */
 
-export * from './csl';
-export * from './doi';
-export * from './datacite';
-export * from './pandoc';
-export * from './crossref'
-export * from './pubmed'
-export * from './zotero'
-export * from './xref'
-export * from './environment'
-export * from './server'
+export interface PubMedResult {
+  status: 'ok' | 'notfound' | 'nohost' | 'error';
+  message: PubMedDocument[] | null;
+  error: string;
+}
+
+export interface PubMedDocument {
+  doi: string;
+  pubTypes?: string[];
+  authors?: string[];
+  sortFirstAuthor?: string;
+  title?: string;
+  source?: string;
+  volume?: string;
+  issue?: string;
+  pubDate?: string;
+}
+
+export interface PubMedServer {
+  search: (query: string) => Promise<PubMedResult>;
+}
+

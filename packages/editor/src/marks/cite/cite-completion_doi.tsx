@@ -28,12 +28,12 @@ import { formatAuthors, formatIssuedDate } from '../../api/cite';
 import { CSL, imageForType } from '../../api/csl';
 import { CompletionItemDetailedView } from '../../api/widgets/completion-detailed';
 import { BibliographyManager } from '../../api/bibliography/bibliography';
-import { EditorServer } from '../../api/server';
 import { DOIServer } from '../../api/doi';
 
 import { doiFromEditingContext } from './cite-doi';
 import { insertCitation } from './cite';
 import { kCitationCompleteScope } from './cite-completion';
+import { EditorServer } from 'editor-types';
 
 const kCompletionWidth = 400;
 const kCompletionItemPadding = 10;

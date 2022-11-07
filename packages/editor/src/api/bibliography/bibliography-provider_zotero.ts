@@ -13,7 +13,6 @@
  *
  */
 
-import { ZoteroCollection, ZoteroServer, kZoteroBibTeXTranslator, ZoteroCollectionSpec, ZoteroCSL } from '../zotero';
 
 import { ParsedYaml, valueFromYamlText } from '../yaml';
 import { suggestCiteId } from '../cite';
@@ -27,8 +26,13 @@ import {
 import { EditorUI } from '../ui';
 import { CSL } from '../csl';
 import { toBibTeX } from './bibDB';
+import { ZoteroCollection, ZoteroCollectionSpec, ZoteroCSL, ZoteroServer } from 'editor-types';
 
 export const kZoteroProviderKey = '2509FBBE-5BB0-44C4-B119-6083A81ED673';
+
+// https://github.com/retorquere/zotero-better-bibtex/blob/master/translators/Better%20BibTeX.json
+export const kZoteroBibTeXTranslator = 'ca65189f-8815-4afe-8c8b-8c7c15f0edca';
+
 
 export class BibliographyDataProviderZotero implements BibliographyDataProvider {
   private allCollections: ZoteroCollection[] = [];

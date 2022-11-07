@@ -27,7 +27,6 @@ import { searchPlaceholderDecoration } from '../../api/placeholder';
 import { EditorUI } from '../../api/ui';
 import { CompletionItemView } from '../../api/widgets/completion';
 
-import { EditorServer } from '../../api/server';
 import { EditorEvents } from '../../api/events';
 
 import { parseCitation } from './cite';
@@ -37,6 +36,7 @@ import { bibliographyCiteCompletionProvider } from './cite-completion-bibliograp
 import { EditorFormat, kQuartoDocType } from '../../api/format';
 import { quartoXrefCiteCompletionProvider, kCiteCompletionTypeXref } from './cite-completion-quarto-xref';
 import { completionIndex, CiteCompletionSearch } from './cite-completion-search';
+import { EditorServer } from 'editor-types';
 
 
 const kAuthorMaxChars = 28;

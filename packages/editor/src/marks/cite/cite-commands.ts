@@ -23,12 +23,12 @@ import { canInsertNode } from '../../api/node';
 import { EditorUI } from '../../api/ui';
 import { OmniInsertGroup } from '../../api/omni_insert';
 import { EditorEvents } from '../../api/events';
-import { EditorServer } from '../../api/server';
 import { BibliographyManager } from '../../api/bibliography/bibliography';
 
 import { ensureSourcesInBibliography } from './cite';
 import { showInsertCitationDialog, InsertCitationDialogResult } from '../../behaviors/insert_citation/insert_citation';
 import { markIsActive, getMarkRange } from '../../api/mark';
+import { EditorServer } from 'editor-types';
 
 export class InsertCitationCommand extends ProsemirrorCommand {
   private initialSelectionKey: string | undefined;

@@ -3,7 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
-import { EditorDataCiteServer } from 'editor-server'
+import { dataCiteServer } from 'editor-server'
 
 export const createServer = () => {
   const app = express();
@@ -14,7 +14,7 @@ export const createServer = () => {
     .use(json())
     .use(cors())
     .get("/datacite", async (_req, res) => {
-      const server = new EditorDataCiteServer();
+      const server = dataCiteServer();
       return res.json(await server.search(''));
     })
     .get("/message/:name", (req, res) => {

@@ -19,7 +19,7 @@ import { ZoteroServer } from './zotero';
 import { XRefServer } from './xref';
 import { DOIServer } from './doi';
 import { PubMedServer } from './pubmed';
-import { DataCiteServer } from './datacite';
+import { DataCiteServer } from 'editor-types';
 import { EnvironmentServer } from './environment';
 
 export interface EditorServer {

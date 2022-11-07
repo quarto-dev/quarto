@@ -13,30 +13,8 @@
  *
  */
 
-export interface DataCiteResult {
-  status: 'ok' | 'notfound' | 'nohost' | 'error';
-  message: DataCiteRecord[] | null;
-  error: string;
-}
+import { DataCiteRecord } from 'editor-types';
 
-export interface DataCiteRecord {
-  doi: string;
-  title?: string;
-  publisher?: string;
-  publicationYear?: number;
-  creators?: DataCiteCreator[];
-  type?: string; // citeproc type
-}
-
-export interface DataCiteCreator {
-  fullName: string;
-  familyName?: string;
-  givenName?: string;
-}
-
-export interface DataCiteServer {
-  search: (query: string) => Promise<DataCiteResult>;
-}
 
 export function suggestCiteId(record: DataCiteRecord): string {
   // Try to use the last name (or the first name)

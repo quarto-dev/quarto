@@ -15,9 +15,11 @@
 
 import React from 'react';
 
+import { DataCiteServer, DataCiteRecord, DataCiteCreator } from 'editor-types';
+
 import { createUniqueCiteId } from '../../../api/cite';
 import { imageForType } from '../../../api/csl';
-import { DataCiteServer, DataCiteRecord, suggestCiteId, DataCiteCreator } from '../../../api/datacite';
+import { suggestCiteId } from '../../../api/datacite';
 import { DOIServer } from '../../../api/doi';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { logException } from '../../../api/log';

@@ -26,6 +26,6 @@
     "eslint-config-custom-server": "*",
     "tsconfig": "*",
     "tsup": "^6.2.3",
-    "typescript": "^4.8.3"
+    "typescript": "^4.5.2"
   }
 }

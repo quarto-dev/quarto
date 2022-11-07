@@ -1,0 +1,13 @@
+{
+  "name": "eslint-config-custom-server",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "eslint-config-turbo": "latest"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

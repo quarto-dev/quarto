@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * pubmed.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,19 @@
  *
  */
 
+import { PubMedResult, PubMedServer } from "editor-types";
 
-export { dataCiteServer } from './datacite';
-export { editorServer } from './server';
-
+export function pubMedServer() : PubMedServer {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async search(_query: string) : Promise<PubMedResult> {  
+      return {
+        status: 'notfound',
+        message: null,
+        error: ''
+      }
+    }
+  }
+}
 
 

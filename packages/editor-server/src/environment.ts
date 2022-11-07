@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * environment.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,16 @@
  *
  */
 
+import { EnvironmentServer, RPackageCitation, RPackageState } from "editor-types";
 
-export { dataCiteServer } from './datacite';
-export { editorServer } from './server';
-
-
-
+export function environmentServer() : EnvironmentServer {
+  return {
+    getRPackageState() : Promise<RPackageState> {
+      throw new Error("not implemented");
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getRPackageCitations(pkgName: string) : Promise<RPackageCitation[]> {
+      throw new Error("not implemented");
+    }
+  };
+}

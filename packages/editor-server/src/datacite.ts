@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * datacite.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,17 @@
  *
  */
 
+import { DataCiteResult, DataCiteServer } from "editor-types";
 
-export { dataCiteServer } from './datacite';
-export { editorServer } from './server';
-
-
-
+export function dataCiteServer() : DataCiteServer {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async search(_query: string) : Promise<DataCiteResult> {
+      return {
+        status: 'notfound',
+        message: null,
+        error: ''
+      }
+    }
+  }
+}

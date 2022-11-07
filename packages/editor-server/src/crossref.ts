@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * crossref.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,14 @@
  *
  */
 
+import { CrossrefMessage, CrossrefServer, CrossrefWork } from "editor-types";
 
-export { dataCiteServer } from './datacite';
-export { editorServer } from './server';
-
-
+export function crossrefServer() : CrossrefServer {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    works(query: string) : Promise<CrossrefMessage<CrossrefWork>> {
+      throw new Error("not implemented");
+    }
+  };
+}
 

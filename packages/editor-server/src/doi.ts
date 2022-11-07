@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * doi.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,21 @@
  *
  */
 
+import { DOIResult, DOIServer } from "editor-types"
 
-export { dataCiteServer } from './datacite';
-export { editorServer } from './server';
+
+export function doiServer() : DOIServer {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async fetchCSL(doi: string, progressDelay: number) : Promise<DOIResult> {
+      return {
+        status: 'notfound',
+        message: null,
+        error: ''
+      }
+    }
+  }
+}
 
 
 

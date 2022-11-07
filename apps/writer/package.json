@@ -2,6 +2,7 @@
   "name": "writer",
   "private": true,
   "version": "0.0.0",
+  "license": "agpl-3.0",
   "type": "module",
   "scripts": {
     "dev": "tsc --noEmit && vite",

@@ -11,7 +11,8 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "editor": "*"
+    "editor": "*",
+    "jayson": "^4.0.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",

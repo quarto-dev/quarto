@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * json-rpc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,14 +13,11 @@
  *
  */
 
-export * from './csl';
-export * from './doi';
-export * from './datacite';
-export * from './pandoc';
-export * from './crossref'
-export * from './pubmed'
-export * from './zotero'
-export * from './xref'
-export * from './environment'
-export * from './server'
-export * from './json-rpc'
+// pandoc server
+export const kPandocGetCapabilities = 'pandoc_get_capabilities';
+export const kPandocMarkdownToAst = 'pandoc_markdown_to_ast';
+export const kPandocAstToMarkdown = 'pandoc_ast_to_markdown';
+export const kPandocListExtensions = 'pandoc_list_extensions';
+export const kPandocGetBibliography  = 'pandoc_get_bibliography';
+export const kPandocAddtoBibliography = 'pandoc_add_to_bibliography';
+export const kPandocCitationHtml = 'pandoc_citation_html';

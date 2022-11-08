@@ -15,5 +15,8 @@
 
 
 import { Editor, UITools } from './editor/editor';
-export default { Editor, UITools };
+import { editorJsonRpcServer } from './editor/editor-server';
+
+
+export default { Editor, UITools, editorJsonRpcServer };
 

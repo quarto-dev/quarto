@@ -14,12 +14,32 @@
  *
  */
 
-import { BibliographyResult, PandocAst, PandocCapabilitiesResult, PandocServer } from "editor-types";
+import { 
+  BibliographyResult, 
+  PandocAst, 
+  PandocCapabilitiesResult, 
+  PandocServer,
+  kPandocAstToMarkdown, 
+  kPandocGetCapabilities, 
+  kPandocListExtensions, 
+  kPandocMarkdownToAst,
+  kPandocGetBibliography,
+  kPandocAddtoBibliography, 
+} from "editor-types";
+
+import jayson from 'jayson'
+import { jsonRcpMethod } from "./json-rpc";
+
 
 export function pandocServer() : PandocServer {
   return {
-    getCapabilities(): Promise<PandocCapabilitiesResult> {
-      throw new Error("not implemented");
+    async getCapabilities(): Promise<PandocCapabilitiesResult> {
+      return {
+        version: "2.19.2",
+        api_version: [2,19,2],
+        output_formats: 'html',
+        highlight_languages: 'python'
+      }
     },
     markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
       throw new Error("not implemented");
@@ -52,3 +72,17 @@ export function pandocServer() : PandocServer {
     }
   };
 }
+
+export function pandocServerMethods() : Record<string, jayson.Method> {
+  const server = pandocServer();
+  const methods: Record<string, jayson.Method> = {
+    [kPandocGetCapabilities]: jsonRcpMethod(() => server.getCapabilities()),
+    [kPandocMarkdownToAst]: jsonRcpMethod(args => server.markdownToAst(args[0], args[1], args[2])),
+    [kPandocAstToMarkdown]: jsonRcpMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
+    [kPandocListExtensions]: jsonRcpMethod(args => server.listExtensions(args[0])),
+    [kPandocGetBibliography]: jsonRcpMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
+    [kPandocAddtoBibliography]: jsonRcpMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
+  };
+  return methods;
+}
+

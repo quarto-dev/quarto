@@ -3,9 +3,14 @@ import typescriptLogo from "./typescript.svg";
 
 import editor from "editor"
 
+
 const uiTools = new editor.UITools();
 
 console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
+
+const editorServer = editor.editorJsonRpcServer('/editor-server');
+
+console.log(await editorServer.pandoc.getCapabilities())
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>

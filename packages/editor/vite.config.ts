@@ -12,7 +12,7 @@ const outDir = process.env.PANMIRROR_OUT_DIR || "dist";
 // setup plugins
 const plugins = [cssInjectedByJsPlugin()];
 if (types) {
-  plugins.push(dts());
+  plugins.push(dts({entryRoot: 'src'}));
 }
 
 export default defineConfig({

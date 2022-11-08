@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * json-rpc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,14 +13,17 @@
  *
  */
 
-export * from './csl';
-export * from './doi';
-export * from './datacite';
-export * from './pandoc';
-export * from './crossref'
-export * from './pubmed'
-export * from './zotero'
-export * from './xref'
-export * from './environment'
-export * from './server'
-export * from './json-rpc'
+import jayson from 'jayson'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function jsonRcpMethod(method: (args: Array<any>) => Promise<unknown>) : jayson.Method {
+  return jayson.Method({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handler: (args: any, done: any) => {
+      method(args)
+        .then(result => done(null, result))
+        .catch(error => done(error.message || "Unknown error"))
+    },
+    params: Array
+  })
+}

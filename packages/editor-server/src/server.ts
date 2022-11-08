@@ -20,10 +20,12 @@ import { crossrefServer } from "./crossref";
 import { dataCiteServer } from "./datacite";
 import { doiServer } from "./doi";
 import { environmentServer } from "./environment";
-import { pandocServer } from "./pandoc";
+import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer } from "./pubmed";
 import { xrefServer } from "./xref";
 import { zoteroServer } from "./zotero";
+
+import jayson from 'jayson'
 
 export function editorServer() : EditorServer {
   return {
@@ -36,4 +38,10 @@ export function editorServer() : EditorServer {
     xref: xrefServer(),
     environment: environmentServer()
   };
+}
+
+export function editorServerMethods(): Record<string,jayson.Method> {
+  return {
+    ...pandocServerMethods()
+  }
 }

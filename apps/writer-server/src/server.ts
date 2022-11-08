@@ -19,7 +19,12 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
-import { dataCiteServer } from 'editor-server'
+import jayson from 'jayson'
+
+import { editorServerMethods } from "editor-server/src/server";
+
+const serverMethods = editorServerMethods();
+const server = new jayson.Server(serverMethods, {});
 
 export const createServer = () => {
   const app = express();
@@ -29,10 +34,7 @@ export const createServer = () => {
     .use(urlencoded({ extended: true }))
     .use(json())
     .use(cors())
-    .get("/datacite", async (_req, res) => {
-      const server = dataCiteServer();
-      return res.json(await server.search(''));
-    })
+    .use('/editor-server', server.middleware())
     .get("/message/:name", (req, res) => {
       return res.json({ message: `hello ${req.params.name}` });
     })

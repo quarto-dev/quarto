@@ -22,6 +22,7 @@ import {
   ChunkEditor,
   CodeBlockEditResult,
   CodeBlockProps,
+  Editor,
   EditorContext,
   EditorDialogs,
   EditorDisplay,
@@ -58,11 +59,11 @@ import {
   UITools,
   XRef,
 } from "editor";
+import { EditorFormat } from "editor/dist/api/format";
 
-export async function createEditor() {
+export async function createEditor(parent: HTMLElement) : Promise<Editor> {
+  
   const uiTools = new UITools();
-  const server = uiTools.context.jsonRpcServer("/editor-server");
-
   const ui = {
     dialogs: editorDialogs(),
     display: editorDisplay(),
@@ -74,8 +75,19 @@ export async function createEditor() {
     images: uiTools.context.defaultUIImages()
   };
 
+  const server = uiTools.context.jsonRpcServer("/editor-server");
+
   const context : EditorContext = { server, ui };
-  await context.server.pandoc.getCapabilities();
+
+  const format: EditorFormat = {
+    pandocMode: 'markdown',
+    pandocExtensions: '',
+    rmdExtensions: {},
+    hugoExtensions: {},
+    docTypes: []
+  }
+
+  return Editor.create(parent, context, format, {});
 }
 
 function editorDialogs(): EditorDialogs {

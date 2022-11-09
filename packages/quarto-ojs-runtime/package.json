@@ -1,0 +1,36 @@
+{
+  "name": "@quarto/quarto-ojs-runtime",
+  "version": "0.0.14",
+  "description": "A runtime for quarto's support of ObservableHQ's reactive Javascript.",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quarto-dev/quarto-ojs-runtime.git"
+  },
+  "scripts": {
+    "prepublishOnly": "rollup -c"
+  },
+  "keywords": [
+    "quarto",
+    "observablehq",
+    "javascript"
+  ],
+  "author": "RStudio, PBC",
+  "license": "ISC",
+  "dependencies": {
+    "@observablehq/inputs": "^0.10.4",
+    "@quarto/external-alex-garcia-unofficial-observablehq-compiler": "^0.0.6",
+    "@quarto/external-observablehq-parser": "^6.0.2",
+    "@quarto/external-observablehq-runtime": "^4.23.1",
+    "@quarto/external-observablehq-stdlib": "^3.23.1",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "eslint": "^7.32.0",
+    "exceljs": "^4.3.0",
+    "node-fetch": "^2.6.1",
+    "rollup": "^2.72.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "tap": "^14.11.0"
+  }
+}

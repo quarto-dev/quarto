@@ -21,7 +21,7 @@ import { EditorView } from 'prosemirror-view';
 import { ProsemirrorCommand } from './command';
 import { PandocMark } from './mark';
 import { PandocNode } from './node';
-import { EditorUI } from './ui-types';
+import { EditorMath, EditorUI } from './ui-types';
 import { BaseKeyBinding } from './basekeys';
 import { AppendTransactionHandler, AppendMarkTransactionHandler } from './transaction';
 import { EditorOptions } from './options';
@@ -33,7 +33,6 @@ import { EditorFormat } from './format';
 import { MarkInputRuleFilter } from './input_rule';
 import { CompletionHandler } from './completion';
 import { EditorNavigation } from './navigation';
-import { EditorMath } from './math';
 import { EditorServer } from 'editor-types';
 
 export interface Extension {

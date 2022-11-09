@@ -15,7 +15,7 @@
 
 import { EditorState } from 'prosemirror-state';
 
-import { EditorUI } from './ui-types';
+import { EditorMath, EditorUI } from './ui-types';
 import { PandocToken } from './pandoc';
 import { markIsActive, getMarkAttrs } from './mark';
 
@@ -28,10 +28,6 @@ export const kMathId = 2;
 export enum MathType {
   Inline = 'InlineMath',
   Display = 'DisplayMath',
-}
-
-export interface EditorMath {
-  typeset: (el: HTMLElement, math: string, priority: boolean) => Promise<boolean>;
 }
 
 export function editorMath(ui: EditorUI): EditorMath {

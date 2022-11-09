@@ -10,7 +10,7 @@ const uiTools = new UITools();
 console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
 
 
-const editorServer = uiTools.server.jsonRpcServer('/editor-server');
+const editorServer = uiTools.context.jsonRpcServer('/editor-server');
 editorServer.pandoc.getCapabilities().then(console.log);
 
 

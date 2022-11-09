@@ -27,7 +27,7 @@ import { CiteField } from './cite';
 import { PandocAttr } from './pandoc_attr';
 
 export * from './spelling';
-export type { SkinTone } from './emoji';
+export { SkinTone } from './emoji';
 export type { LinkTargets, LinkCapabilities, LinkType } from './link';
 export type { ImageDimensions } from './image';
 export type { ListCapabilities, ListType } from './list';
@@ -42,9 +42,9 @@ export interface EditorUI {
   math: EditorUIMath;
   context: EditorUIContext;
   prefs: EditorUIPrefs;
-  images: EditorUIImages;
   chunks: EditorUIChunks;
   spelling: EditorUISpelling;
+  images: EditorUIImages;
 }
 
 /**
@@ -74,6 +74,12 @@ export interface ChunkEditor {
   setExpanded(expanded: boolean): void;
   getExpanded(): boolean;
 }
+
+
+export interface EditorMath {
+  typeset: (el: HTMLElement, math: string, priority: boolean) => Promise<boolean>;
+}
+
 
 export interface EditorUIContext {
   // check if we are the active tab

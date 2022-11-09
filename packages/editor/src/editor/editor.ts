@@ -25,7 +25,7 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorUI } from '../api/ui-types';
+import { EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   AttrProps,
   AttrEditInput,
@@ -213,7 +213,8 @@ export interface UIToolsCitation {
   citeUI(citeProps: InsertCiteProps): InsertCiteUI;
 }
 
-export interface UIToolsServer {
+export interface UIToolsContext {
+  defaultUIImages(): EditorUIImages;
   jsonRpcServer(url: string) : EditorServer;
 }
 
@@ -223,7 +224,7 @@ export class UITools {
   public readonly format: UIToolsFormat;
   public readonly source: UIToolsSource;
   public readonly citation: UIToolsCitation;
-  public readonly server: UIToolsServer;
+  public readonly context: UIToolsContext;
 
   constructor() {
     this.attr = {
@@ -252,7 +253,8 @@ export class UITools {
       citeUI,
     };
 
-    this.server = {
+    this.context = {
+      defaultUIImages: defaultEditorUIImages,
       jsonRpcServer: editorJsonRpcServer
     }
   }
@@ -333,6 +335,8 @@ export class Editor {
       },
       docTypes: format.docTypes || [],
     };
+
+  
 
     // provide context defaults
     const defaultImages = defaultEditorUIImages();

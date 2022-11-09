@@ -27,7 +27,7 @@ import { ScrollEvent, ResizeEvent } from '../../api/event-types';
 import { applyStyles } from '../../api/css';
 import { editingRootNodeClosestToPos, editingRootNode } from '../../api/node';
 import { createPopup } from '../../api/widgets/widgets';
-import { EditorMath } from '../../api/math';
+import { EditorMath } from '../../api/ui-types';
 
 const kMathPopupVerticalOffset = 10;
 const kMathPopupInputDebuounceMs = 250;

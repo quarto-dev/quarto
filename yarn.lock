@@ -431,10 +431,10 @@
     "@observablehq/inspector" "^3.2.2"
     "@quarto/external-observablehq-stdlib" "^3.19.9"
 
-"@quarto/external-observablehq-stdlib@^3.19.9", "@quarto/external-observablehq-stdlib@^3.23.1":
-  "integrity" "sha512-YNmplqq0z/5RtJR4l8XwNo9T+VrBpzCErNJ6qYA70DPRDr3mk5RhkWi6FwlEeVwyiPl8LEHY1cFQuOeAE9vL2w=="
-  "resolved" "https://registry.npmjs.org/@quarto/external-observablehq-stdlib/-/external-observablehq-stdlib-3.23.1.tgz"
-  "version" "3.23.1"
+"@quarto/external-observablehq-stdlib@^3.19.9", "@quarto/external-observablehq-stdlib@^3.23.2":
+  "integrity" "sha512-BAlyao0GkGWXLt1pePv9rHLLrZcMyWrNpI4/BqJkRT10QDI6HkWOkl7LdLk7LDa4ils6MKJ8xjXNUAK4zFKUpg=="
+  "resolved" "https://registry.npmjs.org/@quarto/external-observablehq-stdlib/-/external-observablehq-stdlib-3.23.2.tgz"
+  "version" "3.23.2"
   dependencies:
     "@quarto/external-d3-d3-require" "^1.3.1"
     "d3-dsv" "^2.0.0"

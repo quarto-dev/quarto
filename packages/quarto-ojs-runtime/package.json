@@ -9,6 +9,7 @@
     "url": "https://github.com/quarto-dev/quarto-ojs-runtime.git"
   },
   "scripts": {
+    "build": "rollup -c",
     "prepublishOnly": "rollup -c"
   },
   "keywords": [

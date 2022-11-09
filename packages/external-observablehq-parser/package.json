@@ -28,6 +28,7 @@
     "node": ">=14.5.0"
   },
   "scripts": {
+    "build": "rollup -c rollup.config.debug.js && rollup -c rollup.config.min.js",
     "test": "mkdir -p test/output && mocha -r module-alias/register 'test/**/*-test.js' && eslint src test",
     "prepublishOnly": "rm -rf dist && rollup -c rollup.config.debug.js && rollup -c rollup.config.min.js",
     "postpublish": "git push && git push --tags"

@@ -13,6 +13,7 @@
     "url": "https://github.com/quarto-dev/external-observablehq-runtime.git"
   },
   "scripts": {
+    "build": "rollup -c",
     "test": "tape -r esm 'test/**/*-test.js'",
     "prepublishOnly": "rm -rf dist && rollup -c",
     "postpublish": "git push && git push --tags"

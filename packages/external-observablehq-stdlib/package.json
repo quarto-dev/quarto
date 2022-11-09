@@ -13,6 +13,7 @@
     "url": "https://github.com/quarto-dev/external-observablehq-stdlib.git"
   },
   "scripts": {
+    "build": "rollup -c",
     "test": "mocha 'test/**/*-test.mjs' && eslint src test --ext mjs",
     "prepublishOnly": "rollup -c",
     "postpublish": "git push && git push --tags"

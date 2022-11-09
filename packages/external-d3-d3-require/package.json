@@ -18,6 +18,7 @@
     "src/**/*.mjs"
   ],
   "scripts": {
+    "build": "rollup -c",
     "test": "mocha -r module-alias/register 'test/**/*-test.mjs' && eslint --ext mjs src test",
     "prepublishOnly": "rm -rf dist && rollup -c",
     "postpublish": "git push && git push --tags"

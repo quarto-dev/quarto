@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * index-umd.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,6 @@
  *
  */
 
-export * from './editor/editor';
 
-
-
-
-
+import { Editor, UITools } from './editor/editor';
+export default { Editor, UITools };

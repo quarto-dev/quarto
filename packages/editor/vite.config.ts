@@ -7,7 +7,8 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 // allow environment to drive configuration
 const types = !(process.env.PANMIRROR_TYPES === "0");
 const formats = (process.env.PANMIRROR_FORMATS || "es").split(",") as LibraryFormats[];
-const outDir = process.env.PANMIRROR_OUT_DIR || "dist";
+const formatUmd = formats.length === 1 && formats[0] === "umd";
+const outDir = process.env.PANMIRROR_OUTDIR || "dist";
 
 // setup plugins
 const plugins = [cssInjectedByJsPlugin()];
@@ -22,7 +23,7 @@ export default defineConfig({
   plugins,
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(__dirname, formatUmd ? 'src/index-umd.ts' : 'src/index.ts'),
       name: 'Panmirror',
       formats,
       fileName: (format) => `panmirror.${format === 'umd' ? 'js' : format === 'es' ? 'mjs' : format + '.js'}` 

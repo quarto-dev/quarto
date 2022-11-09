@@ -1,16 +1,18 @@
 import "./style.css";
 import typescriptLogo from "./typescript.svg";
 
-import editor from "editor"
+
+import { UITools } from "editor";
 
 
-const uiTools = new editor.UITools();
+const uiTools = new UITools();
 
 console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
 
-const editorServer = editor.editorJsonRpcServer('/editor-server');
 
+const editorServer = uiTools.server.jsonRpcServer('/editor-server');
 editorServer.pandoc.getCapabilities().then(console.log);
+
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>

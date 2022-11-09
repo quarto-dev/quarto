@@ -18,7 +18,9 @@
   "scripts": {
     "lint": "TIMING=1 eslint \"src/**/*.ts\"",
     "build": "tsc --noEmit && vite build",
-    "dev": "tsc --noEmit && vite build --watch"
+    "dev": "tsc --noEmit && vite build --watch",
+    "rstudio-build": "PANMIRROR_TYPES=0 PANMIRROR_FORMATS=umd PANMIRROR_OUTDIR=dist-rstudio yarn build",
+    "rstudio-dev": "PANMIRROR_TYPES=0 PANMIRROR_FORMATS=umd PANMIRROR_OUTDIR=dist-rstudio yarn dev"
   },
   "dependencies": {
     "@types/ace": "^0.0.43",

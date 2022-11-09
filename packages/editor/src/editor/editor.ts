@@ -118,6 +118,7 @@ import './styles/frame.css';
 import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { EditorServer } from 'editor-types';
+import { editorJsonRpcServer } from './editor-server';
 
 export interface EditorCode {
   code: string;
@@ -206,12 +207,17 @@ export interface UIToolsCitation {
   citeUI(citeProps: InsertCiteProps): InsertCiteUI;
 }
 
+export interface UIToolsServer {
+  jsonRpcServer(url: string) : EditorServer;
+}
+
 export class UITools {
   public readonly attr: UIToolsAttr;
   public readonly image: UIToolsImage;
   public readonly format: UIToolsFormat;
   public readonly source: UIToolsSource;
   public readonly citation: UIToolsCitation;
+  public readonly server: UIToolsServer;
 
   constructor() {
     this.attr = {
@@ -239,6 +245,10 @@ export class UITools {
     this.citation = {
       citeUI,
     };
+
+    this.server = {
+      jsonRpcServer: editorJsonRpcServer
+    }
   }
 }
 

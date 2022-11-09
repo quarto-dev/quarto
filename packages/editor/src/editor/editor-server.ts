@@ -17,19 +17,45 @@
 
 import {
   BibliographyResult,
+  CrossrefMessage,
+  CrossrefWork,
+  DataCiteResult,
+  DOIResult,
+  EditorServer,
+  kCrossrefWorks,
+  kDataCiteSearch,
+  kDoiFetchCsl,
+  kEnvironmentGetRPackageCitations,
+  kEnvironmentGetRPackageState,
   kPandocAddtoBibliography,
   kPandocCitationHtml,
   kPandocGetBibliography,
   kPandocGetCapabilities,
   kPandocListExtensions,
   kPandocMarkdownToAst,
+  kPubMedSearch,
+  kXRefIndexForFile,
+  kXRefQuartoIndexForFile,
+  kXRefQuartoXRefForId,
+  kXRefXRefForId,
+  kZoteroBetterBibtexExport,
+  kZoteroGetActiveCollectionSpecs,
+  kZoteroGetCollections,
+  kZoteroGetLibraryNames,
+  kZoteroValidateWebApiKey,
   PandocAst,
   PandocCapabilitiesResult,
+  PubMedResult,
+  RPackageCitation,
+  RPackageState,
+  XRefs,
+  ZoteroCollectionSpec,
+  ZoteroResult,
 } from "editor-types";
 
 import ClientBrowser from "jayson/lib/client/browser";
 
-export function editorJsonRpcServer(url: string) {
+export function editorJsonRpcServer(url: string) : EditorServer {
   const callServer = (
     request: string,
     callback: (err?: Error | null, response?: string) => void
@@ -128,5 +154,88 @@ export function editorJsonRpcServer(url: string) {
         return request(kPandocCitationHtml, [file, sourceAsJson, csl]);
       },
     },
+    doi: {
+      fetchCSL(doi: string, progressDelay: number): Promise<DOIResult> {
+        return request(kDoiFetchCsl, [doi, progressDelay]);
+      },
+    },
+    crossref: {
+      works(query: string): Promise<CrossrefMessage<CrossrefWork>> {
+        return request(kCrossrefWorks, [query]);
+      },
+    },
+    datacite: {
+      search(query: string): Promise<DataCiteResult> {
+        return request(kDataCiteSearch, [query]);
+      },
+    },
+    pubmed: {
+      search(query: string): Promise<PubMedResult> {
+        return request(kPubMedSearch, [query]);
+      },
+    },
+    zotero: {
+      validateWebAPIKey(key: string): Promise<boolean> {
+        return request(kZoteroValidateWebApiKey, [key]);
+      },
+
+      getCollections(
+        file: string | null,
+        collections: string[],
+        cached: ZoteroCollectionSpec[],
+        useCache: boolean
+      ): Promise<ZoteroResult> {
+        return request(kZoteroGetCollections, [
+          file,
+          collections,
+          cached,
+          useCache,
+        ]);
+      },
+
+      getLibraryNames(): Promise<ZoteroResult> {
+        return request(kZoteroGetLibraryNames, []);
+      },
+
+      getActiveCollectionSpecs(
+        file: string | null,
+        collections: string[]
+      ): Promise<ZoteroResult> {
+        return request(kZoteroGetActiveCollectionSpecs, [file, collections]);
+      },
+
+      // Return status: nohost w/ warning text if it fails to
+      // communciate w/ Better BibTeX. Otherwise returns
+      // status: ok with exported text in message.
+      betterBibtexExport(
+        itemKeys: string[],
+        translatorId: string,
+        libraryId: number
+      ): Promise<ZoteroResult> {
+        return request(kZoteroBetterBibtexExport, [itemKeys, translatorId, libraryId]);
+      },
+    },
+    xref: {
+      indexForFile(file: string) : Promise<XRefs> {
+        return request(kXRefIndexForFile, [file]);
+      },
+      xrefForId(file: string, id: string) : Promise<XRefs> {
+        return request(kXRefXRefForId, [file,id]);
+      },
+      quartoIndexForFile(file: string) : Promise<XRefs> {
+        return request(kXRefQuartoIndexForFile, [file]);
+      },
+      quartoXrefForId(file: string, id: string) : Promise<XRefs> {
+        return request(kXRefQuartoXRefForId, [file, id]);
+      }
+    },
+    environment: {
+      getRPackageState() : Promise<RPackageState> {
+        return request(kEnvironmentGetRPackageState, []);
+      },
+      getRPackageCitations(pkgName: string) : Promise<RPackageCitation[]> {
+        return request(kEnvironmentGetRPackageCitations, [pkgName]);
+      }
+    }
   };
 }

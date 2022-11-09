@@ -43,7 +43,7 @@ export const kZoteroBetterBibtexExport = 'zotero_better_bibtex_export';
 
 // xref
 export const kXRefIndexForFile = 'xref_index_for_file';
-export const kXRefForId = 'xref_for_id';
+export const kXRefXRefForId = 'xref_xref_for_id';
 export const kXRefQuartoIndexForFile = 'xref_quarto_index_for_file';
 export const kXRefQuartoXRefForId = 'xref_quarto_xref_for_id';
 

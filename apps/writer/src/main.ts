@@ -10,7 +10,7 @@ console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
 
 const editorServer = editor.editorJsonRpcServer('/editor-server');
 
-console.log(await editorServer.pandoc.getCapabilities())
+editorServer.pandoc.getCapabilities().then(console.log);
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>

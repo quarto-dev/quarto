@@ -8,21 +8,21 @@
 *
 */
 
-import { lineOffsets, lines } from "./text.ts";
-import { Range, rangedLines, RangedSubstring } from "./ranged-text.ts";
+import { lineOffsets, lines } from "./text.js";
+import { Range, rangedLines, RangedSubstring } from "./ranged-text.js";
 import {
   asMappedString,
   EitherString,
   mappedString,
   mappedSubstring,
-} from "./mapped-text.ts";
+} from "./mapped-text.js";
 
-import { partitionCellOptionsMapped } from "./partition-cell-options.ts";
+import { partitionCellOptionsMapped } from "./partition-cell-options.js";
 
-import { QuartoMdCell, QuartoMdChunks } from "./break-quarto-md-types.ts";
-import { isBlockShortcode, Shortcode } from "./parse-shortcode.ts";
+import { QuartoMdCell, QuartoMdChunks } from "./break-quarto-md-types.js";
+import { isBlockShortcode, Shortcode } from "./parse-shortcode.js";
 
-export type { QuartoMdCell, QuartoMdChunks } from "./break-quarto-md-types.ts";
+export type { QuartoMdCell, QuartoMdChunks } from "./break-quarto-md-types.js";
 
 export async function breakQuartoMd(
   src: EitherString,

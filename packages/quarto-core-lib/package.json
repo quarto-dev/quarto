@@ -4,12 +4,16 @@
   "description": "",
   "dependencies": {},
   "devDependencies": {
+    "@rollup/plugin-json": "^5.0.1",
+    "rollup": "^3.2.5",
     "tsconfig": "*",
     "typescript": "^4.5.2"
   },
-
+  "main": "./src/main.js",
+  "types": "./src/main.d.ts",
   "scripts": {
-    "build": "tsc -p .",
+    "package": "rollup -c",
+    "build": "tsc --build",
     "clean": "tsc --build --clean",
     "start": "npm run build -- -w"
   }

@@ -20,7 +20,7 @@ import { ResolvedPos } from 'prosemirror-model';
 import debounce from 'lodash.debounce';
 import zenscroll from 'zenscroll';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { getMarkRange } from '../../api/mark';
 import { EditorEvents } from '../../api/events';
 import { ScrollEvent, ResizeEvent } from '../../api/event-types';

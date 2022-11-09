@@ -18,7 +18,7 @@ import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 
 import React from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { emojiCategories, emojis, Emoji, emojiFromString, SkinTone } from '../../api/emoji';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { nodeForEmoji } from '../../marks/emoji/emoji';

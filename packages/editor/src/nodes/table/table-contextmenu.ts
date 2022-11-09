@@ -18,7 +18,7 @@ import { EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { isInTable } from 'prosemirror-tables';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { EditorCommandId } from '../../api/command';
 
 export class TableContextMenuPlugin extends Plugin {

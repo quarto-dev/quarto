@@ -24,7 +24,7 @@ import { firstBy } from 'thenby';
 import { OmniInserter, omniInsertGroupCompare, omniInsertPriorityCompare } from '../../api/omni_insert';
 import { CompletionHandler, CompletionResult } from '../../api/completion';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { placeholderDecoration } from '../../api/placeholder';
 import { kAddToHistoryTransaction } from '../../api/transaction';
 

@@ -14,7 +14,7 @@
  */
 
 import { PubMedDocument } from 'editor-types';
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 
 
 export function suggestCiteId(doc: PubMedDocument): string {

@@ -20,7 +20,7 @@ import { BibliographySource, BibliographyManager } from '../../api/bibliography/
 import { kZoteroProviderKey } from '../../api/bibliography/bibliography-provider_zotero';
 import { formatAuthors, formatIssuedDate } from '../../api/cite';
 import { imageForType, joinAuthorNames } from '../../api/csl';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 import { insertCitation as insertSingleCitation, performCiteCompletionReplacement } from './cite';
 import { CiteCompletionEntry, CiteCompletionProvider } from './cite-completion';

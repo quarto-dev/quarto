@@ -18,7 +18,7 @@ import { findChildren } from 'prosemirror-utils';
 import { Plugin, PluginKey, Transaction, EditorState, Selection, EditorStateConfig } from 'prosemirror-state';
 import { DecorationSet, Decoration } from 'prosemirror-view';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { pandocAttrEnabled, pandocAttrAvailable } from '../../api/pandoc_attr';
 import { kSetMarkdownTransaction, transactionsAreTypingChange, forChangedNodes } from '../../api/transaction';
 

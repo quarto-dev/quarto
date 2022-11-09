@@ -20,7 +20,7 @@ import { findParentNodeOfType, setTextSelection } from "prosemirror-utils";
 import { EditorView } from "prosemirror-view";
 
 import { EditorCommandId, ProsemirrorCommand, toggleWrap } from "../../api/command";
-import { EditorUI } from "../../api/ui";
+import { EditorUI } from "../../api/ui-types";
 import { OmniInsertGroup } from "../../api/omni_insert";
 import { pandocAttrEnsureClass } from "../../api/pandoc_attr";
 

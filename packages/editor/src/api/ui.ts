@@ -1,5 +1,5 @@
 /*
- * ui.ts
+ * ui-tools.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,131 +13,79 @@
  *
  */
 
-import { SkinTone } from './emoji';
+import { attrPartitionKeyvalue, kStyleAttrib, pandocAttrKeyvalueFromText } from "./pandoc_attr";
+import { AttrEditInput, AttrProps } from "./ui-types";
 
-import { EditorUIImages } from './ui-images';
-import { EditorDialogs } from './ui-dialogs';
-import { EditorUISpelling } from './spelling';
-import { XRef } from 'editor-types';
 
-export interface EditorUI {
-  dialogs: EditorDialogs;
-  display: EditorDisplay;
-  math: EditorUIMath;
-  context: EditorUIContext;
-  prefs: EditorUIPrefs;
-  images: EditorUIImages;
-  chunks: EditorUIChunks;
-  spelling: EditorUISpelling;
-}
-
-/**
- * Callbacks supplied to the host to interact with a code chunk and its output.
- */
-export interface EditorUIChunkCallbacks {
-  getPos: () => number;
-  scrollIntoView: (ele: HTMLElement) => void;
-  scrollCursorIntoView: () => void;
-  getTextContent: () => string;
-}
-
-export interface EditorUIChunks {
-  // create a code chunk editor
-  createChunkEditor: (type: string, element: Element, index: number, classes: string[], callbacks: EditorUIChunkCallbacks) => ChunkEditor;
-
-  // expand or collapse all chunk editors
-  setChunksExpanded: (expanded: boolean) => void;
-}
-
-export interface ChunkEditor {
-  editor: unknown;
-  setMode(mode: string): void;
-  executeSelection(): void;
-  element: HTMLElement;
-  destroy(): void;
-  setExpanded(expanded: boolean): void;
-  getExpanded(): boolean;
-}
-
-export interface EditorUIContext {
-  // check if we are the active tab
-  isActiveTab: () => boolean;
-
-  // get the path to the current document
-  getDocumentPath: () => string | null;
-
-  // ensure the edited document is saved on the server before proceeding
-  // (note this just means that the server has a copy of it for e.g.
-  // indexing xrefs, from the user's standpoint the doc is still dirty)
-  withSavedDocument: () => Promise<boolean>;
-
-  // get the default directory for resources (e.g. where relative links point to)
-  getDefaultResourceDir: () => string;
-
-  // map from a filesystem path to a resource reference
-  mapPathToResource: (path: string) => string;
-
-  // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
-  mapResourceToURL: (path: string) => string;
-
-  // watch a resource for changes (returns an unsubscribe function)
-  watchResource: (path: string, notify: VoidFunction) => VoidFunction;
-
-  // translate a string
-  translateText: (text: string) => string;
-
-  // are there dropped uris available?
-  droppedUris: () => string[] | null;
-
-  // uris from the clipboard
-  clipboardUris: () => Promise<string[] | null>;
-
-  // image from the clipboard (returned as file path)
-  clipboardImage: () => Promise<string | null>;
-
-  // resolve image uris (make relative, copy to doc local 'images' dir, etc)
-  resolveImageUris: (uris: string[]) => Promise<string[]>;
-
-  // are we running in windows desktop mode?
-  isWindowsDesktop: () => boolean;
-}
-
-export interface EditorMenuItem {
-  text?: string;
-  exec?: VoidFunction;
-  command?: string;
-  separator?: boolean;
-  subMenu?: {
-    items: EditorMenuItem[];
+export function attrInputToProps(attr: AttrEditInput): AttrProps {
+  const classes = attr.classes ? attr.classes.split(/\s+/) : [];
+  let keyvalue: Array<[string, string]> | undefined;
+  if (attr.keyvalue || attr.style) {
+    let text = attr.keyvalue || '';
+    if (attr.style) {
+      text += `\nstyle=${attr.style}\n`;
+    }
+    keyvalue = pandocAttrKeyvalueFromText(text, '\n');
+  }
+  return {
+    id: asPandocId(attr.id || ''),
+    classes: classes.map(asPandocClass),
+    keyvalue,
   };
 }
 
-export interface EditorUIMath {
-  typeset?: (el: HTMLElement, text: string, priority: boolean) => Promise<boolean>;
+function asPandocId(id: string) {
+  return id.replace(/^#/, '');
 }
 
-export interface EditorDisplay {
-  openURL: (url: string) => void;
-  navigateToXRef: (file: string, xref: XRef) => void;
-  navigateToFile: (file: string) => void;
-  showContextMenu?: (items: EditorMenuItem[], clientX: number, clientY: number) => Promise<boolean>;
+function asPandocClass(clz: string) {
+  return clz.replace(/^\./, '');
 }
 
-export const kListSpacingTight = 'tight';
-export const kListSpacingSpaced = 'spaced';
-export type ListSpacing = 'tight' | 'spaced';
+export function attrPropsToInput(attr: AttrProps): AttrEditInput {
+  let style: string | undefined;
+  let keyvalue: string | undefined;
+  if (attr.keyvalue) {
+    const partitionedKeyvalue = attrPartitionKeyvalue([kStyleAttrib], attr.keyvalue);
+    if (partitionedKeyvalue.partitioned.length > 0) {
+      style = partitionedKeyvalue.partitioned[0][1];
+    }
+    keyvalue = attrTextFromKeyvalue(partitionedKeyvalue.base);
+  }
 
-export interface EditorUIPrefs {
-  darkMode: () => boolean;
-  listSpacing: () => ListSpacing;
-  equationPreview: () => boolean;
-  packageListingEnabled: () => boolean;
-  tabKeyMoveFocus: () => boolean;
-  emojiSkinTone: () => SkinTone;
-  setEmojiSkinTone: (skinTone: SkinTone) => void;
-  zoteroUseBetterBibtex: () => boolean;
-  setBibliographyDefaultType: (type: string) => void;
-  bibliographyDefaultType: () => string;
-  citationDefaultInText: () => boolean;
-  setCitationDefaultInText: (value: boolean) => void;
+  return {
+    id: asHtmlId(attr.id) || undefined,
+    classes: attr.classes ? attr.classes.map(asHtmlClass).join(' ') : undefined,
+    style,
+    keyvalue,
+  };
 }
+
+function attrTextFromKeyvalue(keyvalue: Array<[string, string]>) {
+  return keyvalue.map(kv => `${kv[0]}=${kv[1]}`).join('\n');
+}
+
+function asHtmlId(id: string | undefined) {
+  if (id) {
+    if (id.startsWith('#')) {
+      return id;
+    } else {
+      return '#' + id;
+    }
+  } else {
+    return id;
+  }
+}
+
+function asHtmlClass(clz: string | undefined) {
+  if (clz) {
+    if (clz.startsWith('.')) {
+      return clz;
+    } else {
+      return '.' + clz;
+    }
+  } else {
+    return clz;
+  }
+}
+

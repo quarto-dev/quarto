@@ -19,7 +19,7 @@ import { setTextSelection } from 'prosemirror-utils';
 
 import { ExtensionContext, Extension } from '../../api/extension';
 import { PandocOutput, PandocTokenType } from '../../api/pandoc';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { canInsertNode } from '../../api/node';
 import { codeNodeSpec } from '../../api/code';

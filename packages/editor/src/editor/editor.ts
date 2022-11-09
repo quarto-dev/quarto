@@ -25,15 +25,17 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorUI } from '../api/ui';
+import { EditorUI } from '../api/ui-types';
 import {
-  attrPropsToInput,
-  attrInputToProps,
   AttrProps,
   AttrEditInput,
   InsertCiteProps,
   InsertCiteUI,
-} from '../api/ui-dialogs';
+} from '../api/ui-types';
+import {
+  attrPropsToInput,
+  attrInputToProps,
+} from '../api/ui';
 
 import { Extension } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc';
@@ -119,6 +121,10 @@ import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
+
+
+// re-export editor ui
+export * from '../api/ui-types';
 
 export interface EditorCode {
   code: string;

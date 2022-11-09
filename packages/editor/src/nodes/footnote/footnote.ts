@@ -28,7 +28,7 @@ import { uuidv4 } from '../../api/util';
 import { PandocOutput, PandocTokenType, ProsemirrorWriter, PandocToken } from '../../api/pandoc';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { canInsertNode } from '../../api/node';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { OmniInsertGroup } from '../../api/omni_insert';
 
 import {

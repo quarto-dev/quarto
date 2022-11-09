@@ -20,7 +20,7 @@ import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { CompletionHandler, selectionAllowsCompletions } from '../../api/completion';
 import { OmniInserter } from '../../api/omni_insert';
 import { MarkInputRuleFilter } from '../../api/input_rule';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 import { omniInsertCompletionHandler } from './omni_insert-completion';
 import { Extension } from '../../api/extension';

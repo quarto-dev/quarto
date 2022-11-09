@@ -21,7 +21,7 @@ import { PandocOutput, PandocTokenType } from '../../api/pandoc';
 import { codeNodeSpec } from '../../api/code';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { kBookdownDocType } from '../../api/format';
 import { rmdChunk, insertRmdChunk } from '../../api/rmd';
 import { OmniInsertGroup } from '../../api/omni_insert';

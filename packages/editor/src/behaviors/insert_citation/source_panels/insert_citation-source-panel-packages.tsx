@@ -15,7 +15,7 @@
 
 import React from 'react';
 
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { imageForType, CSL, cslTypes, CSLDate } from '../../../api/csl';
 import { bibtextTypeToCSLType } from '../../../api/bibtex/types';

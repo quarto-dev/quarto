@@ -27,7 +27,7 @@ import { imageForType } from '../../../api/csl';
 import { suggestCiteId } from '../../../api/datacite';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { logException } from '../../../api/log';
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 
 import {
   CitationSourcePanelProps,

@@ -19,7 +19,7 @@ import { DecorationSet, EditorView } from 'prosemirror-view';
 
 import React from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { textPopupDecorationPlugin, TextPopupTarget } from '../../api/text-popup';
 import { WidgetProps } from '../../api/widgets/react';
 import { Popup } from '../../api/widgets/popup';

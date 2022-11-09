@@ -13,6 +13,13 @@
  *
  */
 
+// base shared types
+export * from 'editor-types';
+
+// ui types
+export * from './api/ui-types'
+
+// main editor module
 export * from './editor/editor';
 
 

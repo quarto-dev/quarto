@@ -15,7 +15,7 @@
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 import { performCiteCompletionReplacement } from './cite';
 import { CiteCompletionEntry, CiteCompletionProvider } from './cite-completion';

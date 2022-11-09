@@ -18,7 +18,7 @@ import { FixedSizeGrid } from 'react-window';
 
 import debounce from 'lodash.debounce';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { WidgetProps } from '../../api/widgets/react';
 
 import { CharacterGridCellItemData, SymbolCharacterCell } from './insert_symbol-grid-cell';

@@ -17,11 +17,11 @@ import React from 'react';
 
 import { WidgetProps } from './react';
 
-import { EditorUI } from '../ui';
+import { EditorUI } from '../ui-types';
 
 import './tag-input.css';
 import { TextInput } from './text';
-import { kAlertTypeError } from '../ui-dialogs';
+import { kAlertTypeError } from '../ui-types';
 
 // Item representing a tag entry
 // The key remains stable even if the tag is edited

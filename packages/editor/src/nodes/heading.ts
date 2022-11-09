@@ -29,7 +29,7 @@ import {
   pandocAttrParseText,
 } from '../api/pandoc_attr';
 import { uuidv4 } from '../api/util';
-import { EditorUI } from '../api/ui';
+import { EditorUI } from '../api/ui-types';
 import { OmniInsert, OmniInsertGroup } from '../api/omni_insert';
 import { emptyNodePlaceholderPlugin } from '../api/placeholder';
 import { kHeadingLevel, kHeadingAttr, kHeadingChildren } from '../api/heading';

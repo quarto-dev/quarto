@@ -32,7 +32,7 @@ import {
 } from '../api/pandoc';
 import { ProsemirrorCommand, EditorCommandId } from '../api/command';
 
-import { EditorUI } from '../api/ui';
+import { EditorUI } from '../api/ui-types';
 import { isSingleLineHTML } from '../api/html';
 import { kHTMLFormat, kTexFormat, editRawBlockCommand, isRawHTMLFormat } from '../api/raw';
 import { OmniInsert, OmniInsertGroup } from '../api/omni_insert';

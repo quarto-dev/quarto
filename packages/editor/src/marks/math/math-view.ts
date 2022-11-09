@@ -24,7 +24,7 @@ import { findChildrenByMark, setTextSelection } from 'prosemirror-utils';
 import { getMarkRange, getMarkAttrs } from '../../api/mark';
 
 import { EditorMath, MathType } from '../../api/math';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { kSetMarkdownTransaction } from '../../api/transaction';
 import { attrEditDecorationWidget } from '../../api/attr_edit/attr_edit-decoration';
 import { EditorFormat } from '../../api/format';

@@ -16,7 +16,7 @@ import React from 'react';
 
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 import { WidgetProps } from '../../../api/widgets/react';
 
 import { CitationListEntry, CitationSourceListStatus } from './insert_citation-source-panel';

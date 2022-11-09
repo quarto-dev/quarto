@@ -27,7 +27,7 @@ import {
 } from '../../api/bibliography/bibliography';
 import { kInvalidCiteKeyChars } from '../../api/cite';
 import { changeExtension } from '../../api/path';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { WidgetProps } from '../../api/widgets/react';
 import { TagInput, TagItem } from '../../api/widgets/tag-input';
 import { NavigationTreeNode, containsChild, NavigationTree } from '../../api/widgets/navigation-tree';

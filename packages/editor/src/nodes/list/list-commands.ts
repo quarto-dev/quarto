@@ -20,8 +20,8 @@ import { autoJoin } from 'prosemirror-commands';
 import { NodeWithPos, findParentNode } from 'prosemirror-utils';
 
 import { NodeCommand, toggleList, ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { EditorUI, EditorUIPrefs } from '../../api/ui';
-import { ListProps } from '../../api/ui-dialogs';
+import { EditorUI, EditorUIPrefs } from '../../api/ui-types';
+import { ListProps } from '../../api/ui-types';
 import { ListType, ListCapabilities, isList } from '../../api/list';
 import { OmniInsert } from '../../api/omni_insert';
 import { findWrapping } from 'prosemirror-transform';

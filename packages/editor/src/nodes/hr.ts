@@ -21,7 +21,7 @@ import { EditorState } from 'prosemirror-state';
 import { ProsemirrorCommand, insertNode, EditorCommandId } from '../api/command';
 import { ExtensionContext } from '../api/extension';
 import { PandocOutput, PandocTokenType } from '../api/pandoc';
-import { EditorUI } from '../api/ui';
+import { EditorUI } from '../api/ui-types';
 import { OmniInsertGroup } from '../api/omni_insert';
 
 import './hr-styles.css';

@@ -19,7 +19,7 @@ import { EditorView } from 'prosemirror-view';
 
 import { findParentNodeOfType, setTextSelection } from 'prosemirror-utils';
 
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 import { setBlockType } from 'prosemirror-commands';
 
 export const kTexFormat = 'tex';

@@ -18,7 +18,7 @@ import uniqby from 'lodash.uniqby';
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import {
   BibliographyManager,

@@ -15,7 +15,7 @@
 
 import { Transaction, EditorState } from 'prosemirror-state';
 
-import { EditorUIPrefs, EditorUIContext } from '../../api/ui';
+import { EditorUIPrefs, EditorUIContext } from '../../api/ui-types';
 import { WidgetProps } from '../../api/widgets/react';
 
 // The data provider is used by the insert symbol popup to render different types of

@@ -14,7 +14,7 @@
  */
 
 import { EditorCommandId } from './command';
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 
 export interface TableCapabilities {
   captions: boolean;

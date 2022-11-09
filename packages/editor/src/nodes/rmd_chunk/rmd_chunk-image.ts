@@ -20,7 +20,7 @@ import { DecorationSet, Decoration, EditorView } from 'prosemirror-view';
 import { findChildrenByType, setTextSelection } from 'prosemirror-utils';
 
 import { transactionsAreTypingChange, transactionsHaveChange } from '../../api/transaction';
-import { EditorUIContext } from '../../api/ui';
+import { EditorUIContext } from '../../api/ui-types';
 import { stripQuotes } from '../../api/text';
 import { onElementRemoved } from '../../api/dom';
 

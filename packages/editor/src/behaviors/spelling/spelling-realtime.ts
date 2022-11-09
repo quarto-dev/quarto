@@ -30,7 +30,7 @@ import {
 } from '../../api/spelling';
 import { EditorEvents } from '../../api/events';
 import { kAddToHistoryTransaction } from '../../api/transaction';
-import { EditorUI, EditorMenuItem } from '../../api/ui';
+import { EditorUI, EditorMenuItem } from '../../api/ui-types';
 
 import { excludedMarks, getWords, spellcheckerWord, findBeginWord, findEndWord, charAt } from './spelling';
 

@@ -18,7 +18,7 @@ import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import { EditorView, DecorationSet } from 'prosemirror-view';
 
 import { canInsertNode } from './node';
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 import { kInsertCompletionTransaction } from './transaction';
 
 export const kCompletionDefaultItemHeight = 22;

@@ -18,7 +18,7 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 import Fuse from 'fuse.js';
 import { PandocServer } from '../pandoc';
 
-import { EditorUI } from '../ui';
+import { EditorUI } from '../ui-types';
 import { ParsedYaml, parseYamlNodes } from '../yaml';
 import { CSL } from '../csl';
 import { BibliographyDataProviderLocal, kLocalBibliographyProviderKey } from './bibliography-provider_local';

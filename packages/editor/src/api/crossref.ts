@@ -13,7 +13,7 @@
  *
  */
 
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 import { cslTypes } from './csl';
 
 export function imageForCrossrefType(ui: EditorUI, type: string): [string?, string?] {

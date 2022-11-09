@@ -14,7 +14,7 @@
  */
 import React from 'react';
 
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 
 import { suggestCiteId, formatAuthors, formatIssuedDate } from '../../../api/cite';
 import { CSL, imageForType } from '../../../api/csl';

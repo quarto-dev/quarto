@@ -30,7 +30,7 @@ import {
 import { Popup } from '../../api/widgets/popup';
 
 import './completion-popup.css';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 const kNoResultsHeight = 22;
 

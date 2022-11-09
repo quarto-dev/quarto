@@ -19,7 +19,7 @@ import { setTextSelection } from 'prosemirror-utils';
 
 import * as React from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../ui-types';
 import { ImageButton } from '../../api/widgets/button';
 import { CommandFn } from '../../api/command';
 import { WidgetProps, reactRenderForEditorView } from '../../api/widgets/react';

@@ -15,7 +15,7 @@
 
 import React from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { changeExtension } from '../../api/path';
 import { WidgetProps } from '../../api/widgets/react';
 import { TextInput } from '../../api/widgets/text';

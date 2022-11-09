@@ -19,7 +19,7 @@ import { EditorView } from 'prosemirror-view';
 
 import { ExtensionContext } from '../api/extension';
 import { ProsemirrorCommand, EditorCommandId } from '../api/command';
-import { EditorUI } from '../api/ui';
+import { EditorUI } from '../api/ui-types';
 import { markIsActive, getMarkAttrs, getSelectionMarkRange } from '../api/mark';
 import { PandocOutput, PandocTokenType, PandocToken } from '../api/pandoc';
 import {

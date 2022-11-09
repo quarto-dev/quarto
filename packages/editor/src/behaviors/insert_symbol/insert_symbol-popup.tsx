@@ -15,7 +15,7 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { isElementFocused, focusElement } from '../../api/focus';
 import { Popup } from '../../api/widgets/popup';
 import { SelectInput } from '../../api/widgets/select';

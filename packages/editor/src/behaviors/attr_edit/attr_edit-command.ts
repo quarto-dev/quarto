@@ -19,7 +19,7 @@ import { Mark, Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { findParentNodeOfType, NodeWithPos } from 'prosemirror-utils';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { pandocAttrInSpec } from '../../api/pandoc_attr';
 import { getSelectionMarkRange } from '../../api/mark';
 import { EditorCommandId, ProsemirrorCommand } from '../../api/command';

@@ -18,7 +18,7 @@ import { Transaction } from 'prosemirror-state';
 import { PandocServer } from '../pandoc';
 
 import { getExtension, joinPaths, isAbsolute } from '../path';
-import { EditorUI } from '../ui';
+import { EditorUI } from '../ui-types';
 
 import {
   BibliographyDataProvider,

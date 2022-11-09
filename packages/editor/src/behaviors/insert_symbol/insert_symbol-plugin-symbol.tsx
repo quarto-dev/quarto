@@ -17,7 +17,7 @@ import { PluginKey, Transaction, EditorState } from 'prosemirror-state';
 
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { Extension, ExtensionContext } from '../../api/extension';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { parseCodepoint } from '../../api/unicode';
 import { OmniInsertGroup } from '../../api/omni_insert';
 

@@ -23,7 +23,7 @@ import {
   BibliographySourceWithCollections,
   BibliographyCollection,
 } from './bibliography';
-import { EditorUI } from '../ui';
+import { EditorUI } from '../ui-types';
 import { CSL } from '../csl';
 import { toBibTeX } from './bibDB';
 import { ZoteroCollection, ZoteroCollectionSpec, ZoteroCSL, ZoteroServer } from 'editor-types';

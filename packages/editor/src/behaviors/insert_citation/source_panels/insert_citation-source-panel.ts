@@ -2,7 +2,7 @@
 
 import { WidgetProps } from '../../../api/widgets/react';
 
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { BibliographySource, BibliographyManager } from '../../../api/bibliography/bibliography';

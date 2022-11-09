@@ -21,7 +21,7 @@ import { EditorView } from 'prosemirror-view';
 import { ProsemirrorCommand } from './command';
 import { PandocMark } from './mark';
 import { PandocNode } from './node';
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 import { BaseKeyBinding } from './basekeys';
 import { AppendTransactionHandler, AppendMarkTransactionHandler } from './transaction';
 import { EditorOptions } from './options';

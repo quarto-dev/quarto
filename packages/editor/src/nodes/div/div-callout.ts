@@ -20,11 +20,11 @@ import { wrapIn } from "prosemirror-commands";
 
 
 import { EditorCommandId, ProsemirrorCommand, toggleWrap } from "../../api/command";
-import { EditorUI } from "../../api/ui";
+import { EditorUI } from "../../api/ui-types";
 import { OmniInsertGroup } from "../../api/omni_insert";
 import { pandocAttrEnsureClass, pandocAttrSetKeyvalue, pandocAttrGetKeyvalue, 
          pandocAttrRemoveKeyvalue, pandocAttrRemoveClass, pandocAttrFrom, PandocAttr } from "../../api/pandoc_attr";
-import { CalloutProps } from "../../api/ui-dialogs";
+import { CalloutProps } from "../../api/ui-types";
 import { removeDiv } from "./div";
 
 export function insertCalloutCommand(ui: EditorUI) {

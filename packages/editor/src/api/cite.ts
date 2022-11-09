@@ -14,7 +14,7 @@
  */
 
 import { CSLName, CSLDate, CSL } from './csl';
-import { InsertCiteProps, InsertCiteUI } from './ui-dialogs';
+import { InsertCiteProps, InsertCiteUI } from './ui-types';
 import { urlForDOI } from './doi';
 
 import pinyin from 'pinyin';

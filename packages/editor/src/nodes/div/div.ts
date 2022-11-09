@@ -33,11 +33,11 @@ import {
 } from '../../api/pandoc_attr';
 import { PandocOutput, PandocTokenType, PandocToken } from '../../api/pandoc';
 import { ProsemirrorCommand, EditorCommandId, toggleWrap } from '../../api/command';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { OmniInsertGroup, OmniInsert } from '../../api/omni_insert';
 import { markIsActive } from '../../api/mark';
 import { BaseKey } from '../../api/basekeys';
-import { attrInputToProps } from '../../api/ui-dialogs';
+import { attrInputToProps } from '../../api/ui';
 import { kQuartoDocType } from '../../api/format';
 
 import { insertCalloutCommand, editCalloutDiv } from './div-callout';

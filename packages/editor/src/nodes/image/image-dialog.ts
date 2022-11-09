@@ -17,8 +17,8 @@ import { Node as ProsemirrorNode, NodeType, Fragment, Mark } from 'prosemirror-m
 import { EditorView } from 'prosemirror-view';
 
 import { insertAndSelectNode } from '../../api/node';
-import { EditorUI } from '../../api/ui';
-import { ImageProps } from '../../api/ui-dialogs';
+import { EditorUI } from '../../api/ui-types';
+import { ImageProps } from '../../api/ui-types';
 import { extractSizeStyles, kPercentUnit, kPixelUnit } from '../../api/css';
 import { ImageType, ImageDimensions, isNaturalAspectRatio } from '../../api/image';
 import { kWidthAttrib, kHeightAttrib, pandocAttrRemoveKeyvalue, 

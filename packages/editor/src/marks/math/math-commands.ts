@@ -18,7 +18,7 @@ import { setTextSelection, findParentNodeOfType } from 'prosemirror-utils';
 
 import { ProsemirrorCommand, EditorCommandId, toggleMarkType } from '../../api/command';
 import { canInsertNode } from '../../api/node';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { OmniInsert, OmniInsertGroup } from '../../api/omni_insert';
 import { MathType, delimiterForType } from '../../api/math';
 import { EditorView } from 'prosemirror-view';

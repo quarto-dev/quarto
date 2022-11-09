@@ -22,7 +22,7 @@ import React from 'react';
 import Fuse from 'fuse.js';
 import uniqby from 'lodash.uniqby';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { CompletionHandler, CompletionResult } from '../../api/completion';
 import { xrefKey } from '../../api/xref';
 import { markIsActive } from '../../api/mark';

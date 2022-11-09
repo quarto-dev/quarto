@@ -20,7 +20,7 @@ import { findParentNodeOfType, setTextSelection } from 'prosemirror-utils';
 
 import { canInsertNode } from '../../api/node';
 import { insertDefinitionList } from './definition_list-insert';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { OmniInsertGroup } from '../../api/omni_insert';
 
 export class InsertDefinitionList extends ProsemirrorCommand {

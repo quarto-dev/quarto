@@ -18,7 +18,7 @@ import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 
 import React from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 import { CompletionHandler, CompletionResult, CompletionHeaderProps } from '../../api/completion';
 import { emojis, Emoji, SkinTone, emojiFromChar, emojiForAllSkinTones } from '../../api/emoji';

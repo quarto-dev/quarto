@@ -25,7 +25,7 @@ import { canInsertNode, nodeIsActive } from './node';
 import { pandocAttrInSpec, pandocAttrAvailable, pandocAttrFrom } from './pandoc_attr';
 import { isList } from './list';
 import { OmniInsert } from './omni_insert';
-import { EditorUIPrefs, kListSpacingTight } from './ui';
+import { EditorUIPrefs, kListSpacingTight } from './ui-types';
 import { selectionIsWithinRange, selectionHasRange } from './selection';
 import { requiresTrailingP, insertTrailingP } from './trailing_p';
 

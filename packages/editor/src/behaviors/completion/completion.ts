@@ -32,7 +32,7 @@ import { EditorEvents } from '../../api/events';
 import { ScrollEvent } from '../../api/event-types';
 
 import { createCompletionPopup, renderCompletionPopup, destroyCompletionPopup } from './completion-popup';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { PromiseQueue } from '../../api/promise';
 import { MarkInputRuleFilter } from '../../api/input_rule';
 import { kInsertCompletionTransaction, kPasteTransaction } from '../../api/transaction';

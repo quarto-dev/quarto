@@ -13,7 +13,7 @@
  *
  */
 
-import { EditorMenuItem, EditorUI } from '../api/ui';
+import { EditorMenuItem, EditorUI } from '../api/ui-types';
 import { tableMenu } from '../api/table';
 import { EditorCommandId, EditorCommand } from '../api/command';
 

@@ -18,7 +18,7 @@ import { EditorState, Transaction } from 'prosemirror-state';
 
 import React from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import {
   CompletionHandler,
   CompletionResult,

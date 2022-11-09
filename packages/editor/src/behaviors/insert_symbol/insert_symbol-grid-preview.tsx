@@ -15,7 +15,7 @@
 
 import React, { CSSProperties, ReactNode } from 'react';
 
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { WidgetProps } from '../../api/widgets/react';
 
 import { SymbolCharacter } from './insert_symbol-dataprovider';

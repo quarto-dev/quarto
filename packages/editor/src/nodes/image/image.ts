@@ -36,7 +36,7 @@ import {
   stringifyTokens,
   imageAttributesAvailable,
 } from '../../api/pandoc';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { ImageDimensions } from '../../api/image';
 import { asHTMLTag } from '../../api/html';
 import { OmniInsertGroup } from '../../api/omni_insert';

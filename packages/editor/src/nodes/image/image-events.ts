@@ -16,7 +16,7 @@
 import { EditorView } from 'prosemirror-view';
 
 import { Plugin, PluginKey } from 'prosemirror-state';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 const kTextUriList = 'text/uri-list';
 const kApplicationQtImage = 'application/x-qt-image';

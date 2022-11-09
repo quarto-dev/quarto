@@ -19,7 +19,7 @@ import { DecorationSet, Decoration } from 'prosemirror-view';
 
 import { findParentNode } from 'prosemirror-utils';
 
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 
 export function emptyNodePlaceholderPlugin(nodeType: NodeType, placeholder: (node: ProsemirrorNode) => string, filter?: (tr: Transaction) => boolean) {
   const pluginKey = new PluginKey(nodeType.name + '-empty-placeholder');

@@ -21,7 +21,7 @@ import { DOIServer } from '../../../api/doi';
 import { logException } from '../../../api/log';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import { suggestCiteId, imageForType } from '../../../api/pubmed';
-import { EditorUI } from '../../../api/ui';
+import { EditorUI } from '../../../api/ui-types';
 
 import {
   CitationSourcePanelProps,

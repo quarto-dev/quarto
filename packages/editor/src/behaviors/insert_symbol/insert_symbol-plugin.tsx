@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { applyStyles } from '../../api/css';
 import { EditorEvents } from '../../api/events';
 import { canInsertNode } from '../../api/node';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 
 import { InsertSymbolPopup } from './insert_symbol-popup';
 import { SymbolDataProvider, SymbolCharacter } from './insert_symbol-dataprovider';

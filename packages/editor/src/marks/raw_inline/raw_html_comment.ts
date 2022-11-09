@@ -22,7 +22,7 @@ import { EditorCommandId, ProsemirrorCommand, toggleMarkType } from '../../api/c
 import { canInsertNode } from '../../api/node';
 import { ProsemirrorWriter, PandocOutput } from '../../api/pandoc';
 import { Extension, ExtensionContext } from '../../api/extension';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { MarkTransaction } from '../../api/transaction';
 import { removeInvalidatedMarks, detectAndApplyMarks } from '../../api/mark';
 import { matchPandocFormatComment } from '../../api/pandoc_format';

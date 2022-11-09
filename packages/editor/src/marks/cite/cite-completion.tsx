@@ -24,7 +24,7 @@ import { BibliographyManager } from '../../api/bibliography/bibliography';
 import { CompletionHandler, CompletionResult, CompletionHeaderProps } from '../../api/completion';
 import { hasDOI } from '../../api/doi';
 import { searchPlaceholderDecoration } from '../../api/placeholder';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { CompletionItemView } from '../../api/widgets/completion';
 
 import { EditorEvents } from '../../api/events';

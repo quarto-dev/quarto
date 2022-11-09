@@ -20,7 +20,7 @@ import { setTextSelection } from 'prosemirror-utils';
 
 import { ProsemirrorCommand, EditorCommandId, toggleMarkType } from '../../api/command';
 import { canInsertNode } from '../../api/node';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { OmniInsertGroup } from '../../api/omni_insert';
 import { EditorEvents } from '../../api/events';
 import { BibliographyManager } from '../../api/bibliography/bibliography';

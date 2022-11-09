@@ -28,7 +28,7 @@ import {
   createSelectInput,
   createTextInput,
 } from '../../api/widgets/widgets';
-import { EditorUI } from '../../api/ui';
+import { EditorUI } from '../../api/ui-types';
 import { editingRootScrollContainerElement } from '../../api/node';
 import { extractSizeStyles, kPercentUnit, kPixelUnit, removeStyleAttrib } from '../../api/css';
 import {

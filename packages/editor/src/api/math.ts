@@ -15,7 +15,7 @@
 
 import { EditorState } from 'prosemirror-state';
 
-import { EditorUI } from './ui';
+import { EditorUI } from './ui-types';
 import { PandocToken } from './pandoc';
 import { markIsActive, getMarkAttrs } from './mark';
 

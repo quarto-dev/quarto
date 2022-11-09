@@ -13,7 +13,11 @@
  *
  */
 
-import { CrossrefMessage, CrossrefServer, CrossrefWork } from "editor-types";
+import { CrossrefMessage, CrossrefServer, CrossrefWork, kCrossrefWorks } from "editor-types";
+
+import jayson from 'jayson'
+import { jsonRpcMethod } from "./json-rpc";
+
 
 export function crossrefServer() : CrossrefServer {
   return {
@@ -24,3 +28,10 @@ export function crossrefServer() : CrossrefServer {
   };
 }
 
+export function crossrefServerMethods() : Record<string, jayson.Method> {
+  const server = crossrefServer();
+  const methods: Record<string, jayson.Method> = {
+    [kCrossrefWorks]: jsonRpcMethod(args => server.works(args[0]))
+  };
+  return methods;
+}

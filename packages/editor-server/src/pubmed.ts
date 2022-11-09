@@ -13,7 +13,10 @@
  *
  */
 
-import { PubMedResult, PubMedServer } from "editor-types";
+import { kPubMedSearch, PubMedResult, PubMedServer } from "editor-types";
+
+import jayson from 'jayson'
+import { jsonRpcMethod } from "./json-rpc";
 
 export function pubMedServer() : PubMedServer {
   return {
@@ -27,5 +30,14 @@ export function pubMedServer() : PubMedServer {
     }
   }
 }
+
+export function pubMedServerMethods() : Record<string, jayson.Method> {
+  const server = pubMedServer();
+  const methods: Record<string, jayson.Method> = {
+    [kPubMedSearch]: jsonRpcMethod(args => server.search(args[0]))
+  }
+  return methods;
+}
+
 
 

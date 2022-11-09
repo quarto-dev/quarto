@@ -13,7 +13,10 @@
  *
  */
 
-import { DataCiteResult, DataCiteServer } from "editor-types";
+import { DataCiteResult, DataCiteServer, kDataCiteSearch } from "editor-types";
+
+import jayson from 'jayson'
+import { jsonRpcMethod } from "./json-rpc";
 
 export function dataCiteServer() : DataCiteServer {
   return {
@@ -27,3 +30,13 @@ export function dataCiteServer() : DataCiteServer {
     }
   }
 }
+
+export function dataCiteServerMethods() : Record<string, jayson.Method> {
+  const server = dataCiteServer();
+  const methods: Record<string, jayson.Method> = {
+    [kDataCiteSearch]: jsonRpcMethod(args => server.search(args[0]))
+  }
+  return methods;
+}
+
+

@@ -28,7 +28,7 @@ import {
 } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRcpMethod } from "./json-rpc";
+import { jsonRpcMethod } from "./json-rpc";
 
 
 export function pandocServer() : PandocServer {
@@ -76,12 +76,12 @@ export function pandocServer() : PandocServer {
 export function pandocServerMethods() : Record<string, jayson.Method> {
   const server = pandocServer();
   const methods: Record<string, jayson.Method> = {
-    [kPandocGetCapabilities]: jsonRcpMethod(() => server.getCapabilities()),
-    [kPandocMarkdownToAst]: jsonRcpMethod(args => server.markdownToAst(args[0], args[1], args[2])),
-    [kPandocAstToMarkdown]: jsonRcpMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
-    [kPandocListExtensions]: jsonRcpMethod(args => server.listExtensions(args[0])),
-    [kPandocGetBibliography]: jsonRcpMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
-    [kPandocAddtoBibliography]: jsonRcpMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
+    [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
+    [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),
+    [kPandocAstToMarkdown]: jsonRpcMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
+    [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
+    [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
+    [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
   };
   return methods;
 }

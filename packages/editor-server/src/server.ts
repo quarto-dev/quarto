@@ -16,14 +16,14 @@
 
 import { EditorServer } from "editor-types";
 
-import { crossrefServer } from "./crossref";
-import { dataCiteServer } from "./datacite";
-import { doiServer } from "./doi";
-import { environmentServer } from "./environment";
+import { crossrefServer, crossrefServerMethods } from "./crossref";
+import { dataCiteServer, dataCiteServerMethods } from "./datacite";
+import { doiServer, doiServerMethods } from "./doi";
+import { environmentServer, environmentServerMethods } from "./environment";
 import { pandocServer, pandocServerMethods } from "./pandoc";
-import { pubMedServer } from "./pubmed";
-import { xrefServer } from "./xref";
-import { zoteroServer } from "./zotero";
+import { pubMedServer, pubMedServerMethods } from "./pubmed";
+import { xrefServer, xrefServerMethods } from "./xref";
+import { zoteroServer, zoteroServerMethods } from "./zotero";
 
 import jayson from 'jayson'
 
@@ -42,6 +42,13 @@ export function editorServer() : EditorServer {
 
 export function editorServerMethods(): Record<string,jayson.Method> {
   return {
-    ...pandocServerMethods()
+    ...pandocServerMethods(),
+    ...doiServerMethods(),
+    ...crossrefServerMethods(),
+    ...dataCiteServerMethods(),
+    ...pubMedServerMethods(),
+    ...zoteroServerMethods(),
+    ...xrefServerMethods(),
+    ...environmentServerMethods()
   }
 }

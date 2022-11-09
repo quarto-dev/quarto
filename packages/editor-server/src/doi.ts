@@ -13,7 +13,10 @@
  *
  */
 
-import { DOIResult, DOIServer } from "editor-types"
+import { DOIResult, DOIServer, kDoiFetchCsl } from "editor-types"
+
+import jayson from 'jayson'
+import { jsonRpcMethod } from "./json-rpc";
 
 
 export function doiServer() : DOIServer {
@@ -29,5 +32,12 @@ export function doiServer() : DOIServer {
   }
 }
 
+export function doiServerMethods() : Record<string, jayson.Method> {
+  const server = doiServer();
+  const methods: Record<string, jayson.Method> = {
+    [kDoiFetchCsl]: jsonRpcMethod(args => server.fetchCSL(args[0], args[1]))
+  };
+  return methods;
+}
 
 

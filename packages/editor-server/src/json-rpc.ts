@@ -16,7 +16,7 @@
 import jayson from 'jayson'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function jsonRcpMethod(method: (args: Array<any>) => Promise<unknown>) : jayson.Method {
+export function jsonRpcMethod(method: (args: Array<any>) => Promise<unknown>) : jayson.Method {
   return jayson.Method({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handler: (args: any, done: any) => {

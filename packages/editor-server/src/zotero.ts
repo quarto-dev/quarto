@@ -14,7 +14,10 @@
  *
  */
 
-import { ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
+import { kZoteroBetterBibtexExport, kZoteroGetActiveCollectionSpecs, kZoteroGetCollections, kZoteroGetLibraryNames, kZoteroValidateWebApiKey, ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
+
+import jayson from 'jayson'
+import { jsonRpcMethod } from "./json-rpc";
 
 export function zoteroServer(): ZoteroServer {
   return {
@@ -53,4 +56,16 @@ export function zoteroServer(): ZoteroServer {
       throw new Error("not supported");
     },
   };
+}
+
+export function zoteroServerMethods() : Record<string, jayson.Method> {
+  const server = zoteroServer();
+  const methods: Record<string, jayson.Method> = {
+    [kZoteroValidateWebApiKey]: jsonRpcMethod(args => server.validateWebAPIKey(args[0])),
+    [kZoteroGetCollections]: jsonRpcMethod(args => server.getCollections(args[0], args[1], args[2], args[3])),
+    [kZoteroGetLibraryNames]: jsonRpcMethod(() => server.getLibraryNames()),
+    [kZoteroGetActiveCollectionSpecs]: jsonRpcMethod(args => server.getActiveCollectionSpecs(args[0], args[1])),
+    [kZoteroBetterBibtexExport]: jsonRpcMethod(args => server.betterBibtexExport(args[0], args[1], args[2]))
+  }
+  return methods;
 }

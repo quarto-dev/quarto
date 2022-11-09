@@ -1,33 +1,7 @@
 import "./style.css";
 import typescriptLogo from "./typescript.svg";
 
-
-import { UITools } from "editor";
-
-
-const uiTools = new UITools();
-
-console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
-
-
-const server = uiTools.context.jsonRpcServer('/editor-server');
-
-
-server.pandoc.getCapabilities().then(console.log);
-server.pandoc.listExtensions('').then(console.log);
-
-
-server.pandoc.markdownToAst('**bold**', 'html', []).then(ast => {
-  server.pandoc.astToMarkdown(ast, 'html', []).then(console.log);
-});
-
-
-server.zotero.getCollections(null, [], [], false).then(console.log);
-server.zotero.getActiveCollectionSpecs(null, []).then(console.log);
-
-
-
-
+import { createEditor } from "./editor";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -37,5 +11,13 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <a href="https://www.typescriptlang.org/" target="_blank">
       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
     </a>
+    <EditorDiv />
   </div>
 `;
+
+
+const editorDiv = document.querySelector<HTMLElement>("#editor");
+if (editorDiv) {
+  await createEditor(editorDiv);
+}
+

@@ -1,0 +1,16 @@
+{
+  "extends": "tsconfig/base.json",
+  "include": ["./src", "./resources", "./decs.d.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "target": "es2020",
+    "resolveJsonModule": true,
+    "module": "esnext",
+    "lib": ["es2020"],
+    "jsx": "react"
+  },
+  "paths": {
+    "js-yaml": "src/external/js-yaml.js",
+    "regexp": "src/regexp.js",
+  }
+}

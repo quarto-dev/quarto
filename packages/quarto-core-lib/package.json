@@ -1,0 +1,16 @@
+{
+  "name": "quarto-core-lib",
+  "version": "0.0.1",
+  "description": "",
+  "dependencies": {},
+  "devDependencies": {
+    "tsconfig": "*",
+    "typescript": "^4.5.2"
+  },
+
+  "scripts": {
+    "build": "tsc -p .",
+    "clean": "tsc --build --clean",
+    "start": "npm run build -- -w"
+  }
+}

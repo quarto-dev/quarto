@@ -10,8 +10,23 @@ const uiTools = new UITools();
 console.log(uiTools.attr.pandocAutoIdentifier('here we all go'));
 
 
-const editorServer = uiTools.context.jsonRpcServer('/editor-server');
-editorServer.pandoc.getCapabilities().then(console.log);
+const server = uiTools.context.jsonRpcServer('/editor-server');
+
+
+server.pandoc.getCapabilities().then(console.log);
+server.pandoc.listExtensions('').then(console.log);
+
+
+server.pandoc.markdownToAst('**bold**', 'html', []).then(ast => {
+  server.pandoc.astToMarkdown(ast, 'html', []).then(console.log);
+});
+
+
+server.zotero.getCollections(null, [], [], false).then(console.log);
+server.zotero.getActiveCollectionSpecs(null, []).then(console.log);
+
+
+
 
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `

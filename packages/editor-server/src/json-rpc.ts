@@ -21,7 +21,8 @@ export function jsonRpcMethod(method: (args: Array<any>) => Promise<unknown>) : 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handler: (args: any, done: any) => {
       method(args)
-        .then(result => done(null, result))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((result: unknown) => done(null, result))
         .catch(error => done(error.message || "Unknown error"))
     },
     params: Array

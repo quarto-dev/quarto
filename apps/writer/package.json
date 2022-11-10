@@ -11,6 +11,8 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {
+    "@fluentui/react": "^8.101.0",
+    "@fluentui/react-components": "^9.6.3",
     "editor": "*",
     "jayson": "^4.0.0"
   },

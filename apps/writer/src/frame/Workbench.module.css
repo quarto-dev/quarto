@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * Workbench.module.css
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,20 +13,11 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
-
-// format
-export * from './api/format';
-
-// main editor module
-export * from './editor/editor';
-
-
-
-
-
+.workbench {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}

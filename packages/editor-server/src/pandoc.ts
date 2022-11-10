@@ -14,6 +14,10 @@
  *
  */
 
+import stream from 'stream';
+import * as child_process from "child_process";
+
+
 import { 
   BibliographyResult, 
   PandocAst, 
@@ -34,30 +38,55 @@ import { jsonRpcMethod } from "./json-rpc";
 export function pandocServer() : PandocServer {
   return {
     async getCapabilities(): Promise<PandocCapabilitiesResult> {
+      const version = await runPandoc(["--version"]);
+      const ast = JSON.parse(await runPandoc(["--to", "json"], " ")) as PandocAst;
+      const formats = await runPandoc(["--list-output-formats"]);
+      const languages = await runPandoc(["--list-highlight-languages"]);
       return {
-        version: "2.19.2",
-        api_version: [2,19,2],
-        output_formats: 'html',
-        highlight_languages: 'python'
+        version,
+        api_version: ast['pandoc-api-version'],
+        output_formats: formats,
+        highlight_languages: languages
       }
     },
-    markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
-      throw new Error("not implemented");
+    async markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
+      const ast = JSON.parse(await runPandoc(
+        ["--from", format,
+         "--to", "json", ...options],
+         markdown)
+      ) as PandocAst;
+      return ast;
     },
-    astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
-      throw new Error("not implemented");
+    async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
+      const markdown = await runPandoc(
+        ["--from", "json",
+         "--to", format, ...options],
+         JSON.stringify(ast)
+      );
+      return markdown;
     },
     listExtensions(format: string): Promise<string> {
-      throw new Error("not implemented");
+      const args = ["--list-extensions"];
+      if (format.length > 0) {
+        args.push(format);
+      }
+      return runPandoc(args);
     },
-    getBibliography(
+    async getBibliography(
       file: string | null,
       bibliography: string[],
       refBlock: string | null,
       etag: string | null,
     ): Promise<BibliographyResult> {
-      throw new Error("not implemented");
+      return {
+        etag: 'foo',
+        bibliography: {
+          sources: [],
+          project_biblios: []
+        }
+      }
     },
+
     addToBibliography(
       bibliography: string,
       project: boolean,
@@ -84,5 +113,31 @@ export function pandocServerMethods() : Record<string, jayson.Method> {
     [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
   };
   return methods;
+}
+
+async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = child_process.execFile("pandoc", args, { encoding: "utf-8" }, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      } else if (child.exitCode !== 0) {
+        reject(new Error(`Error status ${child.exitCode}: ${stderr.trim()}`));
+      } else {
+        resolve(stdout.trim());
+      }
+    });
+    if (stdin) {
+      const stdinStream = new stream.Readable();
+      stdinStream.push(stdin);  
+      stdinStream.push(null);  
+      if (child.stdin) {
+        stdinStream.pipe(child.stdin);
+      } else {
+        reject(new Error("Unable to access Pandoc stdin stream"));
+      }
+    }
+
+  });
+  
 }
 

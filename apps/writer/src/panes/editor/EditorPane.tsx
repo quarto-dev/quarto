@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * EditorPane.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,20 +13,19 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
+import React from 'react'
+import { createEditor } from './editor-context';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
+import classes from './EditorPane.module.css';
 
-// format
-export * from './api/format';
+export const EditorPane: React.FunctionComponent = () => {
 
-// main editor module
-export * from './editor/editor';
+  const initEditor = async (el: HTMLDivElement) => {
+    await createEditor(el);
+  }
 
-
-
-
-
+  return (
+    <div ref={initEditor} className={classes.editor}>
+    </div>
+  );
+}

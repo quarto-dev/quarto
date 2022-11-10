@@ -25,24 +25,34 @@ export function zoteroServer(): ZoteroServer {
       throw new Error("not supported");
     },
 
-    getCollections(
+    async getCollections(
       file: string | null,
       collections: string[],
       cached: ZoteroCollectionSpec[],
       useCache: boolean
     ): Promise<ZoteroResult> {
-      throw new Error("not supported");
+      return {
+        status: 'ok',
+        message: [],
+        warning: '',
+        error: ''
+      }
     },
 
     getLibraryNames(): Promise<ZoteroResult> {
       throw new Error("not supported");
     },
 
-    getActiveCollectionSpecs(
+    async getActiveCollectionSpecs(
       file: string | null,
       collections: string[]
     ): Promise<ZoteroResult> {
-      throw new Error("not supported");
+      return {
+        status: 'ok',
+        message: [],
+        warning: '',
+        error: ''
+      }
     },
 
     // Return status: nohost w/ warning text if it fails to

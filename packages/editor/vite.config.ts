@@ -6,6 +6,7 @@ import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 
 // allow environment to drive configuration
 const types = !(process.env.PANMIRROR_TYPES === "0");
+const sourcemap = !(process.env.PANMIRROR_SOURCEMAP === "0");
 const formats = (process.env.PANMIRROR_FORMATS || "es").split(",") as LibraryFormats[];
 const formatUmd = formats.length === 1 && formats[0] === "umd";
 const outDir = process.env.PANMIRROR_OUTDIR || "dist";
@@ -33,7 +34,7 @@ export default defineConfig({
         assetFileNames: "panmirror.[ext]",
       },
     },
-    sourcemap: true,
+    sourcemap,
     outDir,
     emptyOutDir: false,
   }

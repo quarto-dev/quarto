@@ -69,7 +69,7 @@ import {
   kAddToHistoryTransaction,
   kSetMarkdownTransaction,
 } from '../api/transaction';
-import { EditorOutline, getOutlineNodes, EditingOutlineLocation, getEditingOutlineLocation } from '../api/outline';
+import { getOutlineNodes, getEditingOutlineLocation } from '../api/outline';
 import { EditingLocation, getEditingLocation, setEditingLocation } from '../api/location';
 import { navigateTo, NavigationType } from '../api/navigation';
 import { FixupContext } from '../api/fixup';
@@ -121,6 +121,7 @@ import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
+import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
 
 
 // re-export editor ui

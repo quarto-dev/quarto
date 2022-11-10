@@ -23,6 +23,12 @@ export type { ListSpacing } from './api/ui-types';
 // format
 export * from './api/format';
 
+// commands
+export * from './api/command-types';
+
+// outline
+export * from './api/outline-types';
+
 // main editor module
 export * from './editor/editor';
 

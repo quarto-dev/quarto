@@ -11,12 +11,21 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {
+    "@blueprintjs/core": "^4.12.0",
+    "@blueprintjs/select": "^4.8.11",
     "editor": "*",
-    "jayson": "^4.0.0"
+    "jayson": "^4.0.0",
+    "normalize.css": "^8.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "redux": "^4.2.0",
+    "redux-thunk": "^2.4.2"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
+    "sass": "^1.56.1",
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "vite": "^3.0.0"

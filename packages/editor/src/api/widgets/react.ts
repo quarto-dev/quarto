@@ -19,6 +19,7 @@ import * as ReactDOM from 'react-dom';
 import { EditorView } from 'prosemirror-view';
 
 export interface WidgetProps {
+  children?: React.ReactNode;
   classes?: string[];
   style?: React.CSSProperties;
 }

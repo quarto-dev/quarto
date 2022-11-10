@@ -16,9 +16,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { configureStore } from './store/store';
 
-ReactDOM.render(
-  <div>App</div>,
-  document.getElementById('root'),
-);
+import { setEditorMarkdown } from './store/editor/editor-actions';
+
+import { UserContext } from './user/user';
+
+import 'normalize.css/normalize.css';
+import '@blueprintjs/core/lib/css/blueprint.css';
+import '@blueprintjs/icons/lib/css/blueprint-icons.css';
+import Workbench from './Workbench';
+
+async function runApp() {
+  try {
+    // user context
+    const username = 'jjallaire';
+
+    // configure store
+    const store = configureStore();
+
+    // initialize with content
+    store.dispatch(setEditorMarkdown('The quick brown fox jumped over the lazy dog'));
+
+    ReactDOM.render(
+      <UserContext.Provider value={{username}}>
+        <Workbench store={store} />
+      </UserContext.Provider>,
+      document.getElementById('root'),
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+runApp();
+
 

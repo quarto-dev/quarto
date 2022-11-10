@@ -18,7 +18,7 @@ import { createEditor } from './editor-context';
 
 import classes from './EditorPane.module.css';
 
-export const EditorPane = () => {
+export const EditorPane: React.FunctionComponent = () => {
 
   const initEditor = async (el: HTMLDivElement) => {
     await createEditor(el);

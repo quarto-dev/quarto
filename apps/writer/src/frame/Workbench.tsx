@@ -16,16 +16,18 @@
 
 import React from 'react'
 
-import { FluentProvider, teamsLightTheme } from '@fluentui/react-components';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 
 import { EditorPane } from '../panes/editor/EditorPane';
 
 import classes from './Workbench.module.css';
+import { WorkbenchToolbar } from './WorkbenchToolbar';
 
-export const Workbench = () => {
+export const Workbench : React.FunctionComponent = () => {
   return (
-    <FluentProvider theme={teamsLightTheme}>
+    <FluentProvider theme={webLightTheme}>
       <div className={classes.workbench}>
+        <WorkbenchToolbar />
         <EditorPane />
       </div>
     </FluentProvider>

@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { configureStore } from './store/store';
 
@@ -38,11 +38,11 @@ async function runApp() {
     // initialize with content
     store.dispatch(setEditorMarkdown('The quick brown fox jumped over the lazy dog'));
 
-    ReactDOM.render(
+    const root = createRoot(document.getElementById('root')!);
+    root.render(
       <UserContext.Provider value={{username}}>
         <Workbench store={store} />
-      </UserContext.Provider>,
-      document.getElementById('root'),
+      </UserContext.Provider>
     );
   } catch (error) {
     console.error(error);

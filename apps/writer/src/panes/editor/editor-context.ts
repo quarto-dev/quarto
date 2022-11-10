@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*
- * editor.ts
+ * editor-context.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -22,9 +22,11 @@ import {
   ChunkEditor,
   CodeBlockEditResult,
   CodeBlockProps,
+  Editor,
   EditorContext,
   EditorDialogs,
   EditorDisplay,
+  EditorFormat,
   EditorHTMLDialogCreateFn,
   EditorHTMLDialogValidateFn,
   EditorMath,
@@ -59,10 +61,25 @@ import {
   XRef,
 } from "editor";
 
-export async function createEditor() {
-  const uiTools = new UITools();
-  const server = uiTools.context.jsonRpcServer("/editor-server");
 
+export async function createEditor(parent: HTMLElement) : Promise<Editor> {
+  
+  const context = editorContext();
+
+  const format: EditorFormat = {
+    pandocMode: 'markdown',
+    pandocExtensions: '',
+    rmdExtensions: {},
+    hugoExtensions: {},
+    docTypes: []
+  }
+
+  return Editor.create(parent, context, format, { autoFocus: true });
+}
+
+export function editorContext() : EditorContext {
+  
+  const uiTools = new UITools();
   const ui = {
     dialogs: editorDialogs(),
     display: editorDisplay(),
@@ -74,8 +91,11 @@ export async function createEditor() {
     images: uiTools.context.defaultUIImages()
   };
 
+  const server = uiTools.context.jsonRpcServer("/editor-server");
+
   const context : EditorContext = { server, ui };
-  await context.server.pandoc.getCapabilities();
+
+  return context;
 }
 
 function editorDialogs(): EditorDialogs {

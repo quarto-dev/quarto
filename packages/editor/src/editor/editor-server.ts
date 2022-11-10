@@ -28,6 +28,7 @@ import {
   kEnvironmentGetRPackageCitations,
   kEnvironmentGetRPackageState,
   kPandocAddtoBibliography,
+  kPandocAstToMarkdown,
   kPandocCitationHtml,
   kPandocGetBibliography,
   kPandocGetCapabilities,
@@ -90,7 +91,7 @@ export function editorJsonRpcServer(url: string) : EditorServer {
         if (err) {
           reject(err);
         } else {
-          resolve(result);
+          resolve(result.result);
         }
       });
     });
@@ -113,7 +114,7 @@ export function editorJsonRpcServer(url: string) : EditorServer {
         format: string,
         options: string[]
       ): Promise<string> {
-        return request(kPandocMarkdownToAst, [ast, format, options]);
+        return request(kPandocAstToMarkdown, [ast, format, options]);
       },
       listExtensions(format: string): Promise<string> {
         return request(kPandocListExtensions, [format]);

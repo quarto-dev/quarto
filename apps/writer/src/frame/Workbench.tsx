@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * Workbench.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,20 +13,23 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
+import React from 'react'
 
-// format
-export * from './api/format';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 
-// main editor module
-export * from './editor/editor';
+import { EditorPane } from '../panes/editor/EditorPane';
 
+import classes from './Workbench.module.css';
+import { WorkbenchToolbar } from './WorkbenchToolbar';
 
-
-
-
+export const Workbench : React.FunctionComponent = () => {
+  return (
+    <FluentProvider theme={webLightTheme}>
+      <div className={classes.workbench}>
+        <WorkbenchToolbar />
+        <EditorPane />
+      </div>
+    </FluentProvider>
+  );
+}

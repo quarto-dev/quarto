@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * index.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,20 +13,13 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
+import { Workbench } from './frame/Workbench';
 
-// format
-export * from './api/format';
-
-// main editor module
-export * from './editor/editor';
-
-
-
-
+ReactDOM.render(
+  <Workbench />,
+  document.getElementById('root'),
+);
 

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * EditorPane.module.css
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,20 +13,12 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
-
-// format
-export * from './api/format';
-
-// main editor module
-export * from './editor/editor';
-
-
-
-
-
+.editor {
+  border: 1px dotted lightblue;
+  position: absolute;
+  left: 10px;
+  top: 45px;
+  right: 10px;
+  bottom: 10px;
+}

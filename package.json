@@ -3,7 +3,8 @@
   "license": "agpl-3.0",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "packages/quarto/*"
   ],
   "scripts": {
     "build": "turbo run build",

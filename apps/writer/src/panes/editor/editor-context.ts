@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*
- * editor.ts
+ * editor-context.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -61,7 +61,23 @@ import {
 } from "editor";
 import { EditorFormat } from "editor/dist/api/format";
 
+
 export async function createEditor(parent: HTMLElement) : Promise<Editor> {
+  
+  const context = editorContext();
+
+  const format: EditorFormat = {
+    pandocMode: 'markdown',
+    pandocExtensions: '',
+    rmdExtensions: {},
+    hugoExtensions: {},
+    docTypes: []
+  }
+
+  return Editor.create(parent, context, format, { autoFocus: true });
+}
+
+export function editorContext() : EditorContext {
   
   const uiTools = new UITools();
   const ui = {
@@ -79,15 +95,7 @@ export async function createEditor(parent: HTMLElement) : Promise<Editor> {
 
   const context : EditorContext = { server, ui };
 
-  const format: EditorFormat = {
-    pandocMode: 'markdown',
-    pandocExtensions: '',
-    rmdExtensions: {},
-    hugoExtensions: {},
-    docTypes: []
-  }
-
-  return Editor.create(parent, context, format, {});
+  return context;
 }
 
 function editorDialogs(): EditorDialogs {

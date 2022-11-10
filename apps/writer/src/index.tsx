@@ -16,10 +16,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Workbench } from './frame/Workbench';
 
 ReactDOM.render(
-  <Workbench />,
+  <div>App</div>,
   document.getElementById('root'),
 );
 

@@ -26,6 +26,7 @@ import {
   EditorContext,
   EditorDialogs,
   EditorDisplay,
+  EditorFormat,
   EditorHTMLDialogCreateFn,
   EditorHTMLDialogValidateFn,
   EditorMath,
@@ -59,7 +60,6 @@ import {
   UITools,
   XRef,
 } from "editor";
-import { EditorFormat } from "editor/dist/api/format";
 
 
 export async function createEditor(parent: HTMLElement) : Promise<Editor> {

@@ -20,6 +20,9 @@ export * from 'editor-types';
 export * from './api/ui-types'
 export type { ListSpacing } from './api/ui-types';
 
+// format
+export * from './api/format';
+
 // main editor module
 export * from './editor/editor';
 

@@ -15,6 +15,7 @@
     "@blueprintjs/icons": "^4.10.1",
     "@blueprintjs/popover2": "^1.10.1",
     "@blueprintjs/select": "^4.8.11",
+    "codemirror": "^5.48.4",
     "editor": "*",
     "i18next": "^22.0.4",
     "i18next-browser-languagedetector": "^7.0.1",
@@ -29,6 +30,7 @@
     "redux-thunk": "^2.4.2"
   },
   "devDependencies": {
+    "@types/codemirror": "^5.60.5",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
     "sass": "^1.56.1",

@@ -22,10 +22,11 @@ import { setEditorMarkdown } from './store/editor/editor-actions';
 
 import { UserContext } from './user/user';
 
+import Workbench from './workbench/Workbench';
+
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import Workbench from './Workbench';
 
 async function runApp() {
   try {

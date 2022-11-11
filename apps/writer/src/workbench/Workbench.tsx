@@ -20,10 +20,10 @@ import { Provider as StoreProvider } from 'react-redux';
 
 import { FocusStyleManager } from '@blueprintjs/core';
 
-import { WorkbenchState } from './store/store';
+import { WorkbenchState } from '../store/store';
 
 import './Workbench.scss';
-import { CommandManagerProvider } from './commands/CommandManager';
+import { CommandManagerProvider } from '../commands/CommandManager';
 
 interface WorkbenchProps {
   store: Store<WorkbenchState>;

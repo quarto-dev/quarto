@@ -20,7 +20,7 @@ import { XRef } from 'editor-types';
 
 import { LinkTargets, LinkCapabilities, LinkType } from './link';
 import { ImageDimensions } from './image';
-import { ListCapabilities, ListType } from './list';
+import { ListCapabilities, ListType } from './list-types';
 import { TableCapabilities } from './table';
 import { CSL } from './csl';
 import { CiteField } from './cite';
@@ -30,7 +30,8 @@ export * from './spelling';
 export { SkinTone } from './emoji';
 export type { LinkTargets, LinkCapabilities, LinkType } from './link';
 export type { ImageDimensions } from './image';
-export type { ListCapabilities, ListType } from './list';
+export { ListType } from './list-types';
+export type { ListCapabilities } from './list-types';
 export type { TableCapabilities } from './table';
 export type { CSL } from './csl'
 export type { CiteField } from './cite'

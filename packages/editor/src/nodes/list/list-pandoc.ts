@@ -19,7 +19,8 @@ import { PandocOutput, PandocToken, ProsemirrorWriter, PandocTokenType } from '.
 
 import { fragmentWithCheck, tokensWithChecked } from './list-checked';
 import { ListNumberDelim, ListNumberStyle } from './list';
-import { ListCapabilities, isList } from '../../api/list';
+import { isList } from '../../api/list';
+import { ListCapabilities } from '../../api/list-types';
 
 const LIST_ATTRIBS = 0;
 const LIST_CHILDREN = 1;

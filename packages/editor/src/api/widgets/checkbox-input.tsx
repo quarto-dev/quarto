@@ -26,7 +26,7 @@ export interface CheckboxInputProps extends WidgetProps {
   checked?: boolean;
   onChange?: ChangeEventHandler;
 }
-
+  
 export const CheckboxInput= React.forwardRef<HTMLInputElement, CheckboxInputProps>((props, ref) => {
   const style: React.CSSProperties = {
     ...props.style,

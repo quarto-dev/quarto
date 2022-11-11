@@ -1,10 +1,10 @@
 /*
- * prefs-selectors.ts
+ * list-types.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
- * Unless you have received this program directly from RStudio pursuant
- * to the terms of a commercial license agreement with RStudio, then
+ * Unless you have received this program directly from Posit Software pursuant
+ * to the terms of a commercial license agreement with Posit Software, then
  * this program is licensed to you under the terms of version 3 of the
  * GNU Affero General Public License. This program is distributed WITHOUT
  * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
@@ -14,12 +14,15 @@
  */
 
 
-import { WorkbenchState } from '../store';
-
-export function prefsShowOutline(state: WorkbenchState) {
-  return state.prefs.showOutline;
+export enum ListType {
+  Ordered = 'OrderedList',
+  Bullet = 'BulletList',
 }
 
-export function prefsShowMarkdown(state: WorkbenchState) {
-  return state.prefs.showMarkdown;
+export interface ListCapabilities {
+  tasks: boolean;
+  fancy: boolean;
+  example: boolean;
+  order: boolean;
+  incremental: boolean;
 }

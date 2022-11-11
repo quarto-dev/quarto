@@ -20,8 +20,6 @@ import { configureStore } from './store/store';
 
 import { setEditorMarkdown } from './store/editor/editor-actions';
 
-import { UserContext } from './user/user';
-
 import Workbench from './workbench/Workbench';
 
 import 'normalize.css/normalize.css';
@@ -30,20 +28,16 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 
 async function runApp() {
   try {
-    // user context
-    const username = 'jjallaire';
-
     // configure store
     const store = configureStore();
 
     // initialize with content
     store.dispatch(setEditorMarkdown('The quick brown fox jumped over the lazy dog'));
 
+    // create root element and render
     const root = createRoot(document.getElementById('root')!);
     root.render(
-      <UserContext.Provider value={{username}}>
-        <Workbench store={store} />
-      </UserContext.Provider>
+      <Workbench store={store} />
     );
   } catch (error) {
     console.error(error);

@@ -23,7 +23,7 @@ import { findParentNodeOfType } from 'prosemirror-utils';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { BaseKey } from '../../api/basekeys';
 import { EditorUI, kListSpacingTight } from '../../api/ui-types';
-import { ListCapabilities } from '../../api/list';
+import { ListCapabilities } from '../../api/list-types';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { PandocTokenType } from '../../api/pandoc';
 import { OmniInsertGroup } from '../../api/omni_insert';

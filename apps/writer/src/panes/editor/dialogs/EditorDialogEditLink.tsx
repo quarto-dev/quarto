@@ -18,8 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@blueprintjs/core';
 
-import { LinkEditResult, LinkProps } from 'editor';
-import { LinkTargets, LinkCapabilities, LinkType } from 'editor/src/api/link';
+import { LinkEditResult, LinkProps, LinkTargets, LinkCapabilities, LinkType } from 'editor';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { DialogTextInput } from '../../../widgets/dialog/DialogInputs';

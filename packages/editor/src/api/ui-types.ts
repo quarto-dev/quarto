@@ -28,9 +28,10 @@ import { PandocAttr } from './pandoc_attr';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
-export type { LinkTargets, LinkCapabilities, LinkType } from './link';
+export type { LinkTargets, LinkCapabilities } from './link';
+export  { LinkType } from './link';
 export type { ImageDimensions } from './image';
-export { ListType } from './list-types';
+export { ListType, ListNumberStyle, ListNumberDelim } from './list-types';
 export type { ListCapabilities } from './list-types';
 export type { TableCapabilities } from './table';
 export type { CSL } from './csl'

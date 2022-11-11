@@ -21,7 +21,7 @@ import { EditorUI } from '../../api/ui-types';
 import { ImageType } from '../../api/image';
 import { PandocExtensions, imageAttributesAvailable } from '../../api/pandoc';
 import { isElementVisible } from '../../api/dom';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { ResizeEvent } from '../../api/event-types';
 import { EditorFormat } from '../../api/format';
 

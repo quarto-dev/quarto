@@ -18,12 +18,11 @@ import { useTranslation } from 'react-i18next';
 
 import { ControlGroup, FormGroup, Checkbox } from '@blueprintjs/core';
 
-import { InsertTableResult } from 'editor';
+import { InsertTableResult, TableCapabilities } from 'editor';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { focusInput } from '../../../widgets/utils';
 import { DialogNumericInput, DialogTextInput } from '../../../widgets/dialog/DialogInputs';
-import { TableCapabilities } from 'editor/src/api/table';
 
 export interface EditorDialogInsertTableProps {
   isOpen: boolean;

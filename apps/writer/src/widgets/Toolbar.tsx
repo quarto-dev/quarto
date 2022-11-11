@@ -28,7 +28,7 @@ import {
   MaybeElement,
 } from '@blueprintjs/core';
 
-import { Popover2 } from '@blueprintjs/popover2'
+import { Popover } from '@blueprintjs/core'
 
 import styles from './Toolbar.module.scss';
 
@@ -77,7 +77,7 @@ export interface ToolbarMenuProps extends Props {
 
 export const ToolbarMenu: React.FC<PropsWithChildren<ToolbarMenuProps>> = props => {
   return (
-    <Popover2
+    <Popover
       className={[styles.toolbarMenu, props.className].join(' ')}
       disabled={props.disabled}
       autoFocus={false}
@@ -94,6 +94,6 @@ export const ToolbarMenu: React.FC<PropsWithChildren<ToolbarMenuProps>> = props 
         {props.text}
       </Button>
       <Menu>{props.children}</Menu>
-    </Popover2>
+    </Popover>
   );
 };

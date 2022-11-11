@@ -33,7 +33,7 @@ import { GapCursor } from 'prosemirror-gapcursor';
 import { CodeViewOptions, editingRootNode } from '../../api/node';
 import { insertParagraph } from '../../api/paragraph';
 import { EditorUI, ChunkEditor } from '../../api/ui-types';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { ExtensionContext, ExtensionFn } from '../../api/extension';
 import { DispatchEvent, ResizeEvent, ScrollEvent } from '../../api/event-types';
 import { verticalArrowCanAdvanceWithinTextBlock } from '../../api/basekeys';

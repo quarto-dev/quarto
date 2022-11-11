@@ -22,7 +22,7 @@ import { ProsemirrorCommand, EditorCommandId, toggleMarkType } from '../../api/c
 import { canInsertNode } from '../../api/node';
 import { EditorUI } from '../../api/ui-types';
 import { OmniInsertGroup } from '../../api/omni_insert';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { BibliographyManager } from '../../api/bibliography/bibliography';
 
 import { ensureSourcesInBibliography } from './cite';

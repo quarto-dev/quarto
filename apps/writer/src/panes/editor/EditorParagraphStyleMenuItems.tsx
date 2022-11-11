@@ -17,7 +17,7 @@ import React from 'react';
 
 import { MenuDivider } from '@blueprintjs/core';
 
-import { EditorCommandId } from 'editor/src/api/command';
+import { EditorCommandId } from 'editor';
 
 import { CommandMenuItem, CommandMenuItemActive } from '../../widgets/command/CommandMenuItem';
 

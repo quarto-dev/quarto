@@ -25,7 +25,7 @@ import { Command, CommandId } from '../../commands/commands';
 import { ToolbarMenu } from '../../widgets/Toolbar';
 
 import { CommandMenuItem, CommandMenuItemActive } from './CommandMenuItem';
-import { uuidv4 } from 'editor/src/api/util';
+import { v4 as uuidv4 } from 'uuid';
 
 const kSeparator = '---';
 

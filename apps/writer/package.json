@@ -28,11 +28,13 @@
     "react-redux": "^8.0.5",
     "react-transition-group": "^4.4.5",
     "redux": "^4.2.0",
-    "redux-thunk": "^2.4.2"
+    "redux-thunk": "^2.4.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/codemirror": "^5.60.5",
     "@types/react-transition-group": "^4.4.5",
+    "@types/uuid": "^8.3.4",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
     "sass": "^1.56.1",

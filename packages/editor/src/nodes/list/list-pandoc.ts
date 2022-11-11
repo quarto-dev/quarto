@@ -18,7 +18,7 @@ import { Node as ProsemirrorNode, NodeType, Fragment, Attrs } from 'prosemirror-
 import { PandocOutput, PandocToken, ProsemirrorWriter, PandocTokenType } from '../../api/pandoc';
 
 import { fragmentWithCheck, tokensWithChecked } from './list-checked';
-import { ListNumberDelim, ListNumberStyle } from './list';
+import { ListNumberDelim, ListNumberStyle } from '../../api/list-types';
 import { isList } from '../../api/list';
 import { ListCapabilities } from '../../api/list-types';
 

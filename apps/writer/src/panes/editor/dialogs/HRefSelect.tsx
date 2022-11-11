@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ControlGroup, FormGroup, HTMLSelect, Classes, InputGroup } from '@blueprintjs/core';
 
-import { LinkTargets, LinkCapabilities, LinkType } from 'editor/src/api/link';
+import { LinkTargets, LinkCapabilities, LinkType } from 'editor';
 
 export interface HRefSelectProps {
   type: LinkType;

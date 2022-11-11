@@ -28,7 +28,7 @@ import {
   EditorWordRange,
   kCharClassWord
 } from '../../api/spelling';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { kAddToHistoryTransaction } from '../../api/transaction';
 import { EditorUI, EditorMenuItem } from '../../api/ui-types';
 

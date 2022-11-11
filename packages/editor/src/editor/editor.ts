@@ -41,7 +41,9 @@ import { Extension } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
-import { DOMEditorEvents, EventType, EventHandler } from '../api/events';
+import { EventType, EventHandler } from '../api/event-types';
+import { DOMEditorEvents } from '../api/events';
+
 import {
   ScrollEvent,
   UpdateEvent,
@@ -71,7 +73,8 @@ import {
 } from '../api/transaction';
 import { getOutlineNodes, getEditingOutlineLocation } from '../api/outline';
 import { EditingLocation, getEditingLocation, setEditingLocation } from '../api/location';
-import { navigateTo, NavigationType } from '../api/navigation';
+import { navigateTo } from '../api/navigation';
+import { NavigationType } from '../api/navigation-types';
 import { FixupContext } from '../api/fixup';
 import { unitToPixels, pixelsToUnit, roundUnit, kValidUnits } from '../api/image';
 import { kPercentUnit } from '../api/css';
@@ -79,7 +82,7 @@ import { EditorFormat } from '../api/format';
 import { diffChars, EditorChange } from '../api/change';
 import { markInputRuleFilter } from '../api/input_rule';
 import { editorMath } from '../api/math';
-import { EditorEvents } from '../api/events';
+import { EditorEvents } from '../api/event-types';
 import { insertRmdChunk } from '../api/rmd';
 import { pandocAutoIdentifier } from '../api/pandoc_id';
 import { wrapSentences } from '../api/wrap';

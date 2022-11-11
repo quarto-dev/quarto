@@ -23,23 +23,7 @@ import { editingRootNode } from './node';
 import { kNavigationTransaction } from './transaction';
 import { xrefPosition } from './xref';
 import { EditorFormat, kQuartoDocType } from './format';
-
-export interface EditorNavigation {
-  navigate: (type: NavigationType, location: string, animate?: boolean) => void;
-}
-
-export enum NavigationType {
-  Pos = 'pos',
-  Id = 'id',
-  Href = 'href',
-  Heading = 'heading',
-  XRef = 'xref',
-}
-
-export interface Navigation {
-  pos: number;
-  prevPos: number;
-}
+import { Navigation, NavigationType } from './navigation-types';
 
 export function navigateTo(
   view: EditorView,

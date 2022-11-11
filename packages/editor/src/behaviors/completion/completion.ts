@@ -28,8 +28,7 @@ import {
   CompletionResult,
   CompletionsStream,
 } from '../../api/completion';
-import { EditorEvents } from '../../api/events';
-import { ScrollEvent } from '../../api/event-types';
+import { EditorEvents, ScrollEvent } from '../../api/event-types';
 
 import { createCompletionPopup, renderCompletionPopup, destroyCompletionPopup } from './completion-popup';
 import { EditorUI } from '../../api/ui-types';

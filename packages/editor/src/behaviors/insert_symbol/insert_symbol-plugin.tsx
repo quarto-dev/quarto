@@ -20,7 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { applyStyles } from '../../api/css';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { canInsertNode } from '../../api/node';
 import { EditorUI } from '../../api/ui-types';
 

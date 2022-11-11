@@ -16,8 +16,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ImageEditResult, ImageProps } from 'editor';
-import { ImageDimensions } from 'editor/src/api/image';
+import { ImageEditResult, ImageProps, ImageDimensions } from 'editor';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { DialogTextInput } from '../../../widgets/dialog/DialogInputs';

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * navigation-types.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,24 +13,21 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
+export interface EditorNavigation {
+  navigate: (type: NavigationType, location: string, animate?: boolean) => void;
+}
 
-// more types
-export * from './api/format';
-export * from './api/command-types';
-export * from './api/outline-types';
-export * from './api/navigation-types';
-export * from './api/event-types';
+export enum NavigationType {
+  Pos = 'pos',
+  Id = 'id',
+  Href = 'href',
+  Heading = 'heading',
+  XRef = 'xref',
+}
 
-// main editor module
-export * from './editor/editor';
-
-
-
-
+export interface Navigation {
+  pos: number;
+  prevPos: number;
+}
 

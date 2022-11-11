@@ -15,7 +15,7 @@
 
 import React from 'react';
 
-import { t } from '../../../i18next';
+import { t } from '../../../i18n';
 
 import { AlertDialogProps, AlertDialog } from '../../../widgets/dialog/AlertDialog';
 
@@ -69,7 +69,7 @@ export interface EditorDialogsState {
   insertTable: EditorDialogInsertTableProps;
 }
 
-export default class EditorDialogs extends React.Component<Readonly<Record<string,unknown>>, EditorDialogsState> {
+export default class EditorDialogsImpl extends React.Component<Readonly<Record<string,unknown>>, EditorDialogsState> {
   constructor(props: Readonly<Record<string,unknown>>) {
     super(props);
     this.state = {

@@ -24,6 +24,11 @@ import { WorkbenchState } from '../store/store';
 
 import './Workbench.scss';
 import { CommandManagerProvider } from '../commands/CommandManager';
+import WorkbenchNavbar from './WorkbenchNavbar';
+import WorkbenchClipboard from './WorkbenchClipboard';
+import WorkbenchHotkeys from './WorkbenchHotkeys';
+import EditorPane from '../panes/editor/EditorPane';
+import MarkdownPane from '../panes/markdown/MarkdownPane';
 
 interface WorkbenchProps {
   store: Store<WorkbenchState>;
@@ -39,9 +44,13 @@ const Workbench: React.FC<WorkbenchProps> = props => {
     <div className={'workbench'}>
       <StoreProvider store={props.store}>
         <CommandManagerProvider>
+          <WorkbenchNavbar />
           <div className={'workspace'}>
-            
+            <EditorPane />
+            <MarkdownPane />
           </div>
+          <WorkbenchClipboard />
+          <WorkbenchHotkeys />
         </CommandManagerProvider>
       </StoreProvider>
     </div>

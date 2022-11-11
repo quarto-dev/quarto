@@ -25,6 +25,7 @@ import Workbench from './workbench/Workbench';
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
+import { i18nInit } from './i18n';
 
 async function runApp() {
   try {
@@ -32,7 +33,12 @@ async function runApp() {
     const store = configureStore();
 
     // initialize with content
-    store.dispatch(setEditorMarkdown('The quick brown fox jumped over the lazy dog'));
+    const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
+    const markdown = await (await fetch(contentUrl)).text();
+    store.dispatch(setEditorMarkdown(markdown));
+
+     // init localization
+     await i18nInit();
 
     // create root element and render
     const root = createRoot(document.getElementById('root')!);

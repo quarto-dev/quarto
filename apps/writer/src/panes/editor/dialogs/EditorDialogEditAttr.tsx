@@ -19,7 +19,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@blueprintjs/core';
 
 import { AttrEditResult, AttrProps } from 'editor';
-import { pandocAttrAvailable } from 'editor/src/api/pandoc_attr';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 
@@ -110,3 +109,9 @@ export const EditorDialogEditAttr: React.FC<EditorDialogEditAttrProps> = props =
     </Dialog>
   );
 };
+
+function pandocAttrAvailable(attrs: AttrProps, keyvalue = true) {
+  return !!attrs.id || 
+         (attrs.classes && attrs.classes.length > 0) || 
+         (keyvalue && attrs.keyvalue && attrs.keyvalue.length > 0);
+}

@@ -22,7 +22,7 @@ import zenscroll from 'zenscroll';
 
 import { EditorUI } from '../../api/ui-types';
 import { getMarkRange } from '../../api/mark';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { ScrollEvent, ResizeEvent } from '../../api/event-types';
 import { applyStyles } from '../../api/css';
 import { editingRootNodeClosestToPos, editingRootNode } from '../../api/node';

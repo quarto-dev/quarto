@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ButtonGroup, MenuDivider } from '@blueprintjs/core';
 
-import { EditorCommandId } from 'editor/src/api/command';
+import { EditorCommandId } from 'editor';
 
 import { MainMenu, MenubarMenu } from '../widgets/Menu';
 import { WithCommand } from '../widgets/command/WithCommand';
@@ -36,8 +36,6 @@ const FileMenu: React.FC = () => {
   return (
     <MenubarMenu>
       <CommandMenuItem id={WorkbenchCommandId.Rename} />
-      <MenuDivider />
-      <CommandMenuItem id={WorkbenchCommandId.Print} />
     </MenubarMenu>
   );
 };

@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { MenuDivider } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { EditorCommandId } from 'editor/src/api/command';
+import { EditorCommandId } from 'editor';
 
 import { CommandMenuItem, CommandMenuItemActive } from '../../widgets/command/CommandMenuItem';
 import { CommandSubMenu } from '../../widgets/command/CommandSubMenu';

@@ -18,8 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Checkbox, FormGroup, HTMLSelect } from '@blueprintjs/core';
 
-import { ListProps, ListEditResult, ListType, ListCapabilities } from 'editor';
-import { ListNumberStyle, ListNumberDelim } from 'editor/src/nodes/list/list';
+import { ListProps, ListEditResult, ListType, ListCapabilities, ListNumberStyle, ListNumberDelim } from 'editor';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { DialogNumericInput } from '../../../widgets/dialog/DialogInputs';

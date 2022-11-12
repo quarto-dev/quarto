@@ -127,8 +127,6 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
       // update editor
       this.updateEditor();
-    
-    
   }
 
   private onResize() {
@@ -170,9 +168,9 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
   }
 
-  private updateEditor() {
+  private async updateEditor() {
     // set content (will no-op if prop change was from ourselves)
-    this.setEditorContent(this.props.markdown);
+    await this.setEditorContent(this.props.markdown);
 
     // if title changed then set it
     if (this.props.title !== this.editor!.getTitle()) {
@@ -191,6 +189,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
       this.editorMarkdown = markdown;
       try {
         await this.editor!.setMarkdown(markdown, this.panmirrorWriterOptions(), false);
+        this.onEditorOutlineChanged();
       } catch (error) {
         this.errorAlert(error);
       }

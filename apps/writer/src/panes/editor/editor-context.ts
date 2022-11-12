@@ -262,7 +262,7 @@ function editorSpelling() : EditorUISpelling {
   return {
     // realtime interface
     realtimeEnabled(): boolean {
-      return true;
+      return false;
     },
     checkWords(_words: string[]): string[] {
       return [];

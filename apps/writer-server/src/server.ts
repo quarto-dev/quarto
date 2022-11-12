@@ -32,7 +32,7 @@ export const createServer = () => {
     .disable("x-powered-by")
     .use(morgan("dev"))
     .use(urlencoded({ extended: true }))
-    .use(json())
+    .use(json({limit: '100mb' }))
     .use(cors())
     .use('/editor-server', server.middleware())
     .get("/message/:name", (req, res) => {

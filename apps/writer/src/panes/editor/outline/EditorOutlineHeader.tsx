@@ -31,7 +31,7 @@ export const EditorOutlineHeader: React.FC<EditorOutlineHeaderProps> = props => 
 
   return (
     <div className={styles.outlineHeader}>
-      <Icon icon={IconNames.ALIGN_JUSTIFY} />
+      <Icon icon={IconNames.ALIGN_JUSTIFY} onClick={props.onCloseClicked} />
       <div className={styles.outlineHeaderText}>{t('outline_header_text')}</div>
       <Icon
         icon={IconNames.CHEVRON_LEFT}

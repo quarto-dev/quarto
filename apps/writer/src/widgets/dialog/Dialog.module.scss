@@ -23,7 +23,7 @@
 
 .dialogFooterActionsLeft {
   :global {
-    .bp3-button:first-of-type {
+    .bp4-button:first-of-type {
       margin-left: 0 !important;
     }
   }
@@ -34,10 +34,10 @@
 }
 
 :global {
-  .bp3-control-group:not(.bp3-vertical) > * {
+  .bp4-control-group:not(.bp4-vertical) > * {
     margin-right: 10px !important;
   }
-  .bp3-control-group:not(.bp3-vertical) > *:last-of-type {
+  .bp4-control-group:not(.bp4-vertical) > *:last-of-type {
     margin-right: -1px !important; 
   }
 }

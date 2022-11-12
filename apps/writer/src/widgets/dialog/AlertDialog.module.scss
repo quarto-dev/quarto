@@ -17,7 +17,7 @@
 
 .alertDialog {
   :global {
-    .bp3-alert-contents > p:first-of-type > strong {
+    .bp4-alert-contents > p:first-of-type > strong {
       font-size: 1.2em;
     }
   }
@@ -25,7 +25,7 @@
 
 .alertDialog {
   :global {
-    .bp3-alert-body > .bp3-icon-error {
+    .bp4-alert-body > .bp4-icon-error {
       color: $red4;
     }
   }
@@ -33,7 +33,7 @@
 
 .alertDialog {
   :global {
-    .bp3-alert-body > .bp3-icon-warning-sign {
+    .bp4-alert-body > .bp4-icon-warning-sign {
       color: $orange4;
     }
   }
@@ -41,7 +41,7 @@
 
 .alertDialog {
   :global {
-    .bp3-alert-body > .bp3-icon-info-sign {
+    .bp4-alert-body > .bp4-icon-info-sign {
       color: $blue4;
     }
   }

@@ -50,7 +50,7 @@ $verticalPadding: 20px;
 
 
 .outlineHeader {
-  :global(.bp3-icon) {
+  :global(.bp4-icon) {
     color: $gray1 !important;
   }
 }
@@ -86,29 +86,29 @@ $verticalPadding: 20px;
 
 .outlineTree {
   :global {
-    .bp3-tree-node-caret-none {
+    .bp4-tree-node-caret-none {
       min-width: 10px !important;
     }
-    .bp3-tree-node-content {
+    .bp4-tree-node-content {
       padding-right: 15px;
     }
-    .bp3-tree-node-content-0 {
+    .bp4-tree-node-content-0 {
       font-weight: 500 !important;
       padding-left: 8px;
     }
-    .bp3-tree-node-content-1 {
-      padding-left: 20px;
+    .bp4-tree-node-content-1 {
+      padding-left: 20px !important;
     }
-    .bp3-tree-node-content-2 {
+    .bp4-tree-node-content-2 {
       padding-left: 30px;
     }
-    .bp3-tree-node-content-3 {
+    .bp4-tree-node-content-3 {
       padding-left: 40px;
     }
-    .bp3-tree-node-content-4 {
+    .bp4-tree-node-content-4 {
       padding-left: 50px;
     }
-    .bp3-tree-node-content-5 {
+    .bp4-tree-node-content-5 {
       padding-left: 60px;
     }
   }
@@ -133,7 +133,7 @@ $verticalPadding: 20px;
 }
 
 .showOutlineButton {
-  :global(.bp3-icon) {
+  :global(.bp4-icon) {
     color: $gray1  !important;
   }
 }

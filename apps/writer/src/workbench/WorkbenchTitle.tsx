@@ -80,10 +80,10 @@ class WorkbenchTitle extends React.Component<WorkbenchTitleProps> {
     // no ref property available on EditableText, so we need this hack:
     //  https://github.com/palantir/blueprint/issues/2492
     const editableText = ReactDOM.findDOMNode(this) as Element;
-    const editableTextContent = editableText!.querySelector('.bp3-editable-text-content');
+    const editableTextContent = editableText!.querySelector('.bp4-editable-text-content');
     editableTextContent!.dispatchEvent(new Event('focus'));
     setTimeout(() => {
-      const editableTextInput = editableText!.querySelector('.bp3-editable-text-input');
+      const editableTextInput = editableText!.querySelector('.bp4-editable-text-input');
       focusInput(editableTextInput as HTMLInputElement);
     }, 50);
   }

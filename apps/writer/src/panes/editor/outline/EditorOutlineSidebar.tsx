@@ -48,9 +48,14 @@ export interface EditorOutlineSidebarProps extends IProps {
   t: TFunction;
 }
 
-class EditorOutlineSidebar extends React.Component<EditorOutlineSidebarProps> {
+interface EditorOutlineSidebarState {
+  animating: boolean;
+}
+
+class EditorOutlineSidebar extends React.Component<EditorOutlineSidebarProps,EditorOutlineSidebarState> {
   constructor(props: EditorOutlineSidebarProps) {
     super(props);
+    this.state = { animating: false };
     this.onOpenClicked = this.onOpenClicked.bind(this);
     this.onCloseClicked = this.onCloseClicked.bind(this);
   }
@@ -78,13 +83,24 @@ class EditorOutlineSidebar extends React.Component<EditorOutlineSidebarProps> {
       outlineClassName.push(styles.outlineVisible);
     }
 
+    const setAnimating = (animating: boolean) => {
+      return () => {
+        this.setState({animating});
+      }
+    }
+
     return (
       <>
         <EditorOutlineButton visible={!this.props.showOutline} onClick={this.onOpenClicked} />
-        <CSSTransition in={this.props.showOutline} timeout={200} classNames={{ ...transition }}>
+        <CSSTransition in={this.props.showOutline} timeout={200} classNames={{ ...transition }} 
+          onEnter={setAnimating(true)}
+          onEntered={setAnimating(false)}
+          onExit={setAnimating(true)}
+          onExited={setAnimating(false)}
+        >            
           <div className={outlineClassName.join(' ')}>
             <EditorOutlineHeader onCloseClicked={this.onCloseClicked} />
-            {this.props.outline.length ? <EditorOutlineTree outline={this.props.outline} /> : <EditorOutlineEmpty />}
+            {this.props.outline.length ? <EditorOutlineTree outline={this.props.outline} /> : !this.state.animating ? <EditorOutlineEmpty /> : null}
           </div>
         </CSSTransition>
       </>

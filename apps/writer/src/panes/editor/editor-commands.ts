@@ -243,6 +243,9 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.YamlMetadata]: {
         menuText: t('commands:yaml_metadata_menu_text'),
       },
+      [EditorCommandId.HTMLComment]: {
+        menuText: t('commands:html_comment_menu_text'),
+      },
       [EditorCommandId.RCodeChunk]: {
         icon: IconNames.CODE_BLOCK,
         menuText: t('commands:rmd_chunk_menu_text'),

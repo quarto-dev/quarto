@@ -199,9 +199,12 @@ class EditorPane extends React.Component<EditorPaneProps> {
       this.editorMarkdown = markdown;
       try {
         await this.editor!.setMarkdown(markdown, this.panmirrorWriterOptions(), false);
-        this.props.setLoading(false);
         this.props.setTitle(this.editor!.getTitle() || '');
         this.onEditorOutlineChanged();
+        if (this.props.loading) {
+          this.props.setLoading(false);
+          this.editor!.focus();
+        }
       } catch (error) {
         this.errorAlert(error);
       }

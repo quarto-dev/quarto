@@ -126,7 +126,10 @@ class EditorPane extends React.Component<EditorPaneProps> {
       ]);
 
       // update editor
-      this.updateEditor();
+      await this.updateEditor(true);
+
+      // sync title
+      this.syncEditorTitle();
   }
 
   private onResize() {
@@ -150,7 +153,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
 
     // update editor
-    this.updateEditor();
+    this.updateEditor(false);
   }
 
   // implement EditorActions interface by proxing to this.editor --
@@ -168,13 +171,14 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
   }
 
-  private async updateEditor() {
+  private async updateEditor(loading: boolean) {
     // set content (will no-op if prop change was from ourselves)
     await this.setEditorContent(this.props.markdown);
-
-    // if title changed then set it
-    if (this.props.title !== this.editor!.getTitle()) {
-      this.editor!.setTitle(this.props.title);
+ 
+    if (!loading) {
+      if (this.props.title !== this.editor!.getTitle()) {
+        this.editor!.setTitle(this.props.title);
+      }
     }
   }
 
@@ -202,8 +206,13 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
 
     // set title into reduce
-    const title = this.editor!.getTitle();
-    this.props.setTitle(title || '');
+    this.syncEditorTitle();
+  }
+
+  private syncEditorTitle() {
+     // set title into reduce
+     const title = this.editor!.getTitle();
+     this.props.setTitle(title || '');
   }
 
   private onEditorOutlineChanged() {

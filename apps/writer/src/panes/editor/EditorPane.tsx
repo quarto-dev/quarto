@@ -182,11 +182,9 @@ class EditorPane extends React.Component<EditorPaneProps> {
   private async updateEditor() {
     // set content (will no-op if prop change was from ourselves)
     await this.setEditorContent(this.props.markdown);
- 
-    if (!this.props.loading) {
-      if (this.props.title !== this.editor!.getTitle()) {
-        this.editor!.setTitle(this.props.title);
-      }
+   
+    if (this.props.title !== this.editor!.getTitle()) {
+      this.editor!.setTitle(this.props.title);
     }
   }
 
@@ -202,6 +200,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
       try {
         await this.editor!.setMarkdown(markdown, this.panmirrorWriterOptions(), false);
         this.props.setLoading(false);
+        this.props.setTitle(this.editor!.getTitle() || '');
         this.onEditorOutlineChanged();
       } catch (error) {
         this.errorAlert(error);

@@ -39,6 +39,7 @@
   "line_block_menu_text": "Line Block",
   "yaml_metadata_menu_text": "YAML Block...",
   "user_comment_menu_text": "Comment...",
+  "html_comment_menu_text": "HTML Comment",
   "rmd_chunk_menu_text": "Code Chunk",
   "definition_list_menu_text": "Definition List",
   "definition_term_menu_text": "Term",

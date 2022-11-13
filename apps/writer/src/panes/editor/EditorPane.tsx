@@ -37,6 +37,7 @@ import {
   setEditorSelection,
   setEditorOutline,
   setEditorTitle,
+  setEditorLoading,
 } from '../../store/editor/editor-actions';
 import { Pane } from '../../widgets/Pane';
 
@@ -55,9 +56,11 @@ import styles from './EditorPane.module.scss';
 
 
 interface EditorPaneProps {
+  loading: boolean;
   title: string;
   markdown: string;
   showMarkdown: boolean;
+  setLoading: (loading: boolean) => void;
   setTitle: (title: string) => void;
   setMarkdown: (markdown: string) => void;
   setOutline: (outline: EditorOutline) => void;
@@ -65,11 +68,7 @@ interface EditorPaneProps {
   commandManager: CommandManager;
 }
 
-interface EditorPaneState {
-  loading: boolean;
-}
-
-class EditorPane extends React.Component<EditorPaneProps, EditorPaneState> {
+class EditorPane extends React.Component<EditorPaneProps> {
   // container for the editor
   private parent: HTMLDivElement | null;
 
@@ -104,7 +103,7 @@ class EditorPane extends React.Component<EditorPaneProps, EditorPaneState> {
         <EditorActionsContext.Provider value={this}>
           <EditorToolbar />
           <div id="editor" className={styles.editorParent} ref={el => (this.parent = el)}>
-            {this.state.loading ? <EditorPaneLoading /> : null}
+            {this.props.loading ? <EditorPaneLoading /> : null}
             <EditorOutlineSidebar />
           </div>
           <EditorDialogsImpl ref={this.editorDialogsRef} />
@@ -184,7 +183,7 @@ class EditorPane extends React.Component<EditorPaneProps, EditorPaneState> {
     // set content (will no-op if prop change was from ourselves)
     await this.setEditorContent(this.props.markdown);
  
-    if (!this.state.loading) {
+    if (!this.props.loading) {
       if (this.props.title !== this.editor!.getTitle()) {
         this.editor!.setTitle(this.props.title);
       }
@@ -202,7 +201,7 @@ class EditorPane extends React.Component<EditorPaneProps, EditorPaneState> {
       this.editorMarkdown = markdown;
       try {
         await this.editor!.setMarkdown(markdown, this.panmirrorWriterOptions(), false);
-        this.setState( { loading: false });
+        this.props.setLoading(false);
         this.onEditorOutlineChanged();
       } catch (error) {
         this.errorAlert(error);
@@ -290,6 +289,7 @@ const EditorPaneLoading: React.FC = () => {
 
 const mapStateToProps = (state: WorkbenchState) => {
   return {
+    loading: state.editor.loading,
     title: state.editor.title,
     markdown: state.editor.markdown,
     showMarkdown: state.prefs.showMarkdown,
@@ -299,6 +299,7 @@ const mapStateToProps = (state: WorkbenchState) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapDispatchToProps = (dispatch: any) => {
   return {
+    setLoading: (loading: boolean) => dispatch(setEditorLoading(loading)),
     setMarkdown: (markdown: string) => dispatch(setEditorMarkdown(markdown)),
     setTitle: (title: string) => dispatch(setEditorTitle(title)),
     setOutline: (outline: EditorOutline) => dispatch(setEditorOutline(outline)),

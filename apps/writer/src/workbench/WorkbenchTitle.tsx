@@ -21,7 +21,7 @@ import { connect } from 'react-redux';
 import { TFunction } from 'i18next';
 import { withTranslation } from 'react-i18next';
 
-import { IProps, EditableText } from '@blueprintjs/core';
+import { EditableText, Props } from '@blueprintjs/core';
 
 import { WorkbenchState } from '../store/store';
 import { setEditorTitle } from '../store/editor/editor-actions';
@@ -33,7 +33,8 @@ import { focusInput } from '../widgets/utils';
 
 import styles from './WorkbenchNavbar.module.scss';
 
-export interface WorkbenchTitleProps extends IProps {
+export interface WorkbenchTitleProps extends Props {
+  loading: boolean;
   title: string;
   setTitle: (title: string) => void;
   commandManager: CommandManager;
@@ -66,7 +67,7 @@ class WorkbenchTitle extends React.Component<WorkbenchTitleProps> {
     return (
       <EditableText
         className={styles.title}
-        placeholder={this.props.t('untitled_document')}
+        placeholder={this.props.loading ? '' : this.props.t('untitled_document')}
         value={this.props.title}
         onChange={this.props.setTitle}
         onCancel={this.focusEditor}
@@ -98,6 +99,7 @@ class WorkbenchTitle extends React.Component<WorkbenchTitleProps> {
 
 const mapStateToProps = (state: WorkbenchState) => {
   return {
+    loading: state.editor.loading,
     title: state.editor.title,
   };
 };

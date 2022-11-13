@@ -18,6 +18,7 @@ import { Reducer } from 'redux';
 import { EditorState, EditorActions, EditorActionTypes } from './editor-types';
 
 const initialEditorState: EditorState = {
+  loading: true,
   title: '',
   markdown: '',
   outline: [],
@@ -26,6 +27,12 @@ const initialEditorState: EditorState = {
 
 export const editorReducer: Reducer<EditorState, EditorActions> = (state = initialEditorState, action) => {
   switch (action.type) {
+    case EditorActionTypes.SET_LOADING: {
+      return {
+        ...state,
+        loading: action.loading,
+      };
+    }
     case EditorActionTypes.SET_TITLE: {
       return {
         ...state,

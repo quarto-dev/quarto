@@ -23,12 +23,18 @@ import {
   EditorSetSelectionAction,
   EditorSetMarkdownAction,
   EditorSetOutlineAction,
+  EditorSetLoadingAction,
 } from './editor-types';
 
 export const setEditorTitle: ActionCreator<EditorSetTitleAction> = (title: string) => ({
   type: EditorActionTypes.SET_TITLE,
   title,
 });
+
+export const setEditorLoading: ActionCreator<EditorSetLoadingAction> = (loading: boolean) => ({
+  type: EditorActionTypes.SET_LOADING,
+  loading
+})
 
 export const setEditorMarkdown: ActionCreator<EditorSetMarkdownAction> = (markdown: string) => ({
   type: EditorActionTypes.SET_MARKDOWN,

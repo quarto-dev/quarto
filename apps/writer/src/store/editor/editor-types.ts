@@ -16,10 +16,16 @@
 import { EditorOutline } from 'editor';
 
 export enum EditorActionTypes {
+  SET_LOADING = 'EDITOR/SET_LOADING',
   SET_TITLE = 'EDITOR/SET_TITLE',
   SET_MARKDOWN = 'EDITOR/SET_MARKDOWN',
   SET_OUTLINE = 'EDITOR/SET_OUTLINE',
   SET_SELECTION = 'EDITOR/SET_SELECTION',
+}
+
+export interface EditorSetLoadingAction {
+  type: EditorActionTypes.SET_LOADING;
+  loading: boolean;
 }
 
 export interface EditorSetTitleAction {
@@ -43,6 +49,7 @@ export interface EditorSetSelectionAction {
 }
 
 export interface EditorState {
+  readonly loading: boolean;
   readonly title: string;
   readonly markdown: string;
   readonly outline: EditorOutline;
@@ -50,6 +57,7 @@ export interface EditorState {
 }
 
 export type EditorActions =
+  | EditorSetLoadingAction
   | EditorSetTitleAction
   | EditorSetMarkdownAction
   | EditorSetOutlineAction

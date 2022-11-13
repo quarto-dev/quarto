@@ -15,6 +15,11 @@
 
 import { WorkbenchState } from '../store';
 
+export function editorLoading(state: WorkbenchState) {
+  return state.editor.loading;
+}
+
+
 export function editorTitle(state: WorkbenchState) {
   return state.editor.title;
 }

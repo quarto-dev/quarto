@@ -14,7 +14,7 @@
  */
 
 import { Node as ProsemirrorNode, NodeSpec, NodeType, ResolvedPos } from 'prosemirror-model';
-import { EditorState, Selection, NodeSelection } from 'prosemirror-state';
+import { EditorState, Selection, NodeSelection, Transaction } from 'prosemirror-state';
 import {
   findParentNode,
   findSelectedNodeOfType,
@@ -24,6 +24,7 @@ import {
   findChildrenByType,
   findChildren,
   findParentNodeOfTypeClosestToPos,
+  Predicate,
 } from 'prosemirror-utils';
 
 import { EditorView } from 'prosemirror-view';
@@ -40,6 +41,7 @@ import { PandocBlockCapsuleFilter } from './pandoc_capsule';
 
 import { AttrEditOptions } from './attr_edit';
 import { CommandFn } from './command';
+import { traverseNodes, TraverseResult } from './node-traverse';
 
 export interface PandocNode {
   readonly name: string;
@@ -193,6 +195,25 @@ export function editingRootScrollContainerElement(view: EditorView) {
   } else {
     return undefined;
   }
+}
+
+export function setNodeAttrs(tr: Transaction, {pos, node}: NodeWithPos, attrs: { [key: string]: unknown }) {
+  return tr.setNodeMarkup(
+    pos, node.type,
+    Object.assign({}, node.attrs, attrs),
+    node.marks
+  );
+}
+
+export function findOneNode(node: ProsemirrorNode, from: number, to: number, predicate: Predicate) {
+  let result: ProsemirrorNode | null = null;
+  traverseNodes(node, from, to, x => {
+    if (predicate(x)) {
+      result = x;
+      return TraverseResult.End;
+    }
+  });
+  return result;
 }
 
 function asSelection(context: EditorState | Selection) {

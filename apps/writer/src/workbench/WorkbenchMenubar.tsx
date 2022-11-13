@@ -97,6 +97,8 @@ const InsertMenu: React.FC = () => {
       <CommandMenuItem id={CommandId.RawInline} />
       <MenuDivider />
       <CommandMenuItem id={CommandId.YamlMetadata} />
+      <MenuDivider />
+      <CommandMenuItem id={CommandId.UserComment} />
     </MenubarMenu>
   );
 };

@@ -84,6 +84,10 @@ export interface EditorMath {
 
 
 export interface EditorUIContext {
+
+  // get the current username
+  getUsername?: () => string;
+
   // check if we are the active tab
   isActiveTab: () => boolean;
 

@@ -21,3 +21,18 @@ export function uuidv4() {
     return v.toString(16);
   });
 }
+
+
+// Returns a random string of (alpha)numeric characters of len length.
+// Note that this may return strings with leading numbers, which isn't
+// allowed for JavaScript identifiers.
+export function randomAlphanumeric(len: number, includeLower = true, includeUpper = true) {
+  const pool = "0123456789" +
+    (includeLower ? "abcdefghijklmnopqrstuvwxyz" : "") +
+    (includeUpper ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "");
+
+  return " ".repeat(len).replace(/./g, () => {
+    return pool.charAt(Math.floor(Math.random() * pool.length));
+  });
+}
+

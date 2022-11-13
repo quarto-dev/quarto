@@ -111,6 +111,9 @@ export enum EditorCommandId {
   RawInline = '984167C8-8582-469C-97D8-42CB12773657',
   RawBlock = 'F5757992-4D33-45E6-86DC-F7D7B174B1EC',
 
+  // user comments
+  UserComment = '201FA139-4C86-4A5D-AF98-DE9EFB1A867C',
+
   // chunk
   RCodeChunk = 'EBFD21FF-4A6E-4D88-A2E0-B38470B00BB9',
   BashCodeChunk = '5FBB7283-E8AB-450C-9359-A4658CBCD136',

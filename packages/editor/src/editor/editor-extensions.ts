@@ -106,6 +106,7 @@ import nodeDiv from '../nodes/div/div';
 import nodeLineBlock from '../nodes/line_block';
 import nodeTable from '../nodes/table/table';
 import nodeDefinitionList from '../nodes/definition_list/definition_list';
+import nodeUserComment from '../nodes/user_comment/user_comment';
 import nodeShortcodeBlock from '../nodes/shortcode_block';
 import nodeHtmlPreserve from '../nodes/html_preserve';
 
@@ -171,6 +172,7 @@ export function initExtensions(context: ExtensionContext, extensions?: readonly 
     nodeDefinitionList,
     nodeLineBlock,
     nodeRawBlock,
+    nodeUserComment, // MUST come before markRawInline
     nodeShortcodeBlock,
     nodeHtmlPreserve,
 
@@ -255,6 +257,15 @@ export class ExtensionManager {
 
   public registerPlugins(plugins: Plugin[], priority = false) {
     this.register([{ plugins: () => plugins }], priority);
+  }
+
+  public view(view: EditorView) {
+    this.collect(extension => {
+      if (extension.view) {
+        extension.view(view);
+      }
+      return undefined;
+    });
   }
 
   public pandocMarks(): readonly PandocMark[] {

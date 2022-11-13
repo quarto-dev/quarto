@@ -36,6 +36,7 @@ import { EditorNavigation } from './navigation-types';
 import { EditorServer } from 'editor-types';
 
 export interface Extension {
+  view?: (view: EditorView) => void;
   marks?: PandocMark[];
   nodes?: PandocNode[];
   baseKeys?: (schema: Schema) => readonly BaseKeyBinding[];

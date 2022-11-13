@@ -63,6 +63,7 @@
     "prosemirror-view": "^1.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-textarea-autosize": "^8.4.0",
     "react-window": "^1.8.8",
     "sentence-splitter": "^3.2.2",
     "thenby": "^1.3.3",

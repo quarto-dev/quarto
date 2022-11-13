@@ -215,6 +215,150 @@ p.ProseMirror-selectednode {
   outline: none;
 }
 
+
+.pm-annotations {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  bottom: 0;
+  width: 232px;
+  overflow: hidden;
+}
+
+a.pm-insert-user-comment-button, a.pm-insert-user-comment-button:hover {
+  display: inline-block;
+  position: absolute;
+  right: 12px;
+  user-select: none;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-style: normal;
+  font-weight: normal;
+}
+
+.pm-user-comment-view, .pm-annotations {
+  /* The speed at which the comments pane adjusts to match the selection */
+  transition-property: transform, margin-left;
+  transition-duration: 750ms;
+}
+
+.pm-user-comment-view {
+  width: 220px;
+  margin-left: 12px;
+}
+/* When the current doc selection head is within a comment's extent, this class
+ * is added to its satellite element */
+.pm-user-comment-view.pm-user-comment-active {
+  margin-left: 0;
+}
+
+.pm-user-comment-thread {
+  width: 100%;
+  font-size: 0.75rem;
+  color: rgb(57, 75, 89);
+}
+
+.pm-user-comment-item {
+  width: 100%;
+  background-color: white;
+  box-shadow: rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  margin-bottom: 8px;
+}
+
+.pm-user-comment-header {
+  padding: .3rem .6rem;
+  background-color: rgba(167, 182, 194, 0.3);
+  display: flex;
+  align-items: baseline;
+}
+.pm-user-comment-item:focus-within .pm-user-comment-header {
+  padding: .3rem .6rem;
+  background-color: rgba(167, 182, 194, 0.6);
+  display: flex;
+  align-items: baseline;
+}
+    
+.pm-user-comment-meta {
+  flex: 1;
+}
+
+.pm-user-comment-author {
+  font-weight: 500;
+}
+.pm-user-comment-created {
+  flex: 1;
+  opacity: 0.58;
+}
+.pm-user-comment-actions {
+  padding: 0;
+  text-align: center;
+  float: right;
+  margin-right: -3px;
+}
+.pm-user-comment-actions > button {
+  padding: 1px 3px;
+}
+.pm-user-comment-delete {
+  margin-left: 3px;
+}
+.pm-user-comment-delete:before {
+  content: '\2715';
+}
+.pm-user-comment-edit:before {
+  content: '\270E';
+}
+.pm-user-comment-edit.active {
+  color: #777;
+  cursor: default;
+}
+
+.pm-user-comment-content {
+  display: block;
+  padding: .6rem;
+  max-height: 200px;
+  white-space: pre-wrap;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  resize: none;
+  width: 100%;
+  outline-width: 0px !important;
+  border: none;
+  margin: 0px;
+  background-color: inherit;
+}
+.pm-user-comment-footer {
+  padding: .3rem .6rem;
+}
+.pm-user-comment-footer button {
+  margin-right: 6px;
+}
+.pm-user-comment-add {
+  float: right;
+}
+.pm-user-comment-add:before {
+  content: 'Reply\2026';
+}
+
+.pm-user-comment-content:not([disabled]) {
+  background-color: #FFFFDD;
+  border-bottom: 1px solid #DDD;
+}
+.pm-user-comment-content:not([disabled]):empty:not(:focus):before {
+  content: "(Empty)";
+}
+.pm-user-comment-content:not([disabled]):empty {
+  font-style: italic;
+  color: #888;
+}
+
+.pm-user-comment-content[disabled]:empty:not(:focus):before {
+  content: "(Empty comment)";
+}
+.pm-user-comment-content[disabled]:empty {
+  color: #888;
+}
+
 .pm-input-text {
   border: 1px;
   border-style: solid;

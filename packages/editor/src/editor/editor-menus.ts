@@ -199,6 +199,7 @@ function insertMenu(ui: EditorUI, commands: EditorCommand[]) {
     { command: EditorCommandId.CodeBlockFormat },
     { command: EditorCommandId.YamlMetadata },
     { separator: true },
+    { command: EditorCommandId.UserComment },
     { command: EditorCommandId.HTMLComment },
   ];
 }

@@ -50,3 +50,29 @@ export function onElementRemoved(container: Node, el: HTMLElement, onRemoved: Vo
   });
   observer.observe(container, { attributes: false, childList: true, subtree: true });
 }
+
+
+
+// Receive a callback when the given node is attached to the given document.
+export function onNodeAttached(node: Node, doc: Document,
+  callback: (node: Node, parentNode: Node) => void) {
+
+  const obs = new MutationObserver(mutations => {
+    for (const mut of mutations) {
+      mut.addedNodes.forEach(x => {
+        if (x === node) {
+          obs.disconnect();
+          callback(node, mut.target);
+          return;
+        }
+      });
+    }
+  });
+
+  obs.observe(doc, {
+    childList: true,
+    subtree: true
+  });
+
+  return obs;
+}

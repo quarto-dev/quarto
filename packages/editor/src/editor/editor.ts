@@ -441,6 +441,9 @@ export class Editor {
       },
     });
 
+    // Tell extensions about the new view
+    this.extensions.view(this.view);
+
     // add proportinal font class to parent
     this.parent.classList.add('pm-proportional-font');
 

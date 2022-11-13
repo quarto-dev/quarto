@@ -17,6 +17,8 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
+import { Intent, Spinner } from '@blueprintjs/core';
+
 import { 
   Editor, 
   EditorDialogs, 
@@ -51,6 +53,7 @@ import { editorDialogs } from './dialogs/editor-dialogs';
 
 import styles from './EditorPane.module.scss';
 
+
 interface EditorPaneProps {
   title: string;
   markdown: string;
@@ -62,7 +65,11 @@ interface EditorPaneProps {
   commandManager: CommandManager;
 }
 
-class EditorPane extends React.Component<EditorPaneProps> {
+interface EditorPaneState {
+  loading: boolean;
+}
+
+class EditorPane extends React.Component<EditorPaneProps, EditorPaneState> {
   // container for the editor
   private parent: HTMLDivElement | null;
 
@@ -82,6 +89,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   constructor(props: Readonly<EditorPaneProps>) {
     super(props);
+    this.state = { loading: true };
     this.parent = null;
     this.editor = null;
     this.editorEvents = [];
@@ -96,6 +104,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
         <EditorActionsContext.Provider value={this}>
           <EditorToolbar />
           <div id="editor" className={styles.editorParent} ref={el => (this.parent = el)}>
+            {this.state.loading ? <EditorPaneLoading /> : null}
             <EditorOutlineSidebar />
           </div>
           <EditorDialogsImpl ref={this.editorDialogsRef} />
@@ -126,7 +135,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
       ]);
 
       // update editor
-      await this.updateEditor(true);
+      await this.updateEditor();
 
       // sync title
       this.syncEditorTitle();
@@ -153,7 +162,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
 
     // update editor
-    this.updateEditor(false);
+    this.updateEditor();
   }
 
   // implement EditorActions interface by proxing to this.editor --
@@ -171,11 +180,11 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
   }
 
-  private async updateEditor(loading: boolean) {
+  private async updateEditor() {
     // set content (will no-op if prop change was from ourselves)
     await this.setEditorContent(this.props.markdown);
  
-    if (!loading) {
+    if (!this.state.loading) {
       if (this.props.title !== this.editor!.getTitle()) {
         this.editor!.setTitle(this.props.title);
       }
@@ -193,6 +202,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
       this.editorMarkdown = markdown;
       try {
         await this.editor!.setMarkdown(markdown, this.panmirrorWriterOptions(), false);
+        this.setState( { loading: false });
         this.onEditorOutlineChanged();
       } catch (error) {
         this.errorAlert(error);
@@ -265,6 +275,17 @@ class EditorPane extends React.Component<EditorPaneProps> {
       atxHeaders: true
     };
   }
+}
+
+
+const EditorPaneLoading: React.FC = () => {
+  return (
+    <div className={['ProseMirror', styles.editorLoading].join(' ')}>
+      <div className='body pm-editing-root-node pm-text-color pm-background-color'>
+        <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
+      </div>
+    </div>
+  )
 }
 
 const mapStateToProps = (state: WorkbenchState) => {

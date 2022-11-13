@@ -49,7 +49,7 @@ export async function createEditor(parent: HTMLElement, dialogs: EditorDialogs) 
     docTypes: []
   }
 
-  return Editor.create(parent, context, format, { autoFocus: true });
+  return Editor.create(parent, context, format, { spellCheck: true });
 }
 
 export function editorContext(dialogs: EditorDialogs) : EditorContext {

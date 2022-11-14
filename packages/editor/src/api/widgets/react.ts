@@ -14,7 +14,7 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { EditorView } from 'prosemirror-view';
 
@@ -31,7 +31,8 @@ export interface WidgetProps {
 // ReactDOM.unmountComponentAtNode
 export function reactRenderForEditorView(element: React.ReactElement, container: HTMLElement, view: EditorView) {
   // render the react element into the container
-  const ref = ReactDOM.render(element, container);
+  const root = createRoot(container);
+  root.render(element);
 
   // track view dom mutations to determine when ProseMirror has destroyed the element
   // (our cue to unmount/cleanup the react component)
@@ -40,13 +41,10 @@ export function reactRenderForEditorView(element: React.ReactElement, container:
       mutation.removedNodes.forEach(node => {
         if (node === container) {
           observer.disconnect();
-          ReactDOM.unmountComponentAtNode(container);
+          root.unmount();
         }
       });
     });
   });
   observer.observe(view.dom, { attributes: false, childList: true, subtree: true });
-
-  // return the ref
-  return ref;
 }

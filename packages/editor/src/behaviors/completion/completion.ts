@@ -30,7 +30,7 @@ import {
 } from '../../api/completion';
 import { EditorEvents, ScrollEvent } from '../../api/event-types';
 
-import { createCompletionPopup, renderCompletionPopup, destroyCompletionPopup } from './completion-popup';
+import { createCompletionPopup, renderCompletionPopup, destroyCompletionPopup, CompletionPopup } from './completion-popup';
 import { EditorUI } from '../../api/ui-types';
 import { PromiseQueue } from '../../api/promise';
 import { MarkInputRuleFilter } from '../../api/input_rule';
@@ -64,7 +64,7 @@ class CompletionPlugin extends Plugin<CompletionState> {
   private view: EditorView | null = null;
 
   // popup elemeent
-  private completionPopup: HTMLElement | null = null;
+  private completionPopup: CompletionPopup | null = null;
 
   // currently selected index and last set of completions are held as transient
   // state because they can't be derived from the document state (selectedIndex
@@ -378,7 +378,6 @@ class CompletionPlugin extends Plugin<CompletionState> {
       // create the completion popup if we need to
       if (this.completionPopup === null) {
         this.completionPopup = createCompletionPopup();
-        window.document.body.appendChild(this.completionPopup);
       }
 
       // render

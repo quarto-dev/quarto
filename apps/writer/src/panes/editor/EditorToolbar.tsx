@@ -13,7 +13,7 @@
  *
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { IconNames } from '@blueprintjs/icons';
 
@@ -25,13 +25,16 @@ import { CommandToolbarMenu } from '../../widgets/command/CommandToolbarMenu';
 import { WithCommand } from '../../widgets/command/WithCommand';
 import { WorkbenchCommandId } from '../../commands/commands';
 
-import EditorTableMenuItems from './EditorTableMenuItems';
-
 import styles from './EditorPane.module.scss';
+import { CommandManagerContext } from '../../commands/CommandManager';
+import { CommandMenuItems } from '../../widgets/command/CommandMenuItems';
 
 const CommandId = { ...EditorCommandId, ...WorkbenchCommandId };
 
 const EditorToolbar: React.FC = () => {
+
+  const commandManager = useContext(CommandManagerContext);
+
   return (
     <Toolbar className={styles.toolbar}>
       <CommandToolbarButton command={CommandId.Undo} />
@@ -63,7 +66,7 @@ const EditorToolbar: React.FC = () => {
       <ToolbarDivider />
       <WithCommand id={CommandId.TableInsertTable}>
         <ToolbarMenu icon={IconNames.TH}>
-          <EditorTableMenuItems />
+          <CommandMenuItems menu={commandManager.menus.table}/>
         </ToolbarMenu>
         <ToolbarDivider />
       </WithCommand>

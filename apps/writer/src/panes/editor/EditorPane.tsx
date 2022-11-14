@@ -133,6 +133,9 @@ class EditorPane extends React.Component<EditorPaneProps> {
         ...editorDebugCommands(this.editor!),
       ]);
 
+      // set menus
+      this.props.commandManager.setMenus(this.editor!.getMenus());
+
       // update editor
       await this.updateEditor();
 

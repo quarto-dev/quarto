@@ -25,7 +25,7 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorUI, EditorUIImages } from '../api/ui-types';
+import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   AttrProps,
   AttrEditInput,
@@ -115,7 +115,7 @@ import { PandocConverter, PandocLineWrapping } from '../pandoc/pandoc_converter'
 import { ExtensionManager, initExtensions } from './editor-extensions';
 import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
 import { defaultEditorUIImages } from './editor-images';
-import { editorMenus, EditorMenus } from './editor-menus';
+import { editorMenus } from './editor-menus';
 import { editorSchema } from './editor-schema';
 
 // import styles before extensions so they can be overridden by extensions

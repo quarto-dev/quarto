@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
@@ -102,8 +102,6 @@ export async function showInsertCitationDialog(
       const width = Math.max(Math.min(kMaxWidth, windowWidth * 0.9), 550);
 
       const container = window.document.createElement('div');
-      container.style.width = width + 'px';
-      container.style.height = height + 'px';
       container.className = 'pm-default-theme';
 
       // Provide the providers top the dialog and then refresh the bibliography and reload
@@ -142,9 +140,6 @@ export async function showInsertCitationDialog(
           existingIds: bibliographyManager.localSources().map(source => source.id),
         };
       });
-
-      // create react rendering root
-      const root = createRoot(container);
 
       // Handles the confirmation by the user
       const onOk = async (
@@ -195,30 +190,23 @@ export async function showInsertCitationDialog(
             hideProgress();
           }
         }
-
-        // unmount the compontent
-        root.unmount();
-
         // Dismiss the dialog
         confirm();
       };
 
-      const onCancel = () => {
-        root.unmount();
-        cancel();
-      }
-
-      root.render(
+      container.style.width = width + 'px';
+      ReactDOM.render(
         <InsertCitationPanel
           height={height}
           width={width}
           configuration={configurationStream}
           initiallySelectedNodeKey={initiallySelectedNodeKey}
           onOk={onOk}
-          onCancel={onCancel}
+          onCancel={cancel}
           doc={doc}
           ui={ui}
-        />
+        />,
+        container,
       );
       return container;
     },

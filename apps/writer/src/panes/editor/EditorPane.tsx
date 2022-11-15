@@ -17,7 +17,7 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import { ContextMenu, Intent, Menu, Spinner } from '@blueprintjs/core';
+import { Intent, Spinner } from '@blueprintjs/core';
 
 import { 
   Editor, 
@@ -28,9 +28,7 @@ import {
   UpdateEvent, 
   OutlineChangeEvent, 
   StateChangeEvent,
-  XRef,
-  EditorMenuItem,
-  EditorDisplay
+  EditorFormat
 } from 'editor';
 
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
@@ -52,11 +50,10 @@ import EditorToolbar from './EditorToolbar';
 import EditorDialogsImpl from './dialogs/EditorDialogsImpl';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 
-import { createEditor } from './editor-context';
+import { editorContext } from './context/editor-context';
 import { editorDialogs } from './dialogs/editor-dialogs';
 
 import styles from './EditorPane.module.scss';
-import { CommandMenuItems } from '../../widgets/command/CommandMenuItems';
 
 
 interface EditorPaneProps {
@@ -118,7 +115,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   public async componentDidMount() {
 
-      this.editor = await createEditor(this.parent!,this.editorDisplay, this.editorDialogs);
+      this.editor = await this.createEditor();
 
       window.addEventListener("resize", this.onResize);
 
@@ -186,6 +183,21 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
   }
 
+  
+  private async createEditor() : Promise<Editor> {
+    const context = editorContext(() => this.props.commandManager, this.editorDialogs);
+    const format: EditorFormat = {
+      pandocMode: 'markdown',
+      pandocExtensions: '',
+      rmdExtensions: {},
+      hugoExtensions: {},
+      docTypes: []
+    }
+    return Editor.create(this.parent!, context, format, { spellCheck: true });
+  }
+
+
+
   private async updateEditor() {
     // set content (will no-op if prop change was from ourselves)
     await this.setEditorContent(this.props.markdown);
@@ -199,40 +211,6 @@ class EditorPane extends React.Component<EditorPaneProps> {
     const dialogsImpl = this.editorDialogsRef.current!;
     return editorDialogs(dialogsImpl);
   }
-
-  private get editorDisplay(): EditorDisplay {
-    const showContextMenu = async (
-      items: EditorMenuItem[],
-      clientX: number,
-      clientY: number
-    ): Promise<boolean> => {
-      const commandManager = this.props.commandManager;
-      return new Promise(resolve => {        
-        ContextMenu.show(<Menu><CommandMenuItems menu={items} commandManager={commandManager}></CommandMenuItems></Menu>, { left: clientX, top: clientY }, () => {
-          resolve(true);
-        });
-      }); 
-    };
-
-    
-
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      openURL(_url: string) {
-        //
-      },
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      navigateToXRef(_file: string, _xref: XRef) {
-        //
-      },
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      navigateToFile(_file: string) {
-        //
-      },
-      showContextMenu
-    };
-  }
-
   private async setEditorContent(markdown: string) {
     if (markdown !== this.editorMarkdown) {
       this.editorMarkdown = markdown;

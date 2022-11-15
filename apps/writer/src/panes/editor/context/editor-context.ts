@@ -16,11 +16,8 @@
 
 import {
   ChunkEditor,
-  Editor,
   EditorContext,
   EditorDialogs,
-  EditorDisplay,
-  EditorFormat,
   EditorMath,
   EditorUIChunkCallbacks,
   EditorUIChunks,
@@ -33,30 +30,16 @@ import {
   SkinTone,
   UITools,
 } from "editor";
+import { CommandManager } from "../../../commands/CommandManager";
+import { editorDisplay } from "./editor-display";
 
 
-
-export async function createEditor(parent: HTMLElement, display: EditorDisplay, dialogs: EditorDialogs) : Promise<Editor> {
-  
-  const context = editorContext(display, dialogs);
-
-  const format: EditorFormat = {
-    pandocMode: 'markdown',
-    pandocExtensions: '',
-    rmdExtensions: {},
-    hugoExtensions: {},
-    docTypes: []
-  }
-
-  return Editor.create(parent, context, format, { spellCheck: true });
-}
-
-export function editorContext(display: EditorDisplay, dialogs: EditorDialogs) : EditorContext {
+export function editorContext(commandManager: () => CommandManager, dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
   const ui = {
     dialogs,
-    display,
+    display: editorDisplay(commandManager),
     math: editorMath(),
     context: editorUIContext(),
     prefs: editorPrefs(),

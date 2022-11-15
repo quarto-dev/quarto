@@ -22,7 +22,7 @@ import { IconNames } from '@blueprintjs/icons';
 import { editorSelection } from '../../store/editor/editor-selectors';
 import { keyCodeString } from '../../commands/keycodes';
 import { commandKeymapText, CommandId } from '../../commands/commands';
-import { CommandManagerContext } from '../../commands/CommandManager';
+import { CommandManager, CommandManagerContext } from '../../commands/CommandManager';
 
 export enum CommandMenuItemActive {
   Check = 'check',
@@ -35,16 +35,19 @@ export interface CommandMenuItemProps {
   text?: string;
   keyCode?: string;
   active?: CommandMenuItemActive;
+  commandManager?: CommandManager;
 }
 
 export const CommandMenuItem: React.FC<CommandMenuItemProps> = props => {
   const { id, keyCode, active = CommandMenuItemActive.None } = props;
 
   // force re-render when the selection changes
-  useSelector(editorSelection);
-
+  if (!props.commandManager) {
+    useSelector(editorSelection);
+  }
+  
   // get command
-  const commandManager = useContext(CommandManagerContext);
+  const commandManager = props.commandManager || useContext(CommandManagerContext);
   const command = commandManager.commands[id];
 
   if (command) {

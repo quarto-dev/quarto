@@ -23,28 +23,30 @@ import { CommandMenuItem } from "./CommandMenuItem";
 import { CommandId } from "../../commands/commands";
 import { MenuDivider } from "@blueprintjs/core";
 import { CommandSubMenu } from "./CommandSubMenu";
+import { CommandManager } from "../../commands/CommandManager";
 
 
 
 export interface CommandMenuItemsProps {
   menu: EditorMenuItem[];
+  commandManager?: CommandManager;
 }
 
 export const CommandMenuItems: React.FC<CommandMenuItemsProps> = (props) => {
   return (
     <>
-      {props.menu.map(editorCommandMenuItem)}
+      {props.menu.map(mi => editorCommandMenuItem(mi, props.commandManager))}
     </>
   )
 };
 
-function editorCommandMenuItem(mi: EditorMenuItem) {
+function editorCommandMenuItem(mi: EditorMenuItem, commandManager?: CommandManager) {
   if (mi.separator) {
     return <MenuDivider key={uuidv4()}/>
   } else if (mi.command) {
-    return <CommandMenuItem id={mi.command as CommandId} key={mi.command} text={mi.text}/> 
+    return <CommandMenuItem id={mi.command as CommandId} key={mi.command} text={mi.text} commandManager={commandManager}/> 
   } else if (mi.subMenu && mi.text) {
-    return <CommandSubMenu text={mi.text} key={uuidv4()}>{mi.subMenu.items.map(editorCommandMenuItem)}</CommandSubMenu>
+    return <CommandSubMenu text={mi.text} key={uuidv4()}>{mi.subMenu.items.map(mi => editorCommandMenuItem(mi, commandManager))}</CommandSubMenu>
   } else {
     return null;
   }

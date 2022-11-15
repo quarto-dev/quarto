@@ -17,7 +17,7 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import { Intent, Spinner } from '@blueprintjs/core';
+import { ContextMenu, Intent, Menu, Spinner } from '@blueprintjs/core';
 
 import { 
   Editor, 
@@ -27,7 +27,10 @@ import {
   NavigationType,
   UpdateEvent, 
   OutlineChangeEvent, 
-  StateChangeEvent
+  StateChangeEvent,
+  XRef,
+  EditorMenuItem,
+  EditorDisplay
 } from 'editor';
 
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
@@ -53,6 +56,7 @@ import { createEditor } from './editor-context';
 import { editorDialogs } from './dialogs/editor-dialogs';
 
 import styles from './EditorPane.module.scss';
+import { CommandMenuItems } from '../../widgets/command/CommandMenuItems';
 
 
 interface EditorPaneProps {
@@ -114,7 +118,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   public async componentDidMount() {
 
-      this.editor = await createEditor(this.parent!,this.editorDialogs);
+      this.editor = await createEditor(this.parent!,this.editorDisplay, this.editorDialogs);
 
       window.addEventListener("resize", this.onResize);
 
@@ -194,7 +198,39 @@ class EditorPane extends React.Component<EditorPaneProps> {
   private get editorDialogs(): EditorDialogs {
     const dialogsImpl = this.editorDialogsRef.current!;
     return editorDialogs(dialogsImpl);
-   
+  }
+
+  private get editorDisplay(): EditorDisplay {
+    const showContextMenu = async (
+      items: EditorMenuItem[],
+      clientX: number,
+      clientY: number
+    ): Promise<boolean> => {
+      const commandManager = this.props.commandManager;
+      return new Promise(resolve => {        
+        ContextMenu.show(<Menu><CommandMenuItems menu={items} commandManager={commandManager}></CommandMenuItems></Menu>, { left: clientX, top: clientY }, () => {
+          resolve(true);
+        });
+      }); 
+    };
+
+    
+
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      openURL(_url: string) {
+        //
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      navigateToXRef(_file: string, _xref: XRef) {
+        //
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      navigateToFile(_file: string) {
+        //
+      },
+      showContextMenu
+    };
   }
 
   private async setEditorContent(markdown: string) {

@@ -22,7 +22,6 @@ import {
   EditorDisplay,
   EditorFormat,
   EditorMath,
-  EditorMenuItem,
   EditorUIChunkCallbacks,
   EditorUIChunks,
   EditorUIContext,
@@ -33,13 +32,13 @@ import {
   ListSpacing,
   SkinTone,
   UITools,
-  XRef,
 } from "editor";
 
 
-export async function createEditor(parent: HTMLElement, dialogs: EditorDialogs) : Promise<Editor> {
+
+export async function createEditor(parent: HTMLElement, display: EditorDisplay, dialogs: EditorDialogs) : Promise<Editor> {
   
-  const context = editorContext(dialogs);
+  const context = editorContext(display, dialogs);
 
   const format: EditorFormat = {
     pandocMode: 'markdown',
@@ -52,12 +51,12 @@ export async function createEditor(parent: HTMLElement, dialogs: EditorDialogs) 
   return Editor.create(parent, context, format, { spellCheck: true });
 }
 
-export function editorContext(dialogs: EditorDialogs) : EditorContext {
+export function editorContext(display: EditorDisplay, dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
   const ui = {
     dialogs,
-    display: editorDisplay(),
+    display,
     math: editorMath(),
     context: editorUIContext(),
     prefs: editorPrefs(),
@@ -73,26 +72,6 @@ export function editorContext(dialogs: EditorDialogs) : EditorContext {
   return context;
 }
 
-function editorDisplay(): EditorDisplay {
-  return {
-    openURL(_url: string) {
-      //
-    },
-    navigateToXRef(_file: string, _xref: XRef) {
-      //
-    },
-    navigateToFile(_file: string) {
-      //
-    },
-    async showContextMenu(
-      _items: EditorMenuItem[],
-      _clientX: number,
-      _clientY: number
-    ): Promise<boolean> {
-      return false;
-    },
-  };
-}
 
 function editorMath(): EditorMath {
   return {

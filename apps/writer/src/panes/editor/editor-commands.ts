@@ -43,6 +43,10 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.SelectAll]: {
         menuText: t('commands:select_all_menu_text'),
       },
+      [EditorCommandId.ClearFormatting]: {
+        icon: IconNames.CLEAN,
+        menuText: t('commands:clear_formatting_menu_text'),
+      }
     },
     [t('commands:group_formatting')]: {
       [EditorCommandId.Strong]: {
@@ -69,8 +73,9 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.Smallcaps]: {
         menuText: t('commands:smallcaps_menu_text'),
       },
-      [EditorCommandId.Span]: {
-        menuText: t('commands:span_menu_text'),
+      [EditorCommandId.Underline]: {
+        icon: IconNames.UNDERLINE,
+        menuText: t('commands:underline_menu_text'),
       },
       [EditorCommandId.Paragraph]: {
         icon: IconNames.PARAGRAPH,
@@ -103,6 +108,10 @@ function editorCommandDefs(): CommandDefs {
         icon: IconNames.CODE,
         menuText: t('commands:code_block_menu_text'),
       },
+      [EditorCommandId.CodeBlockFormat]: {
+        icon: IconNames.CODE,
+        menuText: t('commands:code_block_format_menu_text'),
+      },
       [EditorCommandId.Blockquote]: {
         icon: IconNames.CITATION,
         menuText: t('commands:blockquote_menu_text'),
@@ -110,11 +119,17 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.LineBlock]: {
         menuText: t('commands:line_block_menu_text'),
       },
+      [EditorCommandId.AttrEdit]: {
+        menuText: t('commands:attr_edit_menu_text'),
+      },
+      [EditorCommandId.Span]: {
+        menuText: t('commands:span_menu_text'),
+      },
       [EditorCommandId.Div]: {
         menuText: t('commands:div_menu_text'),
       },
-      [EditorCommandId.AttrEdit]: {
-        menuText: t('commands:attr_edit_menu_text'),
+      [EditorCommandId.InsertDiv]: {
+        menuText: t('commands:insert_div_menu_text')
       },
     },
 
@@ -135,6 +150,9 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.ListItemLift]: {
         menuText: t('commands:list_item_lift_menu_text'),
+      },
+      [EditorCommandId.ListItemSplit]: {
+        menuText: t('commands:list_item_split_menu_text'),
       },
       [EditorCommandId.ListItemCheck]: {
         menuText: t('commands:list_item_check_menu_text'),
@@ -158,13 +176,19 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.TableToggleCaption]: {
         menuText: t('commands:table_toggle_caption'),
       },
-      [EditorCommandId.TableAddColumnAfter]: {
-        icon: IconNames.ADD_COLUMN_RIGHT,
-        menuText: t('commands:table_add_column_after'),
+      [EditorCommandId.TableNextCell]: {
+        menuText: t('commands:table_next_cell'),
+      },
+      [EditorCommandId.TablePreviousCell]: {
+        menuText: t('commands:table_previous_cell'),
       },
       [EditorCommandId.TableAddColumnBefore]: {
         icon: IconNames.ADD_COLUMN_LEFT,
         menuText: t('commands:table_add_column_before'),
+      },
+      [EditorCommandId.TableAddColumnAfter]: {
+        icon: IconNames.ADD_COLUMN_RIGHT,
+        menuText: t('commands:table_add_column_after'),
       },
       [EditorCommandId.TableDeleteColumn]: {
         icon: IconNames.REMOVE_COLUMN,
@@ -186,12 +210,6 @@ function editorCommandDefs(): CommandDefs {
         icon: IconNames.TH_DISCONNECT,
         menuText: t('commands:table_delete_table'),
       },
-      [EditorCommandId.TableNextCell]: {
-        menuText: t('commands:table_next_cell'),
-      },
-      [EditorCommandId.TablePreviousCell]: {
-        menuText: t('commands:table_previous_cell'),
-      },
       [EditorCommandId.TableAlignColumnLeft]: {
         menuText: t('commands:table_align_column_left'),
       },
@@ -207,9 +225,20 @@ function editorCommandDefs(): CommandDefs {
     },
 
     [t('commands:group_insert')]: {
+      [EditorCommandId.OmniInsert]: {
+        icon: IconNames.Plus,
+        menuText: t('commands:any_menu_text')
+      },
+      [EditorCommandId.Table]: {
+        icon: IconNames.ListColumns,
+        menuText: t('commands:table_menu_text')
+      },
       [EditorCommandId.Link]: {
         icon: IconNames.LINK,
         menuText: t('commands:link_menu_text'),
+      },
+      [EditorCommandId.RemoveLink]: {
+        menuText: t('commands:remove_link_menu_text'),
       },
       [EditorCommandId.Image]: {
         icon: IconNames.MEDIA,
@@ -218,12 +247,18 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.Footnote]: {
         menuText: t('commands:footnote_menu_text'),
       },
-      [EditorCommandId.HorizontalRule]: {
-        menuText: t('commands:horizontal_rule_menu_text'),
-      },
       [EditorCommandId.ParagraphInsert]: {
         icon: IconNames.PARAGRAPH,
         menuText: t('commands:paragraph_insert_menu_text'),
+      },
+      [EditorCommandId.HorizontalRule]: {
+        menuText: t('commands:horizontal_rule_menu_text'),
+      },
+      [EditorCommandId.YamlMetadata]: {
+        menuText: t('commands:yaml_metadata_menu_text'),
+      },
+      [EditorCommandId.Shortcode]: {
+        menuText: t('commands:shortcode_menu_text'),
       },
       [EditorCommandId.InlineMath]: {
         menuText: t('commands:inline_math_menu_text'),
@@ -231,24 +266,11 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.DisplayMath]: {
         menuText: t('commands:display_math_menu_text'),
       },
-      [EditorCommandId.TexInline]: {
-        menuText: t('commands:inline_latex_menu_text'),
+      [EditorCommandId.Citation]: {
+        menuText: t('commands:citation_menu_text'),
       },
-      [EditorCommandId.RawInline]: {
-        menuText: t('commands:raw_inline_menu_text'),
-      },
-      [EditorCommandId.RawBlock]: {
-        menuText: t('commands:raw_block_menu_text'),
-      },
-      [EditorCommandId.YamlMetadata]: {
-        menuText: t('commands:yaml_metadata_menu_text'),
-      },
-      [EditorCommandId.HTMLComment]: {
-        menuText: t('commands:html_comment_menu_text'),
-      },
-      [EditorCommandId.RCodeChunk]: {
-        icon: IconNames.CODE_BLOCK,
-        menuText: t('commands:rmd_chunk_menu_text'),
+      [EditorCommandId.CrossReference]: {
+        menuText: t('commands:crossref_menu_text')
       },
       [EditorCommandId.DefinitionList]: {
         menuText: t('commands:definition_list_menu_text'),
@@ -259,10 +281,89 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.DefinitionDescription]: {
         menuText: t('commands:definition_description_menu_text'),
       },
-      [EditorCommandId.Citation]: {
-        menuText: t('commands:citation_menu_text'),
+      [EditorCommandId.Symbol]: {
+        menuText: t('commands:symbol_menu_text'),
       },
+      [EditorCommandId.Emoji]: {
+        menuText: t('commands:emoji_menu_text'),
+      },
+      [EditorCommandId.EmDash]: {
+        menuText: t('commands:emdash_menu_text'),
+      },
+      [EditorCommandId.EnDash]: {
+        menuText: t('commands:endash_menu_text'),
+      },
+      [EditorCommandId.NonBreakingSpace]: {
+        menuText: t('commands:nbsp_menu_text'),
+      },
+      [EditorCommandId.HardLineBreak]: {
+        menuText: t('commands:hard_break_menu_text'),
+      },
+      [EditorCommandId.Tabset]: {
+        menuText: t('commands:tabset_menu_text'),
+      },
+      [EditorCommandId.Callout]: {
+        menuText: t('commands:callout_menu_text'),
+      },
+      // raw
+      [EditorCommandId.TexInline]: {
+        menuText: t('commands:inline_latex_menu_text'),
+      },
+      [EditorCommandId.TexBlock]: {
+        menuText: t('commands:block_latex_menu_text')
+      },
+      [EditorCommandId.HTMLComment]: {
+        icon: IconNames.Comment,
+        menuText: t('commands:html_comment_menu_text'),
+      },
+      [EditorCommandId.HTMLInline]: {
+        menuText: t('commands:inline_html_menu_text')
+      },
+      [EditorCommandId.HTMLBlock]: {
+        menuText: t('commands:block_html_menu_text')
+      },
+      [EditorCommandId.RawInline]: {
+        menuText: t('commands:raw_inline_menu_text'),
+      },
+      [EditorCommandId.RawBlock]: {
+        menuText: t('commands:raw_block_menu_text'),
+      },
+      // chunk
+      [EditorCommandId.RCodeChunk]: {
+        icon: IconNames.CODE_BLOCK,
+        menuText: 'R',
+      },
+      [EditorCommandId.BashCodeChunk]: {
+        menuText: 'Bash',
+      },
+      [EditorCommandId.D3CodeChunk]: {
+        menuText: 'D3',
+      },
+      [EditorCommandId.PythonCodeChunk]: {
+        menuText: 'Python',
+      },
+      [EditorCommandId.RcppCodeChunk]: {
+        menuText: 'Rcpp',
+      },
+      [EditorCommandId.SQLCodeChunk]: {
+        menuText: 'SQL',
+      },
+      [EditorCommandId.StanCodeChunk]: {
+        menuText: 'Stan',
+      }
     },
+    [t('commands:group_slides')]: {
+      [EditorCommandId.InsertSlidePause]: {
+        menuText: t('commands:slide_pause_menu_text'),
+      },
+      [EditorCommandId.InsertSlideNotes]: {
+        menuText: t('commands:slide_notes_menu_text'),
+      },
+      [EditorCommandId.InsertSlideColumns]: {
+        menuText: t('commands:slide_columns_menu_text'),
+      },
+    }
+
   };
 }
 

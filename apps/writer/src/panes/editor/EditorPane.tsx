@@ -28,7 +28,8 @@ import {
   UpdateEvent, 
   OutlineChangeEvent, 
   StateChangeEvent,
-  EditorFormat
+  EditorFormat,
+  kQuartoDocType
 } from 'editor';
 
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
@@ -189,9 +190,16 @@ class EditorPane extends React.Component<EditorPaneProps> {
     const format: EditorFormat = {
       pandocMode: 'markdown',
       pandocExtensions: '',
-      rmdExtensions: {},
-      hugoExtensions: {},
-      docTypes: []
+      rmdExtensions: {
+        codeChunks: true,
+        bookdownPart: true,
+        bookdownXRef: true,
+        bookdownXRefUI: true
+      },
+      hugoExtensions: {
+        shortcodes: true
+      },
+      docTypes: [kQuartoDocType]
     }
     return Editor.create(this.parent!, context, format, { spellCheck: true });
   }

@@ -18,8 +18,9 @@ import { Schema, NodeSpec, MarkSpec, Node as ProsemirrorNode } from 'prosemirror
 import { ExtensionManager } from './editor-extensions';
 import { PandocNode } from '../api/node';
 import { PandocMark } from '../api/mark';
+import { kPmScrollContainer } from '../api/scroll';
 
-export function editorSchema(extensions: ExtensionManager): Schema {
+export function editorSchema(extensions: ExtensionManager, bodyScrollContainer: boolean): Schema {
   // build in doc node + nodes from extensions
   const nodes: { [name: string]: NodeSpec } = {
     doc: {
@@ -36,7 +37,8 @@ export function editorSchema(extensions: ExtensionManager): Schema {
       toDOM() {
         return [
           'div',
-          { class: 'body pm-cursor-color pm-text-color pm-background-color pm-editing-root-node' },
+          { class: 'body pm-cursor-color pm-text-color pm-background-color pm-editing-root-node'
+                   + (bodyScrollContainer ? ` ${kPmScrollContainer}` : '') },
           ['div', { class: 'pm-content' }, 0],
         ];
       },
@@ -48,7 +50,7 @@ export function editorSchema(extensions: ExtensionManager): Schema {
       toDOM() {
         return [
           'div',
-          { class: 'notes pm-cursor-color pm-text-color pm-background-color pm-editing-root-node' },
+          { class: `notes pm-cursor-color pm-text-color pm-background-color pm-editing-root-node ${kPmScrollContainer}` },
           ['div', { class: 'pm-content' }, 0],
         ];
       },

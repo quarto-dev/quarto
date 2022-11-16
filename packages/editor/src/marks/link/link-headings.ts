@@ -43,14 +43,16 @@ export function linkHeadingsPostprocessor(doc: ProsemirrorNode) {
         doc.nodesBetween(markRange.from, markRange.to, node => {
           const linkMark = node.marks.find(m => m.type === schema.marks.link);
           if (linkMark) {
-            // TURBO: this never worked anyway? violates setting of readonly
-            // linkMark.attrs.heading = matchedHeading.node.textContent;
+            // this violates the 'readonly' attribute of linkMark.attrs but this
+            // isn't actually a prposemirror node but rather the node we read
+            // from the pandoc ast -- cast away the readonly
+            (linkMark.attrs as Record<string,unknown>).heading = matchedHeading.node.textContent;
           }
         });
 
         // update the heading to indicate it has a named link to it
-        // TURBO: this never worked anyway? violates setting of readonly
-        // matchedHeading.node.attrs.link = linkText;
+        // see comment above re: cast
+        (matchedHeading.node.attrs as Record<string,unknown>).link = linkText;
       }
     }
   });

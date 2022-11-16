@@ -23,23 +23,8 @@ import { editingRootNode } from './node';
 import { kNavigationTransaction } from './transaction';
 import { xrefPosition } from './xref';
 import { EditorFormat, kQuartoDocType } from './format';
-
-export interface EditorNavigation {
-  navigate: (type: NavigationType, location: string, animate?: boolean) => void;
-}
-
-export enum NavigationType {
-  Pos = 'pos',
-  Id = 'id',
-  Href = 'href',
-  Heading = 'heading',
-  XRef = 'xref',
-}
-
-export interface Navigation {
-  pos: number;
-  prevPos: number;
-}
+import { Navigation, NavigationType } from './navigation-types';
+import { editorScrollContainer } from './scroll';
 
 export function navigateTo(
   view: EditorView,
@@ -117,7 +102,7 @@ export function navigateToPos(view: EditorView, pos: number, animate = true): Na
       view.focus();
       const editingRoot = editingRootNode(view.state.selection)!;
       const container = view.nodeDOM(editingRoot.pos) as HTMLElement;
-      const scroller = zenscroll.createScroller(container, 700, 20);
+      const scroller = zenscroll.createScroller(editorScrollContainer(container), 700, 20);
       // some nodes' DOM elements are grandchildren rather than direct children
       // of the scroll container; move up a level if this is the case
       let dest = node;

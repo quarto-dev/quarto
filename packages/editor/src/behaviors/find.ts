@@ -21,6 +21,7 @@ import { mergedTextNodes } from '../api/text';
 import { kAddToHistoryTransaction } from '../api/transaction';
 import { editingRootNode } from '../api/node';
 import zenscroll from 'zenscroll';
+import { editorScrollContainer } from '../api/scroll';
 
 const key = new PluginKey<DecorationSet>('find-plugin');
 
@@ -462,7 +463,7 @@ class FindPlugin extends Plugin<DecorationSet> {
 
       // Perform the scroll to the element's container plus its offset inside
       // the container.
-      const scroller = zenscroll.createScroller(container);
+      const scroller = zenscroll.createScroller(editorScrollContainer(container));
       scroller.center(scrollElement, 350, offset);
     }
   }

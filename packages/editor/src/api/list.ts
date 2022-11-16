@@ -18,18 +18,6 @@ import { Transaction, Selection } from 'prosemirror-state';
 
 import { findParentNodeOfType, setTextSelection } from 'prosemirror-utils';
 
-export enum ListType {
-  Ordered = 'OrderedList',
-  Bullet = 'BulletList',
-}
-
-export interface ListCapabilities {
-  tasks: boolean;
-  fancy: boolean;
-  example: boolean;
-  order: boolean;
-  incremental: boolean;
-}
 
 export function isList(node: ProsemirrorNode | null | undefined) {
   if (node) {

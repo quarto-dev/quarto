@@ -21,35 +21,8 @@ import { NodeWithPos, findChildrenByType, findChildren } from 'prosemirror-utils
 import { findTopLevelBodyNodes } from './node';
 import { titleFromYamlMetadataNode } from './yaml';
 import { rmdChunkEngineAndLabel } from './rmd';
+import { EditingOutlineLocation, EditingOutlineLocationItem, kHeadingOutlineItemType, kRmdchunkOutlineItemType, kYamlMetadataOutlineItemType } from './outline-types';
 
-export interface EditorOutlineItem {
-  navigation_id: string;
-  type: EditorOutlineItemType;
-  level: number;
-  sequence: number;
-  title: string;
-  children: EditorOutlineItem[];
-}
-
-export const kHeadingOutlineItemType = 'heading';
-export const kRmdchunkOutlineItemType = 'rmd_chunk';
-export const kYamlMetadataOutlineItemType = 'yaml_metadata';
-
-export type EditorOutlineItemType = 'heading' | 'rmd_chunk' | 'yaml_metadata';
-
-export type EditorOutline = EditorOutlineItem[];
-
-export interface EditingOutlineLocationItem {
-  type: EditorOutlineItemType;
-  level: number;
-  title: string;
-  active: boolean;
-  position: number;
-}
-
-export interface EditingOutlineLocation {
-  items: EditingOutlineLocationItem[];
-}
 
 export function getEditingOutlineLocation(state: EditorState): EditingOutlineLocation {
   // traverse document outline to get base location info

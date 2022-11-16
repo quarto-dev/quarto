@@ -27,7 +27,7 @@ import { searchPlaceholderDecoration } from '../../api/placeholder';
 import { EditorUI } from '../../api/ui-types';
 import { CompletionItemView } from '../../api/widgets/completion';
 
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 
 import { parseCitation } from './cite';
 

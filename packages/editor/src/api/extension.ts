@@ -27,12 +27,12 @@ import { AppendTransactionHandler, AppendMarkTransactionHandler } from './transa
 import { EditorOptions } from './options';
 import { PandocExtensions } from './pandoc';
 import { FixupFn } from './fixup';
-import { EditorEvents } from './events';
+import { EditorEvents } from './event-types';
 import { PandocCapabilities } from './pandoc_capabilities';
 import { EditorFormat } from './format';
 import { MarkInputRuleFilter } from './input_rule';
 import { CompletionHandler } from './completion';
-import { EditorNavigation } from './navigation';
+import { EditorNavigation } from './navigation-types';
 import { EditorServer } from 'editor-types';
 
 export interface Extension {

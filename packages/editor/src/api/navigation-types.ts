@@ -1,5 +1,5 @@
 /*
- * Workbench.tsx
+ * navigation-types.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -14,22 +14,20 @@
  */
 
 
-import React from 'react'
-
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
-
-import { EditorPane } from '../panes/editor/EditorPane';
-
-import classes from './Workbench.module.css';
-import { WorkbenchToolbar } from './WorkbenchToolbar';
-
-export const Workbench : React.FunctionComponent = () => {
-  return (
-    <FluentProvider theme={webLightTheme}>
-      <div className={classes.workbench}>
-        <WorkbenchToolbar />
-        <EditorPane />
-      </div>
-    </FluentProvider>
-  );
+export interface EditorNavigation {
+  navigate: (type: NavigationType, location: string, animate?: boolean) => void;
 }
+
+export enum NavigationType {
+  Pos = 'pos',
+  Id = 'id',
+  Href = 'href',
+  Heading = 'heading',
+  XRef = 'xref',
+}
+
+export interface Navigation {
+  pos: number;
+  prevPos: number;
+}
+

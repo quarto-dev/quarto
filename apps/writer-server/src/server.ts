@@ -14,7 +14,6 @@
  */
 
 
-import { json, urlencoded } from "body-parser";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
@@ -31,8 +30,8 @@ export const createServer = () => {
   app
     .disable("x-powered-by")
     .use(morgan("dev"))
-    .use(urlencoded({ extended: true }))
-    .use(json())
+    .use(express.urlencoded({ limit: '100mb', extended: true, parameterLimit:100000 }))
+    .use(express.json({limit: '100mb' }))
     .use(cors())
     .use('/editor-server', server.middleware())
     .get("/message/:name", (req, res) => {

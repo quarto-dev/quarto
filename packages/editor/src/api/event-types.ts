@@ -17,7 +17,7 @@ import { Transaction } from 'prosemirror-state';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { makeEventType } from './events';
-import { Navigation } from './navigation';
+import { Navigation } from './navigation-types';
 
 export const UpdateEvent = makeEventType('Update');
 export const OutlineChangeEvent = makeEventType('OutlineChange');
@@ -29,3 +29,38 @@ export const BlurEvent = makeEventType('Blur');
 export const FocusEvent = makeEventType<ProsemirrorNode>('Focus');
 export const DispatchEvent = makeEventType<Transaction>('Dispatch');
 export const NavigateEvent = makeEventType<Navigation>('Navigate');
+
+/**
+ * Represents an event type; only a single instance of this should exist per
+ * event type (akin to PluginKey) and it should be visible to everyone who wants
+ * to subscribe to or emit events of that type. Do not create one of these
+ * directly, instead use makeEventType().
+ */
+ export interface EventType<TDetail> {
+  readonly eventName: string;
+  // This field is needed only to prevent TDetail from being ignored by the type
+  // checker; if TDetail isn't used, tsc acts as if EventType isn't generic.
+  readonly dummy?: TDetail;
+}
+
+/**
+ * Type signature of event-handler functions; the TDetail must match with the
+ * EventType<TDetail> being subscribed to.
+ *
+ * (Note that the detail is always optional. I couldn't figure out how to make
+ * it mandatory for some event types, forbidden for others, and optional for
+ * still others, so it's just optional for everyone.)
+ */
+export type EventHandler<TDetail> = (detail?: TDetail) => void;
+
+/**
+ * Generic interface for objects that support eventing.
+ *
+ * TODO: I don't see a reason why this interface should support both
+ * subscription *and* emitting, the latter seems like something private.
+ */
+export interface EditorEvents {
+  subscribe<TDetail>(event: EventType<TDetail>, handler: EventHandler<TDetail>): VoidFunction;
+  emit<TDetail>(event: EventType<TDetail>, detail?: TDetail): void;
+}
+

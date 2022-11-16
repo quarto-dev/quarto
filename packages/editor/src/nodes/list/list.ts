@@ -23,7 +23,7 @@ import { findParentNodeOfType } from 'prosemirror-utils';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { BaseKey } from '../../api/basekeys';
 import { EditorUI, kListSpacingTight } from '../../api/ui-types';
-import { ListCapabilities } from '../../api/list';
+import { ListCapabilities, ListNumberDelim, ListNumberStyle } from '../../api/list-types';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { PandocTokenType } from '../../api/pandoc';
 import { OmniInsertGroup } from '../../api/omni_insert';
@@ -44,25 +44,6 @@ import { writePandocBulletList, writePandocOrderedList, readPandocList } from '.
 
 import './list-styles.css';
 
-export enum ListNumberStyle {
-  DefaultStyle = 'DefaultStyle',
-  Decimal = 'Decimal',
-  LowerRoman = 'LowerRoman',
-  UpperRoman = 'UpperRoman',
-  LowerAlpha = 'LowerAlpha',
-  UpperAlpha = 'UpperAlpha',
-  Example = 'Example',
-}
-
-// NOTE: HTML output doesn't currently respect this and it's difficult to
-// do with CSS (especially for nested lists). So we allow the user to edit
-// it but it isn't reflected in the editor.
-export enum ListNumberDelim {
-  DefaultDelim = 'DefaultDelim',
-  Period = 'Period',
-  OneParen = 'OneParen',
-  TwoParens = 'TwoParens',
-}
 
 const plugin = new PluginKey('list');
 

@@ -14,7 +14,7 @@
  */
 
 import { AceNodeView } from './ace';
-import { EditorEvents } from '../../api/events';
+import { EditorEvents } from '../../api/event-types';
 import { ScrollEvent, UpdateEvent } from '../../api/event-types';
 
 /**

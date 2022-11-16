@@ -31,7 +31,7 @@ import { showTooltip } from '../../api/widgets/tooltip';
 import { WidgetProps } from '../../api/widgets/react';
 import { LinkButton, ImageButton } from '../../api/widgets/button';
 import { Popup } from '../../api/widgets/popup';
-import { EditorNavigation, NavigationType } from '../../api/navigation';
+import { EditorNavigation, NavigationType } from '../../api/navigation-types';
 import { Schema } from 'prosemirror-model';
 import { textPopupDecorationPlugin, TextPopupTarget } from '../../api/text-popup';
 import { isHttpURL } from '../../api/url';

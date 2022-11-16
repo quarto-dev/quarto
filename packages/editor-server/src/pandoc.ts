@@ -117,7 +117,7 @@ export function pandocServerMethods() : Record<string, jayson.Method> {
 
 async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = child_process.execFile("pandoc", args, { encoding: "utf-8" }, (error, stdout, stderr) => {
+    const child = child_process.execFile("pandoc", args, { encoding: "utf-8", maxBuffer: 1024 * 102400 }, (error, stdout, stderr) => {
       if (error) {
         reject(error);
       } else if (child.exitCode !== 0) {

@@ -4,15 +4,11 @@ import { NodeWithPos } from 'prosemirror-utils';
 
 import { bodyElement } from './dom';
 import {
-  kYamlMetadataOutlineItemType,
-  kHeadingOutlineItemType,
-  kRmdchunkOutlineItemType,
-  EditingOutlineLocation,
   getDocumentOutline,
-  EditingOutlineLocationItem,
 } from './outline';
 import { restoreSelection } from './selection';
 import { scrollToPos } from './scroll';
+import { EditingOutlineLocation, EditingOutlineLocationItem, kHeadingOutlineItemType, kRmdchunkOutlineItemType, kYamlMetadataOutlineItemType } from './outline-types';
 
 export interface EditingLocation {
   pos: number;

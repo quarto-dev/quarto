@@ -13,15 +13,9 @@
  *
  */
 
-import { EditorMenuItem, EditorUI } from '../api/ui-types';
+import { EditorUI } from '../api/ui-types';
 import { tableMenu } from '../api/table';
 import { EditorCommandId, EditorCommand } from '../api/command';
-
-export interface EditorMenus {
-  format: EditorMenuItem[];
-  insert: EditorMenuItem[];
-  table: EditorMenuItem[];
-}
 
 export function editorMenus(ui: EditorUI, commands: EditorCommand[]) {
   return {

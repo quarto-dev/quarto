@@ -25,7 +25,7 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorUI, EditorUIImages } from '../api/ui-types';
+import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   AttrProps,
   AttrEditInput,
@@ -41,7 +41,9 @@ import { Extension } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
-import { DOMEditorEvents, EventType, EventHandler } from '../api/events';
+import { EventType, EventHandler } from '../api/event-types';
+import { DOMEditorEvents } from '../api/events';
+
 import {
   ScrollEvent,
   UpdateEvent,
@@ -69,9 +71,10 @@ import {
   kAddToHistoryTransaction,
   kSetMarkdownTransaction,
 } from '../api/transaction';
-import { EditorOutline, getOutlineNodes, EditingOutlineLocation, getEditingOutlineLocation } from '../api/outline';
+import { getOutlineNodes, getEditingOutlineLocation } from '../api/outline';
 import { EditingLocation, getEditingLocation, setEditingLocation } from '../api/location';
-import { navigateTo, NavigationType } from '../api/navigation';
+import { navigateTo } from '../api/navigation';
+import { NavigationType } from '../api/navigation-types';
 import { FixupContext } from '../api/fixup';
 import { unitToPixels, pixelsToUnit, roundUnit, kValidUnits } from '../api/image';
 import { kPercentUnit } from '../api/css';
@@ -79,7 +82,7 @@ import { EditorFormat } from '../api/format';
 import { diffChars, EditorChange } from '../api/change';
 import { markInputRuleFilter } from '../api/input_rule';
 import { editorMath } from '../api/math';
-import { EditorEvents } from '../api/events';
+import { EditorEvents } from '../api/event-types';
 import { insertRmdChunk } from '../api/rmd';
 import { pandocAutoIdentifier } from '../api/pandoc_id';
 import { wrapSentences } from '../api/wrap';
@@ -112,7 +115,7 @@ import { PandocConverter, PandocLineWrapping } from '../pandoc/pandoc_converter'
 import { ExtensionManager, initExtensions } from './editor-extensions';
 import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
 import { defaultEditorUIImages } from './editor-images';
-import { editorMenus, EditorMenus } from './editor-menus';
+import { editorMenus } from './editor-menus';
 import { editorSchema } from './editor-schema';
 
 // import styles before extensions so they can be overridden by extensions
@@ -121,6 +124,8 @@ import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
+import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
+import { kPmScrollContainer } from '../api/scroll';
 
 
 // re-export editor ui
@@ -394,7 +399,7 @@ export class Editor {
     this.extensions = this.initExtensions();
 
     // create schema
-    this.schema = editorSchema(this.extensions);
+    this.schema = editorSchema(this.extensions, !options.outerScrollContainer);
 
     // register completion handlers (done in a separate step b/c omni insert
     // completion handlers require access to the initializezd commands that
@@ -417,6 +422,11 @@ export class Editor {
     const attributes: { [name: string]: string } = {};
     if (options.className) {
       attributes.class = options.className;
+    }
+
+    // add scroll container class if we are using an outer scroll container
+    if (options.outerScrollContainer) {
+      attributes.class = (attributes.class || '').split(' ').concat(kPmScrollContainer).join(' ');
     }
 
     // create view

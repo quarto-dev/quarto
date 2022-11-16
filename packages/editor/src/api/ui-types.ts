@@ -20,7 +20,7 @@ import { XRef } from 'editor-types';
 
 import { LinkTargets, LinkCapabilities, LinkType } from './link';
 import { ImageDimensions } from './image';
-import { ListCapabilities, ListType } from './list';
+import { ListCapabilities, ListType } from './list-types';
 import { TableCapabilities } from './table';
 import { CSL } from './csl';
 import { CiteField } from './cite';
@@ -28,9 +28,11 @@ import { PandocAttr } from './pandoc_attr';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
-export type { LinkTargets, LinkCapabilities, LinkType } from './link';
+export type { LinkTargets, LinkCapabilities } from './link';
+export  { LinkType } from './link';
 export type { ImageDimensions } from './image';
-export type { ListCapabilities, ListType } from './list';
+export { ListType, ListNumberStyle, ListNumberDelim } from './list-types';
+export type { ListCapabilities } from './list-types';
 export type { TableCapabilities } from './table';
 export type { CSL } from './csl'
 export type { CiteField } from './cite'
@@ -122,6 +124,12 @@ export interface EditorUIContext {
 
   // are we running in windows desktop mode?
   isWindowsDesktop: () => boolean;
+}
+
+export interface EditorMenus {
+  format: EditorMenuItem[];
+  insert: EditorMenuItem[];
+  table: EditorMenuItem[];
 }
 
 export interface EditorMenuItem {

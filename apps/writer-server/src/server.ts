@@ -22,10 +22,8 @@ import jayson from 'jayson'
 
 import { editorServerMethods } from "editor-server/src/server";
 
-const serverMethods = editorServerMethods();
-const server = new jayson.Server(serverMethods, {});
-
-export const createServer = () => {
+export const createServer = (resourcesDir: string) => {
+  const editorServer = new jayson.Server(editorServerMethods(resourcesDir), {});
   const app = express();
   app
     .disable("x-powered-by")
@@ -33,7 +31,7 @@ export const createServer = () => {
     .use(express.urlencoded({ limit: '100mb', extended: true, parameterLimit:100000 }))
     .use(express.json({limit: '100mb' }))
     .use(cors())
-    .use('/editor-server', server.middleware())
+    .use('/editor-server', editorServer.middleware())
     .get("/message/:name", (req, res) => {
       return res.json({ message: `hello ${req.params.name}` });
     })

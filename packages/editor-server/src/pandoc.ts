@@ -15,6 +15,7 @@
  */
 
 import stream from 'stream';
+import path from 'path';
 import * as child_process from "child_process";
 
 
@@ -35,7 +36,7 @@ import jayson from 'jayson'
 import { jsonRpcMethod } from "./json-rpc";
 
 
-export function pandocServer() : PandocServer {
+export function pandocServer(resourcesDir: string) : PandocServer {
   return {
     async getCapabilities(): Promise<PandocCapabilitiesResult> {
       const version = await runPandoc(["--version"]);
@@ -52,6 +53,7 @@ export function pandocServer() : PandocServer {
     async markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
       const ast = JSON.parse(await runPandoc(
         ["--from", format,
+         "--abbreviations", path.join(resourcesDir, 'abbreviations'),
          "--to", "json", ...options],
          markdown)
       ) as PandocAst;
@@ -102,8 +104,8 @@ export function pandocServer() : PandocServer {
   };
 }
 
-export function pandocServerMethods() : Record<string, jayson.Method> {
-  const server = pandocServer();
+export function pandocServerMethods(resourcesDir: string) : Record<string, jayson.Method> {
+  const server = pandocServer(resourcesDir);
   const methods: Record<string, jayson.Method> = {
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
     [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),

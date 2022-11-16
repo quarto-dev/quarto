@@ -144,7 +144,7 @@ export class CheckedListItemToggleCommand extends ProsemirrorCommand {
 
 // allow users to type [x] or [ ] to define a checked list item
 export function checkedListItemInputRule() {
-  return new InputRule(/\[([ x])\]\s$/, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(/\[([ x])\]\s$/, (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
     const schema = state.schema;
 
     const itemNode = findParentNodeOfType(schema.nodes.list_item)(state.selection);
@@ -178,7 +178,7 @@ export function checkedListInputRule(schema: Schema) {
   // we are going to steal the handler from the base bullet list wrapping input rule
   const baseInputRule = wrappingInputRule(regex, schema.nodes.bullet_list) as InputRuleWithHandler;
 
-  return new InputRule(regex, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(regex, (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
     // call the base handler to create the bullet list
     const tr = baseInputRule.handler(state, match, start, end);
     if (tr) {

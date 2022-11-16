@@ -111,7 +111,7 @@ function writeInlneHTML(schema: Schema, html: string, writer: ProsemirrorWriter)
 }
 
 export function rawHtmlInputRule(schema: Schema, filter: MarkInputRuleFilter) {
-  return new InputRule(/>$/, (state: EditorState, _match: string[], start: number, end: number) => {
+  return new InputRule(/>$/, (state: EditorState, _match: RegExpMatchArray, start: number, end: number) => {
     const rawhtmlMark = state.schema.marks.raw_html;
 
     // ensure we pass all conditions for html input

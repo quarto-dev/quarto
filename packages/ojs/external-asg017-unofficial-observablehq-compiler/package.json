@@ -1,0 +1,48 @@
+{
+  "name": "@alex.garcia/unofficial-observablehq-compiler",
+  "version": "0.6.0-alpha.9",
+  "description": "An unofficial compiler to bind @observablehq/parser and @observablehq/runtime",
+  "main": "dist/index.js",
+  "author": "Alex Garcia <alexsebastian.garcia@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asg017/unofficial-observablehq-compiler.git"
+  },
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/**/*.js"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "format": "prettier --write src/**/*.js",
+    "test": "npm run build && tape 'test/**/*-test.js' && npm run test-format",
+    "test-format": "prettier --check src/**/*.js",
+    "test-html": "http-server",
+    "prepublishOnly": "npm run build",
+    "postpublish": "git push && git push --tags"
+  },
+  "keywords": [
+    "observable",
+    "observablehq",
+    "observable-notebooks",
+    "notebooks",
+    "parser",
+    "compiler"
+  ],
+  "dependencies": {
+    "@observablehq/parser": "4.2",
+    "acorn-walk": "^7.0.0"
+  },
+  "devDependencies": {
+    "@observablehq/runtime": "^4.6.4",
+    "http-server": "^0.11.1",
+    "prettier": "1.19.1",
+    "rollup": "^1.26.4",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "tape": "^4.11.0"
+  }
+}

@@ -31,6 +31,7 @@ import { Popup } from '../../api/widgets/popup';
 
 import './completion-popup.css';
 import { EditorUI } from '../../api/ui-types';
+import { editorScrollContainer } from '../../api/scroll';
 
 const kNoResultsHeight = 22;
 
@@ -98,7 +99,7 @@ const CompletionList: React.FC<CompletionListProps<unknown>> = props => {
       const rows = containerEl.getElementsByClassName('pm-completion-list-item-row');
       const scrollToRow = rows.item(props.selectedIndex);
       if (scrollToRow) {
-        const scroller = zenscroll.createScroller(containerEl);
+        const scroller = zenscroll.createScroller(editorScrollContainer(containerEl));
         scroller.intoView(scrollToRow as HTMLElement);
       }
     }

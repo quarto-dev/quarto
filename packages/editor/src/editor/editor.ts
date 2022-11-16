@@ -125,6 +125,7 @@ import { getPresentationEditorLocation, PresentationEditorLocation, positionForP
 import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
 import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
+import { kPmScrollContainer } from '../api/scroll';
 
 
 // re-export editor ui
@@ -398,7 +399,7 @@ export class Editor {
     this.extensions = this.initExtensions();
 
     // create schema
-    this.schema = editorSchema(this.extensions);
+    this.schema = editorSchema(this.extensions, !options.outerScrollContainer);
 
     // register completion handlers (done in a separate step b/c omni insert
     // completion handlers require access to the initializezd commands that
@@ -421,6 +422,11 @@ export class Editor {
     const attributes: { [name: string]: string } = {};
     if (options.className) {
       attributes.class = options.className;
+    }
+
+    // add scroll container class if we are using an outer scroll container
+    if (options.outerScrollContainer) {
+      attributes.class = (attributes.class || '').split(' ').concat(kPmScrollContainer).join(' ');
     }
 
     // create view

@@ -21,4 +21,5 @@ export interface EditorOptions {
   readonly rmdExampleHighlight?: boolean;
   readonly hideFormatComment?: boolean;
   readonly className?: string;
+  readonly outerScrollContainer?: boolean;
 }

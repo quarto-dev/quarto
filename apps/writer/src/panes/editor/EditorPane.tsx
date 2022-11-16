@@ -201,7 +201,10 @@ class EditorPane extends React.Component<EditorPaneProps> {
       },
       docTypes: [kQuartoDocType]
     }
-    return Editor.create(this.parent!, context, format, { spellCheck: true });
+    return Editor.create(this.parent!, context, format, { 
+      spellCheck: true,
+      outerScrollContainer: true 
+    });
   }
 
 

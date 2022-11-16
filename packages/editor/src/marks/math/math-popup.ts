@@ -28,6 +28,7 @@ import { applyStyles } from '../../api/css';
 import { editingRootNodeClosestToPos, editingRootNode } from '../../api/node';
 import { createPopup } from '../../api/widgets/widgets';
 import { EditorMath } from '../../api/ui-types';
+import { editorScrollContainer } from '../../api/scroll';
 
 const kMathPopupVerticalOffset = 10;
 const kMathPopupInputDebuounceMs = 250;
@@ -191,7 +192,7 @@ export class MathPopupPlugin extends Plugin {
         const mathScrollBottom = editorEl.scrollTop + mathBottom.bottom;
         const mathPopupScrollBottom = mathScrollBottom + kMathPopupVerticalOffset + popupBox.height;
         const scrollTop = mathPopupScrollBottom + kMathPopupVerticalOffset - editorBox.top - editorBox.height;
-        const scroller = zenscroll.createScroller(editorEl);
+        const scroller = zenscroll.createScroller(editorScrollContainer(editorEl));
         scroller.toY(scrollTop, 100);
       }
     }

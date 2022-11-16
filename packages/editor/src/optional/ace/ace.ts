@@ -50,6 +50,7 @@ import zenscroll from 'zenscroll';
 
 import './ace.css';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
+import { editorScrollContainer } from '../../api/scroll';
 
 const plugin = new PluginKey('ace');
 
@@ -463,7 +464,7 @@ export class AceNodeView implements NodeView {
     const editingRoot = editingRootNode(this.view.state.selection);
     if (editingRoot) {
       const container = this.view.nodeDOM(editingRoot.pos) as HTMLElement;
-      const scroller = zenscroll.createScroller(container);
+      const scroller = zenscroll.createScroller(editorScrollContainer(container));
 
       let top = 0;
 

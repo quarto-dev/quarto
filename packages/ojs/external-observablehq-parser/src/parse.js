@@ -384,3 +384,29 @@ function parseFeatures(cell, input) {
   }
   return cell;
 }
+
+/* Fork changes begin here */
+
+export function parseModule(input, {globals} = {}) {
+  const program = ModuleParser.parse(input);
+  for (const cell of program.cells) {
+    parseReferences(cell, input, globals);
+    parseFeatures(cell, input, globals);
+  }
+  return program;
+}
+
+export class ModuleParser extends CellParser {
+  parseTopLevel(node) {
+    if (!node.cells) node.cells = [];
+    while (this.type !== tt.eof) {
+      const cell = this.parseCell(this.startNode());
+      cell.input = this.input;
+      node.cells.push(cell);
+    }
+    this.next();
+    return this.finishNode(node, "Program");
+  }
+}
+
+/* Fork changes end here */

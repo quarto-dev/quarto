@@ -1,10 +1,10 @@
 {
-  "name": "@observablehq/parser",
-  "description": "An Acorn parser for Observable JavaScript",
-  "version": "6.0.0",
+  "name": "@quarto/external-observablehq-parser",
+  "description": "A fork of ObservableHQ's Acorn parser for Observable JavaScript",
+  "version": "6.0.2",
   "author": {
-    "name": "Observable, Inc.",
-    "url": "https://observablehq.com"
+    "name": "quarto-dev (RStudio PBC).",
+    "url": "https://quarto.org"  
   },
   "license": "ISC",
   "type": "module",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/observablehq/parser.git"
+    "url": "https://github.com/quarto-dev/quarto/"
   },
   "files": [
     "dist/**/*.js",
@@ -28,12 +28,13 @@
     "node": ">=14.5.0"
   },
   "scripts": {
+    "build": "rollup -c rollup.config.debug.js && rollup -c rollup.config.min.js",
     "test": "mkdir -p test/output && mocha -r module-alias/register 'test/**/*-test.js' && eslint src test",
-    "prepublishOnly": "rm -rf dist && rollup -c",
+    "prepublishOnly": "rm -rf dist && rollup -c rollup.config.debug.js && rollup -c rollup.config.min.js",
     "postpublish": "git push && git push --tags"
   },
   "_moduleAliases": {
-    "@observablehq/parser": "./src/index.js"
+    "@quarto/external-observablehq-parser": "./src/index.js"
   },
   "dependencies": {
     "acorn": "8",

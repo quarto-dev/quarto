@@ -3,8 +3,7 @@ import * as meta from "./package.json";
 
 const copyright = `// @observablehq/parser v${meta.version} Copyright ${(new Date).getFullYear()} Observable, Inc.`;
 
-export default [
-{
+const base = {
   input: "src/index.js",
   plugins: [
     terser({
@@ -26,5 +25,8 @@ export default [
     name: "observablehq",
     file: "dist/parser.min.js"
   }
-}
+};
+
+export default [
+  base
 ];

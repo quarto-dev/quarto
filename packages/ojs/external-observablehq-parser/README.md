@@ -1,3 +1,11 @@
+# @quarto/external-observablehq-parser: A fork of @observablehq/parser
+
+Changes from the original:
+
+- add back `parseModule`, since that's required by Quarto's OJS runtime.
+
+(Original README.md follows.)
+
 # @observablehq/parser
 
 To parse a cell:

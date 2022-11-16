@@ -15,6 +15,7 @@
  */
 
 import stream from 'stream';
+import path from 'path';
 import * as child_process from "child_process";
 
 
@@ -35,7 +36,7 @@ import jayson from 'jayson'
 import { jsonRpcMethod } from "./json-rpc";
 
 
-export function pandocServer() : PandocServer {
+export function pandocServer(resourcesDir: string) : PandocServer {
   return {
     async getCapabilities(): Promise<PandocCapabilitiesResult> {
       const version = await runPandoc(["--version"]);
@@ -50,11 +51,29 @@ export function pandocServer() : PandocServer {
       }
     },
     async markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
+      // ast
       const ast = JSON.parse(await runPandoc(
         ["--from", format,
+         "--abbreviations", path.join(resourcesDir, 'abbreviations'),
          "--to", "json", ...options],
          markdown)
       ) as PandocAst;
+
+      // heading-ids
+      // disable auto identifiers so we can discover *only* explicit ids
+      format += "-auto_identifiers-gfm_auto_identifiers";
+      const headingIds = await runPandoc(
+        ["--from", format,
+         "--to", "plain",
+         "--lua-filter", path.join(resourcesDir, 'heading-ids.lua'),
+        ],
+        markdown
+      );
+
+      if (headingIds) {
+        ast.heading_ids = headingIds.split('\n').filter(id => id.length !== 0);
+      }
+  
       return ast;
     },
     async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
@@ -102,8 +121,8 @@ export function pandocServer() : PandocServer {
   };
 }
 
-export function pandocServerMethods() : Record<string, jayson.Method> {
-  const server = pandocServer();
+export function pandocServerMethods(resourcesDir: string) : Record<string, jayson.Method> {
+  const server = pandocServer(resourcesDir);
   const methods: Record<string, jayson.Method> = {
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
     [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),

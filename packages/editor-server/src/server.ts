@@ -27,9 +27,9 @@ import { zoteroServer, zoteroServerMethods } from "./zotero";
 
 import jayson from 'jayson'
 
-export function editorServer() : EditorServer {
+export function editorServer(resourcesDir: string) : EditorServer {
   return {
-    pandoc: pandocServer(),
+    pandoc: pandocServer(resourcesDir),
     doi: doiServer(),
     crossref: crossrefServer(),
     datacite: dataCiteServer(),
@@ -40,9 +40,9 @@ export function editorServer() : EditorServer {
   };
 }
 
-export function editorServerMethods(): Record<string,jayson.Method> {
+export function editorServerMethods(resourcesDir: string): Record<string,jayson.Method> {
   return {
-    ...pandocServerMethods(),
+    ...pandocServerMethods(resourcesDir),
     ...doiServerMethods(),
     ...crossrefServerMethods(),
     ...dataCiteServerMethods(),

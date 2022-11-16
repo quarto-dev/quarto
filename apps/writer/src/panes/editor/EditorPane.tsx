@@ -105,7 +105,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
         <EditorActionsContext.Provider value={this}>
           <EditorToolbar />
           <div id="editor" className={styles.editorParent} ref={el => (this.parent = el)}>
-            {this.props.loading ? <EditorPaneLoading /> : null}
+            {this.editorLoading()}
             <EditorOutlineSidebar />
           </div>
           <EditorDialogsImpl ref={this.editorDialogsRef} />
@@ -181,6 +181,20 @@ class EditorPane extends React.Component<EditorPaneProps> {
   public navigate(id: string) {
     if (this.editor) {
       this.editor.navigate(NavigationType.Id, id);
+    }
+  }
+
+  private editorLoading() {
+    if (this.props.loading) {
+      return this.props.loading && (
+        <div className={['ProseMirror', styles.editorLoading].join(' ')}>
+          <div className='body pm-editing-root-node pm-text-color pm-background-color'>
+            <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
+          </div>
+        </div>
+      )
+    } else {
+      return <div/>;
     }
   }
 
@@ -306,16 +320,6 @@ class EditorPane extends React.Component<EditorPaneProps> {
   }
 }
 
-
-const EditorPaneLoading: React.FC = () => {
-  return (
-    <div className={['ProseMirror', styles.editorLoading].join(' ')}>
-      <div className='body pm-editing-root-node pm-text-color pm-background-color'>
-        <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
-      </div>
-    </div>
-  )
-}
 
 const mapStateToProps = (state: WorkbenchState) => {
   return {

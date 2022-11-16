@@ -1,6 +1,11 @@
 import { walk } from "@observablehq/parser";
 
-import { simple } from "acorn-walk";
+import { full, simple } from "acorn-walk";
+
+/**
+ *  FINISH REPLACING THE SIMPLE WALKER WITH A FULL WALKER THAT DOES SUBSTITUTION ALL AT ONCE.
+ * 
+ */
 
 export const extractPath = path => {
   let source = path;
@@ -80,63 +85,61 @@ export function setupRegularCell(cell) {
   if (cell.id && cell.id.name) name = cell.id.name;
   else if (cell.id && cell.id.id && cell.id.id.name) name = cell.id.id.name;
   let bodyText = cell.input.substring(cell.body.start, cell.body.end);
-  const cellReferences = (cell.references || []).map(ref => {
+  let expressionMap = {};
+  let references = [];
+  const cellReferences = Array.from(new Set((cell.references || []).map(ref => {
     if (ref.type === "ViewExpression") {
+      if (expressionMap[ref.id.name] === undefined) {
+        expressionMap[ref.id.name] = ref.id.name;
+        references.push(ref.id.name);
+      }
       return "viewof " + ref.id.name;
     } else if (ref.type === "MutableExpression") {
+      if (expressionMap[ref.id.name] === undefined) {
+        expressionMap[ref.id.name] = ref.id.name;
+        references.push(ref.id.name);
+      }
       return "mutable " + ref.id.name;
-    } else return ref.name;
-  });
-  let $count = 0;
-  let indexShift = 0;
-  const references = (cell.references || []).map(ref => {
-    if (ref.type === "ViewExpression") {
-      const $string = "$" + $count;
-      $count++;
-      // replace "viewof X" in bodyText with "$($count)"
-      simple(
-        cell.body,
-        {
-          ViewExpression(node) {
-            const start = node.start - cell.body.start;
-            const end = node.end - cell.body.start;
-            bodyText =
-              bodyText.slice(0, start + indexShift) +
-              $string +
-              bodyText.slice(end + indexShift);
-            indexShift += $string.length - (end - start);
-          }
-        },
-        walk
-      );
-      return $string;
-    } else if (ref.type === "MutableExpression") {
-      const $string = "$" + $count;
-      const $stringValue = $string + ".value";
-      $count++;
-      // replace "mutable Y" in bodyText with "$($count).value"
-      simple(
-        cell.body,
-        {
-          MutableExpression(node) {
-            const start = node.start - cell.body.start;
-            const end = node.end - cell.body.start;
-            bodyText =
-              bodyText.slice(0, start + indexShift) +
-              $stringValue +
-              bodyText.slice(end + indexShift);
-            indexShift += $stringValue.length - (end - start);
-          }
-        },
-        walk
-      );
-      return $string;
-    } else return ref.name;
-  });
+    } else {
+      references.push(ref.name);
+      return ref.name;
+    }
+  })));
+  const uniq = (lst) => {
+    const result = [];
+    const s = new Set();
+    for (const v of lst) {
+      if (s.has(v)) continue;
+      s.add(v);
+      result.push(v);
+    }
+    return result;
+  }
+  const patches = [];
+  let latestPatch = { newStr: "", span: [cell.body.start, cell.body.start] };
+  full(cell.body, node => {
+    if (node.type === "ViewExpression" || node.type === "MutableExpression") {
+      // cover previous ground?
+      if (node.start !== latestPatch.span[1]) {
+        patches.push({ newStr: cell.input.substring(latestPatch.span[1], node.start)});
+      }
+      const suffix = node.type === "MutableExpression" ? ".value" : "";
+      const newStr = `${expressionMap[node.id.name]}${suffix}`;
+      const patch = {
+        newStr,
+        span: [node.start, node.end]
+      };
+      latestPatch = patch;
+      patches.push(patch);
+    }
+  }, walk);
+  patches.push({newStr: cell.input.substring(latestPatch.span[1], cell.body.end), span: [latestPatch.span[1], cell.body.end]});
+  bodyText = patches.map(x => x.newStr).join("");
+
   return {
     cellName: name,
-    references: Array.from(new Set(references)),
+    references: uniq(references),
     bodyText,
-    cellReferences: Array.from(new Set(cellReferences))
+    cellReferences: uniq(cellReferences)
   };
 }

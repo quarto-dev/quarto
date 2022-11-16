@@ -51,12 +51,29 @@ export function pandocServer(resourcesDir: string) : PandocServer {
       }
     },
     async markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
+      // ast
       const ast = JSON.parse(await runPandoc(
         ["--from", format,
          "--abbreviations", path.join(resourcesDir, 'abbreviations'),
          "--to", "json", ...options],
          markdown)
       ) as PandocAst;
+
+      // heading-ids
+      // disable auto identifiers so we can discover *only* explicit ids
+      format += "-auto_identifiers-gfm_auto_identifiers";
+      const headingIds = await runPandoc(
+        ["--from", format,
+         "--to", "plain",
+         "--lua-filter", path.join(resourcesDir, 'heading-ids.lua'),
+        ],
+        markdown
+      );
+
+      if (headingIds) {
+        ast.heading_ids = headingIds.split('\n').filter(id => id.length !== 0);
+      }
+  
       return ast;
     },
     async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {

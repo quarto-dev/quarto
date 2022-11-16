@@ -4,6 +4,7 @@
   "description": "A runtime for quarto's support of ObservableHQ's reactive Javascript.",
   "main": "src/index.js",
   "module": "src/index.js",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto-ojs-runtime.git"
@@ -30,7 +31,9 @@
     "eslint": "^7.32.0",
     "exceljs": "^4.3.0",
     "node-fetch": "^2.6.1",
-    "rollup": "^2.72.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup": "^3.2.5",
+    "@rollup/plugin-json": "^5.0.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "mime": "^3.0.0"
   }
 }

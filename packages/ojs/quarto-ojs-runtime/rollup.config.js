@@ -1,7 +1,7 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import { terser } from "rollup-plugin-terser";
-import * as meta from "./package.json";
+import meta from "./package.json" assert { type: "json" };
 
 const config = {
   input: "src/index.js",

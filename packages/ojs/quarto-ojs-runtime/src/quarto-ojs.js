@@ -31,6 +31,8 @@ import { OJSConnector } from "./ojs-connector.js";
 
 import { createQuartoJsxShim } from "./quarto-jsx.js";
 
+import mime from "mime";
+
 //////////////////////////////////////////////////////////////////////////////
 // Quarto-specific code starts here.
 
@@ -682,17 +684,27 @@ export function createRuntime() {
       return localResolver[n];
     }
 
-    if (n.startsWith("/")) {
-      // docToRoot can be empty, in which case naive concatenation creates
-      // an absolute path.
-      if (quartoOjsGlobal.paths.docToRoot === "") {
-        return `.${n}`;
+    const name = (() => {
+      if (n.startsWith("/")) {
+        // docToRoot can be empty, in which case naive concatenation creates
+        // an absolute path.
+        if (quartoOjsGlobal.paths.docToRoot === "") {
+          return `.${n}`;
+        } else {
+          return `${quartoOjsGlobal.paths.docToRoot}${n}`;
+        }
       } else {
-        return `${quartoOjsGlobal.paths.docToRoot}${n}`;
-      }
-    } else {
-      return n;
+        return n;
+      }  
+    })();
+
+    const mimeType = mime.getType(name);
+
+    return {
+      url: name,
+      mimeType: mimeType,
     }
+
   }
   lib.FileAttachment = () => FileAttachments(fileAttachmentPathResolver);
 

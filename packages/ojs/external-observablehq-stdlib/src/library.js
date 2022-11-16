@@ -1,4 +1,4 @@
-import {requireFrom, resolveFrom} from "d3-require";
+import {requireFrom, resolveFrom} from "@quarto/external-d3-d3-require";
 import * as DOM from "./dom/index.js";
 import * as Files from "./files/index.js";
 import {AbstractFile, FileAttachment, NoFileAttachments} from "./fileAttachment.js";

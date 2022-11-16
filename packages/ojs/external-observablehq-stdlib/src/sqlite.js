@@ -1,5 +1,6 @@
 import {sql} from "./dependencies.js";
 import {requireDefault} from "./require.js";
+import {fromEntries} from "./fromEntries.js";
 
 export async function SQLite(require) {
   const [init, dist] = await Promise.all([require(sql.resolve()), require.resolve(sql.resolve("dist/"))]);
@@ -107,7 +108,7 @@ async function exec(db, query, params) {
   const [result] = await db.exec(query, params);
   if (!result) return [];
   const {columns, values} = result;
-  const rows = values.map(row => Object.fromEntries(row.map((value, i) => [columns[i], value])));
+  const rows = values.map(row => fromEntries(row.map((value, i) => [columns[i], value])));
   rows.columns = columns;
   return rows;
 }

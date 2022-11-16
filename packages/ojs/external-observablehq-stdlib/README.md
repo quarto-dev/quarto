@@ -1,3 +1,16 @@
+# @quarto/external-observablehq-stdlib, a fork of @observablehq/stdlib
+
+We track here a number of small changes required to make the
+observable stdlib work in the RStudio IDE. The important bits are:
+
+- The build process (and as a result `dist/stdlib.js`) needs to use a [fork of
+  `d3-require`](https://github.com/quarto-dev/external-d3-d3-require) to support a
+  require() function that works from inside IPython's HTMLwidgets as
+  well as the observable runtime.
+
+- We can't call `Object.fromEntries` because the RStudio IDE uses an
+  old version of the JS stdlib.
+
 # @observablehq/stdlib
 
 [![Node CI](https://github.com/observablehq/stdlib/workflows/Node%20CI/badge.svg)](https://github.com/observablehq/stdlib/actions?workflow=Node+CI)

@@ -164,7 +164,7 @@ const extension = (context: ExtensionContext): Extension => {
 };
 
 function headingAttributeInputRule(schema: Schema) {
-  return new InputRule(/ {([^}]+)}$/, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(/ {([^}]+)}$/, (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
     // only fire in headings
     const heading = findParentNodeOfType(schema.nodes.heading)(state.selection);
     if (heading) {

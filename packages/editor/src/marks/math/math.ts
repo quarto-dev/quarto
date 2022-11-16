@@ -268,7 +268,7 @@ const extension = (context: ExtensionContext): Extension | null => {
         // inline math
         new InputRule(
           new RegExp('(^|[^`])' + kInlineMathInputRulePattern + '$'),
-          (state: EditorState, match: string[], start: number, end: number) => {
+          (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
             if (!markIsActive(state, schema.marks.math) && filter(state)) {
               const tr = state.tr;
               tr.insertText('$');
@@ -281,7 +281,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             }
           },
         ),
-        new InputRule(/(?:^|[^`])\$$/, (state: EditorState, _match: string[], start: number) => {
+        new InputRule(/(?:^|[^`])\$$/, (state: EditorState, _match: RegExpMatchArray, start: number) => {
           if (!markIsActive(state, schema.marks.math)) {
             const { parent, parentOffset } = state.selection.$head;
             const text = '$' + parent.textContent.slice(parentOffset);
@@ -302,7 +302,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           return null;
         }),
         // display math
-        new InputRule(/^\$\$$/, (state: EditorState, _match: string[], start: number, end: number) => {
+        new InputRule(/^\$\$$/, (state: EditorState, _match: RegExpMatchArray, start: number, end: number) => {
           if (filter(state, start, end)) {
             const tr = state.tr;
             tr.delete(start, end);

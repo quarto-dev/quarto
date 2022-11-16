@@ -20,7 +20,7 @@ import { setTextSelection, findParentNodeOfTypeClosestToPos } from 'prosemirror-
 import { insertDefinitionList } from './definition_list-insert';
 
 export function definitionInputRule() {
-  return new InputRule(/^:[ ]+$/, (state: EditorState, _match: string[], start: number, end: number) => {
+  return new InputRule(/^:[ ]+$/, (state: EditorState, _match: RegExpMatchArray, start: number, end: number) => {
     const schema = state.schema;
 
     // if we are inside a definiition list description this means start a new description

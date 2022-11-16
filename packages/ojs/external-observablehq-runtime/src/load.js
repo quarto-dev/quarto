@@ -1,5 +1,5 @@
 import {Library} from "@quarto/external-observablehq-stdlib";
-import Runtime from "./runtime";
+import {Runtime} from "./runtime.js";
 
 export default function load(notebook, library, observer) {
   if (typeof library == "function") observer = library, library = null;

@@ -1,9 +1,9 @@
 {
-  "name": "@observablehq/runtime",
-  "version": "5.0.2",
+  "name": "@quarto/external-observablehq-runtime",
+  "version": "5.0.3",
   "author": {
-    "name": "Observable, Inc.",
-    "url": "https://observablehq.com"
+    "name": "Quarto Authors, RStudio, PBC.",
+    "url": "https://quarto.org"
   },
   "license": "ISC",
   "type": "module",
@@ -17,13 +17,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/observablehq/runtime.git"
+    "url": "https://github.com/quarto-dev/quarto.git"
   },
   "files": [
     "dist/**/*.js",
     "src/**/*.js"
   ],
   "scripts": {
+    "build": "rollup -c",
     "test": "mocha 'test/**/*-test.js' && eslint src test",
     "prepublishOnly": "rm -rf dist && rollup -c",
     "postpublish": "git push && git push --tags"
@@ -33,7 +34,7 @@
   },
   "dependencies": {
     "@observablehq/inspector": "^5.0.0",
-    "@observablehq/stdlib": "^5.0.0"
+    "@quarto/external-observablehq-stdlib": "^5.0.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.1",

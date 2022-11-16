@@ -21,17 +21,16 @@
   "license": "ISC",
   "dependencies": {
     "@observablehq/inputs": "^0.10.4",
-    "@quarto/external-alex-garcia-unofficial-observablehq-compiler": "../external-asg017-unofficial-observablehq-compiler",
-    "@quarto/external-observablehq-parser": "../external-observablehq-parser",
-    "@quarto/external-observablehq-runtime": "../external-observablehq-runtime",
-    "@quarto/external-observablehq-stdlib": "../external-observablehq-stdlib",
+    "@quarto/external-alex-garcia-unofficial-observablehq-compiler": "link:../external-asg017-unofficial-observablehq-compiler",
+    "@quarto/external-observablehq-parser": "link:../external-observablehq-parser",
+    "@quarto/external-observablehq-runtime": "link:../external-observablehq-runtime",
+    "@quarto/external-observablehq-stdlib": "link:../external-observablehq-stdlib",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "eslint": "^7.32.0",
     "exceljs": "^4.3.0",
     "node-fetch": "^2.6.1",
     "rollup": "^2.72.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "tap": "^14.11.0"
+    "rollup-plugin-terser": "^7.0.2"
   }
 }

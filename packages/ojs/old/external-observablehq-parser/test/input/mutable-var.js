@@ -1,3 +1,0 @@
-{
-  var mutable = 2;
-}

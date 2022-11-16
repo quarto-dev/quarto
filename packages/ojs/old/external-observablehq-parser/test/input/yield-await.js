@@ -1,4 +1,0 @@
-{
-  yield value;
-  await promise;
-}

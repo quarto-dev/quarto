@@ -1,3 +1,8 @@
+# @quarto/external-d3-d3-require: a fork of https://github.com/d3/d3-require
+
+This fork changes d3-require to work better in the presence of other javascript importers that might hijack window.define.
+This comes up in [quarto](https://quarto.org) specifically when using Jupyter's HTMLWidgets.
+
 # d3-require
 
 A minimal, promise-based implementation to require [asynchronous module definitions](https://github.com/amdjs/amdjs-api/blob/master/AMD.md) (AMD). This implementation is [small](https://github.com/d3/d3-require/blob/main/src/index.mjs) and supports a strict subset of AMD. It is designed to work with browser-targeting libraries that implement one of the [recommended UMD patterns](https://github.com/umdjs/umd). The constraints of this implementation are:

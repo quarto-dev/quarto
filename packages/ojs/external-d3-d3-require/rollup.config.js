@@ -10,7 +10,7 @@ const config = {
     format: "umd",
     indent: false,
     extend: true,
-    banner: `// ${meta.name} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author.name}`,
+    banner: `// ${meta.name} v${meta.version} Fork changes are Copyright ${(new Date).getFullYear()} ${meta.author.name}\n// Original package Copyright ${(new Date).getFullYear()} ObservableHQ.`,
     globals: Object.assign({}, ...Object.keys(meta.dependencies || {}).filter(key => /^d3-/.test(key)).map(key => ({[key]: "d3"})))
   },
   plugins: []

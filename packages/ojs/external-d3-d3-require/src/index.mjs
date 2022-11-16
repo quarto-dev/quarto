@@ -67,6 +67,8 @@ export function resolveFrom(origin = "https://cdn.jsdelivr.net/npm/", mains = ["
 }
 
 export var require = requireFrom(resolveFrom());
+let requestsInFlight = 0;
+let prevDefine = undefined;
 
 export function requireFrom(resolver) {
   const cache = new Map;
@@ -81,14 +83,27 @@ export function requireFrom(resolver) {
         try { resolve(queue.pop()(requireRelative(url))); }
         catch (error) { reject(new RequireError("invalid module")); }
         script.remove();
+        requestsInFlight--;
+        if (requestsInFlight === 0) {
+          window.define = prevDefine;
+        }
       };
       script.onerror = () => {
         reject(new RequireError("unable to load module"));
         script.remove();
+        requestsInFlight--;
+        if (requestsInFlight === 0) {
+          window.define = prevDefine;
+        }
       };
       script.async = true;
       script.src = url;
-      window.define = define;
+      if (requestsInFlight === 0) {
+        prevDefine = window.define;
+        window.define = define;
+      }
+      requestsInFlight++;
+
       document.head.appendChild(script);
     }));
     return module;

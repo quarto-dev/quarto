@@ -1,5 +1,5 @@
 {
-  "name": "@quarto/external-observablehq-stdlib",
+  "name": "external-observablehq-stdlib",
   "version": "5.0.3",
   "author": {
     "name": "Quarto authors, RStudio, PBC.",
@@ -34,7 +34,7 @@
   "dependencies": {
     "d3-array": "^3.2.0",
     "d3-dsv": "^3.0.1",
-    "@quarto/external-d3-d3-require": "link:../external-d3-d3-require"
+    "external-d3-d3-require": "*"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.1",

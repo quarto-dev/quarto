@@ -1,4 +1,4 @@
-import {require as initialRequire, requireFrom} from "@quarto/external-d3-d3-require";
+import {require as initialRequire, requireFrom} from "external-d3-d3-require";
 
 // TODO Allow this to be overridden using the Library’s resolver.
 export const cdn = "https://cdn.observableusercontent.com/npm/";

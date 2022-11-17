@@ -49,8 +49,8 @@ export const EditorDialogEditAttr: React.FC<EditorDialogEditAttrProps> = props =
   // prop defaults
   const {
     removeEnabled = false,
-    caption = t('edit_attr_dialog_caption'),
-    removeCaption = t('edit_attr_dialog_remove'),
+    caption = t('edit_attr_dialog_caption') as string,
+    removeCaption = t('edit_attr_dialog_remove') as string,
   } = props;
 
   const attrInput = React.createRef<AttrEditor>();

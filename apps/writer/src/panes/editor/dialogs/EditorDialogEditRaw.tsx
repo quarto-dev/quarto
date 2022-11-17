@@ -98,7 +98,7 @@ export const EditorDialogEditRaw: React.FC<EditorDialogEditRawProps> = props => 
   return (
     <Dialog
       isOpen={props.isOpen}
-      title={t('edit_raw_dialog_caption')}
+      title={t('edit_raw_dialog_caption') as string}
       onOK={onActionClicked('edit')}
       onCancel={onCancel}
       leftButtons={removeButton}

@@ -136,7 +136,7 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
   return (
     <Dialog
       isOpen={props.isOpen}
-      title={t('edit_link_dialog_caption')}
+      title={t('edit_link_dialog_caption') as string}
       onOpening={onOpening}
       onOpened={onOpened}
       onOK={onOK}

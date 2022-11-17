@@ -80,7 +80,7 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
   return (
     <Dialog
       isOpen={props.isOpen}
-      title={t('edit_image_dialog_caption')}
+      title={t('edit_image_dialog_caption') as string}
       onOpened={onOpened}
       onOK={onOK}
       onCancel={onCancel}

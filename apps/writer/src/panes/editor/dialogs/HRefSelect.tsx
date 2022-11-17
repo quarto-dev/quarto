@@ -73,11 +73,11 @@ export const HRefSelect : React.FC<HRefSelectProps> = ((props: HRefSelectProps) 
           }}
           elementRef={props.typeRef}
           options={[
-            { label: t('edit_link_dialog_type_url'), value: LinkType.URL },
+            { label: t('edit_link_dialog_type_url') as string, value: LinkType.URL },
             ...(props.capabilities.headings
-              ? [{ label: t('edit_link_dialog_type_heading'), value: LinkType.Heading }]
+              ? [{ label: t('edit_link_dialog_type_heading') as string, value: LinkType.Heading }]
               : []),
-            { label: t('edit_link_dialog_type_id'), value: LinkType.ID },
+            { label: t('edit_link_dialog_type_id') as string, value: LinkType.ID },
           ]}
           className={Classes.FIXED}
         />

@@ -67,7 +67,7 @@ class WorkbenchTitle extends React.Component<WorkbenchTitleProps> {
     return (
       <EditableText
         className={styles.title}
-        placeholder={this.props.loading ? '' : this.props.t('untitled_document')}
+        placeholder={this.props.loading ? '' : this.props.t('untitled_document') as string}
         value={this.props.title}
         onChange={this.props.setTitle}
         onCancel={this.focusEditor}

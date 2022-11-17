@@ -26,6 +26,7 @@ export * from './api/command-types';
 export * from './api/outline-types';
 export * from './api/navigation-types';
 export * from './api/event-types';
+export * from './api/extension-types'
 
 // main editor module
 export * from './editor/editor';

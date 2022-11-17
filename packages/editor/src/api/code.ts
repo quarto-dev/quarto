@@ -15,8 +15,9 @@
 
 import { Plugin, PluginKey } from 'prosemirror-state';
 
-import { CodeViewOptions, canInsertNodeAtPos } from './node';
+import { canInsertNodeAtPos } from './node';
 import { ResolvedPos, Slice, Fragment } from 'prosemirror-model';
+import { CodeViewOptions } from './extension-types';
 
 export const kCodeAttr = 0;
 export const kCodeText = 1;

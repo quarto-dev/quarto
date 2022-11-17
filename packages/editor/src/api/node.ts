@@ -39,7 +39,7 @@ import {
 import { PandocBlockCapsuleFilter } from './pandoc_capsule';
 
 import { AttrEditOptions } from './attr_edit';
-import { CommandFn } from './command';
+import { CodeViewOptions } from './extension-types';
 
 export interface PandocNode {
   readonly name: string;
@@ -57,17 +57,6 @@ export interface PandocNode {
   };
 }
 
-export interface CodeViewOptions {
-  lang: (node: ProsemirrorNode, content: string) => string | null;
-  attrEditFn?: CommandFn;
-  createFromPastePattern?: RegExp;
-  classes?: string[];
-  borderColorClass?: string;
-  firstLineMeta?: boolean;
-  lineNumbers?: boolean;
-  bookdownTheorems?: boolean;
-  lineNumberFormatter?: (lineNumber: number, lineCount?: number, line?: string) => string;
-}
 
 export type NodeTraversalFn = (
   node: Node,

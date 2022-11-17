@@ -30,7 +30,7 @@ import { keymap } from 'prosemirror-keymap';
 import { undoInputRule } from 'prosemirror-inputrules';
 import { GapCursor } from 'prosemirror-gapcursor';
 
-import { CodeViewOptions, editingRootNode } from '../../api/node';
+import { editingRootNode } from '../../api/node';
 import { insertParagraph } from '../../api/paragraph';
 import { EditorUI, ChunkEditor } from '../../api/ui-types';
 import { EditorEvents } from '../../api/event-types';
@@ -51,6 +51,7 @@ import zenscroll from 'zenscroll';
 import './ace.css';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { editorScrollContainer } from '../../api/scroll';
+import { CodeViewOptions } from '../../api/extension-types';
 
 const plugin = new PluginKey('ace');
 

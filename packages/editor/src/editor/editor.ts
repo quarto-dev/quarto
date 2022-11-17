@@ -37,7 +37,7 @@ import {
   attrInputToProps,
 } from '../api/ui';
 
-import { Extension } from '../api/extension';
+import { Extension, ExtensionFn } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
@@ -126,6 +126,7 @@ import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
 import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
 import { kPmScrollContainer } from '../api/scroll';
+import { CodeViewExtensionFn } from '../api/extension-types';
 
 
 // re-export editor ui
@@ -161,7 +162,8 @@ export interface EditorContext {
   readonly server: EditorServer;
   readonly ui: EditorUI;
   readonly hooks?: EditorHooks;
-  readonly extensions?: readonly Extension[];
+  readonly extensions?: Array<Extension | ExtensionFn>;
+  readonly codeViewExtension?: CodeViewExtensionFn;
 }
 
 export interface EditorHooks {

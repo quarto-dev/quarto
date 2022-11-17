@@ -1,5 +1,5 @@
 {
-  "name": "@quarto/external-observablehq-parser",
+  "name": "external-observablehq-parser",
   "description": "A fork of ObservableHQ's Acorn parser for Observable JavaScript",
   "version": "6.0.2",
   "author": {
@@ -34,7 +34,7 @@
     "postpublish": "git push && git push --tags"
   },
   "_moduleAliases": {
-    "@quarto/external-observablehq-parser": "./src/index.js"
+    "external-observablehq-parser": "./src/index.js"
   },
   "dependencies": {
     "acorn": "8",

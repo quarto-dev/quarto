@@ -1,5 +1,5 @@
 {
-  "name": "@quarto/external-d3-d3-require",
+  "name": "external-d3-d3-require",
   "version": "1.3.1",
   "description": "A fork of d3/d3-require.",
   "author": {

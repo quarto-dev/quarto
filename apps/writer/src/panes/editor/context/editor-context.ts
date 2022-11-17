@@ -33,6 +33,8 @@ import {
 import { CommandManager } from "../../../commands/CommandManager";
 import { editorDisplay } from "./editor-display";
 
+import { codeMirrorExtension } from "editor-codemirror";
+
 
 export function editorContext(commandManager: () => CommandManager, dialogs: EditorDialogs) : EditorContext {
   
@@ -50,7 +52,11 @@ export function editorContext(commandManager: () => CommandManager, dialogs: Edi
 
   const server = uiTools.context.jsonRpcServer("/editor-server");
 
-  const context : EditorContext = { server, ui };
+  const context : EditorContext = { 
+    server, 
+    ui, 
+    codeViewExtension: codeMirrorExtension 
+  };
 
   return context;
 }

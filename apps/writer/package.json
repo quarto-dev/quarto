@@ -18,6 +18,7 @@
     "@codemirror/lang-markdown": "^6.0.5",
     "codemirror": "^6.0.1",
     "editor": "*",
+    "editor-codemirror": "*",
     "i18next": "^22.0.4",
     "i18next-browser-languagedetector": "^7.0.1",
     "i18next-http-backend": "^2.0.1",
@@ -32,7 +33,6 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/codemirror": "^5.60.5",
     "@types/react-transition-group": "^4.4.5",
     "@types/uuid": "^8.3.4",
     "eslint": "^7.32.0",

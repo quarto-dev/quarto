@@ -331,13 +331,6 @@
     htl "0.3"
     isoformat "^0.2.0"
 
-"@observablehq/inspector@^3.2.2":
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/@observablehq/inspector/-/inspector-3.2.4.tgz#b620af79e721ae0e26e9bc83ec6e2e26ad260880"
-  integrity sha512-P1TdR95pvvNri0XV6X/R+s9XO70d8ozhOp2cMXEJ2zsiGzB8VjOdrJgRJyLjEJ0OJy7jP9VXFiC1Hej8WgsF5A==
-  dependencies:
-    isoformat "^0.2.0"
-
 "@observablehq/inspector@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@observablehq/inspector/-/inspector-5.0.0.tgz#7dec08d4fa20dfb79977ce62f7cc4a814b44e595"
@@ -357,50 +350,6 @@
   version "2.11.6"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.6.tgz#cee20bd55e68a1720bdab363ecf0c821ded4cd45"
   integrity sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==
-
-"@quarto/external-alex-garcia-unofficial-observablehq-compiler@link:packages/ojs/external-asg017-unofficial-observablehq-compiler":
-  version "0.0.6"
-  dependencies:
-    "@observablehq/parser" "4.2"
-    acorn-walk "^7.0.0"
-
-"@quarto/external-d3-d3-require@link:packages/ojs/external-d3-d3-require":
-  version "1.3.1"
-
-"@quarto/external-observablehq-parser@link:packages/ojs/external-observablehq-parser":
-  version "6.0.2"
-  dependencies:
-    acorn "8"
-    acorn-walk "8"
-
-"@quarto/external-observablehq-runtime@^4.21.0":
-  version "4.23.1"
-  resolved "https://registry.yarnpkg.com/@quarto/external-observablehq-runtime/-/external-observablehq-runtime-4.23.1.tgz#58dbac155c6032805416491d7bb421be5e13e4d8"
-  integrity sha512-7B7NZM2HFla0e9XyhHsrjCj0YZd/LJF1FbtmePUSYrFUbp+624ti38pAVsRIIeo26TQNqUk9ZYUqi3uZurfJBA==
-  dependencies:
-    "@observablehq/inspector" "^3.2.2"
-    "@quarto/external-observablehq-stdlib" "^3.19.9"
-
-"@quarto/external-observablehq-runtime@link:packages/ojs/external-observablehq-runtime":
-  version "5.0.3"
-  dependencies:
-    "@observablehq/inspector" "^5.0.0"
-    "@quarto/external-observablehq-stdlib" "^5.0.1"
-
-"@quarto/external-observablehq-stdlib@^3.19.9":
-  version "3.23.3"
-  resolved "https://registry.yarnpkg.com/@quarto/external-observablehq-stdlib/-/external-observablehq-stdlib-3.23.3.tgz#7eea6fd226517c9a7ba010590fafab50f430faec"
-  integrity sha512-DzRmbLoUPpTZWMWEAaj7KrJA0whQ7OzniYmWY13GYAwOC925Of4JxgofDakrsN9UCaMMijnqAkukM0X6tqw5/w==
-  dependencies:
-    "@quarto/external-d3-d3-require" "^1.3.1"
-    d3-dsv "^2.0.0"
-
-"@quarto/external-observablehq-stdlib@link:packages/ojs/external-observablehq-stdlib":
-  version "5.0.3"
-  dependencies:
-    "@quarto/external-d3-d3-require" "link:packages/ojs/external-d3-d3-require"
-    d3-array "^3.2.0"
-    d3-dsv "^3.0.1"
 
 "@rollup/plugin-commonjs@^22.0.0":
   version "22.0.2"
@@ -1407,15 +1356,15 @@ colors@~1.2.1:
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.5.tgz#89c7ad9a374bc030df8013241f68136ed8835afc"
   integrity sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==
 
-commander@2, commander@^2.20.0, commander@^2.20.3:
-  version "2.20.3"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
-  integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
-
 commander@7:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
   integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
+
+commander@^2.20.0, commander@^2.20.3:
+  version "2.20.3"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
+  integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
 commander@^4.0.0:
   version "4.1.1"
@@ -1573,15 +1522,6 @@ d3-array@^3.2.0:
   integrity sha512-3yXFQo0oG3QCxbF06rMPFyGRMGJNS7NvsV1+2joOjbBE+9xvWQ8+GcMJAjRCzw06zQ3/arXeJgbPYcjUCuC+3g==
   dependencies:
     internmap "1 - 2"
-
-d3-dsv@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/d3-dsv/-/d3-dsv-2.0.0.tgz#b37b194b6df42da513a120d913ad1be22b5fe7c5"
-  integrity sha512-E+Pn8UJYx9mViuIUkoc93gJGGYut6mSDKy2+XaPwccwkRGlR+LO97L2VCCRjQivTwLHkSnAJG7yo00BWY6QM+w==
-  dependencies:
-    commander "2"
-    iconv-lite "0.4"
-    rw "1"
 
 d3-dsv@^3.0.1:
   version "3.0.1"
@@ -2799,7 +2739,7 @@ i18next@^22.0.4:
   dependencies:
     "@babel/runtime" "^7.17.2"
 
-iconv-lite@0.4, iconv-lite@0.4.24:
+iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
   integrity sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==

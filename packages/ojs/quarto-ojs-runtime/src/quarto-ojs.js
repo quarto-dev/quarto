@@ -15,7 +15,7 @@
 // grab FileAttachments and Library)
 
 
-import { FileAttachments, Library } from "@quarto/external-observablehq-stdlib";
+import { FileAttachments, Library } from "external-observablehq-stdlib";
 
 import { PandocCodeDecorator } from "./pandoc-code-decorator.js";
 

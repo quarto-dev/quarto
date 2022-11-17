@@ -1,4 +1,4 @@
-import {Library, FileAttachments} from "@quarto/external-observablehq-stdlib";
+import {Library, FileAttachments} from "external-observablehq-stdlib";
 import {RuntimeError} from "./errors.js";
 import {generatorish} from "./generatorish.js";
 import {load} from "./load.js";

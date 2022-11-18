@@ -84,12 +84,12 @@ export function pandocServer(resourcesDir: string) : PandocServer {
       );
       return markdown;
     },
-    listExtensions(format: string): Promise<string> {
+    async listExtensions(format: string): Promise<string> {
       const args = ["--list-extensions"];
       if (format.length > 0) {
         args.push(format);
       }
-      return runPandoc(args);
+      return await runPandoc(args);
     },
     async getBibliography(
       file: string | null,

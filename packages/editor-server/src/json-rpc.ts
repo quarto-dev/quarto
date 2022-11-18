@@ -23,7 +23,9 @@ export function jsonRpcMethod(method: (args: Array<any>) => Promise<unknown>) : 
       method(args)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((result: unknown) => done(null, result))
-        .catch(error => done(error.message || "Unknown error"))
+        .catch(error => {
+          done({code: jayson.Server.errors.INTERNAL_ERROR, message: error.message});
+        });
     },
     params: Array
   })

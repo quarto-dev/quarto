@@ -32,6 +32,8 @@ import {
   kQuartoDocType
 } from 'editor';
 
+import { t } from '../../i18n';
+
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
 import { WorkbenchState } from '../../store/store';
 import {
@@ -116,33 +118,37 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   public async componentDidMount() {
 
-      this.editor = await this.createEditor();
+    const editor = await this.createEditor();
+    if (!editor) {
+      return;
+    }
+    this.editor = editor;
+        
+    window.addEventListener("resize", this.onResize);
 
-      window.addEventListener("resize", this.onResize);
+    // show any warnings
+    this.showPandocWarnings();
 
-      // show any warnings
-      this.showPandocWarnings();
+    // subscribe to events
+    this.onEditorEvent(UpdateEvent, this.onEditorDocChanged);
+    this.onEditorEvent(OutlineChangeEvent, this.onEditorOutlineChanged);
+    this.onEditorEvent(StateChangeEvent, this.onEditorStateChanged);
 
-      // subscribe to events
-      this.onEditorEvent(UpdateEvent, this.onEditorDocChanged);
-      this.onEditorEvent(OutlineChangeEvent, this.onEditorOutlineChanged);
-      this.onEditorEvent(StateChangeEvent, this.onEditorStateChanged);
+    // add commands
+    this.props.commandManager.addCommands([
+      ...editorProsemirrorCommands(this.editor!.commands()),
+      ...editorExternalCommands(this.editor!),
+      ...editorDebugCommands(this.editor!),
+    ]);
 
-      // add commands
-      this.props.commandManager.addCommands([
-        ...editorProsemirrorCommands(this.editor!.commands()),
-        ...editorExternalCommands(this.editor!),
-        ...editorDebugCommands(this.editor!),
-      ]);
+    // set menus
+    this.props.commandManager.setMenus(this.editor!.getMenus());
 
-      // set menus
-      this.props.commandManager.setMenus(this.editor!.getMenus());
+    // update editor
+    await this.updateEditor();
 
-      // update editor
-      await this.updateEditor();
-
-      // sync title
-      this.syncEditorTitle();
+    // sync title
+    this.syncEditorTitle();
   }
 
   private onResize() {
@@ -199,7 +205,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
   }
 
   
-  private async createEditor() : Promise<Editor> {
+  private async createEditor() : Promise<Editor | undefined> {
     const context = editorContext(() => this.props.commandManager, this.editorDialogs);
     const format: EditorFormat = {
       pandocMode: 'markdown',
@@ -215,10 +221,15 @@ class EditorPane extends React.Component<EditorPaneProps> {
       },
       docTypes: [kQuartoDocType]
     }
-    return Editor.create(this.parent!, context, format, { 
-      spellCheck: true,
-      outerScrollContainer: true 
-    });
+    try {
+      return await Editor.create(this.parent!, context, format, { 
+        spellCheck: true,
+        outerScrollContainer: true 
+      });
+    } catch(e) {
+      this.errorAlert(e);
+      return undefined;
+    }
   }
 
 
@@ -291,7 +302,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   private errorAlert(error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    this.editorDialogs.alert(message, message, kAlertTypeError);
+    this.editorDialogs.alert(message, t('error_alert_title'), kAlertTypeError);
   }
 
   private onEditorStateChanged() {

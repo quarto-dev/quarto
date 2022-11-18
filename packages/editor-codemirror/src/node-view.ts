@@ -35,7 +35,7 @@ import { foldGutter, foldKeymap } from "@codemirror/language";
 import { indentOnInput } from "@codemirror/language";
 import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
-import { defaultHighlightStyle } from "@codemirror/highlight";
+import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { bracketMatching } from "@codemirror/language";
 import { Compartment, EditorState } from "@codemirror/state";
 import { exitCode, selectAll } from "prosemirror-commands";
@@ -49,14 +49,16 @@ import {
   valueChanged,
 } from "./utils";
 import { CodeBlockSettings } from "./types";
+import { CodeViewOptions } from "editor";
 
 export const codeMirrorBlockNodeView: (
-  settings: CodeBlockSettings
+  settings: CodeBlockSettings,
+  codeViewOptions: CodeViewOptions
 ) => (
   pmNode: Node,
   view: PMEditorView,
   getPos: (() => number) | boolean
-) => NodeView = (settings) => (pmNode, view, getPos) => {
+) => NodeView = (settings, codeViewOptions) => (pmNode, view, getPos) => {
   let node = pmNode;
   let updating = false;
   const dom = document.createElement("div");
@@ -64,7 +66,7 @@ export const codeMirrorBlockNodeView: (
   const languageConf = new Compartment();
   const state = EditorState.create({
     extensions: [
-      EditorState.readOnly.of(settings.readOnly),
+      EditorState.readOnly.of(!!settings.readOnly),
       EditorView.editable.of(!settings.readOnly),
       lineNumbers(),
       highlightActiveLineGutter(),
@@ -76,11 +78,11 @@ export const codeMirrorBlockNodeView: (
       drawSelection({ cursorBlinkRate: 1000 }),
       EditorState.allowMultipleSelections.of(true),
       highlightActiveLine(),
-      defaultHighlightStyle.fallback,
+      syntaxHighlighting(defaultHighlightStyle),
       languageConf.of([]),
       indentOnInput(),
       EditorView.domEventHandlers({
-        blur(event, cmView) {
+        blur(_event, cmView) {
           cmView.dispatch({ selection: { anchor: 0 } });
         },
       }),
@@ -164,7 +166,12 @@ export const codeMirrorBlockNodeView: (
   });
   dom.append(codeMirrorView.dom);
 
-  setMode(node.attrs.lang, codeMirrorView, settings, languageConf);
+  setMode(
+    codeViewOptions.lang(node, view.state.doc.toString()) || '', 
+    codeMirrorView, 
+    settings, 
+    languageConf
+  );
 
   return {
     dom,
@@ -176,8 +183,6 @@ export const codeMirrorBlockNodeView: (
       codeMirrorView.focus();
       forwardSelection(codeMirrorView, view, getPos);
       updating = true;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const pos = typeof getPos === "function" ? getPos() : 0;
       codeMirrorView.dispatch({
         selection: { anchor: anchor, head: head },
       });

@@ -888,6 +888,7 @@ export class Editor {
         },
       },
       this.context.extensions,
+      this.context.codeViewExtension
     );
   }
 

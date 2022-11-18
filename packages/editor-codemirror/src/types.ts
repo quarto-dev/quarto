@@ -24,10 +24,8 @@ export type LanguageLoaders = Record<string, () => Promise<LanguageSupport>>;
 
 export type CodeBlockSettings = {
   languageLoaders?: LanguageLoaders;
-  languageNameMap?: Record<string, string>;
-  languageWhitelist?: string[];
   undo?: (state: EditorState, dispatch: (tr: Transaction) => void) => void;
   redo?: (state: EditorState, dispatch: (tr: Transaction) => void) => void;
   theme?: Extension[];
-  readOnly: boolean;
+  readOnly?: boolean;
 };

@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2022 by Emergence Engineering (ISC License)
  * https://gitlab.com/emergence-engineering/prosemirror-codemirror-block
- * 
+ *
  * Copyright (C) 2022 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -16,19 +16,50 @@
  *
  */
 
-import { 
-  ExtensionFn,
-  CodeViewOptions,
-  ExtensionContext
-} from "editor"
+import { Plugin, PluginKey } from "prosemirror-state";
+import { Node as ProsemirrorNode } from "prosemirror-model";
+import { EditorView, NodeView } from "prosemirror-view";
+import { undo, redo } from "prosemirror-history";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function codeMirrorExtension(_codeViews: { [key: string]: CodeViewOptions }): ExtensionFn {
+import { ExtensionFn, CodeViewOptions } from "editor";
+import { CodeBlockSettings } from "./types";
+import { codeMirrorBlockNodeView } from "./node-view";
+import { languageLoaders } from "./languages";
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return (_context: ExtensionContext) => {
-    return null;
-  }
+export const codeMirrorPluginKey = new PluginKey("codemirror");
 
+export function codeMirrorExtension(
+  codeViews: { [key: string]: CodeViewOptions })
+: ExtensionFn {
+  return () => {
+    // build nodeViews
+    const nodeTypes = Object.keys(codeViews);
+    const nodeViews: {
+      [name: string]: (
+        node: ProsemirrorNode,
+        view: EditorView,
+        getPos: boolean | (() => number)
+      ) => NodeView;
+    } = {};
+    const settings: CodeBlockSettings = {
+      languageLoaders,
+      undo, 
+      redo
+    };
+    nodeTypes.forEach((name) => {
+      nodeViews[name] = codeMirrorBlockNodeView(settings, codeViews[name]);
+    });
 
+    // return plugin
+    return {
+      plugins: () => [
+        new Plugin({
+          key: codeMirrorPluginKey,
+          props: {
+            nodeViews,
+          },
+        }),
+      ]
+    };
+  };
 }

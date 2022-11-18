@@ -18,7 +18,7 @@
  *
  */
 
-import { StreamLanguage } from "@codemirror/stream-parser";
+import { StreamLanguage } from "@codemirror/language";
 import { LanguageLoaders } from "./types";
 
 export enum Languages {

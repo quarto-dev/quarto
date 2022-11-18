@@ -1,6 +1,9 @@
 /*
  * index.ts
  *
+ * Copyright (C) 2022 by Emergence Engineering (ISC License)
+ * https://gitlab.com/emergence-engineering/prosemirror-codemirror-block
+ * 
  * Copyright (C) 2022 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -19,8 +22,10 @@ import {
   ExtensionContext
 } from "editor"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function codeMirrorExtension(_codeViews: { [key: string]: CodeViewOptions }): ExtensionFn {
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return (_context: ExtensionContext) => {
     return null;
   }

@@ -1,0 +1,130 @@
+/*
+ * languages.ts
+ *
+ * Copyright (C) 2022 by Emergence Engineering (ISC License)
+ * https://gitlab.com/emergence-engineering/prosemirror-codemirror-block
+ * 
+ * Copyright (C) 2022 by Posit Software, PBC
+ *
+ * Unless you have received this program directly from Posit Software pursuant
+ * to the terms of a commercial license agreement with Posit Software, then
+ * this program is licensed to you under the terms of version 3 of the
+ * GNU Affero General Public License. This program is distributed WITHOUT
+ * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
+ * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
+ *
+ */
+
+
+export enum CodeBlockLanguages {
+  javascript = "javascript",
+  html = "html",
+  css = "css",
+  sql = "sql",
+  python = "python",
+  rust = "rust",
+  xml = "xml",
+  json = "json",
+  markdown = "markdown",
+  java = "java",
+  cpp = "cpp",
+  lezer = "lezer",
+  php = "php",
+  wast = "wast",
+}
+
+export enum LegacyLanguages {
+  apl = "apl",
+  asciiarmor = "asciiarmor",
+  asn1 = "asn1",
+  asterisk = "asterisk",
+  brainfuck = "brainfuck",
+  clike = "clike",
+  clojure = "clojure",
+  cmake = "cmake",
+  cobol = "cobol",
+  coffeescript = "coffeescript",
+  commonlisp = "commonlisp",
+  crystal = "crystal",
+  cypher = "cypher",
+  d = "d",
+  diff = "diff",
+  dockerfile = "dockerfile",
+  dtd = "dtd",
+  dylan = "dylan",
+  ebnf = "ebnf",
+  ecl = "ecl",
+  eiffel = "eiffel",
+  elm = "elm",
+  erlang = "erlang",
+  factor = "factor",
+  fcl = "fcl",
+  forth = "forth",
+  fortran = "fortran",
+  gas = "gas",
+  gherkin = "gherkin",
+  go = "go",
+  groovy = "groovy",
+  haskell = "haskell",
+  haxe = "haxe",
+  http = "http",
+  idl = "idl",
+  jinja2 = "jinja2",
+  julia = "julia",
+  livescript = "livescript",
+  lua = "lua",
+  mathematica = "mathematica",
+  mbox = "mbox",
+  mirc = "mirc",
+  mllike = "mllike",
+  modelica = "modelica",
+  mscgen = "mscgen",
+  mumps = "mumps",
+  nginx = "nginx",
+  nsis = "nsis",
+  ntriples = "ntriples",
+  octave = "octave",
+  oz = "oz",
+  pascal = "pascal",
+  perl = "perl",
+  pig = "pig",
+  powershell = "powershell",
+  properties = "properties",
+  protobuf = "protobuf",
+  puppet = "puppet",
+  q = "q",
+  r = "r",
+  rpm = "rpm",
+  ruby = "ruby",
+  sas = "sas",
+  scheme = "scheme",
+  shell = "shell",
+  smalltalk = "smalltalk",
+  solr = "solr",
+  sparql = "sparql",
+  spreadsheet = "spreadsheet",
+  stex = "stex",
+  stylus = "stylus",
+  swift = "swift",
+  tcl = "tcl",
+  textile = "textile",
+  tiddlywiki = "tiddlywiki",
+  tiki = "tiki",
+  toml = "toml",
+  troff = "troff",
+  ttcn = "ttcn",
+  turtle = "turtle",
+  vb = "vb",
+  vbscript = "vbscript",
+  velocity = "velocity",
+  verilog = "verilog",
+  vhdl = "vhdl",
+  webidl = "webidl",
+  xquery = "xquery",
+  yacas = "yacas",
+  yaml = "yaml",
+  z80 = "z80",
+}
+
+

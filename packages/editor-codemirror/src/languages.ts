@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 /*
  * languages.ts
  *
@@ -16,8 +18,10 @@
  *
  */
 
+import { StreamLanguage } from "@codemirror/stream-parser";
+import { LanguageLoaders } from "./types";
 
-export enum CodeBlockLanguages {
+export enum Languages {
   javascript = "javascript",
   html = "html",
   css = "css",
@@ -25,106 +29,91 @@ export enum CodeBlockLanguages {
   python = "python",
   rust = "rust",
   xml = "xml",
-  json = "json",
   markdown = "markdown",
-  java = "java",
   cpp = "cpp",
-  lezer = "lezer",
-  php = "php",
-  wast = "wast",
-}
-
-export enum LegacyLanguages {
-  apl = "apl",
-  asciiarmor = "asciiarmor",
-  asn1 = "asn1",
-  asterisk = "asterisk",
-  brainfuck = "brainfuck",
   clike = "clike",
-  clojure = "clojure",
-  cmake = "cmake",
-  cobol = "cobol",
-  coffeescript = "coffeescript",
-  commonlisp = "commonlisp",
-  crystal = "crystal",
-  cypher = "cypher",
-  d = "d",
-  diff = "diff",
-  dockerfile = "dockerfile",
-  dtd = "dtd",
-  dylan = "dylan",
-  ebnf = "ebnf",
-  ecl = "ecl",
-  eiffel = "eiffel",
-  elm = "elm",
-  erlang = "erlang",
-  factor = "factor",
-  fcl = "fcl",
-  forth = "forth",
   fortran = "fortran",
-  gas = "gas",
-  gherkin = "gherkin",
-  go = "go",
-  groovy = "groovy",
   haskell = "haskell",
-  haxe = "haxe",
-  http = "http",
-  idl = "idl",
-  jinja2 = "jinja2",
   julia = "julia",
-  livescript = "livescript",
   lua = "lua",
-  mathematica = "mathematica",
-  mbox = "mbox",
-  mirc = "mirc",
-  mllike = "mllike",
-  modelica = "modelica",
-  mscgen = "mscgen",
-  mumps = "mumps",
-  nginx = "nginx",
-  nsis = "nsis",
-  ntriples = "ntriples",
-  octave = "octave",
-  oz = "oz",
-  pascal = "pascal",
-  perl = "perl",
-  pig = "pig",
   powershell = "powershell",
-  properties = "properties",
-  protobuf = "protobuf",
-  puppet = "puppet",
-  q = "q",
   r = "r",
-  rpm = "rpm",
   ruby = "ruby",
   sas = "sas",
-  scheme = "scheme",
   shell = "shell",
-  smalltalk = "smalltalk",
-  solr = "solr",
-  sparql = "sparql",
-  spreadsheet = "spreadsheet",
   stex = "stex",
-  stylus = "stylus",
-  swift = "swift",
-  tcl = "tcl",
-  textile = "textile",
-  tiddlywiki = "tiddlywiki",
-  tiki = "tiki",
-  toml = "toml",
-  troff = "troff",
-  ttcn = "ttcn",
-  turtle = "turtle",
-  vb = "vb",
-  vbscript = "vbscript",
-  velocity = "velocity",
-  verilog = "verilog",
-  vhdl = "vhdl",
-  webidl = "webidl",
-  xquery = "xquery",
-  yacas = "yacas",
   yaml = "yaml",
-  z80 = "z80",
 }
+
+
+export const languageLoaders: LanguageLoaders = {
+  [Languages.cpp]: () =>
+    import("@codemirror/lang-cpp").then((i) => i.cpp()),
+  [Languages.css]: () =>
+    import("@codemirror/lang-css").then((i) => i.css()),
+  [Languages.html]: () =>
+    import("@codemirror/lang-html").then((i) => i.html()),
+  [Languages.sql]: () =>
+    import("@codemirror/lang-sql").then((i) => i.sql()),
+  [Languages.xml]: () =>
+    import("@codemirror/lang-xml").then((i) => i.xml()),
+  [Languages.javascript]: () =>
+    import("@codemirror/lang-javascript").then((i) => i.javascript()),
+  [Languages.markdown]: () =>
+    import("@codemirror/lang-markdown").then((i) => i.markdown()),
+  [Languages.python]: () =>
+    import("@codemirror/lang-python").then((i) => i.python()),
+  [Languages.rust]: () =>
+    import("@codemirror/lang-rust").then((i) => i.rust()),
+  [Languages.clike]: () =>
+    import("@codemirror/legacy-modes/mode/clike").then(({ clike }) =>
+      StreamLanguage.define(clike)
+    ),
+  [Languages.fortran]: () =>
+    import("@codemirror/legacy-modes/mode/fortran").then(({ fortran }) =>
+      StreamLanguage.define(fortran)
+    ),
+  [Languages.haskell]: () =>
+    import("@codemirror/legacy-modes/mode/haskell").then(({ haskell }) =>
+      StreamLanguage.define(haskell)
+    ),
+  [Languages.julia]: () =>
+    import("@codemirror/legacy-modes/mode/julia").then(({ julia }) =>
+      StreamLanguage.define(julia)
+    ),
+  [Languages.lua]: () =>
+    import("@codemirror/legacy-modes/mode/lua").then(({ lua: legacyLua }) =>
+      StreamLanguage.define(legacyLua)
+    ),
+  [Languages.powershell]: () =>
+    import("@codemirror/legacy-modes/mode/powershell").then(({ powerShell }) =>
+      StreamLanguage.define(powerShell)
+    ),
+  [Languages.r]: () =>
+    import("@codemirror/legacy-modes/mode/r").then(({ r }) =>
+      StreamLanguage.define(r)
+    ),
+  [Languages.ruby]: () =>
+    import("@codemirror/legacy-modes/mode/ruby").then(({ ruby }) =>
+      StreamLanguage.define(ruby)
+    ),
+  [Languages.sas]: () =>
+    import("@codemirror/legacy-modes/mode/sas").then(({ sas }) =>
+      StreamLanguage.define(sas)
+    ),
+  [Languages.shell]: () =>
+    import("@codemirror/legacy-modes/mode/shell").then(({ shell }) =>
+      StreamLanguage.define(shell)
+    ),
+  [Languages.stex]: () =>
+    import("@codemirror/legacy-modes/mode/stex").then(({ stex }) =>
+      StreamLanguage.define(stex)
+    ),
+  [Languages.yaml]: () =>
+    import("@codemirror/legacy-modes/mode/yaml").then(({ yaml }) =>
+      StreamLanguage.define(yaml)
+    )
+};
+
 
 

@@ -164,13 +164,6 @@ export const codeMirrorBlockNodeView: (
   });
   dom.append(codeMirrorView.dom);
 
-  const selectDeleteCB = settings.createSelect(
-    settings,
-    dom,
-    node,
-    view,
-    getPos
-  );
   setMode(node.attrs.lang, codeMirrorView, settings, languageConf);
 
   return {
@@ -178,7 +171,7 @@ export const codeMirrorBlockNodeView: (
     selectNode() {
       codeMirrorView.focus();
     },
-    stopEvent: (e: Event) => settings.stopEvent(e, node, getPos, view, dom),
+    stopEvent: () => true,
     setSelection: (anchor, head) => {
       codeMirrorView.focus();
       forwardSelection(codeMirrorView, view, getPos);
@@ -194,7 +187,6 @@ export const codeMirrorBlockNodeView: (
       if (updateNode.type.name !== node.type.name) return false;
       if (updateNode.attrs.lang !== node.attrs.lang)
         setMode(updateNode.attrs.lang, codeMirrorView, settings, languageConf);
-      const oldNode = node;
       node = updateNode;
       const change = computeChange(
         codeMirrorView.state.doc.toString(),
@@ -212,12 +204,11 @@ export const codeMirrorBlockNodeView: (
         });
         updating = false;
       }
-      settings.updateSelect(settings, dom, updateNode, view, getPos, oldNode);
       return true;
     },
     ignoreMutation: () => true,
     destroy: () => {
-      selectDeleteCB();
+      // 
     },
   };
 };

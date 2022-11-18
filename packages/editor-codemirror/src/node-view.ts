@@ -19,24 +19,22 @@
 
 import { Node } from "prosemirror-model";
 import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
-import { highlightActiveLineGutter, lineNumbers } from "@codemirror/view";
+import { undo, redo } from "prosemirror-history";
+
+import { lineNumbers } from "@codemirror/view";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import {
   drawSelection,
   EditorView,
-  highlightActiveLine,
   keymap,
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
   selectNextOccurrence,
 } from "@codemirror/search";
-import { foldGutter, foldKeymap } from "@codemirror/language";
 import { indentOnInput } from "@codemirror/language";
-import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
-import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
-import { bracketMatching } from "@codemirror/language";
+import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
 import { Compartment, EditorState } from "@codemirror/state";
 import { exitCode, selectAll } from "prosemirror-commands";
 
@@ -48,44 +46,44 @@ import {
   setMode,
   valueChanged,
 } from "./utils";
-import { CodeBlockSettings } from "./types";
 import { CodeViewOptions } from "editor";
 
 export const codeMirrorBlockNodeView: (
-  settings: CodeBlockSettings,
   codeViewOptions: CodeViewOptions
 ) => (
   pmNode: Node,
   view: PMEditorView,
   getPos: (() => number) | boolean
-) => NodeView = (settings, codeViewOptions) => (pmNode, view, getPos) => {
+) => NodeView = (codeViewOptions) => (pmNode, view, getPos) => {
+
+  // create theme
+  const theme = EditorView.theme({
+    "&.cm-editor.cm-focused": {
+      outline: "none"
+    },
+  }, {dark: false})
+
   let node = pmNode;
   let updating = false;
   const dom = document.createElement("div");
-  dom.className = "codeblock-root";
+  dom.classList.add('pm-code-editor');
+  dom.classList.add('pm-codemirror-editor');
+  dom.classList.add('pm-codemirror-editor-inactive');
+  dom.classList.add(codeViewOptions.borderColorClass || 'pm-block-border-color');
+  if (codeViewOptions.classes) {
+    codeViewOptions.classes.forEach(className => dom.classList.add(className));
+  }
   const languageConf = new Compartment();
   const state = EditorState.create({
     extensions: [
-      EditorState.readOnly.of(!!settings.readOnly),
-      EditorView.editable.of(!settings.readOnly),
-      lineNumbers(),
-      highlightActiveLineGutter(),
-      foldGutter(),
-      bracketMatching(),
+      ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
       closeBrackets(),
       highlightSelectionMatches(),
-      autocompletion(),
+      indentUnit.of(' '),
       drawSelection({ cursorBlinkRate: 1000 }),
-      EditorState.allowMultipleSelections.of(true),
-      highlightActiveLine(),
       syntaxHighlighting(defaultHighlightStyle),
       languageConf.of([]),
       indentOnInput(),
-      EditorView.domEventHandlers({
-        blur(_event, cmView) {
-          cmView.dispatch({ selection: { anchor: 0 } });
-        },
-      }),
       keymap.of([
         { key: "Mod-d", run: selectNextOccurrence, preventDefault: true },
         {
@@ -106,12 +104,12 @@ export const codeMirrorBlockNodeView: (
         },
         {
           key: "Mod-z",
-          run: () => settings.undo?.(view.state, view.dispatch) || true,
-          shift: () => settings.redo?.(view.state, view.dispatch) || true,
+          run: () => undo(view.state, view.dispatch) || true,
+          shift: () => redo(view.state, view.dispatch) || true,
         },
         {
           key: "Mod-y",
-          run: () => settings.redo?.(view.state, view.dispatch) || true,
+          run: () => redo(view.state, view.dispatch) || true,
         },
         { key: "Backspace", run: (cmView) => backspaceHandler(view, cmView) },
         {
@@ -127,13 +125,11 @@ export const codeMirrorBlockNodeView: (
           },
         },
         {
-          key: "Enter",
+          key: "Shift-Enter",
           run: (cmView) => {
             const sel = cmView.state.selection.main;
-            if (
-              cmView.state.doc.line(cmView.state.doc.lines).text === "" &&
-              sel.from === sel.to &&
-              sel.from === cmView.state.doc.length
+            if (sel.from === sel.to &&
+                sel.from === cmView.state.doc.length
             ) {
               exitCode(view.state, view.dispatch);
               view.focus();
@@ -143,12 +139,10 @@ export const codeMirrorBlockNodeView: (
           },
         },
         ...defaultKeymap,
-        ...foldKeymap,
         ...closeBracketsKeymap,
-        ...completionKeymap,
-        indentWithTab,
+        indentWithTab
       ]),
-      ...(settings.theme ? settings.theme : []),
+      theme,
     ],
     doc: node.textContent,
   });
@@ -166,10 +160,11 @@ export const codeMirrorBlockNodeView: (
   });
   dom.append(codeMirrorView.dom);
 
+  const nodeLang = (nd: Node) => codeViewOptions.lang(nd, nd.textContent) || '';
+
   setMode(
-    codeViewOptions.lang(node, view.state.doc.toString()) || '', 
+    nodeLang(node), 
     codeMirrorView, 
-    settings, 
     languageConf
   );
 
@@ -190,8 +185,8 @@ export const codeMirrorBlockNodeView: (
     },
     update: (updateNode) => {
       if (updateNode.type.name !== node.type.name) return false;
-      if (updateNode.attrs.lang !== node.attrs.lang)
-        setMode(updateNode.attrs.lang, codeMirrorView, settings, languageConf);
+      if (nodeLang(updateNode)!== nodeLang(node))
+        setMode(nodeLang(updateNode), codeMirrorView, languageConf);
       node = updateNode;
       const change = computeChange(
         codeMirrorView.state.doc.toString(),

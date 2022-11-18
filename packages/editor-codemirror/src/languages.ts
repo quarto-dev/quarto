@@ -18,8 +18,9 @@
  *
  */
 
-import { StreamLanguage } from "@codemirror/language";
-import { LanguageLoaders } from "./types";
+import { StreamLanguage, LanguageSupport } from "@codemirror/language";
+
+export type LanguageLoaders = Record<string, () => Promise<LanguageSupport>>;
 
 export enum Languages {
   javascript = "javascript",

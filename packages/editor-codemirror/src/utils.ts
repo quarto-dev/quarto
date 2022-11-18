@@ -25,11 +25,12 @@ import {
 } from "prosemirror-state";
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { Node } from "prosemirror-model";
+import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from "@codemirror/view";
 import { setBlockType } from "prosemirror-commands";
 import { Compartment } from "@codemirror/state";
 
-import { CodeBlockSettings } from "./types";
+import { languageLoaders } from "./languages";
 
 export function computeChange(oldVal: string, newVal: string) {
   if (oldVal === newVal) return null;
@@ -84,11 +85,19 @@ export const valueChanged = (
   if (change && typeof getPos === "function") {
     const start = getPos() + 1;
 
-    const pmTr = view.state.tr.replaceWith(
-      start + change.from,
-      start + change.to,
-      view.state.schema.text(change.text || '')
-    );
+    const pmTr = view.state.tr;
+    if (change.text) {
+      pmTr.replaceWith(
+        start + change.from,
+        start + change.to,
+        view.state.schema.text(change.text)
+      );
+    } else {
+      pmTr.deleteRange(
+        start + change.from,
+        start + change.to
+      )
+    }
     view.dispatch(pmTr);
   }
 };
@@ -136,41 +145,64 @@ export const backspaceHandler = (pmView: PMEditorView, view: EditorView) => {
 export const setMode = async (
   lang: string,
   cmView: EditorView,
-  settings: CodeBlockSettings,
   languageConf: Compartment
 ) => {
-  const support = await settings.languageLoaders?.[lang]?.();
+  // language mappings
+  switch(lang) {
+    case 'yaml-frontmatter':
+      lang = 'yaml';
+      break;
+    case 'bash':
+    case 'sh':
+      lang = 'shell';
+      break;
+  }
+
+
+  const support = await languageLoaders[lang]?.();
   if (support)
     cmView.dispatch({
       effects: languageConf.reconfigure(support),
     });
 };
 
-const arrowHandler =
-  (dir: "left" | "right" | "up" | "down") =>
-  (
-    state: EditorState,
-    dispatch: ((tr: Transaction) => void) | undefined,
-    view?: PMEditorView
-  ) => {
-    if (state.selection.empty && view?.endOfTextblock(dir)) {
-      const side = dir === "left" || dir === "up" ? -1 : 1;
-      const { $head } = state.selection;
-      const nextPos = Selection.near(
-        state.doc.resolve(side > 0 ? $head.after() : $head.before()),
-        side
-      );
-      if (nextPos.$head && nextPos.$head.parent.type.name === "code_block") {
-        dispatch?.(state.tr.setSelection(nextPos));
+
+
+
+export function arrowHandler(dir: 'up' | 'down' | 'left' | 'right', nodeTypes: string[]) {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: PMEditorView) => {
+    if (state.selection.empty && !(state.selection instanceof GapCursor) && view && view.endOfTextblock(dir)) {
+      const side = dir === 'left' || dir === 'up' ? -1 : 1;
+      const $head = state.selection.$head;
+      const nextPos = Selection.near(state.doc.resolve(side > 0 ? $head.after() : $head.before()), side);
+      if (nextPos.$head && nodeTypes.includes(nextPos.$head.parent.type.name)) {
+        // check for e.g. math where you can advance across embedded newlines
+        if ((dir === 'up' || dir === 'down') && verticalArrowCanAdvanceWithinTextBlock(state.selection, dir)) {
+          return false;
+        }
+        if (dispatch) {
+          dispatch(state.tr.setSelection(nextPos));
+        }
         return true;
       }
     }
     return false;
   };
+}
 
-export const codeBlockArrowHandlers = {
-  ArrowLeft: arrowHandler("left"),
-  ArrowRight: arrowHandler("right"),
-  ArrowUp: arrowHandler("up"),
-  ArrowDown: arrowHandler("down"),
-};
+
+export function verticalArrowCanAdvanceWithinTextBlock(selection: Selection, dir: 'up' | 'down') {
+  const $head = selection.$head;
+  const node = $head.node();
+  if (node.isTextblock) {
+    const cursorOffset = $head.parentOffset;
+    const nodeText = node.textContent;
+    if (dir === 'down' && nodeText.substr(cursorOffset).includes('\n')) {
+      return true;
+    }
+    if (dir === 'up' && nodeText.substr(0, cursorOffset).includes('\n')) {
+      return true;
+    }
+  }
+  return false;
+}

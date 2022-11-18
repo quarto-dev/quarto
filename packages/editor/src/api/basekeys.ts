@@ -36,38 +36,11 @@ import { editingRootNodeClosestToPos, editingRootNode } from './node';
 import { selectionIsBodyTopLevel } from './selection';
 import { kPlatformMac } from './platform';
 
-export enum BaseKey {
-  Home = 'Home',
-  End = 'End',
-  Enter = 'Enter',
-  ModEnter = 'Mod-Enter',
-  ShiftEnter = 'Shift-Enter',
-  Backspace = 'Backspace',
-  Delete = 'Delete|Mod-Delete', // Use pipes to register multiple commands
-  Tab = 'Tab',
-  ShiftTab = 'Shift-Tab',
-  ArrowUp = 'Up|ArrowUp',
-  ArrowDown = 'Down|ArrowDown',
-  ArrowLeft = 'Left|ArrowLeft',
-  ArrowRight = 'Right|ArrowRight',
-  ModArrowUp = 'Mod-Up|Mod-ArrowUp',
-  ModArrowDown = 'Mod-Down|Mod-ArrowDown',
-  CtrlHome = 'Ctrl-Home',
-  CtrlEnd = 'Ctrl-End',
-  ShiftArrowLeft = 'Shift-Left|Shift-ArrowLeft',
-  ShiftArrowRight = 'Shift-Right|Shift-ArrowRight',
-  AltArrowLeft = 'Alt-Left|Alt-ArrowLeft',
-  AltArrowRight = 'Alt-Right|Alt-ArrowRight',
-  CtrlArrowLeft = 'Ctrl-Left|Ctrl-ArrowLeft',
-  CtrlArrowRight = 'Ctrl-Right|Ctrl-ArrowRight',
-  CtrlShiftArrowLeft = 'Ctrl-Shift-Left|Ctrl-Shift-ArrowLeft',
-  CtrlShiftArrowRight = 'Ctrl-Shift-Right|Ctrl-Shift-ArrowRight',
-}
+import { BaseKey, BaseKeyBinding } from './basekeys-types';
 
-export interface BaseKeyBinding {
-  key: BaseKey;
-  command: CommandFn;
-}
+export { BaseKey} ;
+export type { BaseKeyBinding }
+
 
 export function baseKeysPlugin(keys: readonly BaseKeyBinding[]): Plugin {
   // collect all keys

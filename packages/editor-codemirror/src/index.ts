@@ -19,12 +19,10 @@
 import { Plugin, PluginKey } from "prosemirror-state";
 import { Node as ProsemirrorNode } from "prosemirror-model";
 import { EditorView, NodeView } from "prosemirror-view";
-import { undo, redo } from "prosemirror-history";
 
-import { ExtensionFn, CodeViewOptions } from "editor";
-import { CodeBlockSettings } from "./types";
+import { ExtensionFn, CodeViewOptions, BaseKey } from "editor";
 import { codeMirrorBlockNodeView } from "./node-view";
-import { languageLoaders } from "./languages";
+import { arrowHandler } from "./utils";
 
 export const codeMirrorPluginKey = new PluginKey("codemirror");
 
@@ -32,6 +30,7 @@ export function codeMirrorExtension(
   codeViews: { [key: string]: CodeViewOptions })
 : ExtensionFn {
   return () => {
+
     // build nodeViews
     const nodeTypes = Object.keys(codeViews);
     const nodeViews: {
@@ -41,13 +40,8 @@ export function codeMirrorExtension(
         getPos: boolean | (() => number)
       ) => NodeView;
     } = {};
-    const settings: CodeBlockSettings = {
-      languageLoaders,
-      undo, 
-      redo
-    };
     nodeTypes.forEach((name) => {
-      nodeViews[name] = codeMirrorBlockNodeView(settings, codeViews[name]);
+      nodeViews[name] = codeMirrorBlockNodeView(codeViews[name]);
     });
 
     // return plugin
@@ -59,7 +53,16 @@ export function codeMirrorExtension(
             nodeViews,
           },
         }),
-      ]
+      ],
+      baseKeys: () => {
+        return [
+          { key: BaseKey.ArrowLeft, command: arrowHandler('left', nodeTypes) },
+          { key: BaseKey.ArrowRight, command: arrowHandler('right', nodeTypes) },
+          { key: BaseKey.ArrowUp, command: arrowHandler('up', nodeTypes) },
+          { key: BaseKey.ArrowDown, command: arrowHandler('down', nodeTypes) }
+        
+        ];
+      },
     };
   };
 }

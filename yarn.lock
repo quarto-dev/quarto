@@ -486,9 +486,9 @@
     "@lezer/common" "^1.0.0"
 
 "@lezer/html@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@lezer/html/-/html-1.1.0.tgz#b4c7e8f2d877cb979b0d4790c142d926a63386e1"
-  integrity sha512-94MMm4oyXnmphMldSy6cC/p1zbsIS+/m71kyo3dmId858iWOXslba23fvD5vGl3kcJIZZJA3+DLQv2+GR5AeYQ==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@lezer/html/-/html-1.1.1.tgz#eaf4fb45f5f6deb0b6336e46a5e9620300e920ff"
+  integrity sha512-L70zLh1+bemYcnaAK03Ghfu24DVxY9uScDawyjR1Y/13P2MbN72hMB9T7Ln/Vl5dL5DWI0YsxbaeIHKikx2DiQ==
   dependencies:
     "@lezer/common" "^1.0.0"
     "@lezer/highlight" "^1.0.0"

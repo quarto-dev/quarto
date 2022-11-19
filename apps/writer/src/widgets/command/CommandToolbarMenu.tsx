@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux';
 import { Props, MenuDivider } from '@blueprintjs/core';
 
 import { CommandManagerContext } from '../../commands/CommandManager';
-import { editorSelection } from '../../store/editor/editor-selectors';
+import { editorSelection } from '../../store/editor';
 import { Command, CommandId } from '../../commands/commands';
 import { ToolbarMenu } from '../../widgets/Toolbar';
 

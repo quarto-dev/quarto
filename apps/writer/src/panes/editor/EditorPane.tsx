@@ -42,7 +42,7 @@ import {
   setEditorOutline,
   setEditorTitle,
   setEditorLoading,
-} from '../../store/editor/editor-actions';
+} from '../../store/editor';
 import { Pane } from '../../widgets/Pane';
 
 

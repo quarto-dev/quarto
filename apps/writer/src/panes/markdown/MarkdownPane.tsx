@@ -29,7 +29,7 @@ import { markdown } from "@codemirror/lang-markdown"
 import { WorkbenchState } from '../../store/store';
 import { Pane } from '../../widgets/Pane';
 import { Toolbar, ToolbarText, ToolbarButton } from '../../widgets/Toolbar';
-import { setPrefsShowMarkdown } from '../../store/prefs/prefs-actions';
+import { setPrefsShowMarkdown } from '../../store/prefs';
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
 

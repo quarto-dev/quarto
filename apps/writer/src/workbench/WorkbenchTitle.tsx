@@ -24,7 +24,7 @@ import { withTranslation } from 'react-i18next';
 import { EditableText, Props } from '@blueprintjs/core';
 
 import { WorkbenchState } from '../store/store';
-import { setEditorTitle } from '../store/editor/editor-actions';
+import { setEditorTitle } from '../store/editor';
 
 import { CommandManager, withCommandManager } from '../commands/CommandManager';
 import { WorkbenchCommandId } from '../commands/commands';

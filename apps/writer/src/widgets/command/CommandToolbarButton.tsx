@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux';
 
 import { Props } from '@blueprintjs/core';
 
-import { editorSelection } from '../../store/editor/editor-selectors';
+import { editorSelection } from '../../store/editor';
 import { ToolbarButton } from '../../widgets/Toolbar';
 import { CommandId, commandTooltipText } from '../../commands/commands';
 import { CommandManagerContext } from '../../commands/CommandManager';

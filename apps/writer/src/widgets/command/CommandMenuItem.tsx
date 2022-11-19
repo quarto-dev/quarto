@@ -19,7 +19,7 @@ import React, { useContext } from 'react';
 import { MenuItem } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { editorSelection } from '../../store/editor/editor-selectors';
+import { editorSelection } from '../../store/editor';
 import { keyCodeString } from '../../commands/keycodes';
 import { commandKeymapText, CommandId } from '../../commands/commands';
 import { CommandManager, CommandManagerContext } from '../../commands/CommandManager';

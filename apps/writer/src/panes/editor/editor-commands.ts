@@ -404,7 +404,7 @@ export function editorExternalCommands(editor: Editor): Command[] {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorDebugCommands(_editor: Editor): Command[] {
+export function editorDebugCommands(editor: Editor): Command[] {
   return [
     {
       id: WorkbenchCommandId.EnableDevTools,
@@ -414,7 +414,7 @@ export function editorDebugCommands(_editor: Editor): Command[] {
       isEnabled: () => true,
       isActive: () => false,
       execute: () => {
-        // editor.enableDevTools(applyDevTools);
+        editor.enableDevTools();
       },
     },
   ];

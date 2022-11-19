@@ -20,6 +20,8 @@ import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'pros
 import { EditorView } from 'prosemirror-view';
 import 'prosemirror-view/style/prosemirror.css';
 
+import applyDevTools from "prosemirror-dev-tools";
+
 import { setTextSelection } from 'prosemirror-utils';
 
 import { citeUI } from '../api/cite';
@@ -127,7 +129,6 @@ import { editorJsonRpcServer } from './editor-server';
 import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
 import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/extension-types';
-
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -769,8 +770,8 @@ export class Editor {
     this.emitEvent(ResizeEvent);
   }
 
-  public enableDevTools(initFn: (view: EditorView, stateClass: unknown) => void) {
-    initFn(this.view, { EditorState });
+  public enableDevTools() {
+    applyDevTools(this.view);
   }
 
   public getMenus(): EditorMenus {

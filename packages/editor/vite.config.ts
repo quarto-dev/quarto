@@ -19,7 +19,9 @@ if (types) {
 
 export default defineConfig({
   define: {
-    'process.env.NODE_ENV': '"production"'
+    'process.env.NODE_ENV': '"production"',
+    'process.env.TERM': '""',
+    'process.platform': '""'
   },
   plugins,
   build: {

@@ -20,16 +20,16 @@ import cors from "cors";
 
 import jayson from 'jayson'
 
-import { editorServerMethods } from "editor-server/src/server";
+import { editorServerMethods, EditorServerOptions } from "editor-server/src/server";
 
-export const createServer = (resourcesDir: string) => {
-  const editorServer = new jayson.Server(editorServerMethods(resourcesDir), {});
+export const createServer = (options: EditorServerOptions) => {
+  const editorServer = new jayson.Server(editorServerMethods(options), {});
   const app = express();
   app
     .disable("x-powered-by")
     .use(morgan("dev"))
-    .use(express.urlencoded({ limit: '100mb', extended: true, parameterLimit:100000 }))
-    .use(express.json({limit: '100mb' }))
+    .use(express.urlencoded({ limit: options.payloadLimitMb + 'mb', extended: true }))
+    .use(express.json({limit: options.payloadLimitMb + 'mb' }))
     .use(cors())
     .use('/editor-server', editorServer.middleware())
     .get("/message/:name", (req, res) => {

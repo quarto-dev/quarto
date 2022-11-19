@@ -13,7 +13,6 @@
  *
  */
 
-
 import path from 'path';
 import process  from 'process';
 import { createServer } from "./server";
@@ -25,11 +24,14 @@ const development = process.env.NODE_ENV !== 'production';
 const developmentResourcesPath = path.normalize(path.join(
   process.cwd(), "../../packages/editor-server/src/resources"
 ));
-const editorResources = development ? developmentResourcesPath : developmentResourcesPath;
+const resourcesDir = development ? developmentResourcesPath : developmentResourcesPath;
 
 // start server
 const port = process.env.PORT || 5001;
-const server = createServer(editorResources);
+const server = createServer({
+  resourcesDir,
+  payloadLimitMb: 100
+});
 server.listen(port, () => {
   console.log(`api running on ${port}`);
 });

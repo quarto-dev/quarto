@@ -13,7 +13,15 @@
  *
  */
 
-import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { 
+  AnyAction,
+  createListenerMiddleware,
+  createSelector, 
+  createSlice, 
+  isAnyOf, 
+  PayloadAction
+} from '@reduxjs/toolkit';
+
 import { WorkbenchState } from './store';
 
 export interface PrefsState {
@@ -21,17 +29,40 @@ export interface PrefsState {
   readonly showMarkdown: boolean;
 }
 
-// automatically save and load prefs from local storage
+export const prefsSlice = createSlice({
+  name: 'prefs',
+  initialState: () => loadPrefs(),
+  reducers: {
+    setPrefsShowOutline: (state, action: PayloadAction<boolean>) => {
+      state.showOutline = action.payload;
+    },
+    setPrefsShowMarkdown: (state, action: PayloadAction<boolean>) => {
+      state.showMarkdown = action.payload;
+    },
+  },
+})
+
+const prefsSelector = (state: WorkbenchState) => state.prefs;
+export const prefsShowOutline = createSelector(prefsSelector, (state) => state.showOutline);
+export const prefsShowMarkdown = createSelector(prefsSelector, (state) => state.showMarkdown);
+
+export const { 
+  setPrefsShowOutline,
+  setPrefsShowMarkdown, 
+} = prefsSlice.actions
+
+
+// middle ware to persist prefs to local storage
+
 const kPrefsLocalStorage = 'panmirror-prefs';
 
-function savePrefs(prefs: PrefsState) {
-  try {
-    const serializedPrefs = JSON.stringify(prefs);
-    localStorage.setItem(kPrefsLocalStorage, serializedPrefs);
-  } catch {
-    // ignore write errors
+export const prefsPersist = createListenerMiddleware<{ prefs: PrefsState }> ();
+prefsPersist.startListening({
+  matcher: isAnyOf(setPrefsShowMarkdown, setPrefsShowOutline),
+  effect: async (_action: AnyAction, listenerApi) => {
+    savePrefs(listenerApi.getState().prefs);
   }
-}
+})
 
 function loadPrefs() {
   const defaultPrefs = {
@@ -52,32 +83,14 @@ function loadPrefs() {
   }
 }
 
-export const prefsSlice = createSlice({
-  name: 'prefs',
-  initialState: () => loadPrefs(),
-  reducers: {
-    setPrefsShowOutline: (state, action: PayloadAction<boolean>) => {
-      state.showOutline = action.payload;
-      savePrefs(state);
-    },
-    setPrefsShowMarkdown: (state, action: PayloadAction<boolean>) => {
-      state.showMarkdown = action.payload;
-      savePrefs(state);
-    },
-  },
-})
-
-const prefsSelector = (state: WorkbenchState) => state.prefs;
-export const prefsShowOutline = createSelector(prefsSelector, (state) => state.showOutline);
-export const prefsShowMarkdown = createSelector(prefsSelector, (state) => state.showMarkdown);
-
-export const { 
-  setPrefsShowOutline,
-  setPrefsShowMarkdown, 
-} = prefsSlice.actions
-
-
-
+function savePrefs(prefs: PrefsState) {
+  try {
+    const serializedPrefs = JSON.stringify(prefs);
+    localStorage.setItem(kPrefsLocalStorage, serializedPrefs);
+  } catch {
+    // ignore write errors
+  }
+}
 
 export default prefsSlice.reducer;
 

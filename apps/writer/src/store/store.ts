@@ -15,14 +15,17 @@
 
 import { configureStore } from '@reduxjs/toolkit'
 import { editorSlice } from './editor';
-import { prefsSlice } from './prefs';
+import { prefsSlice, prefsPersist } from './prefs';
 
 const store = configureStore({
   reducer: {
     editor: editorSlice.reducer,
     prefs: prefsSlice.reducer
+  },
+  middleware: (getDefaultMiddleware) => {
+    return getDefaultMiddleware().prepend(prefsPersist.middleware)
   }
-})
+});
 
 export type WorkbenchState = ReturnType<typeof store.getState>
 

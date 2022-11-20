@@ -19,6 +19,8 @@
 import { Plugin, PluginKey, Transaction, Selection, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
+import { PromiseQueue } from 'core';
+
 import {
   CompletionHandler,
   selectionAllowsCompletions,
@@ -32,7 +34,6 @@ import { EditorEvents, ScrollEvent } from '../../api/event-types';
 
 import { createCompletionPopup, renderCompletionPopup, destroyCompletionPopup, CompletionPopup } from './completion-popup';
 import { EditorUI } from '../../api/ui-types';
-import { PromiseQueue } from '../../api/promise';
 import { MarkInputRuleFilter } from '../../api/input_rule';
 import { kInsertCompletionTransaction, kPasteTransaction } from '../../api/transaction';
 

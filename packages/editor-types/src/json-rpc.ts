@@ -51,3 +51,8 @@ export const kXRefQuartoXRefForId = 'xref_quarto_xref_for_id';
 export const kEnvironmentGetRPackageState = 'environment_get_r_package_state';
 export const kEnvironmentGetRPackageCitations = 'environment_get_r_package_citations';
 
+// math
+export const kMathMathjaxTypesetSvg = 'math_mathjax_typeset_svg';
+
+
+

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * math.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,15 +13,20 @@
  *
  */
 
-export * from './csl';
-export * from './doi';
-export * from './datacite';
-export * from './pandoc';
-export * from './crossref'
-export * from './pubmed'
-export * from './zotero'
-export * from './xref'
-export * from './environment'
-export * from './server'
-export * from './json-rpc'
-export * from './math'
+
+export interface MathjaxTypesetOptions {
+  format: "svg" | "data-uri";
+  theme: "light" | "dark";
+  scale: number;
+  extensions: string[];
+}
+
+export interface MathjaxTypesetResult {
+  math?: string;
+  error?: string;
+}
+
+export interface MathServer {
+  mathjaxTypeset: (math: string, options: MathjaxTypesetOptions) => Promise<MathjaxTypesetResult>;
+}
+

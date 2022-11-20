@@ -27,6 +27,7 @@ import {
   kDoiFetchCsl,
   kEnvironmentGetRPackageCitations,
   kEnvironmentGetRPackageState,
+  kMathMathjaxTypesetSvg,
   kPandocAddtoBibliography,
   kPandocAstToMarkdown,
   kPandocCitationHtml,
@@ -239,6 +240,11 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       getRPackageCitations(pkgName: string) : Promise<RPackageCitation[]> {
         return request(kEnvironmentGetRPackageCitations, [pkgName]);
       }
+    },
+    math: {
+      mathjaxTypeset(math, options) {
+        return request(kMathMathjaxTypesetSvg, [math, options]);
+      },
     }
   };
 }

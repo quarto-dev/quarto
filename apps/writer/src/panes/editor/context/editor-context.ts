@@ -14,6 +14,8 @@
  *
  */
 
+import { PromiseQueue } from 'core';
+
 import {
   ChunkEditor,
   EditorContext,
@@ -27,6 +29,8 @@ import {
   EditorWordRange,
   kCharClassWord,
   ListSpacing,
+  MathjaxTypesetResult,
+  MathServer,
   SkinTone,
   UITools,
 } from "editor";
@@ -39,10 +43,12 @@ import { codeMirrorExtension } from "editor-codemirror";
 export function editorContext(commandManager: () => CommandManager, dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
+  const server = uiTools.context.jsonRpcServer("/editor-server");
+
   const ui = {
     dialogs,
     display: editorDisplay(commandManager),
-    math: editorMath(),
+    math: editorMath(server.math),
     context: editorUIContext(),
     prefs: editorPrefs(),
     chunks: editorChunks(),
@@ -50,7 +56,6 @@ export function editorContext(commandManager: () => CommandManager, dialogs: Edi
     images: uiTools.context.defaultUIImages()
   };
 
-  const server = uiTools.context.jsonRpcServer("/editor-server");
 
   const context : EditorContext = { 
     server, 
@@ -62,14 +67,41 @@ export function editorContext(commandManager: () => CommandManager, dialogs: Edi
 }
 
 
-function editorMath(): EditorMath {
+function editorMath(server: MathServer): EditorMath {
+
+  const mathQueue = new PromiseQueue<MathjaxTypesetResult>();
+
   return {
     async typeset(
-      _el: HTMLElement,
-      _text: string,
-      _priority: boolean
+      el: HTMLElement,
+      text: string,
+      priority: boolean
     ): Promise<boolean> {
-      return false;
+
+      // typeset function
+      const typesetFn = () => {
+        text = text.replace(/^\$\$?/, "").replace(/\$\$?$/, "");
+        return server.mathjaxTypeset(text, { 
+          format: "data-uri",
+          theme: "light",
+          scale: 1,
+          extensions: []
+        });
+      }
+
+      // execute immediately or enque depending on priority
+      const result = priority ? await typesetFn() : await mathQueue.enqueue(typesetFn);
+
+      // handle result
+      if (result.math) {
+        const img = window.document.createElement("img");
+        img.src = result.math;
+        el.replaceChildren(img);
+        return false; // no error
+      } else {
+        console.log(result.error);
+        return true; // error
+      }
     },
   };
 }

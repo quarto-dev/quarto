@@ -317,7 +317,7 @@ export class Editor {
     // provide option defaults
     options = {
       autoFocus: false,
-      spellCheck: false,
+      browserSpellCheck: false,
       codeEditor: '',
       rmdImagePreview: false,
       hideFormatComment: false,
@@ -412,7 +412,10 @@ export class Editor {
     // register realtime spellchecking (done in a separate step b/c it
     // requires access to PandocMark definitions to determine which
     // marks to exclude from spellchecking)
-    this.registerRealtimeSpelling();
+    if (!this.options.browserSpellCheck) {
+      this.parent.setAttribute('spellcheck', 'false');
+      this.registerRealtimeSpelling();
+    }
 
     // create state
     this.state = EditorState.create({
@@ -469,11 +472,6 @@ export class Editor {
       window.setTimeout(() => {
         this.focus();
       }, 10);
-    }
-
-    // disale spellcheck if requested
-    if (!this.options.spellCheck) {
-      this.parent.setAttribute('spellcheck', 'false');
     }
 
     {

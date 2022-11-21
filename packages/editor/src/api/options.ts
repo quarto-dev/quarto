@@ -15,7 +15,7 @@
 
 export interface EditorOptions {
   readonly autoFocus?: boolean;
-  readonly spellCheck?: boolean;
+  readonly browserSpellCheck?: boolean;
   readonly codeEditor?: string;
   readonly rmdImagePreview?: boolean;
   readonly rmdExampleHighlight?: boolean;

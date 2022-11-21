@@ -13,8 +13,6 @@
  *
  */
 
-import { ISpellingWordBreaker, kCharClassBoundary, kCharClassNonWord, kCharClassWord } from "editor-types";
-
 
 // This string is a compact representation of the set of Unicode characters
 // that we consider to be letters. Each pair of characters represents the
@@ -29,8 +27,16 @@ const DATA = "\u0041\u005A\u0061\u007A\u00AA\u00AA\u00B5\u00B5\u00BA\u00BA\u00C0
 const kSingleQuote = 39;
 const kFancySingleQuote = 8217;
 
+export const kCharClassWord = 0;
+export const kCharClassBoundary = 1;
+export const kCharClassNonWord = 2;
 
-export function spellingWordBreaker() : ISpellingWordBreaker {
+export interface WordBreaker {
+  breakWords: (text: string) => Array<{ start: number, end: number }>;
+  classifyCharacter: (ch: number) => number;
+}
+
+export function wordBreaker() : WordBreaker {
 
   const CACHE = new Map<number,boolean>();
   

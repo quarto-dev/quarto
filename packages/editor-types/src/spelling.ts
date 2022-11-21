@@ -13,14 +13,6 @@
  *
  */
 
-export const kCharClassWord = 0;
-export const kCharClassBoundary = 1;
-export const kCharClassNonWord = 2;
-
-export interface ISpellingWordBreaker {
-  breakWords: (text: string) => Array<{ start: number, end: number }>;
-  classifyCharacter: (ch: number) => number;
-}
 
 export interface ISpellingDictionary {
   checkWords: (words: string[]) => string[];
@@ -34,9 +26,7 @@ export interface ISpellingIgnoredWords {
   unignoreWord: (word: string) => void;
 }
 
-
 export interface EditorUISpelling extends 
-  ISpellingWordBreaker, 
   ISpellingDictionary,
   ISpellingIgnoredWords {
  

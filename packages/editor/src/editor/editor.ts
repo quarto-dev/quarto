@@ -654,7 +654,7 @@ export class Editor {
   }
 
   public getSpellingDoc(): EditorSpellingDoc {
-    return getSpellingDoc(this.view, this.extensions.pandocMarks(), this.context.ui.spelling);
+    return getSpellingDoc(this.view, this.extensions.pandocMarks());
   }
 
   public spellingInvalidateAllWords() {

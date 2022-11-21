@@ -26,8 +26,6 @@ import {
   EditorUIContext,
   EditorUIPrefs,
   EditorUISpelling,
-  EditorWordRange,
-  kCharClassWord,
   ListSpacing,
   MathjaxTypesetResult,
   MathServer,
@@ -282,14 +280,6 @@ function editorSpelling() : EditorUISpelling {
     },
     addToDictionary(_word: string) {
       //
-    },
-
-    // word breaking
-    breakWords(_text: string): EditorWordRange[] {
-      return [];
-    },
-    classifyCharacter(_ch: number) {
-      return kCharClassWord;
-    },
+    }
   };
 }

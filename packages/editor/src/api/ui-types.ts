@@ -130,6 +130,12 @@ export interface EditorUIContext {
   isWindowsDesktop: () => boolean;
 }
 
+export interface EditorMenus {
+  format: EditorMenuItem[];
+  insert: EditorMenuItem[];
+  table: EditorMenuItem[];
+}
+
 export interface EditorMenuItem {
   text?: string;
   exec?: VoidFunction;

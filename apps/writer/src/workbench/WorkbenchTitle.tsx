@@ -24,7 +24,7 @@ import { withTranslation } from 'react-i18next';
 import { EditableText, Props } from '@blueprintjs/core';
 
 import { WorkbenchState } from '../store/store';
-import { setEditorTitle } from '../store/editor/editor-actions';
+import { setEditorTitle } from '../store/editor';
 
 import { CommandManager, withCommandManager } from '../commands/CommandManager';
 import { WorkbenchCommandId } from '../commands/commands';
@@ -67,7 +67,7 @@ class WorkbenchTitle extends React.Component<WorkbenchTitleProps> {
     return (
       <EditableText
         className={styles.title}
-        placeholder={this.props.loading ? '' : this.props.t('untitled_document')}
+        placeholder={this.props.loading ? '' : this.props.t('untitled_document') as string}
         value={this.props.title}
         onChange={this.props.setTitle}
         onCancel={this.focusEditor}

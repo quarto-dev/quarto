@@ -13,9 +13,9 @@
  *
  */
 
+export type { EditorServerOptions } from './server';
 
-export { dataCiteServer } from './datacite';
-export { editorServer } from './server';
+export { editorServer, editorServerMethods } from './server';
 
 
 

@@ -197,7 +197,7 @@ export default class EditorDialogsImpl extends React.Component<Readonly<Record<s
           isOpen: true,
           attr,
           removeEnabled: true,
-          caption: t('edit_span_dialog_caption'),
+          caption: t('edit_span_dialog_caption') as string,
           onClosed: (result: AttrEditResult | null) => {
             this.setState({ editSpan: { ...this.state.editSpan, isOpen: false } });
             resolve(result);
@@ -214,7 +214,7 @@ export default class EditorDialogsImpl extends React.Component<Readonly<Record<s
           isOpen: true,
           attr,
           removeEnabled,
-          caption: t('edit_div_dialog_caption'),
+          caption: t('edit_div_dialog_caption') as string,
           onClosed: (result: AttrEditResult | null) => {
             this.setState({ editDiv: { ...this.state.editDiv, isOpen: false } });
             resolve(result);

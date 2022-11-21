@@ -17,7 +17,6 @@ import { EditorState, Transaction, Plugin, PluginKey } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import { applyStyles } from '../../api/css';
 import { EditorEvents } from '../../api/event-types';
@@ -28,6 +27,7 @@ import { InsertSymbolPopup } from './insert_symbol-popup';
 import { SymbolDataProvider, SymbolCharacter } from './insert_symbol-dataprovider';
 
 import { ScrollEvent } from '../../api/event-types';
+import { createRoot, Root } from 'react-dom/client';
 
 const kMinimumPanelPaddingToEdgeOfView = 5;
 
@@ -52,7 +52,7 @@ function isEnabled(state: EditorState) {
 export class InsertSymbolPlugin extends Plugin<boolean> {
   private readonly scrollUnsubscribe: VoidFunction;
   private readonly ui: EditorUI;
-  private popup: HTMLElement | null = null;
+  private popup: { popup: HTMLElement, root: Root } | null = null;
   private dataProvider: SymbolDataProvider;
 
   constructor(pluginKey: PluginKey<boolean>, dataProvider: SymbolDataProvider, ui: EditorUI, events: EditorEvents) {
@@ -83,15 +83,15 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
     if (!this.popup) {
       const kHeight = 336;
       const kWidth = 450;
-
-      this.popup = window.document.createElement('div');
-      this.popup.tabIndex = 0;
-      this.popup.style.position = 'absolute';
-      this.popup.style.zIndex = '900';
-
-      applyStyles(this.popup, [], this.panelPositionStylesForCurrentSelection(view, kHeight, kWidth));
-      ReactDOM.render(this.insertSymbolPopup(view, [kHeight, kWidth]), this.popup);
-      window.document.body.appendChild(this.popup);
+      const popup = window.document.createElement('div');
+      popup.tabIndex = 0;
+      popup.style.position = 'absolute';
+      popup.style.zIndex = '900';
+      applyStyles(popup, [], this.panelPositionStylesForCurrentSelection(view, kHeight, kWidth));
+      const root = createRoot(popup);
+      root.render(this.insertSymbolPopup(view, [kHeight, kWidth]));
+      window.document.body.appendChild(popup);
+      this.popup = { popup, root };
     }
   }
 
@@ -125,15 +125,15 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
   }
 
   private focusChanged() {
-    if (window.document.activeElement !== this.popup && !this.popup?.contains(window.document.activeElement)) {
+    if (window.document.activeElement !== this.popup?.popup && !this.popup?.popup.contains(window.document.activeElement)) {
       this.closePopup();
     }
   }
 
   private closePopup() {
     if (this.popup) {
-      ReactDOM.unmountComponentAtNode(this.popup);
-      this.popup.remove();
+      this.popup.root.unmount();
+      this.popup.popup.remove();
       this.popup = null;
     }
   }

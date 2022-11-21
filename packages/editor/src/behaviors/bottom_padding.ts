@@ -23,6 +23,7 @@ import { selectionWithinLastBodyParagraph } from '../api/selection';
 import { EditorView } from 'prosemirror-view';
 import { bodyElement } from '../api/dom';
 import { findParentNodeOfType } from 'prosemirror-utils';
+import { editorScrollContainer } from '../api/scroll';
 
 // when we get close to the bottom, we autoscroll to provide more padding
 const kAutoscrollGapPx = 25;
@@ -44,7 +45,7 @@ const extension: Extension = {
                 const editorRect = editorEl.getBoundingClientRect();
                 if (Math.abs(paragraphRect.bottom - editorRect.bottom) < kAutoscrollGapPx) {
                   const bodyEl = bodyElement(view);
-                  const scroller = zenscroll.createScroller(bodyEl);
+                  const scroller = zenscroll.createScroller(editorScrollContainer(bodyEl));
                   scroller.toY(bodyEl.scrollHeight, 0);
                 }
               }

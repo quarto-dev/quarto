@@ -19,7 +19,7 @@ import { Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { ProsemirrorCommand } from '../api/command';
 import { PandocMark } from '../api/mark';
-import { PandocNode, CodeViewOptions } from '../api/node';
+import { PandocNode } from '../api/node';
 import { Extension, ExtensionFn, ExtensionContext } from '../api/extension';
 import { BaseKeyBinding } from '../api/basekeys';
 import { OmniInserter } from '../api/omni_insert';
@@ -114,8 +114,13 @@ import nodeHtmlPreserve from '../nodes/html_preserve';
 import { aceExtension } from '../optional/ace/ace';
 import { attrEditExtension } from '../behaviors/attr_edit/attr_edit';
 import { codeViewClipboardPlugin } from '../api/code';
+import { CodeViewExtensionFn, CodeViewOptions } from '../api/extension-types';
 
-export function initExtensions(context: ExtensionContext, extensions?: readonly Extension[]): ExtensionManager {
+export function initExtensions(
+  context: ExtensionContext, 
+  extensions?: Array<Extension | ExtensionFn>,
+  codeViewExtension?: CodeViewExtensionFn)
+: ExtensionManager {
   // create extension manager
   const manager = new ExtensionManager(context);
 
@@ -195,7 +200,7 @@ export function initExtensions(context: ExtensionContext, extensions?: readonly 
     markOmniInsert,
   ]);
 
-  // register external extensions
+  // register external extensions (except CodeViewExtensions which are registe)
   if (extensions) {
     manager.register(extensions);
   }
@@ -211,10 +216,13 @@ export function initExtensions(context: ExtensionContext, extensions?: readonly 
   // additional plugins derived from extensions
   const codeViews = manager.codeViews();
   const plugins: Plugin[] = [];
+  // provide ace code view extension if requested
   if (context.options.codeEditor === 'ace') {
-    manager.register([
-      aceExtension(codeViews)
-    ]);
+    codeViewExtension = aceExtension;
+  } 
+  // register code view extension
+  if (codeViewExtension) {
+    manager.register([codeViewExtension(codeViews)]);
   }
   plugins.push(codeViewClipboardPlugin(codeViews));
 

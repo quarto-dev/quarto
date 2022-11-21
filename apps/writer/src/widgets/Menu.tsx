@@ -16,7 +16,7 @@
 import React, { PropsWithChildren } from 'react';
 
 import { Props, Position, Button, Menu, MenuItem } from '@blueprintjs/core';
-import { Popover } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 import { IconNames, IconName } from '@blueprintjs/icons';
 
 import styles from './Menu.module.scss';
@@ -28,7 +28,7 @@ export interface MainMenuProps extends Props {
 
 export const MainMenu: React.FC<MainMenuProps> = props => {
   return (
-    <Popover
+    <Popover2
       autoFocus={false}
       minimal={true}
       inheritDarkTheme={false}
@@ -36,7 +36,7 @@ export const MainMenu: React.FC<MainMenuProps> = props => {
       position={Position.BOTTOM_LEFT}
     >
       <Button className={styles.button}>{props.text}</Button>
-    </Popover>
+    </Popover2>
   );
 };
 

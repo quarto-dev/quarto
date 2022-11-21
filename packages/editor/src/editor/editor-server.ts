@@ -27,6 +27,7 @@ import {
   kDoiFetchCsl,
   kEnvironmentGetRPackageCitations,
   kEnvironmentGetRPackageState,
+  kMathMathjaxTypesetSvg,
   kPandocAddtoBibliography,
   kPandocAstToMarkdown,
   kPandocCitationHtml,
@@ -90,7 +91,9 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       client.request(method, params, (err: any, result: any) => {
         if (err) {
           reject(err);
-        } else {
+        } else if (result.error) {
+          reject(new Error(result.error.message));
+        } else { 
           resolve(result.result);
         }
       });
@@ -237,6 +240,11 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       getRPackageCitations(pkgName: string) : Promise<RPackageCitation[]> {
         return request(kEnvironmentGetRPackageCitations, [pkgName]);
       }
+    },
+    math: {
+      mathjaxTypeset(math, options) {
+        return request(kMathMathjaxTypesetSvg, [math, options]);
+      },
     }
   };
 }

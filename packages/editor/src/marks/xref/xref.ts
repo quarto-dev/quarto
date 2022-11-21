@@ -258,7 +258,7 @@ const extension = (context: ExtensionContext): Extension | null => {
 };
 
 function atRefInputRule() {
-  return new InputRule(/(^|[^`])(\\?@ref\()$/, (state: EditorState, match: string[], start: number, end: number) => {
+  return new InputRule(/(^|[^`])(\\?@ref\()$/, (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
     // if this completes an xref at this position then stand down
     const kRefLen = 4;
     const { parent, parentOffset } = state.selection.$head;
@@ -280,7 +280,7 @@ function atRefInputRule() {
 function refPrefixInputRule() {
   return new InputRule(
     /(^|[^`])(Chapter|Chapters|Appendix|Section|Figure|Table|Equation) $/,
-    (state: EditorState, match: string[]) => {
+    (state: EditorState, match: RegExpMatchArray) => {
       const tr = state.tr;
       tr.insertText(' ');
       let prefix = '';

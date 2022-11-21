@@ -21,6 +21,7 @@ import { PandocServer } from "./pandoc";
 import { PubMedServer } from "./pubmed";
 import { XRefServer } from "./xref";
 import { ZoteroServer } from "./zotero";
+import { MathServer } from "./math";
 
 
 export interface EditorServer {
@@ -32,4 +33,5 @@ export interface EditorServer {
   readonly zotero: ZoteroServer;
   readonly xref: XRefServer;
   readonly environment: EnvironmentServer;
+  readonly math: MathServer;
 }

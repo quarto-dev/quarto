@@ -13,6 +13,7 @@
  *
  */
 
+import jayson from 'jayson'
 
 import { EditorServer } from "editor-types";
 
@@ -24,31 +25,37 @@ import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer, pubMedServerMethods } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
+import { mathServer, mathServerMethods } from "./math/math";
 
-import jayson from 'jayson'
+export interface EditorServerOptions {
+  resourcesDir: string;
+  payloadLimitMb: number;
+}
 
-export function editorServer() : EditorServer {
+export function editorServer(options: EditorServerOptions) : EditorServer {
   return {
-    pandoc: pandocServer(),
+    pandoc: pandocServer(options),
     doi: doiServer(),
     crossref: crossrefServer(),
     datacite: dataCiteServer(),
     pubmed: pubMedServer(),
     zotero: zoteroServer(),
     xref: xrefServer(),
-    environment: environmentServer()
+    environment: environmentServer(),
+    math: mathServer()
   };
 }
 
-export function editorServerMethods(): Record<string,jayson.Method> {
+export function editorServerMethods(options: EditorServerOptions): Record<string,jayson.Method> {
   return {
-    ...pandocServerMethods(),
+    ...pandocServerMethods(options),
     ...doiServerMethods(),
     ...crossrefServerMethods(),
     ...dataCiteServerMethods(),
     ...pubMedServerMethods(),
     ...zoteroServerMethods(),
     ...xrefServerMethods(),
-    ...environmentServerMethods()
+    ...environmentServerMethods(),
+    ...mathServerMethods()
   }
 }

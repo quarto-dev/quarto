@@ -13,25 +13,22 @@
  *
  */
 
-import { combineReducers, createStore, Store, applyMiddleware } from 'redux';
+import { configureStore } from '@reduxjs/toolkit'
+import { editorSlice } from './editor';
+import { prefsSlice, prefsPersist } from './prefs';
 
-import { editorReducer } from './editor/editor-reducer';
-import { EditorState } from './editor/editor-types';
-
-import { prefsReducer, prefsMiddleware } from './prefs/prefs-reducer';
-import { PrefsState } from './prefs/prefs-types';
-
-export interface WorkbenchState {
-  editor: EditorState;
-  prefs: PrefsState;
-}
-
-const rootReducer = combineReducers<WorkbenchState>({
-  editor: editorReducer,
-  prefs: prefsReducer,
+const store = configureStore({
+  reducer: {
+    editor: editorSlice.reducer,
+    prefs: prefsSlice.reducer
+  },
+  middleware: (getDefaultMiddleware) => {
+    return getDefaultMiddleware().prepend(prefsPersist.middleware)
+  }
 });
 
-export function configureStore(): Store<WorkbenchState> {
-  const store = createStore(rootReducer, applyMiddleware(prefsMiddleware()));
-  return store;
-}
+export type WorkbenchState = ReturnType<typeof store.getState>
+
+export default store;
+
+

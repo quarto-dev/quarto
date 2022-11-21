@@ -13,55 +13,12 @@
  *
  */
 
-import { InputRule } from 'prosemirror-inputrules';
-import { Schema } from 'prosemirror-model';
-import { Plugin } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
 
-import { ProsemirrorCommand } from './command';
-import { PandocMark } from './mark';
-import { PandocNode } from './node';
-import { EditorMath, EditorUI } from './ui-types';
-import { BaseKeyBinding } from './basekeys';
-import { AppendTransactionHandler, AppendMarkTransactionHandler } from './transaction';
-import { EditorOptions } from './options';
 import { PandocExtensions } from './pandoc';
-import { FixupFn } from './fixup';
-import { EditorEvents } from './event-types';
-import { PandocCapabilities } from './pandoc_capabilities';
-import { EditorFormat } from './format';
-import { MarkInputRuleFilter } from './input_rule';
-import { CompletionHandler } from './completion';
-import { EditorNavigation } from './navigation-types';
-import { EditorServer } from 'editor-types';
 
-export interface Extension {
-  view?: (view: EditorView) => void;
-  marks?: PandocMark[];
-  nodes?: PandocNode[];
-  baseKeys?: (schema: Schema) => readonly BaseKeyBinding[];
-  inputRules?: (schema: Schema, markFilter: MarkInputRuleFilter) => readonly InputRule[];
-  commands?: (schema: Schema) => readonly ProsemirrorCommand[];
-  plugins?: (schema: Schema) => readonly Plugin[];
-  appendTransaction?: (schema: Schema) => readonly AppendTransactionHandler[];
-  appendMarkTransaction?: (schema: Schema) => readonly AppendMarkTransactionHandler[];
-  fixups?: (schema: Schema, view: EditorView) => Readonly<FixupFn[]>;
-  completionHandlers?: () => readonly CompletionHandler[];
-}
+import { Extension, ExtensionContext, ExtensionFn } from './extension-types'
 
-export interface ExtensionContext {
-  pandocExtensions: PandocExtensions;
-  pandocCapabilities: PandocCapabilities;
-  server: EditorServer;
-  ui: EditorUI;
-  math?: EditorMath;
-  format: EditorFormat;
-  options: EditorOptions;
-  events: EditorEvents;
-  navigation: EditorNavigation;
-}
-
-export type ExtensionFn = (context: ExtensionContext) => Extension | null;
+export type { Extension, ExtensionContext, ExtensionFn } ;
 
 // create an ExtensionFn for a given extension and format option that must be enabled
 export function extensionIfEnabled(extension: Extension, name: string | string[]) {

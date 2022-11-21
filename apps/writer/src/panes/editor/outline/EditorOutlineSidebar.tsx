@@ -27,7 +27,7 @@ import { IProps } from '@blueprintjs/core';
 import { EditorOutline } from 'editor';
 
 import { WorkbenchState } from '../../../store/store';
-import { setPrefsShowOutline } from '../../../store/prefs/prefs-actions';
+import { setPrefsShowOutline } from '../../../store/prefs';
 
 import { CommandManager, withCommandManager } from '../../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../../commands/commands';

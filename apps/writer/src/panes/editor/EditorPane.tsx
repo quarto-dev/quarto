@@ -27,8 +27,12 @@ import {
   NavigationType,
   UpdateEvent, 
   OutlineChangeEvent, 
-  StateChangeEvent
+  StateChangeEvent,
+  EditorFormat,
+  kQuartoDocType
 } from 'editor';
+
+import { t } from '../../i18n';
 
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
 import { WorkbenchState } from '../../store/store';
@@ -38,7 +42,7 @@ import {
   setEditorOutline,
   setEditorTitle,
   setEditorLoading,
-} from '../../store/editor/editor-actions';
+} from '../../store/editor';
 import { Pane } from '../../widgets/Pane';
 
 
@@ -49,7 +53,7 @@ import EditorToolbar from './EditorToolbar';
 import EditorDialogsImpl from './dialogs/EditorDialogsImpl';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 
-import { createEditor } from './editor-context';
+import { editorContext } from './context/editor-context';
 import { editorDialogs } from './dialogs/editor-dialogs';
 
 import styles from './EditorPane.module.scss';
@@ -103,7 +107,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
         <EditorActionsContext.Provider value={this}>
           <EditorToolbar />
           <div id="editor" className={styles.editorParent} ref={el => (this.parent = el)}>
-            {this.props.loading ? <EditorPaneLoading /> : null}
+            {this.editorLoading()}
             <EditorOutlineSidebar />
           </div>
           <EditorDialogsImpl ref={this.editorDialogsRef} />
@@ -114,30 +118,37 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   public async componentDidMount() {
 
-      this.editor = await createEditor(this.parent!,this.editorDialogs);
+    const editor = await this.createEditor();
+    if (!editor) {
+      return;
+    }
+    this.editor = editor;
+        
+    window.addEventListener("resize", this.onResize);
 
-      window.addEventListener("resize", this.onResize);
+    // show any warnings
+    this.showPandocWarnings();
 
-      // show any warnings
-      this.showPandocWarnings();
+    // subscribe to events
+    this.onEditorEvent(UpdateEvent, this.onEditorDocChanged);
+    this.onEditorEvent(OutlineChangeEvent, this.onEditorOutlineChanged);
+    this.onEditorEvent(StateChangeEvent, this.onEditorStateChanged);
 
-      // subscribe to events
-      this.onEditorEvent(UpdateEvent, this.onEditorDocChanged);
-      this.onEditorEvent(OutlineChangeEvent, this.onEditorOutlineChanged);
-      this.onEditorEvent(StateChangeEvent, this.onEditorStateChanged);
+    // add commands
+    this.props.commandManager.addCommands([
+      ...editorProsemirrorCommands(this.editor!.commands()),
+      ...editorExternalCommands(this.editor!),
+      ...editorDebugCommands(this.editor!),
+    ]);
 
-      // add commands
-      this.props.commandManager.addCommands([
-        ...editorProsemirrorCommands(this.editor!.commands()),
-        ...editorExternalCommands(this.editor!),
-        ...editorDebugCommands(this.editor!),
-      ]);
+    // set menus
+    this.props.commandManager.setMenus(this.editor!.getMenus());
 
-      // update editor
-      await this.updateEditor();
+    // update editor
+    await this.updateEditor();
 
-      // sync title
-      this.syncEditorTitle();
+    // sync title
+    this.syncEditorTitle();
   }
 
   private onResize() {
@@ -179,6 +190,50 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
   }
 
+  private editorLoading() {
+    if (this.props.loading) {
+      return this.props.loading && (
+        <div className={['ProseMirror', styles.editorLoading].join(' ')}>
+          <div className='body pm-editing-root-node pm-text-color pm-background-color'>
+            <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
+          </div>
+        </div>
+      )
+    } else {
+      return <div/>;
+    }
+  }
+
+  
+  private async createEditor() : Promise<Editor | undefined> {
+    const context = editorContext(() => this.props.commandManager, this.editorDialogs);
+    const format: EditorFormat = {
+      pandocMode: 'markdown',
+      pandocExtensions: '',
+      rmdExtensions: {
+        codeChunks: true,
+        bookdownPart: true,
+        bookdownXRef: true,
+        bookdownXRefUI: true
+      },
+      hugoExtensions: {
+        shortcodes: true
+      },
+      docTypes: [kQuartoDocType]
+    }
+    try {
+      return await Editor.create(this.parent!, context, format, { 
+        spellCheck: true,
+        outerScrollContainer: true 
+      });
+    } catch(e) {
+      this.errorAlert(e);
+      return undefined;
+    }
+  }
+
+
+
   private async updateEditor() {
     // set content (will no-op if prop change was from ourselves)
     await this.setEditorContent(this.props.markdown);
@@ -191,9 +246,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
   private get editorDialogs(): EditorDialogs {
     const dialogsImpl = this.editorDialogsRef.current!;
     return editorDialogs(dialogsImpl);
-   
   }
-
   private async setEditorContent(markdown: string) {
     if (markdown !== this.editorMarkdown) {
       this.editorMarkdown = markdown;
@@ -249,7 +302,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
 
   private errorAlert(error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    this.editorDialogs.alert(message, message, kAlertTypeError);
+    this.editorDialogs.alert(message, t('error_alert_title'), kAlertTypeError);
   }
 
   private onEditorStateChanged() {
@@ -278,16 +331,6 @@ class EditorPane extends React.Component<EditorPaneProps> {
   }
 }
 
-
-const EditorPaneLoading: React.FC = () => {
-  return (
-    <div className={['ProseMirror', styles.editorLoading].join(' ')}>
-      <div className='body pm-editing-root-node pm-text-color pm-background-color'>
-        <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
-      </div>
-    </div>
-  )
-}
 
 const mapStateToProps = (state: WorkbenchState) => {
   return {

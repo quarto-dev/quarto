@@ -1,4 +1,5 @@
 {
+  "error_alert_title": "Error",
   "file_menu": "File",
   "edit_menu": "Edit",
   "view_menu": "View",
@@ -26,7 +27,8 @@
   "edit_image_dialog_caption": "Image",
   "edit_image_dialog_src": "URL",
   "edit_image_dialog_title": "Title/Tooltip",
-  "edit_image_dialog_alt": "Caption/Alt",
+  "edit_image_dialog_alt": "Alternative Teext",
+  "edit_image_dialog_img_caption": "Caption",
   "edit_ordered_list_dialog_caption": "Ordered List",
   "edit_ordered_list_dialog_tight": "Tight layout (less vertical space between list items)",
   "edit_ordered_list_dialog_order": "Starting number",

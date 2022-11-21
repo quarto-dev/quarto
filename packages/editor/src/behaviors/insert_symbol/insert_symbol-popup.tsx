@@ -78,15 +78,15 @@ export const InsertSymbolPopup: React.FC<InsertSymbolPopupProps> = props => {
     }
   }, [selectedSymbolIndex, filteredSymbols]);
 
-  const textRef = React.useRef<HTMLInputElement>(null);
+  let textRef: HTMLInputElement | null;
+  const onTextRef = (ref: HTMLInputElement) => {
+    textRef = ref;
+    setTimeout(() => focusElement(textRef), 0);
+  };
+
   const selectRef = React.useRef<HTMLSelectElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null);
   const preferenceRef = React.useRef<HTMLElement>(null);
-
-  // Focus the first text box
-  React.useEffect(() => {
-    focusElement(textRef.current);
-  }, []);
 
   const options = props.symbolDataProvider.symbolGroupNames().map(name => (
     <option key={name} value={name}>
@@ -123,17 +123,17 @@ export const InsertSymbolPopup: React.FC<InsertSymbolPopupProps> = props => {
         break;
 
       case 'Tab':
-        if (event.shiftKey && isElementFocused(textRef.current)) {
+        if (event.shiftKey && isElementFocused(textRef)) {
           focusElement(lastElement().current);
           event.preventDefault();
         } else if (!event.shiftKey && isElementFocused(lastElement().current)) {
-          focusElement(textRef.current);
+          focusElement(textRef);
           event.preventDefault();
         }
         break;
 
       case 'Enter':
-        if (isElementFocused(textRef.current) || isElementFocused(gridRef.current)) {
+        if (isElementFocused(textRef) || isElementFocused(gridRef.current)) {
           handleSelectedSymbolCommitted();
           event.preventDefault();
         }
@@ -147,7 +147,7 @@ export const InsertSymbolPopup: React.FC<InsertSymbolPopupProps> = props => {
       case 'PageDown':
         // If the text filter is focused, forward arrow keys to the grid. If other elements are focused
         // they may need to handle arrow keys, so don't handle them in this case
-        if (isElementFocused(textRef.current) && !event.shiftKey && !event.altKey && !event.ctrlKey) {
+        if (isElementFocused(textRef) && !event.shiftKey && !event.altKey && !event.ctrlKey) {
           const newIndex = newIndexForKeyboardEvent(
             event,
             selectedSymbolIndex,
@@ -171,7 +171,7 @@ export const InsertSymbolPopup: React.FC<InsertSymbolPopupProps> = props => {
 
   const handleSelectedSymbolCommitted = () => {
     if (filteredSymbols.length > selectedSymbolIndex) {
-      props.onInsertSymbol(filteredSymbols[selectedSymbolIndex], textRef.current?.value || '');
+      props.onInsertSymbol(filteredSymbols[selectedSymbolIndex], textRef?.value || '');
     }
   };
 
@@ -206,7 +206,7 @@ export const InsertSymbolPopup: React.FC<InsertSymbolPopupProps> = props => {
             className="pm-popup-insert-symbol-search-textbox"
             placeholder={props.searchPlaceholder}
             onChange={handleTextChange}
-            ref={textRef}
+            ref={onTextRef}
           />
           <SelectInput
             tabIndex={0}

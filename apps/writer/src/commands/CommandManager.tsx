@@ -18,18 +18,25 @@ import React, { PropsWithChildren, useState } from 'react';
 import { Props } from '@blueprintjs/core';
 
 import { CommandId, Command } from './commands';
+import { EditorMenus } from 'editor';
 
 type Commands = { [id in CommandId]?: Command };
 
 export interface CommandManager {
   commands: Commands;
+  menus: EditorMenus;
   addCommands: (commands: Command[]) => void;
+  setMenus: (menus: EditorMenus) => void;
   execCommand: (id: CommandId) => void;
 }
 
 export const CommandManagerContext = React.createContext<CommandManager>({
   commands: {},
+  menus: { format: [], insert: [], table: [] },
   addCommands: () => {
+    /* */
+  },
+  setMenus: () => {
     /* */
   },
   execCommand: () => {
@@ -42,9 +49,14 @@ export const CommandManagerProvider: React.FC<PropsWithChildren<Props>> = props 
   const initialCommands: Commands = {};
   const [commands, setCommands] = useState(initialCommands);
 
+  // establish menus state
+  const initialMenus: EditorMenus = { format: [], insert: [], table: []};
+  const [menus, setMenus] = useState(initialMenus);
+
   // command manager that enables reading commands and adding new ones
   const commandManager = {
     commands,
+    menus,
     addCommands: (newCommands: Command[]) => {
       setCommands((prevCommands: Commands) => {
         // index commands by name
@@ -58,6 +70,11 @@ export const CommandManagerProvider: React.FC<PropsWithChildren<Props>> = props 
           ...newCommandsById,
         };
       });
+    },
+    setMenus: (menus: EditorMenus) => {
+      setMenus(() => {
+        return menus;
+      })
     },
     execCommand: (id: CommandId) => {
       const command = commands[id];

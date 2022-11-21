@@ -49,7 +49,7 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
 
   const srcInput = React.createRef<HTMLInputElement>();
   const titleInput = React.createRef<HTMLInputElement>();
-  const altInput = React.createRef<HTMLInputElement>();
+  const captionInput = React.createRef<HTMLInputElement>();
   const attrInput = React.createRef<AttrEditor>();
 
   const onOpened = () => {
@@ -61,7 +61,7 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
       props.onClosed({
         src: srcInput.current!.value,
         title: titleInput.current!.value,
-        alt: altInput.current!.value,
+        caption: captionInput.current!.value,
         width: props.image.width,
         height: props.image.height,
         units: props.image.units,
@@ -80,14 +80,14 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
   return (
     <Dialog
       isOpen={props.isOpen}
-      title={t('edit_image_dialog_caption')}
+      title={t('edit_image_dialog_caption') as string}
       onOpened={onOpened}
       onOK={onOK}
       onCancel={onCancel}
     >
       <DialogTextInput label={t('edit_image_dialog_src')} defaultValue={props.image.src || ''} ref={srcInput} />
       <DialogTextInput label={t('edit_image_dialog_title')} defaultValue={props.image.title} ref={titleInput} />
-      <DialogTextInput label={t('edit_image_dialog_alt')} defaultValue={props.image.alt} ref={altInput} />
+      <DialogTextInput label={t('edit_image_dialog_img_caption')} defaultValue={props.image.caption} ref={captionInput} />
       {props.editAttributes ? <AttrEditor defaultValue={props.image} ref={attrInput} /> : null}
     </Dialog>
   );

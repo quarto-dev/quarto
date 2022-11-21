@@ -41,7 +41,7 @@ export function scrollIntoView(
     const resultPos = parentList || parentDiv ? $pos.before(2) : $pos.before();
     const resultNode = view.nodeDOM(resultPos) as HTMLElement;
     if (container && resultNode) {
-      const scroller = zenscroll.createScroller(containerEl, duration, offset);
+      const scroller = zenscroll.createScroller(editorScrollContainer(containerEl), duration, offset);
       if (center) {
         scroller.center(resultNode, duration, offset, onDone);
       } else {
@@ -56,11 +56,17 @@ export function scrollToPos(view: EditorView, pos: number, duration?: number, of
   if (node instanceof HTMLElement) {
     const editingRoot = editingRootNode(view.state.selection)!;
     const container = view.nodeDOM(editingRoot.pos) as HTMLElement;
-    const scroller = zenscroll.createScroller(container, duration, offset);
+    const scroller = zenscroll.createScroller(editorScrollContainer(container), duration, offset);
     if (duration) {
       scroller.to(node, duration, onDone);
     } else {
       scroller.to(node, 0, onDone);
     }
   }
+}
+
+export const kPmScrollContainer = 'pm-scroll-container';
+
+export function editorScrollContainer(container: HTMLElement) : HTMLElement {
+  return (container.closest(`.${kPmScrollContainer}`)|| container) as HTMLElement;
 }

@@ -14,7 +14,8 @@
  */
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import React, { ChangeEvent } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import uniqBy from 'lodash.uniqby';
 import debounce from 'lodash.debounce';
@@ -162,12 +163,14 @@ export async function insertXref(
       const windowHeight = containerHeight;
       const windowWidth = containerWidth;
 
-      const height = Math.min(kMaxHeight, windowHeight * kMaxHeightProportion - kdialogPaddingIncludingButtons);
+      const height = Math.min(kMaxHeight, windowHeight * kMaxHeightProportion) - kdialogPaddingIncludingButtons;
       const width = Math.max(Math.min(kMaxWidth, windowWidth * 0.9), 550);
 
       const container = window.document.createElement('div');
       container.className = 'pm-default-theme';
       container.style.width = width + 'px';
+      container.style.height = height + 75 + 'px';
+      const root = createRoot(container);
 
       // Look up the document and initialize the state
       const docPath = ui.context.getDocumentPath() || "";
@@ -178,24 +181,29 @@ export async function insertXref(
         return (await server.xref.quartoIndexForFile(docPath)).refs;
       };
 
+      const onCancel = () => {
+        root.unmount();
+        cancel();
+      };
+
       const onInsert = (xref: XRef, style: XRefStyle, prefix?: string) => {
         onInsertXref(style.fn(xrefKey(xref, "quarto")), prefix);
+        root.unmount();
         confirm();
       };
 
       // REnder the panel
-      ReactDOM.render(
+      root.render(
         <InsertXrefPanel
           height={height}
           width={width}
           styleIndex={lastSelectedStyleIndex}
           onOk={onInsert}
-          onCancel={cancel}
+          onCancel={onCancel}
           doc={doc}
           ui={ui}
           loadXRefs={loadXRefs}
-        />,
-        container,
+        />
       );
       return container;
     },

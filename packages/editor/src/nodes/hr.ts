@@ -67,7 +67,7 @@ const extension = (context: ExtensionContext) => {
 
     inputRules: () => {
       return [
-        new InputRule(/^\*{3}$/, (state: EditorState, _match: string[], start: number, end: number) => {
+        new InputRule(/^\*{3}$/, (state: EditorState, _match: RegExpMatchArray, start: number, end: number) => {
           const schema = state.schema;
           const paraNode = findParentNodeOfType(schema.nodes.paragraph)(state.selection);
           if (paraNode && state.selection.$anchor.depth === 2) {

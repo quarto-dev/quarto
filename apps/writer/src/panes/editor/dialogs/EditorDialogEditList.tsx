@@ -103,7 +103,7 @@ export const EditorDialogEditList: React.FC<EditorDialogEditListProps> = props =
   return (
     <Dialog
       isOpen={props.isOpen}
-      title={t('edit_ordered_list_dialog_caption')}
+      title={t('edit_ordered_list_dialog_caption') as string}
       onOpened={onOpened}
       onOK={onOK}
       onCancel={onCancel}

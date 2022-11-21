@@ -16,7 +16,7 @@
 import { EditorView } from 'prosemirror-view';
 
 import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import zenscroll from 'zenscroll';
 
@@ -31,6 +31,7 @@ import { Popup } from '../../api/widgets/popup';
 
 import './completion-popup.css';
 import { EditorUI } from '../../api/ui-types';
+import { editorScrollContainer } from '../../api/scroll';
 
 const kNoResultsHeight = 22;
 
@@ -45,26 +46,35 @@ export interface CompletionListProps<T = unknown>{
   ui: EditorUI;
 }
 
-export function createCompletionPopup(): HTMLElement {
+export interface CompletionPopup {
+  el: HTMLElement;
+  root: Root;
+}
+
+export function createCompletionPopup(): CompletionPopup {
   const popup = window.document.createElement('div');
   popup.style.position = 'absolute';
   popup.style.zIndex = '900';
-  return popup;
+  window.document.body.appendChild(popup);
+  return {
+    el: popup,
+    root: createRoot(popup)
+  }
 }
 
-export function renderCompletionPopup(view: EditorView, props: CompletionListProps<unknown>, popup: HTMLElement) {
+export function renderCompletionPopup(view: EditorView, props: CompletionListProps<unknown>, popup: CompletionPopup) {
   // position popup
   const size = completionPopupSize(props);
   const positionStyles = completionPopupPositionStyles(view, props.pos, size.width, size.height);
-  applyStyles(popup, [], positionStyles);
+  applyStyles(popup.el, [], positionStyles);
 
   // render popup
-  ReactDOM.render(<CompletionPopup {...props} />, popup);
+  popup.root.render(<CompletionPopup {...props} />);
 }
 
-export function destroyCompletionPopup(popup: HTMLElement) {
-  ReactDOM.unmountComponentAtNode(popup);
-  popup.remove();
+export function destroyCompletionPopup(popup: CompletionPopup) {
+  popup.root.unmount();
+  popup.el.remove();
 }
 
 const CompletionPopup: React.FC<CompletionListProps<unknown>> = props => {
@@ -89,7 +99,7 @@ const CompletionList: React.FC<CompletionListProps<unknown>> = props => {
       const rows = containerEl.getElementsByClassName('pm-completion-list-item-row');
       const scrollToRow = rows.item(props.selectedIndex);
       if (scrollToRow) {
-        const scroller = zenscroll.createScroller(containerEl);
+        const scroller = zenscroll.createScroller(editorScrollContainer(containerEl));
         scroller.intoView(scrollToRow as HTMLElement);
       }
     }

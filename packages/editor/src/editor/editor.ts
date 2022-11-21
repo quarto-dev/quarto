@@ -20,12 +20,14 @@ import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'pros
 import { EditorView } from 'prosemirror-view';
 import 'prosemirror-view/style/prosemirror.css';
 
+import applyDevTools from "prosemirror-dev-tools";
+
 import { setTextSelection } from 'prosemirror-utils';
 
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorUI, EditorUIImages } from '../api/ui-types';
+import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   AttrProps,
   AttrEditInput,
@@ -37,7 +39,7 @@ import {
   attrInputToProps,
 } from '../api/ui';
 
-import { Extension } from '../api/extension';
+import { Extension, ExtensionFn } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
@@ -115,7 +117,7 @@ import { PandocConverter, PandocLineWrapping } from '../pandoc/pandoc_converter'
 import { ExtensionManager, initExtensions } from './editor-extensions';
 import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
 import { defaultEditorUIImages } from './editor-images';
-import { editorMenus, EditorMenus } from './editor-menus';
+import { editorMenus } from './editor-menus';
 import { editorSchema } from './editor-schema';
 
 // import styles before extensions so they can be overridden by extensions
@@ -125,7 +127,8 @@ import { getPresentationEditorLocation, PresentationEditorLocation, positionForP
 import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
 import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
-
+import { kPmScrollContainer } from '../api/scroll';
+import { CodeViewExtensionFn } from '../api/extension-types';
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -160,7 +163,8 @@ export interface EditorContext {
   readonly server: EditorServer;
   readonly ui: EditorUI;
   readonly hooks?: EditorHooks;
-  readonly extensions?: readonly Extension[];
+  readonly extensions?: Array<Extension | ExtensionFn>;
+  readonly codeViewExtension?: CodeViewExtensionFn;
 }
 
 export interface EditorHooks {
@@ -398,7 +402,7 @@ export class Editor {
     this.extensions = this.initExtensions();
 
     // create schema
-    this.schema = editorSchema(this.extensions);
+    this.schema = editorSchema(this.extensions, !options.outerScrollContainer);
 
     // register completion handlers (done in a separate step b/c omni insert
     // completion handlers require access to the initializezd commands that
@@ -421,6 +425,11 @@ export class Editor {
     const attributes: { [name: string]: string } = {};
     if (options.className) {
       attributes.class = options.className;
+    }
+
+    // add scroll container class if we are using an outer scroll container
+    if (options.outerScrollContainer) {
+      attributes.class = (attributes.class || '').split(' ').concat(kPmScrollContainer).join(' ');
     }
 
     // create view
@@ -764,8 +773,8 @@ export class Editor {
     this.emitEvent(ResizeEvent);
   }
 
-  public enableDevTools(initFn: (view: EditorView, stateClass: unknown) => void) {
-    initFn(this.view, { EditorState });
+  public enableDevTools() {
+    applyDevTools(this.view);
   }
 
   public getMenus(): EditorMenus {
@@ -883,6 +892,7 @@ export class Editor {
         },
       },
       this.context.extensions,
+      this.context.codeViewExtension
     );
   }
 

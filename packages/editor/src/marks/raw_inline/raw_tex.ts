@@ -124,7 +124,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       plugins.push(
         inputRules({
           rules: [
-            new InputRule(/(^|[^^\\])([{[])$/, (state: EditorState, match: string[], start: number) => {
+            new InputRule(/(^|[^^\\])([{[])$/, (state: EditorState, match: RegExpMatchArray, start: number) => {
               if (markIsActive(state, schema.marks.raw_tex)) {
                 const tr = state.tr;
                 tr.insertText(match[2] + braces.get(match[2]));

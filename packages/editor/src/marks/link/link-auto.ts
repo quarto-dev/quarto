@@ -29,7 +29,7 @@ export function linkInputRules(autoLink: boolean) {
         href: match[1],
       })),
        // full markdown link
-      new InputRule(/(?:\[)([^\]]+)(?:\]\()([^)]+)(?:\))$/, (state: EditorState, match: string[], start: number, end: number) => {
+      new InputRule(/(?:\[)([^\]]+)(?:\]\()([^)]+)(?:\))$/, (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
         if (!filter(state, start, end)) {
           return null;
         }
@@ -64,7 +64,7 @@ export function linkInputRules(autoLink: boolean) {
       rules.push(
         new InputRule(
           /(^|[^`])(https?:\/\/[^\s]+\w)[.?!,)]* $/,
-          (state: EditorState, match: string[], start: number, end: number) => {
+          (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
             const tr = state.tr;
             start = start + match[1].length;
             const linkEnd = start + match[2].length;

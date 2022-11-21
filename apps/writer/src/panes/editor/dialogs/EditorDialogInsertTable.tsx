@@ -81,7 +81,7 @@ export const EditorDialogInsertTable: React.FC<EditorDialogInsertTableProps> = p
   return (
     <Dialog
       isOpen={props.isOpen}
-      title={t('insert_table_dialog_caption')}
+      title={t('insert_table_dialog_caption') as string}
       onOpened={onOpened}
       onOK={onOK}
       onCancel={onCancel}
@@ -107,7 +107,7 @@ export const EditorDialogInsertTable: React.FC<EditorDialogInsertTableProps> = p
         <DialogTextInput
           defaultValue={''}
           label={t('insert_table_dialog_table_caption')}
-          labelInfo={t('label_optional')}
+          labelInfo={t('label_optional') as string}
           ref={setInputCaption}
         />
       ) : null}

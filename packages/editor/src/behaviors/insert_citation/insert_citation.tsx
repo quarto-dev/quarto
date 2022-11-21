@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
@@ -53,7 +53,6 @@ import './insert_citation.css';
 import debounce from 'lodash.debounce';
 import { CheckboxInput } from '../../api/widgets/checkbox-input';
 import { EditorServer } from 'editor-types';
-
 
 // When the dialog has completed, it will return this result
 // If the dialog is canceled no result will be returned
@@ -98,12 +97,16 @@ export async function showInsertCitationDialog(
       const windowHeight = containerHeight;
       const windowWidth = containerWidth;
 
-      const height = Math.min(kMaxHeight, windowHeight * kMaxHeightProportion - kdialogPaddingIncludingButtons);
+      const height = Math.min(kMaxHeight, windowHeight * kMaxHeightProportion) - kdialogPaddingIncludingButtons;
       const width = Math.max(Math.min(kMaxWidth, windowWidth * 0.9), 550);
 
+      // set container size  
       const container = window.document.createElement('div');
+      container.style.width = width + 'px';
+      container.style.height = height + 'px';
       container.className = 'pm-default-theme';
-
+      const root = createRoot(container);
+    
       // Provide the providers top the dialog and then refresh the bibliography and reload
       // the items
       const providersForBibliography = (writable: boolean) => {
@@ -191,22 +194,26 @@ export async function showInsertCitationDialog(
           }
         }
         // Dismiss the dialog
+        root.unmount();
         confirm();
       };
 
-      container.style.width = width + 'px';
-      ReactDOM.render(
+      const onCancel = () => {
+        root.unmount();
+        cancel();
+      };
+
+      root.render(
         <InsertCitationPanel
           height={height}
           width={width}
           configuration={configurationStream}
           initiallySelectedNodeKey={initiallySelectedNodeKey}
           onOk={onOk}
-          onCancel={cancel}
+          onCancel={onCancel}
           doc={doc}
           ui={ui}
-        />,
-        container,
+        />
       );
       return container;
     },
@@ -444,7 +451,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
   };
 
   // Figure out the panel height (the height of the main panel less padding and other elements)
-  const panelHeight = props.height * 0.75;
+  const panelHeight = props.height - 85;
 
   // In order to debounce typeahead search, we need to memoize the callback so the same debounce function will be
   // used even when renders happen. Be sure to pass everything that need to reflect updated state since

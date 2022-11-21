@@ -22,14 +22,14 @@ import { withTranslation } from 'react-i18next';
 
 import { IconNames } from '@blueprintjs/icons';
 
-import CodeMirror from 'codemirror';
-import 'codemirror/mode/markdown/markdown';
-import 'codemirror/lib/codemirror.css';
+import { EditorView, basicSetup } from 'codemirror';
+import { markdown } from "@codemirror/lang-markdown"
+
 
 import { WorkbenchState } from '../../store/store';
 import { Pane } from '../../widgets/Pane';
 import { Toolbar, ToolbarText, ToolbarButton } from '../../widgets/Toolbar';
-import { setPrefsShowMarkdown } from '../../store/prefs/prefs-actions';
+import { setPrefsShowMarkdown } from '../../store/prefs';
 import { CommandManager, withCommandManager } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
 
@@ -45,7 +45,7 @@ interface MarkdownPaneProps {
 
 export class MarkdownPane extends React.Component<MarkdownPaneProps> {
   private parent: HTMLDivElement | null;
-  private cm: CodeMirror.Editor | null;
+  private cm: EditorView | null;
 
   constructor(props: Readonly<MarkdownPaneProps>) {
     super(props);
@@ -81,13 +81,10 @@ export class MarkdownPane extends React.Component<MarkdownPaneProps> {
 
   public componentDidMount() {
     // initialize codemirror
-    this.cm = CodeMirror(this.parent!, {
-      mode: 'markdown',
-      readOnly: true,
-      autofocus: false,
-      lineWrapping: true,
-    });
-    this.cm.setSize(null, '100%');
+    this.cm = new EditorView({
+      extensions: [basicSetup, markdown(), EditorView.lineWrapping, EditorView.editable.of(false)],
+      parent: this.parent!
+    })
     this.updateCodeMirror();
 
     // register command used to toggle pane
@@ -111,12 +108,9 @@ export class MarkdownPane extends React.Component<MarkdownPaneProps> {
   }
 
   private updateCodeMirror() {
-    const doc = this.cm!.getDoc();
-    doc.replaceRange(
-      this.props.markdown,
-      { line: doc.firstLine(), ch: 0 },
-      { line: doc.lastLine(), ch: doc.getLine(doc.lastLine()).length },
-    );
+    this.cm?.dispatch({
+      changes: { from: 0, to: this.cm?.state.doc.length, insert: this.props.markdown }
+    })
   }
 
   private onCloseClicked() {

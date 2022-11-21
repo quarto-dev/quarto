@@ -15,8 +15,8 @@
  */
 
 import stream from 'stream';
+import path from 'path';
 import * as child_process from "child_process";
-
 
 import { 
   BibliographyResult, 
@@ -33,9 +33,38 @@ import {
 
 import jayson from 'jayson'
 import { jsonRpcMethod } from "./json-rpc";
+import { EditorServerOptions } from './server';
 
 
-export function pandocServer() : PandocServer {
+export function pandocServer(options: EditorServerOptions) : PandocServer {
+
+  async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
+    return new Promise((resolve, reject) => {
+      const child = child_process.execFile("pandoc", args, { 
+        encoding: "utf-8", 
+        maxBuffer: options.payloadLimitMb * 1024 * 1024 }, 
+        (error, stdout, stderr) => {
+          if (error) {
+            reject(error);
+          } else if (child.exitCode !== 0) {
+            reject(new Error(`Error status ${child.exitCode}: ${stderr.trim()}`));
+          } else {
+            resolve(stdout.trim());
+          }
+      });
+      if (stdin) {
+        const stdinStream = new stream.Readable();
+        stdinStream.push(stdin);  
+        stdinStream.push(null);  
+        if (child.stdin) {
+          stdinStream.pipe(child.stdin);
+        } else {
+          reject(new Error("Unable to access Pandoc stdin stream"));
+        }
+      }
+    });
+  }
+
   return {
     async getCapabilities(): Promise<PandocCapabilitiesResult> {
       const version = await runPandoc(["--version"]);
@@ -49,12 +78,30 @@ export function pandocServer() : PandocServer {
         highlight_languages: languages
       }
     },
-    async markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst> {
+    async markdownToAst(markdown: string, format: string, mdOptions: string[]): Promise<PandocAst> {
+      // ast
       const ast = JSON.parse(await runPandoc(
         ["--from", format,
-         "--to", "json", ...options],
+         "--abbreviations", path.join(options.resourcesDir, 'abbreviations'),
+         "--to", "json", ...mdOptions],
          markdown)
       ) as PandocAst;
+
+      // heading-ids
+      // disable auto identifiers so we can discover *only* explicit ids
+      format += "-auto_identifiers-gfm_auto_identifiers";
+      const headingIds = await runPandoc(
+        ["--from", format,
+         "--to", "plain",
+         "--lua-filter", path.join(options.resourcesDir, 'heading-ids.lua'),
+        ],
+        markdown
+      );
+
+      if (headingIds) {
+        ast.heading_ids = headingIds.split('\n').filter(id => id.length !== 0);
+      }
+  
       return ast;
     },
     async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
@@ -65,12 +112,12 @@ export function pandocServer() : PandocServer {
       );
       return markdown;
     },
-    listExtensions(format: string): Promise<string> {
+    async listExtensions(format: string): Promise<string> {
       const args = ["--list-extensions"];
       if (format.length > 0) {
         args.push(format);
       }
-      return runPandoc(args);
+      return await runPandoc(args);
     },
     async getBibliography(
       file: string | null,
@@ -102,8 +149,8 @@ export function pandocServer() : PandocServer {
   };
 }
 
-export function pandocServerMethods() : Record<string, jayson.Method> {
-  const server = pandocServer();
+export function pandocServerMethods(options: EditorServerOptions) : Record<string, jayson.Method> {
+  const server = pandocServer(options);
   const methods: Record<string, jayson.Method> = {
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
     [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),
@@ -115,29 +162,5 @@ export function pandocServerMethods() : Record<string, jayson.Method> {
   return methods;
 }
 
-async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = child_process.execFile("pandoc", args, { encoding: "utf-8", maxBuffer: 1024 * 102400 }, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-      } else if (child.exitCode !== 0) {
-        reject(new Error(`Error status ${child.exitCode}: ${stderr.trim()}`));
-      } else {
-        resolve(stdout.trim());
-      }
-    });
-    if (stdin) {
-      const stdinStream = new stream.Readable();
-      stdinStream.push(stdin);  
-      stdinStream.push(null);  
-      if (child.stdin) {
-        stdinStream.pipe(child.stdin);
-      } else {
-        reject(new Error("Unable to access Pandoc stdin stream"));
-      }
-    }
 
-  });
-  
-}
 

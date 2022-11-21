@@ -19,7 +19,7 @@ import { Transaction } from 'prosemirror-state';
 import { findChildren } from 'prosemirror-utils';
 
 import { Extension, ExtensionContext } from '../api/extension';
-import { detectAndApplyMarks, removeInvalidatedMarks } from '../api/mark';
+import { detectAndApplyMarks, domAttrNoSpelling, removeInvalidatedMarks } from '../api/mark';
 import { MarkTransaction } from '../api/transaction';
 import { FixupContext } from '../api/fixup';
 import { kShortcodeRegEx } from '../api/shortcode';
@@ -48,7 +48,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             },
           ],
           toDOM() {
-            return ['span', { class: 'shortcode pm-markup-text-color pm-fixedwidth-font' }];
+            return ['span', domAttrNoSpelling({ class: 'shortcode pm-markup-text-color pm-fixedwidth-font' })];
           },
         },
         pandoc: {

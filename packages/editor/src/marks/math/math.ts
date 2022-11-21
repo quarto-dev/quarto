@@ -21,7 +21,7 @@ import { InputRule } from 'prosemirror-inputrules';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { PandocTokenType, PandocToken, PandocOutput } from '../../api/pandoc';
 import { BaseKey, BaseKeyBinding } from '../../api/basekeys';
-import { markIsActive } from '../../api/mark';
+import { domAttrNoSpelling, markIsActive } from '../../api/mark';
 import { kCodeText } from '../../api/code';
 import { kPasteTransaction } from '../../api/transaction';
 import { kQuartoDocType } from '../../api/format';
@@ -82,11 +82,11 @@ const extension = (context: ExtensionContext): Extension | null => {
           toDOM(mark: Mark) {
             return [
               'span',
-              {
+              domAttrNoSpelling({
                 class: 'math pm-fixedwidth-font pm-light-text-color',
                 'data-type': mark.attrs.type,
                 spellcheck: 'false',
-              },
+              }),
             ];
           },
         },

@@ -26,6 +26,7 @@ import { MarkInputRuleFilter } from '../../api/input_rule';
 
 import { kRawInlineFormat, kRawInlineContent } from './raw_inline';
 import { toggleMarkType } from '../../api/command';
+import { domAttrNoSpelling } from '../../api/mark';
 
 const extension = (context: ExtensionContext): Extension | null => {
   const { pandocExtensions } = context;
@@ -50,7 +51,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             const attr = {
               class: 'raw-html pm-fixedwidth-font pm-markup-text-color',
             };
-            return ['span', attr];
+            return ['span', domAttrNoSpelling(attr)];
           },
         },
         pandoc: {

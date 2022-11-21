@@ -23,7 +23,7 @@ import uniqby from 'lodash.uniqby';
 import { FocusEvent } from '../../api/event-types';
 import { PandocTokenType, PandocToken, PandocOutput, ProsemirrorWriter, PandocServer, kPreventBracketEscape } from '../../api/pandoc';
 import { fragmentText } from '../../api/fragment';
-import { markIsActive, splitInvalidatedMarks, getMarkRange, detectAndApplyMarks } from '../../api/mark';
+import { markIsActive, splitInvalidatedMarks, getMarkRange, detectAndApplyMarks, domAttrNoSpelling } from '../../api/mark';
 import { MarkTransaction, kPasteTransaction } from '../../api/transaction';
 import { BibliographyManager, BibliographyFile, BibliographySource } from '../../api/bibliography/bibliography';
 import { EditorUI } from '../../api/ui-types';
@@ -229,7 +229,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             },
           ],
           toDOM() {
-            return ['span', { class: 'cite-id pm-link-text-color pm-fixedwidth-font' }];
+            return ['span', domAttrNoSpelling({ class: 'cite-id pm-link-text-color pm-fixedwidth-font' })];
           },
         },
         pandoc: {

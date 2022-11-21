@@ -86,7 +86,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
           }
 
           // don't continue if either realtime spelling is disabled or we have never been focused
-          if (!this.ui.spelling.realtimeEnabled() || !this.hasBeenFocused) {
+          if (!this.ui.prefs.realtimeSpelling() || !this.hasBeenFocused) {
             return DecorationSet.empty;
           }
 

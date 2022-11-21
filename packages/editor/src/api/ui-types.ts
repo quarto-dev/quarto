@@ -157,6 +157,7 @@ export const kListSpacingSpaced = 'spaced';
 export type ListSpacing = 'tight' | 'spaced';
 
 export interface EditorUIPrefs {
+  realtimeSpelling: () => boolean;
   darkMode: () => boolean;
   listSpacing: () => ListSpacing;
   equationPreview: () => boolean;

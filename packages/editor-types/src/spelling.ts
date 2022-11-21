@@ -17,22 +17,33 @@ export const kCharClassWord = 0;
 export const kCharClassBoundary = 1;
 export const kCharClassNonWord = 2;
 
-export interface IEditorWordBreaker {
+export interface ISpellingWordBreaker {
   breakWords: (text: string) => Array<{ start: number, end: number }>;
   classifyCharacter: (ch: number) => number;
 }
 
-export interface EditorUISpelling extends IEditorWordBreaker {
-  // realtime interface
-  realtimeEnabled: () => boolean;
+export interface ISpellingDictionary {
   checkWords: (words: string[]) => string[];
   suggestionList: (word: string, callback: (suggestions: string[]) => void) => void;
+  addToDictionary: (word: string) => void;
+}
 
-  // dictionary
+export interface ISpellingIgnoredWords {
   isWordIgnored: (word: string) => boolean;
   ignoreWord: (word: string) => void;
   unignoreWord: (word: string) => void;
-  addToDictionary: (word: string) => void;
 }
+
+
+export interface EditorUISpelling extends 
+  ISpellingWordBreaker, 
+  ISpellingDictionary,
+  ISpellingIgnoredWords {
+ 
+}
+
+
+
+
 
 

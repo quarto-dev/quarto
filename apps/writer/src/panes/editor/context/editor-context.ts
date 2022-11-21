@@ -181,6 +181,9 @@ function editorUIContext(): EditorUIContext {
 
 function editorPrefs(): EditorUIPrefs {
   return {
+    realtimeSpelling() : boolean {
+      return false;
+    },
     darkMode(): boolean {
       return false;
     },
@@ -260,10 +263,6 @@ function editorChunks(): EditorUIChunks {
 
 function editorSpelling() : EditorUISpelling {
   return {
-    // realtime interface
-    realtimeEnabled(): boolean {
-      return false;
-    },
     checkWords(_words: string[]): string[] {
       return [];
     },

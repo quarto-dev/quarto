@@ -13,7 +13,7 @@
  *
  */
 
-import { IEditorWordBreaker, kCharClassBoundary, kCharClassNonWord, kCharClassWord } from "editor-types";
+import { ISpellingWordBreaker, kCharClassBoundary, kCharClassNonWord, kCharClassWord } from "editor-types";
 
 
 // This string is a compact representation of the set of Unicode characters
@@ -30,7 +30,7 @@ const kSingleQuote = 39;
 const kFancySingleQuote = 8217;
 
 
-export function editorWordBreaker() : IEditorWordBreaker {
+export function spellingWordBreaker() : ISpellingWordBreaker {
 
   const CACHE = new Map<number,boolean>();
   

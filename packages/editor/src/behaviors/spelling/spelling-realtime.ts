@@ -21,12 +21,12 @@ import { ChangeSet } from 'prosemirror-changeset';
 
 import { setTextSelection } from 'prosemirror-utils';
 
+import { EditorUISpelling, kCharClassWord } from 'editor-types';
+
 import { FocusEvent } from '../../api/event-types';
 import { PandocMark } from '../../api/mark';
 import {
-  EditorUISpelling,
   EditorWordRange,
-  kCharClassWord
 } from '../../api/spelling';
 import { EditorEvents } from '../../api/event-types';
 import { kAddToHistoryTransaction } from '../../api/transaction';

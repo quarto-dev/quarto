@@ -16,8 +16,11 @@
 import { MarkType, Schema, Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 
-import { EditorWordSource, EditorWordRange, EditorUISpelling, kCharClassNonWord } from '../../api/spelling';
+import { EditorUISpelling, kCharClassNonWord } from 'editor-types';
+
+import { EditorWordSource, EditorWordRange } from '../../api/spelling';
 import { PandocMark, getMarkRange } from '../../api/mark';
+
 
 export const beginDocPos = () => 1;
 export const endDocPos = (doc: ProsemirrorNode) => doc.nodeSize - 2;

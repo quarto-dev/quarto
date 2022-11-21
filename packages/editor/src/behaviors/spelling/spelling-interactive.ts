@@ -18,6 +18,8 @@ import { TextSelection, Plugin, PluginKey, EditorState, Transaction } from 'pros
 
 import { setTextSelection } from 'prosemirror-utils';
 
+import { EditorUISpelling } from 'editor-types';
+
 import { PandocMark } from '../../api/mark';
 import {
   EditorWordRange,
@@ -25,7 +27,6 @@ import {
   EditorWordSource,
   EditorAnchor,
   EditorRect,
-  EditorUISpelling,
 } from '../../api/spelling';
 import { scrollIntoView } from '../../api/scroll';
 

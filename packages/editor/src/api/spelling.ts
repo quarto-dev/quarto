@@ -30,7 +30,7 @@ export interface EditorUISpelling {
   addToDictionary: (word: string) => void;
 
   // word breaking
-  breakWords: (text: string) => EditorWordRange[];
+  breakWords: (text: string) => Array<{ start: number, end: number }>;
   classifyCharacter: (ch: number) => number;
 }
 

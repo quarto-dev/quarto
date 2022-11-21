@@ -135,7 +135,7 @@ export class InsertHTMLCommentCommand extends ProsemirrorCommand {
   constructor(schema: Schema, ui: EditorUI) {
     super(
       EditorCommandId.HTMLComment,
-      ['Shift-Mod-c'],
+      [],
       (state: EditorState, dispatch?: (tr: Transaction) => void) => {
         // make sure we can insert a text node here
         if (!canInsertNode(state, schema.nodes.text)) {

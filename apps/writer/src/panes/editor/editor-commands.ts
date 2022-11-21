@@ -313,10 +313,8 @@ function editorCommandDefs(): CommandDefs {
         menuText: t('commands:block_latex_menu_text')
       },
       [EditorCommandId.HTMLComment]: {
-        icon: IconNames.Comment,
         menuText: t('commands:html_comment_menu_text'),
       },
-     
       [EditorCommandId.HTMLInline]: {
         menuText: t('commands:inline_html_menu_text')
       },
@@ -331,6 +329,7 @@ function editorCommandDefs(): CommandDefs {
       },
       // user comments
       [EditorCommandId.UserComment]: {
+        icon: IconNames.Comment,
         menuText: t('commands:user_comment_menu_text'),
       },
       // chunk

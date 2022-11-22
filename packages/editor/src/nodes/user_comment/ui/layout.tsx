@@ -17,14 +17,15 @@ import { EditorView } from 'prosemirror-view';
 import { NodeWithPos } from 'prosemirror-utils';
 import { getUserCommentNodeCache, getUserCommentNodePairs } from '../user_comment-cache';
 import { getThreadElement } from './common';
+import { editorScrollContainer } from '../../../api/scroll';
 
 // Keep comment UI elements in sync with corresponding editor nodes
 export function synchronizeCommentViewPositions(view: EditorView) {
   const schema = view.state.schema;
 
-  const topOfDocument = view.coordsAtPos(0).top;
-
   return () => {
+    const topOfDocument = view.coordsAtPos(0).top + scrollPos(view).top;
+
     const cache = getUserCommentNodeCache(view.state);
     if (cache.length === 0) {
       // Nothing to do.
@@ -190,4 +191,17 @@ function layoutCommentViews(threads: NodeWithPos[], activeThreadId: string, view
       layoutSpec.el.style.transform = "";
     }
   });
+}
+
+function scrollPos(view: EditorView) {
+  const node = view.domAtPos(0)?.node;
+  if (node?.nodeType !== Node.ELEMENT_NODE) {
+    return {top: 0, left: 0};
+  }
+
+  const scrollEl = editorScrollContainer(node as HTMLElement);
+  return {
+    top: scrollEl.scrollTop,
+    left: scrollEl.scrollLeft
+  };
 }

@@ -27,7 +27,7 @@ export function editorSchema(extensions: ExtensionManager, bodyScrollContainer: 
       attrs: {
         initial: { default: false },
       },
-      content: 'body notes',
+      content: 'body notes annotations',
     },
 
     body: {
@@ -81,6 +81,14 @@ export function editorSchema(extensions: ExtensionManager, bodyScrollContainer: 
           0,
         ];
       },
+    },
+
+    annotations: {
+      content: '',
+      editable: false,
+      selectable: false,
+      attrs: {},
+      // No parseDOM/toDOM because we're using a NodeView
     },
   };
   extensions.pandocNodes().forEach((node: PandocNode) => {

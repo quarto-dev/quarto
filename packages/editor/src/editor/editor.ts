@@ -402,7 +402,7 @@ export class Editor {
     this.extensions = this.initExtensions();
 
     // create schema
-    this.schema = editorSchema(this.extensions, !options.outerScrollContainer);
+    this.schema = editorSchema(this.options, this.extensions, !options.outerScrollContainer);
 
     // register completion handlers (done in a separate step b/c omni insert
     // completion handlers require access to the initializezd commands that

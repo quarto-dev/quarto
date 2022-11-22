@@ -73,7 +73,7 @@ const EditorToolbar: React.FC = () => {
       <CommandToolbarButton command={CommandId.Link} />
       <CommandToolbarButton command={CommandId.Image} />
       <ToolbarDivider />
-      <CommandToolbarButton command={CommandId.RCodeChunk} />
+      <CommandToolbarButton command={CommandId.UserComment} />
     </Toolbar>
   );
 };

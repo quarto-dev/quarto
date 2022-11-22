@@ -224,6 +224,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
     try {
       return await Editor.create(this.parent!, context, format, { 
         browserSpellCheck: true,
+        commenting: true,
         outerScrollContainer: true 
       });
     } catch(e) {

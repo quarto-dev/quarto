@@ -19,15 +19,16 @@ import { ExtensionManager } from './editor-extensions';
 import { PandocNode } from '../api/node';
 import { PandocMark } from '../api/mark';
 import { kPmScrollContainer } from '../api/scroll';
+import { EditorOptions } from '../api/options';
 
-export function editorSchema(extensions: ExtensionManager, bodyScrollContainer: boolean): Schema {
+export function editorSchema(options: EditorOptions, extensions: ExtensionManager, bodyScrollContainer: boolean): Schema {
   // build in doc node + nodes from extensions
   const nodes: { [name: string]: NodeSpec } = {
     doc: {
       attrs: {
         initial: { default: false },
       },
-      content: 'body notes annotations',
+      content: 'body notes' + (options.commenting ? ' annotations' : ''),
     },
 
     body: {
@@ -83,13 +84,16 @@ export function editorSchema(extensions: ExtensionManager, bodyScrollContainer: 
       },
     },
 
-    annotations: {
-      content: '',
-      editable: false,
-      selectable: false,
-      attrs: {},
-      // No parseDOM/toDOM because we're using a NodeView
-    },
+    ...(options.commenting ? {
+      annotations: {
+        content: '',
+        editable: false,
+        selectable: false,
+        attrs: {},
+        // No parseDOM/toDOM because we're using a NodeView
+      },
+    } : {}),
+
   };
   extensions.pandocNodes().forEach((node: PandocNode) => {
     nodes[node.name] = node.spec;

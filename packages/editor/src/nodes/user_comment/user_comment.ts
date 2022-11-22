@@ -61,7 +61,12 @@ const kHTMLUserCommentEnd = /^<!--\/#([\w-]+)-->$/;
 
 const extension = (context: ExtensionContext): Extension | null => {
 
-  const { pandocExtensions, events, ui } = context;
+  const { pandocExtensions, events, ui, options } = context;
+
+  // disable if commenting is disabled
+  if (!options.commenting) {
+    return null;
+  }
 
   // short circuit to no extension if raw HTML is not supported
   if (!pandocExtensions.raw_html) {

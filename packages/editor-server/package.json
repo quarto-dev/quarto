@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "core-server": "*",
     "editor-types": "*",
     "jayson": "^4.0.0",
     "mathjax-full": "^3.2.2",

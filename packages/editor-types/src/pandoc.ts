@@ -15,6 +15,14 @@
 
 import { Bibliography } from "./csl";
 
+export const kPandocGetCapabilities = 'pandoc_get_capabilities';
+export const kPandocMarkdownToAst = 'pandoc_markdown_to_ast';
+export const kPandocAstToMarkdown = 'pandoc_ast_to_markdown';
+export const kPandocListExtensions = 'pandoc_list_extensions';
+export const kPandocGetBibliography  = 'pandoc_get_bibliography';
+export const kPandocAddtoBibliography = 'pandoc_add_to_bibliography';
+export const kPandocCitationHtml = 'pandoc_citation_html';
+
 export type PandocApiVersion = number[];
 
 export interface PandocServer {

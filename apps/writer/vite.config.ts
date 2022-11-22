@@ -1,12 +1,15 @@
 import { defineConfig } from 'vite'
 
+const writerServerProxyTarget = {
+  target: "http://localhost:5001",
+  changeOrigin: true
+}
+
 export default defineConfig({
   server: {
     proxy: {
-      "/editor-server": {
-        target: "http://localhost:5001",
-        changeOrigin: true
-      },
+      "/editor-server": writerServerProxyTarget,
+      "/writer-server": writerServerProxyTarget
     },
   },
 });

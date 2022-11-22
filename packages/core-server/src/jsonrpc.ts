@@ -1,5 +1,5 @@
 /*
- * json-rpc.ts
+ * jsonrp.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -12,6 +12,7 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
+
 
 import jayson from 'jayson'
 
@@ -30,3 +31,4 @@ export function jsonRpcMethod(method: (args: Array<any>) => Promise<unknown>) : 
     params: Array
   })
 }
+

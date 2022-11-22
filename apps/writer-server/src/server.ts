@@ -14,30 +14,45 @@
  */
 
 
+import path from 'path';
+import tmp from 'tmp';
+tmp.setGracefulCleanup();
+
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
 import jayson from 'jayson'
+import { editorServerMethods } from 'editor-server';
+import { dictionaryServerMethods } from './dictionary';
+import { kWriterServerPath } from 'writer-types';
+import { kEditorServerPath } from 'editor-types';
 
-import { editorServerMethods, EditorServerOptions } from "editor-server/src/server";
+// constants
+const kPayloadLimitMb = 100;
 
-export const createServer = (options: EditorServerOptions) => {
-  const editorServer = new jayson.Server(editorServerMethods(options), {});
-  const app = express();
-  app
+export function createServer(resourcesDir: string, editorResourcesDir: string) {
+
+  const editorServer = new jayson.Server(editorServerMethods({
+    resourcesDir: editorResourcesDir,
+    payloadLimitMb: kPayloadLimitMb
+  }));
+
+  const writerServer = new jayson.Server({
+    ...dictionaryServerMethods({
+      dictionariesDir: path.join(resourcesDir, "dictionaries"),
+      userDictionaryDir: tmp.dirSync().name
+    })
+  });
+
+  const server = express()
     .disable("x-powered-by")
     .use(morgan("dev"))
-    .use(express.urlencoded({ limit: options.payloadLimitMb + 'mb', extended: true }))
-    .use(express.json({limit: options.payloadLimitMb + 'mb' }))
+    .use(express.urlencoded({ limit: kPayloadLimitMb+ 'mb', extended: true }))
+    .use(express.json({limit: kPayloadLimitMb + 'mb' }))
     .use(cors())
-    .use('/editor-server', editorServer.middleware())
-    .get("/message/:name", (req, res) => {
-      return res.json({ message: `hello ${req.params.name}` });
-    })
-    .get("/healthz", (_req, res) => {
-      return res.json({ ok: true });
-    });
+    .use(kEditorServerPath, editorServer.middleware())
+    .use(kWriterServerPath, writerServer.middleware());
 
-  return app;
-};
+  return server;
+}

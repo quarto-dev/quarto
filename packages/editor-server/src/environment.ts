@@ -13,10 +13,10 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { EnvironmentServer, kEnvironmentGetRPackageCitations, kEnvironmentGetRPackageState, RPackageCitation, RPackageState } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
 
 export function environmentServer() : EnvironmentServer {
   return {

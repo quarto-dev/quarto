@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * server.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,7 +13,11 @@
  *
  */
 
-export * from './promise';
-export * from './wordbreak';
-export * from './jsonrpc';
+import { DictionaryServer } from "./dictionary";
+
+export const kWriterServerPath = "/writer-server";
+
+export interface WriterServer {
+  readonly dictionary: DictionaryServer;
+}
 

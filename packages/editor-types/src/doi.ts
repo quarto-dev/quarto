@@ -15,6 +15,8 @@
 
 import { CSL } from "./csl";
 
+export const kDoiFetchCsl = 'doi_fetch_csl';
+
 export interface DOIResult {
     status: 'ok' | 'notfound' | 'nohost' | 'error';
     message: CSL | null;

@@ -13,10 +13,10 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { DataCiteResult, DataCiteServer, kDataCiteSearch } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
 
 export function dataCiteServer() : DataCiteServer {
   return {

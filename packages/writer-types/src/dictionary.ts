@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * dictionaries.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,7 +13,18 @@
  *
  */
 
-export * from './promise';
-export * from './wordbreak';
-export * from './jsonrpc';
+export const kDictionaryGetDictionary = "dictionary_get_dictionary";
+export const kDictionaryGetUserDictionary = "dictionary_get_user_dictionary";
+export const kDictionaryAddToUserDictionary = "dictionary_add_to_user_dictionary";
+
+export interface Dictionary {
+  aff: string;
+  words: string;
+}
+
+export interface DictionaryServer {
+  getDictionary: (locale: string) => Promise<Dictionary>;
+  getUserDictionary: () => Promise<string>;
+  addToUserDictionary: (word: string) => Promise<void>;
+}
 

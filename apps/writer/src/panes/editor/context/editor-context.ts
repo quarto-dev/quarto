@@ -16,6 +16,8 @@
 
 import { PromiseQueue } from 'core';
 
+import { kEditorServerPath } from "editor-types";
+
 import {
   ChunkEditor,
   EditorContext,
@@ -41,7 +43,7 @@ import { codeMirrorExtension } from "editor-codemirror";
 export function editorContext(commandManager: () => CommandManager, dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
-  const server = uiTools.context.jsonRpcServer("/editor-server");
+  const server = uiTools.context.jsonRpcServer(kEditorServerPath);
 
   const ui = {
     dialogs,

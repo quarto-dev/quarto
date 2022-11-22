@@ -13,6 +13,8 @@
  *
  */
 
+export const kDataCiteSearch = 'datacite_search';
+
 export interface DataCiteResult {
   status: 'ok' | 'notfound' | 'nohost' | 'error';
   message: DataCiteRecord[] | null;

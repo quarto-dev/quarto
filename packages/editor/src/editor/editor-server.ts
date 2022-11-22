@@ -15,6 +15,8 @@
  *
  */
 
+import { jsonRpcBrowserClient } from "core";
+
 import {
   BibliographyResult,
   CrossrefMessage,
@@ -55,50 +57,10 @@ import {
   ZoteroResult,
 } from "editor-types";
 
-import ClientBrowser from "jayson/lib/client/browser";
 
 export function editorJsonRpcServer(url: string) : EditorServer {
-  const callServer = (
-    request: string,
-    callback: (err?: Error | null, response?: string) => void
-  ) => {
-    const options = {
-      method: "POST",
-      body: request,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    fetch(url, options)
-      .then(function (res) {
-        return res.text();
-      })
-      .then(function (text) {
-        callback(null, text);
-      })
-      .catch(function (err) {
-        callback(err);
-      });
-  };
 
-  const client = new ClientBrowser(callServer, {});
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const request = (method: string, params: any[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new Promise<any>((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      client.request(method, params, (err: any, result: any) => {
-        if (err) {
-          reject(err);
-        } else if (result.error) {
-          reject(new Error(result.error.message));
-        } else { 
-          resolve(result.result);
-        }
-      });
-    });
-  };
+  const request = jsonRpcBrowserClient(url);
 
   return {
     pandoc: {

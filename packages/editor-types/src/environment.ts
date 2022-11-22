@@ -13,6 +13,9 @@
  *
  */
 
+export const kEnvironmentGetRPackageState = 'environment_get_r_package_state';
+export const kEnvironmentGetRPackageCitations = 'environment_get_r_package_citations';
+
 export interface EnvironmentServer {
   getRPackageState: () => Promise<RPackageState>;
   getRPackageCitations: (pkgName: string) => Promise<RPackageCitation[]>;

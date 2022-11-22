@@ -23,6 +23,7 @@ import { XRefServer } from "./xref";
 import { ZoteroServer } from "./zotero";
 import { MathServer } from "./math";
 
+export const kEditorServerPath = "/editor-server";
 
 export interface EditorServer {
   readonly pandoc: PandocServer;

@@ -317,10 +317,10 @@ class InsertUserCommentPlugin extends Plugin<DecorationSet> {
             return DecorationSet.empty;
           } else {
             return DecorationSet.create(tr.doc, [
-              Decoration.widget(tr.selection.from,
+              Decoration.widget(tr.selection.from-1,
                 createInsertButton.bind(undefined, ui),
                 { key: "insert-comment-button" }),
-            ]);
+            ]);      
           }
         }
       },

@@ -194,7 +194,7 @@ export function findCommentItem(commentId: string, thread: string | NodeWithPos,
   let commentNode: NodeWithPos | null = null;
   traverseNodes(state.doc, threadNode.pos + 1, threadNode.pos + threadNode.node.nodeSize - 1,
     (node, pos) => {
-      if (node.attrs.type === state.schema.nodes.user_comment_item) {
+      if (node.type === state.schema.nodes.user_comment_item) {
         if (node.attrs.commentId === commentId) {
           commentNode = {node, pos};
         }

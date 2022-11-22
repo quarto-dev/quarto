@@ -14,6 +14,8 @@
  */
 
 
+export const kMathMathjaxTypesetSvg = 'math_mathjax_typeset_svg';
+
 export interface MathjaxTypesetOptions {
   format: "svg" | "data-uri";
   theme: "light" | "dark";

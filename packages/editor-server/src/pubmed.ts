@@ -13,10 +13,11 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { kPubMedSearch, PubMedResult, PubMedServer } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
+
 
 export function pubMedServer() : PubMedServer {
   return {

@@ -13,6 +13,8 @@
  *
  */
 
+export const kPubMedSearch = 'pubmed_search';
+
 export interface PubMedResult {
   status: 'ok' | 'notfound' | 'nohost' | 'error';
   message: PubMedDocument[] | null;

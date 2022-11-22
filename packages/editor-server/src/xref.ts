@@ -14,10 +14,10 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { kXRefIndexForFile, kXRefQuartoIndexForFile, kXRefQuartoXRefForId, kXRefXRefForId, XRefs, XRefServer } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
 
 export function xrefServer() : XRefServer {
   return {

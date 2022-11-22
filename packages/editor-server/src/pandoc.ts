@@ -32,8 +32,9 @@ import {
 } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
+
 import { EditorServerOptions } from './server';
+import { jsonRpcMethod } from 'core-server';
 
 
 export function pandocServer(options: EditorServerOptions) : PandocServer {

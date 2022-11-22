@@ -13,6 +13,11 @@
  *
  */
 
+export const kXRefIndexForFile = 'xref_index_for_file';
+export const kXRefXRefForId = 'xref_xref_for_id';
+export const kXRefQuartoIndexForFile = 'xref_quarto_index_for_file';
+export const kXRefQuartoXRefForId = 'xref_quarto_xref_for_id';
+
 export interface XRefServer {
   indexForFile: (file: string) => Promise<XRefs>;
   xrefForId: (file: string, id: string) => Promise<XRefs>;

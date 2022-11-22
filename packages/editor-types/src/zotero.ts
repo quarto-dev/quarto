@@ -16,6 +16,12 @@
 
 import { CSL } from './csl';
 
+export const kZoteroValidateWebApiKey = 'zotero_validate_web_api_key';
+export const kZoteroGetCollections = 'zotero_get_collections';
+export const kZoteroGetLibraryNames = 'zotero_get_library_names';
+export const kZoteroGetActiveCollectionSpecs = 'zotero_get_active_collection_specs';
+export const kZoteroBetterBibtexExport = 'zotero_better_bibtex_export';
+
 export interface ZoteroResult {
   status:
     | 'ok' // ok (results in 'message')

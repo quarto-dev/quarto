@@ -13,6 +13,7 @@
  *
  */
 
+export const kCrossrefWorks = 'crossref_works';
 
 // https://github.com/CrossRef/rest-api-doc
 export interface CrossrefServer {

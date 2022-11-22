@@ -13,10 +13,11 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { kMathMathjaxTypesetSvg, MathjaxTypesetOptions, MathServer } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "../json-rpc";
+
 import { mathjaxTypeset } from "./mathjax";
 
 export function mathServer() : MathServer {

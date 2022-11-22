@@ -1,12 +1,11 @@
 {
-  "name": "core",
+  "name": "writer-types",
   "version": "0.1.0",
   "private": true,
   "license": "agpl-3.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "jayson": "^4.0.0",
     "typescript": "^4.5.2",
     "tsconfig": "*"
   }

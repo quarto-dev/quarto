@@ -13,10 +13,10 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { CrossrefMessage, CrossrefServer, CrossrefWork, kCrossrefWorks } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
 
 
 export function crossrefServer() : CrossrefServer {

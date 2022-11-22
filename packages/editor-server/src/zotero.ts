@@ -14,10 +14,10 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { kZoteroBetterBibtexExport, kZoteroGetActiveCollectionSpecs, kZoteroGetCollections, kZoteroGetLibraryNames, kZoteroValidateWebApiKey, ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
 
 export function zoteroServer(): ZoteroServer {
   return {

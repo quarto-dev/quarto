@@ -13,11 +13,10 @@
  *
  */
 
+import { jsonRpcMethod } from "core-server";
 import { DOIResult, DOIServer, kDoiFetchCsl } from "editor-types"
 
 import jayson from 'jayson'
-import { jsonRpcMethod } from "./json-rpc";
-
 
 export function doiServer() : DOIServer {
   return {

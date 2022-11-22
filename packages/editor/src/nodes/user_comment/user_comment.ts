@@ -324,7 +324,9 @@ class InsertUserCommentPlugin extends Plugin<DecorationSet> {
             return DecorationSet.create(tr.doc, [
               Decoration.widget(tr.selection.from-1,
                 createInsertButton.bind(undefined, ui),
-                { key: "insert-comment-button" }),
+                { key: "insert-comment-button",
+                  ignoreSelection: true,
+                 }),
             ]);      
           }
         }

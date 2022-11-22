@@ -37,6 +37,10 @@ export interface PandocMark {
   };
 }
 
+export function domAttrNoSpelling(attrs: Record<string,unknown>) {
+  return { ...attrs, spellcheck: "false" };
+}
+
 export function markIsActive(context: EditorState | Transaction, type: MarkType) {
   const { from, $from, to, empty } = context.selection;
 

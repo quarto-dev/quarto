@@ -24,7 +24,7 @@ import { ProsemirrorWriter, PandocOutput } from '../../api/pandoc';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { EditorUI } from '../../api/ui-types';
 import { MarkTransaction } from '../../api/transaction';
-import { removeInvalidatedMarks, detectAndApplyMarks } from '../../api/mark';
+import { removeInvalidatedMarks, detectAndApplyMarks, domAttrNoSpelling } from '../../api/mark';
 import { matchPandocFormatComment } from '../../api/pandoc_format';
 import { kHTMLCommentRegEx, isHTMLComment } from '../../api/html';
 import { OmniInsertGroup } from '../../api/omni_insert';
@@ -70,7 +70,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               'data-editing': mark.attrs.editing ? '1' : '0',
               'data-format': mark.attrs.format ? '1' : '0',
             };
-            return ['span', attr];
+            return ['span', domAttrNoSpelling(attr)];
           },
         },
         pandoc: {

@@ -18,6 +18,8 @@ import { TextSelection, Plugin, PluginKey, EditorState, Transaction } from 'pros
 
 import { setTextSelection } from 'prosemirror-utils';
 
+import { wordBreaker } from 'core';
+
 import { PandocMark } from '../../api/mark';
 import {
   EditorWordRange,
@@ -25,7 +27,6 @@ import {
   EditorWordSource,
   EditorAnchor,
   EditorRect,
-  EditorUISpelling,
 } from '../../api/spelling';
 import { scrollIntoView } from '../../api/scroll';
 
@@ -35,8 +36,7 @@ import { excludedMarks, getWords, spellcheckerWord } from './spelling';
 
 export function getSpellingDoc(
   view: EditorView,
-  marks: readonly PandocMark[],
-  spelling: EditorUISpelling,
+  marks: readonly PandocMark[]
 ): EditorSpellingDoc {
   // alias schema
   const schema = view.state.schema;
@@ -44,12 +44,15 @@ export function getSpellingDoc(
   // initialize marks we don't want to check
   const excluded = excludedMarks(schema, marks);
 
+  // create word breaker
+  const wb = wordBreaker();
+
   // check begin
   spellingDocPlugin(view.state).onCheckBegin();
 
   return {
     getWords: (start: number, end: number): EditorWordSource => {
-      return getWords(view.state, start, end, spelling, excluded);
+      return getWords(view.state, start, end, wb, excluded);
     },
 
     createAnchor: (pos: number): EditorAnchor => {

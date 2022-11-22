@@ -36,7 +36,7 @@ import {
   kEmojiContent,
 } from '../../api/emoji';
 import { emojiCompletionHandler, emojiSkintonePreferenceCompletionHandler } from './emoji-completion';
-import { getMarkAttrs } from '../../api/mark';
+import { domAttrNoSpelling, getMarkAttrs } from '../../api/mark';
 
 const extension = (context: ExtensionContext): Extension | null => {
   const { pandocExtensions, ui } = context;
@@ -68,12 +68,12 @@ const extension = (context: ExtensionContext): Extension | null => {
           toDOM(mark: Mark) {
             return [
               'span',
-              {
+              domAttrNoSpelling({
                 class: 'emoji pm-emoji-font',
                 title: ':' + mark.attrs.emojihint + ':',
                 'data-emojihint': mark.attrs.emojihint,
                 'data-emojiprompt': mark.attrs.prompt,
-              },
+              }),
             ];
           },
         },

@@ -1,5 +1,5 @@
 /*
- * options.ts
+ * spelling.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,13 +13,27 @@
  *
  */
 
-export interface EditorOptions {
-  readonly autoFocus?: boolean;
-  readonly browserSpellCheck?: boolean;
-  readonly codeEditor?: string;
-  readonly rmdImagePreview?: boolean;
-  readonly rmdExampleHighlight?: boolean;
-  readonly hideFormatComment?: boolean;
-  readonly className?: string;
-  readonly outerScrollContainer?: boolean;
+
+export interface ISpellingDictionary {
+  checkWords: (words: string[]) => string[];
+  suggestionList: (word: string, callback: (suggestions: string[]) => void) => void;
+  addToDictionary: (word: string) => void;
 }
+
+export interface ISpellingIgnoredWords {
+  isWordIgnored: (word: string) => boolean;
+  ignoreWord: (word: string) => void;
+  unignoreWord: (word: string) => void;
+}
+
+export interface EditorUISpelling extends 
+  ISpellingDictionary,
+  ISpellingIgnoredWords {
+ 
+}
+
+
+
+
+
+

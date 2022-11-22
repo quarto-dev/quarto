@@ -20,7 +20,7 @@ import { EditorView } from 'prosemirror-view';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { ProsemirrorCommand, EditorCommandId, toggleMarkType } from '../../api/command';
 import { PandocOutput, PandocToken, PandocTokenType } from '../../api/pandoc';
-import { getMarkRange, markIsActive, getMarkAttrs } from '../../api/mark';
+import { getMarkRange, markIsActive, getMarkAttrs, domAttrNoSpelling } from '../../api/mark';
 import { EditorUI } from '../../api/ui-types';
 import { RawFormatProps } from '../../api/ui-types';
 import { canInsertNode } from '../../api/node';
@@ -68,7 +68,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               class: 'raw-inline pm-fixedwidth-font pm-markup-text-color',
               'data-format': mark.attrs.format,
             };
-            return ['span', attr];
+            return ['span', domAttrNoSpelling(attr)];
           },
         },
         pandoc: {

@@ -21,7 +21,7 @@ import { Transform } from 'prosemirror-transform';
 import { setTextSelection, findChildren, findChildrenByMark } from 'prosemirror-utils';
 
 import { Extension, ExtensionContext } from '../../api/extension';
-import { detectAndApplyMarks, removeInvalidatedMarks, getMarkRange } from '../../api/mark';
+import { detectAndApplyMarks, removeInvalidatedMarks, getMarkRange, domAttrNoSpelling } from '../../api/mark';
 import { MarkTransaction, trTransform } from '../../api/transaction';
 import { FixupContext } from '../../api/fixup';
 import { ProsemirrorCommand, EditorCommandId, toggleMarkType } from '../../api/command';
@@ -59,7 +59,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             },
           ],
           toDOM() {
-            return ['span', { class: 'xref pm-link-text-color pm-fixedwidth-font' }];
+            return ['span', domAttrNoSpelling({ class: 'xref pm-link-text-color pm-fixedwidth-font' })];
           },
         },
         pandoc: {

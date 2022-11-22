@@ -223,7 +223,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
     }
     try {
       return await Editor.create(this.parent!, context, format, { 
-        spellCheck: true,
+        browserSpellCheck: true,
         outerScrollContainer: true 
       });
     } catch(e) {

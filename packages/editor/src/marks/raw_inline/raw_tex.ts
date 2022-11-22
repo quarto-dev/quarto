@@ -25,7 +25,7 @@ import { Extension, ExtensionContext } from '../../api/extension';
 import { kTexFormat } from '../../api/raw';
 import { markHighlightPlugin, markHighlightDecorations } from '../../api/mark-highlight';
 import { MarkTransaction } from '../../api/transaction';
-import { markIsActive, splitInvalidatedMarks } from '../../api/mark';
+import { domAttrNoSpelling, markIsActive, splitInvalidatedMarks } from '../../api/mark';
 import { EditorCommandId, toggleMarkType } from '../../api/command';
 import { texLength } from '../../api/tex';
 import { MarkInputRuleFilter } from '../../api/input_rule';
@@ -60,7 +60,7 @@ const extension = (context: ExtensionContext): Extension | null => {
             const attr = {
               class: 'raw-tex pm-fixedwidth-font pm-light-text-color',
             };
-            return ['span', attr];
+            return ['span', domAttrNoSpelling(attr)];
           },
         },
         pandoc: {

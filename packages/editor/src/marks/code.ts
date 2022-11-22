@@ -22,6 +22,7 @@ import { PandocToken, PandocOutput, PandocTokenType } from '../api/pandoc';
 
 import { kCodeText, kCodeAttr } from '../api/code';
 import { delimiterMarkInputRule, MarkInputRuleFilter } from '../api/input_rule';
+import { domAttrNoSpelling } from '../api/mark';
 
 const extension = (context: ExtensionContext): Extension => {
   const { pandocExtensions } = context;
@@ -59,7 +60,7 @@ const extension = (context: ExtensionContext): Extension => {
               : {
                   class: fontClass,
                 };
-            return ['code', attrs];
+            return ['code', domAttrNoSpelling(attrs)];
           },
         },
         pandoc: {

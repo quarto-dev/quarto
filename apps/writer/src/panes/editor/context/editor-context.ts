@@ -26,8 +26,6 @@ import {
   EditorUIContext,
   EditorUIPrefs,
   EditorUISpelling,
-  EditorWordRange,
-  kCharClassWord,
   ListSpacing,
   MathjaxTypesetResult,
   MathServer,
@@ -181,6 +179,9 @@ function editorUIContext(): EditorUIContext {
 
 function editorPrefs(): EditorUIPrefs {
   return {
+    realtimeSpelling() : boolean {
+      return false;
+    },
     darkMode(): boolean {
       return false;
     },
@@ -260,10 +261,6 @@ function editorChunks(): EditorUIChunks {
 
 function editorSpelling() : EditorUISpelling {
   return {
-    // realtime interface
-    realtimeEnabled(): boolean {
-      return false;
-    },
     checkWords(_words: string[]): string[] {
       return [];
     },
@@ -283,14 +280,6 @@ function editorSpelling() : EditorUISpelling {
     },
     addToDictionary(_word: string) {
       //
-    },
-
-    // word breaking
-    breakWords(_text: string): EditorWordRange[] {
-      return [];
-    },
-    classifyCharacter(_ch: number) {
-      return kCharClassWord;
-    },
+    }
   };
 }

@@ -13,26 +13,6 @@
  *
  */
 
-export const kCharClassWord = 0;
-export const kCharClassBoundary = 1;
-export const kCharClassNonWord = 2;
-
-export interface EditorUISpelling {
-  // realtime interface
-  realtimeEnabled: () => boolean;
-  checkWords: (words: string[]) => string[];
-  suggestionList: (word: string, callback: (suggestions: string[]) => void) => void;
-
-  // dictionary
-  isWordIgnored: (word: string) => boolean;
-  ignoreWord: (word: string) => void;
-  unignoreWord: (word: string) => void;
-  addToDictionary: (word: string) => void;
-
-  // word breaking
-  breakWords: (text: string) => EditorWordRange[];
-  classifyCharacter: (ch: number) => number;
-}
 
 export interface EditorAnchor {
   getPosition: () => number;

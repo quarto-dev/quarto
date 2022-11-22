@@ -16,7 +16,9 @@
 import { MarkType, Schema, Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 
-import { EditorWordSource, EditorWordRange, EditorUISpelling, kCharClassNonWord } from '../../api/spelling';
+import { kCharClassNonWord, WordBreaker } from 'core';
+
+import { EditorWordSource, EditorWordRange } from '../../api/spelling';
 import { PandocMark, getMarkRange } from '../../api/mark';
 
 export const beginDocPos = () => 1;
@@ -26,7 +28,7 @@ export function getWords(
   state: EditorState,
   start: number,
   end: number,
-  spelling: EditorUISpelling,
+  wb: WordBreaker,
   excluded: MarkType[],
 ): EditorWordSource {
   // provide defaults
@@ -38,20 +40,20 @@ export function getWords(
   }
 
   // enlarge range to begin/end
-  const beginPos = findBeginWord(state, start, spelling.classifyCharacter);
-  const endPos = findEndWord(state, end, spelling.classifyCharacter);
+  const beginPos = findBeginWord(state, start, wb.classifyCharacter);
+  const endPos = findEndWord(state, end, wb.classifyCharacter);
 
   const words: EditorWordRange[] = [];
   let currentPos = beginPos;
   while (currentPos <= endPos) {
     // advance until we find a word
-    currentPos = advanceToWord(state, currentPos, spelling.classifyCharacter);
+    currentPos = advanceToWord(state, currentPos, wb.classifyCharacter);
     if (currentPos >= endPos) {
       break;
     }
 
     // find end of word
-    const endWordPos = findEndWord(state, currentPos, spelling.classifyCharacter);
+    const endWordPos = findEndWord(state, currentPos, wb.classifyCharacter);
     if (endWordPos === currentPos) {
       break;
     }
@@ -60,7 +62,7 @@ export function getWords(
     if (!excludeWord(state.doc, currentPos, endWordPos, excluded)) {
       const wordText = state.doc.textBetween(currentPos, endWordPos);
       words.push(
-        ...spelling.breakWords(wordText).map(wordRange => {
+        ...wb.breakWords(wordText).map(wordRange => {
           return {
             start: currentPos + wordRange.start,
             end: currentPos + wordRange.end,

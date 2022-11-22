@@ -15,8 +15,7 @@
 
 import { SkinTone } from './emoji';
 
-import { EditorUISpelling } from './spelling';
-import { XRef } from 'editor-types';
+import { XRef, EditorUISpelling } from 'editor-types';
 
 import { LinkTargets, LinkCapabilities, LinkType } from './link';
 import { ImageDimensions } from './image';
@@ -162,6 +161,7 @@ export const kListSpacingSpaced = 'spaced';
 export type ListSpacing = 'tight' | 'spaced';
 
 export interface EditorUIPrefs {
+  realtimeSpelling: () => boolean;
   darkMode: () => boolean;
   listSpacing: () => ListSpacing;
   equationPreview: () => boolean;

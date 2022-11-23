@@ -105,11 +105,11 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
   
       return ast;
     },
-    async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
+    async astToMarkdown(params: { ast: PandocAst, format: string, options?: string[] }): Promise<string> {
       const markdown = await runPandoc(
         ["--from", "json",
-         "--to", format, ...options],
-         JSON.stringify(ast)
+         "--to", params.format, ...(params.options || [])] ,
+         JSON.stringify(params.ast)
       );
       return markdown;
     },
@@ -155,7 +155,7 @@ export function pandocServerMethods(options: EditorServerOptions) : Record<strin
   const methods: Record<string, jayson.Method> = {
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
     [kPandocMarkdownToAst]: jsonRpcMethod(params => server.markdownToAst(params)),
-    [kPandocAstToMarkdown]: jsonRpcMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
+    [kPandocAstToMarkdown]: jsonRpcMethod(params => server.astToMarkdown(params)),
     [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
     [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
     [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))

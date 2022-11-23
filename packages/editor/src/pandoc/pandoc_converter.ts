@@ -203,7 +203,7 @@ export class PandocConverter {
     pandocOptions = pandocOptions.concat(wrapOptions(options));
 
     // render to markdown
-    const markdown = await this.pandoc.astToMarkdown(output.ast, format, pandocOptions);
+    const markdown = await this.pandoc.astToMarkdown({ ast: output.ast, format, options: pandocOptions});
 
     // normalize newlines (don't know if pandoc uses \r\n on windows)
     return markdown.replace(/\r\n|\n\r|\r/g, '\n');

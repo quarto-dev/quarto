@@ -29,7 +29,7 @@ export interface PandocServer {
   getCapabilities(): Promise<PandocCapabilitiesResult>;
   markdownToAst(params : { markdown: string, format: string, options?: string[] }): Promise<PandocAst>;
   astToMarkdown(params: { ast: PandocAst, format: string, options?: string[] }): Promise<string>;
-  listExtensions(format: string): Promise<string>;
+  listExtensions(params: { format: string }): Promise<string>;
   getBibliography(
     file: string | null,
     bibliography: string[],

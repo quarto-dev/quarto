@@ -102,7 +102,7 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
       if (headingIds) {
         ast.heading_ids = headingIds.split('\n').filter(id => id.length !== 0);
       }
-  
+      
       return ast;
     },
     async astToMarkdown(params: { ast: PandocAst, format: string, options?: string[] }): Promise<string> {
@@ -113,10 +113,10 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
       );
       return markdown;
     },
-    async listExtensions(format: string): Promise<string> {
+    async listExtensions(params: { format: string }): Promise<string> {
       const args = ["--list-extensions"];
-      if (format.length > 0) {
-        args.push(format);
+      if (params.format.length > 0) {
+        args.push(params.format);
       }
       return await runPandoc(args);
     },
@@ -156,7 +156,7 @@ export function pandocServerMethods(options: EditorServerOptions) : Record<strin
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
     [kPandocMarkdownToAst]: jsonRpcMethod(params => server.markdownToAst(params)),
     [kPandocAstToMarkdown]: jsonRpcMethod(params => server.astToMarkdown(params)),
-    [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
+    [kPandocListExtensions]: jsonRpcMethod(params => server.listExtensions(params)),
     [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
     [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
   };

@@ -80,8 +80,8 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       }): Promise<string> {
         return request(kPandocAstToMarkdown, params);
       },
-      listExtensions(format: string): Promise<string> {
-        return request(kPandocListExtensions, [format]);
+      listExtensions(params: { format: string }): Promise<string> {
+        return request(kPandocListExtensions, params);
       },
       getBibliography(
         file: string | null,

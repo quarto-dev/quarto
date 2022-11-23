@@ -51,7 +51,7 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     .use(express.urlencoded({ limit: kPayloadLimitMb+ 'mb', extended: true }))
     .use(express.json({limit: kPayloadLimitMb + 'mb' }))
     .use(cors())
-    .use(kWriterJsonRpcPath, writerRpcServer.middleware());
+    .use(`${kWriterJsonRpcPath}/*`, writerRpcServer.middleware());
 
   return server;
 }

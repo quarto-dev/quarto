@@ -3,6 +3,7 @@
   "license": "agpl-3.0",
   "workspaces": [
     "apps/*",
+    "libs/*",
     "packages/*",
     "packages/ojs/*"
   ],
@@ -11,7 +12,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "watch": "concurrently 'tsc --watch --noEmit --project apps/writer/tsconfig.json' 'tsc --watch --noEmit  --project packages/editor/tsconfig.json'"
+    "watch": "concurrently 'tsc --watch --noEmit --project apps/writer/tsconfig.json' 'tsc --watch --noEmit  --project packages/writer-server/tsconfig.json'"
   },
   "devDependencies": {
     "concurrently": "^7.5.0",

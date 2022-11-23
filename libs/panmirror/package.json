@@ -1,0 +1,29 @@
+{
+  "name": "panmirror",
+  "version": "0.0.0",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/panmirror.js",
+  "exports": {
+    ".": {
+      "require": "./dist/panmirror.js"
+    }
+  },
+  "private": true,
+  "license": "agpl-3.0",
+  "scripts": {
+    "lint": "TIMING=1 eslint \"src/**/*.ts\"",
+    "build": "tsc --noEmit && vite build"
+  },
+  "dependencies": {
+    "editor": "*"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.5.2",
+    "vite-plugin-css-injected-by-js": "^2.1.1"
+  }
+}

@@ -1,25 +1,10 @@
 {
   "name": "editor",
-  "version": "0.0.0",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/panmirror.js",
-  "module": "./dist/panmirror.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/panmirror.mjs",
-      "require": "./dist/panmirror.js"
-    }
-  },
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "private": true,
   "license": "agpl-3.0",
-  "scripts": {
-    "lint": "TIMING=1 eslint \"src/**/*.ts\"",
-    "build": "tsc --noEmit && vite build",
-    "dev": "tsc --noEmit && vite build --watch"
-  },
   "dependencies": {
     "biblatex-csl-converter": "^2.0.2",
     "clipboard": "^2.0.8",
@@ -76,8 +61,6 @@
     "@types/zenscroll": "^4.0.1",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
-    "tsconfig": "*",
-    "vite-plugin-css-injected-by-js": "^2.1.1",
-    "vite-plugin-dts": "^1.6.6"
+    "tsconfig": "*"
   }
 }

@@ -277,7 +277,7 @@ export async function resolvePandocFormat(pandoc: PandocServer, format: EditorFo
   }
 
   // query for format options
-  const formatOptions = await pandoc.listExtensions({ format: baseName });
+  const formatOptions = await pandoc.listExtensions(baseName);
 
   // active pandoc extensions
   const pandocExtensions: { [key: string]: boolean } = {};

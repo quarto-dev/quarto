@@ -27,27 +27,23 @@ export type PandocApiVersion = number[];
 
 export interface PandocServer {
   getCapabilities(): Promise<PandocCapabilitiesResult>;
-  markdownToAst(params : { markdown: string, format: string, options: string[]}): Promise<PandocAst>;
-  astToMarkdown(params: { ast: PandocAst, format: string, options: string[]}): Promise<string>;
-  listExtensions(params: { format: string }): Promise<string>;
-  getBibliography(params: {
+  markdownToAst(markdown: string, format: string, options: string[]): Promise<PandocAst>;
+  astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string>;
+  listExtensions(format: string): Promise<string>;
+  getBibliography(
     file: string | null,
     bibliography: string[],
     refBlock: string | null,
     etag: string | null,
-  }): Promise<BibliographyResult>;
-  addToBibliography(params: {
+  ): Promise<BibliographyResult>;
+  addToBibliography(
     bibliography: string,
     project: boolean,
     id: string,
     sourceAsJson: string,
     sourceAsBibTeX: string,
-  }): Promise<boolean>;
-  citationHTML(params: {
-    file: string | null, 
-    sourceAsJson: string, 
-    csl: string | null
-  }): Promise<string>;
+  ): Promise<boolean>;
+  citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string>;
 }
 
 export interface BibliographyResult {

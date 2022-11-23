@@ -66,46 +66,57 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       getCapabilities(): Promise<PandocCapabilitiesResult> {
         return request(kPandocGetCapabilities, []);
       },
-      markdownToAst(params: {
+      markdownToAst(
         markdown: string,
         format: string,
         options: string[]
-      }): Promise<PandocAst> {
-        return request(kPandocMarkdownToAst, params);
+      ): Promise<PandocAst> {
+        return request(kPandocMarkdownToAst, [markdown, format, options]);
       },
-      astToMarkdown(params: {
+      astToMarkdown(
         ast: PandocAst,
         format: string,
         options: string[]
-      }): Promise<string> {
-        return request(kPandocAstToMarkdown, params);
+      ): Promise<string> {
+        return request(kPandocAstToMarkdown, [ast, format, options]);
       },
-      listExtensions(params: { format: string }): Promise<string> {
-        return request(kPandocListExtensions, params);
+      listExtensions(format: string): Promise<string> {
+        return request(kPandocListExtensions, [format]);
       },
-      getBibliography(params: {
+      getBibliography(
         file: string | null,
         bibliography: string[],
         refBlock: string | null,
         etag: string | null
-      }): Promise<BibliographyResult> {
-        return request(kPandocGetBibliography, params);
+      ): Promise<BibliographyResult> {
+        return request(kPandocGetBibliography, [
+          file,
+          bibliography,
+          refBlock,
+          etag,
+        ]);
       },
-      addToBibliography(params: {
+      addToBibliography(
         bibliography: string,
         project: boolean,
         id: string,
         sourceAsJson: string,
         sourceAsBibTeX: string
-      }): Promise<boolean> {
-        return request(kPandocAddtoBibliography, params);
+      ): Promise<boolean> {
+        return request(kPandocAddtoBibliography, [
+          bibliography,
+          project,
+          id,
+          sourceAsJson,
+          sourceAsBibTeX,
+        ]);
       },
-      citationHTML(params: {
+      citationHTML(
         file: string | null,
         sourceAsJson: string,
         csl: string | null
-      }): Promise<string> {
-        return request(kPandocCitationHtml, params);
+      ): Promise<string> {
+        return request(kPandocCitationHtml, [file, sourceAsJson, csl]);
       },
     },
     doi: {

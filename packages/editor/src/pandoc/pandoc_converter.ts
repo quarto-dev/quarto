@@ -121,7 +121,7 @@ export class PandocConverter {
       markdown = pandocMarkdownWithBlockCapsules(original, markdown, filter);
     });
 
-    const ast = await this.pandoc.markdownToAst({ markdown, format: targetFormat, options: [] });
+    const ast = await this.pandoc.markdownToAst(markdown, targetFormat, []);
     const result = pandocToProsemirror(
       ast,
       this.schema,
@@ -203,7 +203,7 @@ export class PandocConverter {
     pandocOptions = pandocOptions.concat(wrapOptions(options));
 
     // render to markdown
-    const markdown = await this.pandoc.astToMarkdown({ ast: output.ast, format, options: pandocOptions});
+    const markdown = await this.pandoc.astToMarkdown(output.ast, format, pandocOptions);
 
     // normalize newlines (don't know if pandoc uses \r\n on windows)
     return markdown.replace(/\r\n|\n\r|\r/g, '\n');

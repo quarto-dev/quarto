@@ -29,7 +29,6 @@ import {
   kPandocMarkdownToAst,
   kPandocGetBibliography,
   kPandocAddtoBibliography, 
-  kPandocCitationHtml
 } from "editor-types";
 
 import jayson from 'jayson'
@@ -80,53 +79,53 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
         highlight_languages: languages
       }
     },
-    async markdownToAst(params: { markdown: string, format: string, options: string[] }): Promise<PandocAst> {
+    async markdownToAst(markdown: string, format: string, mdOptions: string[]): Promise<PandocAst> {
       // ast
       const ast = JSON.parse(await runPandoc(
-        ["--from", params.format,
+        ["--from", format,
          "--abbreviations", path.join(options.resourcesDir, 'abbreviations'),
-         "--to", "json", ...params.options],
-         params.markdown)
+         "--to", "json", ...mdOptions],
+         markdown)
       ) as PandocAst;
 
       // heading-ids
       // disable auto identifiers so we can discover *only* explicit ids
-      params.format += "-auto_identifiers-gfm_auto_identifiers";
+      format += "-auto_identifiers-gfm_auto_identifiers";
       const headingIds = await runPandoc(
-        ["--from", params.format,
+        ["--from", format,
          "--to", "plain",
          "--lua-filter", path.join(options.resourcesDir, 'heading-ids.lua'),
         ],
-        params.markdown
+        markdown
       );
 
       if (headingIds) {
         ast.heading_ids = headingIds.split('\n').filter(id => id.length !== 0);
       }
-
+  
       return ast;
     },
-    async astToMarkdown(params: { ast: PandocAst, format: string, options: string[] }): Promise<string> {
+    async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
       const markdown = await runPandoc(
         ["--from", "json",
-         "--to", params.format, ...params.options] ,
-         JSON.stringify(params.ast)
+         "--to", format, ...options],
+         JSON.stringify(ast)
       );
       return markdown;
     },
-    async listExtensions(params: { format: string }): Promise<string> {
+    async listExtensions(format: string): Promise<string> {
       const args = ["--list-extensions"];
-      if (params.format.length > 0) {
-        args.push(params.format);
+      if (format.length > 0) {
+        args.push(format);
       }
       return await runPandoc(args);
     },
-    async getBibliography(params: {
+    async getBibliography(
       file: string | null,
       bibliography: string[],
       refBlock: string | null,
       etag: string | null,
-    }): Promise<BibliographyResult> {
+    ): Promise<BibliographyResult> {
       return {
         etag: 'foo',
         bibliography: {
@@ -135,16 +134,17 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
         }
       }
     },
-    addToBibliography(params: {
+
+    addToBibliography(
       bibliography: string,
       project: boolean,
       id: string,
       sourceAsJson: string,
       sourceAsBibTeX: string,
-    }): Promise<boolean> {
+    ): Promise<boolean> {
       throw new Error("not implemented");
     },
-    citationHTML(params: { file: string | null, sourceAsJson: string, csl: string | null }): Promise<string> {
+    citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string> {
       throw new Error("not implemented");
     }
   };
@@ -154,12 +154,11 @@ export function pandocServerMethods(options: EditorServerOptions) : Record<strin
   const server = pandocServer(options);
   const methods: Record<string, jayson.Method> = {
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
-    [kPandocMarkdownToAst]: jsonRpcMethod(params => server.markdownToAst(params)),
-    [kPandocAstToMarkdown]: jsonRpcMethod(params => server.astToMarkdown(params)),
-    [kPandocListExtensions]: jsonRpcMethod(params => server.listExtensions(params)),
-    [kPandocGetBibliography]: jsonRpcMethod(params => server.getBibliography(params)),
-    [kPandocAddtoBibliography]: jsonRpcMethod(params => server.addToBibliography(params)),
-    [kPandocCitationHtml]: jsonRpcMethod(params => server.citationHTML(params))
+    [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),
+    [kPandocAstToMarkdown]: jsonRpcMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
+    [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
+    [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
+    [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
   };
   return methods;
 }

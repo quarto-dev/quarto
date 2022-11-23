@@ -126,12 +126,16 @@ import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { EditorServer } from 'editor-types';
 import { editorJsonRpcServer } from './editor-server';
+import { editorJsonRpcServices } from './editor-services';
 import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
 import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/extension-types';
 
 // re-export editor ui
 export * from '../api/ui-types';
+
+// re-export json-rpc server and services
+export { editorJsonRpcServer, editorJsonRpcServices };
 
 export interface EditorCode {
   code: string;
@@ -223,7 +227,6 @@ export interface UIToolsCitation {
 
 export interface UIToolsContext {
   defaultUIImages(): EditorUIImages;
-  jsonRpcServer(url: string) : EditorServer;
 }
 
 export class UITools {
@@ -263,7 +266,6 @@ export class UITools {
 
     this.context = {
       defaultUIImages: defaultEditorUIImages,
-      jsonRpcServer: editorJsonRpcServer
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * services.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,12 +13,11 @@
  *
  */
 
- 
-export type { EditorServerOptions } from './server';
 
-export { editorServer, editorServerMethods } from './server';
+import { MathServer } from "./math";
 
-export { editorServices, editorServicesMethods } from './services/services';
+export const kEditorServicesPath = "/editor-services";
 
-
-
+export interface EditorServices {
+  readonly math: MathServer;
+}

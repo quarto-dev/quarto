@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
- * index.ts
+ * editor-services.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,12 +14,24 @@
  *
  */
 
- 
-export type { EditorServerOptions } from './server';
+import { jsonRpcBrowserClient } from "core";
 
-export { editorServer, editorServerMethods } from './server';
+import {
+  EditorServices,
+  kMathMathjaxTypesetSvg,
+  
+} from "editor-types";
 
-export { editorServices, editorServicesMethods } from './services/services';
 
+export function editorJsonRpcServices(url: string) : EditorServices {
 
+  const request = jsonRpcBrowserClient(url);
 
+  return {
+    math: {
+      mathjaxTypeset(math, options) {
+        return request(kMathMathjaxTypesetSvg, [math, options]);
+      },
+    }
+  };
+}

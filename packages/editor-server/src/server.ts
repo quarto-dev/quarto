@@ -25,7 +25,6 @@ import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer, pubMedServerMethods } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
-import { mathServer, mathServerMethods } from "./math/math";
 
 export interface EditorServerOptions {
   resourcesDir: string;
@@ -41,8 +40,7 @@ export function editorServer(options: EditorServerOptions) : EditorServer {
     pubmed: pubMedServer(),
     zotero: zoteroServer(),
     xref: xrefServer(),
-    environment: environmentServer(),
-    math: mathServer()
+    environment: environmentServer()
   };
 }
 
@@ -55,7 +53,6 @@ export function editorServerMethods(options: EditorServerOptions): Record<string
     ...pubMedServerMethods(),
     ...zoteroServerMethods(),
     ...xrefServerMethods(),
-    ...environmentServerMethods(),
-    ...mathServerMethods()
+    ...environmentServerMethods()
   }
 }

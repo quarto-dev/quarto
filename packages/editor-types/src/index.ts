@@ -22,6 +22,9 @@ export * from './pubmed'
 export * from './zotero'
 export * from './xref'
 export * from './environment'
-export * from './server'
-export * from './math'
 export * from './spelling'
+export * from './server'
+
+export * from './math'
+export * from './services'
+

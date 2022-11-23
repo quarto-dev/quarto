@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * services.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,12 +13,21 @@
  *
  */
 
- 
-export type { EditorServerOptions } from './server';
+import jayson from 'jayson'
 
-export { editorServer, editorServerMethods } from './server';
+import { EditorServices } from "editor-types";
 
-export { editorServices, editorServicesMethods } from './services/services';
-
+import { mathServer, mathServerMethods } from "./math/math";
 
 
+export function editorServices() : EditorServices {
+  return {
+    math: mathServer()
+  };
+}
+
+export function editorServicesMethods(): Record<string,jayson.Method> {
+  return {
+    ...mathServerMethods()
+  }
+}

@@ -34,7 +34,7 @@ async function runApp() {
   try {
   
     // initialize with content
-    const contentUrl = `content/${window.location.search.slice(1) || 'comment-boundaries.md'}`;
+    const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
     const markdown = await (await fetch(contentUrl)).text();
     store.dispatch(setEditorMarkdown(markdown));
 

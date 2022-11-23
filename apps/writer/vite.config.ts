@@ -9,6 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/editor-server": writerServerProxyTarget,
+      "/editor-services": writerServerProxyTarget,
       "/writer-server": writerServerProxyTarget
     },
   },

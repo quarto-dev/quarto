@@ -8,7 +8,7 @@ const writerServerProxyTarget = {
 export default defineConfig({
   server: {
     proxy: {
-      "/writer-rpc": writerServerProxyTarget
+      "/rpc": writerServerProxyTarget
     },
   },
 });

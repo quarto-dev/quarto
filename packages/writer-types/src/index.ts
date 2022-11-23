@@ -13,7 +13,7 @@
  *
  */
 
-export const kWriterJsonRpcPath = "/writer-rpc";
+export const kWriterJsonRpcPath = "/rpc";
 
 export * from './dictionary';
 export * from './server';

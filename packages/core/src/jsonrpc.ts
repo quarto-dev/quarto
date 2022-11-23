@@ -16,8 +16,7 @@
 
 import ClientBrowser from "jayson/lib/client/browser";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function jsonRpcBrowserClient(url: string) : (method: string, params: any[]) => Promise<any> {
+export function jsonRpcBrowserClient(url: string) {
 
   const callServer = (
     request: string,
@@ -45,7 +44,7 @@ export function jsonRpcBrowserClient(url: string) : (method: string, params: any
   const client = new ClientBrowser(callServer, {});
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return  (method: string, params: any[]) => {
+  return  (method: string, params: any[] | Record<string,unknown> | undefined) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Promise<any>((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -121,7 +121,7 @@ export class PandocConverter {
       markdown = pandocMarkdownWithBlockCapsules(original, markdown, filter);
     });
 
-    const ast = await this.pandoc.markdownToAst(markdown, targetFormat, []);
+    const ast = await this.pandoc.markdownToAst({ markdown, format: targetFormat });
     const result = pandocToProsemirror(
       ast,
       this.schema,

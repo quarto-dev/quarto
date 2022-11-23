@@ -14,21 +14,18 @@
  */
 
 
-import jayson from 'jayson'
+import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function jsonRpcMethod(method: (args: Array<any>) => Promise<unknown>) : jayson.Method {
+export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayson.Method {
   return jayson.Method({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handler: (args: any, done: any) => {
+    handler: (args: RequestParamsLike, done: JSONRPCCallbackTypePlain) => {
       method(args)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then((result: unknown) => done(null, result))
         .catch(error => {
           done({code: jayson.Server.errors.INTERNAL_ERROR, message: error.message});
         });
-    },
-    params: Array
+    }
   })
 }
 

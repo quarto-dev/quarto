@@ -66,12 +66,12 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       getCapabilities(): Promise<PandocCapabilitiesResult> {
         return request(kPandocGetCapabilities, []);
       },
-      markdownToAst(
+      markdownToAst(params: {
         markdown: string,
         format: string,
-        options: string[]
-      ): Promise<PandocAst> {
-        return request(kPandocMarkdownToAst, [markdown, format, options]);
+        options?: string[]
+      }): Promise<PandocAst> {
+        return request(kPandocMarkdownToAst, params);
       },
       astToMarkdown(
         ast: PandocAst,

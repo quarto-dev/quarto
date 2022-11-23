@@ -79,24 +79,24 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
         highlight_languages: languages
       }
     },
-    async markdownToAst(markdown: string, format: string, mdOptions: string[]): Promise<PandocAst> {
+    async markdownToAst(params: { markdown: string, format: string, options?: string[] }): Promise<PandocAst> {
       // ast
       const ast = JSON.parse(await runPandoc(
-        ["--from", format,
+        ["--from", params.format,
          "--abbreviations", path.join(options.resourcesDir, 'abbreviations'),
-         "--to", "json", ...mdOptions],
-         markdown)
+         "--to", "json", ...(params.options || [])],
+         params.markdown)
       ) as PandocAst;
 
       // heading-ids
       // disable auto identifiers so we can discover *only* explicit ids
-      format += "-auto_identifiers-gfm_auto_identifiers";
+      params.format += "-auto_identifiers-gfm_auto_identifiers";
       const headingIds = await runPandoc(
-        ["--from", format,
+        ["--from", params.format,
          "--to", "plain",
          "--lua-filter", path.join(options.resourcesDir, 'heading-ids.lua'),
         ],
-        markdown
+        params.markdown
       );
 
       if (headingIds) {
@@ -154,7 +154,7 @@ export function pandocServerMethods(options: EditorServerOptions) : Record<strin
   const server = pandocServer(options);
   const methods: Record<string, jayson.Method> = {
     [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
-    [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),
+    [kPandocMarkdownToAst]: jsonRpcMethod(params => server.markdownToAst(params)),
     [kPandocAstToMarkdown]: jsonRpcMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
     [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
     [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),

@@ -23,24 +23,22 @@ import morgan from "morgan";
 import cors from "cors";
 
 import jayson from 'jayson'
+
+import { kWriterJsonRpcPath } from 'writer-types';
 import { editorServerMethods, editorServicesMethods } from 'editor-server';
 import { dictionaryServerMethods } from './dictionary';
-import { kWriterServerPath } from 'writer-types';
-import { kEditorServerPath, kEditorServicesPath } from 'editor-types';
 
 // constants
 const kPayloadLimitMb = 100;
 
 export function createServer(resourcesDir: string, editorResourcesDir: string) {
 
-  const editorServer = new jayson.Server(editorServerMethods({
-    resourcesDir: editorResourcesDir,
-    payloadLimitMb: kPayloadLimitMb
-  }));
-
-  const editorServices = new jayson.Server(editorServicesMethods());
-
-  const writerServer = new jayson.Server({
+  const writerRpcServer = new jayson.Server({
+    ...editorServerMethods({
+      resourcesDir: editorResourcesDir,
+      payloadLimitMb: kPayloadLimitMb
+    }),
+    ...editorServicesMethods(),
     ...dictionaryServerMethods({
       dictionariesDir: path.join(resourcesDir, "dictionaries"),
       userDictionaryDir: tmp.dirSync().name
@@ -53,9 +51,7 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     .use(express.urlencoded({ limit: kPayloadLimitMb+ 'mb', extended: true }))
     .use(express.json({limit: kPayloadLimitMb + 'mb' }))
     .use(cors())
-    .use(kEditorServerPath, editorServer.middleware())
-    .use(kEditorServicesPath, editorServices.middleware())
-    .use(kWriterServerPath, writerServer.middleware());
+    .use(kWriterJsonRpcPath, writerRpcServer.middleware());
 
   return server;
 }

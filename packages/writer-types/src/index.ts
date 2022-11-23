@@ -13,5 +13,7 @@
  *
  */
 
+export const kWriterJsonRpcPath = "/writer-rpc";
+
 export * from './dictionary';
 export * from './server';

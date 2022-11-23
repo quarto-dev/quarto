@@ -16,7 +16,6 @@
 
 import { MathServer } from "./math";
 
-export const kEditorServicesPath = "/editor-services";
 
 export interface EditorServices {
   readonly math: MathServer;

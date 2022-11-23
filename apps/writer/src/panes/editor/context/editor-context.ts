@@ -16,8 +16,6 @@
 
 import { PromiseQueue } from 'core';
 
-import { kEditorServerPath, kEditorServicesPath } from "editor-types";
-
 import {
   ChunkEditor,
   EditorContext,
@@ -40,13 +38,14 @@ import { CommandManager } from "../../../commands/CommandManager";
 import { editorDisplay } from "./editor-display";
 
 import { codeMirrorExtension } from "editor-codemirror";
+import { kWriterJsonRpcPath } from 'writer-types';
 
 
 export function editorContext(commandManager: () => CommandManager, dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
-  const server = editorJsonRpcServer(kEditorServerPath);
-  const services = editorJsonRpcServices(kEditorServicesPath);
+  const server = editorJsonRpcServer(kWriterJsonRpcPath);
+  const services = editorJsonRpcServices(kWriterJsonRpcPath);
   
   const ui = {
     dialogs,

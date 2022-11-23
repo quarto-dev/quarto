@@ -15,8 +15,6 @@
 
 import { DictionaryServer } from "./dictionary";
 
-export const kWriterServerPath = "/writer-server";
-
 export interface WriterServer {
   readonly dictionary: DictionaryServer;
 }

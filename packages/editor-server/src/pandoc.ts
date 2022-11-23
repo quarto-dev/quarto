@@ -28,7 +28,8 @@ import {
   kPandocListExtensions, 
   kPandocMarkdownToAst,
   kPandocGetBibliography,
-  kPandocAddtoBibliography, 
+  kPandocAddtoBibliography,
+  kPandocCitationHtml, 
 } from "editor-types";
 
 import jayson from 'jayson'
@@ -158,7 +159,8 @@ export function pandocServerMethods(options: EditorServerOptions) : Record<strin
     [kPandocAstToMarkdown]: jsonRpcMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
     [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
     [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
-    [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]))
+    [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4])),
+    [kPandocCitationHtml]: jsonRpcMethod(args => server.citationHTML(args[0], args[1], args[2]))
   };
   return methods;
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "dev": "npx nodemon --watch src --watch ../../packages src/index.ts",
+    "dev": "npx nodemon --watch src --watch ../../packages/core --watch ../../packages/core-server --watch ../../packages/editor-server --watch ../../packages/writer-server src/index.ts",
     "lint": "tsc --noEmit && TIMING=1 eslint \"src/**/*.ts*\"",
     "start": "node dist/index.js"
   },

@@ -87,7 +87,7 @@ export class NodeIndex {
     return ni;
   }
 
-  private doApply(step: Step, oldDoc: Node, newDoc: Node): NodeIndex {
+  private doApply(step: Step, _oldDoc: Node, newDoc: Node): NodeIndex {
     let newIndex: NodeWithPos[] = [];
     
     for (const nodeWithPos of this.index) {
@@ -100,7 +100,7 @@ export class NodeIndex {
         }
       }
     }
-    step.getMap().forEach((oldStart, oldEnd, newStart, newEnd) => {
+    step.getMap().forEach((_oldStart, _oldEnd, newStart, newEnd) => {
       traverseNodes(newDoc, newStart, newEnd, (node, pos) => {
         if (pos >= newStart && pos < newEnd) {
           // The start of the node is entirely inside the changed region; this

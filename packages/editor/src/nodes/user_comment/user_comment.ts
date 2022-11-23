@@ -309,7 +309,7 @@ function readPandocUserCommentEnd(schema: Schema, html: string, writer?: Prosemi
 
 
 class InsertUserCommentPlugin extends Plugin<DecorationSet> {
-  constructor(schema: Schema, ui: EditorUI) {
+  constructor(_schema: Schema, ui: EditorUI) {
     super({
       state: {
         init() {
@@ -357,7 +357,7 @@ function createInsertButton(ui: EditorUI, view: EditorView) {
 }
 
 class InsertUserCommentCommand extends ProsemirrorCommand {
-  constructor(schema: Schema, ui: EditorUI) {
+  constructor(_schema: Schema, ui: EditorUI) {
     super(EditorCommandId.UserComment, ['Shift-Mod-c'], (state, dispatch) => {
       return insertUserComment(ui, state, dispatch);
     }, undefined, false);
@@ -403,7 +403,7 @@ class UserCommentPlugin extends Plugin<DecorationSet> {
         init(_config: EditorStateConfig, instance: EditorState) : DecorationSet {
           return createCommentDecorators(instance, schema);
         },
-        apply: (tr: Transaction, old: DecorationSet, oldState: EditorState, newState: EditorState) : DecorationSet => {
+        apply: (tr: Transaction, old: DecorationSet, _oldState: EditorState, newState: EditorState) : DecorationSet => {
           if (!tr.docChanged) {
             return old;
           }

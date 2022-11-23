@@ -181,7 +181,7 @@ function layoutCommentViews(threads: NodeWithPos[], activeThreadId: string, view
 
   // Now that actualTop and finalTop have been finalized, actually mutate the
   // DOM. Hopefully doing this all at once at the end will minimize reflows.
-  layoutSpecs.forEach((layoutSpec, i) => {
+  layoutSpecs.forEach((layoutSpec) => {
     layoutSpec.el.style.top = layoutSpec.actualTop + "px";
     // Note that falsy layoutSpec.finalTop could mean undefined or 0; we don't
     // care about that distinction in this case.

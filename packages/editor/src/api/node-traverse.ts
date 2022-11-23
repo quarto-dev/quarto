@@ -45,7 +45,7 @@ export function traverseNodes(node: Node, from: number, to: number, fn: Traverse
 }
 
 function traverseNodesImpl(node: Node, from: number, to: number, fn: TraverseFn,
-  offset: number, parent: Node | null, debug: boolean) : boolean {
+  offset: number, _parent: Node | null, debug: boolean) : boolean {
   let pos = 0;
 
   for (let i = 0; i < node.content.childCount; i++) {

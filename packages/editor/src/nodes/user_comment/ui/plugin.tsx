@@ -15,7 +15,7 @@
 
 import { Schema } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
-import { EditorView, NodeView } from 'prosemirror-view';
+import { NodeView } from 'prosemirror-view';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { onNodeAttached } from '../../../api/dom';
@@ -27,8 +27,7 @@ import { EditorUI } from '../../../api/ui-types';
 import { currentUsername } from '../../../api/user';
 
 export class UserCommentViewPlugin extends Plugin {
-  private view: EditorView | null = null;
-
+  
   constructor(schema: Schema, ui: EditorUI) {
     super({
       key: UserCommentViewPluginKey,
@@ -55,7 +54,7 @@ export class UserCommentViewPlugin extends Plugin {
               ignoreMutation: () => true,
             };
           },
-          user_comment_begin(node, view, getPos, decorations) {
+          user_comment_begin(node, view, _getPos, decorations) {
 
             const el = document.createElement("div");
             el.classList.add('pm-user-comment-view');
@@ -133,11 +132,7 @@ export class UserCommentViewPlugin extends Plugin {
             return nodeView;
           },
         },
-      },
-      view: (view: EditorView) => {
-        this.view = view;
-        return {};
-      },
+      }
     });
     const pendingElements: HTMLElement[] = [];
   }

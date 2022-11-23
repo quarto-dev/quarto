@@ -200,6 +200,8 @@ export function findOneNode(node: ProsemirrorNode, from: number, to: number, pre
     if (predicate(x)) {
       result = x;
       return TraverseResult.End;
+    } else {
+      return undefined;
     }
   });
   return result;

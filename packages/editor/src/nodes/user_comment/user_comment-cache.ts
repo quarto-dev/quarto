@@ -24,7 +24,7 @@ export class UserCommentNodeCachePlugin extends Plugin {
     super({
       key: UserCommentNodeCachePluginKey,
       state: {
-        init(config, instance): NodeIndex {
+        init(_config, instance): NodeIndex {
           return NodeIndex.create(
             isCommentNode.bind(undefined, schema),
             instance.doc);

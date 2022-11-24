@@ -13,102 +13,77 @@
  *
  */
 
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { TFunction } from 'i18next';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { EditableText, Props } from '@blueprintjs/core';
+import { EditableText } from '@blueprintjs/core';
 
-import { WorkbenchState } from '../store/store';
-import { setEditorTitle } from '../store/editor';
+import { editorLoading, editorTitle, setEditorTitle } from '../store/editor';
 
-import { CommandManager, withCommandManager } from '../commands/CommandManager';
+import { CommandManagerContext } from '../commands/CommandManager';
 import { WorkbenchCommandId } from '../commands/commands';
 
 import { focusInput } from '../widgets/utils';
 
 import styles from './WorkbenchNavbar.module.scss';
 
-export interface WorkbenchTitleProps extends Props {
-  loading: boolean;
-  title: string;
-  setTitle: (title: string) => void;
-  commandManager: CommandManager;
-  t: TFunction;
-}
+const WorkbenchTitle: React.FC = () => {
 
-class WorkbenchTitle extends React.Component<WorkbenchTitleProps> {
-  constructor(props: WorkbenchTitleProps) {
-    super(props);
-    this.focusInput = this.focusInput.bind(this);
-    this.focusEditor = this.focusEditor.bind(this);
+  const { t } = useTranslation();
+  const commandManager = useContext(CommandManagerContext);
+  const loading = useSelector(editorLoading);
+  const title = useSelector(editorTitle);
+  const dispatch = useDispatch();
+
+  const inputRef = React.useRef<EditableText>(null);
+
+  const focusTitleEditor = () => {
+    if (inputRef.current) {
+      // no ref property available on EditableText, so we need this hack:
+      //  https://github.com/palantir/blueprint/issues/2492
+      const editableText = ReactDOM.findDOMNode(inputRef.current) as Element;
+      const editableTextInput = editableText!.querySelector('.bp4-editable-text-input');
+        focusInput(editableTextInput as HTMLInputElement);
+    }
   }
 
-  public componentDidMount() {
-    // register keyboard shortcuts command
-    this.props.commandManager.addCommands([
+  const focusEditor = () => {
+    // delay so the enter key doesn't go to the editor
+    setTimeout(() => {
+      commandManager.execCommand(WorkbenchCommandId.ActivateEditor);
+    }, 0);
+  }
+
+  useEffect(() => {
+    commandManager.addCommands([
       {
         id: WorkbenchCommandId.Rename,
-        menuText: this.props.t('commands:rename_menu_text'),
-        group: this.props.t('commands:group_utilities'),
+        menuText: t('commands:rename_menu_text'),
+        group: t('commands:group_utilities'),
         keymap: [],
         isEnabled: () => true,
         isActive: () => false,
-        execute: this.focusInput,
+        execute: focusTitleEditor,
       },
-    ]);
-  }
+    ])
+  }, []);
 
-  public render() {
-    return (
-      <EditableText
-        className={styles.title}
-        placeholder={this.props.loading ? '' : this.props.t('untitled_document') as string}
-        value={this.props.title}
-        onChange={this.props.setTitle}
-        onCancel={this.focusEditor}
-        onConfirm={this.focusEditor}
-        onEdit={this.focusInput}
-      />
-    );
-  }
-
-  private focusInput() {
-    // no ref property available on EditableText, so we need this hack:
-    //  https://github.com/palantir/blueprint/issues/2492
-    const editableText = ReactDOM.findDOMNode(this) as Element;
-    const editableTextContent = editableText!.querySelector('.bp4-editable-text-content');
-    editableTextContent!.dispatchEvent(new Event('focus'));
-    setTimeout(() => {
-      const editableTextInput = editableText!.querySelector('.bp4-editable-text-input');
-      focusInput(editableTextInput as HTMLInputElement);
-    }, 50);
-  }
-
-  private focusEditor() {
-    // delay so the enter key doesn't go to the editor
-    setTimeout(() => {
-      this.props.commandManager.execCommand(WorkbenchCommandId.ActivateEditor);
-    }, 0);
-  }
+  return (
+    <EditableText
+      ref={inputRef}
+      alwaysRenderInput={true}
+      className={styles.title}
+      placeholder={loading ? '' : t('untitled_document') as string}
+      value={title}
+      onChange={value => dispatch(setEditorTitle(value))}
+      onCancel={focusEditor}
+      onConfirm={focusEditor}
+    />
+  );
 }
 
-const mapStateToProps = (state: WorkbenchState) => {
-  return {
-    loading: state.editor.loading,
-    title: state.editor.title,
-  };
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setTitle: (title: string) => dispatch(setEditorTitle(title)),
-  };
-};
-
-export default withCommandManager(withTranslation()(connect(mapStateToProps, mapDispatchToProps)(WorkbenchTitle)));
+export default WorkbenchTitle;

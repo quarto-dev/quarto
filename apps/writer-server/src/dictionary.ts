@@ -31,8 +31,8 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
   return {
     async getDictionary(locale: string): Promise<Dictionary> {
       return {
-        aff: '',
-        words: ''
+        aff: 'this is the aff',
+        words: 'these are the words'
       }
     },
     async getUserDictionary() : Promise<string> {

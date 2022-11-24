@@ -13,23 +13,17 @@
  *
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { CSSTransition } from 'react-transition-group';
 
-import { TFunction } from 'i18next';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { IProps } from '@blueprintjs/core';
+import { prefsShowOutline, setPrefsShowOutline } from '../../../store/prefs';
 
-import { EditorOutline } from 'editor';
-
-import { WorkbenchState } from '../../../store/store';
-import { setPrefsShowOutline } from '../../../store/prefs';
-
-import { CommandManager, withCommandManager } from '../../../commands/CommandManager';
+import { CommandManagerContext } from '../../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../../commands/commands';
 
 import { EditorOutlineButton } from './EditorOutlineButton';
@@ -39,97 +33,61 @@ import { EditorOutlineEmpty } from './EditorOutlineEmpty';
 
 import styles from './EditorOutlineSidebar.module.scss';
 import transition from './EditorOutlineTransition.module.scss';
+import { editorOutline } from '../../../store/editor';
 
-export interface EditorOutlineSidebarProps extends IProps {
-  setShowOutline: (showOutline: boolean) => void;
-  showOutline: boolean;
-  outline: EditorOutline;
-  commandManager: CommandManager;
-  t: TFunction;
-}
+const EditorOutlineSidebar: React.FC = () => {
 
-interface EditorOutlineSidebarState {
-  animating: boolean;
-}
+  const { t } = useTranslation();
+  const commandManager = useContext(CommandManagerContext);
 
-class EditorOutlineSidebar extends React.Component<EditorOutlineSidebarProps,EditorOutlineSidebarState> {
-  constructor(props: EditorOutlineSidebarProps) {
-    super(props);
-    this.state = { animating: false };
-    this.onOpenClicked = this.onOpenClicked.bind(this);
-    this.onCloseClicked = this.onCloseClicked.bind(this);
-  }
+  const outline = useSelector(editorOutline);
+  const showOutline = useSelector(prefsShowOutline);
+  const dispatch = useDispatch();
+ 
+  const [animating, setAnimating] = useState(false);
 
-  public componentDidMount() {
-    // register command used to toggle pane
-    this.props.commandManager.addCommands([
+  const setShowOutline = (show: boolean) =>  dispatch(setPrefsShowOutline(show));
+
+  const onOpenClicked = () => setShowOutline(true);
+  const onCloseClicked= () => setShowOutline(false);
+
+  useEffect(() => {
+    commandManager.addCommands([
       {
         id: WorkbenchCommandId.ShowOutline,
-        menuText: this.props.t('commands:show_outline_menu_text'),
-        group: this.props.t('commands:group_view'),
+        menuText: t('commands:show_outline_menu_text'),
+        group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-O'],
         isEnabled: () => true,
-        isActive: () => this.props.showOutline,
+        isActive: () => showOutline,
         execute: () => {
-          this.props.setShowOutline(!this.props.showOutline);
+          setShowOutline(!showOutline);
         },
       },
-    ]);
-  }
+    ])
+  }, [])
 
-  public render() {
-    const outlineClassName = [styles.outline];
-    if (this.props.showOutline) {
+  const outlineClassName = [styles.outline];
+    if (showOutline) {
       outlineClassName.push(styles.outlineVisible);
     }
 
-    const setAnimating = (animating: boolean) => {
-      return () => {
-        this.setState({animating});
-      }
-    }
-
-    return (
-      <>
-        <EditorOutlineButton visible={!this.props.showOutline} onClick={this.onOpenClicked} />
-        <CSSTransition in={this.props.showOutline} timeout={200} classNames={{ ...transition }} 
-          onEnter={setAnimating(true)}
-          onEntered={setAnimating(false)}
-          onExit={setAnimating(true)}
-          onExited={setAnimating(false)}
+  return (
+    <>
+        <EditorOutlineButton visible={!showOutline} onClick={onOpenClicked} />
+        <CSSTransition in={showOutline} timeout={200} classNames={{ ...transition }} 
+          onEnter={() => setAnimating(true)}
+          onEntered={() => setAnimating(false)}
+          onExit={() => setAnimating(true)}
+          onExited={() => setAnimating(false)}
         >            
           <div className={outlineClassName.join(' ')}>
-            <EditorOutlineHeader onCloseClicked={this.onCloseClicked} />
-            {this.props.outline.length ? <EditorOutlineTree outline={this.props.outline} /> : !this.state.animating ? <EditorOutlineEmpty /> : null}
+            <EditorOutlineHeader onCloseClicked={onCloseClicked} />
+            {outline.length ? <EditorOutlineTree outline={outline} /> : !animating ? <EditorOutlineEmpty /> : null}
           </div>
         </CSSTransition>
       </>
-    );
-  }
-
-  private onOpenClicked() {
-    this.props.setShowOutline(true);
-  }
-
-  private onCloseClicked() {
-    this.props.setShowOutline(false);
-  }
+  );
 }
 
-const mapStateToProps = (state: WorkbenchState) => {
-  return {
-    showOutline: state.prefs.showOutline,
-    outline: state.editor.outline,
-  };
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setShowOutline: (showOutline: boolean) => dispatch(setPrefsShowOutline(showOutline)),
-  };
-};
-
-export default withCommandManager(
-  withTranslation()(connect(mapStateToProps, mapDispatchToProps)(EditorOutlineSidebar)),
-);
+export default EditorOutlineSidebar;

@@ -35,6 +35,8 @@ import styles from './EditorOutlineSidebar.module.scss';
 import transition from './EditorOutlineTransition.module.scss';
 import { editorOutline } from '../../../store/editor';
 
+import store from '../../../store/store';
+
 const EditorOutlineSidebar: React.FC = () => {
 
   const { t } = useTranslation();
@@ -51,6 +53,9 @@ const EditorOutlineSidebar: React.FC = () => {
   const onOpenClicked = () => setShowOutline(true);
   const onCloseClicked= () => setShowOutline(false);
 
+  // add commands on initial mount (note that the callbacks are run
+  // outside of the flow of this component's render so need to 
+  // access the store directly)
   useEffect(() => {
     commandManager.addCommands([
       {
@@ -59,9 +64,9 @@ const EditorOutlineSidebar: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-O'],
         isEnabled: () => true,
-        isActive: () => showOutline,
+        isActive: () => prefsShowOutline(store.getState()),
         execute: () => {
-          setShowOutline(!showOutline);
+          setShowOutline(!prefsShowOutline(store.getState()));
         },
       },
     ])

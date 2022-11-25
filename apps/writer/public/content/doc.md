@@ -1,5 +1,3 @@
-
-
 ## First Up
 
 Here we go

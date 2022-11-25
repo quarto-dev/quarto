@@ -64,7 +64,7 @@ prefsPersist.startListening({
   }
 })
 
-function loadPrefs() {
+function loadPrefs() : PrefsState {
   const defaultPrefs = {
     showOutline: false,
     showMarkdown: false,

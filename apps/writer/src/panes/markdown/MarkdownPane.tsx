@@ -13,123 +13,101 @@
  *
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { TFunction } from 'i18next';
-import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { IconNames } from '@blueprintjs/icons';
 
 import { EditorView, basicSetup } from 'codemirror';
-import { markdown } from "@codemirror/lang-markdown"
+import { markdown as markdownLang } from "@codemirror/lang-markdown"
 
+import store from '../../store/store';
+import { editorMarkdown } from '../../store/editor';
+import { prefsShowMarkdown, setPrefsShowMarkdown } from '../../store/prefs';
 
-import { WorkbenchState } from '../../store/store';
+import { CommandManagerContext } from '../../commands/CommandManager';
+import { WorkbenchCommandId } from '../../commands/commands';
+
 import { Pane } from '../../widgets/Pane';
 import { Toolbar, ToolbarText, ToolbarButton } from '../../widgets/Toolbar';
-import { setPrefsShowMarkdown } from '../../store/prefs';
-import { CommandManager, withCommandManager } from '../../commands/CommandManager';
-import { WorkbenchCommandId } from '../../commands/commands';
 
 import styles from './MarkdownPane.module.scss';
 
-interface MarkdownPaneProps {
-  setShowMarkdown: (showMarkdown: boolean) => void;
-  showMarkdown: boolean;
-  markdown: string;
-  commandManager: CommandManager;
-  t: TFunction;
-}
+const MarkdownPane: React.FC = () => {
 
-export class MarkdownPane extends React.Component<MarkdownPaneProps> {
-  private parent: HTMLDivElement | null;
-  private cm: EditorView | null;
+  const { t } = useTranslation();
+  const commandManager = useContext(CommandManagerContext);
 
-  constructor(props: Readonly<MarkdownPaneProps>) {
-    super(props);
-    this.parent = null;
-    this.cm = null;
-    this.onCloseClicked = this.onCloseClicked.bind(this);
+  const markdown = useSelector(editorMarkdown);
+  const showMarkdown = useSelector(prefsShowMarkdown);
+  const dispatch = useDispatch();
+
+  const onCloseClicked = () => {
+    dispatch(setPrefsShowMarkdown(false));
   }
 
-  public render() {
-    // build className dynamically
-    const classes = ['markdown-pane', styles.pane];
-    if (this.props.showMarkdown) {
-      classes.push('markdown-visible');
-    }
-
-    return (
-      <Pane className={classes.join(' ')}>
-        <Toolbar className={styles.toolbar}>
-          <ToolbarText>{this.props.t('markdown_pane_caption')}</ToolbarText>
-          <ToolbarButton
-            title={this.props.t('close_button_title')}
-            className={styles.closeButton}
-            icon={IconNames.SMALL_CROSS}
-            enabled={true}
-            active={false}
-            onClick={this.onCloseClicked}
-          />
-        </Toolbar>
-        <div className={styles.codemirrorParent} ref={el => (this.parent = el)} />
-      </Pane>
-    );
-  }
-
-  public componentDidMount() {
-    // initialize codemirror
-    this.cm = new EditorView({
-      extensions: [basicSetup, markdown(), EditorView.lineWrapping, EditorView.editable.of(false)],
-      parent: this.parent!
-    })
-    this.updateCodeMirror();
-
-    // register command used to toggle pane
-    this.props.commandManager.addCommands([
+  // add commands on initial mount (note that the callbacks are run
+  // outside of the flow of this component's render so need to 
+  // access the store directly)
+  useEffect(() => {
+    commandManager.addCommands([
       {
         id: WorkbenchCommandId.ShowMarkdown,
-        menuText: this.props.t('commands:show_markdown_menu_text'),
-        group: this.props.t('commands:group_view'),
+        menuText: t('commands:show_markdown_menu_text'),
+        group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-M'],
         isEnabled: () => true,
-        isActive: () => this.props.showMarkdown,
+        isActive: () => prefsShowMarkdown(store.getState()),
         execute: () => {
-          this.props.setShowMarkdown(!this.props.showMarkdown);
+          dispatch(setPrefsShowMarkdown(!prefsShowMarkdown(store.getState())));
         },
       },
     ]);
-  }
+  }, []);
 
-  public componentDidUpdate() {
-    this.updateCodeMirror();
-  }
-
-  private updateCodeMirror() {
-    this.cm?.dispatch({
-      changes: { from: 0, to: this.cm?.state.doc.length, insert: this.props.markdown }
+  // codemirror instance
+  const cmRef = useRef<HTMLDivElement>(null);
+  const [cm, setCm] = useState<EditorView>();
+  
+  // init/destroy codemirror instance on mount/unmount
+  useEffect(() => {
+    setCm(new EditorView({
+      extensions: [basicSetup, markdownLang(), EditorView.lineWrapping, EditorView.editable.of(false)],
+      parent: cmRef.current || undefined
+    }));
+    return () => {
+      cm?.destroy();
+    }
+  }, []);
+ 
+  // update codemirror on render
+  useEffect(() => {
+    cm?.dispatch({
+      changes: { from: 0, to: cm?.state.doc.length, insert: markdown }
     })
-  }
+  });
 
-  private onCloseClicked() {
-    this.props.setShowMarkdown(false);
-  }
-}
+  return (
+    <Pane className={['markdown-pane', styles.pane].concat(showMarkdown ? ['markdown-visible'] : [] ).join(' ')}>
+      <Toolbar className={styles.toolbar}>
+        <ToolbarText>{t('markdown_pane_caption')}</ToolbarText>
+        <ToolbarButton
+          title={t('close_button_title')}
+          className={styles.closeButton}
+          icon={IconNames.SMALL_CROSS}
+          enabled={true}
+          active={false}
+          onClick={onCloseClicked}
+        />
+      </Toolbar>
+      <div className={styles.codemirrorParent} ref={cmRef} />
+    </Pane>
+  );
 
-const mapStateToProps = (state: WorkbenchState) => {
-  return {
-    markdown: state.editor.markdown,
-    showMarkdown: state.prefs.showMarkdown,
-  };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapDispatchToProps = (dispatch: (any)) => {
-  return {
-    setShowMarkdown: (showMarkdown: boolean) => dispatch(setPrefsShowMarkdown(showMarkdown)),
-  };
-};
+export default MarkdownPane;
 
-export default withCommandManager(withTranslation()(connect(mapStateToProps, mapDispatchToProps)(MarkdownPane)));

@@ -13,10 +13,10 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ImageEditResult, ImageProps, ImageDimensions } from 'editor';
+import { ImageEditResult, ImageProps, ImageDimensions, AttrProps } from 'editor';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { DialogTextInput } from '../../../widgets/dialog/DialogInputs';
@@ -50,7 +50,8 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
   const srcInput = React.createRef<HTMLInputElement>();
   const titleInput = React.createRef<HTMLInputElement>();
   const captionInput = React.createRef<HTMLInputElement>();
-  const attrInput = React.createRef<AttrEditor>();
+
+  const [attr, setAttr] = useState<AttrProps>(props.image);
 
   const onOpened = () => {
     focusInput(srcInput.current);
@@ -66,7 +67,7 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
         height: props.image.height,
         units: props.image.units,
         lockRatio: props.image.lockRatio,
-        ...(props.editAttributes ? attrInput.current!.value : null),
+        ...(props.editAttributes ? attr : null),
       });
     } else {
       onCancel();
@@ -88,7 +89,7 @@ export const EditorDialogEditImage: React.FC<EditorDialogEditImageProps> = props
       <DialogTextInput label={t('edit_image_dialog_src')} defaultValue={props.image.src || ''} ref={srcInput} />
       <DialogTextInput label={t('edit_image_dialog_title')} defaultValue={props.image.title} ref={titleInput} />
       <DialogTextInput label={t('edit_image_dialog_img_caption')} defaultValue={props.image.caption} ref={captionInput} />
-      {props.editAttributes ? <AttrEditor defaultValue={props.image} ref={attrInput} /> : null}
+      {props.editAttributes ? <AttrEditor value={attr} onChange={setAttr} /> : null}
     </Dialog>
   );
 };

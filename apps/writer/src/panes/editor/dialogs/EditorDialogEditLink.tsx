@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@blueprintjs/core';
 
-import { LinkEditResult, LinkProps, LinkTargets, LinkCapabilities, LinkType } from 'editor';
+import { LinkEditResult, LinkProps, LinkTargets, LinkCapabilities, LinkType, AttrProps } from 'editor';
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { DialogTextInput } from '../../../widgets/dialog/DialogInputs';
@@ -65,7 +65,8 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
 
   const textInput = React.createRef<HTMLInputElement>();
   const titleInput = React.createRef<HTMLInputElement>();
-  const attrInput = React.createRef<AttrEditor>();
+  
+  const [attr, setAttr] = useState<AttrProps>(props.link);
 
   let typeInput: HTMLSelectElement | null;
   const setTypeInput = (ref: HTMLSelectElement | null) => {
@@ -111,7 +112,7 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
               text: textInput.current!.value,
               href: target.href,
               title: titleInput.current!.value,
-              ...(props.capabilities.attributes ? attrInput.current!.value : {}),
+              ...(props.capabilities.attributes ? attr : {}),
             },
           });
         }
@@ -155,7 +156,7 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
         <>
           <DialogTextInput label={t('edit_link_dialog_text')} defaultValue={props.link.text} ref={textInput} />
           <DialogTextInput label={t('edit_link_dialog_title')} defaultValue={props.link.title} ref={titleInput} />
-          {props.capabilities.attributes ? <AttrEditor defaultValue={props.link} ref={attrInput} /> : null}
+          {props.capabilities.attributes ? <AttrEditor value={attr} onChange={setAttr} /> : null}
         </>
       ) : null}
     </Dialog>

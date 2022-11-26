@@ -13,7 +13,7 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@blueprintjs/core';
@@ -53,16 +53,13 @@ export const EditorDialogEditAttr: React.FC<EditorDialogEditAttrProps> = props =
     removeCaption = t('edit_attr_dialog_remove') as string,
   } = props;
 
-  const attrInput = React.createRef<AttrEditor>();
-
-  const onOpened = () => {
-    attrInput.current!.focus();
-  };
+ 
+  const [attr, setAttr] = useState(props.attr);
 
   const onActionClicked = (action: 'edit' | 'remove') => {
     return () => {
       // check for attributes
-      const attr = attrInput.current!.value;
+     
       const haveAttr = pandocAttrAvailable(attr);
 
       // special logic for when we don't have attributes
@@ -95,17 +92,16 @@ export const EditorDialogEditAttr: React.FC<EditorDialogEditAttrProps> = props =
     ) : (
       undefined
     );
-
+  
   return (
     <Dialog
       isOpen={props.isOpen}
       title={caption}
-      onOpened={onOpened}
       onOK={onOK}
       onCancel={onCancel}
       leftButtons={removeButton}
     >
-      <AttrEditor defaultValue={props.attr} ref={attrInput} />
+      <AttrEditor value={attr} onChange={setAttr} focus={true} />
     </Dialog>
   );
 };

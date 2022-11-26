@@ -13,10 +13,9 @@
  *
  */
 
-import React from 'react';
+import React, { createRef, useEffect, useRef } from 'react';
 
-import { TFunction } from 'i18next';
-import { Translation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { TextArea, FormGroup } from '@blueprintjs/core';
 
@@ -26,55 +25,47 @@ import { DialogTextInput } from '../../../widgets/dialog/DialogInputs';
 import { focusInput } from '../../../widgets/utils';
 
 export interface AttrEditorProps {
-  defaultValue: AttrProps;
+  value: AttrProps;
+  onChange: (attr: AttrProps) => void;
+  focus?: boolean;
 }
 
-export class AttrEditor extends React.Component<AttrEditorProps> {
-  private idInput: React.RefObject<HTMLInputElement>;
-  private classesInput: React.RefObject<HTMLInputElement>;
-  private keyvalueInput: HTMLTextAreaElement | null;
-  private uiTools: UITools;
+export const AttrEditor: React.FC<AttrEditorProps> = (props) => {
 
-  constructor(props: AttrEditorProps) {
-    super(props);
-    this.state = {};
-    this.idInput = React.createRef<HTMLInputElement>();
-    this.classesInput = React.createRef<HTMLInputElement>();
-    this.keyvalueInput = null;
-    this.uiTools = new UITools();
+  const { t } = useTranslation();
+  const uiTools = useRef(new UITools());
+
+  const idInput = createRef<HTMLInputElement>();
+  const classesInput = createRef<HTMLInputElement>();
+  const keyvalueInput = useRef<HTMLTextAreaElement>();
+  const onKeyvalueInput = (el: HTMLTextAreaElement) => {
+    keyvalueInput.current = el;
   }
 
-  public focus() {
-    focusInput(this.idInput.current);
-  }
+  const value = uiTools.current.attr.propsToInput(props.value);
 
-  public get value(): AttrProps {
-    return this.uiTools.attr.inputToProps({
-      id: this.idInput.current!.value,
-      classes: this.classesInput.current!.value,
-      keyvalue: this.keyvalueInput!.value,
+  const onChange = () => {
+    const attr = uiTools.current.attr.inputToProps({
+      id: idInput.current!.value,
+      classes: classesInput.current!.value,
+      keyvalue: keyvalueInput!.current!.value,
     });
-  }
+    props.onChange(attr);
+  };
 
-  public render() {
-    const value = this.uiTools.attr.propsToInput(this.props.defaultValue);
+  useEffect(() => {
+    if (props.focus) {
+      focusInput(idInput.current);
+    }
+  }, []);
 
-    const setKeyvalueInput = (ref: HTMLTextAreaElement | null) => {
-      this.keyvalueInput = ref;
-    };
-
-    return (
-      <Translation>
-        {(t: TFunction) => (
-          <>
-            <DialogTextInput label={t('attr_editor_id')} defaultValue={value.id} ref={this.idInput} />
-            <DialogTextInput label={t('attr_editor_classes')} defaultValue={value.classes} ref={this.classesInput} />
-            <FormGroup label={t('attr_editor_keyvalue')}>
-              <TextArea defaultValue={value.keyvalue} inputRef={setKeyvalueInput} fill={true} />
-            </FormGroup>
-          </>
-        )}
-      </Translation>
-    );
-  }
+  return (
+    <>
+      <DialogTextInput label={t('attr_editor_id')} defaultValue={props.value.id} onChange={onChange} ref={idInput} />
+      <DialogTextInput label={t('attr_editor_classes')} defaultValue={value.classes} onChange={onChange} ref={classesInput} />
+      <FormGroup label={t('attr_editor_keyvalue')}>
+        <TextArea defaultValue={value.keyvalue} inputRef={onKeyvalueInput} onChange={onChange} fill={true} />
+      </FormGroup>
+    </>
+  );
 }

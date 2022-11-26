@@ -13,23 +13,16 @@
  *
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
-import { TFunction } from 'i18next';
-import { withTranslation } from 'react-i18next';
-
+import { useTranslation } from 'react-i18next';
 
 import { WorkbenchCommandId, CommandId } from '../commands/commands';
-import { CommandManager, withCommandManager } from '../commands/CommandManager';
+import { CommandManagerContext } from '../commands/CommandManager';
 import { keyCodeString } from '../commands/keycodes';
 
 import { AlertDialog } from '../widgets/dialog/AlertDialog';
 import { kAlertTypeWarning } from 'editor';
-
-interface WorkbenchClipboardProps {
-  commandManager: CommandManager;
-  t: TFunction;
-}
 
 interface WorkbenchClipboardState {
   dialogIsOpen: boolean;
@@ -37,84 +30,77 @@ interface WorkbenchClipboardState {
   commandKeycode?: string;
 }
 
-class WorkbenchClipboard extends React.Component<WorkbenchClipboardProps, WorkbenchClipboardState> {
-  constructor(props: WorkbenchClipboardProps) {
-    super(props);
-    this.state = {
-      dialogIsOpen: false,
-    };
-    this.onDialogClosed = () => {
-      this.setState({
-        dialogIsOpen: false,
+const WorkbenchClipboard: React.FC = () => {
+
+  const [state, setState] = useState<WorkbenchClipboardState>({ dialogIsOpen: false });
+   
+  const { t } = useTranslation();
+  const commandManager = useContext(CommandManagerContext);
+
+  const focusEditor = () => {
+    commandManager.execCommand(WorkbenchCommandId.ActivateEditor);
+  }
+
+  const onDialogClosed = () => {
+    setState({ dialogIsOpen: false });
+    focusEditor();
+  }
+
+  const clipboardCommand = (id: CommandId, domId: string, menuText: string, keymap: string) => {
+
+    const openDialog = () => {
+      setState({
+        dialogIsOpen: true,
+        commandMenuText: menuText,
+        commandKeycode: keyCodeString(keymap),
       });
-      this.focusEditor();
     };
-  }
 
-  public render() {
-    return (
-      <AlertDialog
-        title={'Use Keyboard Shortcut'}
-        message={'the message'}
-        type={kAlertTypeWarning}
-        isOpen={this.state.dialogIsOpen}
-        onClosed={this.onDialogClosed}
-      >
-        <p>{this.props.t('clipboard_dialog_title')}</p>
-        <p>
-          {this.props.t('clipboard_dialog_message', {
-            keycode: this.state.commandKeycode,
-            command: this.state.commandMenuText,
-          })}
-        </p>
-      </AlertDialog>
-    );
-  }
-
-  public componentDidMount() {
-    this.props.commandManager.addCommands([
-      this.clipboardCommand(WorkbenchCommandId.Copy, 'copy', this.props.t('commands:copy_menu_text'), 'Mod-c'),
-      this.clipboardCommand(WorkbenchCommandId.Cut, 'cut', this.props.t('commands:cut_menu_text'), 'Mod-x'),
-      this.clipboardCommand(WorkbenchCommandId.Paste, 'paste', this.props.t('commands:paste_menu_text'), 'Mod-v'),
-    ]);
-  }
-
-  private clipboardCommand(id: CommandId, domId: string, menuText: string, keymap: string) {
     return {
       id,
       menuText,
-      group: this.props.t('commands:group_text_editing'),
+      group: t('commands:group_text_editing'),
       keymap: [keymap],
       keysUnbound: true,
       focusEditor: true,
       isEnabled: () => !document.queryCommandSupported(domId) || document.queryCommandEnabled(domId),
       isActive: () => false,
       execute: () => {
-        if (document.queryCommandSupported(domId)) {
-          document.execCommand(domId);
-          this.focusEditor();
+        if (document.queryCommandSupported(domId) && document.execCommand(domId)) {
+          focusEditor();
         } else {
-          // open dialog
-          this.setState({
-            dialogIsOpen: true,
-            commandMenuText: menuText,
-            commandKeycode: keyCodeString(keymap),
-          });
+          openDialog();
         }
       },
     };
   }
 
-  private onDialogClosed() {
-    this.setState({
-      dialogIsOpen: false,
-    });
-    this.focusEditor();
-  }
+  useEffect(() => {
+    commandManager.addCommands([
+      clipboardCommand(WorkbenchCommandId.Copy, 'copy', t('commands:copy_menu_text'), 'Mod-c'),
+      clipboardCommand(WorkbenchCommandId.Cut, 'cut', t('commands:cut_menu_text'), 'Mod-x'),
+      clipboardCommand(WorkbenchCommandId.Paste, 'paste', t('commands:paste_menu_text'), 'Mod-v'),
+    ]);
+  }, []);
 
-  private focusEditor() {
-    this.props.commandManager.execCommand(WorkbenchCommandId.ActivateEditor);
-  }
-}
+  return (
+    <AlertDialog
+      title={'Use Keyboard Shortcut'}
+      message={'the message'}
+      type={kAlertTypeWarning}
+      isOpen={state.dialogIsOpen}
+      onClosed={onDialogClosed}
+    >
+      <p>{t('clipboard_dialog_title')}</p>
+      <p>
+        {t('clipboard_dialog_message', {
+          keycode: state.commandKeycode,
+          command: state.commandMenuText,
+        })}
+      </p>
+    </AlertDialog>
+  );
 
-export default withTranslation()(withCommandManager(WorkbenchClipboard));
+};
+
+export default WorkbenchClipboard;

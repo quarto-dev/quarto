@@ -13,61 +13,56 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
+import { usePrevious } from '../../../api/react-hooks';
 
-interface ContentPanelProps {
+
+export interface ContentPanelProps {
   readonly editable: boolean;
   readonly onCommentChange: (content: string) => void;
   readonly onHeightChange: () => void;
   readonly content: string;
 }
 
-export class ContentPanel extends React.Component<ContentPanelProps, never> {
-  private readonly contentEl = React.createRef<HTMLTextAreaElement>();
+export const ContentPanel: React.FC<ContentPanelProps> = (props) => {
+  
+  const contentEl = React.createRef<HTMLTextAreaElement>();
 
-  constructor(props: ContentPanelProps) {
-    super(props);
-    this.inputChangeListener = this.inputChangeListener.bind(this);
+  const inputChangeListener = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    props.onCommentChange(e.target.value || "")
   }
 
-  private inputChangeListener(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    this.props.onCommentChange(e.target.value || "");
-  }
-
-  private keydownListener(e: KeyboardEvent) {
-    // Without this, Enter and Backspace take effect in the main document even
-    // when the focus is in the comment editor
+  // Without this, Enter and Backspace take effect in the main document even
+  // when the focus is in the comment editor
+  const keydownListener = (e: KeyboardEvent) => {
     e.stopPropagation();
-  }
+  };
 
-  public componentDidMount() {
-    this.contentEl.current!.addEventListener("keydown", this.keydownListener);
-    if (this.props.editable) {
-      this.contentEl.current!.focus();
+  useEffect(() => {
+    contentEl.current!.addEventListener("keydown", keydownListener);
+    if (props.editable) {
+      contentEl.current!.focus();
     }
-  }
-
-  public componentWillUnmount() {
-    this.contentEl.current!.removeEventListener("keydown", this.keydownListener);
-  }
-
-  public componentDidUpdate(prevProps: ContentPanelProps) {
-    // Grab focus if we just went editable
-    if (this.props.editable && !prevProps.editable) {
-      this.contentEl.current!.focus();
+    return () => {
+      contentEl.current!.removeEventListener("keydown", keydownListener);
     }
-  }
+  }, []);
 
-  public render() {
-    return <TextareaAutosize
-      ref = {this.contentEl}
-      className = "pm-user-comment-content"
-      disabled = {!this.props.editable}
-      value = {this.props.content}
-      onChange = {this.inputChangeListener}
-      onHeightChange = {this.props.onHeightChange}
-      cacheMeasurements = {true}
-    />;
-  }
+  const prevEditable = usePrevious(props.editable);
+  useEffect(() => {
+    if (props.editable && !prevEditable) {
+      contentEl.current!.focus();
+    }
+  }, [props.editable])
+
+  return <TextareaAutosize
+    ref = {contentEl}
+    className = "pm-user-comment-content"
+    disabled = {!props.editable}
+    value = {props.content}
+    onChange = {inputChangeListener}
+    onHeightChange = {props.onHeightChange}
+    cacheMeasurements = {true}
+  />;
 }

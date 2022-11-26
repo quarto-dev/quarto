@@ -213,8 +213,7 @@ class EditorPane extends React.Component<EditorPaneProps> {
       rmdExtensions: {
         codeChunks: true,
         bookdownPart: true,
-        bookdownXRef: true,
-        bookdownXRefUI: true
+        bookdownXRef: true
       },
       hugoExtensions: {
         shortcodes: true

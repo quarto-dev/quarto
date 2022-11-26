@@ -17,7 +17,6 @@ import { Schema } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
 import { NodeView } from 'prosemirror-view';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { onNodeAttached } from '../../../api/dom';
 import { UserCommentViewPluginKey } from '../user_comment-constants';
 import { synchronizeCommentViewPositions } from './layout';
@@ -25,6 +24,7 @@ import { createThreadIdAttr } from './common';
 import { CommentThreadContainer } from './comment-thread';
 import { EditorUI } from '../../../api/ui-types';
 import { currentUsername } from '../../../api/user';
+import { createRoot } from 'react-dom/client';
 
 export class UserCommentViewPlugin extends Plugin {
   
@@ -57,6 +57,7 @@ export class UserCommentViewPlugin extends Plugin {
           user_comment_begin(node, view, _getPos, decorations) {
 
             const el = document.createElement("div");
+            const root = createRoot(el);
             el.classList.add('pm-user-comment-view');
             el.id = createThreadIdAttr(node.attrs.threadId);
             el.style.position = "absolute";
@@ -101,18 +102,15 @@ export class UserCommentViewPlugin extends Plugin {
                 node = newNode;
                 const username = currentUsername(ui.context);
 
-                ReactDOM.render(
+                root.render(
                   <CommentThreadContainer
                     node = {newNode}
                     view = {view}
                     username = {username}
                     onHeightChange = {handleHeightChange}
+                    callback={syncCommentViewPos}
                     />,
-                  el,
-                  () => {
-                    syncCommentViewPos();
-                  }
-                );
+                  );``
 
                 return true;
               },
@@ -122,7 +120,7 @@ export class UserCommentViewPlugin extends Plugin {
               // stopEvent(event) { return false; },
               // ignoreMutation(p: MutationRecord | {type: 'selection'; target: Element;}) {},
               destroy() {
-                ReactDOM.unmountComponentAtNode(el);
+                root.unmount();
                 el.remove();
               }
             };

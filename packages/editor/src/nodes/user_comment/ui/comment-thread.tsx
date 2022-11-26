@@ -28,6 +28,9 @@ interface CommentThreadContainerProps {
 
   // A callback to be invoked when the height of the thread changes
   readonly onHeightChange: (commentId: string) => void;
+
+  // callback for when container loads
+  readonly callback?: VoidFunction;
 }
 
 // Later, this will contain multiple CommentContainers
@@ -54,7 +57,7 @@ export function CommentThreadContainer({node, view, ...props}: CommentThreadCont
     return commentIds.indexOf(x) >= 0;
   }).length > 0;
 
-  return <div className={"pm-user-comment-thread " + (hasEditingChild ? " active" : "")}>
+  return <div ref={props.callback} className={"pm-user-comment-thread " + (hasEditingChild ? " active" : "")}>
     {
       commentItems.map(x => {
         const commentId = x.node.attrs.commentId;

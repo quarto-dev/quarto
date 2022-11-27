@@ -24,7 +24,6 @@ import { IconNames } from '@blueprintjs/icons';
 import { EditorView, basicSetup } from 'codemirror';
 import { markdown as markdownLang } from "@codemirror/lang-markdown"
 
-import store from '../../store/store';
 import { editorMarkdown } from '../../store/editor';
 import { prefsShowMarkdown, setPrefsShowMarkdown } from '../../store/prefs';
 
@@ -49,6 +48,10 @@ const MarkdownPane: React.FC = () => {
     dispatch(setPrefsShowMarkdown(false));
   }
 
+  // save showMarkdown value for use in out-of-band callback
+  const showMarkdownRef = useRef<boolean | null>(null);
+
+
   // add commands on initial mount (note that the callbacks are run
   // outside of the flow of this component's render so need to 
   // access the store directly)
@@ -60,9 +63,9 @@ const MarkdownPane: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-M'],
         isEnabled: () => true,
-        isActive: () => prefsShowMarkdown(store.getState()),
+        isActive: () => !!showMarkdownRef.current,
         execute: () => {
-          dispatch(setPrefsShowMarkdown(!prefsShowMarkdown(store.getState())));
+          dispatch(setPrefsShowMarkdown(!showMarkdownRef.current));
         },
       },
     ]);
@@ -83,11 +86,12 @@ const MarkdownPane: React.FC = () => {
     }
   }, []);
  
-  // update codemirror on render
+  // update codemirror and save showMarkdown on render
   useEffect(() => {
     cm?.dispatch({
       changes: { from: 0, to: cm?.state.doc.length, insert: markdown }
     })
+    showMarkdownRef.current = showMarkdown;
   });
 
   return (

@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -35,8 +35,6 @@ import styles from './EditorOutlineSidebar.module.scss';
 import transition from './EditorOutlineTransition.module.scss';
 import { editorOutline } from '../../../store/editor';
 
-import store from '../../../store/store';
-
 const EditorOutlineSidebar: React.FC = () => {
 
   const { t } = useTranslation();
@@ -45,6 +43,8 @@ const EditorOutlineSidebar: React.FC = () => {
   const outline = useSelector(editorOutline);
   const showOutline = useSelector(prefsShowOutline);
   const dispatch = useDispatch();
+
+  const showOutlineRef = useRef<boolean | null>(null);
  
   const [animating, setAnimating] = useState(false);
 
@@ -64,13 +64,18 @@ const EditorOutlineSidebar: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-O'],
         isEnabled: () => true,
-        isActive: () => prefsShowOutline(store.getState()),
+        isActive: () => !!showOutlineRef.current,
         execute: () => {
-          setShowOutline(!prefsShowOutline(store.getState()));
+          setShowOutline(!showOutlineRef.current);
         },
       },
     ])
   }, [])
+
+  // keep showOutline up to date for use in out-of-band callback
+  useEffect(() => {
+    showOutlineRef.current = showOutline;
+  }, [showOutline]);
 
   const outlineClassName = [styles.outline];
     if (showOutline) {

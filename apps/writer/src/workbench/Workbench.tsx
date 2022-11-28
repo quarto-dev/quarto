@@ -40,7 +40,7 @@ const Workbench: React.FC = () => {
   const hotkeys = useMemo(() => {
     return commandHotkeys(commandManager.commands);
   }, [commandManager]);
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: '' });
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: 'Ctrl+Alt+?' });
 
   // hotkeys command
   const [, dispatch] = useContext(HotkeysContext);

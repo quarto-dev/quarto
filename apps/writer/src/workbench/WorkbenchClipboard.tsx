@@ -17,7 +17,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { WorkbenchCommandId, CommandId } from '../commands/commands';
+import { WorkbenchCommandId, CommandId, Command } from '../commands/commands';
 import { CommandManagerContext } from '../commands/CommandManager';
 import { keyCodeString } from '../commands/keycodes';
 
@@ -35,10 +35,10 @@ const WorkbenchClipboard: React.FC = () => {
   const [state, setState] = useState<WorkbenchClipboardState>({ dialogIsOpen: false });
    
   const { t } = useTranslation();
-  const commandManager = useContext(CommandManagerContext);
+  const [, cmDispatch] = useContext(CommandManagerContext);
 
   const focusEditor = () => {
-    commandManager.execCommand(WorkbenchCommandId.ActivateEditor);
+    cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
   }
 
   const onDialogClosed = () => {
@@ -46,7 +46,7 @@ const WorkbenchClipboard: React.FC = () => {
     focusEditor();
   }
 
-  const clipboardCommand = (id: CommandId, domId: string, menuText: string, keymap: string) => {
+  const clipboardCommand = (id: CommandId, domId: string, menuText: string, keymap: string) : Command => {
 
     const openDialog = () => {
       setState({
@@ -62,7 +62,6 @@ const WorkbenchClipboard: React.FC = () => {
       group: t('commands:group_text_editing'),
       keymap: [keymap],
       keysUnbound: true,
-      focusEditor: true,
       isEnabled: () => !document.queryCommandSupported(domId) || document.queryCommandEnabled(domId),
       isActive: () => false,
       execute: () => {
@@ -76,11 +75,11 @@ const WorkbenchClipboard: React.FC = () => {
   }
 
   useEffect(() => {
-    commandManager.addCommands([
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
       clipboardCommand(WorkbenchCommandId.Copy, 'copy', t('commands:copy_menu_text'), 'Mod-c'),
       clipboardCommand(WorkbenchCommandId.Cut, 'cut', t('commands:cut_menu_text'), 'Mod-x'),
       clipboardCommand(WorkbenchCommandId.Paste, 'paste', t('commands:paste_menu_text'), 'Mod-v'),
-    ]);
+    ]});
   }, []);
 
   return (

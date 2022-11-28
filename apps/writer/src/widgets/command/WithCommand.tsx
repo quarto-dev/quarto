@@ -25,8 +25,8 @@ export interface WithCommandProps extends IProps {
 }
 
 export const WithCommand: React.FC<PropsWithChildren<WithCommandProps>> = props => {
-  const commmandManager = useContext(CommandManagerContext);
-  if (commmandManager.commands[props.id]) {
+  const [cmState] = useContext(CommandManagerContext);
+  if (cmState.commands[props.id]) {
     return <>{props.children}</>;
   } else {
     return null;

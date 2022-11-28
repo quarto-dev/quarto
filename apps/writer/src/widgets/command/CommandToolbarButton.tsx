@@ -33,8 +33,8 @@ export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props:
   useSelector(editorSelection);
 
   // get command
-  const commandManager = useContext(CommandManagerContext);
-  const command = commandManager.commands[props.command];
+  const [cmState] = useContext(CommandManagerContext);
+  const command = cmState.commands[props.command];
   if (command) {
     return (
       <ToolbarButton

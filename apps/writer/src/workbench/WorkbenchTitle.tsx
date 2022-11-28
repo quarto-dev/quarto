@@ -34,7 +34,7 @@ import styles from './WorkbenchNavbar.module.scss';
 const WorkbenchTitle: React.FC = () => {
 
   const { t } = useTranslation();
-  const commandManager = useContext(CommandManagerContext);
+  const [, cmDispatch] = useContext(CommandManagerContext);
   const loading = useSelector(editorLoading);
   const title = useSelector(editorTitle);
   const dispatch = useDispatch();
@@ -54,12 +54,12 @@ const WorkbenchTitle: React.FC = () => {
   const focusEditor = () => {
     // delay so the enter key doesn't go to the editor
     setTimeout(() => {
-      commandManager.execCommand(WorkbenchCommandId.ActivateEditor);
+      cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
     }, 0);
   }
 
   useEffect(() => {
-    commandManager.addCommands([
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
         id: WorkbenchCommandId.Rename,
         menuText: t('commands:rename_menu_text'),
@@ -69,7 +69,7 @@ const WorkbenchTitle: React.FC = () => {
         isActive: () => false,
         execute: focusTitleEditor,
       },
-    ])
+    ]})
   }, []);
 
   return (

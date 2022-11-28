@@ -34,18 +34,18 @@ import './Workbench.scss';
 const Workbench: React.FC = () => {
  
   const { t } = useTranslation();
-  const commandManager = useContext(CommandManagerContext);
+  const [cmState, cmDispatch] = useContext(CommandManagerContext);
 
   // register hotkeys
   const hotkeys = useMemo(() => {
-    return commandHotkeys(commandManager.commands);
-  }, [commandManager]);
+    return commandHotkeys(cmState.commands);
+  }, [cmState.commands]);
   const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: 'Ctrl+Alt+?' });
 
   // hotkeys command
-  const [, dispatch] = useContext(HotkeysContext);
+  const [, hkDispatch] = useContext(HotkeysContext);
   useEffect(() => {
-    commandManager.addCommands([
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
         id: WorkbenchCommandId.KeyboardShortcuts,
         menuText: t('commands:keyboard_shortcuts_menu_text'),
@@ -54,10 +54,10 @@ const Workbench: React.FC = () => {
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
-          dispatch({ type: "OPEN_DIALOG"});
+          hkDispatch({ type: "OPEN_DIALOG"});
         },
       },
-    ]);
+    ]});
   }, []); 
 
   // render workbench

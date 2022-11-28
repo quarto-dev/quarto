@@ -17,10 +17,10 @@
 import { ContextMenu, Menu } from "@blueprintjs/core";
 import { EditorDisplay, EditorMenuItem, XRef } from "editor";
 import React from "react";
-import { CommandManager } from "../../../commands/CommandManager";
+import { Commands } from "../../../commands/CommandManager";
 import { CommandMenuItems } from "../../../widgets/command/CommandMenuItems";
 
-export function editorDisplay(commandManager: () => CommandManager) : EditorDisplay {
+export function editorDisplay(commands: () => Commands) : EditorDisplay {
   return {
     openURL(_url: string) {
       //
@@ -37,7 +37,7 @@ export function editorDisplay(commandManager: () => CommandManager) : EditorDisp
       clientY: number
     ): Promise<boolean> {
       return new Promise(resolve => {        
-        ContextMenu.show(<Menu><CommandMenuItems menu={items} commandManager={commandManager()}></CommandMenuItems></Menu>, { left: clientX, top: clientY }, () => {
+        ContextMenu.show(<Menu><CommandMenuItems menu={items} commands={commands()}></CommandMenuItems></Menu>, { left: clientX, top: clientY }, () => {
           resolve(true);
         });
       }); 

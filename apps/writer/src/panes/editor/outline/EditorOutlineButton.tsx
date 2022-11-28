@@ -29,8 +29,8 @@ export interface EditorOutlineButtonProps {
 }
 
 export const EditorOutlineButton: React.FC<EditorOutlineButtonProps> = props => {
-  const commandManager = useContext(CommandManagerContext);
-  const command = commandManager.commands[WorkbenchCommandId.ShowOutline];
+  const [cmState] = useContext(CommandManagerContext);
+  const command = cmState.commands[WorkbenchCommandId.ShowOutline];
   const title = command ? commandTooltipText(command) : '';
 
   if (props.visible) {

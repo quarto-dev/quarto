@@ -39,12 +39,12 @@ export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props: Com
 
   // read command instances
   type CommandItem = Command | '---';
-  const commandManager = useContext(CommandManagerContext);
+  const [cmState] = useContext(CommandManagerContext);
   const commands: CommandItem[] = props.commands.reduce((allCmds, command) => {
     if (command === kSeparator) {
       allCmds.push(kSeparator);
     } else {
-      const cmd = commandManager.commands[command];
+      const cmd = cmState.commands[command];
       if (cmd) {
         allCmds.push(cmd);
       }

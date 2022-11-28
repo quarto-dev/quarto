@@ -38,7 +38,7 @@ import styles from './MarkdownPane.module.scss';
 const MarkdownPane: React.FC = () => {
 
   const { t } = useTranslation();
-  const commandManager = useContext(CommandManagerContext);
+  const [,cmDispatch] = useContext(CommandManagerContext);
 
   const markdown = useSelector(editorMarkdown);
   const showMarkdown = useSelector(prefsShowMarkdown);
@@ -52,7 +52,7 @@ const MarkdownPane: React.FC = () => {
   // outside of the flow of this component's render so need to 
   // access the store directly)
   useEffect(() => {
-    commandManager.addCommands([
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
         id: WorkbenchCommandId.ShowMarkdown,
         menuText: t('commands:show_markdown_menu_text'),
@@ -64,7 +64,7 @@ const MarkdownPane: React.FC = () => {
           dispatch(setPrefsShowMarkdown(!showMarkdown));
         },
       },
-    ]);
+    ]});
   }, [showMarkdown]);
 
   // codemirror instance

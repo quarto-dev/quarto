@@ -23,7 +23,7 @@ import { CommandId } from '../../commands/commands';
 
 export const CommandSubMenu: React.FC<PropsWithChildren<SubMenuProps>> = props => {
   // get command manager for command lookup
-  const commandManager = useContext(CommandManagerContext);
+  const [cmState] = useContext(CommandManagerContext);
 
   let haveCommands = false;
   const children = React.Children.toArray(props.children);
@@ -31,7 +31,7 @@ export const CommandSubMenu: React.FC<PropsWithChildren<SubMenuProps>> = props =
     if (
       React.isValidElement(child) &&
       child.type === CommandMenuItem &&
-      commandManager.commands[child.props.id as CommandId]
+      cmState.commands[child.props.id as CommandId]
     ) {
       haveCommands = true;
       break;

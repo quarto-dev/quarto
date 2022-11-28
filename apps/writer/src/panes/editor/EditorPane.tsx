@@ -46,7 +46,7 @@ import {
 } from '../../store/editor';
 import { prefsShowMarkdown } from '../../store/prefs';
 
-import { CommandManager, CommandManagerContext } from '../../commands/CommandManager';
+import { CommandManagerContext, Commands } from '../../commands/CommandManager';
 
 import { Pane } from '../../widgets/Pane';
 
@@ -67,7 +67,7 @@ const EditorPane : React.FC = () => {
 
   // global services
   const { t } = useTranslation();
-  const commandManager = useContext(CommandManagerContext);
+  const [cmState, cmDispatch] = useContext(CommandManagerContext);
 
   // redux state
   const title = useSelector(editorTitle);
@@ -102,7 +102,7 @@ const EditorPane : React.FC = () => {
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    editorRef.current = await createEditor(parentRef.current!, () => commandManager, editorDialogs(editorDialogsRef.current!));
+    editorRef.current = await createEditor(parentRef.current!, () => cmState.commands, editorDialogs(editorDialogsRef.current!));
     
     window.addEventListener("resize", onResize);
 
@@ -114,14 +114,14 @@ const EditorPane : React.FC = () => {
     onEditorEvent(StateChangeEvent, onEditorStateChanged);
 
     // add commands
-    commandManager.addCommands([
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
       ...editorProsemirrorCommands(editorRef.current!.commands()),
       ...editorExternalCommands(editorRef.current!),
       ...editorDebugCommands(editorRef.current!),
-    ]);
+    ]});
 
     // set menus
-    commandManager.setMenus(editorRef.current!.getMenus());
+    cmDispatch({ type: "SET_MENUS", payload: editorRef.current!.getMenus()});
 
     // load editor
     await editorRef.current!.setMarkdown(markdown, panmirrorWriterOptions(), false);
@@ -260,10 +260,10 @@ const editorLoadingUI = (loading: boolean) => {
 
 const createEditor = async (
   parent: HTMLElement, 
-  commandManager: () => CommandManager, 
+  commands: () => Commands, 
   dialogs: EditorDialogs
 ) : Promise<Editor> => {
-  const context = editorContext(commandManager, dialogs);
+  const context = editorContext(commands, dialogs);
     const format: EditorFormat = {
       pandocMode: 'markdown',
       pandocExtensions: '',

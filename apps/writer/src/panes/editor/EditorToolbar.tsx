@@ -33,7 +33,7 @@ const CommandId = { ...EditorCommandId, ...WorkbenchCommandId };
 
 const EditorToolbar: React.FC = () => {
 
-  const commandManager = useContext(CommandManagerContext);
+  const [cmState] = useContext(CommandManagerContext);
 
   return (
     <Toolbar className={styles.toolbar}>
@@ -66,7 +66,7 @@ const EditorToolbar: React.FC = () => {
       <ToolbarDivider />
       <WithCommand id={CommandId.TableInsertTable}>
         <ToolbarMenu icon={IconNames.TH}>
-          <CommandMenuItems menu={commandManager.menus.table}/>
+          <CommandMenuItems menu={cmState.menus.table}/>
         </ToolbarMenu>
         <ToolbarDivider />
       </WithCommand>

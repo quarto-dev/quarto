@@ -34,14 +34,14 @@ import {
   editorJsonRpcServer,
   editorJsonRpcServices
 } from "editor";
-import { CommandManager } from "../../../commands/CommandManager";
 import { editorDisplay } from "./editor-display";
 
 import { codeMirrorExtension } from "editor-codemirror";
 import { kWriterJsonRpcPath } from 'writer-types';
+import { Commands } from '../../../commands/CommandManager';
 
 
-export function editorContext(commandManager: () => CommandManager, dialogs: EditorDialogs) : EditorContext {
+export function editorContext(commands: () => Commands, dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
   const server = editorJsonRpcServer(kWriterJsonRpcPath);
@@ -49,7 +49,7 @@ export function editorContext(commandManager: () => CommandManager, dialogs: Edi
   
   const ui = {
     dialogs,
-    display: editorDisplay(commandManager),
+    display: editorDisplay(commands),
     math: editorMath(services.math),
     context: editorUIContext(),
     prefs: editorPrefs(),

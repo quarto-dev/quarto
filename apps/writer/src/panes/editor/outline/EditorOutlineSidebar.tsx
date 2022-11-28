@@ -38,7 +38,7 @@ import { editorOutline } from '../../../store/editor';
 const EditorOutlineSidebar: React.FC = () => {
 
   const { t } = useTranslation();
-  const commandManager = useContext(CommandManagerContext);
+  const [, cmDispatch] = useContext(CommandManagerContext);
 
   const outline = useSelector(editorOutline);
   const showOutline = useSelector(prefsShowOutline);
@@ -53,7 +53,7 @@ const EditorOutlineSidebar: React.FC = () => {
 
   // update command when showOutline changes
   useEffect(() => {
-    commandManager.addCommands([
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
         id: WorkbenchCommandId.ShowOutline,
         menuText: t('commands:show_outline_menu_text'),
@@ -65,7 +65,7 @@ const EditorOutlineSidebar: React.FC = () => {
           setShowOutline(!showOutline);
         },
       },
-    ])
+    ]})
   }, [showOutline])
 
   const outlineClassName = [styles.outline];

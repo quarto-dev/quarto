@@ -13,94 +13,66 @@
  *
  */
 
-import React, { PropsWithChildren, useState } from 'react';
+import React, { PropsWithChildren } from 'react';
 
-import { Props } from '@blueprintjs/core';
 
 import { CommandId, Command } from './commands';
 import { EditorMenus } from 'editor';
+import { Props } from '@blueprintjs/core';
 
 export type Commands = { [id in CommandId]?: Command };
 
-export interface CommandManager {
+export interface CommandManagerContextState {
   commands: Commands;
   menus: EditorMenus;
-  addCommands: (commands: Command[]) => void;
-  setMenus: (menus: EditorMenus) => void;
-  execCommand: (id: CommandId) => void;
 }
 
-export const CommandManagerContext = React.createContext<CommandManager>({
-  commands: {},
-  menus: { format: [], insert: [], table: [] },
-  addCommands: () => {
-    /* */
-  },
-  setMenus: () => {
-    /* */
-  },
-  execCommand: () => {
-    /* */
-  },
-});
+export type CommandManagerAction = 
+   | { type: "ADD_COMMANDS", payload: Command[] }
+   | { type: "SET_MENUS", payload: EditorMenus }
+   | { type: "EXEC_COMMAND", payload: CommandId };
 
-export const CommandManagerProvider: React.FC<PropsWithChildren<Props>> = props => {
-  // establish commands state
-  const initialCommands: Commands = {};
-  const [commands, setCommands] = useState(initialCommands);
+export type CommandManagerContextInstance = [CommandManagerContextState, React.Dispatch<CommandManagerAction>];
 
-  // establish menus state
-  const initialMenus: EditorMenus = { format: [], insert: [], table: []};
-  const [menus, setMenus] = useState(initialMenus);
+const initialCommandManagerState: CommandManagerContextState = 
+  { commands: {}, menus: { format: [], insert: [], table: []} };
+const noOpDispatch: React.Dispatch<CommandManagerAction> = () => null;
 
-  // command manager that enables reading commands and adding new ones
-  const commandManager = {
-    commands,
-    menus,
-    addCommands: (newCommands: Command[]) => {
-      setCommands((prevCommands: Commands) => {
-        // index commands by name
-        const newCommandsById: Commands = {};
-        newCommands.forEach(command => {
-          newCommandsById[command.id] = command;
-        });
-        const commands = {
-          ...prevCommands,
-          ...newCommandsById,
-        };
-        return commands;
+export const CommandManagerContext = React.createContext<CommandManagerContextInstance>([initialCommandManagerState, noOpDispatch]);
+
+const commandManagerReducer = (state: CommandManagerContextState, action: CommandManagerAction) : CommandManagerContextState => {
+  switch(action.type) {
+    case "ADD_COMMANDS": {
+      const newCommandsById: Commands = {};
+      action.payload.forEach(command => {
+        newCommandsById[command.id] = command;
       });
-    },
-    setMenus: (menus: EditorMenus) => {
-      setMenus(() => {
-        return menus;
-      })
-    },
-    execCommand: (id: CommandId) => {
-      const command = commands[id];
+      const commands = {
+        ...state.commands,
+        ...newCommandsById,
+      };
+
+      return { ...state, commands };
+    }
+    case "SET_MENUS": {
+      return { ...state, menus: action.payload }
+    }
+    case "EXEC_COMMAND": {
+      const command = state.commands[action.payload];
       if (command) {
         command.execute();
       }
-    },
-  };
+      return state;
+    }
+    default: {
+      return state;
+    }
+  }
+}
 
-  return <CommandManagerContext.Provider value={commandManager}>{props.children}</CommandManagerContext.Provider>;
+
+export const CommandManagerProvider: React.FC<PropsWithChildren<Props>> = props => {
+  const [state, dispatch] = React.useReducer(commandManagerReducer, initialCommandManagerState);
+  return <CommandManagerContext.Provider value={[state, dispatch]}>{props.children}</CommandManagerContext.Provider>;
 };
 
-// https://stackoverflow.com/questions/50612299/react-typescript-consuming-context-via-hoc
-// https://medium.com/@jrwebdev/react-higher-order-component-patterns-in-typescript-42278f7590fb
-export function withCommandManager<P extends WithCommandManagerProps>(Component: React.ComponentType<P>) {
-  return function CommandsComponent(props: Pick<P, Exclude<keyof P, keyof WithCommandManagerProps>>) {
-    return (
-      <CommandManagerContext.Consumer>
-        {(commandManager: CommandManager) => {
-          return <Component {...(props as P)} commandManager={commandManager} />;
-        }}
-      </CommandManagerContext.Consumer>
-    );
-  };
-}
-
-interface WithCommandManagerProps {
-  commandManager: CommandManager;
-}

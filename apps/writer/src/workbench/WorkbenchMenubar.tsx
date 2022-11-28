@@ -79,17 +79,17 @@ const HelpMenu: React.FC = () => {
 const WorkbenchMenubar: React.FC = () => {
   const { t } = useTranslation();
 
-  const commandManager = useContext(CommandManagerContext);
+  const [cmState] = useContext(CommandManagerContext);
 
   return (
     <ButtonGroup className={styles.menubarButtons} minimal={true}>
       <MainMenu text={t('file_menu')} menu={<FileMenu />} />
       <MainMenu text={t('edit_menu')} menu={<EditMenu />} />
       <MainMenu text={t('view_menu')} menu={<ViewMenu />} />
-      <MainMenu text={t('insert_menu')} menu={<CommandMenubarMenu menu={commandManager.menus.insert} />} />
-      <MainMenu text={t('format_menu')} menu={<CommandMenubarMenu menu={commandManager.menus.format} />} />
+      <MainMenu text={t('insert_menu')} menu={<CommandMenubarMenu menu={cmState.menus.insert} />} />
+      <MainMenu text={t('format_menu')} menu={<CommandMenubarMenu menu={cmState.menus.format} />} />
       <WithCommand id={CommandId.TableInsertTable}>
-        <MainMenu text={t('table_menu')} menu={<CommandMenubarMenu menu={commandManager.menus.table} />} />
+        <MainMenu text={t('table_menu')} menu={<CommandMenubarMenu menu={cmState.menus.table} />} />
       </WithCommand>
       <MainMenu text={t('help_menu')} menu={<HelpMenu />} />
     </ButtonGroup>

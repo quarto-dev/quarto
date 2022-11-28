@@ -17,10 +17,10 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import store from './store/store';
-
 import { setEditorMarkdown } from './store/editor';
 
-import Workbench from './workbench/Workbench';
+import { i18nInit } from './i18n';
+import App from './App';
 
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -28,7 +28,6 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
 import "./styles.scss"
-import { i18nInit } from './i18n';
 
 async function runApp() {
   try {
@@ -44,7 +43,7 @@ async function runApp() {
     // create root element and render
     const root = createRoot(document.getElementById('root')!);
     root.render(
-      <Workbench store={store} />
+      <App store={store} />
     );
   } catch (error) {
     console.error(error);

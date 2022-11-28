@@ -13,46 +13,62 @@
  *
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 
-import { Store } from 'redux';
-import { Provider as StoreProvider } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
-import { FocusStyleManager } from '@blueprintjs/core';
+import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 
-import { WorkbenchState } from '../store/store';
+import { CommandManagerContext } from '../commands/CommandManager';
+import { commandHotkeys } from '../commands/hotkeys';
+import { WorkbenchCommandId } from '../commands/commands';
 
-import './Workbench.scss';
-import { CommandManagerProvider } from '../commands/CommandManager';
-import WorkbenchNavbar from './WorkbenchNavbar';
-import WorkbenchClipboard from './WorkbenchClipboard';
-import WorkbenchHotkeys from './WorkbenchHotkeys';
 import EditorPane from '../panes/editor/EditorPane';
 import MarkdownPane from '../panes/markdown/MarkdownPane';
 
-interface WorkbenchProps {
-  store: Store<WorkbenchState>;
-}
+import WorkbenchNavbar from './WorkbenchNavbar';
+import WorkbenchClipboard from './WorkbenchClipboard';
 
-const Workbench: React.FC<WorkbenchProps> = props => {
-  // only show focus on key navigation
+import './Workbench.scss';
+
+const Workbench: React.FC = () => {
+ 
+  const { t } = useTranslation();
+  const commandManager = useContext(CommandManagerContext);
+
+  // register hotkeys
+  const hotkeys = useMemo(() => {
+    return commandHotkeys(commandManager.commands);
+  }, [commandManager]);
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: '' });
+
+  // hotkeys command
+  const [, dispatch] = useContext(HotkeysContext);
   useEffect(() => {
-    FocusStyleManager.onlyShowFocusOnTabs();
-  }, []);
+    commandManager.addCommands([
+      {
+        id: WorkbenchCommandId.KeyboardShortcuts,
+        menuText: t('commands:keyboard_shortcuts_menu_text'),
+        group: t('commands:group_utilities'),
+        keymap: ['Ctrl+Alt+K'],
+        isEnabled: () => true,
+        isActive: () => false,
+        execute: () => {
+          dispatch({ type: "OPEN_DIALOG"});
+        },
+      },
+    ]);
+  }, []); 
 
+  // render workbench
   return (
-    <div className={'workbench'}>
-      <StoreProvider store={props.store}>
-        <CommandManagerProvider>
-          <WorkbenchNavbar />
-          <div className={'workspace'}>
-            <EditorPane />
-            <MarkdownPane />
-          </div>
-          <WorkbenchClipboard />
-          <WorkbenchHotkeys />
-        </CommandManagerProvider>
-      </StoreProvider>
+    <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
+      <WorkbenchNavbar />
+      <div className={'workspace'}>
+        <EditorPane />
+        <MarkdownPane />
+      </div>
+      <WorkbenchClipboard />
     </div>
   );
 };

@@ -20,7 +20,7 @@ import { Props } from '@blueprintjs/core';
 import { CommandId, Command } from './commands';
 import { EditorMenus } from 'editor';
 
-type Commands = { [id in CommandId]?: Command };
+export type Commands = { [id in CommandId]?: Command };
 
 export interface CommandManager {
   commands: Commands;

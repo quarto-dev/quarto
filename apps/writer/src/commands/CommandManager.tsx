@@ -64,11 +64,11 @@ export const CommandManagerProvider: React.FC<PropsWithChildren<Props>> = props 
         newCommands.forEach(command => {
           newCommandsById[command.id] = command;
         });
-
-        return {
+        const commands = {
           ...prevCommands,
           ...newCommandsById,
         };
+        return commands;
       });
     },
     setMenus: (menus: EditorMenus) => {

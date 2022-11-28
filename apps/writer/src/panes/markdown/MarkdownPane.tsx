@@ -48,10 +48,6 @@ const MarkdownPane: React.FC = () => {
     dispatch(setPrefsShowMarkdown(false));
   }
 
-  // save showMarkdown value for use in out-of-band callback
-  const showMarkdownRef = useRef<boolean | null>(null);
-
-
   // add commands on initial mount (note that the callbacks are run
   // outside of the flow of this component's render so need to 
   // access the store directly)
@@ -63,13 +59,13 @@ const MarkdownPane: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-M'],
         isEnabled: () => true,
-        isActive: () => !!showMarkdownRef.current,
+        isActive: () => showMarkdown,
         execute: () => {
-          dispatch(setPrefsShowMarkdown(!showMarkdownRef.current));
+          dispatch(setPrefsShowMarkdown(!showMarkdown));
         },
       },
     ]);
-  }, []);
+  }, [showMarkdown]);
 
   // codemirror instance
   const cmRef = useRef<HTMLDivElement>(null);
@@ -91,7 +87,6 @@ const MarkdownPane: React.FC = () => {
     cm?.dispatch({
       changes: { from: 0, to: cm?.state.doc.length, insert: markdown }
     })
-    showMarkdownRef.current = showMarkdown;
   });
 
   return (

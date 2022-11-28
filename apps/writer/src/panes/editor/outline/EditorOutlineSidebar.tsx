@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -43,8 +43,6 @@ const EditorOutlineSidebar: React.FC = () => {
   const outline = useSelector(editorOutline);
   const showOutline = useSelector(prefsShowOutline);
   const dispatch = useDispatch();
-
-  const showOutlineRef = useRef<boolean | null>(null);
  
   const [animating, setAnimating] = useState(false);
 
@@ -53,9 +51,7 @@ const EditorOutlineSidebar: React.FC = () => {
   const onOpenClicked = () => setShowOutline(true);
   const onCloseClicked= () => setShowOutline(false);
 
-  // add commands on initial mount (note that the callbacks are run
-  // outside of the flow of this component's render so need to 
-  // access the store directly)
+  // update command when showOutline changes
   useEffect(() => {
     commandManager.addCommands([
       {
@@ -64,18 +60,13 @@ const EditorOutlineSidebar: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-O'],
         isEnabled: () => true,
-        isActive: () => !!showOutlineRef.current,
+        isActive: () => showOutline,
         execute: () => {
-          setShowOutline(!showOutlineRef.current);
+          setShowOutline(!showOutline);
         },
       },
     ])
-  }, [])
-
-  // keep showOutline up to date for use in out-of-band callback
-  useEffect(() => {
-    showOutlineRef.current = showOutline;
-  }, [showOutline]);
+  }, [showOutline])
 
   const outlineClassName = [styles.outline];
     if (showOutline) {

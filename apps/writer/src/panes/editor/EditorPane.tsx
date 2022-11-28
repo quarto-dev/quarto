@@ -82,6 +82,7 @@ const EditorPane : React.FC = () => {
 
   // refs that hold out of band state 
   const editorRef = useRef<Editor | null>(null);
+  const commandsRef = useRef<Commands | null>(null);
   const showMarkdownRef = useRef<boolean | null>(null);
  
   // subscribe/unsubscribe from editor events
@@ -102,7 +103,7 @@ const EditorPane : React.FC = () => {
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    editorRef.current = await createEditor(parentRef.current!, () => cmState.commands, editorDialogs(editorDialogsRef.current!));
+    editorRef.current = await createEditor(parentRef.current!, () => commandsRef.current!, editorDialogs(editorDialogsRef.current!));
     
     window.addEventListener("resize", onResize);
 
@@ -203,6 +204,11 @@ const EditorPane : React.FC = () => {
       editorRef.current?.setTitle(title);
     }
   }, [title]);
+
+  // update commands ref when it changes
+  useEffect(() => {
+    commandsRef.current = cmState.commands;
+  }, [cmState.commands])
 
   // update markdown in store when pref changes (also
   // note value for out-of-band editor changed callback)

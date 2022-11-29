@@ -56,7 +56,4 @@
 .pm-attr-edit-decoration .attr-edit-button img {
   width: 18px;
   height: 18px;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }

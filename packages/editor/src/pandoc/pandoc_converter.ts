@@ -31,7 +31,7 @@ import {
 
 import { haveTableCellsWithInlineRcode } from '../api/rmd';
 
-import { pandocFormatWith, PandocFormat, kGfmFormat, kCommonmarkFormat } from '../api/pandoc_format';
+import { pandocFormatWith, kGfmFormat, kCommonmarkFormat } from '../api/pandoc_format';
 import { PandocCapabilities } from '../api/pandoc_capabilities';
 import { PandocBlockCapsuleFilter, pandocMarkdownWithBlockCapsules } from '../api/pandoc_capsule';
 
@@ -40,6 +40,7 @@ import { ExtensionManager } from '../editor/editor-extensions';
 import { pandocToProsemirror } from './pandoc_to_prosemirror';
 import { pandocFromProsemirror } from './pandoc_from_prosemirror';
 import { isParagraphNode } from '../api/paragraph';
+import { PandocFormat } from '../api/pandoc-types';
 
 export type PandocLineWrapping = 'none' | 'column' | 'sentence';
 

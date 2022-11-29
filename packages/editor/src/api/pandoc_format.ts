@@ -19,6 +19,7 @@ import { PandocServer, PandocExtensions } from './pandoc';
 import { EditorFormat, kHugoDocType } from './format';
 import { firstYamlBlock, yamlMetadataNodes } from './yaml';
 import { findValue } from './object';
+import { PandocFormat, PandocFormatConfig, PandocFormatWarnings } from './pandoc-types';
 
 export const kMarkdownFormat = 'markdown';
 export const kMarkdownPhpextraFormat = 'markdown_phpextra';
@@ -28,30 +29,6 @@ export const kMarkdownStrictFormat = 'markdown_strict';
 export const kGfmFormat = 'gfm';
 export const kCommonmarkFormat = 'commonmark';
 export const kCommonmarkXFormat = 'commonmark_x';
-
-export interface PandocFormat {
-  mode: string;
-  baseName: string;
-  fullName: string;
-  extensions: PandocExtensions;
-  warnings: PandocFormatWarnings;
-}
-
-export interface PandocFormatWarnings {
-  invalidFormat: string;
-  invalidOptions: string[];
-}
-
-export interface PandocFormatConfig {
-  mode?: string;
-  extensions?: string;
-  rmdExtensions?: string;
-  wrap?: string;
-  doctypes?: string[];
-  references_location?: string;
-  references_prefix?: string;
-  canonical?: boolean;
-}
 
 export function matchPandocFormatComment(code: string) {
   const magicCommentRegEx = /^<!--\s+-\*-([\s\S]*?)-\*-\s+-->\s*$/m;

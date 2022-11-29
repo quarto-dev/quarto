@@ -59,12 +59,14 @@ import {
   BlurEvent,
 } from '../api/event-types';
 import {
-  PandocFormat,
   resolvePandocFormat,
-  PandocFormatConfig,
   pandocFormatConfigFromCode,
   pandocFormatConfigFromDoc,
 } from '../api/pandoc_format';
+import {
+  PandocFormat,
+  PandocFormatConfig
+} from '../api/pandoc-types';
 import { baseKeysPlugin } from '../api/basekeys';
 import {
   appendTransactionsPlugin,

@@ -30,10 +30,12 @@ import {
   kPreventBracketEscape,
 } from '../api/pandoc';
 
-import { PandocFormat, kGfmFormat } from '../api/pandoc_format';
+import { kGfmFormat } from '../api/pandoc_format';
 import { PandocAttr } from '../api/pandoc_attr';
+import { PandocFormat } from '../api/pandoc-types';
 import { fragmentText } from '../api/fragment';
 import { fancyQuotesToSimple } from '../api/quote';
+
 
 export function pandocFromProsemirror(
   doc: ProsemirrorNode,

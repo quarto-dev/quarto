@@ -59,7 +59,7 @@ import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands 
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
 import EditorToolbar from './EditorToolbar';
 
-import { PandocFormat } from 'editor/src/api/pandoc_format';
+import { PandocFormat } from 'editor';
 
 import styles from './EditorPane.module.scss';
 

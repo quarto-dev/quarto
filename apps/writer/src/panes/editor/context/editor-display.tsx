@@ -14,10 +14,16 @@
  *
  */
 
-import { EditorDisplay, XRef } from "editor";
+import React from "react";
+
+import { ContextMenu, Menu } from "@blueprintjs/core";
+import { EditorDisplay, EditorMenuItem, XRef } from "editor";
+
+import { Commands } from "../../../commands/CommandManager";
+import { CommandMenuItems } from "../../../widgets/command/CommandMenuItems";
 
 
-export function editorDisplay() : EditorDisplay {
+export function editorDisplay(commands: () => Commands) : EditorDisplay {
   return {
     openURL(_url: string) {
       //
@@ -27,7 +33,18 @@ export function editorDisplay() : EditorDisplay {
     },
     navigateToFile(_file: string) {
       //
+    },
+
+    async showContextMenu(
+      items: EditorMenuItem[],
+      clientX: number,
+      clientY: number
+    ): Promise<boolean> {
+      return new Promise(resolve => {        
+        ContextMenu.show(<Menu><CommandMenuItems menu={items} commands={commands()}></CommandMenuItems></Menu>, { left: clientX, top: clientY }, () => {
+          resolve(true);
+        });
+      }); 
     }
   };
 }
-

@@ -19,13 +19,13 @@ import { isInTable } from 'prosemirror-tables';
 import { EditorUI } from '../../api/ui-types';
 import { EditorCommandId } from '../../api/command';
 import { findParentNodeOfTypeClosestToPos } from 'prosemirror-utils';
-import { ContextMenuDefinition } from '../../api/menu';
+import { ContextMenuSource } from '../../api/menu';
 import { EditorView } from 'prosemirror-view';
 
 
 export function tableContextMenuHandler(ui: EditorUI) {
   
-  return (view: EditorView, $pos: ResolvedPos) : (ContextMenuDefinition | null)  => {
+  return (view: EditorView, $pos: ResolvedPos) : (ContextMenuSource | null)  => {
 
     if (!findParentNodeOfTypeClosestToPos($pos, view.state.schema.nodes.table)) {
       return null;
@@ -60,7 +60,7 @@ export function tableContextMenuHandler(ui: EditorUI) {
       { command: EditorCommandId.TableToggleCaption },
     ];
 
-    return { items, preventSelectionChange: isInTable };
+    return { items: async () => items, preventSelectionChange: isInTable };
   };
  
 }

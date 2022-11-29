@@ -19,8 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { useTranslation } from 'react-i18next';
 
-import { Intent, Menu, Spinner } from '@blueprintjs/core';
-import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2';
+import { Intent, Spinner } from '@blueprintjs/core';
 
 import { 
   Editor, 
@@ -61,8 +60,6 @@ import EditorToolbar from './EditorToolbar';
 
 import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 
-import { CommandMenuItems } from '../../widgets/command/CommandMenuItems';
-
 import styles from './EditorPane.module.scss';
 
 const EditorPane : React.FC = () => {
@@ -80,7 +77,7 @@ const EditorPane : React.FC = () => {
   const dispatch = useDispatch();
 
   // refs we get from rendering
-  const parentRef = useRef<HTMLDivElement | null>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // refs that hold out of band state 
   const editorRef = useRef<Editor | null>(null);
@@ -105,7 +102,7 @@ const EditorPane : React.FC = () => {
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    editorRef.current = await createEditor(parentRef.current!, dialogs);
+    editorRef.current = await createEditor(parentRef.current!, () => commandsRef.current!, dialogs);
     
     window.addEventListener("resize", onResize);
 
@@ -145,34 +142,6 @@ const EditorPane : React.FC = () => {
     navigate: function (id: string): void {
       editorRef.current?.navigate(NavigationType.Id, id);
     }
-  }
-
-  // context menu handler
-  const onContextMenu = (ctxHandler: React.MouseEventHandler<HTMLDivElement>) => {
-    return (event: React.MouseEvent<HTMLDivElement>) => {
-      if (editorRef.current?.contextMenu(event.nativeEvent)) {
-        return ctxHandler(event);
-      } else {
-        return false;
-      }
-    }
-  }
-
-  // context menu content from editor
-  const contextMenu = (props: ContextMenu2ContentProps) => {
-    if (props.isOpen) {
-      const menu = editorRef.current?.contextMenu(props.mouseEvent!.nativeEvent);
-      if (menu) {
-        return (
-          <Menu>
-            <CommandMenuItems menu={menu} commands={cmState.commands} />
-          </Menu>
-        )
-      }
-    } else {
-      editorRef.current?.contextMenuDismissed();
-    }
-    return <></>;
   }
 
   // when doc changes, propagate markdown only if showMarkdown is true (as
@@ -255,20 +224,10 @@ const EditorPane : React.FC = () => {
     <Pane className={'editor-pane'}>
       <EditorActionsContext.Provider value={editorActions}>
         <EditorToolbar />
-        <ContextMenu2 content={contextMenu}>
-          {(ctxMenuProps: ContextMenu2ChildrenProps) => {
-            return (
-              <div id="editor" className={[styles.editorParent,ctxMenuProps.className].join(' ')} 
-                    onContextMenu={onContextMenu(ctxMenuProps.onContextMenu)}
-                    ref={(el: HTMLDivElement) => { parentRef.current = el; ctxMenuProps.ref = parentRef; } }>
-                {ctxMenuProps.popover}
-                {editorLoadingUI(loading)}
-                <EditorOutlineSidebar />
-              </div>
-            )
-          }}
-        </ContextMenu2>
-      
+        <div id="editor" className={styles.editorParent} ref={parentRef}>
+          {editorLoadingUI(loading)}
+          <EditorOutlineSidebar />
+        </div>
       </EditorActionsContext.Provider>
     </Pane>
   );
@@ -307,9 +266,10 @@ const editorLoadingUI = (loading: boolean) => {
 
 const createEditor = async (
   parent: HTMLElement, 
+  commands: () => Commands,
   dialogs: EditorDialogs
 ) : Promise<Editor> => {
-  const context = editorContext(dialogs);
+  const context = editorContext(commands, dialogs);
     const format: EditorFormat = {
       pandocMode: 'markdown',
       pandocExtensions: '',

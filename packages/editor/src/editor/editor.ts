@@ -27,7 +27,7 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorMenuItem, EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
+import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   AttrProps,
   AttrEditInput,
@@ -133,6 +133,7 @@ import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
 import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/extension-types';
 import { editingRootNodeClosestToPos } from '../api/node';
+import { ContextMenuSource } from '../api/menu';
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -848,7 +849,7 @@ export class Editor {
   // note that calling this may put the editor in an 'ignore selection changes'
   // state so anyone calling this must also call contextMenuDismissed when
   // the menu is no longer in play (either ignored or dismissed)
-  public contextMenu(event: Event) : EditorMenuItem[] | undefined {
+  public contextMenu(event: Event) : ContextMenuSource | undefined {
     if (event.target && event.target instanceof Node) {
       const pos = this.view.posAtDOM(event.target, 0);
       if (pos !== -1) {
@@ -859,13 +860,11 @@ export class Editor {
           for (const handler of handlers) {
             const menu = handler(this.view, $pos);
             if (menu) {
-              this.preventSelectionChange = menu?.preventSelectionChange;
-              return menu?.items;
+              return menu;
             }
           }
         }
       }
-      
     }
     return undefined;
   }
@@ -1027,19 +1026,28 @@ export class Editor {
               return false;
             }
           },
-          contextmenu: (view: EditorView, event: Event) => {
+          contextmenu: (_view: EditorView, event: Event) => {
             
             // don't handle if there is no imperative context menu handler
             if (!this.context.ui.display.showContextMenu) {
               return false;
             }
 
-            const menuItems = this.contextMenu(event);
-            if (menuItems) {
+            const menu = this.contextMenu(event);
+            if (menu) {
+              // show context menu (async)
               const { clientX, clientY } = event as MouseEvent;
-              this.context.ui.display.showContextMenu!(menuItems, clientX, clientY).then(() => {
-                this.contextMenuDismissed();
-              });
+              const showContextMenu = async () => {
+                this.preventSelectionChange = menu.preventSelectionChange;
+                try {
+                  const menuItems = await menu.items();
+                  await this.context.ui.display.showContextMenu!(menuItems, clientX, clientY);
+                } finally {
+                  this.preventSelectionChange = undefined;
+                }
+              };
+              showContextMenu();
+
               event.stopPropagation();
               event.preventDefault();
               return true;

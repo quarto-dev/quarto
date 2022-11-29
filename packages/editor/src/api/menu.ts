@@ -19,10 +19,10 @@ import { EditorView } from "prosemirror-view";
 import { EditorMenuItem } from "./ui-types";
 
 
-export interface ContextMenuDefinition {
-  items: EditorMenuItem[];
+export interface ContextMenuSource {
+  items: () => Promise<EditorMenuItem[]>;
   preventSelectionChange?: (state: EditorState) => boolean
 }
 
-export type ContextMenuHandlerFn = (view: EditorView, $pos: ResolvedPos) => ContextMenuDefinition | null;
+export type ContextMenuHandlerFn = (view: EditorView, $pos: ResolvedPos) => ContextMenuSource | null;
 

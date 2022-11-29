@@ -34,7 +34,7 @@ import { EditorUI, EditorMenuItem } from '../../api/ui-types';
 
 import { excludedMarks, getWords, spellcheckerWord, findBeginWord, findEndWord, charAt } from './spelling';
 import { WordBreaker, kCharClassWord, wordBreaker } from 'core';
-import { ContextMenuDefinition } from '../../api/menu';
+import { ContextMenuSource } from '../../api/menu';
 
 const kUpdateSpellingTransaction = 'updateSpelling';
 const kInvalidateSpellingWordTransaction = 'invalidateSpellingWord';
@@ -276,7 +276,7 @@ function spellingDecorations(
 
 export function spellingContextMenuHandler(ui: EditorUI) {
   
-  return (view: EditorView, $pos: ResolvedPos) : (ContextMenuDefinition | null)  => {
+  return (view: EditorView, $pos: ResolvedPos) : (ContextMenuSource | null)  => {
 
     // word breaker
     const wb = RealtimeSpellingPlugin.wb;
@@ -298,41 +298,42 @@ export function spellingContextMenuHandler(ui: EditorUI) {
     // find the spelling decoration at this position (if any)
     const deco = realtimeSpellingKey.getState(view.state)!.find($pos.pos, $pos.pos);
     if (deco.length) {
-      // get word
-      const { from, to } = deco[0];
-      const word = spellcheckerWord(view.state.doc.textBetween(from, to));
-      const kMaxSuggetions = 5;
-      const menuItems: EditorMenuItem[] = [];
-      ui.spelling.suggestionList(word, (suggestions: string[]): void => {
-        // create menu w/ suggestions
-        menuItems.push(...suggestions.slice(0, kMaxSuggetions).map(suggestion => {
-          return {
-            text: suggestion,
-            exec: () => {
-              const tr = view.state.tr;
-              tr.setSelection(TextSelection.create(tr.doc, from, to));
-              const marks = tr.selection.$from.marks();
-              tr.replaceSelectionWith(schema.text(suggestion, marks), false);
-              setTextSelection(from + suggestion.length)(tr);
-              view.dispatch(tr);
-              view.focus();
-            },
-          };
-        }));
-        if (menuItems.length) {
-          menuItems.push({ separator: true });
-        }
+      return { items: () => new Promise<EditorMenuItem[]>(resolve => {
 
-        menuItems.push(menuAction(ui.context.translateText('Ignore All'), () => ui.spelling.ignoreWord(word)));
-        menuItems.push({ separator: true });
-        menuItems.push(
-          menuAction(ui.context.translateText('Add to Dictionary'), () => ui.spelling.addToDictionary(word)),
-        );
-      });
-    
-      // show context menu
-      return { items: menuItems };
-    }
+        const { from, to } = deco[0];
+        const word = spellcheckerWord(view.state.doc.textBetween(from, to));
+        const kMaxSuggetions = 5;
+        const menuItems: EditorMenuItem[] = [];
+        ui.spelling.suggestionList(word, (suggestions: string[]): void => {
+          // create menu w/ suggestions
+          menuItems.push(...suggestions.slice(0, kMaxSuggetions).map(suggestion => {
+            return {
+              text: suggestion,
+              exec: () => {
+                const tr = view.state.tr;
+                tr.setSelection(TextSelection.create(tr.doc, from, to));
+                const marks = tr.selection.$from.marks();
+                tr.replaceSelectionWith(schema.text(suggestion, marks), false);
+                setTextSelection(from + suggestion.length)(tr);
+                view.dispatch(tr);
+                view.focus();
+              },
+            };
+          }));
+          if (menuItems.length) {
+            menuItems.push({ separator: true });
+          }
+  
+          menuItems.push(menuAction(ui.context.translateText('Ignore All'), () => ui.spelling.ignoreWord(word)));
+          menuItems.push({ separator: true });
+          menuItems.push(
+            menuAction(ui.context.translateText('Add to Dictionary'), () => ui.spelling.addToDictionary(word)),
+          );
+
+          resolve(menuItems);
+        });
+      })};
+    } 
 
     // find the word at this position and see if it's ignored. if so provide an unignore context menu
     const classify = wb.classifyCharacter;
@@ -342,7 +343,7 @@ export function spellingContextMenuHandler(ui: EditorUI) {
       const to = findEndWord(view.state, $pos.pos, classify);
       const word = spellcheckerWord(view.state.doc.textBetween(from, to));
       if (ui.spelling.isWordIgnored(word)) {
-        return { items: [
+        return { items: async () => [
           menuAction(`${ui.context.translateText('Unignore')} '${word}'`, () => ui.spelling.unignoreWord(word)),
         ]};
       }

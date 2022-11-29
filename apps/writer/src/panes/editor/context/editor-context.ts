@@ -38,10 +38,9 @@ import { editorDisplay } from "./editor-display";
 
 import { codeMirrorExtension } from "editor-codemirror";
 import { kWriterJsonRpcPath } from 'writer-types';
-import { Commands } from '../../../commands/CommandManager';
 
 
-export function editorContext(commands: () => Commands, dialogs: EditorDialogs) : EditorContext {
+export function editorContext(dialogs: EditorDialogs) : EditorContext {
   
   const uiTools = new UITools();
   const server = editorJsonRpcServer(kWriterJsonRpcPath);
@@ -49,7 +48,7 @@ export function editorContext(commands: () => Commands, dialogs: EditorDialogs) 
   
   const ui = {
     dialogs,
-    display: editorDisplay(commands),
+    display: editorDisplay(),
     math: editorMath(services.math),
     context: editorUIContext(),
     prefs: editorPrefs(),

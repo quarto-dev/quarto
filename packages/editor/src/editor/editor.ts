@@ -27,7 +27,7 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
+import { EditorMenuItem, EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   AttrProps,
   AttrEditInput,
@@ -844,6 +844,36 @@ export class Editor {
     return pandocFormatConfigFromDoc(this.state.doc, isRmd);
   }
 
+  // are there context menu items available the current mouse position?
+  // note that calling this may put the editor in an 'ignore selection changes'
+  // state so anyone calling this must also call contextMenuDismissed when
+  // the menu is no longer in play (either ignored or dismissed)
+  public contextMenu(event: Event) : EditorMenuItem[] | undefined {
+    if (event.target && event.target instanceof Node) {
+      const pos = this.view.posAtDOM(event.target, 0);
+      if (pos !== -1) {
+        const $pos = this.view.state.doc.resolve(pos);
+        const rootNd = editingRootNodeClosestToPos($pos);
+        if (rootNd) {
+          const handlers = this.extensions.contextMenuHandlers();
+          for (const handler of handlers) {
+            const menu = handler(this.view, $pos);
+            if (menu) {
+              this.preventSelectionChange = menu?.preventSelectionChange;
+              return menu?.items;
+            }
+          }
+        }
+      }
+      
+    }
+    return undefined;
+  }
+
+  public contextMenuDismissed() {
+    this.preventSelectionChange = undefined;
+  }
+
   private dispatchTransaction(tr: Transaction) {
     // track previous outline
     const previousOutline = getOutline(this.state);
@@ -998,26 +1028,21 @@ export class Editor {
             }
           },
           contextmenu: (view: EditorView, event: Event) => {
-            if (event.target && event.target instanceof Node) {
-              const pos = view.posAtDOM(event.target, 0);
-              const $pos = view.state.doc.resolve(pos);
-              const rootNd = editingRootNodeClosestToPos($pos);
-              if (rootNd) {
-                const handlers = this.extensions.contextMenuHandlers();
-                for (const handler of handlers) {
-                  const menu = handler(view, $pos);
-                  if (menu && this.context.ui.display.showContextMenu) {
-                    const { clientX, clientY } = event as MouseEvent;
-                    this.preventSelectionChange = menu.preventSelectionChange;
-                    this.context.ui.display.showContextMenu!(menu.items, clientX, clientY).then(() => {
-                      this.preventSelectionChange = undefined;
-                    });
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return true;
-                  }
-                }
-              }
+            
+            // don't handle if there is no imperative context menu handler
+            if (!this.context.ui.display.showContextMenu) {
+              return false;
+            }
+
+            const menuItems = this.contextMenu(event);
+            if (menuItems) {
+              const { clientX, clientY } = event as MouseEvent;
+              this.context.ui.display.showContextMenu!(menuItems, clientX, clientY).then(() => {
+                this.contextMenuDismissed();
+              });
+              event.stopPropagation();
+              event.preventDefault();
+              return true;
             }
             return false;
           }

@@ -29,7 +29,8 @@ export interface HRefSelectProps {
   targets: LinkTargets;
   capabilities: LinkCapabilities;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  typeRef: (ref: HTMLSelectElement | null) => any;
+  typeRef?: (ref: HTMLSelectElement | null) => any;
+  autoFocus?: boolean;
 }
 
 
@@ -84,6 +85,7 @@ export const HRefSelect : React.FC<HRefSelectProps> = ((props: HRefSelectProps) 
 
         {type === LinkType.URL ? (
           <InputGroup
+            autoFocus={props.autoFocus}
             defaultValue={href}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               const newHRef = event.currentTarget.value;

@@ -22,7 +22,6 @@ import { LinkEditResult, LinkProps, LinkTargets, LinkCapabilities, LinkType, Att
 
 import { Dialog } from '../../../widgets/dialog/Dialog';
 import { DialogTextInput } from '../../../widgets/dialog/DialogInputs';
-import { focusInput } from '../../../widgets/utils';
 
 import { AttrEditor } from './AttrEditor';
 import { HRefSelect } from './HRefSelect';
@@ -68,25 +67,12 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
   
   const [attr, setAttr] = useState<AttrProps>(props.link);
 
-  let typeInput: HTMLSelectElement | null;
-  const setTypeInput = (ref: HTMLSelectElement | null) => {
-    typeInput = ref;
-  };
-
   const onTargetChanged = (type: LinkType, href: string) => {
     setTarget({ type, href });
   };
 
   const onOpening = () => {
     setTarget({ type: props.link.type, href: props.link.href });
-  };
-
-  const onOpened = () => {
-    if (textInput.current && !textInput.current!.value) {
-      focusInput(textInput.current);
-    } else if (typeInput) {
-      focusInput(typeInput);
-    }
   };
 
   const onActionClicked = (action: 'edit' | 'remove') => {
@@ -139,7 +125,6 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
       isOpen={props.isOpen}
       title={t('edit_link_dialog_caption') as string}
       onOpening={onOpening}
-      onOpened={onOpened}
       onOK={onOK}
       onCancel={onCancel}
       leftButtons={removeButton}
@@ -149,8 +134,8 @@ export const EditorDialogEditLink: React.FC<EditorDialogEditLinkProps> = props =
         type={props.link.type}
         capabilities={props.capabilities}
         targets={props.targets}
-        typeRef={setTypeInput}
         onChange={onTargetChanged}
+        autoFocus={true}
       />
       {target.type !== LinkType.Heading ? (
         <>

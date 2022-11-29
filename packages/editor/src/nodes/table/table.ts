@@ -53,7 +53,7 @@ import {
 } from './table-nodes';
 
 import { fixupTableWidths } from './table-columns';
-import { TableContextMenuPlugin } from './table-contextmenu';
+import { tableContextMenuHandler } from './table-contextmenu';
 import { tablePaste } from './table-paste';
 
 import 'prosemirror-tables/style/tables.css';
@@ -126,16 +126,20 @@ const extension = (context: ExtensionContext): Extension | null => {
       return commands;
     },
 
-    plugins: (schema: Schema) => {
+    plugins: () => {
       return [
         columnResizing({
           handleWidth: 5,
         }),
         tableEditing(),
         tablePaste(),
-        new TableContextMenuPlugin(schema, ui),
       ];
     },
+
+    contextMenuHandlers: () => {
+      return [tableContextMenuHandler(ui)]
+    },
+
 
     baseKeys: (schema: Schema) => {
       // core keys

@@ -34,6 +34,7 @@ import { MarkInputRuleFilter } from './input_rule';
 import { CompletionHandler } from './completion';
 import { EditorNavigation } from './navigation-types';
 import { EditorServer } from 'editor-types';
+import { ContextMenuHandlerFn } from './menu';
 
 export interface Extension {
   view?: (view: EditorView) => void;
@@ -47,6 +48,7 @@ export interface Extension {
   appendMarkTransaction?: (schema: Schema) => readonly AppendMarkTransactionHandler[];
   fixups?: (schema: Schema, view: EditorView) => Readonly<FixupFn[]>;
   completionHandlers?: () => readonly CompletionHandler[];
+  contextMenuHandlers?: () => readonly ContextMenuHandlerFn[];
 }
 
 export interface ExtensionContext {

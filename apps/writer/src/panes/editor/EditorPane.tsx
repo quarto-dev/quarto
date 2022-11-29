@@ -283,7 +283,7 @@ const createEditor = async (
     }
     return await Editor.create(parent, context, format, { 
       browserSpellCheck: true,
-      commenting: true,
+      commenting: false,
       outerScrollContainer: true 
     });
 }

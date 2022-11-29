@@ -115,6 +115,7 @@ import { aceExtension } from '../optional/ace/ace';
 import { attrEditExtension } from '../behaviors/attr_edit/attr_edit';
 import { codeViewClipboardPlugin } from '../api/code';
 import { CodeViewExtensionFn, CodeViewOptions } from '../api/extension-types';
+import { ContextMenuHandlerFn } from '../api/menu';
 
 export function initExtensions(
   context: ExtensionContext, 
@@ -398,6 +399,10 @@ export class ExtensionManager {
 
   public completionHandlers(): readonly CompletionHandler[] {
     return this.collect(extension => extension.completionHandlers?.());
+  }
+
+  public contextMenuHandlers(): readonly ContextMenuHandlerFn[] {
+    return this.collect(extension => extension.contextMenuHandlers?.());
   }
 
   // NOTE: return value not readonly b/c it will be fed directly to a

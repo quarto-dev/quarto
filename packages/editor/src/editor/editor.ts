@@ -112,7 +112,7 @@ import { omniInsertExtension } from '../behaviors/omni_insert/omni_insert';
 import { completionExtension } from '../behaviors/completion/completion';
 
 import { getSpellingDoc } from '../behaviors/spelling/spelling-interactive';
-import { realtimeSpellingPlugin, invalidateAllWords, invalidateWord } from '../behaviors/spelling/spelling-realtime';
+import { realtimeSpellingPlugin, invalidateAllWords, invalidateWord, spellingContextMenuHandler } from '../behaviors/spelling/spelling-realtime';
 
 import { PandocConverter, PandocLineWrapping } from '../pandoc/pandoc_converter';
 
@@ -132,6 +132,7 @@ import { editorJsonRpcServices } from './editor-services';
 import { EditingOutlineLocation, EditorOutline } from '../api/outline-types';
 import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/extension-types';
+import { editingRootNodeClosestToPos } from '../api/node';
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -308,6 +309,10 @@ export class Editor {
 
   // keep track of whether the last transaction was selection-only
   private lastTrSelectionOnly = false;
+
+  // keep track of whether we are preventing selection (e.g. for a context menu
+  // handler that wants to mask the selection change caused by the context click)
+  private preventSelectionChange?: (state: EditorState) => boolean;
 
   // create the editor -- note that the markdown argument does not substitute for calling
   // setMarkdown, rather it's used to read the format comment to determine how to
@@ -918,6 +923,9 @@ export class Editor {
       [realtimeSpellingPlugin(this.schema, this.extensions.pandocMarks(), this.context.ui, this.events)],
       true,
     );
+    this.extensions.register([{
+      contextMenuHandlers: () => [spellingContextMenuHandler(this.context.ui)]
+    }])
   }
 
   private createPlugins(): Plugin[] {
@@ -929,6 +937,7 @@ export class Editor {
       ...this.extensions.plugins(this.schema),
       this.inputRulesPlugin(),
       this.editablePlugin(),
+      this.preventSelectionChangePlugin(),
       this.domEventsPlugin(),
     ];
   }
@@ -988,9 +997,45 @@ export class Editor {
               return false;
             }
           },
+          contextmenu: (view: EditorView, event: Event) => {
+            if (event.target && event.target instanceof Node) {
+              const pos = view.posAtDOM(event.target, 0);
+              const $pos = view.state.doc.resolve(pos);
+              const rootNd = editingRootNodeClosestToPos($pos);
+              if (rootNd) {
+                const handlers = this.extensions.contextMenuHandlers();
+                for (const handler of handlers) {
+                  const menu = handler(view, $pos);
+                  if (menu && this.context.ui.display.showContextMenu) {
+                    const { clientX, clientY } = event as MouseEvent;
+                    this.preventSelectionChange = menu.preventSelectionChange;
+                    this.context.ui.display.showContextMenu!(menu.items, clientX, clientY).then(() => {
+                      this.preventSelectionChange = undefined;
+                    });
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          }
         },
       },
     });
+  }
+
+  private preventSelectionChangePlugin() : Plugin {
+    return new Plugin({
+      filterTransaction: (tr: Transaction, state: EditorState) => {
+        if (this.preventSelectionChange?.(state)) {
+          return !(tr.selectionSet && !tr.docChanged && !tr.storedMarksSet);
+        } else {
+          return true;
+        }
+      },
+    })
   }
 
   private keybindingsPlugin(): Plugin {

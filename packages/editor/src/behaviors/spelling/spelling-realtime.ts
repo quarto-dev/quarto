@@ -13,7 +13,7 @@
  *
  */
 
-import { Schema, MarkType } from 'prosemirror-model';
+import { Schema, MarkType, ResolvedPos } from 'prosemirror-model';
 import { Plugin, PluginKey, EditorState, Transaction, TextSelection } from 'prosemirror-state';
 import { DecorationSet, EditorView, Decoration, DecorationAttrs } from 'prosemirror-view';
 import { AddMarkStep, RemoveMarkStep } from 'prosemirror-transform';
@@ -34,6 +34,7 @@ import { EditorUI, EditorMenuItem } from '../../api/ui-types';
 
 import { excludedMarks, getWords, spellcheckerWord, findBeginWord, findEndWord, charAt } from './spelling';
 import { WordBreaker, kCharClassWord, wordBreaker } from 'core';
+import { ContextMenuDefinition } from '../../api/menu';
 
 const kUpdateSpellingTransaction = 'updateSpelling';
 const kInvalidateSpellingWordTransaction = 'invalidateSpellingWord';
@@ -67,7 +68,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
 
   private view: EditorView | null = null;
   private readonly ui: EditorUI;
-  private static readonly wb = wordBreaker();
+  public static readonly wb = wordBreaker();
 
   constructor(excluded: MarkType[], ui: EditorUI, events: EditorEvents) {    
     super({
@@ -188,10 +189,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
       props: {
         decorations: (state: EditorState) => {
           return realtimeSpellingKey.getState(state);
-        },
-        handleDOMEvents: {
-          contextmenu: spellingSuggestionContextMenuHandler(ui, RealtimeSpellingPlugin.wb),
-        },
+        }
       },
     });
 
@@ -275,11 +273,13 @@ function spellingDecorations(
   return decorations;
 }
 
-function spellingSuggestionContextMenuHandler(ui: EditorUI, wb: WordBreaker) {
-  return (view: EditorView, event: Event) => {
-    if (!ui.display.showContextMenu) {
-      return false;
-    }
+
+export function spellingContextMenuHandler(ui: EditorUI) {
+  
+  return (view: EditorView, $pos: ResolvedPos) : (ContextMenuDefinition | null)  => {
+
+    // word breaker
+    const wb = RealtimeSpellingPlugin.wb;
 
     // helper to create a menu action
     const menuAction = (text: string, action: VoidFunction) => {
@@ -292,91 +292,66 @@ function spellingSuggestionContextMenuHandler(ui: EditorUI, wb: WordBreaker) {
       };
     };
 
-    // helper to show a context menu and prevent further event handling
-    const showContextMenu = (menuItems: EditorMenuItem[]) => {
-      // show the menu
-      const { clientX, clientY } = event as MouseEvent;
-      ui.display.showContextMenu!(menuItems, clientX, clientY);
-    };
+    // alias schema
+    const schema = view.state.schema;
 
-    if (event.target && event.target instanceof Node) {
-      // alias schema
-      const schema = view.state.schema;
-
-      // find the spelling decoration at this position (if any)
-      const pos = view.posAtDOM(event.target, 0);
-      const deco = realtimeSpellingKey.getState(view.state)!.find(pos, pos);
-      if (deco.length) {
-        // prevent default handling
-        event.stopPropagation();
-        event.preventDefault();
-
-        // get word
-        const { from, to } = deco[0];
-        const word = spellcheckerWord(view.state.doc.textBetween(from, to));
-
-        const kMaxSuggetions = 5;
-        ui.spelling.suggestionList(word, (suggestions: string[]): void => {
-          // create menu w/ suggestions
-          const menuItems: EditorMenuItem[] = suggestions.slice(0, kMaxSuggetions).map(suggestion => {
-            return {
-              text: suggestion,
-              exec: () => {
-                const tr = view.state.tr;
-                tr.setSelection(TextSelection.create(tr.doc, from, to));
-                const marks = tr.selection.$from.marks();
-                tr.replaceSelectionWith(schema.text(suggestion, marks), false);
-                setTextSelection(from + suggestion.length)(tr);
-                view.dispatch(tr);
-                view.focus();
-              },
-            };
-          });
-          if (menuItems.length) {
-            menuItems.push({ separator: true });
-          }
-
-          menuItems.push(menuAction(ui.context.translateText('Ignore All'), () => ui.spelling.ignoreWord(word)));
+    // find the spelling decoration at this position (if any)
+    const deco = realtimeSpellingKey.getState(view.state)!.find($pos.pos, $pos.pos);
+    if (deco.length) {
+      // get word
+      const { from, to } = deco[0];
+      const word = spellcheckerWord(view.state.doc.textBetween(from, to));
+      const kMaxSuggetions = 5;
+      const menuItems: EditorMenuItem[] = [];
+      ui.spelling.suggestionList(word, (suggestions: string[]): void => {
+        // create menu w/ suggestions
+        menuItems.push(...suggestions.slice(0, kMaxSuggetions).map(suggestion => {
+          return {
+            text: suggestion,
+            exec: () => {
+              const tr = view.state.tr;
+              tr.setSelection(TextSelection.create(tr.doc, from, to));
+              const marks = tr.selection.$from.marks();
+              tr.replaceSelectionWith(schema.text(suggestion, marks), false);
+              setTextSelection(from + suggestion.length)(tr);
+              view.dispatch(tr);
+              view.focus();
+            },
+          };
+        }));
+        if (menuItems.length) {
           menuItems.push({ separator: true });
-          menuItems.push(
-            menuAction(ui.context.translateText('Add to Dictionary'), () => ui.spelling.addToDictionary(word)),
-          );
-
-          // show context menu
-          showContextMenu(menuItems);
-        });
-
-        return true;
-      }
-
-      // find the word at this position and see if it's ignored. if so provide an unignore context menu
-      const classify = wb.classifyCharacter;
-      const mouseEvent = event as MouseEvent;
-      const clickPos = view.posAtCoords({ left: mouseEvent.clientX, top: mouseEvent.clientY });
-      if (clickPos) {
-        const ch = charAt(view.state.doc, clickPos.pos);
-        if (classify(ch) === kCharClassWord) {
-          const from = findBeginWord(view.state, clickPos.pos, classify);
-          const to = findEndWord(view.state, clickPos.pos, classify);
-          const word = spellcheckerWord(view.state.doc.textBetween(from, to));
-
-          if (ui.spelling.isWordIgnored(word)) {
-            // prevent default handling
-            event.stopPropagation();
-            event.preventDefault();
-
-            showContextMenu([
-              menuAction(`${ui.context.translateText('Unignore')} '${word}'`, () => ui.spelling.unignoreWord(word)),
-            ]);
-            return true;
-          }
         }
+
+        menuItems.push(menuAction(ui.context.translateText('Ignore All'), () => ui.spelling.ignoreWord(word)));
+        menuItems.push({ separator: true });
+        menuItems.push(
+          menuAction(ui.context.translateText('Add to Dictionary'), () => ui.spelling.addToDictionary(word)),
+        );
+      });
+    
+      // show context menu
+      return { items: menuItems };
+    }
+
+    // find the word at this position and see if it's ignored. if so provide an unignore context menu
+    const classify = wb.classifyCharacter;
+    const ch = charAt(view.state.doc, $pos.pos);
+    if (classify(ch) === kCharClassWord) {
+      const from = findBeginWord(view.state, $pos.pos, classify);
+      const to = findEndWord(view.state, $pos.pos, classify);
+      const word = spellcheckerWord(view.state.doc.textBetween(from, to));
+      if (ui.spelling.isWordIgnored(word)) {
+        return { items: [
+          menuAction(`${ui.context.translateText('Unignore')} '${word}'`, () => ui.spelling.unignoreWord(word)),
+        ]};
       }
     }
 
-    return false;
-  };
+    return null;
+  }
 }
+
 
 function updateSpelling(view: EditorView) {
   const tr = view.state.tr;

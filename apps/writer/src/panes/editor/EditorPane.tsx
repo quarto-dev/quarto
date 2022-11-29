@@ -31,7 +31,8 @@ import {
   StateChangeEvent,
   EditorFormat,
   kQuartoDocType,
-  EditorDialogs
+  EditorDialogs,
+  PandocFormat
 } from 'editor';
 
 import {
@@ -50,8 +51,6 @@ import { CommandManagerContext, Commands } from '../../commands/CommandManager';
 
 import { Pane } from '../../widgets/Pane';
 
-import { editorDialogs } from './dialogs/editor-dialogs';
-import EditorDialogsImpl from './dialogs/EditorDialogsImpl';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import { editorContext } from './context/editor-context';
 
@@ -59,7 +58,7 @@ import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands 
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
 import EditorToolbar from './EditorToolbar';
 
-import { PandocFormat } from 'editor';
+import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 
 import styles from './EditorPane.module.scss';
 
@@ -68,6 +67,7 @@ const EditorPane : React.FC = () => {
   // global services
   const { t } = useTranslation();
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
+  const dialogs = useContext(EditorDialogsContext);
 
   // redux state
   const title = useSelector(editorTitle);
@@ -78,7 +78,6 @@ const EditorPane : React.FC = () => {
 
   // refs we get from rendering
   const parentRef = useRef<HTMLDivElement>(null);
-  const editorDialogsRef = useRef<EditorDialogsImpl>(null);
 
   // refs that hold out of band state 
   const editorRef = useRef<Editor | null>(null);
@@ -97,13 +96,13 @@ const EditorPane : React.FC = () => {
   // general helper functions
   const errorAlert = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    editorDialogsRef.current?.alert(message, t('error_alert_title') as string, kAlertTypeError);
+    dialogs.alert(message, t('error_alert_title') as string, kAlertTypeError);
   }
 
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    editorRef.current = await createEditor(parentRef.current!, () => commandsRef.current!, editorDialogs(editorDialogsRef.current!));
+    editorRef.current = await createEditor(parentRef.current!, () => commandsRef.current!, dialogs);
     
     window.addEventListener("resize", onResize);
 
@@ -228,7 +227,6 @@ const EditorPane : React.FC = () => {
           {editorLoadingUI(loading)}
           <EditorOutlineSidebar />
         </div>
-        <EditorDialogsImpl ref={editorDialogsRef} />
       </EditorActionsContext.Provider>
     </Pane>
   );

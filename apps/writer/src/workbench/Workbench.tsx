@@ -30,6 +30,7 @@ import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 
 import './Workbench.scss';
+import { EditorDialogsProvider } from '../panes/editor/dialogs/EditorDialogsProvider';
 
 const Workbench: React.FC = () => {
  
@@ -65,7 +66,9 @@ const Workbench: React.FC = () => {
     <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
       <WorkbenchNavbar />
       <div className={'workspace'}>
-        <EditorPane />
+        <EditorDialogsProvider>
+          <EditorPane />
+        </EditorDialogsProvider>
         <MarkdownPane />
       </div>
       <WorkbenchClipboard />

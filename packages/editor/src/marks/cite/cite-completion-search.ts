@@ -39,6 +39,7 @@ export function completionIndex(defaultEntries?: CiteCompletionEntry[]): CiteCom
     minMatchCharLength: 3,
     threshold: 0.5,
     keys: searchFields,
+    useExtendedSearch: true
   };
 
   defaultEntries = defaultEntries || [];

@@ -15,6 +15,6 @@
 
 export const kWriterJsonRpcPath = "/rpc";
 
-export * from './user';
+export * from './prefs';
 export * from './server';
 

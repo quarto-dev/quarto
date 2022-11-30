@@ -1,5 +1,5 @@
 /*
- * user.ts
+ * prefs.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,23 +13,24 @@
  *
  */
 
-export const kUserGetPrefs = "user_get_prefs";
-export const kUserSetPrefs = "user_set_prefs";
-export const kUserGetState = "user_get_state";
-export const kUserSetState = "user_set_state";
+export const kPrefsGetPrefs = "prefs_get_prefs";
+export const kPrefsSetPrefs = "prefs_set_prefs";
 
-export interface UserPrefs {
+export interface Prefs {
+  readonly showOutline: boolean;
+  readonly showMarkdown: boolean;
   readonly dictionaryLocale: string;
 }
 
-export interface UserState {
-  readonly showOutline: boolean;
-  readonly showMarkdown: boolean;
+export function defaultPrefs() : Prefs {
+  return {
+    showMarkdown: false,
+    showOutline: false,
+    dictionaryLocale: 'en-US'
+  }
 }
 
-export interface UserServer {
-  getPrefs: () => Promise<UserPrefs>;
-  setPrefs: (prefs: UserPrefs) => Promise<void>;
-  getState: () => Promise<UserState>;
-  setState: (prefs: UserState) => Promise<void>;
+export interface PrefsServer {
+  getPrefs: () => Promise<Prefs>;
+  setPrefs: (prefs: Prefs) => Promise<void>;
 }

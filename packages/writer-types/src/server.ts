@@ -13,9 +13,9 @@
  *
  */
 
-import { UserServer } from "./user";
+import { PrefsServer } from "./prefs";
 
 export interface WriterServer {
-  readonly user: UserServer;
+  readonly prefs: PrefsServer;
 }
 

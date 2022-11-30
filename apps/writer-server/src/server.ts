@@ -26,7 +26,7 @@ import jayson from 'jayson'
 
 import { kWriterJsonRpcPath } from 'writer-types';
 import { editorServerMethods, editorServicesMethods } from 'editor-server';
-import { prefsServerMethods } from './prefs';
+import { userServerMethods } from './user';
 
 // constants
 const kPayloadLimitMb = 100;
@@ -59,5 +59,5 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
 }
 
 function writerServerMethods() {
-  return prefsServerMethods();
+  return userServerMethods();
 }

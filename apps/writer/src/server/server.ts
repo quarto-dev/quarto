@@ -14,7 +14,7 @@
  */
 
 import { jsonRpcBrowserClient } from "core";
-import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, WriterServer } from "writer-types";
+import { kUserGetPrefs, kUserGetState, kUserSetPrefs, kUserSetState, UserPrefs, UserState, WriterServer } from "writer-types";
 
 
 export function writerJsonRpcServer(url: string) : WriterServer {
@@ -22,12 +22,18 @@ export function writerJsonRpcServer(url: string) : WriterServer {
   const request = jsonRpcBrowserClient(url);
 
   return {
-    prefs: {
-      getPrefs() : Promise<Prefs> {
-        return request(kPrefsGetPrefs, []);
+    user: {
+      getPrefs() : Promise<UserPrefs> {
+        return request(kUserGetPrefs, []);
       },
-      setPrefs(prefs: Prefs) : Promise<void> {
-        return request(kPrefsSetPrefs, [prefs]);
+      setPrefs(prefs: UserPrefs) : Promise<void> {
+        return request(kUserSetPrefs, [prefs]);
+      },
+      getState() : Promise<UserState> {
+        return request(kUserGetState, []);
+      },
+      setState(state: UserState) : Promise<void> {
+        return request(kUserSetState, [state]);
       }
     }
   }

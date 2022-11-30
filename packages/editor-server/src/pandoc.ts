@@ -53,12 +53,15 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
           } else {
             resolve(stdout.trim());
           }
-      });
+      });  
       if (stdin) {
         const stdinStream = new stream.Readable();
         stdinStream.push(stdin);  
         stdinStream.push(null);  
         if (child.stdin) {
+          child.stdin.on('error', () => {
+            // allow errors to be reported by main handler
+          });
           stdinStream.pipe(child.stdin);
         } else {
           reject(new Error("Unable to access Pandoc stdin stream"));

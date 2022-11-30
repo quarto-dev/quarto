@@ -55,10 +55,13 @@ export function jsonRpcBrowserClient(url: string) {
       createClient(method).request(method, params, (err: any, result: any) => {
         if (err) {
           reject(err);
-        } else if (result.error) {
-          reject(new Error(result.error.message));
-        } else { 
+        } else if (result?.error) {
+          const message = result.error?.message || String(result.error);
+          reject(new Error(message));
+        } else if (result?.result) { 
           resolve(result.result);
+        } else {
+          reject(new Error("Unknown error"));
         }
       });
     });

@@ -14,16 +14,39 @@
  */
 
 
-import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
+import jayson, { JSONRPCCallbackTypePlain, JSONRPCError, RequestParamsLike } from 'jayson'
+
+export class JSONRPCServerError implements JSONRPCError {
+  constructor(message: string, data?: string | object, code?: number) {
+    this.code = code || -3200;
+    this.message = message;
+    if (typeof(data) === "string") {
+      this.data = { description: data };
+    } else if (typeof(data) === "object") {
+      this.data = data;
+    }
+  }
+  public readonly code;
+  public readonly message;
+  public readonly data?: object | undefined;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayson.Method {
   return jayson.Method({
     handler: (args: RequestParamsLike, done: JSONRPCCallbackTypePlain) => {
       method(args)
-        .then((result: unknown) => done(null, result))
+        .then((result: unknown) => {
+          done(null, result)
+        })
         .catch(error => {
-          done({code: jayson.Server.errors.INTERNAL_ERROR, message: error.message});
+          if (error instanceof JSONRPCServerError) {
+            done(error);
+          } else {
+            const message = error instanceof Error ? error.message : String(error);
+            const jsonRpcErr = new JSONRPCServerError(message);
+            done(jsonRpcErr);
+          }
         });
     }
   })

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * server.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,8 +13,9 @@
  *
  */
 
-export const kWriterJsonRpcPath = "/rpc";
+import { PrefsServer } from "./prefs";
 
-export * from './prefs';
-export * from './server';
+export interface WriterServer {
+  readonly prefs: PrefsServer;
+}
 

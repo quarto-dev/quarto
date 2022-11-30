@@ -33,7 +33,11 @@ export function jsonRpcBrowserClient(url: string) {
         };
         fetch(`${url}/${method}`, options)
           .then(function (res) {
-            return res.text();
+            if (res.ok) {
+              return res.text();
+            } else {
+              throw new Error(res.status + " error");
+            }
           })
           .then(function (text) {
             callback(null, text);

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * prefs.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,8 +13,24 @@
  *
  */
 
-export const kWriterJsonRpcPath = "/rpc";
+export const kPrefsGetPrefs = "prefs_get_prefs";
+export const kPrefsSetPrefs = "prefs_set_prefs";
 
-export * from './prefs';
-export * from './server';
+export interface Prefs {
+  readonly showOutline: boolean;
+  readonly showMarkdown: boolean;
+  readonly dictionaryLocale: string;
+}
 
+export function defaultPrefs() : Prefs {
+  return {
+    showMarkdown: false,
+    showOutline: false,
+    dictionaryLocale: 'en-US'
+  }
+}
+
+export interface PrefsServer {
+  getPrefs: () => Promise<Prefs>;
+  setPrefs: (prefs: Prefs) => Promise<void>;
+}

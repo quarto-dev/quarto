@@ -9,3 +9,6 @@ dist-*
 .cache
 server/dist
 public/dist
+.Rproj.user
+.Rhistory
+*.Rproj

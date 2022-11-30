@@ -17,7 +17,11 @@
 import { jsonRpcBrowserClient } from "core";
 
 import {
+  Dictionary,
   EditorServices,
+  kDictionaryAddToUserDictionary,
+  kDictionaryGetDictionary,
+  kDictionaryGetUserDictionary,
   kMathMathjaxTypesetSvg,
   
 } from "editor-types";
@@ -32,6 +36,17 @@ export function editorJsonRpcServices(url: string) : EditorServices {
       mathjaxTypeset(math, options) {
         return request(kMathMathjaxTypesetSvg, [math, options]);
       },
+    },
+    dictionary: {
+      getDictionary(locale: string) : Promise<Dictionary> {
+        return request(kDictionaryGetDictionary, [locale]);
+      },
+      getUserDictionary() : Promise<string> {
+        return request(kDictionaryGetUserDictionary, []);
+      },
+      addToUserDictionary(word: string) :  Promise<void> {
+        return request(kDictionaryAddToUserDictionary, [word]);
+      }
     }
   };
 }

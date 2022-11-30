@@ -18,7 +18,7 @@ import jayson from "jayson";
 
 import { jsonRpcMethod } from "core-server";
 
-import { Dictionary, DictionaryServer, kDictionaryAddToUserDictionary, kDictionaryGetDictionary, kDictionaryGetUserDictionary } from "writer-types";
+import { Dictionary, DictionaryServer, kDictionaryAddToUserDictionary, kDictionaryGetDictionary, kDictionaryGetUserDictionary } from "editor-types";
 
 
 export interface DictionaryServerOptions {

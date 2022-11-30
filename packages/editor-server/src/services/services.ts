@@ -18,16 +18,24 @@ import jayson from 'jayson'
 import { EditorServices } from "editor-types";
 
 import { mathServer, mathServerMethods } from "./math/math";
+import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
 
-
-export function editorServices() : EditorServices {
-  return {
-    math: mathServer()
-  };
+export interface EditorServicesOptions {
+  dictionary: DictionaryServerOptions;
 }
 
-export function editorServicesMethods(): Record<string,jayson.Method> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function editorServices(options: EditorServicesOptions) : EditorServices {
   return {
-    ...mathServerMethods()
+    math: mathServer(),
+    dictionary: dictionaryServer(options.dictionary)
+  };
+} 
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function editorServicesMethods(options: EditorServicesOptions): Record<string,jayson.Method> {
+  return {
+    ...mathServerMethods(),
+    ...dictionaryServerMethods(options.dictionary)
   }
 }

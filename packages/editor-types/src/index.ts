@@ -26,5 +26,6 @@ export * from './spelling'
 export * from './server'
 
 export * from './math'
+export * from './dictionary'
 export * from './services'
 

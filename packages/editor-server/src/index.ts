@@ -14,9 +14,10 @@
  */
 
  
-export type { EditorServerOptions } from './server';
+export type { EditorServerOptions } from './server/server';
 
-export { editorServer, editorServerMethods } from './server';
+export { editorServer, editorServerMethods } from './server/server';
+
 
 export { editorServices, editorServicesMethods } from './services/services';
 

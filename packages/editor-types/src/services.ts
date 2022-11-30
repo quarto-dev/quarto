@@ -14,9 +14,11 @@
  */
 
 
+import { DictionaryServer } from "./dictionary";
 import { MathServer } from "./math";
 
 
 export interface EditorServices {
   readonly math: MathServer;
+  readonly dictionary: DictionaryServer;
 }

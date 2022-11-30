@@ -14,12 +14,12 @@
  */
 
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { Dictionary, kWriterJsonRpcPath } from "writer-types";
-import { writerJsonRpcServer } from "../server/server";
+import { Dictionary, editorJsonRpcServices } from "editor";
+import { kWriterJsonRpcPath } from "writer-types";
 
 const kUserDictionaryTag = "UserDictionary";
 
-const server = writerJsonRpcServer(kWriterJsonRpcPath);
+const server = editorJsonRpcServices(kWriterJsonRpcPath);
 
 export const dictionariesApi = createApi({
   reducerPath: "dictionaries",

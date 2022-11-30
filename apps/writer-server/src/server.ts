@@ -26,23 +26,23 @@ import jayson from 'jayson'
 
 import { kWriterJsonRpcPath } from 'writer-types';
 import { editorServerMethods, editorServicesMethods } from 'editor-server';
-import { dictionaryServerMethods } from './dictionary';
 
 // constants
 const kPayloadLimitMb = 100;
 
 export function createServer(resourcesDir: string, editorResourcesDir: string) {
 
+  const dictionaryOptions = {
+    dictionariesDir: path.join(resourcesDir, "dictionaries"),
+    userDictionaryDir: tmp.dirSync().name
+  };
+
   const writerRpcServer = new jayson.Server({
     ...editorServerMethods({
       resourcesDir: editorResourcesDir,
       payloadLimitMb: kPayloadLimitMb
     }),
-    ...editorServicesMethods(),
-    ...dictionaryServerMethods({
-      dictionariesDir: path.join(resourcesDir, "dictionaries"),
-      userDictionaryDir: tmp.dirSync().name
-    })
+    ...editorServicesMethods({ dictionary: dictionaryOptions })
   });
 
   const server = express()

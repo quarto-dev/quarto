@@ -14,20 +14,17 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit'
-import { dictionariesApi } from './dictionaries';
 import { editorSlice } from './editor';
 import { prefsSlice, prefsPersist } from './prefs';
 
 const store = configureStore({
   reducer: {
     editor: editorSlice.reducer,
-    prefs: prefsSlice.reducer,
-    [dictionariesApi.reducerPath]: dictionariesApi.reducer
+    prefs: prefsSlice.reducer
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
         .prepend(prefsPersist.middleware)
-        .concat(dictionariesApi.middleware)
   }
 });
 

@@ -14,6 +14,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit'
+import { dictionariesApi } from './dictionaries';
 import { editorSlice } from './editor';
 import { prefsApi } from './prefs';
 
@@ -21,11 +22,13 @@ import { prefsApi } from './prefs';
 const store = configureStore({
   reducer: {
     editor: editorSlice.reducer,
-    [prefsApi.reducerPath]: prefsApi.reducer
+    [prefsApi.reducerPath]: prefsApi.reducer,
+    [dictionariesApi.reducerPath]: dictionariesApi.reducer
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
         .prepend(prefsApi.middleware)
+        .prepend(dictionariesApi.middleware)
   }
 });
 

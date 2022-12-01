@@ -31,17 +31,12 @@ export const prefsApi = createApi({
   endpoints(build) {
     return {
       getPrefs: build.query<Prefs,void>({
-        queryFn: () => {
-          return handleQuery(server.prefs.getPrefs());
-        },
+        queryFn: () => handleQuery(server.prefs.getPrefs()),
         providesTags: [kPrefsTag]
       }),
       setPrefs: build.mutation<void,Prefs>({
-        queryFn: (prefs: Prefs) => {
-          return handleQuery(server.prefs.setPrefs(prefs));
-        },
-        // optmistic updates for prefs
-        // https://redux-toolkit.js.org/rtk-query/usage/manual-cache-updates#optimistic-updates
+        queryFn: (prefs: Prefs) => handleQuery(server.prefs.setPrefs(prefs)),
+        // optmistic update 
         async onQueryStarted(prefs, { dispatch, queryFulfilled }) {
           dispatch(
             prefsApi.util.updateQueryData("getPrefs", undefined, draft => {

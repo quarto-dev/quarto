@@ -18,8 +18,10 @@ import { jsonRpcBrowserClient } from "core-client";
 
 import {
   Dictionary,
+  DictionaryInfo,
   EditorServices,
   kDictionaryAddToUserDictionary,
+  kDictionaryAvailableDictionaries,
   kDictionaryGetDictionary,
   kDictionaryGetUserDictionary,
   kMathMathjaxTypesetSvg,
@@ -38,6 +40,9 @@ export function editorJsonRpcServices(url: string) : EditorServices {
       },
     },
     dictionary: {
+      availableDictionaries() : Promise<DictionaryInfo[]> {
+        return request(kDictionaryAvailableDictionaries, []);
+      },
       getDictionary(locale: string) : Promise<Dictionary> {
         return request(kDictionaryGetDictionary, [locale]);
       },

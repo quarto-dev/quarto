@@ -62,6 +62,7 @@ import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 import styles from './EditorPane.module.scss';
 import { useGetPrefsQuery } from '../../store/prefs';
 import { defaultPrefs } from 'writer-types';
+import { useAvailableDictionariesQuery } from '../../store/dictionaries';
 
 const EditorPane : React.FC = () => {
 
@@ -220,7 +221,6 @@ const EditorPane : React.FC = () => {
       saveMarkdown();
     }
   }, [prefs.showMarkdown]);
-
 
   // render
   return (

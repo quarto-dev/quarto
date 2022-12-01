@@ -15,7 +15,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { JSONRPCError } from "core";
-import { Dictionary, editorJsonRpcServices } from "editor";
+import { Dictionary, DictionaryInfo, editorJsonRpcServices } from "editor";
 import { kWriterJsonRpcPath } from "writer-types";
 import { fakeBaseQuery, handleQuery } from "./util";
 
@@ -29,6 +29,9 @@ export const dictionariesApi = createApi({
   tagTypes: [kUserDictionaryTag],
   endpoints(build) {
     return {
+      availableDictionaries: build.query<DictionaryInfo[],void>({
+        queryFn: () => handleQuery(server.dictionary.availableDictionaries())
+      }),
       dictionary: build.query<Dictionary,string>({
         queryFn: (locale: string) => handleQuery(server.dictionary.getDictionary(locale))
       }),
@@ -44,7 +47,9 @@ export const dictionariesApi = createApi({
   },
 });
 
+
 export const {
+  useAvailableDictionariesQuery,
   useDictionaryQuery,
   useUserDictionaryQuery,
   useAddToUserDictionaryMutation

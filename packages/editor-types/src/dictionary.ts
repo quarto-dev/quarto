@@ -13,9 +13,15 @@
  *
  */
 
+export const kDictionaryAvailableDictionaries = "dictionary_available_dictionaries";
 export const kDictionaryGetDictionary = "dictionary_get_dictionary";
 export const kDictionaryGetUserDictionary = "dictionary_get_user_dictionary";
 export const kDictionaryAddToUserDictionary = "dictionary_add_to_user_dictionary";
+
+export interface DictionaryInfo {
+  locale: string;
+  name: string;
+}
 
 export interface Dictionary {
   aff: string;
@@ -23,8 +29,11 @@ export interface Dictionary {
 }
 
 export interface DictionaryServer {
+  availableDictionaries: () => Promise<DictionaryInfo[]>;
   getDictionary: (locale: string) => Promise<Dictionary>;
   getUserDictionary: () => Promise<string>;
   addToUserDictionary: (word: string) => Promise<void>;
 }
+
+
 

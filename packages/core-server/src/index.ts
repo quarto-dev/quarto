@@ -15,6 +15,7 @@
 
 
 export * from './jsonrpc';
+export * from './appdirs';
 
 
 

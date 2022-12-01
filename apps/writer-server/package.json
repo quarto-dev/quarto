@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
+    "core-server": "*",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "jayson": "^4.0.0",

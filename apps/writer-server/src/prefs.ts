@@ -13,27 +13,46 @@
  *
  */
 
+import path from "path";
+import fs from "fs";
+
 import jayson from "jayson";
 
-import { jsonRpcMethod } from "core-server";
+import { appConfigDir, jsonRpcMethod } from "core-server";
 
 import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, PrefsServer, defaultPrefs } from "writer-types";
 
 
+const prefsDir = appConfigDir("quarto-writer", "prefs");
+const prefsFile = path.join(prefsDir, "prefs.json");
+
 
 export function prefsServer() : PrefsServer {
  
-  let prefs = defaultPrefs();
-
   return {
+
     async getPrefs() : Promise<Prefs> {
+      let prefs = defaultPrefs();
+      if (fs.existsSync(prefsFile)) {
+        const prefsJSON = fs.readFileSync(prefsFile, { encoding: "utf-8" });
+        prefs = { ...prefs, ...JSON.parse(prefsJSON )}
+      }
       return prefs;
     },
-    async setPrefs(updatedPrefs: Prefs) : Promise<void> {
-      prefs = updatedPrefs;
+
+    async setPrefs(prefs: Prefs) : Promise<void> {
+      const prefsUpdated = prefs as unknown as Record<string,unknown>;
+      const prefsDefault = defaultPrefs() as unknown as Record<string,undefined>;
+      const prefsDiff: Record<string,unknown> = {};
+      Object.keys(prefsUpdated).forEach(pref => {
+        if (prefsUpdated[pref] !== prefsDefault[pref]) {
+          prefsDiff[pref] = prefsUpdated[pref];
+        }
+      });
+      const diffJSON = JSON.stringify(prefsDiff, undefined, 2);
+      fs.writeFileSync(prefsFile, diffJSON, { encoding: "utf-8" });
     }
   }
-
 }
 
 export function prefsServerMethods() : Record<string, jayson.Method> {

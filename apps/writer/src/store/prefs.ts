@@ -13,60 +13,59 @@
  *
  */
 
-import { 
-  AnyAction,
-  createListenerMiddleware,
-  createSelector, 
-  createSlice, 
-  isAnyOf, 
-  PayloadAction
-} from '@reduxjs/toolkit';
-import { defaultPrefs, kWriterJsonRpcPath, Prefs } from 'writer-types';
-import { writerJsonRpcServer } from '../server/server';
+import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { Prefs, kWriterJsonRpcPath } from "writer-types";
+import { writerJsonRpcServer } from "../server/server";
 
-import { WorkbenchState } from './store';
+const kPrefsTag = "Prefs";
 
-export const prefsSlice = createSlice({
-  name: 'prefs',
-  initialState: () => { 
-    return defaultPrefs()
-  },
-  reducers: {
-    initPrefs: (state, action: PayloadAction<Prefs>) => {
-      Object.assign(state, action.payload);
-    },
-    setPrefShowOutline: (state, action: PayloadAction<boolean>) => {
-      state.showOutline = action.payload;
-    },
-    setPrefShowMarkdown: (state, action: PayloadAction<boolean>) => {
-      state.showMarkdown = action.payload;
-    },
-  },
-})
-
-const prefsSelector = (state: WorkbenchState) => state.prefs;
-export const prefShowOutline = createSelector(prefsSelector, (state) => state.showOutline);
-export const prefShowMarkdown = createSelector(prefsSelector, (state) => state.showMarkdown);
-
-export const { 
-  initPrefs,
-  setPrefShowOutline,
-  setPrefShowMarkdown, 
-} = prefsSlice.actions
-
-
-// middleware to persist prefs to server when changed
 const server = writerJsonRpcServer(kWriterJsonRpcPath);
-export const prefsPersist = createListenerMiddleware<{ prefs: Prefs }> ();
-prefsPersist.startListening({
-  matcher: isAnyOf(setPrefShowMarkdown, setPrefShowOutline),
-  effect: async (_action: AnyAction, listenerApi) => {
-    await server.prefs.setPrefs(listenerApi.getState().prefs);
-  }
-})
 
-export default prefsSlice.reducer;
+export const prefsApi = createApi({
+  reducerPath: "prefs",
+  baseQuery: fakeBaseQuery(),
+  tagTypes: [kPrefsTag],
 
+  endpoints(build) {
+    return {
+      getPrefs: build.query<Prefs,void>({
+        queryFn: async () => {
+          return server.prefs.getPrefs()
+            .then(value => {
+              return { data: value };
+            })
+            .catch(error => {
+              return { error };
+            });
+        },
+        providesTags: [kPrefsTag]
+      }),
+      setPrefs: build.mutation<void,Prefs>({
+        queryFn: async (prefs: Prefs) => {
+          await server.prefs.setPrefs(prefs);
+          return { data: undefined };
+        },
+        // optmistic updates for prefs
+        // https://redux-toolkit.js.org/rtk-query/usage/manual-cache-updates#optimistic-updates
+        async onQueryStarted(prefs, { dispatch, queryFulfilled }) {
+          dispatch(
+            prefsApi.util.updateQueryData("getPrefs", undefined, draft => {
+              Object.assign(draft, prefs);
+            })
+          )
+          try {
+            await queryFulfilled
+          } catch {
+            // refetch on failure
+            dispatch(prefsApi.util.invalidateTags([kPrefsTag]));
+          }
+        }
+      })
+    };
+  },
+});
 
-
-
+export const {
+  useGetPrefsQuery,
+  useSetPrefsMutation
+} = prefsApi;

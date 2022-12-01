@@ -15,21 +15,31 @@
 
 import { configureStore } from '@reduxjs/toolkit'
 import { editorSlice } from './editor';
-import { prefsSlice, prefsPersist } from './prefs';
+import { prefsApi } from './prefs';
+
 
 const store = configureStore({
   reducer: {
     editor: editorSlice.reducer,
-    prefs: prefsSlice.reducer
+    [prefsApi.reducerPath]: prefsApi.reducer
   },
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware()
-        .prepend(prefsPersist.middleware)
+        .prepend(prefsApi.middleware)
   }
 });
 
 export type WorkbenchState = ReturnType<typeof store.getState>
 
-export default store;
+export async function initializeStore() {
+
+  // prefech prefs
+  store.dispatch(prefsApi.util.prefetch("getPrefs", undefined, {force: true}));
+  await Promise.all(store.dispatch(prefsApi.util.getRunningQueriesThunk()));
+
+  // return store
+  return store;
+}
+
 
 

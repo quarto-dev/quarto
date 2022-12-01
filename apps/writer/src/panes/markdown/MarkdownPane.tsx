@@ -15,7 +15,7 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { useTranslation } from 'react-i18next';
 
@@ -25,7 +25,6 @@ import { EditorView, basicSetup } from 'codemirror';
 import { markdown as markdownLang } from "@codemirror/lang-markdown"
 
 import { editorMarkdown } from '../../store/editor';
-import { prefShowMarkdown, setPrefShowMarkdown } from '../../store/prefs';
 
 import { CommandManagerContext } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
@@ -34,18 +33,21 @@ import { Pane } from '../../widgets/Pane';
 import { Toolbar, ToolbarText, ToolbarButton } from '../../widgets/Toolbar';
 
 import styles from './MarkdownPane.module.scss';
+import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
+import { defaultPrefs } from 'writer-types';
 
 const MarkdownPane: React.FC = () => {
 
   const { t } = useTranslation();
   const [,cmDispatch] = useContext(CommandManagerContext);
-
   const markdown = useSelector(editorMarkdown);
-  const showMarkdown = useSelector(prefShowMarkdown);
-  const dispatch = useDispatch();
+
+  const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
+  const [setPrefs] = useSetPrefsMutation();
+
 
   const onCloseClicked = () => {
-    dispatch(setPrefShowMarkdown(false));
+    setPrefs({...prefs, showMarkdown: false });
   }
 
   // add commands on initial mount (note that the callbacks are run
@@ -59,13 +61,13 @@ const MarkdownPane: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-M'],
         isEnabled: () => true,
-        isActive: () => showMarkdown,
+        isActive: () => prefs.showMarkdown,
         execute: () => {
-          dispatch(setPrefShowMarkdown(!showMarkdown));
+          setPrefs({...prefs, showMarkdown: !prefs.showMarkdown });
         },
       },
     ]});
-  }, [showMarkdown]);
+  }, [prefs.showMarkdown]);
 
   // codemirror instance
   const cmRef = useRef<HTMLDivElement>(null);
@@ -90,7 +92,7 @@ const MarkdownPane: React.FC = () => {
   });
 
   return (
-    <Pane className={['markdown-pane', styles.pane].concat(showMarkdown ? ['markdown-visible'] : [] ).join(' ')}>
+    <Pane className={['markdown-pane', styles.pane].concat(prefs.showMarkdown ? ['markdown-visible'] : [] ).join(' ')}>
       <Toolbar className={styles.toolbar}>
         <ToolbarText>{t('markdown_pane_caption')}</ToolbarText>
         <ToolbarButton

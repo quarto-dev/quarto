@@ -45,7 +45,6 @@ import {
   setEditorTitle,
   setEditorLoading,
 } from '../../store/editor';
-import { prefShowMarkdown } from '../../store/prefs';
 
 import { CommandManagerContext, Commands } from '../../commands/CommandManager';
 
@@ -61,6 +60,8 @@ import EditorToolbar from './EditorToolbar';
 import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 
 import styles from './EditorPane.module.scss';
+import { useGetPrefsQuery } from '../../store/prefs';
+import { defaultPrefs } from 'writer-types';
 
 const EditorPane : React.FC = () => {
 
@@ -73,9 +74,10 @@ const EditorPane : React.FC = () => {
   const title = useSelector(editorTitle);
   const loading = useSelector(editorLoading);
   const markdown = useSelector(editorMarkdown);
-  const showMarkdown = useSelector(prefShowMarkdown);
   const dispatch = useDispatch();
 
+  const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
+ 
   // refs we get from rendering
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -212,11 +214,11 @@ const EditorPane : React.FC = () => {
   // update markdown in store when pref changes (also
   // note value for out-of-band editor changed callback)
   useEffect(() => {
-    showMarkdownRef.current = showMarkdown;
-    if (editorRef.current && showMarkdown) {
+    showMarkdownRef.current = prefs.showMarkdown;
+    if (editorRef.current && prefs.showMarkdown) {
       saveMarkdown();
     }
-  }, [showMarkdown]);
+  }, [prefs.showMarkdown]);
 
 
   // render

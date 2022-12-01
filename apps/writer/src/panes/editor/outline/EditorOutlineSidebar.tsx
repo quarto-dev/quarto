@@ -15,13 +15,12 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { CSSTransition } from 'react-transition-group';
 
 import { useTranslation } from 'react-i18next';
 
-import { prefShowOutline, setPrefShowOutline } from '../../../store/prefs';
 
 import { CommandManagerContext } from '../../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../../commands/commands';
@@ -34,6 +33,8 @@ import { EditorOutlineEmpty } from './EditorOutlineEmpty';
 import styles from './EditorOutlineSidebar.module.scss';
 import transition from './EditorOutlineTransition.module.scss';
 import { editorOutline } from '../../../store/editor';
+import { useGetPrefsQuery, useSetPrefsMutation } from '../../../store/prefs';
+import { defaultPrefs } from 'writer-types';
 
 const EditorOutlineSidebar: React.FC = () => {
 
@@ -41,12 +42,13 @@ const EditorOutlineSidebar: React.FC = () => {
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const outline = useSelector(editorOutline);
-  const showOutline = useSelector(prefShowOutline);
-  const dispatch = useDispatch();
+
+  const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
+  const [setPrefs] = useSetPrefsMutation();
  
   const [animating, setAnimating] = useState(false);
 
-  const setShowOutline = (show: boolean) =>  dispatch(setPrefShowOutline(show));
+  const setShowOutline = (showOutline: boolean) => setPrefs({...prefs, showOutline});
 
   const onOpenClicked = () => setShowOutline(true);
   const onCloseClicked= () => setShowOutline(false);
@@ -60,23 +62,23 @@ const EditorOutlineSidebar: React.FC = () => {
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-O'],
         isEnabled: () => true,
-        isActive: () => showOutline,
+        isActive: () => prefs.showOutline,
         execute: () => {
-          setShowOutline(!showOutline);
+          setShowOutline(!prefs.showOutline);
         },
       },
     ]})
-  }, [showOutline])
+  }, [prefs.showOutline])
 
   const outlineClassName = [styles.outline];
-    if (showOutline) {
+    if (prefs.showOutline) {
       outlineClassName.push(styles.outlineVisible);
     }
 
   return (
     <>
-        <EditorOutlineButton visible={!showOutline} onClick={onOpenClicked} />
-        <CSSTransition in={showOutline} timeout={200} classNames={{ ...transition }} 
+        <EditorOutlineButton visible={!prefs.showOutline} onClick={onOpenClicked} />
+        <CSSTransition in={prefs.showOutline} timeout={200} classNames={{ ...transition }} 
           onEnter={() => setAnimating(true)}
           onEntered={() => setAnimating(false)}
           onExit={() => setAnimating(true)}

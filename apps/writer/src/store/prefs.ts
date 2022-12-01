@@ -17,7 +17,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { JSONRPCError } from "core";
 import { Prefs, kWriterJsonRpcPath } from "writer-types";
 import { writerJsonRpcServer } from "../server/server";
-import { fakeBaseQuery } from "./util";
+import { fakeBaseQuery, handleQuery } from "./util";
 
 const kPrefsTag = "Prefs";
 
@@ -31,27 +31,14 @@ export const prefsApi = createApi({
   endpoints(build) {
     return {
       getPrefs: build.query<Prefs,void>({
-        queryFn: async () => {
-          return server.prefs.getPrefs()
-            .then(value => {
-              return { data: value };
-            })
-            .catch(error => {
-              return { error };
-            });
+        queryFn: () => {
+          return handleQuery(server.prefs.getPrefs());
         },
         providesTags: [kPrefsTag]
       }),
       setPrefs: build.mutation<void,Prefs>({
-        queryFn: async (prefs: Prefs) => {
-          return server.prefs.setPrefs(prefs)
-            .then(() => {
-              return { data: undefined };
-            })
-            .catch(error => {
-              return { error };
-            })
-        
+        queryFn: (prefs: Prefs) => {
+          return handleQuery(server.prefs.setPrefs(prefs));
         },
         // optmistic updates for prefs
         // https://redux-toolkit.js.org/rtk-query/usage/manual-cache-updates#optimistic-updates

@@ -13,9 +13,11 @@
  *
  */
 
-import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { JSONRPCError } from "core";
 import { Prefs, kWriterJsonRpcPath } from "writer-types";
 import { writerJsonRpcServer } from "../server/server";
+import { fakeBaseQuery } from "./util";
 
 const kPrefsTag = "Prefs";
 
@@ -23,7 +25,7 @@ const server = writerJsonRpcServer(kWriterJsonRpcPath);
 
 export const prefsApi = createApi({
   reducerPath: "prefs",
-  baseQuery: fakeBaseQuery(),
+  baseQuery: fakeBaseQuery<JSONRPCError>(),
   tagTypes: [kPrefsTag],
 
   endpoints(build) {
@@ -42,8 +44,14 @@ export const prefsApi = createApi({
       }),
       setPrefs: build.mutation<void,Prefs>({
         queryFn: async (prefs: Prefs) => {
-          await server.prefs.setPrefs(prefs);
-          return { data: undefined };
+          return server.prefs.setPrefs(prefs)
+            .then(() => {
+              return { data: undefined };
+            })
+            .catch(error => {
+              return { error };
+            })
+        
         },
         // optmistic updates for prefs
         // https://redux-toolkit.js.org/rtk-query/usage/manual-cache-updates#optimistic-updates
@@ -55,7 +63,7 @@ export const prefsApi = createApi({
           )
           try {
             await queryFulfilled
-          } catch {
+          } catch (error) {
             // refetch on failure
             dispatch(prefsApi.util.invalidateTags([kPrefsTag]));
           }

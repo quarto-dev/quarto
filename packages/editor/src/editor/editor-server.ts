@@ -15,7 +15,7 @@
  *
  */
 
-import { jsonRpcBrowserClient } from "core";
+import { jsonRpcBrowserClient } from "core-client";
 
 import {
   BibliographyResult,

@@ -14,22 +14,8 @@
  */
 
 
-import jayson, { JSONRPCCallbackTypePlain, JSONRPCError, RequestParamsLike } from 'jayson'
-
-export class JSONRPCServerError implements JSONRPCError {
-  constructor(message: string, data?: string | object, code?: number) {
-    this.code = code || -3200;
-    this.message = message;
-    if (typeof(data) === "string") {
-      this.data = { description: data };
-    } else if (typeof(data) === "object") {
-      this.data = data;
-    }
-  }
-  public readonly code;
-  public readonly message;
-  public readonly data?: object | undefined;
-}
+import { jsonRpcError } from 'core';
+import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayson.Method {
@@ -40,11 +26,11 @@ export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayso
           done(null, result)
         })
         .catch(error => {
-          if (error instanceof JSONRPCServerError) {
-            done(error);
+          if (typeof(error) === "object" && error.message) {
+            done(jsonRpcError(error.message, error.data, error.code));
           } else {
             const message = error instanceof Error ? error.message : String(error);
-            const jsonRpcErr = new JSONRPCServerError(message);
+            const jsonRpcErr = jsonRpcError(message);
             done(jsonRpcErr);
           }
         });

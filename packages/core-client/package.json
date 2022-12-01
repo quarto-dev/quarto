@@ -1,5 +1,5 @@
 {
-  "name": "core-server",
+  "name": "core-client",
   "version": "0.1.0",
   "private": true,
   "license": "agpl-3.0",
@@ -8,7 +8,7 @@
   "dependencies": {
     "core": "*",
     "jayson": "^4.0.0",
-    "tsconfig": "*",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "tsconfig": "*"
   }
 }

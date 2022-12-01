@@ -1,5 +1,5 @@
 /*
- * server.ts
+ * util.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -11,24 +11,23 @@
  * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
+ *
+ *
  */
 
-import { jsonRpcBrowserClient } from "core-client";
-import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, WriterServer } from "writer-types";
+import { BaseQueryFn } from "@reduxjs/toolkit/dist/query/react";
 
-
-export function writerJsonRpcServer(url: string) : WriterServer {
-
-  const request = jsonRpcBrowserClient(url);
-
-  return {
-    prefs: {
-      getPrefs() : Promise<Prefs> {
-        return request(kPrefsGetPrefs, []);
-      },
-      setPrefs(prefs: Prefs) : Promise<void> {
-        return request(kPrefsSetPrefs, [prefs]);
-      }
-    }
-  }
+// workaround for type errors when using built-in fakeBaseQuery:
+// https://github.com/reduxjs/redux-toolkit/issues/2314
+export function fakeBaseQuery<ErrorType>(): BaseQueryFn<
+  void,
+  never,
+  ErrorType,
+  unknown
+> {
+  return function () {
+    throw new Error(
+      "When using `fakeBaseQuery`, all queries & mutations must use the `queryFn` definition syntax."
+    );
+  };
 }

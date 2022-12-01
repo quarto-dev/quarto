@@ -1,5 +1,5 @@
 /*
- * jsonrpc.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,21 +13,5 @@
  *
  */
 
-
-export interface JSONRPCError {
-  code: number;
-  message: string;
-  data?: object;
-}
-
-export function jsonRpcError(message: string, data?: string | object, code?: number) : JSONRPCError {
-  if (typeof(data) === "string") {
-    data = { description: data };
-  } 
-  return {
-    code: code || -3200,
-    message,
-    data
-  }
-}
+export * from './jsonrpc';
 

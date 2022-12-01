@@ -62,7 +62,7 @@ export function jsonRpcBrowserClient(url: string) {
         } else if (result?.error) {
           const message = result.error?.message || String(result.error);
           reject(new Error(message));
-        } else if (result?.result) { 
+        } else if (result) { 
           resolve(result.result);
         } else {
           reject(new Error("Unknown error"));

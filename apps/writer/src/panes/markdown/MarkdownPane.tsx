@@ -25,7 +25,7 @@ import { EditorView, basicSetup } from 'codemirror';
 import { markdown as markdownLang } from "@codemirror/lang-markdown"
 
 import { editorMarkdown } from '../../store/editor';
-import { prefsShowMarkdown, setPrefsShowMarkdown } from '../../store/prefs';
+import { prefShowMarkdown, setPrefShowMarkdown } from '../../store/prefs';
 
 import { CommandManagerContext } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
@@ -41,11 +41,11 @@ const MarkdownPane: React.FC = () => {
   const [,cmDispatch] = useContext(CommandManagerContext);
 
   const markdown = useSelector(editorMarkdown);
-  const showMarkdown = useSelector(prefsShowMarkdown);
+  const showMarkdown = useSelector(prefShowMarkdown);
   const dispatch = useDispatch();
 
   const onCloseClicked = () => {
-    dispatch(setPrefsShowMarkdown(false));
+    dispatch(setPrefShowMarkdown(false));
   }
 
   // add commands on initial mount (note that the callbacks are run
@@ -61,7 +61,7 @@ const MarkdownPane: React.FC = () => {
         isEnabled: () => true,
         isActive: () => showMarkdown,
         execute: () => {
-          dispatch(setPrefsShowMarkdown(!showMarkdown));
+          dispatch(setPrefShowMarkdown(!showMarkdown));
         },
       },
     ]});

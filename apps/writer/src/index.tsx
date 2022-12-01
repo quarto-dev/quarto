@@ -16,8 +16,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { writerJsonRpcServer } from './server/server';
+import { kWriterJsonRpcPath } from 'writer-types';
+
 import store from './store/store';
 import { setEditorMarkdown } from './store/editor';
+import { initPrefs } from './store/prefs';
 
 import { i18nInit } from './i18n';
 import App from './App';
@@ -29,10 +33,15 @@ import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
 import "./styles.scss"
 
+
 async function runApp() {
   try {
-  
-    // initialize with content
+    // initialize prefs
+    const server = writerJsonRpcServer(kWriterJsonRpcPath);
+    const prefs = await server.prefs.getPrefs();
+    store.dispatch(initPrefs(prefs));
+
+    // initialize content
     const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
     const markdown = await (await fetch(contentUrl)).text();
     store.dispatch(setEditorMarkdown(markdown));

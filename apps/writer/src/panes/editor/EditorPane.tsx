@@ -45,7 +45,7 @@ import {
   setEditorTitle,
   setEditorLoading,
 } from '../../store/editor';
-import { prefsShowMarkdown } from '../../store/prefs';
+import { prefShowMarkdown } from '../../store/prefs';
 
 import { CommandManagerContext, Commands } from '../../commands/CommandManager';
 
@@ -73,7 +73,7 @@ const EditorPane : React.FC = () => {
   const title = useSelector(editorTitle);
   const loading = useSelector(editorLoading);
   const markdown = useSelector(editorMarkdown);
-  const showMarkdown = useSelector(prefsShowMarkdown);
+  const showMarkdown = useSelector(prefShowMarkdown);
   const dispatch = useDispatch();
 
   // refs we get from rendering

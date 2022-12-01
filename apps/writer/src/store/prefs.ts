@@ -21,76 +21,49 @@ import {
   isAnyOf, 
   PayloadAction
 } from '@reduxjs/toolkit';
+import { defaultPrefs, kWriterJsonRpcPath, Prefs } from 'writer-types';
+import { writerJsonRpcServer } from '../server/server';
 
 import { WorkbenchState } from './store';
 
-export interface PrefsState {
-  readonly showOutline: boolean;
-  readonly showMarkdown: boolean;
-}
-
 export const prefsSlice = createSlice({
   name: 'prefs',
-  initialState: () => loadPrefs(),
+  initialState: () => { 
+    return defaultPrefs()
+  },
   reducers: {
-    setPrefsShowOutline: (state, action: PayloadAction<boolean>) => {
+    initPrefs: (state, action: PayloadAction<Prefs>) => {
+      Object.assign(state, action.payload);
+    },
+    setPrefShowOutline: (state, action: PayloadAction<boolean>) => {
       state.showOutline = action.payload;
     },
-    setPrefsShowMarkdown: (state, action: PayloadAction<boolean>) => {
+    setPrefShowMarkdown: (state, action: PayloadAction<boolean>) => {
       state.showMarkdown = action.payload;
     },
   },
 })
 
 const prefsSelector = (state: WorkbenchState) => state.prefs;
-export const prefsShowOutline = createSelector(prefsSelector, (state) => state.showOutline);
-export const prefsShowMarkdown = createSelector(prefsSelector, (state) => state.showMarkdown);
+export const prefShowOutline = createSelector(prefsSelector, (state) => state.showOutline);
+export const prefShowMarkdown = createSelector(prefsSelector, (state) => state.showMarkdown);
 
 export const { 
-  setPrefsShowOutline,
-  setPrefsShowMarkdown, 
+  initPrefs,
+  setPrefShowOutline,
+  setPrefShowMarkdown, 
 } = prefsSlice.actions
 
 
-// middle ware to persist prefs to local storage
-
-const kPrefsLocalStorage = 'panmirror-prefs';
-
-export const prefsPersist = createListenerMiddleware<{ prefs: PrefsState }> ();
+// middleware to persist prefs to server when changed
+const server = writerJsonRpcServer(kWriterJsonRpcPath);
+export const prefsPersist = createListenerMiddleware<{ prefs: Prefs }> ();
 prefsPersist.startListening({
-  matcher: isAnyOf(setPrefsShowMarkdown, setPrefsShowOutline),
+  matcher: isAnyOf(setPrefShowMarkdown, setPrefShowOutline),
   effect: async (_action: AnyAction, listenerApi) => {
-    savePrefs(listenerApi.getState().prefs);
+    await server.prefs.setPrefs(listenerApi.getState().prefs);
   }
 })
-
-function loadPrefs() : PrefsState {
-  const defaultPrefs = {
-    showOutline: false,
-    showMarkdown: false,
-  };
-  try {
-    const serializedPrefs = localStorage.getItem(kPrefsLocalStorage);
-    if (serializedPrefs === null) {
-      return defaultPrefs;
-    }
-    return {
-      ...defaultPrefs,
-      ...JSON.parse(serializedPrefs),
-    };
-  } catch (err) {
-    return defaultPrefs;
-  }
-}
-
-function savePrefs(prefs: PrefsState) {
-  try {
-    const serializedPrefs = JSON.stringify(prefs);
-    localStorage.setItem(kPrefsLocalStorage, serializedPrefs);
-  } catch {
-    // ignore write errors
-  }
-}
 
 export default prefsSlice.reducer;
 

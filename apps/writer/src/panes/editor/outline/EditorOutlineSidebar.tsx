@@ -21,7 +21,7 @@ import { CSSTransition } from 'react-transition-group';
 
 import { useTranslation } from 'react-i18next';
 
-import { prefsShowOutline, setPrefsShowOutline } from '../../../store/prefs';
+import { prefShowOutline, setPrefShowOutline } from '../../../store/prefs';
 
 import { CommandManagerContext } from '../../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../../commands/commands';
@@ -41,12 +41,12 @@ const EditorOutlineSidebar: React.FC = () => {
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const outline = useSelector(editorOutline);
-  const showOutline = useSelector(prefsShowOutline);
+  const showOutline = useSelector(prefShowOutline);
   const dispatch = useDispatch();
  
   const [animating, setAnimating] = useState(false);
 
-  const setShowOutline = (show: boolean) =>  dispatch(setPrefsShowOutline(show));
+  const setShowOutline = (show: boolean) =>  dispatch(setPrefShowOutline(show));
 
   const onOpenClicked = () => setShowOutline(true);
   const onCloseClicked= () => setShowOutline(false);

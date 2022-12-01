@@ -40,7 +40,7 @@ export function prefsServerMethods() : Record<string, jayson.Method> {
   const server = prefsServer();
   const methods: Record<string, jayson.Method> = {
     [kPrefsGetPrefs]: jsonRpcMethod(() => server.getPrefs()),
-    [kPrefsSetPrefs]: jsonRpcMethod((prefs) => server.setPrefs(prefs))
+    [kPrefsSetPrefs]: jsonRpcMethod((prefs) => server.setPrefs(prefs[0]))
   };
   return methods;
 }

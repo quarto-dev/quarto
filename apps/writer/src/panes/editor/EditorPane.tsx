@@ -82,6 +82,7 @@ const EditorPane : React.FC = () => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   // refs that hold out of band state 
+  // https://stackoverflow.com/questions/57847594/react-hooks-accessing-up-to-date-state-from-within-a-callback
   const editorRef = useRef<Editor | null>(null);
   const commandsRef = useRef<Commands | null>(null);
   const showMarkdownRef = useRef<boolean | null>(null);

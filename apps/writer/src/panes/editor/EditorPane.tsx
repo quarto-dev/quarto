@@ -51,7 +51,7 @@ import { CommandManagerContext, Commands } from '../../commands/CommandManager';
 import { Pane } from '../../widgets/Pane';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
-import { editorContext } from './context/editor-context';
+import { editorContext, PrefsSource } from './context/editor-context';
 
 import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands } from './editor-commands';
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
@@ -60,8 +60,8 @@ import EditorToolbar from './EditorToolbar';
 import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 
 import styles from './EditorPane.module.scss';
-import { useGetPrefsQuery } from '../../store/prefs';
-import { defaultPrefs } from 'writer-types';
+import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
+import { defaultPrefs, Prefs } from 'writer-types';
 
 const EditorPane : React.FC = () => {
 
@@ -77,6 +77,7 @@ const EditorPane : React.FC = () => {
   const dispatch = useDispatch();
 
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
+  const [setPrefs] = useSetPrefsMutation();
  
   // refs we get from rendering
   const parentRef = useRef<HTMLDivElement>(null);
@@ -85,7 +86,7 @@ const EditorPane : React.FC = () => {
   // https://stackoverflow.com/questions/57847594/react-hooks-accessing-up-to-date-state-from-within-a-callback
   const editorRef = useRef<Editor | null>(null);
   const commandsRef = useRef<Commands | null>(null);
-  const showMarkdownRef = useRef<boolean | null>(null);
+  const prefsRef = useRef<Prefs | null>(defaultPrefs());
  
   // subscribe/unsubscribe from editor events
   const editorEventsRef = useRef(new Array<VoidFunction>());
@@ -102,10 +103,25 @@ const EditorPane : React.FC = () => {
     dialogs.alert(message, t('error_alert_title') as string, kAlertTypeError);
   }
 
+  // prefs source
+  const prefsSource : PrefsSource = {
+    prefs(): Prefs {
+      return prefsRef.current || defaultPrefs();
+    },
+    setPrefs: function (prefs: Record<string,unknown>): void {
+      setPrefs({ ...prefsRef.current!, ...prefs });
+    }
+  };
+
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    editorRef.current = await createEditor(parentRef.current!, () => commandsRef.current!, dialogs);
+    editorRef.current = await createEditor(
+      parentRef.current!, 
+      () => commandsRef.current!, 
+      dialogs,
+      prefsSource
+    );
     
     window.addEventListener("resize", onResize);
 
@@ -150,7 +166,7 @@ const EditorPane : React.FC = () => {
   // when doc changes, propagate markdown only if showMarkdown is true (as
   // (this is an incredibly expensive operation to run on every keystroke!)
   const onEditorDocChanged = () => {
-    if (showMarkdownRef.current) {
+    if (prefsRef.current?.showMarkdown) {
       saveMarkdown();
     }
     dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
@@ -212,14 +228,14 @@ const EditorPane : React.FC = () => {
     commandsRef.current = cmState.commands;
   }, [cmState.commands])
 
-  // update markdown in store when pref changes (also
-  // note value for out-of-band editor changed callback)
+  // update out of band ref to prefs when they change 
+  // (also propagate markdown if that pref is enabled)
   useEffect(() => {
-    showMarkdownRef.current = prefs.showMarkdown;
+    prefsRef.current = prefs;
     if (editorRef.current && prefs.showMarkdown) {
       saveMarkdown();
     }
-  }, [prefs.showMarkdown]);
+  }, [prefs]);
 
   // render
   return (
@@ -269,9 +285,10 @@ const editorLoadingUI = (loading: boolean) => {
 const createEditor = async (
   parent: HTMLElement, 
   commands: () => Commands,
-  dialogs: EditorDialogs
+  dialogs: EditorDialogs,
+  prefsContext: PrefsSource
 ) : Promise<Editor> => {
-  const context = editorContext(commands, dialogs);
+  const context = editorContext(commands, dialogs, prefsContext);
     const format: EditorFormat = {
       pandocMode: 'markdown',
       pandocExtensions: '',

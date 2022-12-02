@@ -17,16 +17,54 @@ export const kPrefsGetPrefs = "prefs_get_prefs";
 export const kPrefsSetPrefs = "prefs_set_prefs";
 
 export interface Prefs {
+  // view
   readonly showOutline: boolean;
   readonly showMarkdown: boolean;
+
+   // theme
+   readonly darkMode: boolean;
+
+  // spelling
+  readonly realtimeSpelling: boolean;
   readonly dictionaryLocale: string;
+
+  // editing
+  readonly emojiSkinTone: number;
+  readonly listSpacing: 'tight' | 'spaced';
+  readonly tabKeyMoveFocus: boolean;
+  readonly equationPreview: boolean;
+
+  // citations
+  readonly zoteroUseBetterBibtex: boolean;
+  readonly bibliographyDefaultType: 'bib' | 'yaml' | 'json';
+  readonly citationDefaultInText: boolean;
+  readonly packageListingEnabled: boolean;
 }
 
 export function defaultPrefs() : Prefs {
   return {
+    // view
     showMarkdown: false,
     showOutline: false,
-    dictionaryLocale: 'en-US'
+
+    // theme
+    darkMode: false,
+
+    // spelling
+    realtimeSpelling: true,
+    dictionaryLocale: 'en-US',
+
+    // editing
+    emojiSkinTone: 0,
+    listSpacing: 'spaced',
+    tabKeyMoveFocus: false,
+    equationPreview: true,
+
+    // citations
+    zoteroUseBetterBibtex: false,
+    bibliographyDefaultType: 'bib',
+    citationDefaultInText: false,
+    packageListingEnabled: false
   }
 }
 

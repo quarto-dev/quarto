@@ -37,11 +37,19 @@ import {
 import { editorDisplay } from "./editor-display";
 
 import { codeMirrorExtension } from "editor-codemirror";
-import { kWriterJsonRpcPath } from 'writer-types';
+import { kWriterJsonRpcPath, Prefs } from 'writer-types';
 import { Commands } from '../../../commands/CommandManager';
 
+export interface PrefsSource {
+  prefs: () => Prefs, 
+  setPrefs: (prefs: Record<string,unknown>) => void
+}
 
-export function editorContext(commands: () => Commands, dialogs: EditorDialogs) : EditorContext {
+export function editorContext(
+  commands: () => Commands, 
+  dialogs: EditorDialogs,
+  prefs: PrefsSource
+) : EditorContext {
   
   const uiTools = new UITools();
   const server = editorJsonRpcServer(kWriterJsonRpcPath);
@@ -52,7 +60,7 @@ export function editorContext(commands: () => Commands, dialogs: EditorDialogs) 
     display: editorDisplay(commands),
     math: editorMath(services.math),
     context: editorUIContext(),
-    prefs: editorPrefs(),
+    prefs: editorPrefs(prefs),
     chunks: editorChunks(),
     spelling: editorSpelling(),
     images: uiTools.context.defaultUIImages()
@@ -181,46 +189,46 @@ function editorUIContext(): EditorUIContext {
   };
 }
 
-function editorPrefs(): EditorUIPrefs {
+function editorPrefs(prefs: PrefsSource): EditorUIPrefs {
   return {
     realtimeSpelling() : boolean {
-      return false;
+      return prefs.prefs().realtimeSpelling;
     },
     darkMode(): boolean {
-      return false;
+      return prefs.prefs().darkMode;
     },
     listSpacing(): ListSpacing {
-      return "tight";
+      return prefs.prefs().listSpacing;
     },
     equationPreview(): boolean {
-      return true;
+      return prefs.prefs().equationPreview;
     },
     packageListingEnabled(): boolean {
-      return true;
+      return prefs.prefs().packageListingEnabled;
     },
     tabKeyMoveFocus(): boolean {
-      return false;
+      return prefs.prefs().tabKeyMoveFocus;
     },
     emojiSkinTone(): SkinTone {
-      return SkinTone.Default;
+      return prefs.prefs().emojiSkinTone;
     },
-    setEmojiSkinTone(_skinTone: SkinTone) {
-      //
+    setEmojiSkinTone(emojiSkinTone: SkinTone) {
+      prefs.setPrefs({ emojiSkinTone });
     },
     zoteroUseBetterBibtex(): boolean {
-      return false;
+      return prefs.prefs().zoteroUseBetterBibtex;
     },
-    setBibliographyDefaultType(_type: string) {
-      //
+    setBibliographyDefaultType(bibliographyDefaultType: string) {
+      prefs.setPrefs({ bibliographyDefaultType });
     },
     bibliographyDefaultType(): string {
-      return "bib";
+      return prefs.prefs().bibliographyDefaultType;
     },
     citationDefaultInText(): boolean {
-      return true;
+      return prefs.prefs().citationDefaultInText;
     },
-    setCitationDefaultInText(_value: boolean) {
-      //
+    setCitationDefaultInText(citationDefaultInText: boolean) {
+      prefs.setPrefs({ citationDefaultInText });
     },
   };
 }

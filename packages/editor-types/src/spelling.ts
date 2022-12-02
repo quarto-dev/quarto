@@ -14,25 +14,10 @@
  */
 
 
-export interface ISpellingDictionary {
-  checkWords: (words: string[]) => string[];
-  suggestionList: (word: string, callback: (suggestions: string[]) => void) => void;
-  addToDictionary: (word: string) => void;
-}
-
-export interface ISpellingIgnoredWords {
-  isWordIgnored: (word: string) => boolean;
-  ignoreWord: (word: string) => void;
-  unignoreWord: (word: string) => void;
-}
-
 export interface EditorUISpelling {
-
   checkWords: (words: string[]) => string[];
   suggestionList: (word: string, callback: (suggestions: string[]) => void) => void;
-
   addToDictionary: (word: string) => void;
-
   isWordIgnored: (word: string) => boolean;
   ignoreWord: (word: string) => void;
   unignoreWord: (word: string) => void;

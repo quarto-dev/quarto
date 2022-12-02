@@ -25,10 +25,14 @@ import {
   Dictionary, 
   DictionaryInfo, 
   DictionaryServer, 
+  IgnoredWord, 
   kDictionaryAddToUserDictionary, 
   kDictionaryAvailableDictionaries, 
   kDictionaryGetDictionary, 
-  kDictionaryGetUserDictionary 
+  kDictionaryGetIgnoredwords, 
+  kDictionaryGetUserDictionary, 
+  kDictionaryIgnoreWord,
+  kDictionaryUnignoreWord
 } from "editor-types";
 
 export interface DictionaryServerOptions {
@@ -53,11 +57,19 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
     async getUserDictionary() : Promise<string> {
       return '';
     },
-    async addToUserDictionary(word: string) : Promise<void> {
-      //
+    async addToUserDictionary(word: string) : Promise<string> {
+      return word;
+    },
+    async getIgnoredWords(context: string) : Promise<string[]> {
+      return [];
+    },
+    async ignoreWord(word: IgnoredWord) : Promise<string[]> {
+      return [word.word];
+    },
+    async unignoreWord(word: IgnoredWord) : Promise<string[]> {
+      return [];
     }
   }
-
 }
 
 export function dictionaryServerMethods(options: DictionaryServerOptions) : Record<string, jayson.Method> {
@@ -66,7 +78,10 @@ export function dictionaryServerMethods(options: DictionaryServerOptions) : Reco
     [kDictionaryAvailableDictionaries]: jsonRpcMethod(() => server.availableDictionaries()),
     [kDictionaryGetDictionary]: jsonRpcMethod(args => server.getDictionary(args[0])),
     [kDictionaryGetUserDictionary]: jsonRpcMethod(() => server.getUserDictionary()),
-    [kDictionaryAddToUserDictionary]: jsonRpcMethod(args => server.addToUserDictionary(args[0]))
+    [kDictionaryAddToUserDictionary]: jsonRpcMethod(args => server.addToUserDictionary(args[0])),
+    [kDictionaryGetIgnoredwords]: jsonRpcMethod(args => server.getIgnoredWords(args[0])),
+    [kDictionaryIgnoreWord]: jsonRpcMethod(args => server.ignoreWord(args[0])),
+    [kDictionaryUnignoreWord]: jsonRpcMethod(args => server.unignoreWord(args[0]))
   }
   return methods;
 }

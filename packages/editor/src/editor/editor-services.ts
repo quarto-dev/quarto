@@ -20,10 +20,14 @@ import {
   Dictionary,
   DictionaryInfo,
   EditorServices,
+  IgnoredWord,
   kDictionaryAddToUserDictionary,
   kDictionaryAvailableDictionaries,
   kDictionaryGetDictionary,
+  kDictionaryGetIgnoredwords,
   kDictionaryGetUserDictionary,
+  kDictionaryIgnoreWord,
+  kDictionaryUnignoreWord,
   kMathMathjaxTypesetSvg,
   
 } from "editor-types";
@@ -49,8 +53,17 @@ export function editorJsonRpcServices(url: string) : EditorServices {
       getUserDictionary() : Promise<string> {
         return request(kDictionaryGetUserDictionary, []);
       },
-      addToUserDictionary(word: string) :  Promise<void> {
+      addToUserDictionary(word: string) : Promise<string> {
         return request(kDictionaryAddToUserDictionary, [word]);
+      },
+      getIgnoredWords(context: string):  Promise<string[]> {
+        return request(kDictionaryGetIgnoredwords, [context]);
+      },
+      ignoreWord(word: IgnoredWord) : Promise<string[]> {
+        return request(kDictionaryIgnoreWord, [word]);
+      },
+      unignoreWord(word: IgnoredWord) : Promise<string[]> {
+        return request(kDictionaryUnignoreWord, [word]);
       }
     }
   };

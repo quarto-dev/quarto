@@ -15,34 +15,47 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { JSONRPCError } from "core";
-import { Dictionary, DictionaryInfo, editorJsonRpcServices } from "editor";
+import { Dictionary, DictionaryInfo, editorJsonRpcServices, IgnoredWord } from "editor";
 import { kWriterJsonRpcPath } from "writer-types";
 import { fakeBaseQuery, handleQuery } from "./util";
 
 const kUserDictionaryTag = "UserDictionary";
+const kIgnoredWordsTag = "IgnoredWords";
 
 const server = editorJsonRpcServices(kWriterJsonRpcPath);
 
-export const dictionariesApi = createApi({
-  reducerPath: "dictionaries",
+export const dictionaryApi = createApi({
+  reducerPath: "dictionary",
   baseQuery: fakeBaseQuery<JSONRPCError>(),
-  tagTypes: [kUserDictionaryTag],
+  tagTypes: [kUserDictionaryTag, kIgnoredWordsTag],
   endpoints(build) {
     return {
       availableDictionaries: build.query<DictionaryInfo[],void>({
         queryFn: () => handleQuery(server.dictionary.availableDictionaries())
       }),
-      dictionary: build.query<Dictionary,string>({
+      getDictionary: build.query<Dictionary,string>({
         queryFn: (locale: string) => handleQuery(server.dictionary.getDictionary(locale))
       }),
-      userDictionary: build.query<string,void>({
+      getUserDictionary: build.query<string,void>({
         queryFn: () => handleQuery(server.dictionary.getUserDictionary()),
         providesTags: [kUserDictionaryTag]
       }),
-      addToUserDictionary: build.mutation<void,string>({
+      addToUserDictionary: build.mutation<string,string>({
         queryFn: (word: string) => handleQuery(server.dictionary.addToUserDictionary(word)),
         invalidatesTags: [kUserDictionaryTag]
-      })
+      }),
+      ignoredWords: build.query<string[],string>({
+        queryFn: (context: string) => handleQuery(server.dictionary.getIgnoredWords(context)),
+        providesTags: (_result, _error, arg) => [{ type: kIgnoredWordsTag, id: arg }]
+      }),
+      ignoreWord: build.mutation<string[], IgnoredWord>({
+        queryFn: (word: IgnoredWord) => handleQuery(server.dictionary.ignoreWord(word)),
+        invalidatesTags: (_result, _error, arg) =>  [{ type: kIgnoredWordsTag, id: arg.context }]
+      }),
+      unignoreWord: build.mutation<string[], IgnoredWord>({
+        queryFn: (word: IgnoredWord) => handleQuery(server.dictionary.unignoreWord(word)),
+        invalidatesTags: (_result, _error, arg) =>  [{ type: kIgnoredWordsTag, id: arg.context }]
+      }) 
     };
   },
 });
@@ -50,7 +63,7 @@ export const dictionariesApi = createApi({
 
 export const {
   useAvailableDictionariesQuery,
-  useDictionaryQuery,
-  useUserDictionaryQuery,
+  useGetDictionaryQuery,
+  useGetUserDictionaryQuery,
   useAddToUserDictionaryMutation
-} = dictionariesApi;
+} = dictionaryApi;

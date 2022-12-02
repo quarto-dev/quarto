@@ -18,6 +18,8 @@ import fs from "fs";
 import path from "path";
 
 import jayson from "jayson";
+import { v4 as uuidv4 } from 'uuid';
+import iconvlite from "iconv-lite";
 
 import { jsonRpcMethod } from "core-server";
 
@@ -34,6 +36,7 @@ import {
   kDictionaryIgnoreWord,
   kDictionaryUnignoreWord
 } from "editor-types";
+import { jsonRpcError, lines } from "core";
 
 export interface DictionaryServerOptions {
   dictionariesDir: string;
@@ -41,7 +44,68 @@ export interface DictionaryServerOptions {
 }
 
 export function dictionaryServer(options: DictionaryServerOptions) : DictionaryServer {
- 
+  
+  // user dictionary
+  if (!fs.existsSync(options.userDictionaryDir)) {
+    fs.mkdirSync(options.userDictionaryDir);
+  }
+  const userDictionaryPath = path.join(options.userDictionaryDir, "dictionary.txt");
+  // read/write user dictionary
+  const readUserDictionary = () => {
+    if (fs.existsSync(userDictionaryPath)) {
+      return lines(fs.readFileSync(userDictionaryPath, { encoding: "utf-8" }));
+    } else {
+      return [];
+    }
+  }
+  const writeUserDictionary = (words: string[]) => {
+    fs.writeFileSync(userDictionaryPath, words.join("\n"), { encoding: "utf-8" });
+  }
+
+  // ignored words
+  const ignoredWordsPath = path.join(options.userDictionaryDir, "ignored");
+  if (!fs.existsSync(ignoredWordsPath)) {
+    fs.mkdirSync(ignoredWordsPath, { recursive: true });
+  }
+  const ignoredWordsIndexFile = path.join(ignoredWordsPath, "INDEX");
+  const readIgnoredWordsIndex = () : Record<string,string> => {
+    if (fs.existsSync(ignoredWordsIndexFile)) {
+      return JSON.parse(fs.readFileSync(ignoredWordsIndexFile, { encoding: "utf-8" })) as Record<string,string>;
+    } else {
+      return {};
+    }
+  }
+  const writeIgnoredWordsIndex = (index: Record<string,string>) => {
+    fs.writeFileSync(ignoredWordsIndexFile, JSON.stringify(index, undefined, 2), { encoding: "utf-8" });
+  }
+  const readIgnoredWords = (context: string) : string[] => {
+    const index = readIgnoredWordsIndex();
+    if (index[context]) {
+      const wordsPath = path.join(ignoredWordsPath, index[context]);
+      if (fs.existsSync(wordsPath)) {
+        return lines(fs.readFileSync(wordsPath, { encoding: "utf-8" }));
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+  const writeIgnoredWords = (context: string, words: string[]) => {
+    const index = readIgnoredWordsIndex();
+    if (!index[context]) {
+      index[context] = uuidv4();
+      writeIgnoredWordsIndex(index);
+    }
+    const wordsPath = path.join(ignoredWordsPath, index[context]);
+    fs.writeFileSync(wordsPath, words.join("\n"), { "encoding": "utf-8" });
+  }
+  
+  const readAsUtf8 = (file: string, encoding: string) => {
+    const buffer = fs.readFileSync(file);
+    return iconvlite.decode(buffer, encoding);
+  }
+
   return {
     async availableDictionaries(): Promise<DictionaryInfo[]> {
       return kKnownDictionaires.filter(dictionary => {
@@ -49,25 +113,36 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
       })
     },
     async getDictionary(locale: string): Promise<Dictionary> {
-      return {
-        aff: 'this is the aff',
-        words: 'these are the words'
+      const wordsPath = path.join(options.dictionariesDir, `${locale}.dic`);
+      const affPath = path.join(options.dictionariesDir, `${locale}.aff`);
+      if (!fs.existsSync(wordsPath) || !fs.existsSync(affPath)) {
+        const words = readAsUtf8(wordsPath, "latin1");
+        const aff = readAsUtf8(wordsPath, "latin1");
+        return { words, aff };
+      } else {
+        throw jsonRpcError(`Dictionary for ${locale} not found`);
       }
     },
-    async getUserDictionary() : Promise<string> {
-      return '';
+    async getUserDictionary() : Promise<string[]> {
+      return readUserDictionary();
     },
-    async addToUserDictionary(word: string) : Promise<string> {
-      return word;
+    async addToUserDictionary(word: string) : Promise<string[]> {
+      const words = readUserDictionary().concat(word);
+      writeUserDictionary(words);
+      return words;
     },
     async getIgnoredWords(context: string) : Promise<string[]> {
-      return [];
+      return readIgnoredWords(context);
     },
     async ignoreWord(word: IgnoredWord) : Promise<string[]> {
-      return [word.word];
+      const words = readIgnoredWords(word.context).concat(word.word);
+      writeIgnoredWords(word.context, words);
+      return words;
     },
     async unignoreWord(word: IgnoredWord) : Promise<string[]> {
-      return [];
+      const words = readIgnoredWords(word.context).filter(w => w !== word.word);
+      writeIgnoredWords(word.context, words);
+      return words;
     }
   }
 }

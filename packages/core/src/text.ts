@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * text.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,8 +13,12 @@
  *
  */
 
-export * from './promise';
-export * from './wordbreak';
-export * from './jsonrpc';
-export * from './text';
+
+export function lines(text: string): string[] {
+  return text.split(/\r?\n/);
+}
+
+export function normalizeNewlines(text: string) {
+  return lines(text).join("\n");
+}
 

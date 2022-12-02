@@ -24,6 +24,8 @@ import cors from "cors";
 
 import jayson from 'jayson'
 
+import { appConfigDir } from 'core-server';
+
 import { kWriterJsonRpcPath } from 'writer-types';
 import { editorServerMethods, editorServicesMethods } from 'editor-server';
 import { prefsServerMethods } from './prefs';
@@ -33,9 +35,11 @@ const kPayloadLimitMb = 100;
 
 export function createServer(resourcesDir: string, editorResourcesDir: string) {
 
+  const userDictionaryDir = appConfigDir("quarto-writer", "user-dictionary");
+
   const dictionaryOptions = {
     dictionariesDir: path.join(resourcesDir, "dictionaries"),
-    userDictionaryDir: tmp.dirSync().name
+    userDictionaryDir
   };
 
   const writerRpcServer = new jayson.Server({

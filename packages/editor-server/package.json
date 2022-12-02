@@ -8,9 +8,11 @@
   "dependencies": {
     "core-server": "*",
     "editor-types": "*",
+    "iconv-lite": "^0.6.3",
     "jayson": "^4.0.0",
     "mathjax-full": "^3.2.2",
     "tsconfig": "*",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "uuid": "^9.0.0"
   }
 }

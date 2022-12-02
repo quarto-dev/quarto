@@ -41,8 +41,8 @@ export interface IgnoredWord {
 export interface DictionaryServer {
   availableDictionaries: () => Promise<DictionaryInfo[]>;
   getDictionary: (locale: string) => Promise<Dictionary>;
-  getUserDictionary: () => Promise<string>;
-  addToUserDictionary: (word: string) => Promise<string>;
+  getUserDictionary: () => Promise<string[]>;
+  addToUserDictionary: (word: string) => Promise<string[]>;
   getIgnoredWords: (context: string) => Promise<string[]>;
   ignoreWord: (word: IgnoredWord) => Promise<string[]>;
   unignoreWord: (word: IgnoredWord) => Promise<string[]>;

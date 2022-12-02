@@ -36,11 +36,11 @@ export const dictionaryApi = createApi({
       getDictionary: build.query<Dictionary,string>({
         queryFn: (locale: string) => handleQuery(server.dictionary.getDictionary(locale))
       }),
-      getUserDictionary: build.query<string,void>({
+      getUserDictionary: build.query<string[],void>({
         queryFn: () => handleQuery(server.dictionary.getUserDictionary()),
         providesTags: [kUserDictionaryTag]
       }),
-      addToUserDictionary: build.mutation<string,string>({
+      addToUserDictionary: build.mutation<string[],string>({
         queryFn: (word: string) => handleQuery(server.dictionary.addToUserDictionary(word)),
         invalidatesTags: [kUserDictionaryTag]
       }),

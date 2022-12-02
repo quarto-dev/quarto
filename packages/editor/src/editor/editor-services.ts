@@ -50,10 +50,10 @@ export function editorJsonRpcServices(url: string) : EditorServices {
       getDictionary(locale: string) : Promise<Dictionary> {
         return request(kDictionaryGetDictionary, [locale]);
       },
-      getUserDictionary() : Promise<string> {
+      getUserDictionary() : Promise<string[]> {
         return request(kDictionaryGetUserDictionary, []);
       },
-      addToUserDictionary(word: string) : Promise<string> {
+      addToUserDictionary(word: string) : Promise<string[]> {
         return request(kDictionaryAddToUserDictionary, [word]);
       },
       getIgnoredWords(context: string):  Promise<string[]> {

@@ -31,7 +31,11 @@ import {
   useUnignoreWordMutation 
 } from '../../../store/dictionary';
 
-// TODO: why so many errors?
+// TOOD: utf8 dictionaries / server-side spelling
+// https://github.com/wooorm/dictionaries
+
+// TODO: bracket is being counted as a word char!
+
 // TODO: optimistic update?
 // TODO: pref/locale change invalidating all
 // TODO: real context (and/or handled 'undefined' context)

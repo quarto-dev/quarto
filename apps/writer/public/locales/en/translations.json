@@ -55,6 +55,8 @@
   "edit_raw_dialog_content": "Text",
   "edit_raw_dialog_remove": "Remove Format",
   "edit_raw_dialog_choose_format": "(Choose Format)",
+  "prefs_dialog_caption": "Preferences",
+  "prefs_dialog_dictionary_locale": "Main dictionary language",
   "attr_editor_id": "ID",
   "attr_editor_classes": "Classes",
   "attr_editor_keyvalue": "Attributes",

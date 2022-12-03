@@ -30,7 +30,7 @@ export const dictionaryApi = createApi({
   tagTypes: [kUserDictionaryTag, kIgnoredWordsTag],
   endpoints(build) {
     return {
-      availableDictionaries: build.query<DictionaryInfo[],void>({
+      getAvailableDictionaries: build.query<DictionaryInfo[],void>({
         queryFn: () => handleQuery(server.dictionary.availableDictionaries())
       }),
       getDictionary: build.query<Dictionary,string>({
@@ -62,7 +62,7 @@ export const dictionaryApi = createApi({
 
 
 export const {
-  useAvailableDictionariesQuery,
+  useGetAvailableDictionariesQuery,
   useGetDictionaryQuery,
   useGetUserDictionaryQuery,
   useAddToUserDictionaryMutation,

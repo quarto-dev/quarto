@@ -93,6 +93,7 @@
   "table_align_column_center": "Center",
   "table_align_column_default": "Default",
   "rename_menu_text": "Rename",
+  "prefs_menu_text": "Preferences...",
   "show_outline_menu_text": "Show Outline",
   "show_markdown_menu_text": "Show Markdown",
   "activate_editor_menu_text": "Activate Editor",

@@ -31,6 +31,7 @@ import WorkbenchClipboard from './WorkbenchClipboard';
 
 import './Workbench.scss';
 import { EditorDialogsProvider } from '../panes/editor/dialogs/EditorDialogsProvider';
+import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
 
 const Workbench: React.FC = () => {
  
@@ -72,6 +73,7 @@ const Workbench: React.FC = () => {
         <MarkdownPane />
       </div>
       <WorkbenchClipboard />
+      <WorkbenchPrefsDialog />
     </div>
   );
 };

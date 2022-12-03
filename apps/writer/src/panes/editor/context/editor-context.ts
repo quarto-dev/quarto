@@ -40,29 +40,32 @@ import { codeMirrorExtension } from "editor-codemirror";
 import { kWriterJsonRpcPath, Prefs } from 'writer-types';
 import { Commands } from '../../../commands/CommandManager';
 
-export interface PrefsSource {
+export interface EditorPrefs {
   prefs: () => Prefs, 
   setPrefs: (prefs: Record<string,unknown>) => void
 }
 
-export function editorContext(
+export interface EditorProviders {
+  prefs: EditorPrefs
   commands: () => Commands, 
-  dialogs: EditorDialogs,
-  prefs: PrefsSource
-) : EditorContext {
+  dialogs: () => EditorDialogs,
+  spelling: () => EditorUISpelling
+}
+
+export function editorContext(providers: EditorProviders) : EditorContext {
   
   const uiTools = new UITools();
   const server = editorJsonRpcServer(kWriterJsonRpcPath);
-  const services = editorJsonRpcServices(kWriterJsonRpcPath);
+  const { math: mathServer } = editorJsonRpcServices(kWriterJsonRpcPath);
   
   const ui = {
-    dialogs,
-    display: editorDisplay(commands),
-    math: editorMath(services.math),
+    dialogs: providers.dialogs(),
+    display: editorDisplay(providers.commands),
+    math: editorMath(mathServer),
     context: editorUIContext(),
-    prefs: editorPrefs(prefs),
+    prefs: editorPrefs(providers.prefs),
     chunks: editorChunks(),
-    spelling: editorSpelling(),
+    spelling: editorSpelling(providers.spelling),
     images: uiTools.context.defaultUIImages()
   };
 
@@ -189,47 +192,72 @@ function editorUIContext(): EditorUIContext {
   };
 }
 
-function editorPrefs(prefs: PrefsSource): EditorUIPrefs {
+function editorPrefs(provider: EditorPrefs): EditorUIPrefs {
   return {
     realtimeSpelling() : boolean {
-      return prefs.prefs().realtimeSpelling;
+      return provider.prefs().realtimeSpelling;
     },
     darkMode(): boolean {
-      return prefs.prefs().darkMode;
+      return provider.prefs().darkMode;
     },
     listSpacing(): ListSpacing {
-      return prefs.prefs().listSpacing;
+      return provider.prefs().listSpacing;
     },
     equationPreview(): boolean {
-      return prefs.prefs().equationPreview;
+      return provider.prefs().equationPreview;
     },
     packageListingEnabled(): boolean {
-      return prefs.prefs().packageListingEnabled;
+      return provider.prefs().packageListingEnabled;
     },
     tabKeyMoveFocus(): boolean {
-      return prefs.prefs().tabKeyMoveFocus;
+      return provider.prefs().tabKeyMoveFocus;
     },
     emojiSkinTone(): SkinTone {
-      return prefs.prefs().emojiSkinTone;
+      return provider.prefs().emojiSkinTone;
     },
     setEmojiSkinTone(emojiSkinTone: SkinTone) {
-      prefs.setPrefs({ emojiSkinTone });
+      provider.setPrefs({ emojiSkinTone });
     },
     zoteroUseBetterBibtex(): boolean {
-      return prefs.prefs().zoteroUseBetterBibtex;
+      return provider.prefs().zoteroUseBetterBibtex;
     },
     setBibliographyDefaultType(bibliographyDefaultType: string) {
-      prefs.setPrefs({ bibliographyDefaultType });
+      provider.setPrefs({ bibliographyDefaultType });
     },
     bibliographyDefaultType(): string {
-      return prefs.prefs().bibliographyDefaultType;
+      return provider.prefs().bibliographyDefaultType;
     },
     citationDefaultInText(): boolean {
-      return prefs.prefs().citationDefaultInText;
+      return provider.prefs().citationDefaultInText;
     },
     setCitationDefaultInText(citationDefaultInText: boolean) {
-      prefs.setPrefs({ citationDefaultInText });
+      provider.setPrefs({ citationDefaultInText });
     },
+  };
+}
+
+
+
+function editorSpelling(provider: () => EditorUISpelling) : EditorUISpelling {
+  return {
+    checkWords(words: string[]): string[] {
+      return provider().checkWords(words);
+    },
+    suggestionList(word: string, callback: (suggestions: string[]) => void) {
+      return provider().suggestionList(word, callback);
+    },
+    isWordIgnored(word: string): boolean {
+      return provider().isWordIgnored(word);
+    },
+    ignoreWord(word: string) {
+      return provider().ignoreWord(word);
+    },
+    unignoreWord(word: string) {
+      return provider().unignoreWord(word);
+    },
+    addToDictionary(word: string) {
+      return provider().addToDictionary(word);
+    }
   };
 }
 
@@ -268,30 +296,5 @@ function editorChunks(): EditorUIChunks {
     setChunksExpanded(_expanded: boolean) {
       //
     },
-  };
-}
-
-function editorSpelling() : EditorUISpelling {
-  return {
-    checkWords(_words: string[]): string[] {
-      return [];
-    },
-    suggestionList(_word: string, _callback: (suggestions: string[]) => void) {
-      //
-    },
-
-    // dictionary
-    isWordIgnored(_word: string): boolean {
-      return false;
-    },
-    ignoreWord(_word: string) {
-      //
-    },
-    unignoreWord(_word: string) {
-      //
-    },
-    addToDictionary(_word: string) {
-      //
-    }
   };
 }

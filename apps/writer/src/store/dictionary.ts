@@ -65,5 +65,8 @@ export const {
   useAvailableDictionariesQuery,
   useGetDictionaryQuery,
   useGetUserDictionaryQuery,
-  useAddToUserDictionaryMutation
+  useAddToUserDictionaryMutation,
+  useIgnoredWordsQuery,
+  useIgnoreWordMutation,
+  useUnignoreWordMutation
 } = dictionaryApi;

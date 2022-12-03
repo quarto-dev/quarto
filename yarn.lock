@@ -1150,6 +1150,11 @@
   resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.2.3.tgz#908bfb113419fd6a42273674c00994d40902c165"
   integrity sha512-dDZH/tXzwjutnuk4UacGgFRwV+JSLaXL1ikvidfJprkb7L9Nx1njcRHHmi3Dsvt7pgqqTEeucQuOrWHPFgzVHA==
 
+"@types/typo-js@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/typo-js/-/typo-js-1.2.0.tgz#9d1be8b003fb8194cc75e0bdea3bcdec4b6d0acf"
+  integrity sha512-2SjIgnJbhd7cuL9cK+ADxhUvNb3De047J9voorW/UmeTIgYtw/M0KuTjs6qLBJdAq3RzCSkIyzSCSRHt1qoDtw==
+
 "@types/use-sync-external-store@^0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@types/use-sync-external-store/-/use-sync-external-store-0.0.3.tgz#b6725d5f4af24ace33b36fafd295136e75509f43"
@@ -5784,6 +5789,11 @@ typescript@^4.5.2:
   version "4.9.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.3.tgz#3aea307c1746b8c384435d8ac36b8a2e580d85db"
   integrity sha512-CIfGzTelbKNEnLpLdGFgdyKhG23CKdKgQPOBc+OUNrkJ2vr+KSzsSV5kq5iWhEQbok+quxgGzrAtGWCyU7tHnA==
+
+typo-js@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/typo-js/-/typo-js-1.2.2.tgz#340484d81fe518e77c81a5a770162b14492f183b"
+  integrity sha512-C7pYBQK17EjSg8tVNY91KHdUt5Nf6FMJ+c3js076quPmBML57PmNMzAcIq/2kf/hSYtFABNDIYNYlJRl5BJhGw==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"

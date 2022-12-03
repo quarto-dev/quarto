@@ -16,11 +16,14 @@
 
 import React from "react";
 
-import { ContextMenu, Menu } from "@blueprintjs/core";
+import { v4 as uuidv4 } from 'uuid';
+
+import { ContextMenu, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { EditorDisplay, EditorMenuItem, XRef } from "editor";
 
 import { Commands } from "../../../commands/CommandManager";
-import { CommandMenuItems } from "../../../widgets/command/CommandMenuItems";
+import { CommandMenuItem } from "../../../widgets/command/CommandMenuItem";
+import { CommandId } from "../../../commands/commands";
 
 
 export function editorDisplay(commands: () => Commands) : EditorDisplay {
@@ -40,8 +43,18 @@ export function editorDisplay(commands: () => Commands) : EditorDisplay {
       clientX: number,
       clientY: number
     ): Promise<boolean> {
-      return new Promise(resolve => {        
-        ContextMenu.show(<Menu><CommandMenuItems menu={items} commands={commands()}></CommandMenuItems></Menu>, { left: clientX, top: clientY }, () => {
+      return new Promise(resolve => {    
+        const cmds = commands();
+        const menuItems = items.map(item => {
+          if (item.separator) {
+            return <MenuDivider key={uuidv4()}/>;
+          } else if (item.command) {
+            return <CommandMenuItem id={item.command as CommandId} key={item.command} text={item.text} commands={cmds}/>;
+          } else {
+            return <MenuItem text={item.text} key={uuidv4()} onClick={item.exec}/>
+          }
+        });
+        ContextMenu.show(<Menu>{menuItems}</Menu>, { left: clientX, top: clientY }, () => {
           resolve(true);
         });
       }); 

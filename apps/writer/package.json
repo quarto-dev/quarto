@@ -33,11 +33,13 @@
     "react-redux": "^8.0.5",
     "react-transition-group": "^4.4.5",
     "redux": "^4.2.0",
+    "typo-js": "^1.2.2",
     "uuid": "^9.0.0",
     "writer-types": "*"
   },
   "devDependencies": {
     "@types/react-transition-group": "^4.4.5",
+    "@types/typo-js": "^1.2.0",
     "@types/uuid": "^8.3.4",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",

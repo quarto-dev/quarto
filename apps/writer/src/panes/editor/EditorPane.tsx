@@ -31,8 +31,8 @@ import {
   StateChangeEvent,
   EditorFormat,
   kQuartoDocType,
-  EditorDialogs,
-  PandocFormat
+  PandocFormat,
+  EditorUISpelling
 } from 'editor';
 
 import {
@@ -51,7 +51,7 @@ import { CommandManagerContext, Commands } from '../../commands/CommandManager';
 import { Pane } from '../../widgets/Pane';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
-import { editorContext, PrefsSource } from './context/editor-context';
+import { editorContext, EditorProviders } from './context/editor-context';
 
 import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands } from './editor-commands';
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
@@ -62,6 +62,7 @@ import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 import styles from './EditorPane.module.scss';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
 import { defaultPrefs, Prefs } from 'writer-types';
+import { useEditorSpelling } from './context/editor-spelling';
 
 const EditorPane : React.FC = () => {
 
@@ -87,6 +88,7 @@ const EditorPane : React.FC = () => {
   const editorRef = useRef<Editor | null>(null);
   const commandsRef = useRef<Commands | null>(null);
   const prefsRef = useRef<Prefs | null>(defaultPrefs());
+  const spellingRef = useRef<EditorUISpelling | null>(null);
  
   // subscribe/unsubscribe from editor events
   const editorEventsRef = useRef(new Array<VoidFunction>());
@@ -103,24 +105,34 @@ const EditorPane : React.FC = () => {
     dialogs.alert(message, t('error_alert_title') as string, kAlertTypeError);
   }
 
-  // prefs source
-  const prefsSource : PrefsSource = {
-    prefs(): Prefs {
-      return prefsRef.current || defaultPrefs();
-    },
-    setPrefs: function (prefs: Record<string,unknown>): void {
-      setPrefs({ ...prefsRef.current!, ...prefs });
-    }
-  };
+  // keep spelling provider up to date
+  spellingRef.current = useEditorSpelling(
+    "context" + prefs.emojiSkinTone,
+     { invalidateWord: (word: string) => editorRef.current?.spellingInvalidateWord(word),
+       invalidateAllWords: () => editorRef.current?.spellingInvalidateAllWords() }
+    );
 
   // initialize the editor
   const initEditor = useCallback(async () => {
     
+    // create prefs provider
+    const editorPrefs = { 
+      prefs(): Prefs {
+        return prefsRef.current || defaultPrefs();
+      },
+      setPrefs: function (prefs: Record<string,unknown>): void {
+        setPrefs({ ...prefsRef.current!, ...prefs });
+      }
+    };
+
     editorRef.current = await createEditor(
       parentRef.current!, 
-      () => commandsRef.current!, 
-      dialogs,
-      prefsSource
+      {
+        commands: () => commandsRef.current!, 
+        dialogs: () => dialogs,
+        prefs: editorPrefs,
+        spelling: () => spellingRef.current!
+      }
     );
     
     window.addEventListener("resize", onResize);
@@ -284,11 +296,9 @@ const editorLoadingUI = (loading: boolean) => {
 
 const createEditor = async (
   parent: HTMLElement, 
-  commands: () => Commands,
-  dialogs: EditorDialogs,
-  prefsContext: PrefsSource
+  providers: EditorProviders
 ) : Promise<Editor> => {
-  const context = editorContext(commands, dialogs, prefsContext);
+  const context = editorContext(providers);
     const format: EditorFormat = {
       pandocMode: 'markdown',
       pandocExtensions: '',
@@ -303,7 +313,7 @@ const createEditor = async (
       docTypes: [kQuartoDocType]
     }
     return await Editor.create(parent, context, format, { 
-      browserSpellCheck: true,
+      browserSpellCheck: false,
       commenting: false,
       outerScrollContainer: true 
     });

@@ -115,7 +115,7 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
     async getDictionary(locale: string): Promise<Dictionary> {
       const wordsPath = path.join(options.dictionariesDir, `${locale}.dic`);
       const affPath = path.join(options.dictionariesDir, `${locale}.aff`);
-      if (!fs.existsSync(wordsPath) || !fs.existsSync(affPath)) {
+      if (fs.existsSync(wordsPath) && fs.existsSync(affPath)) {
         const words = readAsUtf8(wordsPath, "latin1");
         const aff = readAsUtf8(wordsPath, "latin1");
         return { words, aff };

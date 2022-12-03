@@ -52,7 +52,7 @@ export function defaultPrefs() : Prefs {
 
     // spelling
     realtimeSpelling: true,
-    dictionaryLocale: 'en-US',
+    dictionaryLocale: 'en_US',
 
     // editing
     emojiSkinTone: 0,

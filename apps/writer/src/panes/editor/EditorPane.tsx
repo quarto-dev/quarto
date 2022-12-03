@@ -105,12 +105,12 @@ const EditorPane : React.FC = () => {
     dialogs.alert(message, t('error_alert_title') as string, kAlertTypeError);
   }
 
-  // keep spelling provider up to date
-  spellingRef.current = useEditorSpelling(
-    "context" + prefs.emojiSkinTone,
-     { invalidateWord: (word: string) => editorRef.current?.spellingInvalidateWord(word),
-       invalidateAllWords: () => editorRef.current?.spellingInvalidateAllWords() }
-    );
+  // keep spelling provider up to date 
+  // TODO: add context once we have a relationship to the filesystem
+  spellingRef.current = useEditorSpelling("(Untitled)", { 
+    invalidateWord: (word: string) => editorRef.current?.spellingInvalidateWord(word),
+    invalidateAllWords: () => editorRef.current?.spellingInvalidateAllWords() 
+  });
 
   // initialize the editor
   const initEditor = useCallback(async () => {

@@ -153,7 +153,21 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
             for (const range of addRanges) {
               decos = decos.add(
                 tr.doc,
-                spellingDecorations(newState, wb, ui.spelling, excluded, false, range.from - 1, range.to)
+                // As part of rstudio moving away from typo this line of code was changed to the following:
+                //
+                // spellingDecorations(newState, wb, ui.spelling, excluded, false, range.from - 1, range.to)
+                //
+                // Relevant commits are here:
+                //  - https://github.com/rstudio/rstudio/commit/cee6c3e8181d3020b5a2eed8d1e1562caad9e8c5
+                //  - https://github.com/rstudio/rstudio/pull/9161
+                // 
+                // I am not sure why the range.from - 1 was changed, and the flipping of true -> false
+                // for excludeCursor makes truly realtime implementations show the currently edited
+                // word as misspelled (rstudio evades this by doing async checks). I had to revert to the
+                // previous behavior in order to get the library running against Typo in the browser
+                // to work correctly.
+                // 
+                spellingDecorations(newState, wb, ui.spelling, excluded, true, range.from, range.to)
               );
             }
 

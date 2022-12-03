@@ -31,8 +31,6 @@ import {
   useUnignoreWordMutation 
 } from '../../../store/dictionary';
 
-// TODO: pref/locale change invalidating all
-
 export interface SpellingInvalidate {
   invalidateAllWords: () => void;
   invalidateWord: (word: string) => void;

@@ -31,14 +31,8 @@ import {
   useUnignoreWordMutation 
 } from '../../../store/dictionary';
 
-
-// TODO: bracket is being counted as a word char!
-// TODO: spell checking is happening as you type
-// (check the commit that disabled realtime)
-
-// TODO: optimistic update?
+// TOOD: unignore doesn't cause a re-check (check rstudio)
 // TODO: pref/locale change invalidating all
-// TODO: real context (and/or handled 'undefined' context)
 
 export interface SpellingInvalidate {
   invalidateAllWords: () => void;

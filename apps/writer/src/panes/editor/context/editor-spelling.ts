@@ -36,14 +36,14 @@ import {
 // TODO: pref/locale change invalidating all
 // TODO: real context (and/or handled 'undefined' context)
 
-export interface SpellingInvalidation {
+export interface SpellingInvalidate {
   invalidateAllWords: () => void;
   invalidateWord: (word: string) => void;
 }
 
 export function useEditorSpelling(
   context: string, 
-  invalidation: SpellingInvalidation
+  invalidate: SpellingInvalidate
 ) : EditorUISpelling {
 
   // the typo instance and the ignored list is what we need to checkk/suggest
@@ -66,7 +66,7 @@ export function useEditorSpelling(
   useEffect(() => {
     if (dictionary) {
       typoRef.current = new Typo(prefs.dictionaryLocale, dictionary.aff, dictionary.words);
-      invalidation.invalidateAllWords();
+      invalidate.invalidateAllWords();
     }
   }, [dictionary]);
 
@@ -95,19 +95,19 @@ export function useEditorSpelling(
       },
       addToDictionary(word: string) {
         addToUserDictionary(word).unwrap()
-          .then(() => invalidation.invalidateWord(word));
+          .then(() => invalidate.invalidateWord(word));
       },
       isWordIgnored(word: string) {
         return ignored.includes(word);
       },
       ignoreWord(word: string) {
         ignoreWord({ context, word }).unwrap()
-          .then(() => invalidation.invalidateWord(word));
+          .then(() => invalidate.invalidateWord(word));
        ;
       },
       unignoreWord(word: string) {
         unignoreWord({ context, word }).unwrap()
-          .then(() => invalidation.invalidateWord(word));
+          .then(() => invalidate.invalidateWord(word));
       }
     }
   }, [context, dictionary, ignored]);

@@ -117,7 +117,7 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
       const affPath = path.join(options.dictionariesDir, `${locale}.aff`);
       if (fs.existsSync(wordsPath) && fs.existsSync(affPath)) {
         const words = readAsUtf8(wordsPath, "latin1");
-        const aff = readAsUtf8(wordsPath, "latin1");
+        const aff = readAsUtf8(affPath, "latin1");
         return { words, aff };
       } else {
         throw jsonRpcError(`Dictionary for ${locale} not found`);

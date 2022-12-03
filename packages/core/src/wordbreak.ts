@@ -55,7 +55,8 @@ export function wordBreaker() : WordBreaker {
     let toIndex = DATA.length / 2;  // index of ending range, EXCLUSIVE
     while (fromIndex < toIndex)
     {
-      const testIndex = (fromIndex + toIndex) / 2;
+      // round down from e.g. 180.5 (that's not the JS default behavior)
+      const testIndex =  -Math.round(-((fromIndex + toIndex) / 2));
       const testResult = compareToRange(c, testIndex);
 
         if (testResult < 0)

@@ -31,7 +31,6 @@ import {
   useUnignoreWordMutation 
 } from '../../../store/dictionary';
 
-// TOOD: unignore doesn't cause a re-check (check rstudio)
 // TODO: pref/locale change invalidating all
 
 export interface SpellingInvalidate {

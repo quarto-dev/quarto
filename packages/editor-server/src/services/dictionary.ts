@@ -19,7 +19,6 @@ import path from "path";
 
 import jayson from "jayson";
 import { v4 as uuidv4 } from 'uuid';
-import iconvlite from "iconv-lite";
 
 import { jsonRpcMethod } from "core-server";
 
@@ -37,6 +36,8 @@ import {
   kDictionaryUnignoreWord
 } from "editor-types";
 import { jsonRpcError, lines } from "core";
+
+// dictionaries from: https://github.com/wooorm/dictionaries
 
 export interface DictionaryServerOptions {
   dictionariesDir: string;
@@ -101,11 +102,6 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
     fs.writeFileSync(wordsPath, words.join("\n"), { "encoding": "utf-8" });
   }
   
-  const readAsUtf8 = (file: string, encoding: string) => {
-    const buffer = fs.readFileSync(file);
-    return iconvlite.decode(buffer, encoding);
-  }
-
   return {
     async availableDictionaries(): Promise<DictionaryInfo[]> {
       return kKnownDictionaires.filter(dictionary => {
@@ -116,8 +112,8 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
       const wordsPath = path.join(options.dictionariesDir, `${locale}.dic`);
       const affPath = path.join(options.dictionariesDir, `${locale}.aff`);
       if (fs.existsSync(wordsPath) && fs.existsSync(affPath)) {
-        const words = readAsUtf8(wordsPath, "latin1");
-        const aff = readAsUtf8(affPath, "latin1");
+        const words = fs.readFileSync(wordsPath, { encoding: "utf-8" });
+        const aff = fs.readFileSync(affPath, { encoding: "utf-8" });
         return { words, aff };
       } else {
         throw jsonRpcError(`Dictionary for ${locale} not found`);

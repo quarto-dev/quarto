@@ -34,7 +34,7 @@ async function runApp() {
   try {
     // initialize content
     const store = await initializeStore();
-    const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
+    const contentUrl = `content/${window.location.search.slice(1) || 'doc.md'}`;
     const markdown = await (await fetch(contentUrl)).text();
     store.dispatch(setEditorMarkdown(markdown));
 

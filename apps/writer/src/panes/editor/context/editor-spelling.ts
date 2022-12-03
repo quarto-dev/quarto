@@ -31,10 +31,10 @@ import {
   useUnignoreWordMutation 
 } from '../../../store/dictionary';
 
-// TOOD: utf8 dictionaries / server-side spelling
-// https://github.com/wooorm/dictionaries
 
 // TODO: bracket is being counted as a word char!
+// TODO: spell checking is happening as you type
+// (check the commit that disabled realtime)
 
 // TODO: optimistic update?
 // TODO: pref/locale change invalidating all

@@ -43,6 +43,7 @@ export const Dialog: React.FC<PropsWithChildren<DialogProps>> = props => {
     <BlueprintDialog
       isOpen={props.isOpen}
       title={props.title}
+      className={dialogStyles.dialog}
       onOpening={props.onOpening}
       onOpened={props.onOpened}
       autoFocus={true}

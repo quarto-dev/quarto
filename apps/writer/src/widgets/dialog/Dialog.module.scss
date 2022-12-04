@@ -13,6 +13,7 @@
  *
  */
 
+
 .dialogFooter {
   margin-top: 30px !important;
 }
@@ -33,12 +34,14 @@
   margin-left: auto;
 }
 
-:global {
-  .bp4-control-group:not(.bp4-vertical) > * {
-    margin-right: 10px !important;
-  }
-  .bp4-control-group:not(.bp4-vertical) > *:last-of-type {
-    margin-right: -1px !important; 
+.dialog {
+  :global {
+    .bp4-control-group:not(.bp4-vertical) > * {
+      margin-right: 10px !important;
+    }
+    .bp4-control-group:not(.bp4-vertical) > *:last-of-type {
+      margin-right: -1px !important; 
+    }
   }
 }
 

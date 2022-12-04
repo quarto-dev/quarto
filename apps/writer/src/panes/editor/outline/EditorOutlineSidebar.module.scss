@@ -27,9 +27,9 @@ $verticalPadding: 20px;
   width: 0;
   display: none;
   box-shadow: $paneBoxShadow;
-  border-bottom-right-radius: 10px;
-  border-top-right-radius: 10px;
-  background-color: white;
+  border-bottom-right-radius: $sidebarBottomBorderRadius;
+  border-top-right-radius: $sidebarBottomBorderRadius;
+  background-color: $editorBackgroundColor;
 }
 
 .outlineVisible {

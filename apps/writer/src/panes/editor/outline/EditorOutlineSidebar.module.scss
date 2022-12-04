@@ -114,11 +114,6 @@ $verticalPadding: 20px;
   }
 }
 
-.outlineEmpty {
-  padding: 18px 18px;
-  color: $gray1;
-}
-
 
 .showOutlineButton {
   position: absolute;
@@ -137,3 +132,51 @@ $verticalPadding: 20px;
     color: $gray1  !important;
   }
 }
+
+.outlineEmpty {
+  padding: 18px 18px;
+  color: $gray1;
+}
+
+
+$transitionTime: 300ms;
+
+.enter {
+  width: 0;
+}
+
+.enterActive {
+  width: $sidebarWidth;
+  transition: width $transitionTime;
+}
+
+.enterDone {
+  width: $sidebarWidth;
+}
+
+.exit {
+  width: $sidebarWidth;
+  display: initial;
+}
+
+.exitActive {
+  width: 0;
+  transition: width $transitionTime;
+}
+
+.exitDone {
+  width: 0;
+  display: none;
+}
+
+.enter .outlineEmpty,
+.exit .outlineEmpty {
+  display: none;
+}
+
+.enterDone .outlineEmpty,
+.exitDone .outlineEmpty {
+  display: initial;
+}
+
+

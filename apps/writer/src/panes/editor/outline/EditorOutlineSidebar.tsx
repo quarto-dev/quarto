@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { useSelector } from 'react-redux';
 
@@ -21,6 +21,10 @@ import { CSSTransition } from 'react-transition-group';
 
 import { useTranslation } from 'react-i18next';
 
+import { defaultPrefs } from 'writer-types';
+
+import { editorOutline } from '../../../store/editor';
+import { useGetPrefsQuery, useSetPrefsMutation } from '../../../store/prefs';
 
 import { CommandManagerContext } from '../../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../../commands/commands';
@@ -31,10 +35,6 @@ import { EditorOutlineTree } from './EditorOutlineTree';
 import { EditorOutlineEmpty } from './EditorOutlineEmpty';
 
 import styles from './EditorOutlineSidebar.module.scss';
-import transition from './EditorOutlineTransition.module.scss';
-import { editorOutline } from '../../../store/editor';
-import { useGetPrefsQuery, useSetPrefsMutation } from '../../../store/prefs';
-import { defaultPrefs } from 'writer-types';
 
 const EditorOutlineSidebar: React.FC = () => {
 
@@ -46,8 +46,6 @@ const EditorOutlineSidebar: React.FC = () => {
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
   const [setPrefs] = useSetPrefsMutation();
  
-  const [animating, setAnimating] = useState(false);
-
   const setShowOutline = (showOutline: boolean) => setPrefs({...prefs, showOutline});
 
   const onOpenClicked = () => setShowOutline(true);
@@ -75,18 +73,15 @@ const EditorOutlineSidebar: React.FC = () => {
       outlineClassName.push(styles.outlineVisible);
     }
 
+  const nodeRef = useRef<HTMLDivElement>(null);
+
   return (
     <>
         <EditorOutlineButton visible={!prefs.showOutline} onClick={onOpenClicked} />
-        <CSSTransition in={prefs.showOutline} timeout={200} classNames={{ ...transition }} 
-          onEnter={() => setAnimating(true)}
-          onEntered={() => setAnimating(false)}
-          onExit={() => setAnimating(true)}
-          onExited={() => setAnimating(false)}
-        >            
-          <div className={outlineClassName.join(' ')}>
+        <CSSTransition nodeRef={nodeRef} in={prefs.showOutline} timeout={200} classNames={{ ...styles }}>            
+          <div ref={nodeRef} className={outlineClassName.join(' ')}>
             <EditorOutlineHeader onCloseClicked={onCloseClicked} />
-            {outline.length ? <EditorOutlineTree outline={outline} /> : !animating ? <EditorOutlineEmpty /> : null}
+            {outline.length ? <EditorOutlineTree outline={outline} /> : <EditorOutlineEmpty /> }
           </div>
         </CSSTransition>
       </>

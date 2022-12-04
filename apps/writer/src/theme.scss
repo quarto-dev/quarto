@@ -21,9 +21,12 @@
  $sidebarBottomBorderRadius: 10px;
  $sidebarTransitionTime: 300ms;
  
- $backgroundColor: #f8f9fa;
+ $backgroundColor: $pt-app-background-color;
  $editorBackgroundColor: white;
- $borderColor: 1px solid rgb(218, 220, 224);
+
+ $paneBorderColor: rgb(218, 220, 224);
+ $paneBorder: 1px solid $paneBorderColor;
  
- $paneBoxShadow: rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+ $paneBoxShadowColor: rgba(60, 64, 67, 0.15);
+ $paneBoxShadow: 0 1px 3px 1px $paneBoxShadowColor;
  

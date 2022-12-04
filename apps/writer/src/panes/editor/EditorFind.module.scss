@@ -18,21 +18,32 @@
 @import '../../theme.scss';
 
 $findHeight: 130px;
+$findWidth: 340px;
 $rightPadding: 20px;
 
-.find {
+.findContainer {
   display: none;
   position: absolute;
+  z-index: $pt-z-index-overlay;
   right: $rightPadding;
-  top: -2px;
+  top: -1px;
   height: 0;
-  width: calc(#{$sidebarWidth} - #{$rightPadding});
+  width: calc(#{$findWidth} - #{$rightPadding});
+  background-color: $editorBackgroundColor;
+}
+
+.find {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
   padding: 10px;
-  box-shadow: $paneBoxShadow;
+  overflow: hidden;
+  box-shadow:  0 1px 0 1px $paneBoxShadowColor;
   border-top: none;
   border-bottom-right-radius: $sidebarBottomBorderRadius;
   border-bottom-left-radius: $sidebarBottomBorderRadius;
-  background-color: $editorBackgroundColor;
 }
 
 

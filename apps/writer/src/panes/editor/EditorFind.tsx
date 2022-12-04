@@ -87,15 +87,17 @@ const EditorFind: React.FC = () => {
     <CSSTransition nodeRef={nodeRef} in={active} timeout={200} classNames={{ ...styles }}
       onEntered={() =>focusInput(inputRef.current)}
     >          
-      <div ref={nodeRef} className={styles.find}>
-        <InputGroup
-          inputRef={inputRef}
-          leftIcon={IconNames.Search}
-          onChange={debouncedFindHandler}
-          small={true}
-          fill={true}
-          placeholder={t('find_placeholder') as string}    
-        />
+      <div ref={nodeRef} className={styles.findContainer}>
+        <div className={styles.find}>
+          <InputGroup
+            inputRef={inputRef}
+            leftIcon={IconNames.Search}
+            onChange={debouncedFindHandler}
+            small={true}
+            fill={true}
+            placeholder={t('find_placeholder') as string}    
+          />
+        </div>
       </div>
     </CSSTransition>
   );

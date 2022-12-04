@@ -13,21 +13,16 @@
  *
  */
 
+import { EditorFindReplace } from 'editor';
 import React from 'react';
 
 export interface EditorActions {
   focus(): void;
   navigate(id: string): void;
+  findReplace() : EditorFindReplace
 }
 
-export const EditorActionsContext = React.createContext<EditorActions>({
-  focus() {
-    /* */
-  },
-  navigate() {
-    /* */
-  },
-});
+export const EditorActionsContext = React.createContext<EditorActions>(null!);
 
 export function withEditorActions<P extends WithEditorActionsProps>(Component: React.ComponentType<P>) {
   return function CommandsComponent(props: Pick<P, Exclude<keyof P, keyof WithEditorActionsProps>>) {

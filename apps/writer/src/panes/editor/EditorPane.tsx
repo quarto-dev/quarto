@@ -63,6 +63,7 @@ import styles from './EditorPane.module.scss';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
 import { defaultPrefs, Prefs } from 'writer-types';
 import { useEditorSpelling } from './context/editor-spelling';
+import EditorFind from './EditorFind';
 
 const EditorPane : React.FC = () => {
 
@@ -167,11 +168,14 @@ const EditorPane : React.FC = () => {
 
   // provide EditorActionsContext from editor 
   const editorActions: EditorActions = {
-    focus: function (): void {
+    focus() {
       editorRef.current?.focus();
     },
-    navigate: function (id: string): void {
+    navigate(id: string) {
       editorRef.current?.navigate(NavigationType.Id, id);
+    },
+    findReplace() {
+      return editorRef.current!.getFindReplace();
     }
   }
 
@@ -257,6 +261,7 @@ const EditorPane : React.FC = () => {
         <div id="editor" className={styles.editorParent} ref={parentRef}>
           {editorLoadingUI(loading)}
           <EditorOutlineSidebar />
+          <EditorFind />
         </div>
       </EditorActionsContext.Provider>
     </Pane>

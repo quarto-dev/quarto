@@ -52,6 +52,9 @@ const EditMenu: React.FC = () => {
       <MenuDivider />
       <CommandMenuItem id={CommandId.SelectAll} />
       <MenuDivider />
+      <CommandMenuItem id={WorkbenchCommandId.Find} />
+      <CommandMenuItem id={WorkbenchCommandId.Replace} />
+      <MenuDivider />
       <CommandMenuItem id={WorkbenchCommandId.Prefs} />
     </MenubarMenu>
   );

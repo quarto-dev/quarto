@@ -96,6 +96,8 @@
   "prefs_menu_text": "Preferences...",
   "show_outline_menu_text": "Show Outline",
   "show_markdown_menu_text": "Show Markdown",
+  "find_menu_text": "Find",
+  "replace_menu_text": "Replace",
   "activate_editor_menu_text": "Activate Editor",
   "keyboard_shortcuts_menu_text": "Keyboard Shortcuts",
   "enable_dev_tools_menu_text": "ProseMirror Dev Tools",

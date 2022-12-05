@@ -19,15 +19,16 @@ import { IconNames } from '@blueprintjs/icons';
 
 import { EditorCommandId } from 'editor';
 
-import { Toolbar, ToolbarDivider, ToolbarMenu } from '../../widgets/Toolbar';
-import { CommandToolbarButton } from '../../widgets/command/CommandToolbarButton';
-import { CommandToolbarMenu } from '../../widgets/command/CommandToolbarMenu';
-import { WithCommand } from '../../widgets/command/WithCommand';
-import { WorkbenchCommandId } from '../../commands/commands';
+import { Toolbar, ToolbarDivider, ToolbarMenu } from '../widgets/Toolbar';
+import { CommandToolbarButton } from '../widgets/command/CommandToolbarButton';
+import { CommandToolbarMenu } from '../widgets/command/CommandToolbarMenu';
+import { WithCommand } from '../widgets/command/WithCommand';
+import { WorkbenchCommandId } from '../commands/commands';
 
-import styles from './EditorPane.module.scss';
-import { CommandManagerContext } from '../../commands/CommandManager';
-import { CommandMenuItems } from '../../widgets/command/CommandMenuItems';
+import { CommandManagerContext } from '../commands/CommandManager';
+import { CommandMenuItems } from '../widgets/command/CommandMenuItems';
+
+import styles from './WorkbenchToolbar.module.scss';
 
 const CommandId = { ...EditorCommandId, ...WorkbenchCommandId };
 

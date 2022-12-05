@@ -13,9 +13,9 @@
  *
  */
 
- @import '@blueprintjs/core/lib/scss/variables.scss';
+@import '@blueprintjs/core/lib/scss/variables.scss';
 
- $navbarHeight: 64px;
+@import '../theme.scss';
  
  .workbench {
    position: fixed;
@@ -30,10 +30,10 @@
    height: $navbarHeight;
    box-shadow: none;
  }
- 
+
  .workbench .workspace {
    position: fixed;
-   top: $navbarHeight;
+   top: calc(#{$navbarHeight} + #{$toolbarHeight});
    left: 0;
    right: 0;
    bottom: 0;

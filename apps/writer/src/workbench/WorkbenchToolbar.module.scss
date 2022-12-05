@@ -1,5 +1,5 @@
 /*
- * theme.scss
+ * WorkbenchToolbar.module.scss
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,21 +13,23 @@
  *
  */
 
- @import '@blueprintjs/core/lib/scss/variables.scss';
+ @import '../theme.scss';
 
- $navbarHeight: 64px;
- $toolbarHeight: 42px;
- 
- $sidebarWidth: 240px;
- $sidebarBottomBorderRadius: 10px;
- $sidebarTransitionTime: 300ms;
- 
- $backgroundColor: $pt-app-background-color;
- $editorBackgroundColor: white;
+.toolbar {
+  padding-left: 10px;
+  position: fixed;
+  top: calc(#{$navbarHeight} + 1px);
+  left: 0;
+  right: 0;
+}
 
- $paneBorderColor: rgb(218, 220, 224);
- $paneBorder: 1px solid $paneBorderColor;
+.toolbarBlockFormatMenu {
+  :global {
+    .bp4-button-text {
+      min-width: 75px;
+    }
+  }
+}
  
- $paneBoxShadowColor: rgba(60, 64, 67, 0.15);
- $paneBoxShadow: 0 1px 3px 1px $paneBoxShadowColor;
- 
+
+

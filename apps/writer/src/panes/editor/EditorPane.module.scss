@@ -29,7 +29,7 @@
   :global {
     .ProseMirror {
       position: static;
-      height: calc(100% - #{$toolbarHeight});
+      height: 100%;
       overflow-y: scroll;
     }
     .ProseMirror .pm-editing-root-node { 
@@ -45,7 +45,7 @@
     .ProseMirror .body {
       position: relative;
       box-shadow: $paneBoxShadow;
-      min-height: calc(100% - #{$toolbarHeight});
+      min-height: 100%;
     }
     .ProseMirror .notes {
       position: absolute;
@@ -60,19 +60,7 @@
     .ProseMirror .notes.editing-footnote {
       border-top: 1px solid;
       visibility: visible;
-      top: calc(100% - #{$toolbarHeight} - 90px - 10px);
-    }
-  }
-}
-
-.toolbar {
-  padding-left: 10px;
-}
-
-.toolbarBlockFormatMenu {
-  :global {
-    .bp4-button-text {
-      min-width: 75px;
+      top: calc(100% - 90px - 10px);
     }
   }
 }

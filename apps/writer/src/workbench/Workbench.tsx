@@ -29,11 +29,11 @@ import MarkdownPane from '../panes/markdown/MarkdownPane';
 import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 
-import './Workbench.scss';
 import { EditorDialogsProvider } from '../panes/editor/dialogs/EditorDialogsProvider';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
-import EditorToolbar from './WorkbenchToolbar';
 import WorkbenchToolbar from './WorkbenchToolbar';
+
+import './Workbench.scss';
 
 const Workbench: React.FC = () => {
  

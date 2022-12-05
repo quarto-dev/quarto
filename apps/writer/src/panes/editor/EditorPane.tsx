@@ -55,7 +55,6 @@ import { editorContext, EditorProviders } from './context/editor-context';
 
 import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands } from './editor-commands';
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
-import EditorToolbar from '../../workbench/WorkbenchToolbar';
 
 import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 

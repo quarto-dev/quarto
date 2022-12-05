@@ -82,12 +82,6 @@ const EditorFind: React.FC = () => {
     return find;
   }, [findText, matchCase, matchRegex]);
 
-  // perform find when find text changes (debounced)
-  useEffect(() => {
-    performFind();
-  }, [debouncedFindText, matchCase, matchRegex]);
- 
-
   // find next
   const findNext = useCallback(() => {
     if (!performFind()?.selectNext()) {
@@ -168,7 +162,12 @@ const EditorFind: React.FC = () => {
   }, [active, replaceText, replaceAndFind]);
 
 
+   // perform find when find text changes (debounced)
+  useEffect(() => {
+    performFind();
+  }, [debouncedFindText, matchCase, matchRegex]);
  
+
   // keyboard shortcuts
   const handleFindKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {

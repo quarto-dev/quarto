@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { CSSTransition } from 'react-transition-group';
@@ -55,8 +55,8 @@ const EditorFind: React.FC = () => {
   const [matchCase, setMatchCase] = useState(false);
   const [matchRegex, setMatchRegex] = useState(false);
 
-   // close panel
-   const close = () => {
+  // close panel
+  const close = () => {
     setActive(false);
   }
 
@@ -71,7 +71,7 @@ const EditorFind: React.FC = () => {
   }
 
   // perform most up to date find
-  const performFind = useCallback(() => {
+  const performFind = () => {
     const find = editorActions.findReplace();
     find?.find(findText, {
       caseSensitive: matchCase,
@@ -80,7 +80,7 @@ const EditorFind: React.FC = () => {
     });
     find?.selectCurrent();
     return find;
-  }, [findText, matchCase, matchRegex]);
+  };
 
   // perform find when find text changes (debounced)
   useEffect(() => {
@@ -89,31 +89,31 @@ const EditorFind: React.FC = () => {
  
 
   // find next
-  const findNext = useCallback(() => {
+  const findNext = () => {
     if (!performFind()?.selectNext()) {
       noMoreMatchesAlert();
     }
-  }, [performFind]);
+  };
 
   // find previous 
-  const findPrevious = useCallback(() => {
+  const findPrevious = () => {
     if (!performFind()?.selectPrevious()) {
       noMoreMatchesAlert();
     }
-  }, [performFind]);
+  };
 
   // replace and find
-  const replaceAndFind = useCallback(() => {
+  const replaceAndFind = () => {
     if (!performFind()?.replace(replaceText)) {
       noMoreMatchesAlert();
     }
-  }, [performFind, replaceText]);
+  };
 
   // replace all
-  const replaceAll = useCallback(() => {
+  const replaceAll = () => {
     const replaced = performFind()?.replaceAll(replaceText);
     editorDialogs.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
-  }, [performFind, replaceText]);
+  };
   
   // find and replace commands
   useEffect(() => {
@@ -167,23 +167,21 @@ const EditorFind: React.FC = () => {
     ]})
   }, [active, replaceText, replaceAndFind]);
 
-
- 
   // keyboard shortcuts
-  const handleFindKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleFindKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
       findNext();
     } else if (ev.key == 'Escape') {
       close();
     } 
-  }, [findNext]);
-  const handleReplaceKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {
+  };
+  const handleReplaceKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
       replaceAndFind();
     } else if (ev.key == 'Escape') {
       close();
     } 
-  }, [replaceAndFind]);
+  };
   
   // show nav buttons when we have find text
   const navButtons = 

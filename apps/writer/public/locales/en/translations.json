@@ -66,5 +66,6 @@
   "outline_metadata_text": "Metadata",
   "outline_code_chunk_text": "Code Chunk",
   "outline_empty": "Headings you add to the document will appear here.",
-  "find_placeholder": "Find in document"
+  "find_placeholder": "Find",
+  "replace_placeholder": "Replace"
 }

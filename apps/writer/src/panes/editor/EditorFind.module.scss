@@ -18,7 +18,7 @@
 @import '../../theme.scss';
 
 $findHeight: 130px;
-$findWidth: 340px;
+$findWidth: 270px;
 $rightPadding: 20px;
 
 .findContainer {
@@ -46,9 +46,10 @@ $rightPadding: 20px;
 }
 
 .find {
-  :global(.bp4-button) {
-    padding: 0 3px;
-    max-width: 18px;
+  :global(.bp4-button),
+  :global(.bp4-input-group.bp4-small .bp4-button) {
+    padding: 0 4px;
+    min-width: 15px;
   }
 }
 
@@ -56,6 +57,14 @@ $rightPadding: 20px;
   :global(.bp4-control-group > :not(:last-child)) {
     margin-right: 0;
   }
+}
+
+.findInput {
+  width: calc(#{$findWidth} - 60px);
+}
+
+.findRow {
+  margin-bottom: 8px;
 }
 
 .enter {

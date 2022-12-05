@@ -38,10 +38,13 @@ const EditorFind: React.FC = () => {
   // editor actions context
   const editorActions = useContext(EditorActionsContext);
 
+  // refs
   const nodeRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // state
   const [active, setActive] = useState(false);
+  const [findText, setFindText] = useState("");
 
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
@@ -53,10 +56,9 @@ const EditorFind: React.FC = () => {
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
-          if (active)
-            focusInput(inputRef.current);
-          else
+          if (!active)
             setActive(true);
+          focusInput(inputRef.current);
         },
       },
       {
@@ -67,10 +69,7 @@ const EditorFind: React.FC = () => {
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
-          if (active)
-            focusInput(inputRef.current);
-          else
-            setActive(true);
+          // 
         },
       },
     ]})
@@ -83,7 +82,7 @@ const EditorFind: React.FC = () => {
 
   // perform find
   const performFind = () => {
-    editorActions.findReplace().find(inputRef.current!.value, {});
+    editorActions.findReplace().find(findText, {});
   }
 
   const findNext = () => {
@@ -93,7 +92,7 @@ const EditorFind: React.FC = () => {
   // debounced onChange handler for find
   const debouncedPerformFind = useCallback(
     debounce(performFind, 300)
-  , []);
+  , [findText]);
 
   
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
@@ -104,6 +103,12 @@ const EditorFind: React.FC = () => {
     }
   }
   
+  // show nav buttons when we have find text
+  const navButtons = 
+    <span style={ { visibility: findText.length ? 'visible' : 'hidden' }}>
+      <Button icon={IconNames.ChevronLeft} minimal={true} small={true} />
+      <Button icon={IconNames.ChevronRight} minimal={true} small={true} />
+    </span>;
 
   return (
     <CSSTransition nodeRef={nodeRef} in={active} timeout={200} classNames={{ ...styles }}
@@ -111,20 +116,24 @@ const EditorFind: React.FC = () => {
     >          
       <div ref={nodeRef} className={styles.findContainer}>
         <div className={styles.find}>
-          <ControlGroup fill={true}>
+          <ControlGroup className={styles.findRow}>
             <InputGroup
               inputRef={inputRef}
+              value={findText}
               className={styles.findInput}
-              leftIcon={IconNames.Search}
-              onChange={debouncedPerformFind}
+              onChange={(ev) => { setFindText(ev.target.value); debouncedPerformFind(); } }
               onKeyDown={handleKeyDown}
               small={true}
               placeholder={t('find_placeholder') as string}    
+              rightElement={navButtons}
             />
-            <Button icon={IconNames.ChevronLeft} minimal={true} small={true} />
-            <Button icon={IconNames.ChevronRight} minimal={true} small={true} />
             <Button icon={IconNames.Cross} minimal={true} small={true} onClick={close} />
           </ControlGroup>
+          <InputGroup
+            className={styles.findInput}
+            small={true}
+            placeholder={t('replace_placeholder') as string}  
+          />
         </div>
       </div>
     </CSSTransition>

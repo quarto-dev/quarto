@@ -166,7 +166,11 @@ const EditorFind: React.FC = () => {
   useEffect(() => {
     performFind();
   }, [debouncedFindText, matchCase, matchRegex]);
- 
+
+  // clear search when we go inactive
+  useEffect(() => {
+    editorActions.findReplace()?.clear();
+  }, [active])
 
   // keyboard shortcuts
   const handleFindKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {

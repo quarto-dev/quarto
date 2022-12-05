@@ -13,7 +13,7 @@
  *
  */
 
-import { InputGroup } from '@blueprintjs/core';
+import { Button, ControlGroup, InputGroup } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import debounce from 'lodash.debounce';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -76,12 +76,34 @@ const EditorFind: React.FC = () => {
     ]})
   }, [active]);
 
+  // close panel
+  const close = () => {
+    setActive(false);
+  }
+
+  // perform find
+  const performFind = () => {
+    editorActions.findReplace().find(inputRef.current!.value, {});
+  }
+
+  const findNext = () => {
+    editorActions.findReplace().selectNext();
+  }
+
   // debounced onChange handler for find
-  const debouncedFindHandler = useCallback(
-    debounce((ev: React.ChangeEvent<HTMLInputElement>) => {
-      editorActions.findReplace().find(ev.target.value, {});
-    }, 300)
+  const debouncedPerformFind = useCallback(
+    debounce(performFind, 300)
   , []);
+
+  
+  const handleKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
+    if (ev.key === 'Enter') {
+      findNext();
+    } else if (ev.key == 'Escape') {
+      close();
+    }
+  }
+  
 
   return (
     <CSSTransition nodeRef={nodeRef} in={active} timeout={200} classNames={{ ...styles }}
@@ -89,14 +111,20 @@ const EditorFind: React.FC = () => {
     >          
       <div ref={nodeRef} className={styles.findContainer}>
         <div className={styles.find}>
-          <InputGroup
-            inputRef={inputRef}
-            leftIcon={IconNames.Search}
-            onChange={debouncedFindHandler}
-            small={true}
-            fill={true}
-            placeholder={t('find_placeholder') as string}    
-          />
+          <ControlGroup fill={true}>
+            <InputGroup
+              inputRef={inputRef}
+              className={styles.findInput}
+              leftIcon={IconNames.Search}
+              onChange={debouncedPerformFind}
+              onKeyDown={handleKeyDown}
+              small={true}
+              placeholder={t('find_placeholder') as string}    
+            />
+            <Button icon={IconNames.ChevronLeft} minimal={true} small={true} />
+            <Button icon={IconNames.ChevronRight} minimal={true} small={true} />
+            <Button icon={IconNames.Cross} minimal={true} small={true} onClick={close} />
+          </ControlGroup>
         </div>
       </div>
     </CSSTransition>

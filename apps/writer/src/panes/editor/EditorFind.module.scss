@@ -31,7 +31,6 @@ $rightPadding: 20px;
   width: calc(#{$findWidth} - #{$rightPadding});
   background-color: $editorBackgroundColor;
 }
-
 .find {
   position: absolute;
   top: 0;
@@ -46,6 +45,18 @@ $rightPadding: 20px;
   border-bottom-left-radius: $sidebarBottomBorderRadius;
 }
 
+.find {
+  :global(.bp4-button) {
+    padding: 0 3px;
+    max-width: 18px;
+  }
+}
+
+.find {
+  :global(.bp4-control-group > :not(:last-child)) {
+    margin-right: 0;
+  }
+}
 
 .enter {
   height: 0;

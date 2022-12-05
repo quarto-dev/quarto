@@ -17,7 +17,7 @@
 
 @import '../../theme.scss';
 
-$findHeight: 135px;
+$findHeight: 140px;
 $findWidth: 270px;
 $rightPadding: 20px;
 
@@ -38,6 +38,7 @@ $rightPadding: 20px;
   right: 0;
   left: 0;
   padding: 10px;
+  padding-top: 13px;
   overflow: hidden;
   box-shadow:  0 1px 0 1px $paneBoxShadowColor;
   border-top: none;

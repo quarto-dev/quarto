@@ -32,7 +32,6 @@ import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
-import { find } from 'editor/src/behaviors/find';
 
 const EditorFind: React.FC = () => {
 
@@ -86,7 +85,7 @@ const EditorFind: React.FC = () => {
   // perform find when find text changes (debounced)
   useEffect(() => {
     performFind();
-  }, [debouncedFindText]);
+  }, [debouncedFindText, matchCase, matchRegex]);
  
 
   // find next
@@ -214,6 +213,7 @@ const EditorFind: React.FC = () => {
               value={findText}
               onChange={ev => setFindText(ev.target.value)}
               onKeyDown={handleFindKeyDown}
+              onFocus={performFind}
               small={true}
               placeholder={t('find_placeholder') as string}    
               rightElement={navButtons}

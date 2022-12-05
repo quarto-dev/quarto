@@ -67,5 +67,10 @@
   "outline_code_chunk_text": "Code Chunk",
   "outline_empty": "Headings you add to the document will appear here.",
   "find_placeholder": "Find",
-  "replace_placeholder": "Replace"
+  "replace_placeholder": "Replace",
+  "find_next": "Find next match",
+  "find_previous": "Find previous match",
+  "replace_and_find": "Replace and find next match",
+  "replace_all": "Replace all",
+  "find_close_panel": "Close panel"
 }

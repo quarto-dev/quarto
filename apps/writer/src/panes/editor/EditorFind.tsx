@@ -40,11 +40,14 @@ const EditorFind: React.FC = () => {
 
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const findInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   // state
   const [active, setActive] = useState(false);
+  const [isReplace, setIsReplace] = useState(false);
   const [findText, setFindText] = useState("");
+  const [replaceText, setReplaceText] = useState("");
 
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
@@ -56,9 +59,11 @@ const EditorFind: React.FC = () => {
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
-          if (!active)
+          if (!active) {
             setActive(true);
-          focusInput(inputRef.current);
+          }
+          setIsReplace(false);
+          focusInput(findInputRef.current);
         },
       },
       {
@@ -69,7 +74,11 @@ const EditorFind: React.FC = () => {
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
-          // 
+          if (!active) {
+            setActive(true);
+          }
+          setIsReplace(true);
+          focusInput(findInputRef.current); 
         },
       },
     ]})
@@ -106,19 +115,26 @@ const EditorFind: React.FC = () => {
   // show nav buttons when we have find text
   const navButtons = 
     <span style={ { visibility: findText.length ? 'visible' : 'hidden' }}>
-      <Button icon={IconNames.ChevronLeft} minimal={true} small={true} />
-      <Button icon={IconNames.ChevronRight} minimal={true} small={true} />
+      <Button icon={IconNames.ChevronLeft} title={t('find_next') as string}  minimal={true} small={true} />
+      <Button icon={IconNames.ChevronRight} title={t('find_previous') as string} minimal={true} small={true} />
+    </span>;
+
+  // show replace buttons when we have replace text
+  const replaceButtons = 
+    <span style={ { visibility: replaceText.length ? 'visible' : 'hidden' }}>
+      <Button icon={IconNames.ChevronRight} title={t('replace_and_find') as string} minimal={true} small={true} />
+      <Button icon={IconNames.DoubleChevronRight} title={t('replace_all') as string} minimal={true} small={true} />
     </span>;
 
   return (
     <CSSTransition nodeRef={nodeRef} in={active} timeout={200} classNames={{ ...styles }}
-      onEntered={() =>focusInput(inputRef.current)}
+      onEntered={() =>focusInput(findInputRef.current)}
     >          
       <div ref={nodeRef} className={styles.findContainer}>
         <div className={styles.find}>
           <ControlGroup className={styles.findRow}>
             <InputGroup
-              inputRef={inputRef}
+              inputRef={findInputRef}
               value={findText}
               className={styles.findInput}
               onChange={(ev) => { setFindText(ev.target.value); debouncedPerformFind(); } }
@@ -127,13 +143,18 @@ const EditorFind: React.FC = () => {
               placeholder={t('find_placeholder') as string}    
               rightElement={navButtons}
             />
-            <Button icon={IconNames.Cross} minimal={true} small={true} onClick={close} />
+            <Button icon={IconNames.Cross} title={t('find_close_panel') as string} minimal={true} small={true} onClick={close} />
           </ControlGroup>
-          <InputGroup
+          {isReplace ? <InputGroup
+            inputRef={replaceInputRef}
+            value={replaceText}
+            onChange={ev => setReplaceText(ev.target.value)}
+            onKeyDown={handleKeyDown}
             className={styles.findInput}
             small={true}
             placeholder={t('replace_placeholder') as string}  
-          />
+            rightElement={replaceButtons}
+          /> : null}
         </div>
       </div>
     </CSSTransition>

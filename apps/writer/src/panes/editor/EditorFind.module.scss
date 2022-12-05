@@ -17,7 +17,7 @@
 
 @import '../../theme.scss';
 
-$findHeight: 130px;
+$findHeight: 135px;
 $findWidth: 270px;
 $rightPadding: 20px;
 
@@ -59,13 +59,23 @@ $rightPadding: 20px;
   }
 }
 
+.find {
+  :global(.bp4-checkbox) {
+    font-size: 0.8rem;
+    color: $dark-gray4;
+  }
+}
+
 .findInput {
   width: calc(#{$findWidth} - 60px);
 }
 
 .findRow {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
+
+
+/* transition */
 
 .enter {
   height: 0;

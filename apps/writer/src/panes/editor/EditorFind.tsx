@@ -13,18 +13,22 @@
  *
  */
 
-import { Button, ControlGroup, InputGroup } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
-import debounce from 'lodash.debounce';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { CSSTransition } from 'react-transition-group';
+import { useDebounce } from 'use-debounce';
+
+import { Button, Checkbox, ControlGroup, InputGroup } from '@blueprintjs/core';
+import { IconNames } from '@blueprintjs/icons';
+
+import { kAlertTypeInfo } from 'editor';
 
 
 import { CommandManagerContext } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
 import { focusInput } from '../../widgets/utils';
+import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
@@ -35,20 +39,24 @@ const EditorFind: React.FC = () => {
   const { t } = useTranslation();
   const [, cmDispatch] = useContext(CommandManagerContext);
 
-  // editor actions context
+  // contexts
   const editorActions = useContext(EditorActionsContext);
+  const editorDialogs = useContext(EditorDialogsContext);
 
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
   const findInputRef = useRef<HTMLInputElement>(null);
-  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   // state
   const [active, setActive] = useState(false);
-  const [isReplace, setIsReplace] = useState(false);
   const [findText, setFindText] = useState("");
+  const [debouncedFindText] = useDebounce(findText, 200);
   const [replaceText, setReplaceText] = useState("");
+  const [matchCase, setMatchCase] = useState(false);
+  const [matchRegex, setMatchRegex] = useState(false);
 
+
+  // find and replace commands
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
@@ -62,25 +70,9 @@ const EditorFind: React.FC = () => {
           if (!active) {
             setActive(true);
           }
-          setIsReplace(false);
           focusInput(findInputRef.current);
-        },
-      },
-      {
-        id: WorkbenchCommandId.Replace,
-        menuText: t('commands:replace_menu_text'),
-        group: t('commands:group_utilities'),
-        keymap: ['Mod-Alt-f'],
-        isEnabled: () => true,
-        isActive: () => false,
-        execute: () => {
-          if (!active) {
-            setActive(true);
-          }
-          setIsReplace(true);
-          focusInput(findInputRef.current); 
-        },
-      },
+        }
+      }
     ]})
   }, [active]);
 
@@ -89,45 +81,73 @@ const EditorFind: React.FC = () => {
     setActive(false);
   }
 
-  // perform find
-  const performFind = () => {
-    editorActions.findReplace().find(findText, {});
+  // no more matches alert
+  const noMoreMatchesAlert = () => {
+    editorDialogs.alert(t('find_no_more_matches'), t('find_alert_title'), kAlertTypeInfo);
   }
 
+  // perform find (debounce find text changes)
+  useEffect(() => {
+    editorActions.findReplace()?.find(findText, {
+      caseSensitive: matchCase,
+      regex: matchRegex,
+      wrap: true
+    });
+  }, [debouncedFindText, matchCase, matchRegex])
+ 
+  // find next
   const findNext = () => {
-    editorActions.findReplace().selectNext();
+    if (!editorActions.findReplace()?.selectNext()) {
+      noMoreMatchesAlert();
+    }
   }
 
-  // debounced onChange handler for find
-  const debouncedPerformFind = useCallback(
-    debounce(performFind, 300)
-  , [findText]);
+  // find previous 
+  const findPrevious = () => {
+    if (!editorActions.findReplace()?.selectPrevious()) {
+      noMoreMatchesAlert();
+    }
+  }
 
+  // replace and find
+  const replaceAndFind = useCallback(() => {
+    if (!editorActions.findReplace()?.replace(replaceText)) {
+      noMoreMatchesAlert();
+    }
+  }, [replaceText]);
+
+  // replace all
+  const replaceAll = useCallback(() => {
+    const replaced = editorActions.findReplace()?.replaceAll(replaceText);
+    editorDialogs.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
+  }, [replaceText]);
   
+  // keyboard shortcuts
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
       findNext();
     } else if (ev.key == 'Escape') {
       close();
-    }
+    } 
   }
   
   // show nav buttons when we have find text
   const navButtons = 
     <span style={ { visibility: findText.length ? 'visible' : 'hidden' }}>
-      <Button icon={IconNames.ChevronLeft} title={t('find_next') as string}  minimal={true} small={true} />
-      <Button icon={IconNames.ChevronRight} title={t('find_previous') as string} minimal={true} small={true} />
+      <Button icon={IconNames.ChevronLeft} title={t('find_previous') as string} onClick={findPrevious} minimal={true} small={true} />
+      <Button icon={IconNames.ChevronRight} title={t('find_next') as string} onClick={findNext} minimal={true} small={true} />
     </span>;
 
   // show replace buttons when we have replace text
   const replaceButtons = 
     <span style={ { visibility: replaceText.length ? 'visible' : 'hidden' }}>
-      <Button icon={IconNames.ChevronRight} title={t('replace_and_find') as string} minimal={true} small={true} />
-      <Button icon={IconNames.DoubleChevronRight} title={t('replace_all') as string} minimal={true} small={true} />
+      <Button icon={IconNames.ChevronRight} title={t('replace_and_find') as string} onClick={replaceAndFind} minimal={true} small={true} />
+      <Button icon={IconNames.DoubleChevronRight} title={t('replace_all') as string} onClick={replaceAll} minimal={true} small={true} />
     </span>;
 
+  // component
   return (
-    <CSSTransition nodeRef={nodeRef} in={active} timeout={200} classNames={{ ...styles }}
+    <CSSTransition nodeRef={nodeRef} in={active} timeout={300} classNames={{ ...styles }}
       onEntered={() =>focusInput(findInputRef.current)}
     >          
       <div ref={nodeRef} className={styles.findContainer}>
@@ -135,9 +155,9 @@ const EditorFind: React.FC = () => {
           <ControlGroup className={styles.findRow}>
             <InputGroup
               inputRef={findInputRef}
-              value={findText}
               className={styles.findInput}
-              onChange={(ev) => { setFindText(ev.target.value); debouncedPerformFind(); } }
+              value={findText}
+              onChange={ev => setFindText(ev.target.value)}
               onKeyDown={handleKeyDown}
               small={true}
               placeholder={t('find_placeholder') as string}    
@@ -145,16 +165,17 @@ const EditorFind: React.FC = () => {
             />
             <Button icon={IconNames.Cross} title={t('find_close_panel') as string} minimal={true} small={true} onClick={close} />
           </ControlGroup>
-          {isReplace ? <InputGroup
-            inputRef={replaceInputRef}
+          <InputGroup
+            className={[styles.findInput, styles.findRow].join(' ')}
             value={replaceText}
             onChange={ev => setReplaceText(ev.target.value)}
             onKeyDown={handleKeyDown}
-            className={styles.findInput}
             small={true}
             placeholder={t('replace_placeholder') as string}  
             rightElement={replaceButtons}
-          /> : null}
+          /> 
+          <Checkbox checked={matchCase} onChange={ev => setMatchCase(ev.currentTarget.checked)} label={t('find_match_case') as string} /> 
+          <Checkbox checked={matchRegex} onChange={ev => setMatchRegex(ev.currentTarget.checked)} label={t('find_match_regex') as string} /> 
         </div>
       </div>
     </CSSTransition>

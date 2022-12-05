@@ -19,7 +19,7 @@ import React from 'react';
 export interface EditorActions {
   focus(): void;
   navigate(id: string): void;
-  findReplace() : EditorFindReplace
+  findReplace() : EditorFindReplace | undefined
 }
 
 export const EditorActionsContext = React.createContext<EditorActions>(null!);

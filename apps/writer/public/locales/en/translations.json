@@ -72,5 +72,10 @@
   "find_previous": "Find previous match",
   "replace_and_find": "Replace and find next match",
   "replace_all": "Replace all",
-  "find_close_panel": "Close panel"
+  "find_close_panel": "Close panel",
+  "find_alert_title": "Find",
+  "find_no_more_matches": "No more matches.",
+  "find_instances_replaced": "instances replaced.",
+  "find_match_case": "Match case",
+  "find_match_regex": "Match using regex"
 }

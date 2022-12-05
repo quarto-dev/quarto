@@ -175,7 +175,7 @@ const EditorPane : React.FC = () => {
       editorRef.current?.navigate(NavigationType.Id, id);
     },
     findReplace() {
-      return editorRef.current!.getFindReplace();
+      return editorRef.current?.getFindReplace();
     }
   }
 

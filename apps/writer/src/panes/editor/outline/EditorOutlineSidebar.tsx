@@ -78,7 +78,7 @@ const EditorOutlineSidebar: React.FC = () => {
   return (
     <>
         <EditorOutlineButton visible={!prefs.showOutline} onClick={onOpenClicked} />
-        <CSSTransition nodeRef={nodeRef} in={prefs.showOutline} timeout={200} classNames={{ ...styles }}>            
+        <CSSTransition nodeRef={nodeRef} in={prefs.showOutline} timeout={300} classNames={{ ...styles }}>            
           <div ref={nodeRef} className={outlineClassName.join(' ')}>
             <EditorOutlineHeader onCloseClicked={onCloseClicked} />
             {outline.length ? <EditorOutlineTree outline={outline} /> : <EditorOutlineEmpty /> }

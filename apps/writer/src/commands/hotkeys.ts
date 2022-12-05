@@ -50,7 +50,7 @@ export function commandHotkeys(commands: Commands) : HotkeyConfig[] {
       allowInInput: true,
       combo,
       label: command.menuText,
-      onKeyUp: handler,
+      onKeyDown: handler,
       preventDefault: !command.keysUnbound,
       stopPropagation: !command.keysUnbound
     }

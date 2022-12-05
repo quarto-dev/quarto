@@ -32,6 +32,7 @@ import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
+import { find } from 'editor/src/behaviors/find';
 
 const EditorFind: React.FC = () => {
 
@@ -55,7 +56,66 @@ const EditorFind: React.FC = () => {
   const [matchCase, setMatchCase] = useState(false);
   const [matchRegex, setMatchRegex] = useState(false);
 
+   // close panel
+   const close = () => {
+    setActive(false);
+  }
 
+  // focus find input
+  const focusFindInput = () => {
+    focusInput(findInputRef.current);
+  }
+
+  // no more matches alert
+  const noMoreMatchesAlert = () => {
+    editorDialogs.alert(t('find_no_more_matches'), t('find_alert_title'), kAlertTypeInfo);
+  }
+
+  // perform most up to date find
+  const performFind = useCallback(() => {
+    const find = editorActions.findReplace();
+    find?.find(findText, {
+      caseSensitive: matchCase,
+      regex: matchRegex,
+      wrap: true
+    });
+    find?.selectCurrent();
+    return find;
+  }, [findText, matchCase, matchRegex]);
+
+  // perform find when find text changes (debounced)
+  useEffect(() => {
+    performFind();
+  }, [debouncedFindText]);
+ 
+
+  // find next
+  const findNext = useCallback(() => {
+    if (!performFind()?.selectNext()) {
+      noMoreMatchesAlert();
+    }
+  }, [performFind]);
+
+  // find previous 
+  const findPrevious = useCallback(() => {
+    if (!performFind()?.selectPrevious()) {
+      noMoreMatchesAlert();
+    }
+  }, [performFind]);
+
+  // replace and find
+  const replaceAndFind = useCallback(() => {
+    if (!performFind()?.replace(replaceText)) {
+      noMoreMatchesAlert();
+    }
+  }, [performFind, replaceText]);
+
+  // replace all
+  const replaceAll = useCallback(() => {
+    const replaced = performFind()?.replaceAll(replaceText);
+    editorDialogs.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
+  }, [performFind, replaceText]);
+  
   // find and replace commands
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
@@ -70,66 +130,61 @@ const EditorFind: React.FC = () => {
           if (!active) {
             setActive(true);
           }
-          focusInput(findInputRef.current);
+          focusFindInput();
         }
+      },
+      {
+        id: WorkbenchCommandId.FindNext,
+        menuText: t('commands:find_next_menu_text'),
+        group: t('commands:group_utilities'),
+        keymap: ['Ctrl-g'],
+        isEnabled: () => active,
+        isActive: () => false,
+        execute: findNext
+      },
+      {
+        id: WorkbenchCommandId.FindPrevious,
+        menuText: t('commands:find_previous_menu_text'),
+        group: t('commands:group_utilities'),
+        keymap: ['Mod-Shift-g'],
+        isEnabled: () => active,
+        isActive: () => false,
+        execute: findPrevious
       }
     ]})
-  }, [active]);
+  }, [active, findNext, findPrevious]);
 
-  // close panel
-  const close = () => {
-    setActive(false);
-  }
-
-  // no more matches alert
-  const noMoreMatchesAlert = () => {
-    editorDialogs.alert(t('find_no_more_matches'), t('find_alert_title'), kAlertTypeInfo);
-  }
-
-  // perform find (debounce find text changes)
   useEffect(() => {
-    editorActions.findReplace()?.find(findText, {
-      caseSensitive: matchCase,
-      regex: matchRegex,
-      wrap: true
-    });
-  }, [debouncedFindText, matchCase, matchRegex])
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
+      {
+        id: WorkbenchCommandId.ReplaceAndFind,
+        menuText: t('commands:replace_and_find_menu_text'),
+        group: t('commands:group_utilities'),
+        keymap: ['Mod-Shift-j'],
+        isEnabled: () => active && replaceText.length > 0,
+        isActive: () => false,
+        execute: replaceAndFind
+      }
+    ]})
+  }, [active, replaceText, replaceAndFind]);
+
+
  
-  // find next
-  const findNext = () => {
-    if (!editorActions.findReplace()?.selectNext()) {
-      noMoreMatchesAlert();
-    }
-  }
-
-  // find previous 
-  const findPrevious = () => {
-    if (!editorActions.findReplace()?.selectPrevious()) {
-      noMoreMatchesAlert();
-    }
-  }
-
-  // replace and find
-  const replaceAndFind = useCallback(() => {
-    if (!editorActions.findReplace()?.replace(replaceText)) {
-      noMoreMatchesAlert();
-    }
-  }, [replaceText]);
-
-  // replace all
-  const replaceAll = useCallback(() => {
-    const replaced = editorActions.findReplace()?.replaceAll(replaceText);
-    editorDialogs.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
-  }, [replaceText]);
-  
   // keyboard shortcuts
-  const handleKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleFindKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
       findNext();
     } else if (ev.key == 'Escape') {
       close();
     } 
-  }
+  }, [findNext]);
+  const handleReplaceKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {
+    if (ev.key === 'Enter') {
+      replaceAndFind();
+    } else if (ev.key == 'Escape') {
+      close();
+    } 
+  }, [replaceAndFind]);
   
   // show nav buttons when we have find text
   const navButtons = 
@@ -158,7 +213,7 @@ const EditorFind: React.FC = () => {
               className={styles.findInput}
               value={findText}
               onChange={ev => setFindText(ev.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={handleFindKeyDown}
               small={true}
               placeholder={t('find_placeholder') as string}    
               rightElement={navButtons}
@@ -169,7 +224,7 @@ const EditorFind: React.FC = () => {
             className={[styles.findInput, styles.findRow].join(' ')}
             value={replaceText}
             onChange={ev => setReplaceText(ev.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleReplaceKeyDown}
             small={true}
             placeholder={t('replace_placeholder') as string}  
             rightElement={replaceButtons}

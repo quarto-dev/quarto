@@ -47,8 +47,15 @@ export const Dialog: React.FC<PropsWithChildren<DialogProps>> = props => {
       onOpening={props.onOpening}
       onOpened={props.onOpened}
       autoFocus={true}
+      enforceFocus={true}
       canEscapeKeyClose={true}
+      canOutsideClickClose={false}
+      isCloseButtonShown={true}
+      shouldReturnFocusOnClose={true}
+      transitionDuration={150}
+      hasBackdrop={false}
       onClose={props.onCancel}
+      style={{userSelect: 'none'}}
     >
       <form onKeyUp={onKeyUp}>
         <div className={Classes.DIALOG_BODY}>{props.children}</div>

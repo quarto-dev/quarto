@@ -55,7 +55,7 @@ const EditorFind: React.FC = () => {
         id: WorkbenchCommandId.Find,
         menuText: t('commands:find_menu_text'),
         group: t('commands:group_utilities'),
-        keymap: ['Ctrl-Alt-f'],
+        keymap: ['Mod-f'],
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
@@ -70,7 +70,7 @@ const EditorFind: React.FC = () => {
         id: WorkbenchCommandId.Replace,
         menuText: t('commands:replace_menu_text'),
         group: t('commands:group_utilities'),
-        keymap: ['Ctrl-Alt-r'],
+        keymap: ['Mod-Alt-f'],
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {

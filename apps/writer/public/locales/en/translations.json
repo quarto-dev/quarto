@@ -16,6 +16,8 @@
   "untitled_document": "Untitled document",
   "clipboard_dialog_title": "Your browser has restricted access to your computer's clipboard.",
   "clipboard_dialog_message": "Please use the {{keycode}} shortcut to access the {{command}} command.",
+  "dialog_ok": "OK",
+  "dialog_cancel": "Cancel",
   "edit_link_dialog_caption": "Link",
   "edit_link_dialog_text": "Text",
   "edit_link_dialog_href": "Link To",

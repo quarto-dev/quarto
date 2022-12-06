@@ -15,11 +15,11 @@
 
 import React, { PropsWithChildren } from 'react';
 
-import { Classes, Button, Intent, Dialog as BlueprintDialog, IProps } from '@blueprintjs/core';
+import { Classes, Button, Intent, Dialog as BlueprintDialog, Props } from '@blueprintjs/core';
 
 import dialogStyles from './Dialog.module.scss';
 
-export interface DialogProps extends IProps {
+export interface DialogProps extends Props {
   title?: string;
   isOpen: boolean;
   leftButtons?: JSX.Element;

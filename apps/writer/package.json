@@ -22,6 +22,7 @@
     "core-client": "*",
     "editor": "*",
     "editor-codemirror": "*",
+    "formik": "^2.2.9",
     "i18next": "^22.0.4",
     "i18next-browser-languagedetector": "^7.0.1",
     "i18next-http-backend": "^2.0.1",
@@ -36,7 +37,8 @@
     "redux": "^4.2.0",
     "typo-js": "^1.2.2",
     "uuid": "^9.0.0",
-    "writer-types": "*"
+    "writer-types": "*",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.7",

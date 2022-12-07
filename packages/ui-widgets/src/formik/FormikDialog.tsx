@@ -23,7 +23,7 @@ import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 
 import FormikFocusError from './FormikFocusError';
 
-import dialogStyles from '../dialog/Dialog.module.scss';
+import styles from './Formik.module.scss';
 
 export interface FormikDialogProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   title?: string;
@@ -56,7 +56,7 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
           isOpen={props.isOpen}
           onOpening={props.onOpening}
           onOpened={props.onOpened}
-          className={dialogStyles.dialog}
+          className={styles.dialog}
           autoFocus={true}
           enforceFocus={true}
           canEscapeKeyClose={true}
@@ -70,10 +70,10 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
           <Form onSubmit={onSubmit} ref={formRef}>
             <FormikFocusError formRef={formRef}/>
             <div className={Classes.DIALOG_BODY}>{props.children}</div>
-              <div className={[Classes.DIALOG_FOOTER, dialogStyles.dialogFooter].join(' ')}>
-              <div className={[Classes.DIALOG_FOOTER_ACTIONS, dialogStyles.dialogFooterActions].join(' ')}>
-                <div className={dialogStyles.dialogFooterActionsLeft}>{props.leftButtons}</div>
-                <div className={dialogStyles.dialogFooterActionsRight}>
+              <div className={[Classes.DIALOG_FOOTER, styles.dialogFooter].join(' ')}>
+              <div className={[Classes.DIALOG_FOOTER_ACTIONS, styles.dialogFooterActions].join(' ')}>
+                <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
+                <div className={styles.dialogFooterActionsRight}>
                   <Button type='reset'>{t('dialog_cancel')}</Button>
                   <Button intent={Intent.PRIMARY} type='submit'>{t('dialog_ok')}</Button>
                 </div>

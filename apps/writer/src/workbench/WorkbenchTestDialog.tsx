@@ -18,20 +18,14 @@ import { useTranslation } from 'react-i18next';
 
 import { FormGroup } from '@blueprintjs/core';
 
+import { FormikHelpers } from 'formik';
 import * as yup from 'yup'
+
+import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikNumericInput, FormikRadioGroup, FormikSwitch, FormikTextArea, FormikTextInput } from 'ui-widgets';
 
 import { CommandManagerContext } from '../commands/CommandManager';
 import { WorkbenchCommandId } from '../commands/commands';
 
-import FormikDialog from '../widgets/formik/FormikDialog';
-import { FormikHelpers } from 'formik';
-import FormikTextInput from '../widgets/formik/FormikTextInput';
-import FormikCheckbox from '../widgets/formik/FormikCheckbox';
-import FormikRadioGroup from '../widgets/formik/FormikRadioGroup';
-import FormikHTMLSelect from '../widgets/formik/FormikHTMLSelect';
-import FormikSwitch from '../widgets/formik/FormikSwitch';
-import FormikNumericInput from '../widgets/formik/FormikNumericInput';
-import FormikTextArea from '../widgets/formik/FormikTextArea';
 
 interface TestProps {
   name: string;

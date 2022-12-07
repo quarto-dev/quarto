@@ -1,0 +1,23 @@
+{
+  "name": "ui-widgets",
+  "version": "0.1.0",
+  "private": true,
+  "license": "agpl-3.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@blueprintjs/core": "^4.12.0",
+    "@blueprintjs/icons": "^4.10.1",
+    "@blueprintjs/popover2": "^1.10.1",
+    "@blueprintjs/select": "^4.8.11",
+    "flat": "^5.0.2",
+    "formik": "^2.2.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^4.5.2",
+    "tsconfig": "*"
+  },
+  "devDependencies": {
+    "@types/flat": "^5.0.2"
+  }
+}

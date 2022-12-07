@@ -37,6 +37,7 @@
     "react-transition-group": "^4.4.5",
     "redux": "^4.2.0",
     "typo-js": "^1.2.2",
+    "ui-widgets": "*",
     "uuid": "^9.0.0",
     "writer-types": "*",
     "yup": "^0.32.11"

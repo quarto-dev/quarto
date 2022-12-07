@@ -39,8 +39,8 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
 
   return (
     <Formik {...props}>
-      {formikProps => (
-        <Dialog
+      {formikProps => {
+        return <Dialog
           title={props.title}
           isOpen={props.isOpen}
           onOpening={props.onOpening}
@@ -56,21 +56,20 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
           transitionDuration={150}
           style={{userSelect: 'none'}}
         >
-       <Form>
-         <div className={Classes.DIALOG_BODY}>{props.children}</div>
-           <div className={[Classes.DIALOG_FOOTER, dialogStyles.dialogFooter].join(' ')}>
-           <div className={[Classes.DIALOG_FOOTER_ACTIONS, dialogStyles.dialogFooterActions].join(' ')}>
-             <div className={dialogStyles.dialogFooterActionsLeft}>{props.leftButtons}</div>
-             <div className={dialogStyles.dialogFooterActionsRight}>
-               <Button type='reset'>{t('dialog_cancel')}</Button>
-               <Button intent={Intent.PRIMARY} type='submit'>{t('dialog_ok')}</Button>
-             </div>
-           </div>
-         </div>
-       </Form>
+          <Form>
+            <div className={Classes.DIALOG_BODY}>{props.children}</div>
+              <div className={[Classes.DIALOG_FOOTER, dialogStyles.dialogFooter].join(' ')}>
+              <div className={[Classes.DIALOG_FOOTER_ACTIONS, dialogStyles.dialogFooterActions].join(' ')}>
+                <div className={dialogStyles.dialogFooterActionsLeft}>{props.leftButtons}</div>
+                <div className={dialogStyles.dialogFooterActionsRight}>
+                  <Button type='reset'>{t('dialog_cancel')}</Button>
+                  <Button intent={Intent.PRIMARY} type='submit'>{t('dialog_ok')}</Button>
+                </div>
+              </div>
+            </div>
+          </Form>
        </Dialog>
-      )
-      }
+      }}
      
     </Formik>
   );

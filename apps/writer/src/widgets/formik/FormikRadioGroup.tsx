@@ -19,7 +19,7 @@ import { FormGroup, RadioGroup, RadioGroupProps } from "@blueprintjs/core";
 
 import { useField } from "formik";
 
-import { FormikFormGroupProps } from "./formik";
+import { FormikFormGroupProps } from "./FormikFormGroup";
 
 const FormikRadioGroup: React.FC<FormikFormGroupProps & Omit<RadioGroupProps, "onChange">> = (props) => {
   const [ field ] = useField(props.name);

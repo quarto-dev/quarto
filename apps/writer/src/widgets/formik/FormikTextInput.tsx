@@ -13,59 +13,43 @@
  *
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useField } from 'formik';
 
-import { AnchorButton, FormGroup, InputGroup, InputGroupProps2, Intent, PopoverPosition } from "@blueprintjs/core";
-import { Tooltip2 } from '@blueprintjs/popover2';
+import { AnchorButton, InputGroup, InputGroupProps2, Intent } from "@blueprintjs/core";
 import { IconNames } from '@blueprintjs/icons';
 
-import { FormikFormGroupProps } from './formik';
-
-import styles from './Formik.module.scss';
+import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
 const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (props) => {
-    const [ field, meta ] = useField(props.name);
-    const { label, labelInfo, helperText, validated, ...inputProps } = props;
-    const [inputFocused, setInputFocused] = useState(false);
+  const { name, label, labelInfo, helperText, validated, ...inputProps } = props;
+  const [ field, meta ] = useField(name);
     return (
-      <>
-      <FormGroup
+      <FormikFormGroup 
+        name={name}
         label={label}
-        className={validated ? styles.validatedFormGroup : undefined}
-        intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
         labelInfo={labelInfo}
         helperText={helperText}
+        validated={validated}
       >
-        <InputGroup
-          autoComplete={"off"}
-          intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-          rightElement={validated && meta.touched && !!meta.error 
-              ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 
-              : undefined}
-          type="text"
-          {...field}
-          {...inputProps}
-          onFocus={() => setInputFocused(true)}
-          onBlur={(ev) => {setInputFocused(false); field.onBlur(ev)}}
-        /> 
-      </FormGroup>
-      { validated ? 
-        <Tooltip2
-          className={styles.tooltip}
-          content={meta.error}
-          disabled={!meta.error}
-          isOpen={validated && meta.touched && !!meta.error && inputFocused}
-          placement={PopoverPosition.BOTTOM}
-          popoverClassName={props.helperText ? styles.validationPopupWithHelper : styles.validationPopup}
-          enforceFocus={false}
-          canEscapeKeyClose={false}
-        >
-          <div className={styles.tooltip} tabIndex={-1} />
-        </Tooltip2> 
-        : null}
-      </>
+        {({ onFocus, onBlur }) => {
+          return (
+            <InputGroup
+              autoComplete={"off"}
+              intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+              rightElement={validated && meta.touched && !!meta.error 
+                  ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 
+                  : undefined}
+              type="text"
+              {...field}
+              {...inputProps}
+              onFocus={onFocus}
+              onBlur={onBlur}
+            /> 
+          );
+        }}
+      </FormikFormGroup>
     );
 };
 

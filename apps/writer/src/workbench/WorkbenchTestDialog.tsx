@@ -16,6 +16,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { FormGroup } from '@blueprintjs/core';
+
 import * as yup from 'yup'
 
 import { CommandManagerContext } from '../commands/CommandManager';
@@ -29,6 +31,7 @@ import FormikRadioGroup from '../widgets/formik/FormikRadioGroup';
 import FormikHTMLSelect from '../widgets/formik/FormikHTMLSelect';
 import FormikSwitch from '../widgets/formik/FormikSwitch';
 import FormikNumericInput from '../widgets/formik/FormikNumericInput';
+import FormikTextArea from '../widgets/formik/FormikTextArea';
 
 interface TestProps {
   name: string;
@@ -38,6 +41,7 @@ interface TestProps {
   email: string;
   enabled: boolean;
   cache: boolean;
+  comments: string;
 }
 
 const WorkbenchTestDialog: React.FC = () => {
@@ -64,9 +68,6 @@ const WorkbenchTestDialog: React.FC = () => {
     ]})
   }, []);
 
-
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSubmit = (values: TestProps, helpers: FormikHelpers<TestProps>) => {
     console.log(values);
     helpers.setSubmitting(false);
@@ -84,7 +85,8 @@ const WorkbenchTestDialog: React.FC = () => {
     level: 5,
     email: '',
     enabled: true,
-    cache: false
+    cache: false,
+    comments: ''
   }
 
   return (
@@ -105,8 +107,11 @@ const WorkbenchTestDialog: React.FC = () => {
       <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' fill={true} options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
       <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
       <FormikNumericInput name="level" label="Level" fill={true} validated={true} />
-      <FormikCheckbox name="enabled" label="Enabled" />
-      <FormikSwitch name="cache" label="Cache" />
+      <FormGroup>
+        <FormikCheckbox name="enabled" label="Enabled" />
+        <FormikSwitch name="cache" label="Cache" />
+      </FormGroup>  
+      <FormikTextArea name="comments" label="Comments" fill={true} />
     </FormikDialog>
   );
 };

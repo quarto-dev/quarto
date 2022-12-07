@@ -13,13 +13,15 @@
  *
  */
 
-import React, { useState, PropsWithChildren } from 'react';
+import React, { useState, PropsWithChildren, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
 
-import { Form, Formik, FormikConfig, FormikValues } from 'formik';
+import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
+
+import FormikFocusError from './FormikFocusError';
 
 import dialogStyles from '../dialog/Dialog.module.scss';
 
@@ -37,9 +39,11 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
 
   const [validateOnChange, setValidateOnChange] = useState(false);
 
+  const formRef = useRef<HTMLFormElement>(null);
+  
   return (
     <Formik {...props} validateOnChange={validateOnChange} validateOnBlur={false}>
-      {formikProps => {
+      {(formikProps: FormikProps<Values>) => {
 
         const onSubmit = (ev: React.FormEvent) =>{
           ev.preventDefault()
@@ -63,7 +67,8 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
           transitionDuration={150}
           style={{userSelect: 'none'}}
         >
-          <Form onSubmit={onSubmit}>
+          <Form onSubmit={onSubmit} ref={formRef}>
+            <FormikFocusError formRef={formRef}/>
             <div className={Classes.DIALOG_BODY}>{props.children}</div>
               <div className={[Classes.DIALOG_FOOTER, dialogStyles.dialogFooter].join(' ')}>
               <div className={[Classes.DIALOG_FOOTER_ACTIONS, dialogStyles.dialogFooterActions].join(' ')}>

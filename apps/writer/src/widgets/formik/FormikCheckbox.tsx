@@ -16,6 +16,7 @@
 import React from "react";
 
 import { Checkbox, CheckboxProps } from "@blueprintjs/core";
+
 import { useField } from "formik";
 
 export interface FormikCheckboxProps {

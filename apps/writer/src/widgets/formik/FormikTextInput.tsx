@@ -15,22 +15,17 @@
 
 import React, { useState } from 'react';
 
-import { AnchorButton, FormGroup, InputGroup, InputGroupProps2, Intent, PopoverPosition } from "@blueprintjs/core";
 import { useField } from 'formik';
-import { Tooltip2 } from '@blueprintjs/popover2';
 
-import styles from './Formik.module.scss';
+import { AnchorButton, FormGroup, InputGroup, InputGroupProps2, Intent, PopoverPosition } from "@blueprintjs/core";
+import { Tooltip2 } from '@blueprintjs/popover2';
 import { IconNames } from '@blueprintjs/icons';
 
-export interface FormikTextInputProps {
-  name: string;
-  label: string;
-  labelInfo?: string;
-  helperText?: string;
-  validated?: boolean;
-}
+import { FormikFormGroupProps } from './formik';
 
-const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (props) => {
+import styles from './Formik.module.scss';
+
+const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (props) => {
     const [ field, meta ] = useField(props.name);
     const { label, labelInfo, helperText, validated, ...inputProps } = props;
     const [inputFocused, setInputFocused] = useState(false);

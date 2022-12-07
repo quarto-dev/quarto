@@ -1,5 +1,5 @@
 /*
- * FormikSwitch.tsx
+ * FormikNumericInput.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,22 +13,12 @@
  *
  */
 
+/*
 import React from "react";
-
-import { Switch, SwitchProps } from "@blueprintjs/core";
-
+import { NumericInput, NumericInputProps } from "@blueprintjs/core";
 import { useField } from "formik";
+*/
 
-export interface FormikSwitchProps {
-  name: string;
-  label: string;
-}
+const foo = 'bar';
+export default foo;
 
-const FormikSwitch: React.FC<FormikSwitchProps & SwitchProps> = (props) => {
-  const [ field ] = useField(props.name);
-  return (
-    <Switch {...props} {...field} checked={field.value} />
-  );
-};
-
-export default FormikSwitch;

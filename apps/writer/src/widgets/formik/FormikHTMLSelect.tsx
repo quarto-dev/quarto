@@ -17,16 +17,9 @@ import React from "react";
 
 import { FormGroup, HTMLSelect, HTMLSelectProps } from "@blueprintjs/core";
 import { useField } from "formik";
+import { FormikFormGroupProps } from "./formik";
 
-
-export interface FormikHTMLSelectProps {
-  name: string;
-  label?: string;
-  labelInfo?: string;
-  helperText?: string;
-}
-
-const FormikHTMLSelect: React.FC<FormikHTMLSelectProps & HTMLSelectProps> = (props) => {
+const FormikHTMLSelect: React.FC<FormikFormGroupProps & HTMLSelectProps> = (props) => {
   const [ field ] = useField(props.name);
   const { label, labelInfo, helperText, ...selectProps } = props;
   

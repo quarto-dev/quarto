@@ -1,5 +1,5 @@
 /*
- * FormikSwitch.tsx
+ * formik.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,22 +13,12 @@
  *
  */
 
-import React from "react";
 
-import { Switch, SwitchProps } from "@blueprintjs/core";
-
-import { useField } from "formik";
-
-export interface FormikSwitchProps {
+export interface FormikFormGroupProps {
   name: string;
   label: string;
+  labelInfo?: string;
+  helperText?: string;
+  validated?: boolean;
 }
 
-const FormikSwitch: React.FC<FormikSwitchProps & SwitchProps> = (props) => {
-  const [ field ] = useField(props.name);
-  return (
-    <Switch {...props} {...field} checked={field.value} />
-  );
-};
-
-export default FormikSwitch;

@@ -13,17 +13,15 @@
  *
  */
 
-import React, { useState } from 'react';
-
-import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
-import { Form, Formik, FormikConfig, FormikValues } from 'formik';
-
-import { PropsWithChildren } from 'react';
+import React, { useState, PropsWithChildren } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import dialogStyles from '../dialog/Dialog.module.scss';
+import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
 
+import { Form, Formik, FormikConfig, FormikValues } from 'formik';
+
+import dialogStyles from '../dialog/Dialog.module.scss';
 
 export interface FormikDialogProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   title?: string;

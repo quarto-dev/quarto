@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import { AnchorButton, FormGroup, InputGroup, InputGroupProps2, Intent, PopoverPosition } from "@blueprintjs/core";
 import { useField } from 'formik';
@@ -33,7 +33,6 @@ export interface FormikTextInputProps {
 const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (props) => {
     const [ field, meta ] = useField(props.name);
     const { label, labelInfo, helperText, validated, ...inputProps } = props;
-    const inputRef = useRef<HTMLInputElement>(null);
     const [inputFocused, setInputFocused] = useState(false);
     return (
       <>
@@ -45,9 +44,7 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (prop
         helperText={helperText}
       >
         <InputGroup
-          inputRef={inputRef}
           autoComplete={"off"}
-          fill={true}
           intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
           rightElement={validated && meta.touched && !!meta.error 
               ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 

@@ -26,10 +26,12 @@ import { FormikHelpers } from 'formik';
 import FormikTextInput from '../widgets/formik/FormikTextInput';
 import FormikCheckbox from '../widgets/formik/FormikCheckbox';
 import FormikRadioGroup from '../widgets/formik/FormikRadioGroup';
+import FormikHTMLSelect from '../widgets/formik/FormikHTMLSelect';
 
 interface TestProps {
   name: string;
   color: 'red' | 'green' | 'blue';
+  fruit: 'apple' | 'banana' | 'pear';
   email: string;
   enabled: boolean;
 }
@@ -74,6 +76,7 @@ const WorkbenchTestDialog: React.FC = () => {
   const props: TestProps = {
     name: '',
     color: 'red',
+    fruit: 'banana',
     email: '',
     enabled: true
   }
@@ -92,6 +95,7 @@ const WorkbenchTestDialog: React.FC = () => {
     >
       <FormikTextInput name="name" label='Name' labelInfo='Your full name' helperText='This is the name we will keep on file' autoFocus={true} validated={true}/>
       <FormikTextInput name="email" label='Email' labelInfo='Correspondence address' validated={true}/>
+      <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' fill={true} options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
       <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
       <FormikCheckbox name="enabled" label="Enabled" />
     </FormikDialog>

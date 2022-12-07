@@ -1,5 +1,5 @@
 /*
- * FormikRadioGroup.tsx
+ * FormikHTMLSelect.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,23 +15,23 @@
 
 import React from "react";
 
-import { FormGroup, RadioGroup, RadioGroupProps } from "@blueprintjs/core";
-
+import { FormGroup, HTMLSelect, HTMLSelectProps } from "@blueprintjs/core";
 import { useField } from "formik";
 
-export interface FormikRadioGroupProps {
+
+export interface FormikHTMLSelectProps {
   name: string;
   label?: string;
   labelInfo?: string;
   helperText?: string;
 }
 
-const FormikRadioGroup: React.FC<FormikRadioGroupProps & Omit<RadioGroupProps, "onChange">> = (props) => {
+const FormikHTMLSelect: React.FC<FormikHTMLSelectProps & HTMLSelectProps> = (props) => {
   const [ field ] = useField(props.name);
-  const { label, labelInfo, helperText, ...radioProps } = props;
-
-  const radioGroup = <RadioGroup {...radioProps} {...field} selectedValue={field.value} />;
+  const { label, labelInfo, helperText, ...selectProps } = props;
   
+  const htmlSelect = <HTMLSelect {...selectProps} {...field} multiple={undefined} />
+
   if (label || labelInfo || helperText) {
     return (
       <FormGroup
@@ -39,14 +39,14 @@ const FormikRadioGroup: React.FC<FormikRadioGroupProps & Omit<RadioGroupProps, "
         labelInfo={labelInfo}
         helperText={helperText}
       >
-        {radioGroup}
+        {htmlSelect}
       </FormGroup>
     );
   } else {
-    return radioGroup
+    return htmlSelect;
   }
 };
 
-export default FormikRadioGroup;
+export default FormikHTMLSelect;
 
 

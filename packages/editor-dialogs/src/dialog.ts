@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * dialog.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,7 +13,22 @@
  *
  */
 
-export { editMath } from "./edit-math";
+import React from "react";
+import { createRoot } from "react-dom/client";
 
-
+export function showEditorDialog<T>(
+  dialog: React.FC<{ values: T, onClosed: (values?: T) => void}>,
+  values: T)
+:  Promise<T | null> {
+  return new Promise(resolve => {
+    const parent = globalThis.document.createElement("div");
+    const root = createRoot(parent);
+    const onClosed = (values?: T) => {
+      root.unmount();
+      parent.remove();
+      resolve(values || null);
+    }  
+    root.render(React.createElement(dialog, { values, onClosed }));
+  });
+}
 

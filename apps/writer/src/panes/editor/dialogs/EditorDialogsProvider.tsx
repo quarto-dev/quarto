@@ -46,6 +46,8 @@ import {
   ImageEditResult
 } from 'editor';
 
+import { editMath } from "editor-dialogs";
+
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
@@ -242,9 +244,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
         }));
       });
     },
-    async editMath(_id: string): Promise<string | null> {
-      return null;
-    },
+    editMath,
     async insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
       return new Promise(resolve => {
         setState(prevState => ({

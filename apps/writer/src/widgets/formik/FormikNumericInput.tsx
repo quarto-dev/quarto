@@ -17,8 +17,7 @@ import React from 'react';
 
 import { useField } from 'formik';
 
-import { AnchorButton, Intent, NumericInput, NumericInputProps } from "@blueprintjs/core";
-import { IconNames } from '@blueprintjs/icons';
+import { Intent, NumericInput, NumericInputProps } from "@blueprintjs/core";
 
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
@@ -43,9 +42,6 @@ const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (
               }}
               {...inputProps}
               intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-              rightElement={validated && meta.touched && !!meta.error 
-                ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 
-                : undefined}
               onFocus={onFocus}
               onBlur={onBlur}
             />

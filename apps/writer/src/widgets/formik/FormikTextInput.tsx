@@ -17,8 +17,7 @@ import React from 'react';
 
 import { useField } from 'formik';
 
-import { AnchorButton, InputGroup, InputGroupProps2, Intent } from "@blueprintjs/core";
-import { IconNames } from '@blueprintjs/icons';
+import { InputGroup, InputGroupProps2, Intent } from "@blueprintjs/core";
 
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
@@ -38,9 +37,6 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (prop
             <InputGroup
               autoComplete={"off"}
               intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-              rightElement={validated && meta.touched && !!meta.error 
-                  ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 
-                  : undefined}
               type="text"
               {...field}
               {...inputProps}

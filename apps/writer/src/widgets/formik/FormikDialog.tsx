@@ -13,7 +13,7 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
 import { Form, Formik, FormikConfig, FormikValues } from 'formik';
@@ -37,9 +37,18 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
 
   const { t } = useTranslation();
 
+  const [validateOnChange, setValidateOnChange] = useState(false);
+
   return (
-    <Formik {...props}>
+    <Formik {...props} validateOnChange={validateOnChange} validateOnBlur={false}>
       {formikProps => {
+
+        const onSubmit = (ev: React.FormEvent) =>{
+          ev.preventDefault()
+          setValidateOnChange(true);
+          return formikProps.handleSubmit();
+        }
+
         return <Dialog
           title={props.title}
           isOpen={props.isOpen}
@@ -56,7 +65,7 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
           transitionDuration={150}
           style={{userSelect: 'none'}}
         >
-          <Form>
+          <Form onSubmit={onSubmit}>
             <div className={Classes.DIALOG_BODY}>{props.children}</div>
               <div className={[Classes.DIALOG_FOOTER, dialogStyles.dialogFooter].join(' ')}>
               <div className={[Classes.DIALOG_FOOTER_ACTIONS, dialogStyles.dialogFooterActions].join(' ')}>

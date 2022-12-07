@@ -33,7 +33,7 @@ import {
   AttrEditInput,
   InsertCiteProps,
   InsertCiteUI,
-} from '../api/ui-types';
+} from 'editor-types';
 import {
   attrPropsToInput,
   attrInputToProps,

@@ -21,7 +21,7 @@ import { NodeWithPos, findParentNode } from 'prosemirror-utils';
 
 import { NodeCommand, toggleList, ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { EditorUI, EditorUIPrefs } from '../../api/ui-types';
-import { ListProps } from '../../api/ui-types';
+import { ListProps } from 'editor-types';
 import { ListType, ListCapabilities } from '../../api/list-types';
 import { isList } from '../../api/list';
 

@@ -22,7 +22,7 @@ import { ProsemirrorCommand, EditorCommandId, toggleMarkType } from '../../api/c
 import { PandocOutput, PandocToken, PandocTokenType } from '../../api/pandoc';
 import { getMarkRange, markIsActive, getMarkAttrs, domAttrNoSpelling } from '../../api/mark';
 import { EditorUI } from '../../api/ui-types';
-import { RawFormatProps } from '../../api/ui-types';
+import { RawFormatProps } from 'editor-types';
 import { canInsertNode } from '../../api/node';
 import { fragmentText } from '../../api/fragment';
 import { OmniInsertGroup } from '../../api/omni_insert';

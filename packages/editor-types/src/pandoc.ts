@@ -72,3 +72,9 @@ export interface PandocToken {
   c?: any;
 }
 
+export interface PandocAttr {
+  id: string;
+  classes: string[];
+  keyvalue: Array<[string, string]>;
+}
+

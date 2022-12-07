@@ -16,11 +16,7 @@
 import { EditorCommandId } from './command';
 import { EditorUI } from './ui-types';
 
-export interface TableCapabilities {
-  captions: boolean;
-  headerOptional: boolean;
-  multiline: boolean;
-}
+export type { TableCapabilities } from 'editor-types';
 
 export function tableMenu(insert: boolean, ui: EditorUI) {
   return [

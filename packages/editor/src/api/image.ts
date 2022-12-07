@@ -25,11 +25,9 @@ export enum ImageType {
   Figure,
 }
 
-export interface ImageDimensions {
-  naturalWidth: number | null;
-  naturalHeight: number | null;
-  containerWidth: number;
-}
+import { ImageDimensions } from 'editor-types';
+
+export type { ImageDimensions };
 
 export function isValidImageSizeUnit(unit: string) {
   return kValidUnits.includes(unit);

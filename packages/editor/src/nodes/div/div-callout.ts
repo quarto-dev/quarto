@@ -24,7 +24,7 @@ import { EditorUI } from "../../api/ui-types";
 import { OmniInsertGroup } from "../../api/omni_insert";
 import { pandocAttrEnsureClass, pandocAttrSetKeyvalue, pandocAttrGetKeyvalue, 
          pandocAttrRemoveKeyvalue, pandocAttrRemoveClass, pandocAttrFrom, PandocAttr } from "../../api/pandoc_attr";
-import { CalloutProps } from "../../api/ui-types";
+import { CalloutProps } from "editor-types"
 import { removeDiv } from "./div";
 
 export function insertCalloutCommand(ui: EditorUI) {

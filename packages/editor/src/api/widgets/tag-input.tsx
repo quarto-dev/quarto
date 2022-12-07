@@ -21,7 +21,7 @@ import { EditorUI } from '../ui-types';
 
 import './tag-input.css';
 import { TextInput } from './text';
-import { kAlertTypeError } from '../ui-types';
+import { kAlertTypeError } from 'editor-types';
 
 // Item representing a tag entry
 // The key remains stable even if the tag is edited

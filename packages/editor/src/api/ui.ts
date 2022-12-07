@@ -14,7 +14,7 @@
  */
 
 import { attrPartitionKeyvalue, kStyleAttrib, pandocAttrKeyvalueFromText } from "./pandoc_attr";
-import { AttrEditInput, AttrProps } from "./ui-types";
+import { AttrEditInput, AttrProps } from "editor-types";
 
 
 export function attrInputToProps(attr: AttrEditInput): AttrProps {

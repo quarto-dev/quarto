@@ -21,7 +21,7 @@ import * as React from 'react';
 import ClipboardJS from 'clipboard';
 
 import { EditorUI } from '../../api/ui-types';
-import { LinkProps } from '../../api/ui-types';
+import { LinkProps } from 'editor-types';
 import { CommandFn } from '../../api/command';
 
 import { selectionIsImageNode } from '../../api/selection';

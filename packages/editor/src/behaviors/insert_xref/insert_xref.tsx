@@ -31,8 +31,7 @@ import { kQuartoXRefTypes } from '../../marks/xref/xref-completion';
 
 import { xrefIndex } from './insert_xref_index';
 import './insert_xref-styles.css';
-import { kAlertTypeError } from '../../api/ui-types';
-import { EditorServer, XRef } from 'editor-types';
+import { EditorServer, XRef, kAlertTypeError } from 'editor-types';
 
 // Keep the most recently used selected style around
 let lastSelectedStyleIndex = 0;

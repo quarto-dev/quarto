@@ -18,6 +18,11 @@ export interface Bibliography {
   project_biblios: string[];
 }
 
+export interface CiteField {
+  name: string;
+  value: string;
+}
+
 export interface CSL {
   // The id. This is technically required, but some providers (like crossref) don't provide
   // one

@@ -15,6 +15,8 @@
 
 import { NodeSpec, MarkSpec } from 'prosemirror-model';
 
+import { PandocAttr } from 'editor-types';
+
 import { PandocToken, PandocExtensions } from './pandoc';
 import { extensionEnabled, extensionIfEnabled, Extension } from './extension';
 
@@ -38,11 +40,9 @@ export const kCodeBlockText = 1;
 export const kSpanAttr = 0;
 export const kSpanChildren = 1;
 
-export interface PandocAttr {
-  id: string;
-  classes: string[];
-  keyvalue: Array<[string, string]>;
-}
+export type { PandocAttr };
+
+
 
 export const pandocAttrSpec = {
   id: { default: null },

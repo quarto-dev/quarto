@@ -1,5 +1,5 @@
 /*
- * list-types.ts
+ * link.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,5 +13,27 @@
  *
  */
 
-export { ListType, ListNumberStyle, ListNumberDelim} from 'editor-types';
-export type { ListCapabilities } from 'editor-types';
+
+export enum LinkType {
+  URL = 0,
+  Heading = 1,
+  ID = 2,
+}
+
+export interface LinkCapabilities {
+  headings: boolean;
+  attributes: boolean;
+  text: boolean;
+}
+
+export interface LinkTargets {
+  readonly ids: string[];
+  readonly headings: LinkHeadingTarget[];
+}
+
+export interface LinkHeadingTarget {
+  readonly level: number;
+  readonly text: string;
+}
+
+

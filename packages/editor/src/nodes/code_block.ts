@@ -28,7 +28,7 @@ import { PandocOutput, PandocTokenType, PandocExtensions } from '../api/pandoc';
 import { pandocAttrSpec, pandocAttrParseDom, pandocAttrToDomAttr } from '../api/pandoc_attr';
 import { PandocCapabilities } from '../api/pandoc_capabilities';
 import { EditorUI } from '../api/ui-types';
-import { CodeBlockProps } from '../api/ui-types';
+import { CodeBlockProps } from 'editor-types';
 import { hasFencedCodeBlocks } from '../api/pandoc_format';
 import { precedingListItemInsertPos, precedingListItemInsert } from '../api/list';
 import { EditorOptions } from '../api/options';

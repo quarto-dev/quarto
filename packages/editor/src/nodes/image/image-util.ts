@@ -16,7 +16,7 @@
 import { EditorView } from 'prosemirror-view';
 import { findParentNodeClosestToPos } from 'prosemirror-utils';
 
-import { ImageProps } from '../../api/ui-types';
+import { ImageProps } from 'editor-types';
 import {
   imageSizePropWithUnit,
   isValidImageSizeUnit,

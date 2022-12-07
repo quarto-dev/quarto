@@ -1,5 +1,5 @@
 /*
- * list-types.ts
+ * image.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,5 +13,10 @@
  *
  */
 
-export { ListType, ListNumberStyle, ListNumberDelim} from 'editor-types';
-export type { ListCapabilities } from 'editor-types';
+export interface ImageDimensions {
+  naturalWidth: number | null;
+  naturalHeight: number | null;
+  containerWidth: number;
+}
+
+

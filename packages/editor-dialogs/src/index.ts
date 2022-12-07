@@ -1,5 +1,5 @@
 /*
- * list-types.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,5 +13,7 @@
  *
  */
 
-export { ListType, ListNumberStyle, ListNumberDelim} from 'editor-types';
-export type { ListCapabilities } from 'editor-types';
+const foo = 'bar';
+export default foo;
+
+

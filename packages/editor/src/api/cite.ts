@@ -13,12 +13,16 @@
  *
  */
 
+import { CiteField } from 'editor-types';
+
 import { CSLName, CSLDate, CSL } from './csl';
-import { InsertCiteProps, InsertCiteUI } from './ui-types';
+import { InsertCiteProps, InsertCiteUI } from 'editor-types';
 import { urlForDOI } from './doi';
 
 import pinyin from 'pinyin';
 import { transliterate } from 'transliteration';
+
+export type { CiteField };
 
 export const kInvalidCiteKeyChars = /[\][\s@',\\#}{~%&$^_]/g;
 const kCiteIdLeadingLength = 8;
@@ -124,11 +128,6 @@ export function suggestCiteId(existingIds: string[], csl: CSL) {
   }
 
   return createUniqueCiteId(existingIds, baseId);
-}
-
-export interface CiteField {
-  name: string;
-  value: string;
 }
 
 export function urlForCitation(csl: CSL): string | undefined {

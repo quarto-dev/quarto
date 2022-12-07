@@ -29,7 +29,7 @@ import { BibliographyManager, BibliographyFile, BibliographySource } from '../..
 import { EditorUI } from '../../api/ui-types';
 import { joinPaths, getExtension } from '../../api/path';
 import { Extension, ExtensionContext } from '../../api/extension';
-import { InsertCiteProps, kAlertTypeError, kAlertTypeWarning } from '../../api/ui-types';
+import { InsertCiteProps, kAlertTypeError, kAlertTypeWarning } from 'editor-types';
 import { CSL, sanitizeForCiteproc } from '../../api/csl';
 import { suggestCiteId, formatForPreview } from '../../api/cite';
 import { performCompletionReplacement } from '../../api/completion';

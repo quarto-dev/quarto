@@ -24,8 +24,13 @@ export * from './xref'
 export * from './environment'
 export * from './spelling'
 export * from './server'
-
+export * from './link'
+export * from './list'
+export * from './image'
+export * from './table'
+export * from './dialogs'
 export * from './math'
 export * from './dictionary'
 export * from './services'
+
 

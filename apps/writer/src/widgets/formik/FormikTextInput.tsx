@@ -32,7 +32,7 @@ export interface FormikTextInputProps {
 
 const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (props) => {
     const [ field, meta ] = useField(props.name);
-    const { label, labelInfo, validated, ...inputProps } = props;
+    const { label, labelInfo, helperText, validated, ...inputProps } = props;
     const inputRef = useRef<HTMLInputElement>(null);
     const [inputFocused, setInputFocused] = useState(false);
     return (
@@ -42,7 +42,7 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (prop
         className={validated ? styles.validatedFormGroup : undefined}
         intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
         labelInfo={labelInfo}
-        helperText={props.helperText}
+        helperText={helperText}
       >
         <InputGroup
           inputRef={inputRef}
@@ -63,6 +63,7 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (prop
         <Tooltip2
           className={styles.tooltip}
           content={meta.error}
+          disabled={!meta.error}
           isOpen={validated && meta.touched && !!meta.error && inputFocused}
           placement={PopoverPosition.BOTTOM}
           popoverClassName={props.helperText ? styles.validationPopupWithHelper : styles.validationPopup}

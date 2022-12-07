@@ -1,5 +1,5 @@
 /*
- * FormikCheckbox.tsx
+ * FormikRadioGroup.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,21 +13,23 @@
  *
  */
 
+
+import { RadioGroup, RadioGroupProps } from "@blueprintjs/core";
+import { useField } from "formik";
 import React from "react";
 
-import { Checkbox, CheckboxProps } from "@blueprintjs/core";
-import { useField } from "formik";
-
-export interface FormikCheckboxProps {
+export interface FormikRadioGroupProps {
   name: string;
-  label: string;
+  label?: string;
 }
 
-const FormikCheckbox: React.FC<FormikCheckboxProps & CheckboxProps> = (props) => {
+const FormikRadioGroup: React.FC<FormikRadioGroupProps & Omit<RadioGroupProps, "onChange">> = (props) => {
   const [ field ] = useField(props.name);
   return (
-    <Checkbox {...props} {...field} checked={field.value} />
+    <RadioGroup {...props} {...field} selectedValue={field.value} />
   );
 };
 
-export default FormikCheckbox;
+export default FormikRadioGroup;
+
+

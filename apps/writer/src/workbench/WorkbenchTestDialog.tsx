@@ -25,8 +25,10 @@ import FormikDialog from '../widgets/formik/FormikDialog';
 import { FormikHelpers } from 'formik';
 import FormikTextInput from '../widgets/formik/FormikTextInput';
 import FormikCheckbox from '../widgets/formik/FormikCheckbox';
+import FormikRadioGroup from '../widgets/formik/FormikRadioGroup';
 
 interface TestProps {
+  name: string;
   color: 'red' | 'green' | 'blue';
   email: string;
   enabled: boolean;
@@ -70,6 +72,7 @@ const WorkbenchTestDialog: React.FC = () => {
   }
 
   const props: TestProps = {
+    name: '',
     color: 'red',
     email: '',
     enabled: true
@@ -83,13 +86,14 @@ const WorkbenchTestDialog: React.FC = () => {
       onSubmit={onSubmit} 
       onReset={onCancel}
       validationSchema={yup.object().shape({
-        color: yup.string().oneOf(['red', 'green', 'blue']).required('Color is a required field'),
+        name: yup.string().required(),
         email: yup.string().email("You must provided a valid email").required("You must provided a valid email")
       })}
     >
-       <FormikTextInput name="color" label='Color' labelInfo='The color you want' helperText='This is the helper text that we have' autoFocus={true} validated={true}/>
-       <FormikTextInput name="email" label='Email' labelInfo='Correspondence address' validated={true}/>
-       <FormikCheckbox name="enabled" label="Enabled" />
+      <FormikTextInput name="name" label='Name' labelInfo='Your full name' helperText='This is the name we will keep on file' autoFocus={true} validated={true}/>
+      <FormikTextInput name="email" label='Email' labelInfo='Correspondence address' validated={true}/>
+      <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
+      <FormikCheckbox name="enabled" label="Enabled" />
     </FormikDialog>
   );
 };

@@ -16,7 +16,7 @@
 import React, { useRef, useState } from 'react';
 
 import { AnchorButton, FormGroup, InputGroup, InputGroupProps2, Intent, PopoverPosition } from "@blueprintjs/core";
-import { useField, useFormikContext } from 'formik';
+import { useField } from 'formik';
 import { Tooltip2 } from '@blueprintjs/popover2';
 
 import styles from './Formik.module.scss';
@@ -26,6 +26,7 @@ export interface FormikTextInputProps {
   name: string;
   label: string;
   labelInfo?: string;
+  helperText?: string;
   validated?: boolean;
 }
 
@@ -41,6 +42,7 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (prop
         className={validated ? styles.validatedFormGroup : undefined}
         intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
         labelInfo={labelInfo}
+        helperText={props.helperText}
       >
         <InputGroup
           inputRef={inputRef}
@@ -48,13 +50,13 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (prop
           fill={true}
           intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
           rightElement={validated && meta.touched && !!meta.error 
-              ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Error} title={meta.error} /> 
+              ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 
               : undefined}
           type="text"
           {...field}
           {...inputProps}
           onFocus={() => setInputFocused(true)}
-          onBlur={(ev) => { setInputFocused(false); field.onBlur(ev)}}
+          onBlur={(ev) => {setInputFocused(false); field.onBlur(ev)}}
         /> 
       </FormGroup>
       { validated ? 
@@ -63,7 +65,7 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputGroupProps2> = (prop
           content={meta.error}
           isOpen={validated && meta.touched && !!meta.error && inputFocused}
           placement={PopoverPosition.BOTTOM}
-          popoverClassName={styles.validationPopup}
+          popoverClassName={props.helperText ? styles.validationPopupWithHelper : styles.validationPopup}
           enforceFocus={false}
           canEscapeKeyClose={false}
         >

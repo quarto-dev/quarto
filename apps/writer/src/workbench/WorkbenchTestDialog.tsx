@@ -87,7 +87,7 @@ const WorkbenchTestDialog: React.FC = () => {
         email: yup.string().email("You must provided a valid email").required("You must provided a valid email")
       })}
     >
-       <FormikTextInput name="color" label='Color' labelInfo='The color you want' autoFocus={true} validated={true}/>
+       <FormikTextInput name="color" label='Color' labelInfo='The color you want' helperText='This is the helper text that we have' autoFocus={true} validated={true}/>
        <FormikTextInput name="email" label='Email' labelInfo='Correspondence address' validated={true}/>
        <FormikCheckbox name="enabled" label="Enabled" />
     </FormikDialog>

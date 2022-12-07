@@ -27,6 +27,7 @@ import FormikTextInput from '../widgets/formik/FormikTextInput';
 import FormikCheckbox from '../widgets/formik/FormikCheckbox';
 import FormikRadioGroup from '../widgets/formik/FormikRadioGroup';
 import FormikHTMLSelect from '../widgets/formik/FormikHTMLSelect';
+import FormikSwitch from '../widgets/formik/FormikSwitch';
 
 interface TestProps {
   name: string;
@@ -34,6 +35,7 @@ interface TestProps {
   fruit: 'apple' | 'banana' | 'pear';
   email: string;
   enabled: boolean;
+  cache: boolean;
 }
 
 const WorkbenchTestDialog: React.FC = () => {
@@ -78,7 +80,8 @@ const WorkbenchTestDialog: React.FC = () => {
     color: 'red',
     fruit: 'banana',
     email: '',
-    enabled: true
+    enabled: true,
+    cache: false
   }
 
   return (
@@ -98,6 +101,7 @@ const WorkbenchTestDialog: React.FC = () => {
       <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' fill={true} options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
       <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
       <FormikCheckbox name="enabled" label="Enabled" />
+      <FormikSwitch name="cache" label="Cache" />
     </FormikDialog>
   );
 };

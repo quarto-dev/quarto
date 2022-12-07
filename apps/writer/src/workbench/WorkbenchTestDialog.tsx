@@ -28,11 +28,13 @@ import FormikCheckbox from '../widgets/formik/FormikCheckbox';
 import FormikRadioGroup from '../widgets/formik/FormikRadioGroup';
 import FormikHTMLSelect from '../widgets/formik/FormikHTMLSelect';
 import FormikSwitch from '../widgets/formik/FormikSwitch';
+import FormikNumericInput from '../widgets/formik/FormikNumericInput';
 
 interface TestProps {
   name: string;
   color: 'red' | 'green' | 'blue';
   fruit: 'apple' | 'banana' | 'pear';
+  level: number;
   email: string;
   enabled: boolean;
   cache: boolean;
@@ -79,6 +81,7 @@ const WorkbenchTestDialog: React.FC = () => {
     name: '',
     color: 'red',
     fruit: 'banana',
+    level: 5,
     email: '',
     enabled: true,
     cache: false
@@ -93,6 +96,7 @@ const WorkbenchTestDialog: React.FC = () => {
       onReset={onCancel}
       validationSchema={yup.object().shape({
         name: yup.string().required(),
+        level: yup.number().min(1).max(10),
         email: yup.string().email("You must provided a valid email").required("You must provided a valid email")
       })}
     >
@@ -100,6 +104,7 @@ const WorkbenchTestDialog: React.FC = () => {
       <FormikTextInput name="email" label='Email' labelInfo='Correspondence address' validated={true}/>
       <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' fill={true} options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
       <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
+      <FormikNumericInput name="level" label="Level" fill={true} validated={true} />
       <FormikCheckbox name="enabled" label="Enabled" />
       <FormikSwitch name="cache" label="Cache" />
     </FormikDialog>

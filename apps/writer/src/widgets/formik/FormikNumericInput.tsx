@@ -1,5 +1,5 @@
 /*
- * FormikNumericInput.tsx
+ * FormtNumericInput.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,12 +13,46 @@
  *
  */
 
-/*
-import React from "react";
-import { NumericInput, NumericInputProps } from "@blueprintjs/core";
-import { useField } from "formik";
-*/
+import React from 'react';
 
-const foo = 'bar';
-export default foo;
+import { useField } from 'formik';
 
+import { AnchorButton, Intent, NumericInput, NumericInputProps } from "@blueprintjs/core";
+import { IconNames } from '@blueprintjs/icons';
+
+import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
+
+const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (props) => {
+  const { label, labelInfo, helperText, validated, ...inputProps } = props;
+  const [ field, meta, helpers ] = useField(props.name);
+  const { name, value } = field;
+    return (
+      <FormikFormGroup 
+        name={name}
+        label={label}
+        labelInfo={labelInfo}
+        helperText={helperText}
+        validated={validated}
+      >
+        {({ onFocus, onBlur }) => {
+          return (
+            <NumericInput
+              defaultValue={value}
+              onValueChange={(_value: number, strValue: string) => {
+                helpers.setValue(Number.parseFloat(strValue) || 0);
+              }}
+              {...inputProps}
+              intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+              rightElement={validated && meta.touched && !!meta.error 
+                ? <AnchorButton tabIndex={-1} minimal={true} icon={IconNames.Issue} title={meta.error} /> 
+                : undefined}
+              onFocus={onFocus}
+              onBlur={onBlur}
+            />
+          );
+        }}
+      </FormikFormGroup>
+    );
+};
+
+export default FormikNumericInput;

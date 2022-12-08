@@ -15,6 +15,7 @@
 
 export { editMath } from "./edit-math";
 export { editList } from "./edit-list"
+export { editRawInline, editRawBlock } from "./edit-raw"
 export { insertTable } from "./insert-table"
 export { insertTabset } from "./insert-tabset"
 

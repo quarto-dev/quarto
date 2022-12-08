@@ -24,8 +24,6 @@ import {
   ImageProps,
   AttrProps,
   AttrEditResult,
-  RawFormatResult,
-  RawFormatProps,
   LinkTargets, 
   LinkCapabilities,
   ImageDimensions,
@@ -42,13 +40,12 @@ import {
   ImageEditResult
 } from 'editor';
 
-import { editList, editMath, insertTable } from "editor-dialogs";
+import { editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
 
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
 import { defaultEditAttrProps, EditorDialogEditAttr, EditorDialogEditAttrProps } from "./EditorDialogEditAttr";
-import { defaultEditRawProps, EditorDialogEditRaw, EditorDialogEditRawProps } from "./EditorDialogEditRaw";
 
 interface EditorDialogsState {
   alert: AlertDialogProps;
@@ -57,7 +54,6 @@ interface EditorDialogsState {
   editAttr: EditorDialogEditAttrProps;
   editSpan: EditorDialogEditAttrProps;
   editDiv: EditorDialogEditAttrProps;
-  editRaw: EditorDialogEditRawProps;
 }
 
 export const EditorDialogsContext = React.createContext<EditorDialogs>(null!);
@@ -71,7 +67,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     editImage: defaultEditImageProps(),
     editSpan: defaultEditAttrProps(),
     editDiv: defaultEditAttrProps(),
-    editRaw: defaultEditRawProps(),
   });
 
   const editorDialogsProvider: EditorDialogs = {
@@ -186,37 +181,8 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     async editCallout(_props: CalloutEditProps, _removeEnabled: boolean): Promise<CalloutEditResult | null> {
       return null;
     },
-    async editRawInline(raw: RawFormatProps, _outputFormats: string[]): Promise<RawFormatResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editRaw: {
-            isOpen: true,
-            raw,
-            onClosed: (result: RawFormatResult | null) => {
-              setState({ ...prevState, editRaw: { ...state.editRaw, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
-    async editRawBlock(raw: RawFormatProps, _outputFormats: string[]): Promise<RawFormatResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editRaw: {
-            isOpen: true,
-            minRows: 10,
-            raw,
-            onClosed: (result: RawFormatResult | null) => {
-              setState({ ...prevState, editRaw: { ...state.editRaw, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
+    editRawInline,
+    editRawBlock,
     editMath,
     insertTable,
     async insertTabset(): Promise<InsertTabsetResult | null> {
@@ -239,7 +205,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       <EditorDialogEditImage {...state.editImage} />
       <EditorDialogEditAttr {...state.editSpan} />
       <EditorDialogEditAttr {...state.editDiv} />
-      <EditorDialogEditRaw {...state.editRaw} />
     </EditorDialogsContext.Provider> 
   );
 

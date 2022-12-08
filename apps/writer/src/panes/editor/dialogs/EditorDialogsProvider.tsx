@@ -48,7 +48,6 @@ import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDial
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
 import { defaultEditAttrProps, EditorDialogEditAttr, EditorDialogEditAttrProps } from "./EditorDialogEditAttr";
-import { defaultEditListProps, EditorDialogEditList, EditorDialogEditListProps } from "./EditorDialogEditList";
 import { defaultEditRawProps, EditorDialogEditRaw, EditorDialogEditRawProps } from "./EditorDialogEditRaw";
 
 interface EditorDialogsState {
@@ -56,7 +55,6 @@ interface EditorDialogsState {
   editLink: EditorDialogEditLinkProps;
   editImage: EditorDialogEditImageProps;
   editAttr: EditorDialogEditAttrProps;
-  editList: EditorDialogEditListProps;
   editSpan: EditorDialogEditAttrProps;
   editDiv: EditorDialogEditAttrProps;
   editRaw: EditorDialogEditRawProps;
@@ -71,7 +69,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     editLink: defaultEditLinkProps(),
     editAttr: defaultEditAttrProps(),
     editImage: defaultEditImageProps(),
-    editList: defaultEditListProps(),
     editSpan: defaultEditAttrProps(),
     editDiv: defaultEditAttrProps(),
     editRaw: defaultEditRawProps(),
@@ -240,7 +237,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       <EditorDialogEditLink {...state.editLink} />
       <EditorDialogEditAttr {...state.editAttr} />
       <EditorDialogEditImage {...state.editImage} />
-      <EditorDialogEditList {...state.editList} />
       <EditorDialogEditAttr {...state.editSpan} />
       <EditorDialogEditAttr {...state.editDiv} />
       <EditorDialogEditRaw {...state.editRaw} />

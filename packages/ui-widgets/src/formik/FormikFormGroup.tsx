@@ -31,6 +31,7 @@ export interface FormikFormGroupProps {
   labelInfo?: string;
   helperText?: string;
   validated?: boolean;
+  autoFocus?: boolean;
 }
 
 export interface FormGroupChildren {
@@ -45,7 +46,7 @@ const FormikFormGroup: React.FC<FormikFormGroupProps & FormGroupChildren> = prop
   const onFocus = () => setInputFocused(true);
   const onBlur = (ev: unknown) => { setInputFocused(false); field.onBlur(ev)};
 
-  return (<>
+  return (
     <FormGroup
       label={props.label}
       className={props.validated ? styles.validatedFormGroup : undefined}
@@ -54,22 +55,23 @@ const FormikFormGroup: React.FC<FormikFormGroupProps & FormGroupChildren> = prop
       helperText={props.helperText}
     >
       {props.children({ onFocus, onBlur })}
-    </FormGroup>
-    { props.validated ? 
-      <Tooltip2
-        className={styles.tooltip}
-        content={meta.error}
-        disabled={!meta.error}
-        isOpen={props.validated && meta.touched && !!meta.error && inputFocused}
-        placement={PopoverPosition.BOTTOM}
-        popoverClassName={props.helperText ? styles.validationPopupWithHelper : styles.validationPopup}
-        enforceFocus={false}
-        canEscapeKeyClose={false}
-      >
-        <div className={styles.tooltip} tabIndex={-1} />
+      { props.validated ? 
+        <Tooltip2
+          className={styles.tooltip}
+          content={meta.error}
+          disabled={!meta.error}
+          isOpen={props.validated && meta.touched && !!meta.error && inputFocused}
+          placement={PopoverPosition.BOTTOM}
+          popoverClassName={styles.validationPopup}
+          enforceFocus={false}
+          canEscapeKeyClose={false}
+        >
+          <div className={styles.tooltip} tabIndex={-1} />
       </Tooltip2> 
       : null}
-    </>);
+    </FormGroup>
+   
+  );
 }
 
 export default FormikFormGroup;

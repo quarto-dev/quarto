@@ -8,15 +8,15 @@
 }
 
 .validatedFormGroup {
-  margin: 0 0 -3px !important;
+  :global {
+    .bp4-form-helper-text {
+      margin-top: -15px !important;
+    }
+  }
 }
 
 .validationPopup {
   margin-top: -10px;
-}
-
-.validationPopupWithHelper {
-  margin-top: -33px;
 }
 
 .dialogFooter {

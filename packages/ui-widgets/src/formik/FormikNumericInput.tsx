@@ -13,7 +13,7 @@
  *
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import { useField } from 'formik';
 
@@ -25,30 +25,41 @@ const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (
   const { label, labelInfo, helperText, validated, ...inputProps } = props;
   const [ field, meta, helpers ] = useField(props.name);
   const { name, value } = field;
-    return (
-      <FormikFormGroup 
-        name={name}
-        label={label}
-        labelInfo={labelInfo}
-        helperText={helperText}
-        validated={validated}
-      >
-        {({ onFocus, onBlur }) => {
-          return (
-            <NumericInput
-              defaultValue={value}
-              onValueChange={(_value: number, strValue: string) => {
-                helpers.setValue(Number.parseFloat(strValue) || 0);
-              }}
-              {...inputProps}
-              intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-              onFocus={onFocus}
-              onBlur={onBlur}
-            />
-          );
-        }}
-      </FormikFormGroup>
-    );
+  const autoFocusRef = useRef<HTMLInputElement>(null);
+
+  if (props.autoFocus) {
+    useEffect(() => {
+      setTimeout(() => {
+        autoFocusRef.current?.focus();
+      }, 0);
+    }, []);
+  }
+
+  return (
+    <FormikFormGroup 
+      name={name}
+      label={label}
+      labelInfo={labelInfo}
+      helperText={helperText}
+      validated={validated}
+    >
+      {({ onFocus, onBlur }) => {
+        return (
+          <NumericInput
+            inputRef={autoFocusRef}
+            defaultValue={value}
+            onValueChange={(_value: number, strValue: string) => {
+              helpers.setValue(Number.parseFloat(strValue) || 0);
+            }}
+            {...inputProps}
+            intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+            onFocus={onFocus}
+            onBlur={onBlur}
+          />
+        );
+      }}
+    </FormikFormGroup>
+  );
 };
 
 export default FormikNumericInput;

@@ -96,11 +96,11 @@ const WorkbenchTestDialog: React.FC = () => {
         email: yup.string().email("You must provided a valid email").required("You must provided a valid email")
       })}
     >
-      <FormikTextInput name="name" label='Name' labelInfo='Your full name' helperText='This is the name we will keep on file' autoFocus={true} validated={true}/>
-      <FormikTextInput name="email" label='Email' labelInfo='Correspondence address' validated={true}/>
+      <FormikTextInput name="name" label='Name' labelInfo='Your full name' helperText='This is the name we will keep on file' autoFocus={true}/>
+      <FormikTextInput name="email" label='Email' labelInfo='Correspondence address'/>
       <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' fill={true} options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
       <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
-      <FormikNumericInput name="level" label="Level" fill={true} validated={true} />
+      <FormikNumericInput name="level" label="Level" fill={true} />
       <FormGroup>
         <FormikCheckbox name="enabled" label="Enabled" />
         <FormikSwitch name="cache" label="Cache" />

@@ -70,14 +70,12 @@ const InsertTableDialog: React.FC<{
           min={1}
           max={1000}
           autoFocus={true}
-          validated={true}
         />
         <FormikNumericInput
           name="cols"
           label={"Columns"}
           min={1}
           max={1000}
-          validated={true}
         />
       </ControlGroup>
 

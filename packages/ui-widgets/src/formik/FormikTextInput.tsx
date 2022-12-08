@@ -22,7 +22,7 @@ import { InputGroup, InputGroupProps2, Intent } from "@blueprintjs/core";
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
 const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (props) => {
-  const { name, label, labelInfo, helperText, validated, ...inputProps } = props;
+  const { name, label, labelInfo, helperText, ...inputProps } = props;
   const [ field, meta ] = useField(name);
     return (
       <FormikFormGroup 
@@ -30,7 +30,6 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (prop
         label={label}
         labelInfo={labelInfo}
         helperText={helperText}
-        validated={validated}
       >
         {({ onFocus, onBlur }) => {
           return (

@@ -30,7 +30,6 @@ export interface FormikFormGroupProps {
   label: string;
   labelInfo?: string;
   helperText?: string;
-  validated?: boolean;
   autoFocus?: boolean;
 }
 
@@ -49,28 +48,25 @@ const FormikFormGroup: React.FC<FormikFormGroupProps & FormGroupChildren> = prop
   return (
     <FormGroup
       label={props.label}
-      className={props.validated ? styles.validatedFormGroup : undefined}
+      className={styles.validatedFormGroup}
       intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
       labelInfo={props.labelInfo}
       helperText={props.helperText}
     >
       {props.children({ onFocus, onBlur })}
-      { props.validated ? 
-        <Tooltip2
-          className={styles.tooltip}
-          content={meta.error}
-          disabled={!meta.error}
-          isOpen={props.validated && meta.touched && !!meta.error && inputFocused}
-          placement={PopoverPosition.BOTTOM}
-          popoverClassName={styles.validationPopup}
-          enforceFocus={false}
-          canEscapeKeyClose={false}
-        >
-          <div className={styles.tooltip} tabIndex={-1} />
+      <Tooltip2
+        className={styles.tooltip}
+        content={meta.error}
+        disabled={!meta.error}
+        isOpen={meta.touched && !!meta.error && inputFocused}
+        placement={PopoverPosition.BOTTOM}
+        popoverClassName={styles.validationPopup}
+        enforceFocus={false}
+        canEscapeKeyClose={false}
+      >
+        <div className={styles.tooltip} tabIndex={-1} />
       </Tooltip2> 
-      : null}
     </FormGroup>
-   
   );
 }
 

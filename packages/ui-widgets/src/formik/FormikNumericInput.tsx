@@ -22,7 +22,7 @@ import { Intent, NumericInput, NumericInputProps } from "@blueprintjs/core";
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
 const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (props) => {
-  const { label, labelInfo, helperText, validated, ...inputProps } = props;
+  const { label, labelInfo, helperText, ...inputProps } = props;
   const [ field, meta, helpers ] = useField(props.name);
   const { name, value } = field;
   const autoFocusRef = useRef<HTMLInputElement>(null);
@@ -41,7 +41,6 @@ const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (
       label={label}
       labelInfo={labelInfo}
       helperText={helperText}
-      validated={validated}
     >
       {({ onFocus, onBlur }) => {
         return (

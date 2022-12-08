@@ -17,9 +17,14 @@ import React, { useState } from "react";
 
 import * as yup from "yup"
 
-import { FormikCheckbox, FormikDialog, FormikNumericInput, FormikTextInput } from "ui-widgets";
+import { 
+  FormikCheckbox, 
+  FormikDialog, 
+  FormikNumericInput, 
+  FormikTextInput,
+  showValueEditorDialog 
+} from "ui-widgets";
 
-import { showEditorDialog } from "./dialog";
 
 import { InsertTableResult, TableCapabilities } from "editor-types";
 import { ControlGroup, FormGroup } from "@blueprintjs/core";
@@ -31,7 +36,7 @@ export async function insertTable(capabilities: TableCapabilities): Promise<Inse
     header: true,
     caption: ''
   }
-  return await showEditorDialog(InsertTableDialog, values, capabilities);
+  return await showValueEditorDialog(InsertTableDialog, values, capabilities);
 }
 
 const InsertTableDialog: React.FC<{ 

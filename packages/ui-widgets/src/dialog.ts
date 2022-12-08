@@ -16,7 +16,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-export function showEditorDialog<T,O = undefined>(
+export function showValueEditorDialog<T,O = undefined>(
   dialog: React.FC<{ values: T, options: O, onClosed: (values?: T) => void}>,
   values: T,
   options: O)

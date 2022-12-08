@@ -15,13 +15,11 @@
 
 import React, { useState } from "react";
 
-import { FormikDialog, FormikTextInput } from "ui-widgets";
-
-import { showEditorDialog } from "./dialog";
+import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
 export async function editMath(id: string) : Promise<string | null> {
   const values: MathValues = { id };
-  const result = await showEditorDialog(EditMathDialog, values, undefined);
+  const result = await showValueEditorDialog(EditMathDialog, values, undefined);
   return result?.id || null;
 }
 

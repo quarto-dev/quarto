@@ -25,13 +25,11 @@ import {
   ListProps,
   AttrProps,
   AttrEditResult,
-  InsertTableResult,
   ListCapabilities,
   RawFormatResult,
   RawFormatProps,
   LinkTargets, 
   LinkCapabilities,
-  TableCapabilities,
   ImageDimensions,
   kAlertTypeInfo,
   CodeBlockProps,
@@ -46,7 +44,7 @@ import {
   ImageEditResult
 } from 'editor';
 
-import { editMath } from "editor-dialogs";
+import { editMath, insertTable } from "editor-dialogs";
 
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
@@ -54,8 +52,6 @@ import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProp
 import { defaultEditAttrProps, EditorDialogEditAttr, EditorDialogEditAttrProps } from "./EditorDialogEditAttr";
 import { defaultEditListProps, EditorDialogEditList, EditorDialogEditListProps } from "./EditorDialogEditList";
 import { defaultEditRawProps, EditorDialogEditRaw, EditorDialogEditRawProps } from "./EditorDialogEditRaw";
-import { defaultInsertTableProps, EditorDialogInsertTable, EditorDialogInsertTableProps } from "./EditorDialogInsertTable";
-
 
 interface EditorDialogsState {
   alert: AlertDialogProps;
@@ -66,7 +62,6 @@ interface EditorDialogsState {
   editSpan: EditorDialogEditAttrProps;
   editDiv: EditorDialogEditAttrProps;
   editRaw: EditorDialogEditRawProps;
-  insertTable: EditorDialogInsertTableProps;
 }
 
 export const EditorDialogsContext = React.createContext<EditorDialogs>(null!);
@@ -82,7 +77,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     editSpan: defaultEditAttrProps(),
     editDiv: defaultEditAttrProps(),
     editRaw: defaultEditRawProps(),
-    insertTable: defaultInsertTableProps(),
   });
 
   const editorDialogsProvider: EditorDialogs = {
@@ -245,21 +239,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       });
     },
     editMath,
-    async insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          insertTable: {
-            isOpen: true,
-            capabilities,
-            onClosed: (result: InsertTableResult | null) => {
-              setState({  ...prevState, insertTable: { ...state.insertTable, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
+    insertTable,
     async insertTabset(): Promise<InsertTabsetResult | null> {
       return null;
     },
@@ -282,7 +262,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       <EditorDialogEditAttr {...state.editSpan} />
       <EditorDialogEditAttr {...state.editDiv} />
       <EditorDialogEditRaw {...state.editRaw} />
-      <EditorDialogInsertTable {...state.insertTable} />
     </EditorDialogsContext.Provider> 
   );
 

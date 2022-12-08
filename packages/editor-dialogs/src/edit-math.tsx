@@ -20,8 +20,9 @@ import { FormikDialog, FormikTextInput } from "ui-widgets";
 import { showEditorDialog } from "./dialog";
 
 export async function editMath(id: string) : Promise<string | null> {
-  const values = await showEditorDialog<MathValues>(EditMathDialog, { id });
-  return values?.id || null;
+  const values: MathValues = { id };
+  const result = await showEditorDialog(EditMathDialog, values, undefined);
+  return result?.id || null;
 }
 
 interface MathValues {

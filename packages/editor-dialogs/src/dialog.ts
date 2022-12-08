@@ -16,9 +16,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-export function showEditorDialog<T>(
-  dialog: React.FC<{ values: T, onClosed: (values?: T) => void}>,
-  values: T)
+export function showEditorDialog<T,O = undefined>(
+  dialog: React.FC<{ values: T, options: O, onClosed: (values?: T) => void}>,
+  values: T,
+  options: O)
 :  Promise<T | null> {
   return new Promise(resolve => {
     const parent = globalThis.document.createElement("div");
@@ -28,7 +29,7 @@ export function showEditorDialog<T>(
       parent.remove();
       resolve(values || null);
     }  
-    root.render(React.createElement(dialog, { values, onClosed }));
+    root.render(React.createElement(dialog, { values, options, onClosed }));
   });
 }
 

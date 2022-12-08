@@ -14,6 +14,7 @@
  */
 
 export { editMath } from "./edit-math";
+export { insertTable } from "./insert-table"
 
 
 

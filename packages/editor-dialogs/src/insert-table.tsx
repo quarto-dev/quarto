@@ -29,6 +29,8 @@ import {
 import { InsertTableResult, TableCapabilities } from "editor-types";
 import { ControlGroup, FormGroup } from "@blueprintjs/core";
 
+import { t } from './translate';
+
 export async function insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
   const values: InsertTableResult = {
     rows: 3,
@@ -53,7 +55,7 @@ const InsertTableDialog: React.FC<{
 
   return (
     <FormikDialog
-      title="Insert Table" 
+      title={t("Insert Table")} 
       isOpen={isOpen} 
       initialValues={props.values} 
       validationSchema={yup.object().shape({
@@ -66,14 +68,14 @@ const InsertTableDialog: React.FC<{
       <ControlGroup fill={true}>
         <FormikNumericInput
           name="rows"
-          label={"Rows"}
+          label={t("Rows")}
           min={1}
           max={1000}
           autoFocus={true}
         />
         <FormikNumericInput
           name="cols"
-          label={"Columns"}
+          label={t("Columns")}
           min={1}
           max={1000}
         />
@@ -82,8 +84,8 @@ const InsertTableDialog: React.FC<{
       {props.options.captions ? (
         <FormikTextInput
           name="caption"
-          label={"Caption"}
-          labelInfo={"(Optional)"}
+          label={t("Caption")}
+          labelInfo={t("(Optional)")}
         />
       ) : null}
 
@@ -91,7 +93,7 @@ const InsertTableDialog: React.FC<{
         <FormGroup>
           <FormikCheckbox 
             name="header"
-            label={"Include table header"}
+            label={t("Include table header")}
           />
         </FormGroup>
       ) : null}

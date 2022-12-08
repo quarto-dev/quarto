@@ -14,7 +14,9 @@
  */
 
 export { editMath } from "./edit-math";
+export { editList } from "./edit-list"
 export { insertTable } from "./insert-table"
+export { insertTabset } from "./insert-tabset"
 
 
 

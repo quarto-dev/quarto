@@ -22,10 +22,8 @@ import {
   LinkProps,
   LinkEditResult,
   ImageProps,
-  ListProps,
   AttrProps,
   AttrEditResult,
-  ListCapabilities,
   RawFormatResult,
   RawFormatProps,
   LinkTargets, 
@@ -44,7 +42,7 @@ import {
   ImageEditResult
 } from 'editor';
 
-import { editMath, insertTable } from "editor-dialogs";
+import { editList, editMath, insertTable } from "editor-dialogs";
 
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
@@ -137,23 +135,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     async editCodeBlock(_codeBlock: CodeBlockProps, _attributes: boolean, _languages: string[]): Promise<CodeBlockProps | null> {
       return null;
     },
-    async editList(list: ListProps, capabilities: ListCapabilities): Promise<ListProps | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editList: {
-            isOpen: true,
-            list,
-            capabilities,
-            onClosed: (result: ListProps | null) => {
-              setState({ ...prevState, editList: { ...state.editList, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
-
+    editList,
     async editAttr(attr: AttrProps, _idHint?: string | undefined): Promise<AttrEditResult | null> {
       return new Promise(resolve => {
         setState(prevState => ({

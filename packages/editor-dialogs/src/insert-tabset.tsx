@@ -1,5 +1,6 @@
+
 /*
- * edit-math.tsx
+ * insert-tabset.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,44 +14,51 @@
  *
  */
 
-import React, { useState } from "react";
+import { InsertTabsetResult } from "editor-types";
+import React from "react";
+import { useState } from "react";
+import { FormikDialog } from "ui-widgets";
 
-import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
-
-import { t } from './translate';
 
 
-export async function editMath(id: string) : Promise<string | null> {
-  const values: MathValues = { id };
-  const result = await showValueEditorDialog(EditMathDialog, values, undefined);
-  return result?.id || null;
+export async function insertTabset(): Promise<InsertTabsetResult | null> {
+  const value: InsertTabsetResult = {
+    tabs: [],
+    attr: {
+      id: "",
+      classes: [],
+      keyvalue: []
+    }
+  };
+
+  return value;
+
 }
 
-interface MathValues {
-  id: string;
-}
 
-const EditMathDialog: React.FC<{ 
-  values: MathValues,
-  onClosed: (values?: MathValues) => void }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const InsertTabsetDialog: React.FC<{ 
+  values: InsertTabsetResult,
+  onClosed: (values?: InsertTabsetResult) => void }
 > = props => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const close = (values?: MathValues) => {
+  const close = (values?: InsertTabsetResult) => {
     setIsOpen(false);
     props.onClosed(values);
   }
 
   return (
     <FormikDialog
-      title={t("Edit Math")} 
+      title="Insert Widget" 
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }
       onReset={() => close() }
     >
-      <FormikTextInput name="id" label={t("Identifier")} autoFocus={true} />
+      
     </FormikDialog>
   )
 }

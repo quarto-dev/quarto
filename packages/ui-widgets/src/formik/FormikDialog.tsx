@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useState, PropsWithChildren, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -28,12 +28,13 @@ import styles from './Formik.module.scss';
 export interface FormikDialogProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   title?: string;
   isOpen: boolean;
+  children?: ((props: FormikProps<Values>) => React.ReactNode) | React.ReactNode;
   leftButtons?: JSX.Element;
   onOpening?: () => void;
   onOpened?: () => void;
 }
 
-function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWithChildren<FormikDialogProps<Values>>) {
+function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikDialogProps<Values>) {
 
   const { t } = useTranslation();
 
@@ -69,7 +70,7 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: PropsWi
         >
           <Form onSubmit={onSubmit} ref={formRef}>
             <FormikFocusError formRef={formRef}/>
-            <div className={Classes.DIALOG_BODY}>{props.children}</div>
+            <div className={Classes.DIALOG_BODY}>{typeof(props.children) === "function" ? props.children(formikProps) : props.children}</div>
               <div className={[Classes.DIALOG_FOOTER, styles.dialogFooter].join(' ')}>
               <div className={[Classes.DIALOG_FOOTER_ACTIONS, styles.dialogFooterActions].join(' ')}>
                 <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>

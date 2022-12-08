@@ -53,6 +53,8 @@ const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (
             }}
             {...inputProps}
             intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+            selectAllOnFocus={true}
+            selectAllOnIncrement={true}
             onFocus={onFocus}
             onBlur={onBlur}
           />

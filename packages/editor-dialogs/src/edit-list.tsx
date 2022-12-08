@@ -1,4 +1,3 @@
-
 /*
  * edit-list.tsx
  *
@@ -23,7 +22,6 @@ import { FormikProps } from "formik";
 import { FormGroup } from "@blueprintjs/core";
 
 import { t } from './translate';
-
 
 export function editList(list: ListProps, capabilities: ListCapabilities): Promise<ListProps | null> {
   console.log(list);

@@ -121,6 +121,12 @@ export interface AttrEditResult {
   readonly attr: AttrProps;
 }
 
+export interface UIToolsAttr {
+  propsToInput(attr: AttrProps): AttrEditInput;
+  inputToProps(input: AttrEditInput): AttrProps;
+  pandocAutoIdentifier(text: string): string;
+}
+
 export interface CalloutEditProps {
   attr: PandocAttr;
   callout: CalloutProps;

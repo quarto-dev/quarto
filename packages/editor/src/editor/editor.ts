@@ -29,10 +29,9 @@ import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
 import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
 import {
-  AttrProps,
-  AttrEditInput,
   InsertCiteProps,
   InsertCiteUI,
+  UIToolsAttr,
 } from 'editor-types';
 import {
   attrPropsToInput,
@@ -203,11 +202,8 @@ export interface EditorFindReplace {
 
 export { EditorCommandId as EditorCommands } from '../api/command';
 
-export interface UIToolsAttr {
-  propsToInput(attr: AttrProps): AttrEditInput;
-  inputToProps(input: AttrEditInput): AttrProps;
-  pandocAutoIdentifier(text: string): string;
-}
+export type { UIToolsAttr } from "editor-types"
+
 
 export interface UIToolsImage {
   validUnits(): string[];

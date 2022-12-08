@@ -13,6 +13,7 @@
  *
  */
 
+export { editAttr, editDivAttr } from "./edit-attr";
 export { editMath } from "./edit-math";
 export { editList } from "./edit-list"
 export { editRawInline, editRawBlock } from "./edit-raw"

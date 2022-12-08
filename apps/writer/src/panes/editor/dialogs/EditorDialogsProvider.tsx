@@ -14,7 +14,7 @@
  *
  */
 
-import React, { PropsWithChildren, useState } from "react";
+import React, { PropsWithChildren, useRef, useState } from "react";
 
 import { t } from '../../../i18n';
 
@@ -22,8 +22,6 @@ import {
   LinkProps,
   LinkEditResult,
   ImageProps,
-  AttrProps,
-  AttrEditResult,
   LinkTargets, 
   LinkCapabilities,
   ImageDimensions,
@@ -37,36 +35,32 @@ import {
   EditorHTMLDialogValidateFn,
   InsertCiteResult,
   InsertTabsetResult,
-  ImageEditResult
+  ImageEditResult,
+  UITools
 } from 'editor';
 
-import { editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
+import { editAttr, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
 
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
-import { defaultEditAttrProps, EditorDialogEditAttr, EditorDialogEditAttrProps } from "./EditorDialogEditAttr";
 
 interface EditorDialogsState {
   alert: AlertDialogProps;
   editLink: EditorDialogEditLinkProps;
   editImage: EditorDialogEditImageProps;
-  editAttr: EditorDialogEditAttrProps;
-  editSpan: EditorDialogEditAttrProps;
-  editDiv: EditorDialogEditAttrProps;
 }
 
 export const EditorDialogsContext = React.createContext<EditorDialogs>(null!);
 
 export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
 
+  const uiToolsRef = useRef<UITools>(new UITools());
+
   const [state, setState] = useState<EditorDialogsState>({
     alert: defaultAlertProps(),
     editLink: defaultEditLinkProps(),
-    editAttr: defaultEditAttrProps(),
-    editImage: defaultEditImageProps(),
-    editSpan: defaultEditAttrProps(),
-    editDiv: defaultEditAttrProps(),
+    editImage: defaultEditImageProps()
   });
 
   const editorDialogsProvider: EditorDialogs = {
@@ -127,57 +121,22 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     async editCodeBlock(_codeBlock: CodeBlockProps, _attributes: boolean, _languages: string[]): Promise<CodeBlockProps | null> {
       return null;
     },
-    editList,
-    async editAttr(attr: AttrProps, _idHint?: string | undefined): Promise<AttrEditResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editAttr: {
-            isOpen: true,
-            attr,
-            onClosed: (result: AttrEditResult | null) => {
-              setState({ ...prevState, editAttr: { ...state.editAttr, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
 
-    async editSpan(attr: AttrProps, _idHint?: string | undefined): Promise<AttrEditResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editSpan: {
-            isOpen: true,
-            attr,
-            removeEnabled: true,
-            caption: t('edit_span_dialog_caption') as string,
-            onClosed: (result: AttrEditResult | null) => {
-              setState({ ...prevState, editSpan: { ...state.editSpan, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
-    async editDiv (attr: AttrProps, removeEnabled: boolean): Promise<AttrEditResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editDiv: {
-            isOpen: true,
-            attr,
-            removeEnabled,
-            caption: t('edit_div_dialog_caption') as string,
-            onClosed: (result: AttrEditResult | null) => {
-              setState({ ...prevState, editDiv: { ...state.editDiv, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
+    editList,
+
+    editAttr: editAttr(uiToolsRef.current.attr),
+
+    editSpan: editAttr(uiToolsRef.current.attr, { 
+      caption: t('edit_span_dialog_caption') as string,
+      removeEnabled: true, 
+      removeCaption: t('edit_span_dialog_remove_caption') as string
+    }),
+   
+    editDiv: editDivAttr(uiToolsRef.current.attr, {
+      caption: t('edit_div_dialog_caption') as string,
+      removeCaption: t('edit_div_dialog_remove_caption') as string
+    }),
+    
     async editCallout(_props: CalloutEditProps, _removeEnabled: boolean): Promise<CalloutEditResult | null> {
       return null;
     },
@@ -201,10 +160,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       {props.children}
       <AlertDialog {...state.alert} />
       <EditorDialogEditLink {...state.editLink} />
-      <EditorDialogEditAttr {...state.editAttr} />
       <EditorDialogEditImage {...state.editImage} />
-      <EditorDialogEditAttr {...state.editSpan} />
-      <EditorDialogEditAttr {...state.editDiv} />
     </EditorDialogsContext.Provider> 
   );
 

@@ -14,9 +14,11 @@
  *
  */
 
-import { Button } from "@blueprintjs/core";
-import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
 import React, { useState } from "react"
+import { Button } from "@blueprintjs/core";
+
+import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
+
 import { FormikDialog, FormikTextArea, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';

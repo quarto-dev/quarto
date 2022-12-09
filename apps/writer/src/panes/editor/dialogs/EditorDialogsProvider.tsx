@@ -28,8 +28,6 @@ import {
   kAlertTypeInfo,
   CodeBlockProps,
   EditorDialogs,
-  CalloutEditResult,
-  CalloutEditProps,
   InsertCiteProps,
   EditorHTMLDialogCreateFn,
   EditorHTMLDialogValidateFn,
@@ -39,7 +37,7 @@ import {
   UITools
 } from 'editor';
 
-import { editAttr, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
+import { editAttr, editCallout, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
 
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
@@ -118,6 +116,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
         }));
       });
     },
+
     async editCodeBlock(_codeBlock: CodeBlockProps, _attributes: boolean, _languages: string[]): Promise<CodeBlockProps | null> {
       return null;
     },
@@ -137,13 +136,16 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       removeCaption: t('edit_div_dialog_remove_caption') as string
     }),
     
-    async editCallout(_props: CalloutEditProps, _removeEnabled: boolean): Promise<CalloutEditResult | null> {
-      return null;
-    },
+    editCallout,
+    
     editRawInline,
+
     editRawBlock,
+    
     editMath,
+    
     insertTable,
+
     async insertTabset(): Promise<InsertTabsetResult | null> {
       return null;
     },

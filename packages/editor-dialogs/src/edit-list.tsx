@@ -36,8 +36,6 @@ const EditListDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-
-
   const close = (values?: ListProps) => {
     setIsOpen(false);
     console.log(values);

@@ -28,6 +28,7 @@ import styles from './Formik.module.scss';
 export interface FormikDialogProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   title?: string;
   isOpen: boolean;
+  className?: string;
   children?: ((props: FormikProps<Values>) => React.ReactNode) | React.ReactNode;
   leftButtons?: JSX.Element;
   onOpening?: () => void;
@@ -57,7 +58,7 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
           isOpen={props.isOpen}
           onOpening={props.onOpening}
           onOpened={props.onOpened}
-          className={styles.dialog}
+          className={[styles.dialog].concat(props.className || []).join(' ')}
           autoFocus={true}
           enforceFocus={true}
           canEscapeKeyClose={true}

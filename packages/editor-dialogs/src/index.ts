@@ -15,10 +15,11 @@
 
 export { editAttr, editDivAttr } from "./edit-attr";
 export { editMath } from "./edit-math";
-export { editList } from "./edit-list"
-export { editRawInline, editRawBlock } from "./edit-raw"
-export { insertTable } from "./insert-table"
-export { insertTabset } from "./insert-tabset"
+export { editList } from "./edit-list";
+export { editRawInline, editRawBlock } from "./edit-raw";
+export { editCallout } from "./edit-callout";
+export { insertTable } from "./insert-table";
+export { insertTabset } from "./insert-tabset";
 
 
 

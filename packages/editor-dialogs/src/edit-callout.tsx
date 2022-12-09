@@ -17,7 +17,7 @@ import React, { useState } from "react"
 
 import { Button, ControlGroup, FormGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
 
-import { CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr } from "editor-types";
+import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr, UIToolsAttr } from "editor-types";
 
 import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
@@ -26,10 +26,36 @@ import { editAttrFields } from "./edit-attr";
 import { t } from './translate';
 import styles from "./styles.module.scss";
 
-export async function editCallout(props: CalloutEditProps, removeEnabled: boolean): Promise<CalloutEditResult | null> {
-  return showValueEditorDialog(EditCalloutDialog, { attr: props.attr, callout: props.callout, action: "edit"}, {
-    removeEnabled
-  });
+
+export function editCallout(attrUITools: UIToolsAttr) {
+  return async (props: CalloutEditProps, removeEnabled: boolean): Promise<CalloutEditResult | null> => {
+    
+    const values: EditCalloutDialogValues = { 
+      values: {...attrUITools.propsToInput(props.attr), ...props.callout}, 
+      action: "edit" 
+    };
+
+    const result = await showValueEditorDialog(EditCalloutDialog, values, {
+      removeEnabled
+    });
+    if (result) {
+      const { id, classes, keyvalue, ...callout } = result.values;
+      return {
+        attr: attrUITools.inputToProps({ id, classes, keyvalue }) as PandocAttr,
+        callout,
+        action: result.action
+      }
+    } else {
+      return null;
+    }
+  };
+}
+
+
+
+interface EditCalloutDialogValues {
+  values: AttrEditInput & CalloutProps;
+  action: "edit" | "remove";
 }
 
 interface EditCalloutDialogOptions {
@@ -37,29 +63,26 @@ interface EditCalloutDialogOptions {
 }
 
 const EditCalloutDialog: React.FC<{ 
-  values: CalloutEditResult,
+  values: EditCalloutDialogValues,
   options: EditCalloutDialogOptions,
-  onClosed: (values?: CalloutEditResult) => void }
+  onClosed: (values?: EditCalloutDialogValues) => void }
 > = props => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const close = (values?: CalloutProps & PandocAttr, action?: "edit" | "remove") => {
-    action = action || "edit";
+  const close = (values?: EditCalloutDialogValues) => {
     setIsOpen(false);
     if (values) {
-      const { id, classes, keyvalue, ...callout } = values;
-      props.onClosed({ attr: { id, classes, keyvalue }, callout, action });
+      props.onClosed(values);
     }
   }
 
   const removeButton = 
-    <Button onClick={() => close({...props.values.callout, ...props.values.attr}, 'remove')}>
+    <Button onClick={() => close({ ...props.values, action: 'remove' })}>
       {t("Unwrap Div")}
     </Button>;
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>("callout");
-
 
   const calloutPanel = 
     <div className={styles.editCalloutPanel}>
@@ -69,7 +92,7 @@ const EditCalloutDialog: React.FC<{
           options={["note", "tip", "important", "caution", "warning"]}
         />
         <FormikHTMLSelect 
-          name="appearance" label={t("Apperance")} 
+          name="appearance" label={t("Appearance")} 
           options={["default", "simple", "minimal"]} 
         />
       </ControlGroup>
@@ -88,9 +111,9 @@ const EditCalloutDialog: React.FC<{
     <FormikDialog
       title={t("Callout")} 
       isOpen={isOpen} 
-      initialValues={{...props.values.attr, ...props.values.callout}} 
+      initialValues={props.values.values} 
       leftButtons={props.options.removeEnabled ? removeButton : undefined}
-      onSubmit={(values) => close(values, "edit") }
+      onSubmit={(values) => close({ values, action: "edit" }) }
       onReset={() => close() }
     >
       <Tabs

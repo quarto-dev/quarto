@@ -133,7 +133,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       removeCaption: t('edit_div_dialog_remove_caption') as string
     }),
     
-    editCallout,
+    editCallout: editCallout(uiToolsRef.current.attr),
     
     editRawInline,
 

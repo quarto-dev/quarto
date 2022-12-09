@@ -31,17 +31,17 @@ export interface EditAttrOptions {
 
 export function editAttr(attrUITools: UIToolsAttr, options?: EditAttrOptions) {
   return async (attr: AttrProps, idHint?: string | undefined): Promise<AttrEditResult | null> => {
-    return showAttrEditorDialog(attrUITools, attr, { idHint, ...options });
+    return showEditAttrDialog(attrUITools, attr, { idHint, ...options });
   }
 }
 
 export function editDivAttr(attrUITools: UIToolsAttr, options?: EditAttrOptions) {
   return async (attr: AttrProps, removeEnabled: boolean): Promise<AttrEditResult | null> => {
-    return showAttrEditorDialog(attrUITools, attr, { ...options, removeEnabled });
+    return showEditAttrDialog(attrUITools, attr, { ...options, removeEnabled });
   }
 }
 
-export function attrEditFields(autoFocus?: boolean) {
+export function editAttrFields(autoFocus?: boolean) {
   return (
     <>
     <FormikTextInput name="id" label={t("ID")} labelInfo={t("(e.g. #overview)")} fill={true} autoFocus={autoFocus} />
@@ -52,7 +52,7 @@ export function attrEditFields(autoFocus?: boolean) {
   );
 }
 
-async function showAttrEditorDialog(attrUITools: UIToolsAttr, attr: AttrProps, options: EditAttrDialogOptions) {
+async function showEditAttrDialog(attrUITools: UIToolsAttr, attr: AttrProps, options: EditAttrDialogOptions) {
   const inputAttr = attrUITools.propsToInput(attr);
   const result = await showValueEditorDialog(EditAttrDialog, { attr: inputAttr, action: 'edit' }, options);
   if (result) {
@@ -104,7 +104,7 @@ const EditAttrDialog: React.FC<{
       onSubmit={(values) => close(values) }
       onReset={() => close() }
     >
-      {attrEditFields(true)}
+      {editAttrFields(true)}
     </FormikDialog>
   )
 }

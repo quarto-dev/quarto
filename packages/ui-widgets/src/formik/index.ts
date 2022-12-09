@@ -34,7 +34,7 @@ export {
   FormikRadioGroup,
   FormikSwitch,
   FormikTextArea,
-  FormikTextInput
+  FormikTextInput,
 };
 
 

@@ -26,7 +26,6 @@ import {
   LinkCapabilities,
   ImageDimensions,
   kAlertTypeInfo,
-  CodeBlockProps,
   EditorDialogs,
   InsertCiteProps,
   EditorHTMLDialogCreateFn,
@@ -37,7 +36,7 @@ import {
   UITools
 } from 'editor';
 
-import { editAttr, editCallout, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
+import { editAttr, editCallout, editCodeBlock, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
 
 import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
@@ -117,9 +116,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
       });
     },
 
-    async editCodeBlock(_codeBlock: CodeBlockProps, _attributes: boolean, _languages: string[]): Promise<CodeBlockProps | null> {
-      return null;
-    },
+    editCodeBlock: editCodeBlock(uiToolsRef.current.attr),
 
     editList,
 

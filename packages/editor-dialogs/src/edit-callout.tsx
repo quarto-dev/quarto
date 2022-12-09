@@ -21,9 +21,9 @@ import { CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr } from "e
 
 import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
-import { t } from './translate';
-import { attrEditFields as editAttrFields } from "./edit-attr";
+import { editAttrFields } from "./edit-attr";
 
+import { t } from './translate';
 import styles from "./styles.module.scss";
 
 export async function editCallout(props: CalloutEditProps, removeEnabled: boolean): Promise<CalloutEditResult | null> {

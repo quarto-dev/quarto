@@ -52,7 +52,7 @@ const EditListDialog: React.FC<{
     >
       {(formikProps: FormikProps<ListProps>) => {
         return (<>
-          <FormikHTMLSelect name="type" label={t("List type")} fill={true} 
+          <FormikHTMLSelect name="type" label={t("List type")} 
             options={Object.values(ListType)} 
           />
           <FormGroup>
@@ -60,13 +60,13 @@ const EditListDialog: React.FC<{
           </FormGroup>
           {formikProps.values.type === ListType.Ordered ?
             <>
-            <FormikNumericInput name="order" label={t("Starting number")} fill={true}/>
-            <FormikHTMLSelect name="number_style" label={t("Number style")} fill={true}
+            <FormikNumericInput name="order" label={t("Starting number")} />
+            <FormikHTMLSelect name="number_style" label={t("Number style")}
               options={Object.values(ListNumberStyle).filter(
                 value => props.options.example || value !== ListNumberStyle.Example,
               )}
             />
-             <FormikHTMLSelect name="number_delim" label={t("Number delimiter")} fill={true}
+             <FormikHTMLSelect name="number_delim" label={t("Number delimiter")}
                helperText={t("Pandoc HTML output does not support custom number delimiters, so the editor will always display the period style.")}
                options={Object.values(ListNumberDelim)}
             />

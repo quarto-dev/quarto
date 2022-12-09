@@ -23,7 +23,7 @@ const FormikHTMLSelect: React.FC<FormikFormGroupProps & HTMLSelectProps> = (prop
   const [ field ] = useField(props.name);
   const { label, labelInfo, helperText, ...selectProps } = props;
   
-  const htmlSelect = <HTMLSelect {...selectProps} {...field} multiple={undefined} />
+  const htmlSelect = <HTMLSelect fill={true} {...selectProps} {...field} multiple={undefined} />
 
   if (label || labelInfo || helperText) {
     return (

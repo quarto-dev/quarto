@@ -72,14 +72,12 @@ const EditRawDialog: React.FC<{
       <FormikHTMLSelect 
         name="format" 
         label="Format" 
-        fill={true} 
         options={formats}
       />
       {props.options.editContent ? 
         <FormikTextInput 
           name="content" 
           label="Content" 
-          fill={true} 
           style={{fontFamily: 'monospace, monospace'}} 
         /> : null}
     </FormikDialog>

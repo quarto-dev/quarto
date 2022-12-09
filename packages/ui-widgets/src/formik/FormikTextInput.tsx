@@ -37,6 +37,7 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (prop
               autoComplete={"off"}
               intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
               type="text"
+              fill={true}
               {...field}
               {...inputProps}
               onFocus={onFocus}

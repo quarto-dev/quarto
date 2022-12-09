@@ -98,14 +98,14 @@ const WorkbenchTestDialog: React.FC = () => {
     >
       <FormikTextInput name="name" label='Name' labelInfo='Your full name' helperText='This is the name we will keep on file' autoFocus={true}/>
       <FormikTextInput name="email" label='Email' labelInfo='Correspondence address'/>
-      <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' fill={true} options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
+      <FormikHTMLSelect name="fruit" label='Fruit' labelInfo='The fruit you want' options={[{ value: 'apple' }, { value: 'banana' }, { value: 'pear' }]} />
       <FormikRadioGroup name="color" label="Color" inline={true} options={[{ value: 'red' }, { value: 'green' }, { value: 'blue' }]} />
-      <FormikNumericInput name="level" label="Level" fill={true} />
+      <FormikNumericInput name="level" label="Level"  />
       <FormGroup>
         <FormikCheckbox name="enabled" label="Enabled" />
         <FormikSwitch name="cache" label="Cache" />
       </FormGroup>  
-      <FormikTextArea name="comments" label="Comments" fill={true} />
+      <FormikTextArea name="comments" label="Comments" />
     </FormikDialog>
   );
 };

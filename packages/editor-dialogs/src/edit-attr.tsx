@@ -44,10 +44,10 @@ export function editDivAttr(attrUITools: UIToolsAttr, options?: EditAttrOptions)
 export function editAttrFields(autoFocus?: boolean) {
   return (
     <>
-    <FormikTextInput name="id" label={t("ID")} labelInfo={t("(e.g. #overview)")} fill={true} autoFocus={autoFocus} />
-    <FormikTextInput name="classes" label={t("Classes")} labelInfo={t("(e.g. .illustration)")} fill={true} />
-    <FormikTextInput name="style" label={t("CSS styles")} labelInfo={t("(e.g. color: gray;)")} fill={true} />
-    <FormikTextArea name="keyvalue" label={t("Attributes")} labelInfo={t("(key=value, one per line)")} rows={3} fill={true} />
+    <FormikTextInput name="id" label={t("ID")} labelInfo={t("(e.g. #overview)")} autoFocus={autoFocus} />
+    <FormikTextInput name="classes" label={t("Classes")} labelInfo={t("(e.g. .illustration)")} />
+    <FormikTextInput name="style" label={t("CSS styles")} labelInfo={t("(e.g. color: gray;)")} />
+    <FormikTextArea name="keyvalue" label={t("Attributes")} labelInfo={t("(key=value, one per line)")} rows={3} />
     </>
   );
 }

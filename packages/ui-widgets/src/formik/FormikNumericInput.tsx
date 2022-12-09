@@ -50,10 +50,11 @@ const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (
             onValueChange={(_value: number, strValue: string) => {
               helpers.setValue(Number.parseFloat(strValue) || 0);
             }}
-            {...inputProps}
             intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
             selectAllOnFocus={true}
             selectAllOnIncrement={true}
+            fill={true}
+            {...inputProps}
             onFocus={onFocus}
             onBlur={onBlur}
           />

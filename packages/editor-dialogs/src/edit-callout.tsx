@@ -65,11 +65,11 @@ const EditCalloutDialog: React.FC<{
     <div className={styles.editCalloutPanel}>
       <ControlGroup vertical={false} fill={true}>
         <FormikHTMLSelect 
-          name="type" label={t("Type")} fill={true} 
+          name="type" label={t("Type")} 
           options={["note", "tip", "important", "caution", "warning"]}
         />
         <FormikHTMLSelect 
-          name="appearance" label={t("Apperance")} fill={true} 
+          name="appearance" label={t("Apperance")} 
           options={["default", "simple", "minimal"]} 
         />
       </ControlGroup>

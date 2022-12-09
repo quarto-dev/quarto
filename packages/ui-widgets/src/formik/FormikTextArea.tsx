@@ -36,6 +36,7 @@ const FormikTextArea: React.FC<FormikFormGroupProps & TextAreaProps> = (props) =
             <TextArea
               autoComplete={"off"}
               intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+              fill={true}
               {...field}
               {...textAreaProps}
               onFocus={onFocus}

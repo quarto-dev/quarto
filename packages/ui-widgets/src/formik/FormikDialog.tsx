@@ -71,8 +71,10 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
         >
           <Form onSubmit={onSubmit} ref={formRef}>
             <FormikFocusError formRef={formRef}/>
-            <div className={Classes.DIALOG_BODY}>{typeof(props.children) === "function" ? props.children(formikProps) : props.children}</div>
-              <div className={[Classes.DIALOG_FOOTER, styles.dialogFooter].join(' ')}>
+            <div className={[Classes.DIALOG_BODY, styles.dialogBody].join(' ')}>
+              {typeof(props.children) === "function" ? props.children(formikProps) : props.children}
+            </div>
+            <div className={[Classes.DIALOG_FOOTER, styles.dialogFooter].join(' ')}>
               <div className={[Classes.DIALOG_FOOTER_ACTIONS, styles.dialogFooterActions].join(' ')}>
                 <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
                 <div className={styles.dialogFooterActionsRight}>

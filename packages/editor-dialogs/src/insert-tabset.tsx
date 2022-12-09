@@ -38,7 +38,7 @@ export async function insertTabset(): Promise<InsertTabsetResult | null> {
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const InsertTabsetDialog: React.FC<{ 
+export const InsertTabsetDialog: React.FC<{ 
   values: InsertTabsetResult,
   onClosed: (values?: InsertTabsetResult) => void }
 > = props => {

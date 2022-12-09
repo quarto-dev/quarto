@@ -58,7 +58,9 @@ export const Dialog: React.FC<PropsWithChildren<DialogProps>> = props => {
       style={{userSelect: 'none'}}
     >
       <form onKeyUp={onKeyUp}>
-        <div className={Classes.DIALOG_BODY}>{props.children}</div>
+      <div className={[Classes.DIALOG_BODY, dialogStyles.dialogBody].join(' ')}>
+          {props.children}
+        </div>
         <div className={[Classes.DIALOG_FOOTER, dialogStyles.dialogFooter].join(' ')}>
           <div className={[Classes.DIALOG_FOOTER_ACTIONS, dialogStyles.dialogFooterActions].join(' ')}>
             <div className={dialogStyles.dialogFooterActionsLeft}>{props.leftButtons}</div>

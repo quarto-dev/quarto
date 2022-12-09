@@ -13,26 +13,46 @@
  *
  */
 
-import React, { PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 
-import { Alert, IconName, Props } from '@blueprintjs/core';
+import { Alert, IconName, Intent } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
 import { kAlertTypeError, kAlertTypeInfo, kAlertTypeWarning } from 'editor-types';
 
-import styles from './AlertDialog.module.scss';
+import { showValueEditorDialog } from 'ui-widgets';
 
-export interface AlertDialogProps extends Props {
+import styles from './styles.module.scss';
+
+export async function alert(message: string, title: string, type: number): Promise<boolean> {
+  const values: boolean | null = false;
+  const result = await showValueEditorDialog(AlertDialog, values, { title, message, type });
+  return !!result;
+}
+
+
+interface AlertDialogOptions {
   title?: string;
   message?: string;
   type: number;
-  isOpen: boolean;
-  onClosed: () => void;
 }
 
-export const AlertDialog: React.FC<PropsWithChildren<AlertDialogProps>> = props => {
+const AlertDialog: React.FC<{ 
+  values: boolean,
+  options: AlertDialogOptions,
+  onClosed: (values?: boolean) => void }
+
+> = props => {
+
+  const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  const close = (values?: boolean) => {
+    setIsOpen(false);
+    props.onClosed(values);
+  }
+
   let icon: IconName;
-  switch (props.type) {
+  switch (props.options.type) {
     case kAlertTypeError:
       icon = IconNames.ERROR;
       break;
@@ -45,22 +65,22 @@ export const AlertDialog: React.FC<PropsWithChildren<AlertDialogProps>> = props 
       break;
   }
 
-  const children = props.children ? props.children : <p>{props.message}</p>;
 
   return (
     <Alert
-      isOpen={props.isOpen}
-      onClose={props.onClosed}
-      onCancel={props.onClosed}
+      isOpen={isOpen}
+      onClose={() => close(true)}
+      onCancel={() => close()}
       canOutsideClickCancel={true}
       canEscapeKeyCancel={true}
+      intent={Intent.PRIMARY}
       icon={icon}
       className={styles.alertDialog}
     >
       <p>
-        <strong>{props.title}</strong>
+        <strong>{props.options.title}</strong>
       </p>
-      {children}
+      <p>{props.options.message}</p>
     </Alert>
   );
 };

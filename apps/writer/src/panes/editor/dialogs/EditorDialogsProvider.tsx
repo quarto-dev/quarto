@@ -25,7 +25,6 @@ import {
   LinkTargets, 
   LinkCapabilities,
   ImageDimensions,
-  kAlertTypeInfo,
   EditorDialogs,
   InsertCiteProps,
   EditorHTMLDialogCreateFn,
@@ -36,14 +35,12 @@ import {
   UITools
 } from 'editor';
 
-import { editAttr, editCallout, editCodeBlock, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
+import { alert, editAttr, editCallout, editCodeBlock, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
 
-import { AlertDialog, AlertDialogProps } from "../../../widgets/dialog/AlertDialog";
 import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
 
 interface EditorDialogsState {
-  alert: AlertDialogProps;
   editLink: EditorDialogEditLinkProps;
   editImage: EditorDialogEditImageProps;
 }
@@ -55,29 +52,13 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
   const uiToolsRef = useRef<UITools>(new UITools());
 
   const [state, setState] = useState<EditorDialogsState>({
-    alert: defaultAlertProps(),
     editLink: defaultEditLinkProps(),
     editImage: defaultEditImageProps()
   });
 
   const editorDialogsProvider: EditorDialogs = {
-    async alert(message: string, title: string, type: number): Promise<boolean> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          alert: {
-            isOpen: true,
-            message,
-            title: title || '',
-            type,
-            onClosed: () => {
-              setState({ ...prevState, alert: { ...state.alert, isOpen: false } });
-              resolve(true);
-            },
-          },
-        }));
-      });
-    },
+    alert,
+   
     async yesNoMessage(_message: string, _title: string, _type: number, _yesLabel: string, _noLabel: string): Promise<boolean> {
       return false;
     },
@@ -157,23 +138,9 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
   return (
     <EditorDialogsContext.Provider value={editorDialogsProvider}>
       {props.children}
-      <AlertDialog {...state.alert} />
       <EditorDialogEditLink {...state.editLink} />
       <EditorDialogEditImage {...state.editImage} />
     </EditorDialogsContext.Provider> 
   );
 
-}
-
-
-function defaultAlertProps(): AlertDialogProps {
-  return {
-    title: '',
-    message: '',
-    type: kAlertTypeInfo,
-    isOpen: false,
-    onClosed: () => {
-      /* */
-    },
-  };
 }

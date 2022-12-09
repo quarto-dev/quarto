@@ -43,8 +43,8 @@ function asPandocClass(clz: string) {
 }
 
 export function attrPropsToInput(attr: AttrProps): AttrEditInput {
-  let style: string | undefined;
-  let keyvalue: string | undefined;
+  let style = ""
+  let keyvalue = ""
   if (attr.keyvalue) {
     const partitionedKeyvalue = attrPartitionKeyvalue([kStyleAttrib], attr.keyvalue);
     if (partitionedKeyvalue.partitioned.length > 0) {
@@ -54,8 +54,8 @@ export function attrPropsToInput(attr: AttrProps): AttrEditInput {
   }
 
   return {
-    id: asHtmlId(attr.id) || undefined,
-    classes: attr.classes ? attr.classes.map(asHtmlClass).join(' ') : undefined,
+    id: asHtmlId(attr.id) || "",
+    classes: attr.classes ? attr.classes.map(asHtmlClass).join(' ') : "",
     style,
     keyvalue,
   };

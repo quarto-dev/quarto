@@ -54,10 +54,6 @@ export function attrEditFields(autoFocus?: boolean) {
 
 async function showAttrEditorDialog(attrUITools: UIToolsAttr, attr: AttrProps, options: EditAttrDialogOptions) {
   const inputAttr = attrUITools.propsToInput(attr);
-  inputAttr.id = inputAttr.id || "";
-  inputAttr.classes = inputAttr.classes || "";
-  inputAttr.style = inputAttr.style || "";
-  inputAttr.keyvalue = inputAttr.keyvalue || "";
   const result = await showValueEditorDialog(EditAttrDialog, { attr: inputAttr, action: 'edit' }, options);
   if (result) {
     const editedAttr = attrUITools.inputToProps(result.attr);

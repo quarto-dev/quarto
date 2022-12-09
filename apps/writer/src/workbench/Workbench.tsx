@@ -34,7 +34,6 @@ import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
 import WorkbenchToolbar from './WorkbenchToolbar';
 
 import './Workbench.scss';
-import WorkbenchTestDialog from './WorkbenchTestDialog';
 
 const Workbench: React.FC = () => {
  
@@ -78,7 +77,6 @@ const Workbench: React.FC = () => {
       </div>
       <WorkbenchClipboard />
       <WorkbenchPrefsDialog />
-      <WorkbenchTestDialog />
     </div>
   );
 };

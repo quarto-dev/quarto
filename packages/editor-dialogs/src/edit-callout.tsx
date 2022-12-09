@@ -67,7 +67,7 @@ const EditCalloutDialog: React.FC<{
         <FormikHTMLSelect 
           name="type" label={t("Type")} fill={true} 
           options={["note", "tip", "important", "caution", "warning"]}
-         />
+        />
         <FormikHTMLSelect 
           name="appearance" label={t("Apperance")} fill={true} 
           options={["default", "simple", "minimal"]} 
@@ -77,7 +77,6 @@ const EditCalloutDialog: React.FC<{
       <FormGroup>
         <FormikCheckbox name="icon" label={t("Display icon alongside callout")}/>
       </FormGroup>
-     
     </div>;
 
   const attributesPanel = 

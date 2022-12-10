@@ -16,7 +16,7 @@
 import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, ImageDimensions, ImageProps, InsertCiteProps, InsertCiteResult, InsertTabsetResult, UIToolsAttr } from "editor-types";
 
 import { alert, yesNoMessage } from "./alert";
-import { editAttr, editDivAttr } from "./edit-attr";
+import { editAttr, editDiv, editSpan } from "./edit-attr";
 import { editLink } from "./edit-link";
 import { editMath } from "./edit-math";
 import { editList } from "./edit-list";
@@ -25,13 +25,12 @@ import { editCodeBlock } from "./edit-codeblock";
 import { editCallout } from "./edit-callout";
 import { insertTable } from "./insert-table";
 
-import { t } from './translate';
-
 export { 
   alert, 
   yesNoMessage, 
   editAttr, 
-  editDivAttr, 
+  editDiv, 
+  editSpan,
   editLink, 
   editMath, 
   editList, 
@@ -46,43 +45,22 @@ export {
 export function editorDialogs(uiTools: UIToolsAttr) : EditorDialogs {
   return {
     alert,
-   
     yesNoMessage,
-
     editLink: editLink(uiTools),
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async editImage(image: ImageProps, dims: ImageDimensions | null, _figure: boolean, editAttributes: boolean): Promise<ImageProps | null> {
       return null;
     },
-
     editCodeBlock: editCodeBlock(uiTools),
-
     editList,
-
     editAttr: editAttr(uiTools),
-
-    editSpan: editAttr(uiTools, { 
-      caption: t('Span Attributes') as string,
-      removeEnabled: true, 
-      removeCaption: t('Unwrap Span') as string
-    }),
-   
-    editDiv: editDivAttr(uiTools, {
-      caption: t('Div Attributes') as string,
-      removeCaption: t('Unwrap Div') as string
-    }),
-    
+    editSpan: editSpan(uiTools),
+    editDiv: editDiv(uiTools),
     editCallout: editCallout(uiTools),
-    
     editRawInline,
-
     editRawBlock,
-    
     editMath,
-    
     insertTable,
-
     async insertTabset(): Promise<InsertTabsetResult | null> {
       return null;
     },

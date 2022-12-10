@@ -35,9 +35,23 @@ export function editAttr(attrUITools: UIToolsAttr, options?: EditAttrOptions) {
   }
 }
 
-export function editDivAttr(attrUITools: UIToolsAttr, options?: EditAttrOptions) {
+export function editDiv(attrUITools: UIToolsAttr) {
   return async (attr: AttrProps, removeEnabled: boolean): Promise<AttrEditResult | null> => {
-    return showEditAttrDialog(attrUITools, attr, { ...options, removeEnabled });
+    return showEditAttrDialog(attrUITools, attr, { 
+      caption: t('Div Attributes'),
+      removeCaption: t('Unwrap Div'),
+      removeEnabled 
+    });
+  }
+}
+
+export function editSpan(attrUITools: UIToolsAttr) {
+  return async (attr: AttrProps): Promise<AttrEditResult | null> => {
+    return showEditAttrDialog(attrUITools, attr, { 
+      caption: t('Span Attributes'),
+      removeEnabled: true, 
+      removeCaption: t('Unwrap Span')
+    });
   }
 }
 

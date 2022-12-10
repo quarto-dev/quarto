@@ -31,7 +31,7 @@ import {
   UITools
 } from 'editor';
 
-import { alert, editAttr, editCallout, editCodeBlock, editDivAttr, editLink, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
+import { alert, editAttr, editCallout, editCodeBlock, editDivAttr, editLink, editList, editMath, editRawBlock, editRawInline, insertTable, yesNoMessage } from "editor-dialogs";
 
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
 
@@ -52,9 +52,7 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
   const editorDialogsProvider: EditorDialogs = {
     alert,
    
-    async yesNoMessage(_message: string, _title: string, _type: number, _yesLabel: string, _noLabel: string): Promise<boolean> {
-      return false;
-    },
+    yesNoMessage,
 
     editLink: editLink(uiToolsRef.current.attr),
 

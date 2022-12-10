@@ -1,5 +1,5 @@
 /*
- * AlertDialog.tsx
+ * alert.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,72 +15,89 @@
 
 import React, { useState } from 'react';
 
-import { Alert, IconName, Intent } from '@blueprintjs/core';
+import { Classes, ControlGroup, Icon, IconName, IconSize, Intent, Label } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
+
+import { FormikValues } from 'formik';
 
 import { kAlertTypeError, kAlertTypeInfo, kAlertTypeWarning } from 'editor-types';
 
-import { showValueEditorDialog } from 'ui-widgets';
+import { FormikDialog, showValueEditorDialog } from 'ui-widgets';
 
 import styles from './styles.module.scss';
 
-export async function alert(message: string, title: string, type: number): Promise<boolean> {
-  const values: boolean | null = false;
-  const result = await showValueEditorDialog(AlertDialog, values, { title, message, type });
+export function alert(message: string, title: string, type: number): Promise<boolean> {
+  return alertDialog(message, title, type, true);
+}
+
+export async function yesNoMessage(message: string, title: string, type: number, yesLabel: string, noLabel: string): Promise<boolean> {
+  return alertDialog(message, title, type, false, yesLabel, noLabel);
+}
+
+async function alertDialog(message: string, title: string, type: number, noCancelButton?: boolean, okLabel?: string, cancelLabel?: string) {
+  const result = await showValueEditorDialog(AlertDialog, {}, { title, message, type, noCancelButton, okLabel, cancelLabel });
   return !!result;
 }
 
-
 interface AlertDialogOptions {
+  type: number;
   title?: string;
   message?: string;
-  type: number;
+  noCancelButton?: boolean;
+  okLabel?: string;
+  cancelLabel?: string;
 }
 
 const AlertDialog: React.FC<{ 
-  values: boolean,
+  values: FormikValues,
   options: AlertDialogOptions,
-  onClosed: (values?: boolean) => void }
-
+  onClosed: (values?: FormikValues) => void }
 > = props => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const close = (values?: boolean) => {
+  const close = (values?: FormikValues) => {
     setIsOpen(false);
     props.onClosed(values);
   }
 
   let icon: IconName;
+  let intent: Intent;
   switch (props.options.type) {
     case kAlertTypeError:
       icon = IconNames.ERROR;
+      intent = Intent.DANGER;
       break;
     case kAlertTypeWarning:
       icon = IconNames.WARNING_SIGN;
+      intent = Intent.WARNING;
       break;
     case kAlertTypeInfo:
     default:
       icon = IconNames.INFO_SIGN;
+      intent = Intent.PRIMARY;
       break;
   }
 
-
-  return (
-    <Alert
-      isOpen={isOpen}
-      onClose={() => close(true)}
-      onCancel={() => close()}
-      canOutsideClickCancel={true}
-      canEscapeKeyCancel={true}
-      intent={Intent.PRIMARY}
-      icon={icon}
+   return (
+    <FormikDialog
+      title={props.options.title} 
+      okCaption={props.options.okLabel}
+      noCancelButton={props.options.noCancelButton}
+      cancelCaption={props.options.cancelLabel}
+      focusOKButton={true}
+      isOpen={isOpen} 
+      initialValues={props.values} 
+      onSubmit={(values) => close(values) }
+      onReset={() => close() }
       className={styles.alertDialog}
     >
-      <p>
-        <strong>{props.options.title}</strong>
-      </p>
-      <p>{props.options.message}</p>
-    </Alert>
+      <ControlGroup vertical={false} fill={true}>
+        <Icon icon={icon} size={36} intent={intent} className={Classes.FIXED} />
+        <Label>{props.options.message}</Label>
+      </ControlGroup>
+     
+    </FormikDialog>
   );
+  
 };

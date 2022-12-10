@@ -13,7 +13,7 @@
  *
  */
 
-export { alert } from "./alert";
+export { alert, yesNoMessage } from "./alert";
 export { editAttr, editDivAttr } from "./edit-attr";
 export { editLink } from "./edit-link";
 export { editMath } from "./edit-math";

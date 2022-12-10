@@ -30,6 +30,10 @@ export interface FormikDialogProps<Values extends FormikValues = FormikValues> e
   isOpen: boolean;
   className?: string;
   children?: ((props: FormikProps<Values>) => React.ReactNode) | React.ReactNode;
+  okCaption?: string;
+  noCancelButton?: boolean;
+  cancelCaption?: string;
+  focusOKButton?: boolean;
   leftButtons?: JSX.Element;
   onOpening?: () => void;
   onOpened?: () => void;
@@ -78,8 +82,11 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
               <div className={[Classes.DIALOG_FOOTER_ACTIONS, styles.dialogFooterActions].join(' ')}>
                 <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
                 <div className={styles.dialogFooterActionsRight}>
-                  <Button className={styles.dialogActionButton} type='reset'>{t('dialog_cancel')}</Button>
-                  <Button className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{t('dialog_ok')}</Button>
+                  {!props.noCancelButton 
+                      ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || t('dialog_cancel')}</Button>
+                      : null
+                  }
+                  <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || t('dialog_ok')}</Button>
                 </div>
               </div>
             </div>

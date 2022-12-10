@@ -13,48 +13,15 @@
  *
  */
 
- @import '@blueprintjs/core/lib/scss/variables.scss';
 
 .alertDialog {
   :global {
-    .bp4-alert-contents > p:first-of-type > strong {
+    .bp4-label {
+      margin-left: 20px;
       font-size: 1.2em;
     }
   }
 }
-
-.alertDialog {
-  :global {
-    .bp4-alert-body > .bp4-icon-error {
-      color: $red4;
-    }
-  }
-}
-
-.alertDialog {
-  :global {
-    .bp4-alert-body > .bp4-icon-warning-sign {
-      color: $orange4;
-    }
-  }
-}
-
-.alertDialog {
-  :global {
-    .bp4-alert-body > .bp4-icon-info-sign {
-      color: $blue4;
-    }
-  }
-}
-
-.alertDialog {
-  :global {
-    .bp4-button {
-      min-width: 90px;
-    }
-  }
-}
- 
 
 .editAttributesPanel {
   min-height: 330px;

@@ -32,7 +32,8 @@ import {
   EditorFormat,
   kQuartoDocType,
   PandocFormat,
-  EditorUISpelling
+  EditorUISpelling,
+  UITools
 } from 'editor';
 
 import {
@@ -56,20 +57,19 @@ import { editorContext, EditorProviders } from './context/editor-context';
 import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands } from './editor-commands';
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
 
-import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
-
 import styles from './EditorPane.module.scss';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
 import { defaultPrefs, Prefs } from 'writer-types';
 import { useEditorSpelling } from './context/editor-spelling';
 import EditorFind from './EditorFind';
+import { editorDialogs } from 'editor-dialogs';
 
 const EditorPane : React.FC = () => {
 
   // global services
   const { t } = useTranslation();
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
-  const dialogs = useContext(EditorDialogsContext);
+  const dialogs = useRef(editorDialogs(new UITools().attr));
 
   // redux state
   const title = useSelector(editorTitle);
@@ -102,7 +102,7 @@ const EditorPane : React.FC = () => {
   // general helper functions
   const errorAlert = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    dialogs.alert(message, t('error_alert_title') as string, kAlertTypeError);
+    dialogs.current.alert(message, t('error_alert_title') as string, kAlertTypeError);
   }
 
   // keep spelling provider up to date 
@@ -129,7 +129,7 @@ const EditorPane : React.FC = () => {
       parentRef.current!, 
       {
         commands: () => commandsRef.current!, 
-        dialogs: () => dialogs,
+        dialogs: () => dialogs.current,
         prefs: editorPrefs,
         spelling: () => spellingRef.current!
       }

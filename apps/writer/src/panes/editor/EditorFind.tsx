@@ -22,16 +22,16 @@ import { useDebounce } from 'use-debounce';
 import { Button, Checkbox, ControlGroup, InputGroup } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { kAlertTypeInfo } from 'editor';
+import { kAlertTypeInfo, UITools } from 'editor';
 
 
 import { CommandManagerContext } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
 import { focusInput } from '../../widgets/utils';
-import { EditorDialogsContext } from './dialogs/EditorDialogsProvider';
 import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
+import { editorDialogs } from 'editor-dialogs';
 
 const EditorFind: React.FC = () => {
 
@@ -41,11 +41,11 @@ const EditorFind: React.FC = () => {
 
   // contexts
   const editorActions = useContext(EditorActionsContext);
-  const editorDialogs = useContext(EditorDialogsContext);
 
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
   const findInputRef = useRef<HTMLInputElement>(null);
+  const dialogs = useRef(editorDialogs(new UITools().attr));
 
   // state
   const [active, setActive] = useState(false);
@@ -67,7 +67,7 @@ const EditorFind: React.FC = () => {
 
   // no more matches alert
   const noMoreMatchesAlert = () => {
-    editorDialogs.alert(t('find_no_more_matches'), t('find_alert_title'), kAlertTypeInfo);
+    dialogs.current.alert(t('find_no_more_matches'), t('find_alert_title'), kAlertTypeInfo);
   }
 
   // perform most up to date find
@@ -106,7 +106,7 @@ const EditorFind: React.FC = () => {
   // replace all
   const replaceAll = useCallback(() => {
     const replaced = performFind()?.replaceAll(replaceText);
-    editorDialogs.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
+    dialogs.current.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
   }, [performFind, replaceText]);
   
   // find and replace commands

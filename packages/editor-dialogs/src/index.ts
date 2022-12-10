@@ -13,16 +13,87 @@
  *
  */
 
-export { alert, yesNoMessage } from "./alert";
-export { editAttr, editDivAttr } from "./edit-attr";
-export { editLink } from "./edit-link";
-export { editMath } from "./edit-math";
-export { editList } from "./edit-list";
-export { editRawInline, editRawBlock } from "./edit-raw";
-export { editCodeBlock } from "./edit-codeblock";
-export { editCallout } from "./edit-callout";
-export { insertTable } from "./insert-table";
-export { insertTabset } from "./insert-tabset";
+import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, ImageDimensions, ImageProps, InsertCiteProps, InsertCiteResult, InsertTabsetResult, UIToolsAttr } from "editor-types";
+
+import { alert, yesNoMessage } from "./alert";
+import { editAttr, editDivAttr } from "./edit-attr";
+import { editLink } from "./edit-link";
+import { editMath } from "./edit-math";
+import { editList } from "./edit-list";
+import { editRawInline, editRawBlock } from "./edit-raw";
+import { editCodeBlock } from "./edit-codeblock";
+import { editCallout } from "./edit-callout";
+import { insertTable } from "./insert-table";
+
+import { t } from './translate';
+
+export { 
+  alert, 
+  yesNoMessage, 
+  editAttr, 
+  editDivAttr, 
+  editLink, 
+  editMath, 
+  editList, 
+  editRawInline, 
+  editRawBlock, 
+  editCodeBlock, 
+  editCallout, 
+  insertTable 
+};
 
 
+export function editorDialogs(uiTools: UIToolsAttr) : EditorDialogs {
+  return {
+    alert,
+   
+    yesNoMessage,
+
+    editLink: editLink(uiTools),
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async editImage(image: ImageProps, dims: ImageDimensions | null, _figure: boolean, editAttributes: boolean): Promise<ImageProps | null> {
+      return null;
+    },
+
+    editCodeBlock: editCodeBlock(uiTools),
+
+    editList,
+
+    editAttr: editAttr(uiTools),
+
+    editSpan: editAttr(uiTools, { 
+      caption: t('Span Attributes') as string,
+      removeEnabled: true, 
+      removeCaption: t('Unwrap Span') as string
+    }),
+   
+    editDiv: editDivAttr(uiTools, {
+      caption: t('Div Attributes') as string,
+      removeCaption: t('Unwrap Div') as string
+    }),
+    
+    editCallout: editCallout(uiTools),
+    
+    editRawInline,
+
+    editRawBlock,
+    
+    editMath,
+    
+    insertTable,
+
+    async insertTabset(): Promise<InsertTabsetResult | null> {
+      return null;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async insertCite(_props: InsertCiteProps): Promise<InsertCiteResult | null> {
+      return null;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async htmlDialog(_title: string, _okText: string | null, _create: EditorHTMLDialogCreateFn, _focus: VoidFunction, _validate: EditorHTMLDialogValidateFn): Promise<boolean> {
+      return false;
+    }
+  };
+} 
 

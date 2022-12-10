@@ -29,7 +29,6 @@ import MarkdownPane from '../panes/markdown/MarkdownPane';
 import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 
-import { EditorDialogsProvider } from '../panes/editor/dialogs/EditorDialogsProvider';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
 import WorkbenchToolbar from './WorkbenchToolbar';
 
@@ -70,9 +69,7 @@ const Workbench: React.FC = () => {
       <WorkbenchNavbar />
       <WorkbenchToolbar />
       <div className={'workspace'}>
-        <EditorDialogsProvider>
-          <EditorPane />
-        </EditorDialogsProvider>
+        <EditorPane />
         <MarkdownPane />
       </div>
       <WorkbenchClipboard />

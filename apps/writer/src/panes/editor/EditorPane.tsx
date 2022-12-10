@@ -69,7 +69,8 @@ const EditorPane : React.FC = () => {
   // global services
   const { t } = useTranslation();
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
-  const dialogs = useRef(editorDialogs(new UITools().attr));
+  const uiToolsRef = useRef<UITools>(new UITools());
+  const dialogs = useRef(editorDialogs(uiToolsRef.current.attr));
 
   // redux state
   const title = useSelector(editorTitle);

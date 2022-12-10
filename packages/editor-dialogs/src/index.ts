@@ -45,23 +45,23 @@ export {
 };
 
 
-export function editorDialogs(uiTools: UIToolsAttr) : EditorDialogs {
+export function editorDialogs(uiToolsAttr: UIToolsAttr) : EditorDialogs {
   return {
     alert,
     yesNoMessage,
-    editLink: editLink(uiTools),
-    editImage: editImage(uiTools),
-    editCodeBlock: editCodeBlock(uiTools),
+    editLink: editLink(uiToolsAttr),
+    editImage: editImage(uiToolsAttr),
+    editCodeBlock: editCodeBlock(uiToolsAttr),
     editList,
-    editAttr: editAttr(uiTools),
-    editSpan: editSpan(uiTools),
-    editDiv: editDiv(uiTools),
-    editCallout: editCallout(uiTools),
+    editAttr: editAttr(uiToolsAttr),
+    editSpan: editSpan(uiToolsAttr),
+    editDiv: editDiv(uiToolsAttr),
+    editCallout: editCallout(uiToolsAttr),
     editRawInline,
     editRawBlock,
     editMath,
     insertTable,
-    insertTabset: insertTabset(uiTools),
+    insertTabset: insertTabset(uiToolsAttr),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async insertCite(_props: InsertCiteProps): Promise<InsertCiteResult | null> {
       return null;

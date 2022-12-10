@@ -15,7 +15,7 @@
 
 import React, { useState } from "react";
 
-import { Tab, TabId, Tabs } from "@blueprintjs/core";
+import { ControlGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
 
 import { capitalizeWord } from "core"
 import { FormikDialog, FormikRadioGroup, FormikTextInput, showValueEditorDialog} from "ui-widgets";
@@ -39,10 +39,12 @@ export function editImage(attrUITools: UIToolsAttr) {
       caption: imageAttr.caption || '',
       linkTo: imageAttr.linkTo || ''
     };
-    
-    values.title = values.title || "";
-
-    const result = await showValueEditorDialog(EditImageDialog, values, { dims, figure, editAttributes} );
+ 
+    const result = await showValueEditorDialog(EditImageDialog, values, { 
+      dims, 
+      figure, 
+      editAttributes
+    });
     if (result && result.src) {
       const { id, classes, style, keyvalue, ...imageProps } = result;
       const props = {
@@ -100,9 +102,23 @@ const EditImageDialog: React.FC<{
     props.onClosed(values);
   }
 
+  const sizingUI =
+    props.options.editAttributes && 
+    props.options.dims && 
+    props.options.dims.naturalHeight !== null &&
+    props.options.dims.naturalWidth !== null &&
+    !props.values.keyvalue?.includes("width=") &&
+    !props.values.keyvalue?.includes("height=")
+
   const imagePanel = 
     <div className={styles.editAttributesPanel}>
       <FormikTextInput name="src" label={t("Image")} labelInfo={t("(File or URL)")} autoFocus={true}/>
+      {sizingUI ?
+        <ControlGroup vertical={false}>
+
+
+        </ControlGroup>
+      : null}
       {props.values.align !== undefined
         ? <FormikRadioGroup 
             name={"align"} label={"Alignment:"} inline={true} 

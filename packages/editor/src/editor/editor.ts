@@ -32,6 +32,7 @@ import {
   InsertCiteProps,
   InsertCiteUI,
   UIToolsAttr,
+  UIToolsImage,
 } from 'editor-types';
 import {
   attrPropsToInput,
@@ -202,16 +203,7 @@ export interface EditorFindReplace {
 
 export { EditorCommandId as EditorCommands } from '../api/command';
 
-export type { UIToolsAttr } from "editor-types"
-
-
-export interface UIToolsImage {
-  validUnits(): string[];
-  percentUnit(): string;
-  unitToPixels(value: number, unit: string, containerWidth: number): number;
-  pixelsToUnit(pixels: number, unit: string, containerWidth: number): number;
-  roundUnit(value: number, unit: string): string;
-}
+export type { UIToolsAttr, UIToolsImage } from "editor-types"
 
 export interface UIToolsFormat {
   parseFormatConfig(markdown: string, isRmd: boolean): PandocFormatConfig;

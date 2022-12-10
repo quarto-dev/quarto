@@ -127,6 +127,15 @@ export interface UIToolsAttr {
   pandocAutoIdentifier(text: string): string;
 }
 
+export interface UIToolsImage {
+  validUnits(): string[];
+  percentUnit(): string;
+  unitToPixels(value: number, unit: string, containerWidth: number): number;
+  pixelsToUnit(pixels: number, unit: string, containerWidth: number): number;
+  roundUnit(value: number, unit: string): string;
+}
+
+
 export interface CalloutEditProps {
   attr: PandocAttr;
   callout: CalloutProps;

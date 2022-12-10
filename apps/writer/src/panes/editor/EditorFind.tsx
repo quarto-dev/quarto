@@ -45,7 +45,8 @@ const EditorFind: React.FC = () => {
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
   const findInputRef = useRef<HTMLInputElement>(null);
-  const dialogs = useRef(editorDialogs(new UITools().attr));
+  const uiToolsRef = useRef<UITools>(new UITools());
+  const dialogs = useRef(editorDialogs(uiToolsRef.current.attr));
 
   // state
   const [active, setActive] = useState(false);

@@ -120,7 +120,6 @@ const EditCalloutDialog: React.FC<{
         id="edit-callout" 
         selectedTabId={selectedTabId} 
         onChange={tabId => setSelectedTabId(tabId)}
-        
       >
         <Tab id="callout" title={t("Callout")} panel={calloutPanel}/>
         <Tab id="attributes" title={t("Attributes")} panel={attributesPanel} /> 

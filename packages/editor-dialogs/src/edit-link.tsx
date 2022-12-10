@@ -13,17 +13,20 @@
  *
  */
 
-import { Button, Classes, ControlGroup, FormGroup, HTMLSelect, InputGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
-import { AttrEditInput, LinkCapabilities, LinkEditResult, LinkProps, LinkTargets, LinkType, UIToolsAttr } from "editor-types";
 import React, { useState } from "react";
 
+import { Button, Classes, ControlGroup, FormGroup, HTMLSelect, InputGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
+import { AttrEditInput, LinkCapabilities, LinkEditResult, LinkProps, LinkTargets, LinkType, UIToolsAttr } from "editor-types";
+
+import {  FormikProps, useField, useFormikContext } from "formik";
+
 import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+
 import { editAttrFields } from "./edit-attr";
 
 import { t } from './translate';
 
 import styles from "./styles.module.scss";
-import {  FormikProps, useField, useFormikContext } from "formik";
 
 
 export function editLink(attrUITools: UIToolsAttr) {

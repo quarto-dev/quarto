@@ -30,7 +30,7 @@ export function attrInputToProps(attr: AttrEditInput): AttrProps {
   return {
     id: asPandocId(attr.id || ''),
     classes: classes.map(asPandocClass),
-    keyvalue,
+    keyvalue: keyvalue || [],
   };
 }
 

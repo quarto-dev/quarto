@@ -13,7 +13,7 @@
  *
  */
 
-import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, ImageDimensions, ImageProps, InsertCiteProps, InsertCiteResult, InsertTabsetResult, UIToolsAttr } from "editor-types";
+import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, ImageDimensions, ImageProps, InsertCiteProps, InsertCiteResult, UIToolsAttr } from "editor-types";
 
 import { alert, yesNoMessage } from "./alert";
 import { editAttr, editDiv, editSpan } from "./edit-attr";
@@ -24,6 +24,7 @@ import { editRawInline, editRawBlock } from "./edit-raw";
 import { editCodeBlock } from "./edit-codeblock";
 import { editCallout } from "./edit-callout";
 import { insertTable } from "./insert-table";
+import { insertTabset } from "./insert-tabset";
 
 export { 
   alert, 
@@ -61,9 +62,7 @@ export function editorDialogs(uiTools: UIToolsAttr) : EditorDialogs {
     editRawBlock,
     editMath,
     insertTable,
-    async insertTabset(): Promise<InsertTabsetResult | null> {
-      return null;
-    },
+    insertTabset: insertTabset(uiTools),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async insertCite(_props: InsertCiteProps): Promise<InsertCiteResult | null> {
       return null;

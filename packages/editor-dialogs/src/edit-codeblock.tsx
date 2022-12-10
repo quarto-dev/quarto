@@ -53,7 +53,6 @@ const EditCodeBlockDialog: React.FC<{
 
   const close = (values?: EditCodeBlockValues) => {
     setIsOpen(false);
-    console.log(values);
     props.onClosed(values);
   }
 

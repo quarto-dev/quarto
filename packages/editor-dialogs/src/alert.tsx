@@ -15,7 +15,7 @@
 
 import React, { useState } from 'react';
 
-import { Classes, ControlGroup, Icon, IconName, IconSize, Intent, Label } from '@blueprintjs/core';
+import { Classes, ControlGroup, Icon, IconName, Intent, Label } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
 import { FormikValues } from 'formik';

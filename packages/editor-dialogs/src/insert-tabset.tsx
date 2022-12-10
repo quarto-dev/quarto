@@ -17,6 +17,8 @@
 import React, { useState } from "react";
 import { FormGroup, InputGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
 
+import { useField } from "formik";
+
 import { AttrEditInput, InsertTabsetResult, PandocAttr, UIToolsAttr } from "editor-types";
 
 import { FormikDialog, showValueEditorDialog } from "ui-widgets";
@@ -26,7 +28,7 @@ import { editAttrFields } from "./edit-attr";
 import { t } from "./translate";
 
 import styles from "./styles.module.scss";
-import { useField } from "formik";
+
 
 export function insertTabset(attrUITools: UIToolsAttr) {
   return async (): Promise<InsertTabsetResult | null> => {

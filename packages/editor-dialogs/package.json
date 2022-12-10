@@ -11,6 +11,7 @@
     "@blueprintjs/popover2": "^1.10.1",
     "@blueprintjs/select": "^4.8.11",
     "@types/yup": "^0.32.0",
+    "core": "*",
     "editor-types": "*",
     "formik": "^2.2.9",
     "react": "^18.2.0",

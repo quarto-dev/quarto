@@ -33,6 +33,7 @@ const FormikRadioGroup: React.FC<FormikFormGroupProps & Omit<RadioGroupProps, "o
         label={label}
         labelInfo={labelInfo}
         helperText={helperText}
+        inline={props.inline}
       >
         {radioGroup}
       </FormGroup>

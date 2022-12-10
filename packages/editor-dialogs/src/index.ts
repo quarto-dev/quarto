@@ -13,11 +13,12 @@
  *
  */
 
-import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, ImageDimensions, ImageProps, InsertCiteProps, InsertCiteResult, UIToolsAttr } from "editor-types";
+import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, InsertCiteProps, InsertCiteResult, UIToolsAttr } from "editor-types";
 
 import { alert, yesNoMessage } from "./alert";
 import { editAttr, editDiv, editSpan } from "./edit-attr";
 import { editLink } from "./edit-link";
+import { editImage } from "./edit-image";
 import { editMath } from "./edit-math";
 import { editList } from "./edit-list";
 import { editRawInline, editRawBlock } from "./edit-raw";
@@ -25,6 +26,7 @@ import { editCodeBlock } from "./edit-codeblock";
 import { editCallout } from "./edit-callout";
 import { insertTable } from "./insert-table";
 import { insertTabset } from "./insert-tabset";
+
 
 export { 
   alert, 
@@ -48,10 +50,7 @@ export function editorDialogs(uiTools: UIToolsAttr) : EditorDialogs {
     alert,
     yesNoMessage,
     editLink: editLink(uiTools),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async editImage(image: ImageProps, dims: ImageDimensions | null, _figure: boolean, editAttributes: boolean): Promise<ImageProps | null> {
-      return null;
-    },
+    editImage: editImage(uiTools),
     editCodeBlock: editCodeBlock(uiTools),
     editList,
     editAttr: editAttr(uiTools),

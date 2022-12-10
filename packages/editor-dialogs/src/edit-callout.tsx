@@ -39,9 +39,9 @@ export function editCallout(attrUITools: UIToolsAttr) {
       removeEnabled
     });
     if (result) {
-      const { id, classes, keyvalue, ...callout } = result.values;
+      const { id, classes, style, keyvalue, ...callout } = result.values;
       return {
-        attr: attrUITools.inputToProps({ id, classes, keyvalue }) as PandocAttr,
+        attr: attrUITools.inputToProps({ id, classes, style, keyvalue }) as PandocAttr,
         callout,
         action: result.action
       }
@@ -85,7 +85,7 @@ const EditCalloutDialog: React.FC<{
   const [selectedTabId, setSelectedTabId] = useState<TabId>("callout");
 
   const calloutPanel = 
-    <div className={styles.editCalloutPanel}>
+    <div className={styles.editAttributesPanel}>
       <ControlGroup vertical={false} fill={true}>
         <FormikHTMLSelect 
           name="type" label={t("Type")} 
@@ -103,7 +103,7 @@ const EditCalloutDialog: React.FC<{
     </div>;
 
   const attributesPanel = 
-    <div className={styles.editCalloutPanel}>
+    <div className={styles.editAttributesPanel}>
       {editAttrFields()}
     </div>;
 

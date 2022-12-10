@@ -19,11 +19,7 @@ import React, { PropsWithChildren, useRef, useState } from "react";
 import { t } from '../../../i18n';
 
 import {
-  LinkProps,
-  LinkEditResult,
   ImageProps,
-  LinkTargets, 
-  LinkCapabilities,
   ImageDimensions,
   EditorDialogs,
   InsertCiteProps,
@@ -35,13 +31,11 @@ import {
   UITools
 } from 'editor';
 
-import { alert, editAttr, editCallout, editCodeBlock, editDivAttr, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
+import { alert, editAttr, editCallout, editCodeBlock, editDivAttr, editLink, editList, editMath, editRawBlock, editRawInline, insertTable } from "editor-dialogs";
 
-import { defaultEditLinkProps, EditorDialogEditLink, EditorDialogEditLinkProps } from "./EditorDialogEditLink";
 import { defaultEditImageProps, EditorDialogEditImage, EditorDialogEditImageProps } from "./EditorDialogEditImage";
 
 interface EditorDialogsState {
-  editLink: EditorDialogEditLinkProps;
   editImage: EditorDialogEditImageProps;
 }
 
@@ -52,7 +46,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
   const uiToolsRef = useRef<UITools>(new UITools());
 
   const [state, setState] = useState<EditorDialogsState>({
-    editLink: defaultEditLinkProps(),
     editImage: defaultEditImageProps()
   });
 
@@ -62,23 +55,9 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
     async yesNoMessage(_message: string, _title: string, _type: number, _yesLabel: string, _noLabel: string): Promise<boolean> {
       return false;
     },
-    async editLink(link: LinkProps, targets: LinkTargets, capabilities: LinkCapabilities): Promise<LinkEditResult | null> {
-      return new Promise(resolve => {
-        setState(prevState => ({
-          ...prevState,
-          editLink: {
-            isOpen: true,
-            capabilities,
-            link,
-            targets,
-            onClosed: (result: LinkEditResult | null) => {
-              setState({ ...prevState, editLink: { ...state.editLink, isOpen: false } });
-              resolve(result);
-            },
-          },
-        }));
-      });
-    },
+
+    editLink: editLink(uiToolsRef.current.attr),
+
     async editImage(image: ImageProps, dims: ImageDimensions | null, _figure: boolean, editAttributes: boolean): Promise<ImageProps | null> {
       return new Promise(resolve => {
         setState(prevState => ({
@@ -138,7 +117,6 @@ export const EditorDialogsProvider: React.FC<PropsWithChildren> = (props) => {
   return (
     <EditorDialogsContext.Provider value={editorDialogsProvider}>
       {props.children}
-      <EditorDialogEditLink {...state.editLink} />
       <EditorDialogEditImage {...state.editImage} />
     </EditorDialogsContext.Provider> 
   );

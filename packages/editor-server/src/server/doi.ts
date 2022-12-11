@@ -39,7 +39,7 @@ export function doiServer() : DOIServer {
 export function doiServerMethods() : Record<string, jayson.Method> {
   const server = doiServer();
   const methods: Record<string, jayson.Method> = {
-    [kDoiFetchCsl]: jsonRpcMethod(args => server.fetchCSL(args[0], args[1]))
+    [kDoiFetchCsl]: jsonRpcMethod(args => server.fetchCSL(args[0]))
   };
   return methods;
 }

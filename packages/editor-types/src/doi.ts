@@ -24,7 +24,7 @@ export interface DOIResult {
 }
 
 export interface DOIServer {
-    fetchCSL: (doi: string, progressDelay: number) => Promise<DOIResult>;
+    fetchCSL: (doi: string) => Promise<DOIResult>;
 }
 
 

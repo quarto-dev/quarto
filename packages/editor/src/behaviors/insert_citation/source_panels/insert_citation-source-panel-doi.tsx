@@ -59,7 +59,7 @@ export function doiSourcePanel(
     placeHolderMessage: ui.context.translateText('Paste or enter a DOI to find citation data.'),
     search: async (searchTerm: string, _selectedNode: NavigationTreeNode, existingCitationIds: string[]) => {
       try {
-        const result = await server.fetchCSL(searchTerm, 1000);
+        const result = await server.fetchCSL(searchTerm);
         if (result.status === 'ok') {
 
           // Form the entry

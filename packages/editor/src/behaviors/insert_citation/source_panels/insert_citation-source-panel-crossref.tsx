@@ -138,7 +138,7 @@ function toCitationListEntry(
     },
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
-      const doiResult = await doiServer.fetchCSL(crossrefWork.DOI, -1);
+      const doiResult = await doiServer.fetchCSL(crossrefWork.DOI);
 
       const csl = doiResult.message!;
       return { ...csl, id: finalId, providerKey };

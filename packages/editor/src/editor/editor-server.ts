@@ -120,8 +120,8 @@ export function editorJsonRpcServer(url: string) : EditorServer {
       },
     },
     doi: {
-      fetchCSL(doi: string, progressDelay: number): Promise<DOIResult> {
-        return request(kDoiFetchCsl, [doi, progressDelay]);
+      fetchCSL(doi: string): Promise<DOIResult> {
+        return request(kDoiFetchCsl, [doi]);
       },
     },
     crossref: {

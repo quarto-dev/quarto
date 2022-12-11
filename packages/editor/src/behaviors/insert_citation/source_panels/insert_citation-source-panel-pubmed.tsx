@@ -163,7 +163,7 @@ function toCitationListEntry(
     image: imageForType(ui, doc.pubTypes)[0],
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
-      const doiResult = await doiServer.fetchCSL(doc.doi, -1);
+      const doiResult = await doiServer.fetchCSL(doc.doi);
       const csl = doiResult.message!;
       const sanitizedCSL = sanitizeForCiteproc(csl);
       return { ...sanitizedCSL, id: finalId, providerKey };

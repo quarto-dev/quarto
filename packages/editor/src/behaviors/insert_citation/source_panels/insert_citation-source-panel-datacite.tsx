@@ -160,7 +160,7 @@ function toCitationListEntry(
     },
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
-      const doiResult = await doiServer.fetchCSL(record.doi, -1);
+      const doiResult = await doiServer.fetchCSL(record.doi);
 
       const csl = doiResult.message!;
       return { ...csl, id: finalId, providerKey };

@@ -13,20 +13,25 @@
  *
  */
 
+import fetch from "cross-fetch";
+
 import { jsonRpcMethod } from "core-server";
 import { DOIResult, DOIServer, kDoiFetchCsl } from "editor-types"
 
 import jayson from 'jayson'
+import { handleResponseWithStatus } from "./response";
+
+
+const kDOIHost = "https://doi.org";
+const kCSLJsonFormat = "application/vnd.citationstyles.csl+json";
 
 export function doiServer() : DOIServer {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async fetchCSL(doi: string, progressDelay: number) : Promise<DOIResult> {
-      return {
-        status: 'notfound',
-        message: null,
-        error: ''
-      }
+    async fetchCSL(doi: string) : Promise<DOIResult> {
+      const url = `${kDOIHost}/${doi}`;
+      return handleResponseWithStatus(
+        () => fetch(url, { headers: { Accept: kCSLJsonFormat } })
+      );
     }
   }
 }

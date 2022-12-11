@@ -22,6 +22,11 @@ import { PubMedServer } from "./pubmed";
 import { XRefServer } from "./xref";
 import { ZoteroServer } from "./zotero";
 
+export const kStatusOK = "ok";
+export const kStatusNotFound = "notfound";
+export const kStatusNoHost = "nohost";
+export const kStatusError = "error";
+
 export interface EditorServer {
   readonly pandoc: PandocServer;
   readonly doi: DOIServer;

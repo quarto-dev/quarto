@@ -32,31 +32,6 @@ export interface PubMedServerOptions {
   api_key?: string;
 }
 
-interface ESearchResult {
-  esearchresult: {
-    idlist: string[];
-  }
-}
-
-interface ESummaryResult {
-  "result": {
-    uids: string[];
-    [key: string]: ESummary | unknown;
-  }
-}
-
-interface ESummary {
-  articleids?: Array<{ idtype: string; value: string}>;
-  pubtype?: string[];
-  authors?: Array<{ name?: string }>;
-  sortfirstauthor?: string;
-  title?: string;
-  source?: string;
-  volume?: string;
-  issue?: string;
-  pubdate?: string;
-}
-
 export function pubMedServer(options: PubMedServerOptions) : PubMedServer {
   return {
     async search(query: string) : Promise<PubMedResult> {  
@@ -127,6 +102,32 @@ export function pubMedServerMethods(options: PubMedServerOptions) : Record<strin
     [kPubMedSearch]: jsonRpcMethod(args => server.search(args[0]))
   }
   return methods;
+}
+
+
+interface ESearchResult {
+  esearchresult: {
+    idlist: string[];
+  }
+}
+
+interface ESummaryResult {
+  "result": {
+    uids: string[];
+    [key: string]: ESummary | unknown;
+  }
+}
+
+interface ESummary {
+  articleids?: Array<{ idtype: string; value: string}>;
+  pubtype?: string[];
+  authors?: Array<{ name?: string }>;
+  sortfirstauthor?: string;
+  title?: string;
+  source?: string;
+  volume?: string;
+  issue?: string;
+  pubdate?: string;
 }
 
 

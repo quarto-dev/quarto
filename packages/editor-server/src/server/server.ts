@@ -17,7 +17,7 @@ import jayson from 'jayson'
 
 import { EditorServer } from "editor-types";
 
-import { crossrefServer, crossrefServerMethods } from "./crossref";
+import { crossrefServer, crossrefServerMethods, CrossrefServerOptions } from "./crossref";
 import { dataCiteServer, dataCiteServerMethods } from "./datacite";
 import { doiServer, doiServerMethods } from "./doi";
 import { environmentServer, environmentServerMethods } from "./environment";
@@ -30,15 +30,16 @@ export interface EditorServerOptions {
   resourcesDir: string;
   payloadLimitMb: number;
   pubmed: PubMedServerOptions;
+  crossref: CrossrefServerOptions;
 }
 
 export function editorServer(options: EditorServerOptions) : EditorServer {
   return {
-    pandoc: pandocServer(options),         // partial
-    doi: doiServer(),                      // done
-    crossref: crossrefServer(),
-    datacite: dataCiteServer(),            // done
-    pubmed: pubMedServer(options.pubmed),  // done
+    pandoc: pandocServer(options),               // partial
+    doi: doiServer(),                            // done
+    crossref: crossrefServer(options.crossref),  // done
+    datacite: dataCiteServer(),                  // done
+    pubmed: pubMedServer(options.pubmed),        // done
     zotero: zoteroServer(),
     xref: xrefServer(),
     environment: environmentServer()
@@ -49,7 +50,7 @@ export function editorServerMethods(options: EditorServerOptions): Record<string
   return {
     ...pandocServerMethods(options),
     ...doiServerMethods(),
-    ...crossrefServerMethods(),
+    ...crossrefServerMethods(options.crossref),
     ...dataCiteServerMethods(),
     ...pubMedServerMethods(options.pubmed),
     ...zoteroServerMethods(),

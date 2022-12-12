@@ -16,6 +16,7 @@
  
 export type { EditorServerOptions } from './server/server';
 export type { PubMedServerOptions } from './server/pubmed';
+export type { CrossrefServerOptions } from './server/crossref';
 
 export { editorServer, editorServerMethods } from './server/server';
 

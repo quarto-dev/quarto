@@ -13,25 +13,57 @@
  *
  */
 
+import fetch from "cross-fetch";
+
 import { jsonRpcMethod } from "core-server";
-import { CrossrefMessage, CrossrefServer, CrossrefWork, kCrossrefWorks } from "editor-types";
+import { CrossrefMessage, CrossrefServer, CrossrefWork, kCrossrefWorks, kStatusOK } from "editor-types";
 
 import jayson from 'jayson'
+import { handleResponseWithStatus } from "./response";
 
+const kCrossrefApiHost = "https://api.crossref.org";
+const kCrossrefWorksApi = "works";
 
-export function crossrefServer() : CrossrefServer {
+export interface CrossrefServerOptions {
+  userAgent: string;
+  email: string;
+}
+
+export function crossrefServer(options: CrossrefServerOptions) : CrossrefServer {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    works(query: string) : Promise<CrossrefMessage<CrossrefWork>> {
-      throw new Error("not implemented");
+    async works(query: string) : Promise<CrossrefMessage<CrossrefWork>> {
+      const userAgent = `${options.userAgent}; ${options.userAgent} Crossref Cite (mailto: ${options.email})`;
+      const url = `${kCrossrefApiHost}/${kCrossrefWorksApi}?` + new URLSearchParams({ query });
+      const worksQuery = () => fetch(url, {
+        headers: {
+          "User-Agent": userAgent
+        }
+      });
+      const result = await handleResponseWithStatus<CrossrefApiResponse>(worksQuery);
+      if (result.status === kStatusOK) { 
+        if (result.message?.status === "ok") {
+          return result.message.message!;
+        // non-OK status
+        } else {
+          throw new Error(`Error status from Crossref API: ${result.message?.status}`);
+        }
+       // non-OK status
+      } else {
+        throw new Error(`Crossref API Error: ${result.error}`);
+      }
     }
   };
 }
 
-export function crossrefServerMethods() : Record<string, jayson.Method> {
-  const server = crossrefServer();
+export function crossrefServerMethods(options: CrossrefServerOptions) : Record<string, jayson.Method> {
+  const server = crossrefServer(options);
   const methods: Record<string, jayson.Method> = {
     [kCrossrefWorks]: jsonRpcMethod(args => server.works(args[0]))
   };
   return methods;
+}
+
+interface CrossrefApiResponse {
+  status: string;
+  message?: CrossrefMessage<CrossrefWork>;
 }

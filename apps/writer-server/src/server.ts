@@ -27,7 +27,7 @@ import jayson from 'jayson'
 import { appConfigDir } from 'core-server';
 
 import { kWriterJsonRpcPath } from 'writer-types';
-import { editorServerMethods, editorServicesMethods, PubMedServerOptions } from 'editor-server';
+import { CrossrefServerOptions, editorServerMethods, editorServicesMethods, PubMedServerOptions } from 'editor-server';
 import { prefsServerMethods } from './prefs';
 
 // constants
@@ -47,11 +47,17 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     email: "pubmed@rstudio.com",
   }
 
+  const crossrefOptions: CrossrefServerOptions = {
+    userAgent: "Quarto",
+    email: "crossref@rstudio.com"
+  }
+
   const writerRpcServer = new jayson.Server({
     ...editorServerMethods({
       resourcesDir: editorResourcesDir,
       payloadLimitMb: kPayloadLimitMb,
-      pubmed: pubmedOptions
+      pubmed: pubmedOptions,
+      crossref: crossrefOptions
     }),
     ...editorServicesMethods({ dictionary: dictionaryOptions }),
     ...writerServerMethods()

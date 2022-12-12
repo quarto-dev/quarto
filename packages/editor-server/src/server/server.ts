@@ -22,22 +22,23 @@ import { dataCiteServer, dataCiteServerMethods } from "./datacite";
 import { doiServer, doiServerMethods } from "./doi";
 import { environmentServer, environmentServerMethods } from "./environment";
 import { pandocServer, pandocServerMethods } from "./pandoc";
-import { pubMedServer, pubMedServerMethods } from "./pubmed";
+import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
 
 export interface EditorServerOptions {
   resourcesDir: string;
   payloadLimitMb: number;
+  pubmed: PubMedServerOptions;
 }
 
 export function editorServer(options: EditorServerOptions) : EditorServer {
   return {
-    pandoc: pandocServer(options),
-    doi: doiServer(),
+    pandoc: pandocServer(options),         // partial
+    doi: doiServer(),                      // done
     crossref: crossrefServer(),
-    datacite: dataCiteServer(),
-    pubmed: pubMedServer(),
+    datacite: dataCiteServer(),            // done
+    pubmed: pubMedServer(options.pubmed),  // done
     zotero: zoteroServer(),
     xref: xrefServer(),
     environment: environmentServer()
@@ -50,7 +51,7 @@ export function editorServerMethods(options: EditorServerOptions): Record<string
     ...doiServerMethods(),
     ...crossrefServerMethods(),
     ...dataCiteServerMethods(),
-    ...pubMedServerMethods(),
+    ...pubMedServerMethods(options.pubmed),
     ...zoteroServerMethods(),
     ...xrefServerMethods(),
     ...environmentServerMethods()

@@ -27,8 +27,6 @@ import {
   kCrossrefWorks,
   kDataCiteSearch,
   kDoiFetchCsl,
-  kEnvironmentGetRPackageCitations,
-  kEnvironmentGetRPackageState,
   kPandocAddtoBibliography,
   kPandocAstToMarkdown,
   kPandocCitationHtml,
@@ -49,8 +47,6 @@ import {
   PandocAst,
   PandocCapabilitiesResult,
   PubMedResult,
-  RPackageCitation,
-  RPackageState,
   XRefs,
   ZoteroCollectionSpec,
   ZoteroResult,
@@ -194,13 +190,7 @@ export function editorJsonRpcServer(url: string) : EditorServer {
         return request(kXRefQuartoXRefForId, [file, id]);
       }
     },
-    environment: {
-      getRPackageState() : Promise<RPackageState> {
-        return request(kEnvironmentGetRPackageState, []);
-      },
-      getRPackageCitations(pkgName: string) : Promise<RPackageCitation[]> {
-        return request(kEnvironmentGetRPackageCitations, [pkgName]);
-      }
-    }
+    // not currently implemented by our server
+    environment: undefined
   };
 }

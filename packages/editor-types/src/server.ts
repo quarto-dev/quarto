@@ -35,5 +35,5 @@ export interface EditorServer {
   readonly pubmed: PubMedServer;
   readonly zotero: ZoteroServer;
   readonly xref: XRefServer;
-  readonly environment: EnvironmentServer;
+  readonly environment?: EnvironmentServer;
 }

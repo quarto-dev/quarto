@@ -107,20 +107,25 @@ export async function showInsertCitationDialog(
       container.className = 'pm-default-theme';
       const root = createRoot(container);
     
-      // Provide the providers top the dialog and then refresh the bibliography and reload
-      // the items
+      // Provide the providers top the dialog and then refresh the bibliography and reload the items
       const providersForBibliography = (writable: boolean) => {
-        return writable
-          ? [
+        if (writable) {
+          const providers =  [
             bibliographySourcePanel(doc, ui, bibliographyManager),
             doiSourcePanel(ui, server.doi, bibliographyManager),
             crossrefSourcePanel(ui, server.crossref, server.doi, bibliographyManager),
             dataciteSourcePanel(ui, server.datacite, server.doi, bibliographyManager),
             pubmedSourcePanel(ui, server.pubmed, server.doi, bibliographyManager),
-            packageSourcePanel(ui, server.environment)
-          ]
-          : [bibliographySourcePanel(doc, ui, bibliographyManager)];
+          ];
+          if (server.environment) {
+            providers.push(packageSourcePanel(ui, server.environment));
+          }
+          return providers;
+        } else {
+          return [bibliographySourcePanel(doc, ui, bibliographyManager)];
+        }
       };
+      
 
       // Provide a configuration stream that will update after the bibliography loads
       let updatedConfiguration: InsertCitationPanelConfiguration | undefined;

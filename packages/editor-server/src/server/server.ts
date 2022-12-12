@@ -20,7 +20,6 @@ import { EditorServer } from "editor-types";
 import { crossrefServer, crossrefServerMethods, CrossrefServerOptions } from "./crossref";
 import { dataCiteServer, dataCiteServerMethods } from "./datacite";
 import { doiServer, doiServerMethods } from "./doi";
-import { environmentServer, environmentServerMethods } from "./environment";
 import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
@@ -42,7 +41,7 @@ export function editorServer(options: EditorServerOptions) : EditorServer {
     pubmed: pubMedServer(options.pubmed),        // done
     zotero: zoteroServer(),
     xref: xrefServer(),
-    environment: environmentServer()
+    environment: undefined                       // done
   };
 }
 
@@ -54,7 +53,6 @@ export function editorServerMethods(options: EditorServerOptions): Record<string
     ...dataCiteServerMethods(),
     ...pubMedServerMethods(options.pubmed),
     ...zoteroServerMethods(),
-    ...xrefServerMethods(),
-    ...environmentServerMethods()
+    ...xrefServerMethods()
   }
 }

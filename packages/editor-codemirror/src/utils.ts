@@ -146,18 +146,6 @@ export const setMode = (
   cmView: EditorView,
   languageConf: Compartment
 ) => {
-  // language mappings
-  switch(lang) {
-    case 'yaml-frontmatter':
-      lang = 'yaml';
-      break;
-    case 'bash':
-    case 'sh':
-      lang = 'shell';
-      break;
-  }
-
-
   const support = languageMode(lang);
   if (support)
     cmView.dispatch({

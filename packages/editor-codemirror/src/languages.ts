@@ -18,7 +18,7 @@
  *
  */
 
-import { StreamLanguage, LanguageSupport } from "@codemirror/language";
+import { StreamLanguage, Language } from "@codemirror/language";
 
 import { cpp } from "@codemirror/lang-cpp";
 import { html } from "@codemirror/lang-html"
@@ -67,26 +67,48 @@ export enum Languages {
 }
 
 
-export function languageMode(lang: string) : LanguageSupport  | null {
+const modes = new Map<string,Language>();
+
+export function languageMode(lang: string) : Language  | null {
+  if (!modes.has(lang)) {
+    modes.set(lang, createLanguageMode(lang));
+  }
+  return modes.get(lang) || null;
+}
+
+
+export function createLanguageMode(lang: string) : Language  | null {
+
+  // mappings
+  switch(lang) {
+    case 'yaml-frontmatter':
+      lang = 'yaml';
+      break;
+    case 'bash':
+    case 'sh':
+      lang = 'shell';
+      break;
+  }
+
   switch(lang) {
     case Languages.javascript:
-      return javascript();
+      return javascript().language;
     case Languages.html:
-      return html();
+      return html().language;
     case Languages.css:
-      return css();
+      return css().language;
     case Languages.sql:
-      return sql();
+      return sql().language;
     case Languages.python:
-      return python();
+      return python().language;
     case Languages.rust:
-      return rust();
+      return rust().language;
     case Languages.xml:
-      return xml();
+      return xml().language;
     case Languages.markdown:
-      return markdown();
+      return markdown().language;
     case Languages.cpp:
-      return cpp();
+      return cpp().language;
     case Languages.java:
       return StreamLanguage.define(java);
     case Languages.fortran:

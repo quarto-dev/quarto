@@ -20,7 +20,27 @@
 
 import { StreamLanguage, LanguageSupport } from "@codemirror/language";
 
-export type LanguageLoaders = Record<string, () => Promise<LanguageSupport>>;
+import { cpp } from "@codemirror/lang-cpp";
+import { html } from "@codemirror/lang-html"
+import { css } from "@codemirror/lang-css";
+import { sql } from "@codemirror/lang-sql";
+import { xml } from "@codemirror/lang-xml";
+import { javascript } from "@codemirror/lang-javascript";
+import { markdown } from "@codemirror/lang-markdown";
+import { python } from "@codemirror/lang-python";
+import { rust } from "@codemirror/lang-rust";
+import { java } from "@codemirror/legacy-modes/mode/clike";
+import { fortran } from "@codemirror/legacy-modes/mode/fortran";
+import { haskell } from "@codemirror/legacy-modes/mode/haskell";
+import { julia } from "@codemirror/legacy-modes/mode/julia";
+import { lua } from "@codemirror/legacy-modes/mode/lua";
+import { powerShell } from "@codemirror/legacy-modes/mode/powershell";
+import { r } from "@codemirror/legacy-modes/mode/r";
+import { ruby } from "@codemirror/legacy-modes/mode/ruby";
+import { sas } from "@codemirror/legacy-modes/mode/sas";
+import { shell } from "@codemirror/legacy-modes/mode/shell";
+import { stex } from "@codemirror/legacy-modes/mode/stex";
+import { yaml } from "@codemirror/legacy-modes/mode/yaml";
 
 export enum Languages {
   javascript = "javascript",
@@ -32,7 +52,7 @@ export enum Languages {
   xml = "xml",
   markdown = "markdown",
   cpp = "cpp",
-  clike = "clike",
+  java = "java",
   fortran = "fortran",
   haskell = "haskell",
   julia = "julia",
@@ -47,74 +67,53 @@ export enum Languages {
 }
 
 
-export const languageLoaders: LanguageLoaders = {
-  [Languages.cpp]: () =>
-    import("@codemirror/lang-cpp").then((i) => i.cpp()),
-  [Languages.css]: () =>
-    import("@codemirror/lang-css").then((i) => i.css()),
-  [Languages.html]: () =>
-    import("@codemirror/lang-html").then((i) => i.html()),
-  [Languages.sql]: () =>
-    import("@codemirror/lang-sql").then((i) => i.sql()),
-  [Languages.xml]: () =>
-    import("@codemirror/lang-xml").then((i) => i.xml()),
-  [Languages.javascript]: () =>
-    import("@codemirror/lang-javascript").then((i) => i.javascript()),
-  [Languages.markdown]: () =>
-    import("@codemirror/lang-markdown").then((i) => i.markdown()),
-  [Languages.python]: () =>
-    import("@codemirror/lang-python").then((i) => i.python()),
-  [Languages.rust]: () =>
-    import("@codemirror/lang-rust").then((i) => i.rust()),
-  [Languages.clike]: () =>
-    import("@codemirror/legacy-modes/mode/clike").then(({ clike }) =>
-      StreamLanguage.define(clike)
-    ),
-  [Languages.fortran]: () =>
-    import("@codemirror/legacy-modes/mode/fortran").then(({ fortran }) =>
-      StreamLanguage.define(fortran)
-    ),
-  [Languages.haskell]: () =>
-    import("@codemirror/legacy-modes/mode/haskell").then(({ haskell }) =>
-      StreamLanguage.define(haskell)
-    ),
-  [Languages.julia]: () =>
-    import("@codemirror/legacy-modes/mode/julia").then(({ julia }) =>
-      StreamLanguage.define(julia)
-    ),
-  [Languages.lua]: () =>
-    import("@codemirror/legacy-modes/mode/lua").then(({ lua: legacyLua }) =>
-      StreamLanguage.define(legacyLua)
-    ),
-  [Languages.powershell]: () =>
-    import("@codemirror/legacy-modes/mode/powershell").then(({ powerShell }) =>
-      StreamLanguage.define(powerShell)
-    ),
-  [Languages.r]: () =>
-    import("@codemirror/legacy-modes/mode/r").then(({ r }) =>
-      StreamLanguage.define(r)
-    ),
-  [Languages.ruby]: () =>
-    import("@codemirror/legacy-modes/mode/ruby").then(({ ruby }) =>
-      StreamLanguage.define(ruby)
-    ),
-  [Languages.sas]: () =>
-    import("@codemirror/legacy-modes/mode/sas").then(({ sas }) =>
-      StreamLanguage.define(sas)
-    ),
-  [Languages.shell]: () =>
-    import("@codemirror/legacy-modes/mode/shell").then(({ shell }) =>
-      StreamLanguage.define(shell)
-    ),
-  [Languages.stex]: () =>
-    import("@codemirror/legacy-modes/mode/stex").then(({ stex }) =>
-      StreamLanguage.define(stex)
-    ),
-  [Languages.yaml]: () =>
-    import("@codemirror/legacy-modes/mode/yaml").then(({ yaml }) =>
-      StreamLanguage.define(yaml)
-    )
-};
-
+export function languageMode(lang: string) : LanguageSupport  | null {
+  switch(lang) {
+    case Languages.javascript:
+      return javascript();
+    case Languages.html:
+      return html();
+    case Languages.css:
+      return css();
+    case Languages.sql:
+      return sql();
+    case Languages.python:
+      return python();
+    case Languages.rust:
+      return rust();
+    case Languages.xml:
+      return xml();
+    case Languages.markdown:
+      return markdown();
+    case Languages.cpp:
+      return cpp();
+    case Languages.java:
+      return StreamLanguage.define(java);
+    case Languages.fortran:
+      return StreamLanguage.define(fortran);
+    case Languages.haskell:
+      return StreamLanguage.define(haskell);
+    case Languages.julia:
+      return StreamLanguage.define(julia);
+    case Languages.lua:
+      return StreamLanguage.define(lua);
+    case Languages.powershell:
+      return StreamLanguage.define(powerShell);
+    case Languages.r:
+      return StreamLanguage.define(r);
+    case Languages.ruby:
+      return StreamLanguage.define(ruby);
+    case Languages.sas:
+      return StreamLanguage.define(sas);
+    case Languages.shell:
+      return StreamLanguage.define(shell);
+    case Languages.stex:
+      return StreamLanguage.define(stex);
+    case Languages.yaml:
+      return StreamLanguage.define(yaml);
+    default:
+      return null;
+  }
+}
 
 

@@ -29,8 +29,7 @@ import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from "@codemirror/view";
 import { setBlockType } from "prosemirror-commands";
 import { Compartment } from "@codemirror/state";
-
-import { languageLoaders } from "./languages";
+import { languageMode } from "./languages";
 
 export function computeChange(oldVal: string, newVal: string) {
   if (oldVal === newVal) return null;
@@ -142,7 +141,7 @@ export const backspaceHandler = (pmView: PMEditorView, view: EditorView) => {
   return false;
 };
 
-export const setMode = async (
+export const setMode = (
   lang: string,
   cmView: EditorView,
   languageConf: Compartment
@@ -159,7 +158,7 @@ export const setMode = async (
   }
 
 
-  const support = await languageLoaders[lang]?.();
+  const support = languageMode(lang);
   if (support)
     cmView.dispatch({
       effects: languageConf.reconfigure(support),

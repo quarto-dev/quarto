@@ -19,7 +19,7 @@
 import { highlightTree, Highlighter } from "@lezer/highlight";
 import { Language, defaultHighlightStyle } from '@codemirror/language';
 
-import { languageLoaders } from "./languages";
+import { languageMode, Languages } from "./languages";
 
 export type HighlightCallback = (text: string, style: string | null, from: number, to: number) => void;
 
@@ -41,21 +41,21 @@ export function highlightCode(
 }
 
 export function highlightDemo() {
-  languageLoaders["javascript"]().then(jsLang => {
-    highlightCode(
-      "function(x) { return x + 1; }", 
-      jsLang.language,
-      defaultHighlightStyle,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      (content, classes, _from, _to) => {
-        const span = document.createElement('span');
-        if (classes) {
-          span.classList.add(...classes.split(' '));
-        }
-        span.innerText = content;
-        console.log(span);
+  const jsLang = languageMode(Languages.javascript)!;
+  highlightCode(
+    "function(x) { return x + 1; }", 
+    jsLang.language,
+    defaultHighlightStyle,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (content, classes, _from, _to) => {
+      const span = document.createElement('span');
+      if (classes) {
+        span.classList.add(...classes.split(' '));
       }
-    )
-  });
+      span.innerText = content;
+      console.log(span);
+    }
+  ) 
 }
+
 

@@ -19,7 +19,8 @@
 import { highlightTree, Highlighter } from "@lezer/highlight";
 import { Language, defaultHighlightStyle } from '@codemirror/language';
 
-import { languageMode, Languages } from "./languages";
+import { languageMode } from "./languages";
+import { lines } from "core";
 
 export type HighlightCallback = (text: string, style: string | null, from: number, to: number) => void;
 
@@ -40,22 +41,55 @@ export function highlightCode(
   pos != tree.length && callback(code.slice(pos, tree.length), null, pos, tree.length);
 }
 
-export function highlightDemo() {
-  const jsLang = languageMode(Languages.javascript)!;
-  highlightCode(
-    "function(x) { return x + 1; }", 
-    jsLang.language,
-    defaultHighlightStyle,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (content, classes, _from, _to) => {
-      const span = document.createElement('span');
-      if (classes) {
-        span.classList.add(...classes.split(' '));
-      }
-      span.innerText = content;
-      console.log(span);
+
+// we explored creating lightweight standins for codemirror (with the idea that
+// you'd instantiate an actual editor on demand) however load time and memory
+// usage weren't substantially improved by this. leaving the code here for 
+// possible future use
+export function simulatedCodeMirrorEditor(lang: string, textContent: string) {
+
+  const cmEditor = document.createElement("div");
+  cmEditor.classList.add('cm-editor', 'ͼ1', 'ͼ2',  'ͼ4' , 'ͼo');
+  
+  const cmScroller = document.createElement("div");
+  cmScroller.classList.add('cm-scroller');
+  cmEditor.appendChild(cmScroller);
+  
+  const cmContent = document.createElement("div");
+  cmContent.classList.add('cm-content');
+  cmContent.spellcheck = false;
+  cmContent.autocapitalize = "off";
+  cmContent.translate = false;
+  cmContent.style.tabSize = "4";
+  cmContent.role = "textbox";
+  cmContent.ariaMultiLine = "true";
+  cmScroller.appendChild(cmContent);
+  
+  const mode = languageMode(lang);
+  cmContent.innerHTML = '';
+  lines(textContent).forEach(line => {
+    const cmLine = document.createElement("div");
+    cmLine.classList.add("cm-line");
+    if (mode) {
+
+      highlightCode(line, mode, defaultHighlightStyle, (text, style) => {
+        const span = document.createElement('span');
+        if (style) {
+          span.classList.add(...style.split(' '));
+        }
+        span.innerText = text;
+        cmLine.appendChild(span);
+      });
+    } else {
+      const plainSpan = document.createElement("span");
+      plainSpan.textContent = line;
+      cmLine.appendChild(plainSpan);
     }
-  ) 
-}
+    cmContent.appendChild(cmLine)
+  });
+  cmContent.setAttribute("data-language", lang);
 
+  return cmEditor;
+};
 
+   

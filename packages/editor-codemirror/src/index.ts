@@ -26,9 +26,6 @@ import { arrowHandler } from "./utils";
 
 export const codeMirrorPluginKey = new PluginKey("codemirror");
 
-import { highlightDemo } from "./highlight";
-highlightDemo();
-
 export function codeMirrorExtension(
   codeViews: { [key: string]: CodeViewOptions })
 : ExtensionFn {

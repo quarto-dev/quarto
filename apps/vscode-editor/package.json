@@ -1,0 +1,52 @@
+{
+  "name": "quarto-vscode-editor",
+  "displayName": "Quarto Editor",
+  "description": "quarto visual editor",
+  "version": "0.0.1",
+  "private": true,
+  "license": "agpl-3.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quarto-dev/quarto.git"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:quarto.helloWorld"
+  ],
+  "main": "./out/main.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "quarto.helloWorld",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "yarn run esbuild",
+    "vscode:prepublish": "yarn run esbuild-base --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "yarn run esbuild-base --sourcemap",
+    "esbuild-watch": "yarn run esbuild-base --sourcemap --watch",
+    "lint": "eslint src --ext ts"
+  },
+  "dependencies": {
+    "core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/test-electron": "^2.2.0",
+    "@vscode/vsce": "^2.15.0",
+    "esbuild": "^0.14.21",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.3"
+  }
+}

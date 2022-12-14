@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2019"],
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "mathjax-full": ["./types/mathjax-full"]
+    },
+    "sourceMap": true,
+    "resolveJsonModule": true,
+  },
+  "exclude": ["node_modules"],
+  "extends": "tsconfig/base.json",
+  "include": ["src"]
+}

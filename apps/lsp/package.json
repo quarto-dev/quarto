@@ -1,0 +1,33 @@
+{
+  "name": "quarto-lsp",
+  "version": "0.0.0",
+  "private": true,
+  "license": "agpl-3.0",
+  "scripts": {
+    "build": "esbuild ./src/server.ts --bundle --outfile=dist/quarto-lsp.js --external:vscode --format=cjs --platform=node",
+    "vscode-dev": "yarn run build -- --sourcemap --watch",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "lint": "tsc --noEmit && TIMING=1 eslint \"src/**/*.ts*\"",
+    "start": "node dist/quarto-lsp.js"
+  },
+  "dependencies": {
+    "file-url": "^4.0.0",
+    "js-yaml": "^4.1.0",
+    "markdown-it": "^12.3.2",
+    "mathjax-full": "^3.2.0",
+    "uuid": "^8.3.2",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-textdocument": "^1.0.4",
+    "vscode-uri": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^15.12.2",
+    "@types/js-yaml": "^4.0.5",
+    "@types/markdown-it": "^12.2.3",
+    "esbuild": "^0.16.5",
+    "eslint": "^7.32.0",
+    "eslint-config-custom-server": "*",  
+    "tsconfig": "*",
+    "typescript": "^4.5.2"
+  }
+}

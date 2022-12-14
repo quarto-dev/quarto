@@ -1,7 +1,7 @@
 {
-  "name": "quarto-vscode-editor",
-  "displayName": "Quarto Editor",
-  "description": "quarto visual editor",
+  "name": "quarto-v2",
+  "displayName": "Quarto",
+  "description": "quarto extension",
   "version": "0.0.1",
   "private": true,
   "license": "agpl-3.0",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/quarto-dev/quarto.git"
+    "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
   },
   "categories": [
     "Other"

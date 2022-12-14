@@ -95,7 +95,7 @@ connection.onInitialized(async () => {
   }
 });
 
-connection.onCompletion(async (textDocumentPosition, _token) => {
+connection.onCompletion(async (textDocumentPosition) => {
   const doc = resolveDoc(textDocumentPosition.textDocument);
   if (doc) {
     return await onCompletion(
@@ -108,7 +108,7 @@ connection.onCompletion(async (textDocumentPosition, _token) => {
   }
 });
 
-connection.onHover(async (textDocumentPosition, _token) => {
+connection.onHover(async (textDocumentPosition) => {
   const doc = resolveDoc(textDocumentPosition.textDocument);
   if (doc) {
     if (onHover) {
@@ -121,7 +121,7 @@ connection.onHover(async (textDocumentPosition, _token) => {
   }
 });
 
-connection.onSignatureHelp(async (textDocumentPosition, _token) => {
+connection.onSignatureHelp(async (textDocumentPosition) => {
   const doc = resolveDoc(textDocumentPosition.textDocument);
   if (doc) {
     return await onSignatureHelp(doc, textDocumentPosition.position);

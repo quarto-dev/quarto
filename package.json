@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev-writer": "turbo run dev --filter writer*",
+    "dev-vscode": "turbo run dev --filter quarto-v2...",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "watch": "concurrently 'tsc --watch --noEmit --project apps/writer/tsconfig.json' 'tsc --watch --noEmit  --project packages/writer-server/tsconfig.json'"

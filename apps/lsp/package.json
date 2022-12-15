@@ -4,7 +4,7 @@
   "private": true,
   "license": "agpl-3.0",
   "scripts": {
-    "build": "node build.mjs",
+    "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "lint": "tsc --noEmit && TIMING=1 eslint \"src/**/*.ts*\"",
@@ -29,6 +29,7 @@
     "eslint": "^7.32.0",
     "eslint-config-custom-server": "*",
     "tsconfig": "*",
+    "tsx": "^3.12.1",
     "typescript": "^4.5.2"
   }
 }

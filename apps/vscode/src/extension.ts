@@ -1,29 +1,86 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import { lines } from 'core';
-import * as vscode from 'vscode';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) RStudio, PBC. All rights reserved.
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+import * as vscode from "vscode";
+import QuartoLinkProvider, { OpenLinkCommand } from "./providers/link";
+import QuartoDocumentSymbolProvider from "./providers/symbol-document";
+import QuartoFoldingProvider from "./providers/folding";
+import { PathCompletionProvider } from "./providers/completion-path";
+import QuartoSelectionRangeProvider from "./providers/selection-range";
+import QuartoWorkspaceSymbolProvider from "./providers/symbol-workspace";
+import { MarkdownEngine } from "./markdown/engine";
+import { activateBackgroundHighlighter } from "./providers/background";
+import { kQuartoDocSelector } from "./core/doc";
+import { Command, CommandManager } from "./core/command";
+import { newDocumentCommands } from "./providers/newdoc";
+import { insertCommands } from "./providers/insert";
+import { activateDiagram } from "./providers/diagram/diagram";
+import { activateOptionEnterProvider } from "./providers/option";
+import { formattingCommands } from "./providers/format";
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "quarto" is now active!');
+export function activateCommon(
+  context: vscode.ExtensionContext,
+  engine: MarkdownEngine,
+  commands?: Command[]
+) {
+  // core language features
+  const symbolProvider = new QuartoDocumentSymbolProvider(engine);
+  context.subscriptions.push(
+    vscode.Disposable.from(
+      vscode.languages.registerDocumentSymbolProvider(
+        kQuartoDocSelector,
+        symbolProvider
+      ),
+      vscode.languages.registerDocumentLinkProvider(
+        kQuartoDocSelector,
+        new QuartoLinkProvider(engine)
+      ),
+      vscode.languages.registerFoldingRangeProvider(
+        kQuartoDocSelector,
+        new QuartoFoldingProvider(engine)
+      ),
+      vscode.languages.registerSelectionRangeProvider(
+        kQuartoDocSelector,
+        new QuartoSelectionRangeProvider(engine)
+      ),
+      vscode.languages.registerWorkspaceSymbolProvider(
+        new QuartoWorkspaceSymbolProvider(symbolProvider)
+      ),
+      PathCompletionProvider.register(engine)
+    )
+  );
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('quarto.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		const message =  lines('Hello\World\nfrom\nvscode!').join("--");
+  // option enter handler
+  activateOptionEnterProvider(context, engine);
 
-		vscode.window.showInformationMessage(message);
-	});
+  // background highlighter
+  activateBackgroundHighlighter(context, engine);
 
-	context.subscriptions.push(disposable);
+  // diagramming
+  const diagramCommands = activateDiagram(context, engine);
+
+  // commands (common + passed)
+  const commandManager = new CommandManager();
+  commandManager.register(new OpenLinkCommand(engine));
+  for (const cmd of formattingCommands()) {
+    commandManager.register(cmd);
+  }
+  for (const cmd of newDocumentCommands()) {
+    commandManager.register(cmd);
+  }
+  for (const cmd of insertCommands(engine)) {
+    commandManager.register(cmd);
+  }
+  for (const cmd of diagramCommands) {
+    commandManager.register(cmd);
+  }
+  if (commands) {
+    for (const cmd of commands) {
+      commandManager.register(cmd);
+    }
+  }
+  context.subscriptions.push(commandManager);
 }
-
-// This method is called when your extension is deactivated
-export function deactivate() {}

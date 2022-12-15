@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.58.0 (Unreleased)
+
+- Move to new repo (https://github.com/quarto-dev/quarto/tree/main/apps/vscode)
+
 ## 1.57.0 (Release on 3 December 2022)
 
 - Enable preview of XML files (useful for JATS)

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.59.0 (Release on 15 December 2022)
+
+- Repo cleanup
+
 ## 1.58.0 (Release on 15 December 2022)
 
 - Move to new repo (https://github.com/quarto-dev/quarto/tree/main/apps/vscode)

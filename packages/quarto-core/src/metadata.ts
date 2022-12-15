@@ -5,7 +5,7 @@
 
 import path from "path";
 import fs from "fs";
-
+     
 import * as yaml from "js-yaml";
 import { ExecFileSyncOptions } from "child_process";
 
@@ -20,7 +20,7 @@ export function parseFrontMatterStr(str: string) {
 
 export function projectDirForDocument(doc: string) {
   let dir = path.dirname(doc);
-  while (true) {
+  for (;;) {
     if (hasQuartoProject(dir)) {
       return dir;
     } else {
@@ -39,7 +39,7 @@ export function metadataFilesForDocument(doc: string) {
   const files: string[] = [];
 
   let dir = path.dirname(doc);
-  while (true) {
+  for (;;) {
     if (hasQuartoProject(dir)) {
       files.push(
         ...["_quarto.yml", "_quarto.yaml"]
@@ -75,6 +75,10 @@ export function hasQuartoProject(dir?: string) {
   }
 }
 
+// context
+// cli
+// quarto-core
+
 export function yamlFromMetadataFile(file: string): Record<string, unknown> {
   const yamlSrc = fs.readFileSync(file, "utf-8");
   try {
@@ -94,7 +98,7 @@ export type QuartoProjectConfig = {
     project: {
       type: string;
       preview: {
-        serve: {};
+        serve: { /* */ };
       };
     };
   };

@@ -7,7 +7,7 @@
 import { Hover, Position } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
-import { mathRange } from "../../core/markdown/markdown";
+import { mathRange } from "../../core/markdown";
 import { mathjaxTypesetToMarkdown } from "../../core/mathjax";
 
 export function mathHover(doc: TextDocument, pos: Position): Hover | null {

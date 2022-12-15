@@ -6,20 +6,19 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Range, Position } from "vscode-languageserver-types";
 
-import { CompletionContext, CompletionItem } from "vscode-languageserver/node";
+import { CompletionItem } from "vscode-languageserver/node";
 import { filePathForDoc } from "../../../core/doc";
 import { bypassRefIntelligence } from "../../../core/refs";
 
 import { EditorContext, quarto } from "../../../quarto/quarto";
-import { projectDirForDocument } from "../../../shared/metadata";
+import { projectDirForDocument } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
 
 export async function refsCompletions(
   doc: TextDocument,
   pos: Position,
-  context: EditorContext,
-  _completionContext?: CompletionContext
+  context: EditorContext
 ): Promise<CompletionItem[] | null> {
   // bail if no quarto connection
   if (!quarto) {
@@ -46,7 +45,7 @@ export async function refsCompletions(
   if (atPos !== -1 && atPos > spacePos) {
     // everything between the @ and the cursor must match the cite pattern
     const tokenText = text.slice(atPos + 1, pos.character);
-    if (/[^@;\[\]\s\!\,]*/.test(tokenText)) {
+    if (/[^@;[\]\s!,]*/.test(tokenText)) {
       // make sure there is no text directly ahead (except bracket, space, semicolon)
       const nextChar = text.slice(pos.character, pos.character + 1);
       if (!nextChar || [";", " ", "]"].includes(nextChar)) {

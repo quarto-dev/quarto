@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 export function escapeRegExpCharacters(value: string): string {
-  return value.replace(/[\\\{\}\*\+\?\|\^\$\.\[\]\(\)]/g, "\\$&");
+  return value.replace(/[\\{}*+?|^$.[\]()]/g, "\\$&");
 }
 
 export function shQuote(value: string): string {

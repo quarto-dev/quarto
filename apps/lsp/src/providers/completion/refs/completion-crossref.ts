@@ -14,11 +14,11 @@ import {
   CompletionItemKind,
   MarkupKind,
 } from "vscode-languageserver/node";
-import { quartoProjectConfig } from "../../../shared/metadata";
-import { pathWithForwardSlashes } from "../../../shared/path";
+import { quartoProjectConfig } from "quarto-core/";
+import { pathWithForwardSlashes } from "core";
 
 import { quarto } from "../../../quarto/quarto";
-import { fileCrossrefIndexStorage } from "../../../shared/storage";
+import { fileCrossrefIndexStorage } from "quarto-core";
 
 export async function crossrefCompletions(
   token: string,

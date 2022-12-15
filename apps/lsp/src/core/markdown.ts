@@ -8,11 +8,10 @@ import { Range, Position } from "vscode-languageserver/node";
 import Token from "markdown-it/lib/token";
 
 import MarkdownIt from "markdown-it";
-import { mathPlugin } from "../../shared/markdownit-math";
-import { frontMatterPlugin } from "../../shared/markdownit-yaml";
+import { markdownitFrontMatterPlugin, markdownitMathPlugin } from "quarto-core";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { parseFrontMatterStr } from "../../shared/metadata";
+import { parseFrontMatterStr } from "quarto-core";
 
 export function mathRange(doc: TextDocument, pos: Position) {
   // see if we are in a math block
@@ -98,7 +97,7 @@ export function isLatexCodeBlock(token: Token) {
 function isBlockTypeAtPosition(types: string[], pos: Position) {
   return (token: Token) => {
     if (types.includes(token.type) && token.map) {
-      let [begin, end] = token.map;
+      const [begin, end] = token.map;
       return pos.line >= begin && pos.line < end;
     } else {
       return false;
@@ -114,8 +113,8 @@ class MarkdownTokens {
     if (!this.md_) {
       this.md_ = MarkdownIt("zero");
       this.md_.enable(kCodeBlockTokens);
-      this.md_.use(mathPlugin, { enableInlines: false });
-      this.md_.use(frontMatterPlugin);
+      this.md_.use(markdownitMathPlugin, { enableInlines: false });
+      this.md_.use(markdownitFrontMatterPlugin);
     }
 
     // (re)-primte cache if required
@@ -140,7 +139,7 @@ class MarkdownTokens {
 
 const markdownTokens = new MarkdownTokens();
 
-const kInlineMathPattern = /\$([^ ].*?[^\ ]?)\$/;
+const kInlineMathPattern = /\$([^ ].*?[^ ]?)\$/;
 const kSingleLineDisplayMathPattern = /\$\$([^\n]+?)\$\$/;
 
 function inlineMathRange(pos: Position, line: string, pattern: RegExp) {

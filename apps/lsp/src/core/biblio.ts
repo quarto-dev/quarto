@@ -11,15 +11,15 @@ tmp.setGracefulCleanup();
 import * as yaml from "js-yaml";
 
 import { quarto } from "../quarto/quarto";
-import { shQuote } from "../shared/strings";
+import { shQuote } from "core";
 import {
   metadataFilesForDocument,
   projectDirForDocument,
-} from "../shared/metadata";
+} from "quarto-core";
 import { filePathForDoc } from "./doc";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { documentFrontMatter } from "./markdown/markdown";
-import { pathWithForwardSlashes } from "../shared/path";
+import { documentFrontMatter } from "./markdown";
+import { pathWithForwardSlashes } from "core";
 
 export type CslRef = {
   id: string;
@@ -84,8 +84,7 @@ function biblioFile(path: string, csl?: string) {
     (!biblioFiles.has(path) || (biblioFiles.get(path)?.cached || 0) < mtimeMs)
   ) {
     // call pandoc to get refs
-    const refs: CslRef[] = [];
-
+   
     // create a temp file used as a target document for rendering citations
     const tmpDocPath = tmp.tmpNameSync();
     const tempDoc = [

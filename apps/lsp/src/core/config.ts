@@ -22,6 +22,7 @@ export class ExtensionConfig {
     return this.mathJaxTheme_;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public update(configuration: Record<string, any>) {
     this.quartoPath_ = configuration?.path || this.quartoPath_;
     this.mathJaxExtensions_ =
@@ -30,9 +31,9 @@ export class ExtensionConfig {
     this.mathJaxTheme_ = configuration?.mathjax?.theme || this.mathJaxTheme_;
   }
 
-  private quartoPath_: string = "";
+  private quartoPath_ = "";
   private mathJaxExtensions_: SupportedExtension[] = [];
-  private mathJaxScale_: number = 1;
+  private mathJaxScale_ = 1;
   private mathJaxTheme_: "light" | "dark" = "dark";
 }
 

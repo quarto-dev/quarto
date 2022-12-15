@@ -8,7 +8,7 @@ import * as fs from "fs";
 
 import * as uuid from "uuid";
 
-import { quartoCacheDir } from "./appdirs";
+import { quartoCacheDir } from './appdirs';
 
 export function fileCrossrefIndexStorage(file: string) {
   return fileScratchStorage(file, "xref.json");

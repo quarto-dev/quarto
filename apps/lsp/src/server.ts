@@ -124,7 +124,7 @@ connection.onHover(async (textDocumentPosition) => {
 connection.onSignatureHelp(async (textDocumentPosition) => {
   const doc = resolveDoc(textDocumentPosition.textDocument);
   if (doc) {
-    return await onSignatureHelp(doc, textDocumentPosition.position);
+    return await onSignatureHelp();
   } else {
     return null;
   }

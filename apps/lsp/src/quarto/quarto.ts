@@ -3,10 +3,12 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { URL } from "url";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Position, Range, CompletionItem } from "vscode-languageserver-types";
+
+import { initQuartoContext } from "quarto-core";
+
 import {
   filePathForDoc,
   isQuartoDoc,
@@ -15,7 +17,6 @@ import {
 } from "../core/doc";
 import { initializeAttrCompletionProvider, AttrToken } from "./quarto-attr";
 import { initializeQuartoYamlModule, QuartoYamlModule } from "./quarto-yaml";
-import { initQuartoContext } from "../shared/quarto";
 import { ExecFileSyncOptions } from "child_process";
 
 export interface EditorContext {

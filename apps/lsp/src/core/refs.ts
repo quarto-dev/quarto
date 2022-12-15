@@ -1,6 +1,6 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Position } from "vscode-languageserver-types";
-import { isContentPosition } from "./markdown/markdown";
+import { isContentPosition } from "./markdown";
 
 export function bypassRefIntelligence(
   doc: TextDocument,

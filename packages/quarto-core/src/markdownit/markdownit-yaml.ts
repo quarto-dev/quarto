@@ -9,8 +9,8 @@ import StateBlock from "markdown-it/lib/rules_block/state_block";
 
 // Typescript version of https://github.com/parksb/markdown-it-front-matter
 
-export function frontMatterPlugin(md: MarkdownIt, cb?: (yaml: any) => void) {
-  var min_markers = 3,
+export function markdownitFrontMatterPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
+  const min_markers = 3,
     marker_str = "-",
     marker_char = marker_str.charCodeAt(0),
     marker_len = marker_str.length;
@@ -21,12 +21,8 @@ export function frontMatterPlugin(md: MarkdownIt, cb?: (yaml: any) => void) {
     endLine: number,
     silent: boolean
   ) {
-    var pos,
+    let pos,
       nextLine,
-      marker_count,
-      token,
-      old_parent,
-      old_line_max,
       start_content,
       auto_closed = false,
       start = state.bMarks[startLine] + state.tShift[startLine],
@@ -47,7 +43,7 @@ export function frontMatterPlugin(md: MarkdownIt, cb?: (yaml: any) => void) {
       }
     }
 
-    marker_count = Math.floor((pos - start) / marker_len);
+    const marker_count = Math.floor((pos - start) / marker_len);
 
     if (marker_count < min_markers) {
       return false;
@@ -117,14 +113,14 @@ export function frontMatterPlugin(md: MarkdownIt, cb?: (yaml: any) => void) {
       break;
     }
 
-    old_parent = state.parentType;
-    old_line_max = state.lineMax;
+    const old_parent = state.parentType;
+    const old_line_max = state.lineMax;
     state.parentType = "root";
 
     // this will prevent lazy continuations from ever going past our end marker
     state.lineMax = nextLine;
 
-    token = state.push("front_matter", "", 0);
+    const token = state.push("front_matter", "", 0);
     token.hidden = true;
     token.markup = state.src.slice(startLine, pos);
     token.block = true;

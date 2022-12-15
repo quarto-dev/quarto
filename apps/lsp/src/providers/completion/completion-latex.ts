@@ -16,7 +16,7 @@ import {
   Range,
 } from "vscode-languageserver/node";
 
-import { isLatexPosition } from "../../core/markdown/markdown";
+import { isLatexPosition } from "../../core/markdown";
 
 interface LatexCommand {
   command: string;

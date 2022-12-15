@@ -3,7 +3,6 @@
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import { Position, TextDocument } from "vscode-languageserver-textdocument";
 import { ServerCapabilities, SignatureHelp } from "vscode-languageserver/node";
 
 export const kSignatureCapabilities: ServerCapabilities = {
@@ -15,9 +14,6 @@ export const kSignatureCapabilities: ServerCapabilities = {
   },
 };
 
-export async function onSignatureHelp(
-  doc: TextDocument,
-  pos: Position
-): Promise<SignatureHelp | null> {
+export async function onSignatureHelp(): Promise<SignatureHelp | null> {
   return null;
 }

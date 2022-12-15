@@ -11,7 +11,7 @@ import StateBlock from "markdown-it/lib/rules_block/state_block";
 // Fork of https://github.com/mjbvz/markdown-it-katex/ that doesn't render
 // (so has no depencency on katex or mathjax)
 
-export function mathPlugin(md: MarkdownIt, options: Record<string, undefined>) {
+export function markdownitMathPlugin(md: MarkdownIt, options: Record<string, undefined>) {
   options = options || {};
   const enableBareBlocks = !!options.enableBareBlocks;
   const enableInlines = !!options.enableInlines;
@@ -106,7 +106,7 @@ function isValidBlockDelim(state: StateInline, pos: number) {
 }
 
 function math_inline(state: StateInline, silent: boolean) {
-  var start, match, token, res, pos;
+  let match, token, res, pos;
 
   if (state.src[state.pos] !== "$") {
     return false;
@@ -125,7 +125,7 @@ function math_inline(state: StateInline, silent: boolean) {
   // This loop will assume that the first leading backtick can not
   // be the first character in state.src, which is known since
   // we have found an opening delimieter already.
-  start = state.pos + 1;
+  const start = state.pos + 1;
   match = start;
   while ((match = state.src.indexOf("$", match)) !== -1) {
     // Found potential $, look for escapes, pos will point to
@@ -186,11 +186,10 @@ function math_block_dollar(
   end: number,
   silent: boolean
 ) {
-  var lastLine,
+  let lastLine,
     next,
     lastPos,
     found = false,
-    token,
     pos = state.bMarks[start] + state.tShift[start],
     max = state.eMarks[start];
 
@@ -237,7 +236,7 @@ function math_block_dollar(
 
   state.line = next + 1;
 
-  token = state.push("math_block", "math", 0);
+  const token = state.push("math_block", "math", 0);
   token.block = true;
   token.content =
     (firstLine && firstLine.trim() ? firstLine + "\n" : "") +
@@ -254,7 +253,7 @@ function bare_math_block(
   end: number,
   silent: boolean
 ) {
-  var lastLine,
+  let lastLine,
     found = false,
     pos = state.bMarks[start] + state.tShift[start],
     max = state.eMarks[start];
@@ -314,7 +313,7 @@ function bare_math_block(
 }
 
 function math_inline_block(state: StateInline, silent: boolean) {
-  var start, match, token, res, pos;
+  let match, token, res, pos;
 
   if (state.src.slice(state.pos, state.pos + 2) !== "$$") {
     return false;
@@ -333,7 +332,7 @@ function math_inline_block(state: StateInline, silent: boolean) {
   // This loop will assume that the first leading backtick can not
   // be the first character in state.src, which is known since
   // we have found an opening delimieter already.
-  start = state.pos + 2;
+  const start = state.pos + 2;
   match = start;
   while ((match = state.src.indexOf("$$", match)) !== -1) {
     // Found potential $$, look for escapes, pos will point to

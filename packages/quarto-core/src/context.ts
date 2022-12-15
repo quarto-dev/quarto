@@ -8,7 +8,7 @@ import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
 import { ExecFileSyncOptions } from "child_process";
-import { execProgram } from "./exec";
+import { execProgram } from "core-server";
 
 export interface QuartoContext {
   available: boolean;
@@ -79,8 +79,8 @@ export function initQuartoContext(
       binPath: "",
       resourcePath: "",
       useCmd: false,
-      runQuarto: (_options: ExecFileSyncOptions, ..._args: string[]) => "",
-      runPandoc: (_options: ExecFileSyncOptions, ..._args: string[]) => "",
+      runQuarto: () => "",
+      runPandoc: () => "",
     };
   }
 }
@@ -106,7 +106,7 @@ function detectQuarto(quartoPath: string): QuartoInstallation | undefined {
     if (windows) {
       try {
         readQuartoInfo(quartoPath + ".cmd");
-      } catch (e) {}
+      } catch (e) { /* */ }
     }
   }
   // return version if we have it

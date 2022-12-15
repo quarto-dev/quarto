@@ -58,8 +58,8 @@ export function isQuartoRevealDoc(doc: TextDocument) {
       if (match) {
         const yaml = match[0];
         return (
-          !!yaml.match(/^format\:\s+revealjs\s*$/gm) ||
-          !!yaml.match(/^[ \t]*revealjs\:\s*(default)?\s*$/gm)
+          !!yaml.match(/^format:\s+revealjs\s*$/gm) ||
+          !!yaml.match(/^[ \t]*revealjs:\s*(default)?\s*$/gm)
         );
       }
     }

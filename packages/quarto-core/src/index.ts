@@ -13,11 +13,8 @@
  *
  */
 
-
-export * from './promise';
-export * from './wordbreak';
-export * from './jsonrpc';
-export * from './text';
-export * from './path';
-export * from './strings';
-
+export * from './context';
+export * from './metadata';
+export * from './appdirs';
+export * from './markdownit';
+export * from './storage';

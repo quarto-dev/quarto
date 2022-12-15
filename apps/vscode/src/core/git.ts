@@ -10,10 +10,10 @@ import * as os from "os";
 import { lines } from "./text";
 import { execProgram } from "core-server";
 
-export async function ensureGitignore(
+export function ensureGitignore(
   dir: string,
   entries: string[]
-): Promise<boolean> {
+): boolean {
   // if .gitignore exists, then ensure it has the requisite entries
   const gitignorePath = path.join(dir, ".gitignore");
   if (fs.existsSync(gitignorePath)) {
@@ -37,7 +37,7 @@ export async function ensureGitignore(
   } else {
     // if it doesn't exist then auto-create if we are in a git project or we had the force flag
     try {
-      const result = await execProgram("git", ["rev-parse"], {
+      const result = execProgram("git", ["rev-parse"], {
         cwd: dir,
       });
       if (result !== undefined) {

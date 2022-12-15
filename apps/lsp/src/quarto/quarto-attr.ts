@@ -116,9 +116,6 @@ export function initializeAttrCompletionProvider(resourcesPath: string) {
         // remove leading . if this is a simple div
         const value = normalizedValue(attr.value, simpleDiv);
 
-        // handle inserting cursor between ending quotes
-        const quotes = value.endsWith('""');
-
         const edit = TextEdit.replace(
           Range.create(
             context.position.row,

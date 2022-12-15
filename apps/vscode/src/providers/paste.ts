@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) RStudio, PBC. All rights reserved.
  *  Copyright (c) 2017 张宇

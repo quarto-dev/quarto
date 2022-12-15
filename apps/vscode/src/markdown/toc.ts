@@ -13,9 +13,8 @@ import { parseFrontMatterStr } from "../core/yaml";
 import { isExecutableLanguageBlock } from "./language";
 
 export enum TocEntryType {
-  Title,
-  Heading,
-  CodeCell,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Title, Heading, CodeCell,
 }
 
 export interface TocEntry {
@@ -151,7 +150,7 @@ export class MarkdownTableOfContents {
           ),
         });
       } else if (token.type === kFrontMatter) {
-        const meta = parseFrontMatterStr(token.markup);
+        const meta = parseFrontMatterStr(token.markup) as any;
         if (meta?.["title"]) {
           toc.push({
             type: TocEntryType.Title,
@@ -190,7 +189,7 @@ export class MarkdownTableOfContents {
 
     // Get full range of section
     return toc.map((entry, startIndex): TocEntry => {
-      if (entry.type == TocEntryType.Heading) {
+      if (entry.type === TocEntryType.Heading) {
         let end: number | undefined = undefined;
         for (let i = startIndex + 1; i < toc.length; ++i) {
           if (toc[i].level <= entry.level) {

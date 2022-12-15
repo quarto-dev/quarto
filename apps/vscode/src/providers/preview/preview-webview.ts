@@ -84,7 +84,7 @@ export class QuartoPreviewWebview extends QuartoWebview<string> {
         this._webviewPanel.webview.postMessage({
           type: "didChangeActiveColorTheme",
           theme:
-            window.activeColorTheme.kind == ColorThemeKind.Light
+            window.activeColorTheme.kind === ColorThemeKind.Light
               ? "light"
               : "dark",
         });

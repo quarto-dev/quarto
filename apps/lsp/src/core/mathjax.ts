@@ -73,7 +73,7 @@ export function mathjaxLoadedExtensions() {
 
 export function mathjaxTypesetToMarkdown(tex: string): MarkupContent | null {
   // remove crossref if necessary
-  tex = tex.replace(/\$\$\s+\{#eq[\w\-]+\}\s*$/, "");
+  tex = tex.replace(/\$\$\s+\{#eq[\w-]+\}\s*$/, "");
 
   const typesetOpts = {
     scale: config.mathJaxScale(),
@@ -86,10 +86,11 @@ export function mathjaxTypesetToMarkdown(tex: string): MarkupContent | null {
       kind: MarkupKind.Markdown,
       value: `![equation](${md})`,
     };
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       kind: MarkupKind.Markdown,
-      value: "**LaTeX Error**:\n" + error.message || "Unknown error",
+      value: "**LaTeX Error**:\n" + message || "Unknown error",
     };
   }
 }

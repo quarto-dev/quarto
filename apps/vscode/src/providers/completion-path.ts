@@ -12,10 +12,13 @@ import { kQuartoDocSelector, resolveQuartoDocUri } from "../core/doc";
 import QuartoLinkProvider from "./link";
 
 enum CompletionContextKind {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Link, // [...](|)
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   ReferenceLink, // [...][|]
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   LinkDefinition, // []: | // TODO: not implemented
 }
 

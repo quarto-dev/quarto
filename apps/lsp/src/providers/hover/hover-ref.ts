@@ -27,7 +27,7 @@ export function refHover(doc: TextDocument, pos: Position): Hover | null {
   const atPos = text.lastIndexOf("@");
   if (atPos !== -1) {
     const citeText = line.slice(atPos);
-    const citeMatch = citeText.match(/^@[^@;\[\]\s\!\,]+/);
+    const citeMatch = citeText.match(/^@[^@;[\]\s!,]+/);
     if (citeMatch) {
       const citeId = citeMatch[0].replace(/\.$/, "").slice(1);
       const range = Range.create(

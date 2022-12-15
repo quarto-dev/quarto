@@ -37,7 +37,7 @@ export async function attrCompletions(context: EditorContext) {
   }
 }
 
-const kBlockAttrRegex = /^([\t >]*(`{3,}|\#+|\:{3,}).*?\{)(.*?)\}[ \t]*$/;
+const kBlockAttrRegex = /^([\t >]*(`{3,}|#+|:{3,}).*?\{)(.*?)\}[ \t]*$/;
 function blockCompletionToken(context: EditorContext): AttrToken | undefined {
   return matchCompletionToken(context, kBlockAttrRegex, (type) => {
     return type.indexOf(":") !== -1
@@ -48,7 +48,7 @@ function blockCompletionToken(context: EditorContext): AttrToken | undefined {
   });
 }
 
-const kSimpleDivRegex = /(^[\t >]*(?:\:{3,})\s+)([\w-]+)\s*$/;
+const kSimpleDivRegex = /(^[\t >]*(?::{3,})\s+)([\w-]+)\s*$/;
 function simpleDivToken(context: EditorContext): AttrToken | undefined {
   const match = context.line.match(kSimpleDivRegex);
   // if we are at the end then return a token
@@ -65,9 +65,9 @@ function simpleDivToken(context: EditorContext): AttrToken | undefined {
 }
 
 const kFigureAttrRegex =
-  /^([\t >]*(\!\[[^\]]*\]\([^\]]+\))\{)([^\}]*)\}[ \t]*$/;
+  /^([\t >]*(!\[[^\]]*\]\([^\]]+\))\{)([^}]*)\}[ \t]*$/;
 function figureCompletionToken(context: EditorContext): AttrToken | undefined {
-  return matchCompletionToken(context, kFigureAttrRegex, (type) => "figure");
+  return matchCompletionToken(context, kFigureAttrRegex, () => "figure");
 }
 
 function matchCompletionToken(

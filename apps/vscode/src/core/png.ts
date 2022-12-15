@@ -60,10 +60,14 @@ export default class PngImage {
     // we don't try to read them by default -- leave the code here
     // though in case we need it at some point
     this.bitDepth = chunk.data.slice(8, 9)[0];
-    if (this.bitDepth !== 8) throw new Error("bitDepth not supported");
+    if (this.bitDepth !== 8) {
+      throw new Error("bitDepth not supported");
+    }
 
     this.colourType = chunk.data.slice(9, 10)[0];
-    if (this.colourType !== 6) throw new Error("colourType not supported");
+    if (this.colourType !== 6) {
+      throw new Error("colourType not supported");
+    }
 
     this.compressionMethod = chunk.data.slice(10, 11)[0];
     if (this.compressionMethod !== 0) {
@@ -71,7 +75,9 @@ export default class PngImage {
     }
 
     this.filterMethod = chunk.data.slice(11, 12)[0];
-    if (this.filterMethod !== 0) throw new Error("filterMethod not supported");
+    if (this.filterMethod !== 0) {
+      throw new Error("filterMethod not supported");
+    }
 
     this.interlaceMethod = chunk.data.slice(12, 13)[0];
     if (this.interlaceMethod !== 0) {

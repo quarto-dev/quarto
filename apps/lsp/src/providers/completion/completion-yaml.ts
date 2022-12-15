@@ -75,8 +75,8 @@ export async function yamlCompletions(context: EditorContext) {
 }
 
 function decodeEntities(encodedString: string) {
-  var translate_re = /&(nbsp|amp|quot|lt|gt);/g;
-  var translate: Record<string, string> = {
+  const translate_re = /&(nbsp|amp|quot|lt|gt);/g;
+  const translate: Record<string, string> = {
     nbsp: " ",
     amp: "&",
     quot: '"',
@@ -88,7 +88,7 @@ function decodeEntities(encodedString: string) {
       return translate[entity];
     })
     .replace(/&#(\d+);/gi, function (_match, numStr) {
-      var num = parseInt(numStr, 10);
+      const num = parseInt(numStr, 10);
       return String.fromCharCode(num);
     });
 }

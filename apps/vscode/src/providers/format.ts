@@ -47,7 +47,7 @@ class ToggleCommand implements Command {
       let cursorPos = selection.active;
       const shift = shifts
         .map(([pos, s]) =>
-          selection.start.line == pos.line &&
+          selection.start.line === pos.line &&
           selection.start.character >= pos.character
             ? s
             : 0
@@ -98,7 +98,7 @@ class ToggleCommand implements Command {
         } else {
           // Select word under cursor
           let wordRange = editor.document.getWordRangeAtPosition(cursorPos);
-          if (wordRange == undefined) {
+          if (wordRange === undefined) {
             wordRange = selection;
           }
           // One special case: toggle strikethrough in task list
@@ -205,7 +205,7 @@ function wrapRange(
     if (!isSelected) {
       if (!range.isEmpty) {
         // means quick styling
-        if (cursor.character == range.end.character) {
+        if (cursor.character === range.end.character) {
           newCursorPos = cursor.with({
             character: cursor.character + shift - ptnLength,
           });
@@ -241,7 +241,7 @@ function wrapRange(
     if (!isSelected) {
       if (!range.isEmpty) {
         // means quick styling
-        if (cursor.character == range.end.character) {
+        if (cursor.character === range.end.character) {
           newCursorPos = cursor.with({
             character: cursor.character + shift + ptnLength,
           });
@@ -310,8 +310,8 @@ function getContext(
     )
   );
 
-  if (rightText == endPattern) {
-    if (leftText == startPattern) {
+  if (rightText === endPattern) {
+    if (leftText === startPattern) {
       return `${startPattern}|${endPattern}`;
     } else {
       return `${startPattern}text|${endPattern}`;

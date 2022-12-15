@@ -31,8 +31,8 @@ import {
 import { renderActiveAssist, renderWebviewHtml } from "./render-assist";
 
 enum UpdateMode {
-  Sticky = "sticky",
-  Live = "live",
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Sticky = "sticky", Live = "live",
 }
 
 export class QuartoAssistViewProvider

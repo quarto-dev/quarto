@@ -63,7 +63,7 @@ export function activateBackgroundHighlighter(
           engine,
           highlightingConfig.delayMs(),
           true,
-          event.contentChanges.length == 1
+          event.contentChanges.length === 1
             ? event.contentChanges[0].range.start
             : undefined
         );

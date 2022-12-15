@@ -36,7 +36,7 @@ export async function onCompletion(
   const trigger = completionContext?.triggerCharacter;
   const context = editorContext(doc, pos, explicit, trigger);
   return (
-    (await refsCompletions(doc, pos, context, completionContext)) ||
+    (await refsCompletions(doc, pos, context)) ||
     (await attrCompletions(context)) ||
     (await latexCompletions(doc, pos, completionContext)) ||
     (await yamlCompletions(context)) ||

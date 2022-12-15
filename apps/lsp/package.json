@@ -1,5 +1,5 @@
 {
-  "name": "lsp",
+  "name": "quarto-lsp",
   "version": "0.0.0",
   "private": true,
   "license": "agpl-3.0",

@@ -19,7 +19,12 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "editor": "*"
+    "@blueprintjs/core": "^4.13.0",
+    "@blueprintjs/icons": "^4.11.0",
+    "@blueprintjs/popover2": "^1.10.2",
+    "@blueprintjs/select": "^4.8.12",
+    "editor": "*",
+    "normalize.css": "^8.0.1"
   },
   "devDependencies": {
     "@types/vscode-webview": "^1.57.0",

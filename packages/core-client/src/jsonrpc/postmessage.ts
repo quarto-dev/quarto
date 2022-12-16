@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * postmessage.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,7 +13,18 @@
  *
  */
 
-export * from './jsonrpc/browser';
-export * from './jsonrpc/postmessage';
+
+import { JsonRpcServerMethod } from "core";
+
+// https://github.com/statianzo/pmrpc/blob/master/src/JsonRpc.ts
+
+export function jsonRpcPostMessageRequestTransport() {
+  //
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function jsonRpcPostMessageServer(_methods: Record<string,JsonRpcServerMethod>) {
+  //
+}
 
 

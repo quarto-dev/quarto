@@ -19,7 +19,7 @@ import path from "path";
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 
 import { 
   Dictionary, 
@@ -142,9 +142,9 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
   }
 }
 
-export function dictionaryServerMethods(options: DictionaryServerOptions) : Record<string, JSONRpcServerMethod> {
+export function dictionaryServerMethods(options: DictionaryServerOptions) : Record<string, JsonRpcServerMethod> {
   const server = dictionaryServer(options);
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kDictionaryAvailableDictionaries]: () => server.availableDictionaries(),
     [kDictionaryGetDictionary]: args => server.getDictionary(args[0]),
     [kDictionaryGetUserDictionary]: () => server.getUserDictionary(),

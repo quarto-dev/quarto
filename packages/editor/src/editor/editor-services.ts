@@ -14,7 +14,7 @@
  *
  */
 
-import { JsonRpcRequestTransport } from "core-client";
+import { JsonRpcRequestTransport } from "core";
 
 import {
   Dictionary,

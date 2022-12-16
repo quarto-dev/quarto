@@ -15,7 +15,7 @@
 
 import fetch from "cross-fetch";
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { DOIResult, DOIServer, kDoiFetchCsl } from "editor-types"
 
 import { handleResponseWithStatus } from "./response";
@@ -35,9 +35,9 @@ export function doiServer() : DOIServer {
   }
 }
 
-export function doiServerMethods() : Record<string, JSONRpcServerMethod> {
+export function doiServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = doiServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kDoiFetchCsl]: args => server.fetchCSL(args[0])
   };
   return methods;

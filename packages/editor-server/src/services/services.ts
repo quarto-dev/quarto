@@ -18,7 +18,7 @@ import { EditorServices } from "editor-types";
 
 import { mathServer, mathServerMethods } from "./math/math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
-import { JSONRpcServerMethod } from 'core-server';
+import { JsonRpcServerMethod } from 'core';
 
 export interface EditorServicesOptions {
   dictionary: DictionaryServerOptions;
@@ -33,7 +33,7 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
 } 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorServicesMethods(options: EditorServicesOptions): Record<string,JSONRpcServerMethod> {
+export function editorServicesMethods(options: EditorServicesOptions): Record<string,JsonRpcServerMethod> {
   return {
     ...mathServerMethods(),
     ...dictionaryServerMethods(options.dictionary)

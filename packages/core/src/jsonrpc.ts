@@ -13,6 +13,11 @@
  *
  */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonRpcRequestTransport = (method: string, params: any[] | Record<string, unknown> | undefined) => Promise<any>;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonRpcServerMethod = (params: any) => Promise<unknown>;
 
 export interface JsonRpcError {
   code: number;

@@ -14,7 +14,7 @@
  *
  */
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { kXRefIndexForFile, kXRefQuartoIndexForFile, kXRefQuartoXRefForId, kXRefXRefForId, XRefs, XRefServer } from "editor-types";
 
 export function xrefServer() : XRefServer {
@@ -34,9 +34,9 @@ export function xrefServer() : XRefServer {
   }
 }
 
-export function xrefServerMethods() : Record<string, JSONRpcServerMethod> {
+export function xrefServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = xrefServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kXRefIndexForFile]: args => server.indexForFile(args[0]),
     [kXRefXRefForId]: args => server.xrefForId(args[0], args[1]),
     [kXRefQuartoIndexForFile]: args => server.quartoIndexForFile(args[0]),

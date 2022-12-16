@@ -1,5 +1,5 @@
 /*
- * jsonrpc.ts
+ * browser.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,10 +15,7 @@
 
 import ClientBrowser from "jayson/lib/client/browser";
 
-import { jsonRpcError } from "core";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type JsonRpcRequestTransport = (method: string, params: any[] | Record<string, unknown> | undefined) => Promise<any>;
+import { jsonRpcError, JsonRpcRequestTransport } from "core";
 
 export function jsonRpcBrowserRequestTransport(url: string) : JsonRpcRequestTransport {
 

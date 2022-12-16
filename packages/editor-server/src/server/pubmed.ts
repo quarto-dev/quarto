@@ -15,7 +15,7 @@
 
 import fetch from "cross-fetch";
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { kPubMedSearch, kStatusOK, PubMedDocument, PubMedResult, PubMedServer } from "editor-types";
 
 import { handleResponseWithStatus } from "./response";
@@ -95,9 +95,9 @@ export function pubMedServer(options: PubMedServerOptions) : PubMedServer {
   }
 }
 
-export function pubMedServerMethods(options: PubMedServerOptions) : Record<string, JSONRpcServerMethod> {
+export function pubMedServerMethods(options: PubMedServerOptions) : Record<string, JsonRpcServerMethod> {
   const server = pubMedServer(options);
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kPubMedSearch]: args => server.search(args[0])
   }
   return methods;

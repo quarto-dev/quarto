@@ -13,7 +13,7 @@
  *
  */
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { kMathMathjaxTypesetSvg, MathjaxTypesetOptions, MathServer } from "editor-types";
 
 import { mathjaxTypeset } from "./mathjax";
@@ -26,9 +26,9 @@ export function mathServer() : MathServer {
   };
 }
 
-export function mathServerMethods() : Record<string, JSONRpcServerMethod> {
+export function mathServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = mathServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kMathMathjaxTypesetSvg]: args => server.mathjaxTypeset(args[0], args[1]),
   }
   return methods;

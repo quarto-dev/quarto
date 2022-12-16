@@ -15,7 +15,7 @@
 
 import fetch from "cross-fetch";
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 
 import { DataCiteRecord, DataCiteResult, DataCiteServer, kDataCiteSearch, kStatusError, kStatusOK } from "editor-types";
 
@@ -67,9 +67,9 @@ export function dataCiteServer() : DataCiteServer {
   }
 }
 
-export function dataCiteServerMethods() : Record<string, JSONRpcServerMethod> {
+export function dataCiteServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = dataCiteServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kDataCiteSearch]: args => server.search(args[0])
   }
   return methods;

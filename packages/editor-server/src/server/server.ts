@@ -23,7 +23,7 @@ import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
-import { JSONRpcServerMethod } from 'core-server';
+import { JsonRpcServerMethod } from 'core';
 
 export interface EditorServerOptions {
   resourcesDir: string;
@@ -45,7 +45,7 @@ export function editorServer(options: EditorServerOptions) : EditorServer {
   };
 }
 
-export function editorServerMethods(options: EditorServerOptions): Record<string,JSONRpcServerMethod> {
+export function editorServerMethods(options: EditorServerOptions): Record<string,JsonRpcServerMethod> {
   return {
     ...pandocServerMethods(options),
     ...doiServerMethods(),

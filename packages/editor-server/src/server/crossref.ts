@@ -15,7 +15,7 @@
 
 import fetch from "cross-fetch";
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { CrossrefMessage, CrossrefServer, CrossrefWork, kCrossrefWorks, kStatusOK } from "editor-types";
 
 import { handleResponseWithStatus } from "./response";
@@ -54,9 +54,9 @@ export function crossrefServer(options: CrossrefServerOptions) : CrossrefServer 
   };
 }
 
-export function crossrefServerMethods(options: CrossrefServerOptions) : Record<string, JSONRpcServerMethod> {
+export function crossrefServerMethods(options: CrossrefServerOptions) : Record<string, JsonRpcServerMethod> {
   const server = crossrefServer(options);
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kCrossrefWorks]: args => server.works(args[0])
   };
   return methods;

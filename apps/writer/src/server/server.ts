@@ -13,7 +13,7 @@
  *
  */
 
-import { JsonRpcRequestTransport } from "core-client";
+import { JsonRpcRequestTransport } from "core";
 import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, WriterServer } from "writer-types";
 
 

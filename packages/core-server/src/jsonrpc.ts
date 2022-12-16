@@ -14,13 +14,10 @@
  */
 
 
-import { jsonRpcError } from 'core';
+import { jsonRpcError, JsonRpcServerMethod } from 'core';
 import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type JSONRpcServerMethod = (params: any) => Promise<unknown>;
-
-export function jaysonServerMethods(methods: Record<string,JSONRpcServerMethod>) {
+export function jaysonServerMethods(methods: Record<string,JsonRpcServerMethod>) {
   const jaysonMethods: Record<string,jayson.Method> = {};
   Object.keys(methods).forEach(method => {
     jaysonMethods[method] = jsonRpcMethod(methods[method]);

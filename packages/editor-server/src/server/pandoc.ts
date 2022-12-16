@@ -18,6 +18,8 @@ import stream from 'stream';
 import path from 'path';
 import * as child_process from "child_process";
 
+import { JsonRpcServerMethod } from 'core';
+
 import { 
   BibliographyResult, 
   PandocAst, 
@@ -32,10 +34,7 @@ import {
   kPandocCitationHtml, 
 } from "editor-types";
 
-import jayson from 'jayson'
-
 import { EditorServerOptions } from './server';
-import { jsonRpcMethod, JSONRpcServerMethod } from 'core-server';
 
 
 export function pandocServer(options: EditorServerOptions) : PandocServer {
@@ -154,9 +153,9 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
   };
 }
 
-export function pandocServerMethods(options: EditorServerOptions) : Record<string, JSONRpcServerMethod> {
+export function pandocServerMethods(options: EditorServerOptions) : Record<string, JsonRpcServerMethod> {
   const server = pandocServer(options);
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kPandocGetCapabilities]: () => server.getCapabilities(),
     [kPandocMarkdownToAst]: args => server.markdownToAst(args[0], args[1], args[2]),
     [kPandocAstToMarkdown]: args => server.astToMarkdown(args[0], args[1], args[2]),

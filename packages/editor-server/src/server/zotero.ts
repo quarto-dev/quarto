@@ -14,7 +14,7 @@
  *
  */
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { kZoteroBetterBibtexExport, kZoteroGetActiveCollectionSpecs, kZoteroGetCollections, kZoteroGetLibraryNames, kZoteroValidateWebApiKey, ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
 
 export function zoteroServer(): ZoteroServer {
@@ -66,9 +66,9 @@ export function zoteroServer(): ZoteroServer {
   };
 }
 
-export function zoteroServerMethods() : Record<string, JSONRpcServerMethod> {
+export function zoteroServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = zoteroServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kZoteroValidateWebApiKey]: args => server.validateWebAPIKey(args[0]),
     [kZoteroGetCollections]: args => server.getCollections(args[0], args[1], args[2], args[3]),
     [kZoteroGetLibraryNames]: () => server.getLibraryNames(),

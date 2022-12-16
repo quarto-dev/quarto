@@ -13,7 +13,7 @@
  *
  */
 
-import { JSONRpcServerMethod } from "core-server";
+import { JsonRpcServerMethod } from "core";
 import { EnvironmentServer, kEnvironmentGetRPackageCitations, kEnvironmentGetRPackageState, RPackageCitation, RPackageState } from "editor-types";
 
 export function environmentServer() : EnvironmentServer {
@@ -28,9 +28,9 @@ export function environmentServer() : EnvironmentServer {
   };
 }
 
-export function environmentServerMethods() : Record<string, JSONRpcServerMethod> {
+export function environmentServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = environmentServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kEnvironmentGetRPackageState]: () => server.getRPackageState(),
     [kEnvironmentGetRPackageCitations]: args => server.getRPackageCitations(args[0])
   }

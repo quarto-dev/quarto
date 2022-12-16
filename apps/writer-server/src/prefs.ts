@@ -16,9 +16,10 @@
 import path from "path";
 import fs from "fs";
 
-import { appConfigDir, JSONRpcServerMethod } from "core-server";
+import { appConfigDir } from "core-server";
 
 import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, PrefsServer, defaultPrefs } from "writer-types";
+import { JsonRpcServerMethod } from "core";
 
 
 const prefsDir = appConfigDir("quarto-writer", "prefs");
@@ -53,9 +54,9 @@ export function prefsServer() : PrefsServer {
   }
 }
 
-export function prefsServerMethods() : Record<string, JSONRpcServerMethod> {
+export function prefsServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = prefsServer();
-  const methods: Record<string, JSONRpcServerMethod> = {
+  const methods: Record<string, JsonRpcServerMethod> = {
     [kPrefsGetPrefs]: () => server.getPrefs(),
     [kPrefsSetPrefs]: (prefs) => server.setPrefs(prefs[0])
   };

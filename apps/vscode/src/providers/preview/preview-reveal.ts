@@ -15,9 +15,10 @@
 
 import { Position, TextDocument } from "vscode";
 
+import { parseFrontMatterStr } from "quarto-core";
+
 import { MarkdownEngine } from "../../markdown/engine";
 import { getHeaderLevel } from "../../markdown/toc";
-import { parseFrontMatterStr } from "../../core/yaml";
 
 export async function revealSlideIndex(
   cursorPos: Position,

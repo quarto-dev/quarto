@@ -39,7 +39,7 @@ import vscode, {
   CancellationToken,
 } from "vscode";
 
-import { normalizeNewlines, shQuote, winShEscape, pathWithForwardSlashes } from "core";
+import { normalizeNewlines, shQuote, winShEscape, pathWithForwardSlashes, sleep } from "core";
 import { fileCrossrefIndexStorage, QuartoContext } from "quarto-core";
 
 import { previewCommands } from "./commands";
@@ -52,7 +52,7 @@ import {
   validatateQuartoExtension,
 } from "../../core/doc";
 import { PreviewOutputSink } from "./preview-output";
-import { isHtmlContent, isTextContent, isPdfContent } from "../../core/mime";
+import { isHtmlContent, isTextContent, isPdfContent } from "core-server";
 
 import * as tmp from "tmp";
 import {
@@ -75,7 +75,6 @@ import {
   previewDirForDocument,
   renderOnSave,
 } from "./preview-util";
-import { sleep } from "../../core/wait";
 
 
 import { vsCodeWebUrl } from "../../core/platform";

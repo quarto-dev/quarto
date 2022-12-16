@@ -17,7 +17,7 @@ import * as vscode from "vscode";
 import { MarkdownTextDocument, MarkdownTextLine } from "../markdown/document";
 import { Disposable } from "../core/dispose";
 import { isMarkdownDoc } from "../core/doc";
-import { Lazy, lazy } from "../core/lazy";
+import { Lazy, lazy } from "core";
 import QuartoDocumentSymbolProvider from "./symbol-document";
 
 export interface WorkspaceQuartoDocumentProvider {

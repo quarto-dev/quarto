@@ -24,7 +24,7 @@ import {
   workspace,
   Uri,
 } from "vscode";
-import PngImage from "../core/png";
+import { PngImage } from "core";
 
 const kImagePattern =
   /(!\[((!\[[^\]]*?\]\(\s*)([^\s\(\)]+?)\s*\)\]|(?:\\\]|[^\]])*\])\(\s*)(([^\s\(\)]|\([^\s\(\)]*?\))+)\s*(".*?")?\)/g;

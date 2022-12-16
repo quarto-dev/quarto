@@ -20,4 +20,8 @@ export * from './jsonrpc';
 export * from './text';
 export * from './path';
 export * from './strings';
+export * from './lazy';
+export * from './png';
+export * from './wait';
+export * from './auto-id';
 

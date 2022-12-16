@@ -14,11 +14,16 @@
  */
 
 import * as vscode from "vscode";
+
+import { pandocAutoIdentifier } from "core";
+
+import { parseFrontMatterStr } from "quarto-core";
+
 import { MarkdownEngine } from "./engine";
 import { isQuartoDoc } from "../core/doc";
-import { pandocAutoIdentifier } from "./auto-id";
+
 import { MarkdownTextDocument } from "./document";
-import { parseFrontMatterStr } from "../core/yaml";
+
 import { isExecutableLanguageBlock } from "./language";
 
 export enum TocEntryType {

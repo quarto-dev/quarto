@@ -18,6 +18,6 @@ export * from './jsonrpc';
 export * from './appdirs';
 export * from './exec';
 export * from './git';
-
+export * from './mime';
 
 

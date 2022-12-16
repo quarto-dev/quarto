@@ -20,7 +20,8 @@ import semver from "semver";
 
 import vscode from "vscode";
 import { TextDocument, TextEditor, Uri, workspace } from "vscode";
-import { parseFrontMatterStr } from "../../core/yaml";
+import { parseFrontMatterStr } from "quarto-core";
+
 import { MarkdownEngine } from "../../markdown/engine";
 import {
   metadataFilesForDocument,

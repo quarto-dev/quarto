@@ -18,7 +18,7 @@
  */
 
 
-export default class PngImage {
+export class PngImage {
   public content: Array<Uint8Array> = [];
 
   public width = -1;

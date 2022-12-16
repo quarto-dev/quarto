@@ -98,8 +98,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
   private getHtmlForWebview(webview: Webview): string {
    
     const scriptUri = this.editorAssetUri(webview, "index.js");
-    const stylesUri = this.editorAssetUri(webview, "styles.css");
-
+    const stylesUri = this.editorAssetUri(webview, "style.css");
 
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();

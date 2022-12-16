@@ -1,0 +1,32 @@
+{
+  "name": "vscode-editor",
+  "type": "module",
+  "version": "0.0.1",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    }
+  },
+  "private": true,
+  "license": "agpl-3.0",
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "tsc --noEmit && vite",
+    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "editor": "*"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.5.2",
+    "vite-plugin-css-injected-by-js": "^2.1.1",
+    "vite-plugin-static-copy": "^0.13.0"
+  }
+}

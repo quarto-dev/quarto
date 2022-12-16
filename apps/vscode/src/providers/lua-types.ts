@@ -26,8 +26,11 @@ import {
   MessageItem,
   ConfigurationTarget,
 } from "vscode";
+
+import { ensureGitignore } from "core-server";
+
 import { QuartoContext } from "quarto-core";
-import { ensureGitignore } from "../core/git";
+
 import { join } from "path";
 
 export async function activateLuaTypes(

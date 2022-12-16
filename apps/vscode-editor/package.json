@@ -15,7 +15,7 @@
   "license": "agpl-3.0",
   "scripts": {
     "build": "tsc --noEmit && vite build",
-    "dev": "tsc --noEmit && vite",
+    "dev": "tsc --noEmit && vite build --mode=development",
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {

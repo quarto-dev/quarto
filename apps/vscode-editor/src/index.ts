@@ -18,14 +18,14 @@ import { Editor, UITools } from 'editor';
 
 console.log(Editor.name);
 const uiTools = new UITools();
-console.log(uiTools.attr.pandocAutoIdentifier("Woozy Foobar the Clown"));
+console.log(uiTools.attr.pandocAutoIdentifier("Woozy Foobar the Clown!"));
 
 import 'vscode-webview';
 
 const api = acquireVsCodeApi();
 api.getState();
 
-console.log("the library has loaded!!!!!!!");
+console.log("the library has loaded!!!!!");
 
 
 

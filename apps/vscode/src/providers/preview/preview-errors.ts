@@ -15,7 +15,8 @@
 
 import * as path from "path";
 import * as fs from "fs";
-import { normalizeNewlines } from "../../core/text";
+
+import { normalizeNewlines } from "core";
 
 export type ErrorLocation = {
   lineBegin: number;

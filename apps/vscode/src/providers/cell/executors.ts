@@ -20,6 +20,9 @@ import semver from "semver";
 
 import Token from "markdown-it/lib/token";
 import { commands, extensions, Position, TextDocument, window } from "vscode";
+
+import { lines } from "core";
+
 import { MarkdownEngine } from "../../markdown/engine";
 import {
   isExecutableLanguageBlock,
@@ -27,7 +30,7 @@ import {
   languageNameFromBlock,
 } from "../../markdown/language";
 import { virtualDoc, virtualDocUri } from "../../vdoc/vdoc";
-import { lines } from "../../core/text";
+
 import { cellOptions, kExecuteEval } from "./options";
 
 export function hasExecutor(language: string) {

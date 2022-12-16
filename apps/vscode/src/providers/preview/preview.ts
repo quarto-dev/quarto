@@ -38,7 +38,10 @@ import vscode, {
   ProgressLocation,
   CancellationToken,
 } from "vscode";
-import { QuartoContext } from "quarto-core";
+
+import { normalizeNewlines, shQuote, winShEscape, pathWithForwardSlashes } from "core";
+import { fileCrossrefIndexStorage, QuartoContext } from "quarto-core";
+
 import { previewCommands } from "./commands";
 import { Command } from "../../core/command";
 import {
@@ -59,8 +62,8 @@ import {
   requiresTerminalDelay,
 } from "./preview-env";
 import { MarkdownEngine } from "../../markdown/engine";
-import { shQuote, winShEscape } from "core";
-import { pathWithForwardSlashes } from "core";
+
+
 
 import {
   QuartoPreviewWebview,
@@ -73,8 +76,8 @@ import {
   renderOnSave,
 } from "./preview-util";
 import { sleep } from "../../core/wait";
-import { fileCrossrefIndexStorage } from "quarto-core";
-import { normalizeNewlines } from "../../core/text";
+
+
 import { vsCodeWebUrl } from "../../core/platform";
 
 import {

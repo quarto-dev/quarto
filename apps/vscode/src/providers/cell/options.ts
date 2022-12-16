@@ -17,7 +17,8 @@ import Token from "markdown-it/lib/token";
 
 import * as yaml from "js-yaml";
 
-import { lines } from "../../core/text";
+import { lines } from "core";
+
 import { languageNameFromBlock } from "../../markdown/language";
 
 export const kExecuteEval = "eval";

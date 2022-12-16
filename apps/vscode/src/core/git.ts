@@ -17,7 +17,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 
-import { lines } from "./text";
+import { lines } from "core";
 import { execProgram } from "core-server";
 
 export function ensureGitignore(

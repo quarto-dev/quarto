@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.60.0 (Unreleased)
+
+- Prevent render on save from occuring for documents not being actively previewed.
+
 ## 1.59.0 (Release on 15 December 2022)
 
 - Repo cleanup

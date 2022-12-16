@@ -114,7 +114,7 @@ export function activatePreview(
       if (
         canPreviewDoc(editor.document) &&
         (await renderOnSave(engine, editor)) &&
-        (await previewManager.isPreviewRunning())
+        (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine);
       }
@@ -147,6 +147,10 @@ export function canPreviewDoc(doc?: TextDocument) {
 
 export function isPreviewRunning() {
   return previewManager.isPreviewRunning();
+}
+
+export function isPreviewRunningForDoc(doc: TextDocument) {
+  return previewManager.isPreviewRunningForDoc(doc);
 }
 
 export async function previewDoc(
@@ -305,6 +309,10 @@ class PreviewManager {
     } catch (e) {
       return false;
     }
+  }
+
+  public async isPreviewRunningForDoc(doc: TextDocument) {
+    return await this.isPreviewRunning() && (this.previewTarget_?.fsPath === doc.uri.fsPath);
   }
 
   private async canReuseRunningPreview(

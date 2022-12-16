@@ -22,7 +22,7 @@ import { Command } from "../../core/command";
 import { QuartoContext } from "quarto-core";
 import {
   canPreviewDoc,
-  isPreviewRunning,
+  isPreviewRunningForDoc,
   previewDoc,
   previewProject,
 } from "./preview";
@@ -86,7 +86,7 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
     if (targetEditor) {
       const render =
         !(await renderOnSave(this.engine_, targetEditor)) ||
-        !(await isPreviewRunning());
+        !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
         await previewDoc(targetEditor, format, false, this.engine_, onShow);
       } else {

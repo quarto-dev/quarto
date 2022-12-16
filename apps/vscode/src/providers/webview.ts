@@ -25,6 +25,7 @@ import {
 
 import { Disposable } from "../core/dispose";
 import { preserveEditorFocus } from "../core/doc";
+import { getNonce } from "../core/nonce";
 
 export interface ShowOptions {
   readonly preserveFocus?: boolean;
@@ -210,7 +211,7 @@ export abstract class QuartoWebview<T> extends Disposable {
     bodyHtml: string,
     allowUnsafe = false
   ) {
-    const nonce = this.getNonce();
+    const nonce = getNonce();
 
     if (!Array.isArray(js)) {
       js = [js];
@@ -271,13 +272,4 @@ export abstract class QuartoWebview<T> extends Disposable {
     return value.toString().replace(/"/g, "&quot;");
   }
 
-  private getNonce() {
-    let text = "";
-    const possible =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (let i = 0; i < 64; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-  }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "vscode-editor",
+  "name": "quarto-vscode-editor",
   "type": "module",
   "version": "0.0.1",
   "files": [
@@ -22,11 +22,11 @@
     "editor": "*"
   },
   "devDependencies": {
+    "@types/vscode-webview": "^1.57.0",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",
     "typescript": "^4.5.2",
-    "vite-plugin-css-injected-by-js": "^2.1.1",
     "vite-plugin-static-copy": "^0.13.0"
   }
 }

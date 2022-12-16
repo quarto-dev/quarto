@@ -15,4 +15,19 @@
 
 
 import { Editor, UITools } from 'editor';
-export default { Editor, UITools };
+
+console.log(Editor.name);
+const uiTools = new UITools();
+console.log(uiTools.attr.pandocAutoIdentifier("Woozy Foobar the Clown"));
+
+import 'vscode-webview';
+
+const api = acquireVsCodeApi();
+api.getState();
+
+console.log("the library has loaded!!!!!!!");
+
+
+
+
+

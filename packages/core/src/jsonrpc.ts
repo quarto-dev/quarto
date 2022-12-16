@@ -14,13 +14,13 @@
  */
 
 
-export interface JSONRPCError {
+export interface JsonRpcError {
   code: number;
   message: string;
   data?: object;
 }
 
-export function jsonRpcError(message: string, data?: string | object, code?: number) : JSONRPCError {
+export function jsonRpcError(message: string, data?: string | object, code?: number) : JsonRpcError {
   if (typeof(data) === "string") {
     data = { description: data };
   } 

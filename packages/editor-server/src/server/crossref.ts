@@ -15,10 +15,9 @@
 
 import fetch from "cross-fetch";
 
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 import { CrossrefMessage, CrossrefServer, CrossrefWork, kCrossrefWorks, kStatusOK } from "editor-types";
 
-import jayson from 'jayson'
 import { handleResponseWithStatus } from "./response";
 
 const kCrossrefApiHost = "https://api.crossref.org";
@@ -55,10 +54,10 @@ export function crossrefServer(options: CrossrefServerOptions) : CrossrefServer 
   };
 }
 
-export function crossrefServerMethods(options: CrossrefServerOptions) : Record<string, jayson.Method> {
+export function crossrefServerMethods(options: CrossrefServerOptions) : Record<string, JSONRpcServerMethod> {
   const server = crossrefServer(options);
-  const methods: Record<string, jayson.Method> = {
-    [kCrossrefWorks]: jsonRpcMethod(args => server.works(args[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kCrossrefWorks]: args => server.works(args[0])
   };
   return methods;
 }

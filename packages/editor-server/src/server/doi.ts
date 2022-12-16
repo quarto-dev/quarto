@@ -15,10 +15,9 @@
 
 import fetch from "cross-fetch";
 
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 import { DOIResult, DOIServer, kDoiFetchCsl } from "editor-types"
 
-import jayson from 'jayson'
 import { handleResponseWithStatus } from "./response";
 
 
@@ -36,10 +35,10 @@ export function doiServer() : DOIServer {
   }
 }
 
-export function doiServerMethods() : Record<string, jayson.Method> {
+export function doiServerMethods() : Record<string, JSONRpcServerMethod> {
   const server = doiServer();
-  const methods: Record<string, jayson.Method> = {
-    [kDoiFetchCsl]: jsonRpcMethod(args => server.fetchCSL(args[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kDoiFetchCsl]: args => server.fetchCSL(args[0])
   };
   return methods;
 }

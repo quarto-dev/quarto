@@ -13,13 +13,11 @@
  *
  */
 
-import { jsonRpcBrowserClient } from "core-client";
+import { JsonRpcRequestTransport } from "core-client";
 import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, WriterServer } from "writer-types";
 
 
-export function writerJsonRpcServer(url: string) : WriterServer {
-
-  const request = jsonRpcBrowserClient(url);
+export function writerJsonRpcServer(request: JsonRpcRequestTransport) : WriterServer {
 
   return {
     prefs: {

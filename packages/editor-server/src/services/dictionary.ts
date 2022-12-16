@@ -17,10 +17,9 @@
 import fs from "fs";
 import path from "path";
 
-import jayson from "jayson";
 import { v4 as uuidv4 } from 'uuid';
 
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 
 import { 
   Dictionary, 
@@ -143,16 +142,16 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
   }
 }
 
-export function dictionaryServerMethods(options: DictionaryServerOptions) : Record<string, jayson.Method> {
+export function dictionaryServerMethods(options: DictionaryServerOptions) : Record<string, JSONRpcServerMethod> {
   const server = dictionaryServer(options);
-  const methods: Record<string, jayson.Method> = {
-    [kDictionaryAvailableDictionaries]: jsonRpcMethod(() => server.availableDictionaries()),
-    [kDictionaryGetDictionary]: jsonRpcMethod(args => server.getDictionary(args[0])),
-    [kDictionaryGetUserDictionary]: jsonRpcMethod(() => server.getUserDictionary()),
-    [kDictionaryAddToUserDictionary]: jsonRpcMethod(args => server.addToUserDictionary(args[0])),
-    [kDictionaryGetIgnoredwords]: jsonRpcMethod(args => server.getIgnoredWords(args[0])),
-    [kDictionaryIgnoreWord]: jsonRpcMethod(args => server.ignoreWord(args[0])),
-    [kDictionaryUnignoreWord]: jsonRpcMethod(args => server.unignoreWord(args[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kDictionaryAvailableDictionaries]: () => server.availableDictionaries(),
+    [kDictionaryGetDictionary]: args => server.getDictionary(args[0]),
+    [kDictionaryGetUserDictionary]: () => server.getUserDictionary(),
+    [kDictionaryAddToUserDictionary]: args => server.addToUserDictionary(args[0]),
+    [kDictionaryGetIgnoredwords]: args => server.getIgnoredWords(args[0]),
+    [kDictionaryIgnoreWord]: args => server.ignoreWord(args[0]),
+    [kDictionaryUnignoreWord]: args => server.unignoreWord(args[0])
   }
   return methods;
 }

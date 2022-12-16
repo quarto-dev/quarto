@@ -18,6 +18,18 @@ import { jsonRpcError } from 'core';
 import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JSONRpcServerMethod = (params: any) => Promise<unknown>;
+
+export function jaysonServerMethods(methods: Record<string,JSONRpcServerMethod>) {
+  const jaysonMethods: Record<string,jayson.Method> = {};
+  Object.keys(methods).forEach(method => {
+    jaysonMethods[method] = jsonRpcMethod(methods[method]);
+  });
+  return jaysonMethods;
+}
+
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayson.Method {
   return jayson.Method({
     handler: (args: RequestParamsLike, done: JSONRPCCallbackTypePlain) => {

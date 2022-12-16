@@ -14,7 +14,7 @@
  *
  */
 
-import { jsonRpcBrowserClient } from "core-client";
+import { JsonRpcRequestTransport } from "core-client";
 
 import {
   Dictionary,
@@ -33,9 +33,7 @@ import {
 } from "editor-types";
 
 
-export function editorJsonRpcServices(url: string) : EditorServices {
-
-  const request = jsonRpcBrowserClient(url);
+export function editorJsonRpcServices(request: JsonRpcRequestTransport) : EditorServices {
 
   return {
     math: {

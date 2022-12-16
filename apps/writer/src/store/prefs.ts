@@ -14,18 +14,20 @@
  */
 
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { JSONRPCError } from "core";
+import { JsonRpcError } from "core";
+import { jsonRpcBrowserRequestTransport } from "core-client";
 import { Prefs, kWriterJsonRpcPath } from "writer-types";
 import { writerJsonRpcServer } from "../server/server";
 import { fakeBaseQuery, handleQuery } from "./util";
 
 const kPrefsTag = "Prefs";
 
-const server = writerJsonRpcServer(kWriterJsonRpcPath);
+const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
+const server = writerJsonRpcServer(request);
 
 export const prefsApi = createApi({
   reducerPath: "prefs",
-  baseQuery: fakeBaseQuery<JSONRPCError>(),
+  baseQuery: fakeBaseQuery<JsonRpcError>(),
   tagTypes: [kPrefsTag],
 
   endpoints(build) {

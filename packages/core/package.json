@@ -6,7 +6,6 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "jayson": "^4.0.0",
     "markdown-it": "^13.0.1",
     "tsconfig": "*",
     "typescript": "^4.5.2"

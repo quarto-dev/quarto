@@ -13,10 +13,8 @@
  *
  */
 
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 import { EnvironmentServer, kEnvironmentGetRPackageCitations, kEnvironmentGetRPackageState, RPackageCitation, RPackageState } from "editor-types";
-
-import jayson from 'jayson'
 
 export function environmentServer() : EnvironmentServer {
   return {
@@ -30,11 +28,11 @@ export function environmentServer() : EnvironmentServer {
   };
 }
 
-export function environmentServerMethods() : Record<string, jayson.Method> {
+export function environmentServerMethods() : Record<string, JSONRpcServerMethod> {
   const server = environmentServer();
-  const methods: Record<string, jayson.Method> = {
-    [kEnvironmentGetRPackageState]: jsonRpcMethod(() => server.getRPackageState()),
-    [kEnvironmentGetRPackageCitations]: jsonRpcMethod(args => server.getRPackageCitations(args[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kEnvironmentGetRPackageState]: () => server.getRPackageState(),
+    [kEnvironmentGetRPackageCitations]: args => server.getRPackageCitations(args[0])
   }
   return methods;
 }

@@ -13,7 +13,6 @@
  *
  */
 
-import jayson from 'jayson'
 
 import { EditorServer } from "editor-types";
 
@@ -24,6 +23,7 @@ import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
+import { JSONRpcServerMethod } from 'core-server';
 
 export interface EditorServerOptions {
   resourcesDir: string;
@@ -45,7 +45,7 @@ export function editorServer(options: EditorServerOptions) : EditorServer {
   };
 }
 
-export function editorServerMethods(options: EditorServerOptions): Record<string,jayson.Method> {
+export function editorServerMethods(options: EditorServerOptions): Record<string,JSONRpcServerMethod> {
   return {
     ...pandocServerMethods(options),
     ...doiServerMethods(),

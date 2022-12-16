@@ -15,7 +15,7 @@
  *
  */
 
-import { jsonRpcBrowserClient } from "core-client";
+import { JsonRpcRequestTransport } from "core-client";
 
 import {
   BibliographyResult,
@@ -53,9 +53,7 @@ import {
 } from "editor-types";
 
 
-export function editorJsonRpcServer(url: string) : EditorServer {
-
-  const request = jsonRpcBrowserClient(url);
+export function editorJsonRpcServer(request: JsonRpcRequestTransport) : EditorServer {
 
   return {
     pandoc: {

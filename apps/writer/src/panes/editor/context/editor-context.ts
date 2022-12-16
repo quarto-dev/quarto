@@ -16,6 +16,12 @@
 
 import { PromiseQueue } from 'core';
 
+import { jsonRpcBrowserRequestTransport } from 'core-client';
+
+import { codeMirrorExtension } from "editor-codemirror";
+
+import { kWriterJsonRpcPath, Prefs } from 'writer-types';
+
 import {
   ChunkEditor,
   EditorContext,
@@ -36,8 +42,6 @@ import {
 } from "editor";
 import { editorDisplay } from "./editor-display";
 
-import { codeMirrorExtension } from "editor-codemirror";
-import { kWriterJsonRpcPath, Prefs } from 'writer-types';
 import { Commands } from '../../../commands/CommandManager';
 
 export interface EditorPrefs {
@@ -55,8 +59,9 @@ export interface EditorProviders {
 export function editorContext(providers: EditorProviders) : EditorContext {
   
   const uiTools = new UITools();
-  const server = editorJsonRpcServer(kWriterJsonRpcPath);
-  const { math: mathServer } = editorJsonRpcServices(kWriterJsonRpcPath);
+  const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
+  const server = editorJsonRpcServer(request);
+  const { math: mathServer } = editorJsonRpcServices(request);
   
   const ui = {
     dialogs: providers.dialogs(),

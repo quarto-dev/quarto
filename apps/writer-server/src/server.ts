@@ -24,7 +24,7 @@ import cors from "cors";
 
 import jayson from 'jayson'
 
-import { appConfigDir } from 'core-server';
+import { appConfigDir, jaysonServerMethods } from 'core-server';
 
 import { kWriterJsonRpcPath } from 'writer-types';
 import { CrossrefServerOptions, editorServerMethods, editorServicesMethods, PubMedServerOptions } from 'editor-server';
@@ -52,7 +52,7 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     email: "crossref@rstudio.com"
   }
 
-  const writerRpcServer = new jayson.Server({
+  const writerRpcServer = jayson.Server(jaysonServerMethods({
     ...editorServerMethods({
       resourcesDir: editorResourcesDir,
       payloadLimitMb: kPayloadLimitMb,
@@ -61,7 +61,7 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     }),
     ...editorServicesMethods({ dictionary: dictionaryOptions }),
     ...writerServerMethods()
-  });
+  }));
 
   const server = express()
     .disable("x-powered-by")

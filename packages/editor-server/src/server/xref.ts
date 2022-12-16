@@ -14,10 +14,8 @@
  *
  */
 
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 import { kXRefIndexForFile, kXRefQuartoIndexForFile, kXRefQuartoXRefForId, kXRefXRefForId, XRefs, XRefServer } from "editor-types";
-
-import jayson from 'jayson'
 
 export function xrefServer() : XRefServer {
   return {
@@ -36,13 +34,13 @@ export function xrefServer() : XRefServer {
   }
 }
 
-export function xrefServerMethods() : Record<string, jayson.Method> {
+export function xrefServerMethods() : Record<string, JSONRpcServerMethod> {
   const server = xrefServer();
-  const methods: Record<string, jayson.Method> = {
-    [kXRefIndexForFile]: jsonRpcMethod(args => server.indexForFile(args[0])),
-    [kXRefXRefForId]: jsonRpcMethod(args => server.xrefForId(args[0], args[1])),
-    [kXRefQuartoIndexForFile]: jsonRpcMethod(args => server.quartoIndexForFile(args[0])),
-    [kXRefQuartoXRefForId]: jsonRpcMethod(args => server.quartoXrefForId(args[0], args[1]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kXRefIndexForFile]: args => server.indexForFile(args[0]),
+    [kXRefXRefForId]: args => server.xrefForId(args[0], args[1]),
+    [kXRefQuartoIndexForFile]: args => server.quartoIndexForFile(args[0]),
+    [kXRefQuartoXRefForId]: args => server.quartoXrefForId(args[0], args[1])
   }
   return methods;
 }

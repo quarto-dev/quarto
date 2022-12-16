@@ -15,10 +15,9 @@
 
 import fetch from "cross-fetch";
 
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 import { kPubMedSearch, kStatusOK, PubMedDocument, PubMedResult, PubMedServer } from "editor-types";
 
-import jayson from 'jayson'
 import { handleResponseWithStatus } from "./response";
 
  const kPubMedEUtilsHost = "https://eutils.ncbi.nlm.nih.gov";
@@ -96,10 +95,10 @@ export function pubMedServer(options: PubMedServerOptions) : PubMedServer {
   }
 }
 
-export function pubMedServerMethods(options: PubMedServerOptions) : Record<string, jayson.Method> {
+export function pubMedServerMethods(options: PubMedServerOptions) : Record<string, JSONRpcServerMethod> {
   const server = pubMedServer(options);
-  const methods: Record<string, jayson.Method> = {
-    [kPubMedSearch]: jsonRpcMethod(args => server.search(args[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kPubMedSearch]: args => server.search(args[0])
   }
   return methods;
 }

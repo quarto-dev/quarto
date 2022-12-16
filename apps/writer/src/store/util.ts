@@ -17,7 +17,7 @@
 
 import { QueryReturnValue } from "@reduxjs/toolkit/dist/query/baseQueryTypes";
 import { BaseQueryFn } from "@reduxjs/toolkit/dist/query/react";
-import { JSONRPCError } from "core";
+import { JsonRpcError } from "core";
 
 // workaround for type errors when using built-in fakeBaseQuery:
 // https://github.com/reduxjs/redux-toolkit/issues/2314
@@ -34,12 +34,12 @@ export function fakeBaseQuery<ErrorType>(): BaseQueryFn<
   };
 }
 
-export async function handleQuery<T>(promise: Promise<T>) : Promise<QueryReturnValue<T,JSONRPCError>> {
+export async function handleQuery<T>(promise: Promise<T>) : Promise<QueryReturnValue<T,JsonRpcError>> {
   return promise
     .then((value: T) => {
       return { data: value };
     })
-    .catch((error: JSONRPCError) => {
+    .catch((error: JsonRpcError) => {
       return { error };
     })
 }

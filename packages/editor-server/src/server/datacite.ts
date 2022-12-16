@@ -15,9 +15,7 @@
 
 import fetch from "cross-fetch";
 
-import jayson from 'jayson'
-
-import { jsonRpcMethod } from "core-server";
+import { JSONRpcServerMethod } from "core-server";
 
 import { DataCiteRecord, DataCiteResult, DataCiteServer, kDataCiteSearch, kStatusError, kStatusOK } from "editor-types";
 
@@ -69,10 +67,10 @@ export function dataCiteServer() : DataCiteServer {
   }
 }
 
-export function dataCiteServerMethods() : Record<string, jayson.Method> {
+export function dataCiteServerMethods() : Record<string, JSONRpcServerMethod> {
   const server = dataCiteServer();
-  const methods: Record<string, jayson.Method> = {
-    [kDataCiteSearch]: jsonRpcMethod(args => server.search(args[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kDataCiteSearch]: args => server.search(args[0])
   }
   return methods;
 }

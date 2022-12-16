@@ -13,12 +13,12 @@
  *
  */
 
-import jayson from 'jayson'
 
 import { EditorServices } from "editor-types";
 
 import { mathServer, mathServerMethods } from "./math/math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
+import { JSONRpcServerMethod } from 'core-server';
 
 export interface EditorServicesOptions {
   dictionary: DictionaryServerOptions;
@@ -33,7 +33,7 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
 } 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorServicesMethods(options: EditorServicesOptions): Record<string,jayson.Method> {
+export function editorServicesMethods(options: EditorServicesOptions): Record<string,JSONRpcServerMethod> {
   return {
     ...mathServerMethods(),
     ...dictionaryServerMethods(options.dictionary)

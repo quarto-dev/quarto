@@ -14,7 +14,8 @@
  */
 
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { JSONRPCError } from "core";
+import { JsonRpcError } from "core";
+import { jsonRpcBrowserRequestTransport } from "core-client";
 import { Dictionary, DictionaryInfo, editorJsonRpcServices, IgnoredWord } from "editor";
 import { kWriterJsonRpcPath } from "writer-types";
 import { fakeBaseQuery, handleQuery } from "./util";
@@ -22,11 +23,12 @@ import { fakeBaseQuery, handleQuery } from "./util";
 const kUserDictionaryTag = "UserDictionary";
 const kIgnoredWordsTag = "IgnoredWords";
 
-const server = editorJsonRpcServices(kWriterJsonRpcPath);
+const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
+const server = editorJsonRpcServices(request);
 
 export const dictionaryApi = createApi({
   reducerPath: "dictionary",
-  baseQuery: fakeBaseQuery<JSONRPCError>(),
+  baseQuery: fakeBaseQuery<JsonRpcError>(),
   tagTypes: [kUserDictionaryTag, kIgnoredWordsTag],
   endpoints(build) {
     return {

@@ -13,11 +13,14 @@
  *
  */
 
-
-import { jsonRpcError } from "core";
 import ClientBrowser from "jayson/lib/client/browser";
 
-export function jsonRpcBrowserClient(url: string) {
+import { jsonRpcError } from "core";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonRpcRequestTransport = (method: string, params: any[] | Record<string, unknown> | undefined) => Promise<any>;
+
+export function jsonRpcBrowserRequestTransport(url: string) : JsonRpcRequestTransport {
 
   const createClient = (method: string) => {
     return new ClientBrowser(

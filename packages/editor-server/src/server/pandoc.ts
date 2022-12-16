@@ -35,7 +35,7 @@ import {
 import jayson from 'jayson'
 
 import { EditorServerOptions } from './server';
-import { jsonRpcMethod } from 'core-server';
+import { jsonRpcMethod, JSONRpcServerMethod } from 'core-server';
 
 
 export function pandocServer(options: EditorServerOptions) : PandocServer {
@@ -154,16 +154,16 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
   };
 }
 
-export function pandocServerMethods(options: EditorServerOptions) : Record<string, jayson.Method> {
+export function pandocServerMethods(options: EditorServerOptions) : Record<string, JSONRpcServerMethod> {
   const server = pandocServer(options);
-  const methods: Record<string, jayson.Method> = {
-    [kPandocGetCapabilities]: jsonRpcMethod(() => server.getCapabilities()),
-    [kPandocMarkdownToAst]: jsonRpcMethod(args => server.markdownToAst(args[0], args[1], args[2])),
-    [kPandocAstToMarkdown]: jsonRpcMethod(args => server.astToMarkdown(args[0], args[1], args[2])),
-    [kPandocListExtensions]: jsonRpcMethod(args => server.listExtensions(args[0])),
-    [kPandocGetBibliography]: jsonRpcMethod(args => server.getBibliography(args[0], args[1], args[2], args[3])),
-    [kPandocAddtoBibliography]: jsonRpcMethod(args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4])),
-    [kPandocCitationHtml]: jsonRpcMethod(args => server.citationHTML(args[0], args[1], args[2]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kPandocGetCapabilities]: () => server.getCapabilities(),
+    [kPandocMarkdownToAst]: args => server.markdownToAst(args[0], args[1], args[2]),
+    [kPandocAstToMarkdown]: args => server.astToMarkdown(args[0], args[1], args[2]),
+    [kPandocListExtensions]: args => server.listExtensions(args[0]),
+    [kPandocGetBibliography]: args => server.getBibliography(args[0], args[1], args[2], args[3]),
+    [kPandocAddtoBibliography]: args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]),
+    [kPandocCitationHtml]: args => server.citationHTML(args[0], args[1], args[2])
   };
   return methods;
 }

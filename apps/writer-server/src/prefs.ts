@@ -16,9 +16,7 @@
 import path from "path";
 import fs from "fs";
 
-import jayson from "jayson";
-
-import { appConfigDir, jsonRpcMethod } from "core-server";
+import { appConfigDir, JSONRpcServerMethod } from "core-server";
 
 import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, PrefsServer, defaultPrefs } from "writer-types";
 
@@ -55,11 +53,11 @@ export function prefsServer() : PrefsServer {
   }
 }
 
-export function prefsServerMethods() : Record<string, jayson.Method> {
+export function prefsServerMethods() : Record<string, JSONRpcServerMethod> {
   const server = prefsServer();
-  const methods: Record<string, jayson.Method> = {
-    [kPrefsGetPrefs]: jsonRpcMethod(() => server.getPrefs()),
-    [kPrefsSetPrefs]: jsonRpcMethod((prefs) => server.setPrefs(prefs[0]))
+  const methods: Record<string, JSONRpcServerMethod> = {
+    [kPrefsGetPrefs]: () => server.getPrefs(),
+    [kPrefsSetPrefs]: (prefs) => server.setPrefs(prefs[0])
   };
   return methods;
 }

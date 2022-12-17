@@ -14,10 +14,16 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type JsonRpcRequestTransport = (method: string, params: any[] | Record<string, unknown> | undefined) => Promise<any>;
+export type JsonRpcRequestTransport = (method: string, params: unknown[] | undefined) => Promise<any>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type JsonRpcServerMethod = (params: any) => Promise<unknown>;
+export type JsonRpcServerMethod = (params: Array<any>) => Promise<unknown>;
+
+export const kJsonRpcParseError = -32700;
+export const kJsonRpcInvalidRequest = -32600;
+export const kJsonRpcMethodNotFound = -32601;
+export const kJsonRpcInvalidParams = -32602;
+export const kJsonRpcInternalError = -32603;
 
 export interface JsonRpcError {
   code: number;
@@ -35,4 +41,178 @@ export function jsonRpcError(message: string, data?: string | object, code?: num
     data
   }
 }
+
+export function errorToJsonRpcError(error: Record<string,unknown>) {
+  if (typeof(error) === "object" && typeof(error.message) === "string") {
+    return jsonRpcError(
+      error.message, 
+      error.data as string | object | undefined, 
+      error.code as number | undefined)
+    ;
+  } else {
+    const message = error instanceof Error ? error.message : String(error);
+    return jsonRpcError(message);
+  }
+}
+
+
+export interface JsonRpcPostMessageTarget {
+  postMessage: (data: unknown) => void;
+  onMessage: (handler: (data: unknown) => void) => VoidFunction;
+}
+
+export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTarget) {
+  
+  // track in-flight requests
+  let requestId = 0;
+  const requests = new Map<number, { resolve: (value: unknown) => void, reject: (reason: unknown) => void }>();
+
+  // listen for responses
+  target.onMessage(ev => {
+    const response = asJsonRpcResponse(ev);
+    if (response) {
+      const request = requests.get(response.id);
+      if (request) {
+        requests.delete(response.id);
+        if (response.result) {
+          request.resolve(response.result);
+        } else if (response.error) {
+          request.reject(response.error);
+        }
+      }
+    }
+  });
+
+  return (method: string, params: unknown[] | undefined) => {
+    return new Promise((resolve, reject) => {
+      
+      // track request
+      const id = ++requestId;
+      requests.set(id, { resolve, reject });
+
+      // make request
+      const request: JsonRpcRequest = {
+        jsonrpc: kJsonRpcVersion,
+        id,
+        method,
+        params
+      };
+      target.postMessage(request);
+    });
+  };
+
+}
+
+export function jsonRpcPostMessageServer(
+  target: JsonRpcPostMessageTarget, 
+  methods: Record<string,JsonRpcServerMethod>
+) {
+  // listen for messages
+  return target.onMessage(data => {
+    const request = asJsonRpcRequest(data);
+    if (request) {
+
+      // lookup method
+      const method = methods[request.method];
+      if (!method) {
+        target.postMessage(methodNotFoundResponse(request));
+      }
+      
+      // dispatch method
+      method(request.params || [])
+        .then(value => {
+          target.postMessage(jsonRpcResponse(request, value));
+        })
+        .catch(error => {
+          target.postMessage({
+            jsonrpc: request.jsonrpc,
+            id: request.id,
+            error: errorToJsonRpcError(error)
+          })
+        });
+      }
+  });
+}
+
+const kJsonRpcVersion = "2.0";
+
+interface JsonRpcMessage {
+  jsonrpc: string;
+  id: number;
+}
+
+function isJsonRpcMessage(message: unknown): message is JsonRpcRequest {
+  const jsMessage = message as JsonRpcMessage;
+  return jsMessage.jsonrpc !== undefined && jsMessage.id !== undefined;
+}
+
+interface JsonRpcRequest extends JsonRpcMessage {
+  method: string;
+  params?: unknown[];
+}
+
+function isJsonRpcRequest(message: JsonRpcMessage): message is JsonRpcRequest {
+  return (message as JsonRpcRequest).method !== undefined;
+}
+
+interface JsonRpcResponse extends JsonRpcMessage {
+  result?: unknown;
+  error?: JsonRpcError;
+}
+
+function isJsonRpcResponse(message: JsonRpcMessage): message is JsonRpcResponse {
+  const response = message as JsonRpcResponse;
+  return response.result !== undefined || response.error !== undefined; 
+}
+
+function asJsonRpcMessage(data: unknown) : JsonRpcMessage | null {
+  if (isJsonRpcMessage(data) && data.jsonrpc === kJsonRpcVersion) {
+    return data;
+  } else {
+    return null;
+  }
+}
+
+function asJsonRpcRequest(data: unknown) : JsonRpcRequest | null {
+  const message = asJsonRpcMessage(data);
+  if (message && isJsonRpcRequest(message)) {
+    return message;
+  } else {
+    return null;
+  }
+}
+
+function asJsonRpcResponse(data: unknown) : JsonRpcResponse | null {
+  const message = asJsonRpcMessage(data);
+  if (message && isJsonRpcResponse(message)) {
+    return message;
+  } else {
+    return null;
+  }
+}
+
+function jsonRpcResponse(request: JsonRpcRequest, result?: unknown) {
+  return {
+    jsonrpc: request.jsonrpc,
+    id: request.id,
+    result
+  }
+}
+
+function jsonRpcErrorResponse(request: JsonRpcRequest, code: number, message: string) {
+  return {
+    jsonrpc: request.jsonrpc,
+    id: request.id,
+    error: jsonRpcError(message, undefined, code)
+  }
+}
+
+function methodNotFoundResponse(request: JsonRpcRequest) {
+  return jsonRpcErrorResponse(
+    request, kJsonRpcMethodNotFound, 
+    `Method '${request.method} not found.`
+  );
+}
+
+
 

@@ -13,8 +13,10 @@
  *
  */
 
+import { jsonRpcPostMessageRequestTransport } from 'core';
+import { windowJsonRpcPostMessageTarget } from 'core-client';
 
-import { Editor, UITools } from 'editor';
+import { Editor, editorJsonRpcServer, UITools } from 'editor';
 
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -22,18 +24,24 @@ import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
 
+import 'vscode-webview';
+const vscode = acquireVsCodeApi();
 
 
 console.log(Editor.name);
 const uiTools = new UITools();
 console.log(uiTools.attr.pandocAutoIdentifier("Woozy Foobar the Clown!"));
 
-import 'vscode-webview';
-
-const api = acquireVsCodeApi();
-api.getState();
 
 console.log("the library has loaded!!!!!");
+
+const target = windowJsonRpcPostMessageTarget(vscode, window);
+const request = jsonRpcPostMessageRequestTransport(target);
+const server = editorJsonRpcServer(request);
+
+server.pubmed.search("covid").then(console.log);
+
+
 
 
 

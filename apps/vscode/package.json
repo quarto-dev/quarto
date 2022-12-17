@@ -976,6 +976,7 @@
     "axios": "^1.2.1",
     "core": "*",
     "core-server": "*",
+    "editor-server": "*",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",

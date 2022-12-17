@@ -52,8 +52,7 @@ export function jsonRpcBrowserRequestTransport(url: string) : JsonRpcRequestTran
   }
 
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return  (method: string, params: any[] | Record<string,unknown> | undefined) => {
+  return  (method: string, params: unknown[] | undefined) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Promise<any>((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

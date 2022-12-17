@@ -13,9 +13,9 @@
  *
  */
 
-
-import { jsonRpcError, JsonRpcServerMethod } from 'core';
 import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
+
+import { errorToJsonRpcError, JsonRpcServerMethod } from 'core';
 
 export function jaysonServerMethods(methods: Record<string,JsonRpcServerMethod>) {
   const jaysonMethods: Record<string,jayson.Method> = {};
@@ -35,13 +35,7 @@ export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayso
           done(null, result)
         })
         .catch(error => {
-          if (typeof(error) === "object" && error.message) {
-            done(jsonRpcError(error.message, error.data, error.code));
-          } else {
-            const message = error instanceof Error ? error.message : String(error);
-            const jsonRpcErr = jsonRpcError(message);
-            done(jsonRpcErr);
-          }
+          done(errorToJsonRpcError(error));
         });
     }
   })

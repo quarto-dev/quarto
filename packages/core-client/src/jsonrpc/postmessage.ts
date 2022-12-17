@@ -13,18 +13,32 @@
  *
  */
 
+import { JsonRpcPostMessageTarget } from "core";
 
-import { JsonRpcServerMethod } from "core";
-
-// https://github.com/statianzo/pmrpc/blob/master/src/JsonRpc.ts
-
-export function jsonRpcPostMessageRequestTransport() {
-  //
+export function windowJsonRpcPostMessageTarget(
+  receiver: { postMessage: (data: unknown) => void | boolean } | Window, 
+  source: Window
+) : JsonRpcPostMessageTarget {
+  if (receiver instanceof Window) {
+    const windowReceiver = receiver;
+    receiver = {
+      postMessage: (data: unknown) => {
+        windowReceiver.postMessage(data, { targetOrigin: "*" });
+      }
+    }
+  }
+  return {
+    postMessage: (data: unknown) => {
+      receiver.postMessage(data);
+    },
+    onMessage: (handler: (ev: MessageEvent) => void) => {
+      const onMessage = (ev: MessageEvent) => {
+        handler(ev.data);
+      };
+      source.addEventListener('message', onMessage);
+      return () => {
+        source.removeEventListener('message', onMessage);
+      }
+    }
+  }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function jsonRpcPostMessageServer(_methods: Record<string,JsonRpcServerMethod>) {
-  //
-}
-
-

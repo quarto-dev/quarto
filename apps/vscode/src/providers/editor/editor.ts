@@ -13,12 +13,28 @@
  *
  */
 
+import { 
+  window,
+  workspace, 
+  ExtensionContext, 
+  Disposable, 
+  CustomTextEditorProvider, 
+  TextDocument, 
+  WebviewPanel, 
+  CancellationToken, 
+  Uri, 
+  Webview 
+} from "vscode";
 
-import { ExtensionContext, window, Disposable, CustomTextEditorProvider, TextDocument, WebviewPanel, CancellationToken, workspace, Uri, Webview } from "vscode";
+import { jsonRpcPostMessageServer, JsonRpcPostMessageTarget } from "core";
+
+import { PubMedServerOptions } from "editor-server";
+import { pubMedServerMethods } from "editor-server/src/server/pubmed";
 
 import { QuartoContext } from "quarto-core";
 
 import { getNonce } from "../../core/nonce";
+
 
 export function activateEditor(
   context: ExtensionContext,
@@ -74,9 +90,32 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       }
     );
 
+    // setup server on webview iframe
+    const pubmedOptions: PubMedServerOptions  = {
+      tool: "Quarto",
+      email: "pubmed@rstudio.com",
+    };
+    const target: JsonRpcPostMessageTarget = {
+      postMessage: (data) => {
+        webviewPanel.webview.postMessage(data);
+      },
+      onMessage: (handler: (data: unknown) => void) => {
+        const disposable = webviewPanel.webview.onDidReceiveMessage(ev => {
+          handler(ev);
+        });
+        return () => {
+          disposable.dispose();
+        };
+      }
+    };
+    const stopServer = jsonRpcPostMessageServer(target, pubMedServerMethods(pubmedOptions));
+   
+  
+
     // Make sure we get rid of the listener when our editor is closed.
     webviewPanel.onDidDispose(() => {
       changeDocumentSubscription.dispose();
+      stopServer();
     });
 
     // Receive message from the webview.

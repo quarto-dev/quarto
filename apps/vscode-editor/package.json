@@ -23,6 +23,8 @@
     "@blueprintjs/icons": "^4.11.0",
     "@blueprintjs/popover2": "^1.10.2",
     "@blueprintjs/select": "^4.8.12",
+    "core": "*",
+    "core-client": "*",
     "editor": "*",
     "normalize.css": "^8.0.1"
   },

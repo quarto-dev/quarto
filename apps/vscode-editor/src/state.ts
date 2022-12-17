@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * state.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,26 +13,7 @@
  *
  */
 
-import 'vscode-webview';
 
-import { EditorState } from './state';
-import { editorServer } from './server';
-
-import 'normalize.css/normalize.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
-import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
-import "@blueprintjs/select/lib/css/blueprint-select.css";
-
-const vscode = acquireVsCodeApi<EditorState>();
-
-const server = editorServer(vscode);
-
-server.pubmed.search("covid").then(console.log);
-
-
-
-
-
-
-
+export class EditorState {
+  
+}

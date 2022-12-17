@@ -36,7 +36,7 @@ console.log(uiTools.attr.pandocAutoIdentifier("Woozy Foobar the Clown!"));
 console.log("the library has loaded!!!!!");
 
 const target = windowJsonRpcPostMessageTarget(vscode, window);
-const request = jsonRpcPostMessageRequestTransport(target);
+const { request } = jsonRpcPostMessageRequestTransport(target);
 const server = editorJsonRpcServer(request);
 
 server.pubmed.search("covid").then(console.log);

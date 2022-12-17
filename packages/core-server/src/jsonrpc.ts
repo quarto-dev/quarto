@@ -15,7 +15,7 @@
 
 import jayson, { JSONRPCCallbackTypePlain, RequestParamsLike } from 'jayson'
 
-import { errorToJsonRpcError, JsonRpcServerMethod } from 'core';
+import { asJsonRpcError, JsonRpcServerMethod } from 'core';
 
 export function jaysonServerMethods(methods: Record<string,JsonRpcServerMethod>) {
   const jaysonMethods: Record<string,jayson.Method> = {};
@@ -35,7 +35,7 @@ export function jsonRpcMethod(method: (params: any) => Promise<unknown>) : jayso
           done(null, result)
         })
         .catch(error => {
-          done(errorToJsonRpcError(error));
+          done(asJsonRpcError(error));
         });
     }
   })

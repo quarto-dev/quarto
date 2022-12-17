@@ -42,16 +42,18 @@ export function jsonRpcError(message: string, data?: string | object, code?: num
   }
 }
 
-export function errorToJsonRpcError(error: Record<string,unknown>) {
-  if (typeof(error) === "object" && typeof(error.message) === "string") {
-    return jsonRpcError(
-      error.message, 
-      error.data as string | object | undefined, 
-      error.code as number | undefined)
-    ;
+export function asJsonRpcError(error: unknown) {
+  if (typeof(error) === "object") {
+    const err = error as Record<string,unknown>;
+    if (typeof(err.message) === "string") {
+      return jsonRpcError(
+        err.message, 
+        err.data as string | object | undefined, 
+        err.code as number | undefined)
+      ;
+    }
   } else {
-    const message = error instanceof Error ? error.message : String(error);
-    return jsonRpcError(message);
+    return jsonRpcError(String(error));
   }
 }
 
@@ -61,14 +63,17 @@ export interface JsonRpcPostMessageTarget {
   onMessage: (handler: (data: unknown) => void) => VoidFunction;
 }
 
-export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTarget) {
+export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTarget) : {
+  request: JsonRpcRequestTransport,
+  disconnect: VoidFunction
+} {
   
   // track in-flight requests
   let requestId = 0;
   const requests = new Map<number, { resolve: (value: unknown) => void, reject: (reason: unknown) => void }>();
 
   // listen for responses
-  target.onMessage(ev => {
+  const disconnect = target.onMessage(ev => {
     const response = asJsonRpcResponse(ev);
     if (response) {
       const request = requests.get(response.id);
@@ -83,22 +88,26 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
     }
   });
 
-  return (method: string, params: unknown[] | undefined) => {
-    return new Promise((resolve, reject) => {
-      
-      // track request
-      const id = ++requestId;
-      requests.set(id, { resolve, reject });
-
-      // make request
-      const request: JsonRpcRequest = {
-        jsonrpc: kJsonRpcVersion,
-        id,
-        method,
-        params
-      };
-      target.postMessage(request);
-    });
+  // return transport
+  return {
+    request: (method: string, params: unknown[] | undefined) => {
+      return new Promise((resolve, reject) => {
+        
+        // track request
+        const id = ++requestId;
+        requests.set(id, { resolve, reject });
+  
+        // make request
+        const request: JsonRpcRequest = {
+          jsonrpc: kJsonRpcVersion,
+          id,
+          method,
+          params
+        };
+        target.postMessage(request);
+      });
+    },
+    disconnect
   };
 
 }
@@ -127,7 +136,7 @@ export function jsonRpcPostMessageServer(
           target.postMessage({
             jsonrpc: request.jsonrpc,
             id: request.id,
-            error: errorToJsonRpcError(error)
+            error: asJsonRpcError(error)
           })
         });
       }

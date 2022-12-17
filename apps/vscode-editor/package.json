@@ -24,7 +24,7 @@
     "@blueprintjs/popover2": "^1.10.2",
     "@blueprintjs/select": "^4.8.12",
     "core": "*",
-    "core-client": "*",
+    "core-browser": "*",
     "editor": "*",
     "normalize.css": "^8.0.1"
   },

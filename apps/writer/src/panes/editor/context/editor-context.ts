@@ -16,7 +16,7 @@
 
 import { PromiseQueue } from 'core';
 
-import { jsonRpcBrowserRequestTransport } from 'core-client';
+import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
 import { codeMirrorExtension } from "editor-codemirror";
 

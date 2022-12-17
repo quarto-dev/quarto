@@ -15,7 +15,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
-import { jsonRpcBrowserRequestTransport } from "core-client";
+import { jsonRpcBrowserRequestTransport } from "core-browser";
 import { Dictionary, DictionaryInfo, editorJsonRpcServices, IgnoredWord } from "editor";
 import { kWriterJsonRpcPath } from "writer-types";
 import { fakeBaseQuery, handleQuery } from "./util";

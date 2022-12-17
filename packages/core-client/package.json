@@ -1,5 +1,5 @@
 {
-  "name": "core-client",
+  "name": "core-browser",
   "version": "0.1.0",
   "private": true,
   "license": "agpl-3.0",

@@ -27,7 +27,7 @@ import {
   ConfigurationTarget,
 } from "vscode";
 
-import { ensureGitignore } from "core-server";
+import { ensureGitignore } from "core-node";
 
 import { QuartoContext } from "quarto-core";
 

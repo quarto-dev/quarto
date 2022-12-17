@@ -14,7 +14,7 @@
  */
 
 import { jsonRpcPostMessageRequestTransport } from 'core';
-import { windowJsonRpcPostMessageTarget } from 'core-client';
+import { windowJsonRpcPostMessageTarget } from 'core-browser';
 
 import { Editor, editorJsonRpcServer, UITools } from 'editor';
 

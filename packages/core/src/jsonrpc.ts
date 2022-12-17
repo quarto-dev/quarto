@@ -52,20 +52,19 @@ export function asJsonRpcError(error: unknown) {
         err.code as number | undefined)
       ;
     }
-  } else {
-    return jsonRpcError(String(error));
   }
+  return jsonRpcError(String(error));
 }
 
 
 export interface JsonRpcPostMessageTarget {
   postMessage: (data: unknown) => void;
-  onMessage: (handler: (data: unknown) => void) => VoidFunction;
+  onMessage: (handler: (data: unknown) => void) => () => void;
 }
 
 export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTarget) : {
   request: JsonRpcRequestTransport,
-  disconnect: VoidFunction
+  disconnect: () => void
 } {
   
   // track in-flight requests

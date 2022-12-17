@@ -24,7 +24,7 @@ import cors from "cors";
 
 import jayson from 'jayson'
 
-import { appConfigDir, jaysonServerMethods } from 'core-server';
+import { appConfigDir, jaysonServerMethods } from 'core-node';
 
 import { kWriterJsonRpcPath } from 'writer-types';
 import { CrossrefServerOptions, editorServerMethods, editorServicesMethods, PubMedServerOptions } from 'editor-server';

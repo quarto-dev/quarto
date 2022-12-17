@@ -18,7 +18,7 @@ import * as path from "path";
 import * as os from "os";
 
 import { lines } from "core";
-import { execProgram } from "core-server";
+import { execProgram } from "core-node";
 
 export function ensureGitignore(
   dir: string,

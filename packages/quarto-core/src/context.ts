@@ -19,7 +19,7 @@ import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
 import { ExecFileSyncOptions } from "child_process";
-import { execProgram } from "core-server";
+import { execProgram } from "core-node";
 
 export interface QuartoContext {
   available: boolean;

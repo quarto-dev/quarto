@@ -16,7 +16,7 @@
 import path from "path";
 import fs from "fs";
 
-import { appConfigDir } from "core-server";
+import { appConfigDir } from "core-node";
 
 import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, PrefsServer, defaultPrefs } from "writer-types";
 import { JsonRpcServerMethod } from "core";

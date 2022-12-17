@@ -52,7 +52,7 @@ import {
   validatateQuartoExtension,
 } from "../../core/doc";
 import { PreviewOutputSink } from "./preview-output";
-import { isHtmlContent, isTextContent, isPdfContent } from "core-server";
+import { isHtmlContent, isTextContent, isPdfContent } from "core-node";
 
 import * as tmp from "tmp";
 import {

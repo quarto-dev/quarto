@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * build.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,14 +13,19 @@
  *
  */
 
- 
-export type { EditorServerOptions } from './server/server';
-export type { PubMedServerOptions } from './server/pubmed';
-export type { CrossrefServerOptions } from './server/crossref';
+import { runBuild } from "build";
 
-export { editorServer, editorServerMethods, defaultEditorServerOptions } from './server/server';
+const args = process.argv;
+const dev = args[2] === "dev";
 
-export { editorServices, editorServicesMethods } from './services/services';
-
-
-
+runBuild({
+  entryPoints: ['./src/main.ts'],
+  outfile: './out/main.js',
+  external: ['vscode'],
+  minify: dev,
+  assets: [{
+    from: ['../../packages/editor-server/src/resources/**'],
+    to: ['./assets/editor/resources'],
+  }],
+  dev
+});

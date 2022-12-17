@@ -30,6 +30,8 @@ const server = editorServer(vscode);
 
 server.pubmed.search("covid").then(console.log);
 
+server.pandoc.markdownToAst("**strong**", "markdown", []).then(console.log);
+
 
 
 

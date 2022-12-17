@@ -13,21 +13,26 @@
  *
  */
 
-import { WebviewPanel } from "vscode";
+import * as path from "path";
+
+import { ExtensionContext, WebviewPanel } from "vscode";
 
 import { jsonRpcPostMessageServer, JsonRpcPostMessageTarget } from "core";
-import { PubMedServerOptions } from "editor-server";
-import { pubMedServerMethods } from "editor-server/src/server/pubmed";
 
-
+import { defaultEditorServerOptions, editorServerMethods } from "editor-server";
+import { QuartoContext } from "quarto-core";
 
 // setup postMessage server on webview panel
-export function editorServer(webviewPanel: WebviewPanel) : VoidFunction {
-
-  const pubmedOptions: PubMedServerOptions  = {
-    tool: "Quarto",
-    email: "pubmed@rstudio.com",
-  };
+export function editorServer(
+  context: ExtensionContext, 
+  quartoContext: QuartoContext,
+  webviewPanel: WebviewPanel) 
+: VoidFunction {
+  
+  const options = defaultEditorServerOptions(
+    context.asAbsolutePath(path.join("assets", "editor", "resources")),
+    quartoContext.pandocPath
+  );
   
   const target: JsonRpcPostMessageTarget = {
     postMessage: (data) => {
@@ -43,6 +48,6 @@ export function editorServer(webviewPanel: WebviewPanel) : VoidFunction {
     }
   };
 
-  return jsonRpcPostMessageServer(target, pubMedServerMethods(pubmedOptions));
+  return jsonRpcPostMessageServer(target, editorServerMethods(options));
 }
 

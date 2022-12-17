@@ -34,15 +34,14 @@ import { editorServer } from "./server";
 
 export function activateEditor(
   context: ExtensionContext,
-  _quartoContext: QuartoContext
+  quartoContext: QuartoContext
 ) {
-  context.subscriptions.push(VisualEditorProvider.register(context));
-
+  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext));
 }
 
 class VisualEditorProvider implements CustomTextEditorProvider {
-  public static register(context: ExtensionContext): Disposable {
-    const provider = new VisualEditorProvider(context);
+  public static register(context: ExtensionContext, quartoContext: QuartoContext): Disposable {
+    const provider = new VisualEditorProvider(context, quartoContext);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -53,7 +52,8 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
   private static readonly viewType = "quarto.visualEditor";
 
-  constructor(private readonly context: ExtensionContext) {}
+  constructor(private readonly context: ExtensionContext,
+              private readonly quartoContext: QuartoContext) {}
 
  
   public async resolveCustomTextEditor(
@@ -83,7 +83,11 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     );
 
     // setup server on webview iframe
-    const serverDisconnect = editorServer(webviewPanel);
+    const serverDisconnect = editorServer(
+      this.context, 
+      this.quartoContext,
+      webviewPanel
+    );
   
     // dispose/disconnect when editor is closed
     webviewPanel.onDidDispose(() => {

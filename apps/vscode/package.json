@@ -203,17 +203,17 @@
       ]
     },
     "customEditors": [
-			{
-				"viewType": "quarto.visualEditor",
-				"displayName": "Quarto Visual Editor",
-				"selector": [
-					{
-						"filenamePattern": "*.qmd"
-					}
-				],
+      {
+        "viewType": "quarto.visualEditor",
+        "displayName": "Quarto Visual Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.qmd"
+          }
+        ],
         "priority": "option"
-			}
-		],
+      }
+    ],
     "commands": [
       {
         "command": "quarto.newDocument",
@@ -964,11 +964,8 @@
   },
   "scripts": {
     "vscode:prepublish": "cd ../.. && turbo run build --filter quarto...",
-    "build": "yarn run esbuild --minify",
-    "dev": "yarn run esbuild-watch",
-    "esbuild-base": "esbuild ./src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
-    "esbuild": "yarn run esbuild-base --sourcemap",
-    "esbuild-watch": "yarn run esbuild-base --sourcemap --watch=forever",
+    "build": "tsx build.ts",
+    "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang"
   },
@@ -985,9 +982,9 @@
     "markdown-it-highlightjs": "^4.0.1",
     "quarto-core": "*",
     "quarto-lsp": "*",
+    "quarto-vscode-editor": "*",
     "semver": "^7.3.8",
     "tmp": "^0.2.1",
-    "quarto-vscode-editor": "*",
     "uuid": "^9.0.0",
     "vscode-languageclient": "^8.0.2",
     "vscode-nls": "^5.2.0"
@@ -1009,9 +1006,11 @@
     "@typescript-eslint/parser": "^5.45.0",
     "@vscode/test-electron": "^2.2.0",
     "@vscode/vsce": "^2.15.0",
+    "build": "*",
     "esbuild": "^0.16.7",
     "eslint": "^8.28.0",
     "plist": "^3.0.6",
+    "tsx": "^3.12.1",
     "typescript": "^4.9.3"
   }
 }

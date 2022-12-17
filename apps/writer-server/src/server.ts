@@ -27,8 +27,9 @@ import jayson from 'jayson'
 import { appConfigDir, jaysonServerMethods } from 'core-node';
 
 import { kWriterJsonRpcPath } from 'writer-types';
-import { CrossrefServerOptions, editorServerMethods, editorServicesMethods, PubMedServerOptions } from 'editor-server';
+import { editorServerMethods, editorServicesMethods } from 'editor-server';
 import { prefsServerMethods } from './prefs';
+import { defaultEditorServerOptions } from 'editor-server/src/server/server';
 
 // constants
 const kPayloadLimitMb = 100;
@@ -42,23 +43,8 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     userDictionaryDir
   };
 
-  const pubmedOptions: PubMedServerOptions  = {
-    tool: "Quarto",
-    email: "pubmed@rstudio.com",
-  }
-
-  const crossrefOptions: CrossrefServerOptions = {
-    userAgent: "Quarto",
-    email: "crossref@rstudio.com"
-  }
-
   const writerRpcServer = jayson.Server(jaysonServerMethods({
-    ...editorServerMethods({
-      resourcesDir: editorResourcesDir,
-      payloadLimitMb: kPayloadLimitMb,
-      pubmed: pubmedOptions,
-      crossref: crossrefOptions
-    }),
+    ...editorServerMethods(defaultEditorServerOptions(editorResourcesDir, "pandoc", kPayloadLimitMb)),
     ...editorServicesMethods({ dictionary: dictionaryOptions }),
     ...writerServerMethods()
   }));

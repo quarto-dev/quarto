@@ -26,6 +26,7 @@ export interface QuartoContext {
   version: string;
   binPath: string;
   resourcePath: string;
+  pandocPath: string;
   workspaceDir?: string;
   useCmd: boolean;
   runQuarto: (options: ExecFileSyncOptions, ...args: string[]) => string;
@@ -64,10 +65,11 @@ export function initQuartoContext(
     // use cmd suffix for older versions of quarto on windows
     const windows = os.platform() == "win32";
     const useCmd = windows && semver.lte(quartoInstall.version, "1.1.162");
-
+    const pandocPath = path.join(quartoInstall!.binPath, "tools", "pandoc");
     return {
       available: true,
       ...quartoInstall,
+      pandocPath,
       workspaceDir: workspaceFolder,
       useCmd,
       runQuarto: (options: ExecFileSyncOptions, ...args: string[]) =>
@@ -78,7 +80,7 @@ export function initQuartoContext(
         ),
       runPandoc: (options: ExecFileSyncOptions, ...args: string[]) =>
         execProgram(
-          path.join(quartoInstall!.binPath, "tools", "pandoc"),
+          pandocPath,
           args,
           options
         ),
@@ -89,6 +91,7 @@ export function initQuartoContext(
       version: "",
       binPath: "",
       resourcePath: "",
+      pandocPath: "",
       useCmd: false,
       runQuarto: () => "",
       runPandoc: () => "",

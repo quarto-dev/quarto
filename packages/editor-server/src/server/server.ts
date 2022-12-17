@@ -19,22 +19,43 @@ import { EditorServer } from "editor-types";
 import { crossrefServer, crossrefServerMethods, CrossrefServerOptions } from "./crossref";
 import { dataCiteServer, dataCiteServerMethods } from "./datacite";
 import { doiServer, doiServerMethods } from "./doi";
-import { pandocServer, pandocServerMethods } from "./pandoc";
+import { pandocServer, pandocServerMethods, PandocServerOptions } from "./pandoc";
 import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
 import { JsonRpcServerMethod } from 'core';
 
 export interface EditorServerOptions {
-  resourcesDir: string;
-  payloadLimitMb: number;
+  pandoc: PandocServerOptions;
   pubmed: PubMedServerOptions;
   crossref: CrossrefServerOptions;
 }
 
+export function defaultEditorServerOptions(
+  resourcesDir: string, 
+  pandocPath?: string,
+  payloadLimitMb = 100
+) {
+  return {
+    pandoc: {
+      resourcesDir,
+      pandocPath: pandocPath || "pandoc",
+      payloadLimitMb
+    },
+    pubmed: {
+      tool: "Quarto",
+      email: "pubmed@rstudio.com"
+    },
+    crossref: {
+      userAgent: "Quarto",
+      email: "crossref@rstudio.com"
+    }
+  }
+}
+
 export function editorServer(options: EditorServerOptions) : EditorServer {
   return {
-    pandoc: pandocServer(options),               // partial
+    pandoc: pandocServer(options.pandoc),               // partial
     doi: doiServer(),                            // done
     crossref: crossrefServer(options.crossref),  // done
     datacite: dataCiteServer(),                  // done

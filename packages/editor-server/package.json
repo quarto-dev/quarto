@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "core": "*",
     "core-node": "*",
     "cross-fetch": "^3.1.5",
     "editor-types": "*",
@@ -14,5 +15,8 @@
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.17"
   }
 }

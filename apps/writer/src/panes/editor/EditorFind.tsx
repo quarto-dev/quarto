@@ -31,7 +31,7 @@ import { focusInput } from '../../widgets/utils';
 import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
-import { editorDialogs } from 'editor-dialogs';
+import { editorDialogs } from '../../../../../packages/editor-ui/src';
 
 const EditorFind: React.FC = () => {
 

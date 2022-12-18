@@ -27,7 +27,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
-    "editor-dialogs": "*",
+    "editor-ui": "*",
     "normalize.css": "^8.0.1"
   },
   "devDependencies": {

@@ -22,7 +22,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
-    "editor-dialogs": "*",
+    "editor-ui": "*",
     "formik": "^2.2.9",
     "i18next": "^22.0.4",
     "i18next-browser-languagedetector": "^7.0.1",

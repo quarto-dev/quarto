@@ -62,7 +62,7 @@ import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
 import { defaultPrefs, Prefs } from 'writer-types';
 import { useEditorSpelling } from './context/editor-spelling';
 import EditorFind from './EditorFind';
-import { editorDialogs } from 'editor-dialogs';
+import { editorDialogs } from '../../../../../packages/editor-ui/src';
 
 const EditorPane : React.FC = () => {
 

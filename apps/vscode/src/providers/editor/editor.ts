@@ -128,8 +128,8 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             <!--
             Use a content security policy to only allow loading images from https or from our extension directory,
             and only allow scripts that have a specific nonce.
-            -->
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+            -->
 
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -138,12 +138,6 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             <title>Visual Editor</title>
         </head>
         <body>
-            <div class="notes">
-                <div class="add-button">
-                    <button>Scratch!</button>
-                </div>
-            </div>
-            
             <script nonce="${nonce}" src="${scriptUri}"></script>
         </body>
         </html>`;

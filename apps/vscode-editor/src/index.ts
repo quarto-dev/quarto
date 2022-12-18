@@ -15,22 +15,51 @@
 
 import 'vscode-webview';
 
+import { Editor, EditorFormat, kQuartoDocType } from 'editor';
+
 import { EditorState } from './state';
-import { editorServer } from './server';
+
+import { editorContext } from './context';
 
 import 'normalize.css/normalize.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
+import { kEditorContent } from './content';
 
+// establish editor context
 const vscode = acquireVsCodeApi<EditorState>();
+const context = editorContext(vscode);
 
-const server = editorServer(vscode);
+// create editor div
+const editorDiv = window.document.createElement("div");
+editorDiv.style.position = 'absolute';
+editorDiv.style.top = '0';
+editorDiv.style.left = '0';
+editorDiv.style.right = '0';
+editorDiv.style.bottom = '0';
+window.document.body.appendChild(editorDiv);
 
-server.pubmed.search("covid").then(console.log);
+// create editor
+const format: EditorFormat = {
+  pandocMode: 'markdown',
+  pandocExtensions: '',
+  rmdExtensions: {
+    codeChunks: true,
+    bookdownPart: true,
+    bookdownXRef: true
+  },
+  hugoExtensions: {
+    shortcodes: true
+  },
+  docTypes: [kQuartoDocType]
+}
+Editor.create(editorDiv, context, format).then(async (editor) => {
+  await editor.setMarkdown(kEditorContent, {}, false);
+});
 
-server.pandoc.markdownToAst("**strong**", "markdown", []).then(console.log);
+
 
 
 

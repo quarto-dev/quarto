@@ -310,12 +310,13 @@ export class Editor {
     parent: HTMLElement,
     context: EditorContext,
     format: EditorFormat,
-    options: EditorOptions,
+    options?: EditorOptions,
   ): Promise<Editor> {
     // provide option defaults
     options = {
       autoFocus: false,
       browserSpellCheck: false,
+      commenting: false,
       codeEditor: '',
       rmdImagePreview: false,
       hideFormatComment: false,

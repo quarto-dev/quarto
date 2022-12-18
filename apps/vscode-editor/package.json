@@ -26,6 +26,8 @@
     "core": "*",
     "core-browser": "*",
     "editor": "*",
+    "editor-codemirror": "*",
+    "editor-dialogs": "*",
     "normalize.css": "^8.0.1"
   },
   "devDependencies": {

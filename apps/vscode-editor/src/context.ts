@@ -26,7 +26,7 @@ import {
 
 import { codeMirrorExtension } from "editor-codemirror";
 
-import { editorDialogs } from "../../../packages/editor-ui/src";
+import { editorDialogs } from "editor-ui";
 
 import { WebviewApi } from "vscode-webview";
 

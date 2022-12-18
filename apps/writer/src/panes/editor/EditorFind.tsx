@@ -24,6 +24,7 @@ import { IconNames } from '@blueprintjs/icons';
 
 import { kAlertTypeInfo, UITools } from 'editor';
 
+import { editorDialogs } from "editor-ui";
 
 import { CommandManagerContext } from '../../commands/CommandManager';
 import { WorkbenchCommandId } from '../../commands/commands';
@@ -31,7 +32,7 @@ import { focusInput } from '../../widgets/utils';
 import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
-import { editorDialogs } from '../../../../../packages/editor-ui/src';
+
 
 const EditorFind: React.FC = () => {
 

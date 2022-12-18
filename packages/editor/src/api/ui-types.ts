@@ -23,12 +23,12 @@ export { SkinTone } from './emoji';
 export interface EditorUI {
   dialogs: EditorDialogs;
   display: EditorDisplay;
-  math: EditorUIMath;
   context: EditorUIContext;
   prefs: EditorUIPrefs;
-  chunks: EditorUIChunks;
-  spelling: EditorUISpelling;
   images: EditorUIImages;
+  math?: EditorUIMath;
+  spelling?: EditorUISpelling;
+  chunks?: EditorUIChunks;
 }
 
 /**
@@ -129,7 +129,7 @@ export interface EditorMenuItem {
 }
 
 export interface EditorUIMath {
-  typeset?: (el: HTMLElement, text: string, priority: boolean) => Promise<boolean>;
+  typeset: (el: HTMLElement, text: string, priority: boolean) => Promise<boolean>;
 }
 
 export interface EditorDisplay {

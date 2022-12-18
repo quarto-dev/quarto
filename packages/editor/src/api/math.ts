@@ -15,7 +15,7 @@
 
 import { EditorState } from 'prosemirror-state';
 
-import { EditorMath, EditorUI } from './ui-types';
+import { EditorMath, EditorUIMath } from './ui-types';
 import { PandocToken } from './pandoc';
 import { markIsActive, getMarkAttrs } from './mark';
 
@@ -30,7 +30,7 @@ export enum MathType {
   Display = 'DisplayMath',
 }
 
-export function editorMath(ui: EditorUI): EditorMath {
+export function editorMath(uiMath: EditorUIMath): EditorMath {
   // return a promise that will typeset this node's math (including retrying as long as is
   // required if the element is not yet connected to the DOM)
   return {
@@ -38,13 +38,13 @@ export function editorMath(ui: EditorUI): EditorMath {
       return new Promise(resolve => {
         // regular typeset if we are already connected
         if (el.isConnected) {
-          ui.math.typeset!(el, math, priority).then(resolve);
+          uiMath.typeset(el, math, priority).then(resolve);
         } else {
           // otherwise wait 100ms then retry
           const timerId = window.setInterval(() => {
             if (el.isConnected) {
               clearInterval(timerId);
-              ui.math.typeset!(el, math, priority).then(resolve);
+              uiMath.typeset(el, math, priority).then(resolve);
             }
           }, 100);
         }

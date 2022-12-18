@@ -30,7 +30,7 @@ import {
 } from '../../api/spelling';
 import { EditorEvents } from '../../api/event-types';
 import { kAddToHistoryTransaction } from '../../api/transaction';
-import { EditorUI, EditorMenuItem } from '../../api/ui-types';
+import { EditorMenuItem, EditorUIPrefs } from '../../api/ui-types';
 
 import { excludedMarks, getWords, spellcheckerWord, findBeginWord, findEndWord, charAt } from './spelling';
 import { WordBreaker, kCharClassWord, wordBreaker } from 'core';
@@ -45,10 +45,11 @@ const realtimeSpellingKey = new PluginKey<DecorationSet>('spelling-realtime-plug
 export function realtimeSpellingPlugin(
   schema: Schema,
   marks: readonly PandocMark[],
-  ui: EditorUI,
+  spelling: EditorUISpelling,
+  prefs: EditorUIPrefs,
   events: EditorEvents,
 ) {
-  return new RealtimeSpellingPlugin(excludedMarks(schema, marks), ui, events);
+  return new RealtimeSpellingPlugin(excludedMarks(schema, marks), spelling, prefs, events);
 }
 
 export function invalidateAllWords(view: EditorView) {
@@ -67,10 +68,10 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
   private hasBeenFocused = true;
 
   private view: EditorView | null = null;
-  private readonly ui: EditorUI;
+  private readonly prefs: EditorUIPrefs;
   public static readonly wb = wordBreaker();
 
-  constructor(excluded: MarkType[], ui: EditorUI, events: EditorEvents) {    
+  constructor(excluded: MarkType[], spelling: EditorUISpelling, prefs: EditorUIPrefs, events: EditorEvents) {    
     super({
       key: realtimeSpellingKey,
       view: (view: EditorView) => {
@@ -89,7 +90,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
           }
 
           // don't continue if either realtime spelling is disabled or we have never been focused
-          if (!this.ui.prefs.realtimeSpelling() || !this.hasBeenFocused) {
+          if (!this.prefs.realtimeSpelling() || !this.hasBeenFocused) {
             return DecorationSet.empty;
           }
 
@@ -99,7 +100,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
           if (tr.getMeta(kUpdateSpellingTransaction)) {
             // explicit update request invalidates any existing decorations (this can happen when
             // we get focus for the very first time or when the main or secondary dictionaries change)
-            return DecorationSet.create(newState.doc, spellingDecorations(newState, wb, ui.spelling, excluded));
+            return DecorationSet.create(newState.doc, spellingDecorations(newState, wb, spelling, excluded));
           } else if (tr.getMeta(kInvalidateSpellingWordTransaction)) {
             // for word invalidations we search through the decorations and remove words that match
             const word = tr.getMeta(kInvalidateSpellingWordTransaction) as string;
@@ -167,7 +168,7 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
                 // previous behavior in order to get the library running against Typo in the browser
                 // to work correctly.
                 // 
-                spellingDecorations(newState, wb, ui.spelling, excluded, true, range.from, range.to)
+                spellingDecorations(newState, wb, spelling, excluded, true, range.from, range.to)
               );
             }
 
@@ -207,8 +208,8 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
       },
     });
 
-    // save reference to ui
-    this.ui = ui;
+    // save reference to prefs
+    this.prefs = prefs;
 
     // trigger update on first focus
     const focusUnsubscribe = events.subscribe(FocusEvent, () => {
@@ -288,7 +289,7 @@ function spellingDecorations(
 }
 
 
-export function spellingContextMenuHandler(ui: EditorUI) {
+export function spellingContextMenuHandler(spelling: EditorUISpelling, t: (text: string) => string) {
   
   return (view: EditorView, $pos: ResolvedPos) : (ContextMenuSource | null)  => {
 
@@ -318,7 +319,7 @@ export function spellingContextMenuHandler(ui: EditorUI) {
         const word = spellcheckerWord(view.state.doc.textBetween(from, to));
         const kMaxSuggetions = 5;
         const menuItems: EditorMenuItem[] = [];
-        ui.spelling.suggestionList(word, (suggestions: string[]): void => {
+        spelling.suggestionList(word, (suggestions: string[]): void => {
           // create menu w/ suggestions
           menuItems.push(...suggestions.slice(0, kMaxSuggetions).map(suggestion => {
             return {
@@ -338,10 +339,10 @@ export function spellingContextMenuHandler(ui: EditorUI) {
             menuItems.push({ separator: true });
           }
   
-          menuItems.push(menuAction(ui.context.translateText('Ignore All'), () => ui.spelling.ignoreWord(word)));
+          menuItems.push(menuAction(t('Ignore All'), () => spelling.ignoreWord(word)));
           menuItems.push({ separator: true });
           menuItems.push(
-            menuAction(ui.context.translateText('Add to Dictionary'), () => ui.spelling.addToDictionary(word)),
+            menuAction(t('Add to Dictionary'), () => spelling.addToDictionary(word)),
           );
 
           resolve(menuItems);
@@ -356,9 +357,9 @@ export function spellingContextMenuHandler(ui: EditorUI) {
       const from = findBeginWord(view.state, $pos.pos, classify);
       const to = findEndWord(view.state, $pos.pos, classify);
       const word = spellcheckerWord(view.state.doc.textBetween(from, to));
-      if (ui.spelling.isWordIgnored(word)) {
+      if (spelling.isWordIgnored(word)) {
         return { items: async () => [
-          menuAction(`${ui.context.translateText('Unignore')} '${word}'`, () => ui.spelling.unignoreWord(word)),
+          menuAction(`${t('Unignore')} '${word}'`, () => spelling.unignoreWord(word)),
         ]};
       }
     }

@@ -32,7 +32,7 @@ import { GapCursor } from 'prosemirror-gapcursor';
 
 import { editingRootNode } from '../../api/node';
 import { insertParagraph } from '../../api/paragraph';
-import { EditorUI, ChunkEditor } from '../../api/ui-types';
+import { ChunkEditor, EditorUIChunks } from '../../api/ui-types';
 import { EditorEvents } from '../../api/event-types';
 import { ExtensionContext, ExtensionFn } from '../../api/extension';
 import { DispatchEvent, ResizeEvent, ScrollEvent } from '../../api/event-types';
@@ -58,6 +58,12 @@ const plugin = new PluginKey('ace');
 export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): ExtensionFn {
 
   return (context: ExtensionContext) => {
+
+    // we don't create the ace extension unless we have a chunks implemenentation
+    if (!context.ui.chunks) {
+      return null;
+    }
+   
     // shared services
     const aceRenderQueue = new AceRenderQueue(context.events);
     const aceNodeViews = new AceNodeViews();
@@ -74,6 +80,7 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
           view,
           getPos as () => number,
           context,
+          context.ui.chunks!,
           codeViews[name],
           aceRenderQueue,
           aceNodeViews,
@@ -139,7 +146,7 @@ export class AceNodeView implements NodeView {
   public readonly dom: HTMLElement;
 
   private readonly view: EditorView;
-  private readonly ui: EditorUI;
+  private readonly chunks: EditorUIChunks;
   private readonly nodeViews: AceNodeViews;
   private readonly renderQueue: AceRenderQueue;
   private chunk?: ChunkEditor;
@@ -170,6 +177,7 @@ export class AceNodeView implements NodeView {
     view: EditorView,
     getPos: () => number,
     context: ExtensionContext,
+    chunks: EditorUIChunks,
     options: CodeViewOptions,
     renderQueue: AceRenderQueue,
     nodeViews: AceNodeViews,
@@ -177,7 +185,7 @@ export class AceNodeView implements NodeView {
     // Store for later
     this.node = node;
     this.view = view;
-    this.ui = context.ui;
+    this.chunks = chunks;
     this.events = context.events;
     this.getPos = getPos;
 
@@ -518,7 +526,7 @@ export class AceNodeView implements NodeView {
     }
 
     // call host factory to instantiate editor
-    this.chunk = this.ui.chunks.createChunkEditor('ace', this.dom, this.node.attrs.md_index, this.node.attrs.classes, {
+    this.chunk = this.chunks.createChunkEditor('ace', this.dom, this.node.attrs.md_index, this.node.attrs.classes, {
       getPos: () => this.getPos(),
       scrollIntoView: ele => this.scrollIntoView(ele),
       scrollCursorIntoView: () => this.scrollCursorIntoView(),

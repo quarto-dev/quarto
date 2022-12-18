@@ -23,12 +23,9 @@ import { codeMirrorExtension } from "editor-codemirror";
 import { kWriterJsonRpcPath, Prefs } from 'writer-types';
 
 import {
-  ChunkEditor,
   EditorContext,
   EditorDialogs,
   EditorMath,
-  EditorUIChunkCallbacks,
-  EditorUIChunks,
   EditorUIContext,
   EditorUIPrefs,
   EditorUISpelling,
@@ -69,7 +66,6 @@ export function editorContext(providers: EditorProviders) : EditorContext {
     math: editorMath(mathServer),
     context: editorUIContext(),
     prefs: editorPrefs(providers.prefs),
-    chunks: editorChunks(),
     spelling: editorSpelling(providers.spelling),
     images: uiTools.context.defaultUIImages()
   };
@@ -263,43 +259,5 @@ function editorSpelling(provider: () => EditorUISpelling) : EditorUISpelling {
     addToDictionary(word: string) {
       return provider().addToDictionary(word);
     }
-  };
-}
-
-function editorChunks(): EditorUIChunks {
-  return {
-    // create a code chunk editor
-    createChunkEditor(
-      _type: string,
-      _element: Element,
-      _index: number,
-      _classes: string[],
-      _callbacks: EditorUIChunkCallbacks
-    ): ChunkEditor {
-      return {
-        editor: null,
-        setMode(_mode: string) {
-          //
-        },
-        executeSelection() {
-          //
-        },
-        element: document.createElement("div"),
-        destroy() {
-          //
-        },
-        setExpanded(_expanded: boolean) {
-          //
-        },
-        getExpanded(): boolean {
-          return true;
-        },
-      };
-    },
-
-    // expand or collapse all chunk editors
-    setChunksExpanded(_expanded: boolean) {
-      //
-    },
   };
 }

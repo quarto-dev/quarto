@@ -218,7 +218,7 @@ export function initExtensions(
   const codeViews = manager.codeViews();
   const plugins: Plugin[] = [];
   // provide ace code view extension if requested
-  if (context.options.codeEditor === 'ace') {
+  if (context.options.codeEditor === 'ace' && context.ui.chunks) {
     codeViewExtension = aceExtension;
   } 
   // register code view extension

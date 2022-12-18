@@ -903,7 +903,7 @@ export class Editor {
         format: this.format,
         options: this.options,
         ui: this.context.ui,
-        math: this.context.ui.math.typeset ? editorMath(this.context.ui) : undefined,
+        math: this.context.ui.math ? editorMath(this.context.ui.math) : undefined,
         events: {
           subscribe: this.subscribe.bind(this),
           emit: this.emitEvent.bind(this),
@@ -936,13 +936,26 @@ export class Editor {
   }
 
   private registerRealtimeSpelling() {
-    this.extensions.registerPlugins(
-      [realtimeSpellingPlugin(this.schema, this.extensions.pandocMarks(), this.context.ui, this.events)],
-      true,
-    );
-    this.extensions.register([{
-      contextMenuHandlers: () => [spellingContextMenuHandler(this.context.ui)]
-    }])
+    if (this.context.ui.spelling !== undefined) {
+      this.extensions.registerPlugins(
+        [realtimeSpellingPlugin(
+          this.schema, 
+          this.extensions.pandocMarks(), 
+          this.context.ui.spelling, 
+          this.context.ui.prefs, 
+          this.events
+        )],
+        true,
+      );
+      this.extensions.register([{
+        contextMenuHandlers: () => [
+          spellingContextMenuHandler(
+            this.context.ui.spelling!, 
+            this.context.ui.context.translateText
+          )
+        ]
+      }])
+    }
   }
 
   private createPlugins(): Plugin[] {

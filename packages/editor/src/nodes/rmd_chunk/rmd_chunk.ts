@@ -21,7 +21,7 @@ import { PandocOutput, PandocTokenType } from '../../api/pandoc';
 import { codeNodeSpec } from '../../api/code';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 
-import { EditorUI } from '../../api/ui-types';
+import { EditorUI, EditorUIChunks } from '../../api/ui-types';
 import { kBookdownDocType } from '../../api/format';
 import { rmdChunk, insertRmdChunk } from '../../api/rmd';
 import { OmniInsertGroup } from '../../api/omni_insert';
@@ -107,9 +107,13 @@ const extension = (context: ExtensionContext): Extension | null => {
         new SQLChunkCommand(ui),
         new D3ChunkCommand(ui),
         new StanChunkCommand(ui),
-        new ExpandAllChunksCommand(ui),
-        new CollapseAllChunksCommand(ui)
       ];
+      if (ui.chunks) {
+        commands.push(
+          new ExpandAllChunksCommand(ui.chunks),
+          new CollapseAllChunksCommand(ui.chunks)
+        );
+      }
       return commands;
     },
 
@@ -222,7 +226,7 @@ class StanChunkCommand extends RmdChunkCommand {
 
 class ChunkExpansionCommand extends ProsemirrorCommand {
   constructor(
-    ui: EditorUI,
+    chunks: EditorUIChunks,
     id: EditorCommandId,
     keymap: string[],
     expand: boolean
@@ -230,7 +234,7 @@ class ChunkExpansionCommand extends ProsemirrorCommand {
     super(id, keymap, (_state: EditorState, dispatch?: (tr: Transaction) => void) => 
     {
       if (dispatch) {
-        ui.chunks.setChunksExpanded(expand);
+        chunks.setChunksExpanded(expand);
       }
       return true;
     });
@@ -238,14 +242,14 @@ class ChunkExpansionCommand extends ProsemirrorCommand {
 }
 
 class ExpandAllChunksCommand extends ChunkExpansionCommand {
-  constructor(ui: EditorUI) {
-    super(ui, EditorCommandId.ExpandAllChunks, [], true);
+  constructor(chunks: EditorUIChunks) {
+    super(chunks, EditorCommandId.ExpandAllChunks, [], true);
   }
 }
 
 class CollapseAllChunksCommand extends ChunkExpansionCommand {
-  constructor(ui: EditorUI) {
-    super(ui, EditorCommandId.CollapseAllChunks, [], false);
+  constructor(chunks: EditorUIChunks,) {
+    super(chunks, EditorCommandId.CollapseAllChunks, [], false);
   }
 }
 

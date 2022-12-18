@@ -303,24 +303,24 @@ const createEditor = async (
   providers: EditorProviders
 ) : Promise<Editor> => {
   const context = editorContext(providers);
-    const format: EditorFormat = {
-      pandocMode: 'markdown',
-      pandocExtensions: '',
-      rmdExtensions: {
-        codeChunks: true,
-        bookdownPart: true,
-        bookdownXRef: true
-      },
-      hugoExtensions: {
-        shortcodes: true
-      },
-      docTypes: [kQuartoDocType]
-    }
-    return await Editor.create(parent, context, format, { 
-      browserSpellCheck: false,
-      commenting: false,
-      outerScrollContainer: true 
-    });
+  const format: EditorFormat = {
+    pandocMode: 'markdown',
+    pandocExtensions: '',
+    rmdExtensions: {
+      codeChunks: true,
+      bookdownPart: true,
+      bookdownXRef: true
+    },
+    hugoExtensions: {
+      shortcodes: true
+    },
+    docTypes: [kQuartoDocType]
+  }
+  return await Editor.create(parent, context, format, { 
+    browserSpellCheck: false,
+    commenting: false,
+    outerScrollContainer: true 
+  });
 }
 
 export default EditorPane;

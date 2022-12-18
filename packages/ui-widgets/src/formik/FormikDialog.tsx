@@ -83,10 +83,10 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
                 <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
                 <div className={styles.dialogFooterActionsRight}>
                   {!props.noCancelButton 
-                      ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || t('dialog_cancel')}</Button>
+                      ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || t('Cancel')}</Button>
                       : null
                   }
-                  <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || t('dialog_ok')}</Button>
+                  <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || t('OK')}</Button>
                 </div>
               </div>
             </div>

@@ -22,13 +22,7 @@ import { setEditorMarkdown } from './store/editor';
 import { i18nInit } from './i18n';
 import App from './App';
 
-import 'normalize.css/normalize.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
-import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
-import "@blueprintjs/select/lib/css/blueprint-select.css";
-import "./styles.scss"
-
+import "editor-ui/src/styles";
 
 async function runApp() {
   try {

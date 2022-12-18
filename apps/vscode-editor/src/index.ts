@@ -21,12 +21,9 @@ import { EditorState } from './state';
 
 import { editorContext } from './context';
 
-import 'normalize.css/normalize.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
-import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
-import "@blueprintjs/select/lib/css/blueprint-select.css";
 import { kEditorContent } from './content';
+
+import "editor-ui/src/styles";
 
 // establish editor context
 const vscode = acquireVsCodeApi<EditorState>();

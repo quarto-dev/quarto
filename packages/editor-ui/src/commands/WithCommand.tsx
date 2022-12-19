@@ -17,7 +17,7 @@ import React, { PropsWithChildren, useContext } from 'react';
 
 import { IProps } from '@blueprintjs/core';
 
-import { CommandManagerContext } from 'editor-ui/src/commands/CommandManager';
+import { CommandManagerContext } from 'editor-ui';
 
 export interface WithCommandProps extends IProps {
   id: string;

@@ -19,7 +19,7 @@ import { Props } from '@blueprintjs/core';
 
 import { ToolbarButton } from '../menu/Toolbar';
 import { commandTooltipText } from './commands';
-import { CommandManagerContext } from 'editor-ui/src/commands/CommandManager';
+import { CommandManagerContext } from 'editor-ui';
 
 export interface CommandToolbarButtonProps extends Props {
   command: string;

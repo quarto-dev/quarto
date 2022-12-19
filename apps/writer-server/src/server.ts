@@ -29,7 +29,7 @@ import { appConfigDir, jaysonServerMethods } from 'core-node';
 import { kWriterJsonRpcPath } from 'writer-types';
 import { editorServerMethods, editorServicesMethods } from 'editor-server';
 import { prefsServerMethods } from './prefs';
-import { defaultEditorServerOptions } from 'editor-server/src/server/server';
+import { defaultEditorServerOptions } from 'editor-server';
 
 // constants
 const kPayloadLimitMb = 100;

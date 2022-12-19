@@ -15,7 +15,9 @@
 
 import 'vscode-webview';
 
-import { Editor, EditorFormat, kQuartoDocType } from 'editor';
+import throttle from "lodash.throttle";
+
+import { Editor, EditorFormat, kQuartoDocType, UpdateEvent } from 'editor';
 
 import { EditorState } from './state';
 
@@ -23,11 +25,16 @@ import { editorContext } from './context';
 
 import { kEditorContent } from './content';
 
+import { editorHost } from './host';
+
 import "editor-ui/src/styles";
+
+
 
 // establish editor context
 const vscode = acquireVsCodeApi<EditorState>();
-const context = editorContext(vscode);
+const host = editorHost(vscode);
+const context = editorContext(host);
 
 // create editor div
 const editorDiv = window.document.createElement("div");
@@ -53,7 +60,16 @@ const format: EditorFormat = {
   docTypes: [kQuartoDocType]
 }
 Editor.create(editorDiv, context, format).then(async (editor) => {
+  
+  const applyEdit = throttle(async () => {
+    const code = await editor.getMarkdown( { atxHeaders: true });
+    await host.container.applyVisualEdit(code.code);
+  }, 1000, { leading: false, trailing: true }); 
+
   await editor.setMarkdown(kEditorContent, {}, false);
+
+  editor.subscribe(UpdateEvent, applyEdit);
+
 });
 
 

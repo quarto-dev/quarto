@@ -86,6 +86,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     const serverDisconnect = editorServer(
       this.context, 
       this.quartoContext,
+      document,
       webviewPanel
     );
   
@@ -93,12 +94,6 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     webviewPanel.onDidDispose(() => {
       changeDocumentSubscription.dispose();
       serverDisconnect();
-    });
-
-    // Receive message from the webview.
-    webviewPanel.webview.onDidReceiveMessage((e) => {
-      switch (e.type) {
-      }
     });
 
     updateWebview();

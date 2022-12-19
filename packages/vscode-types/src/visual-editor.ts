@@ -1,5 +1,5 @@
 /*
- * editor.ts
+ * visual-editor.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,12 +13,16 @@
  *
  */
 
+export const kVEApplyTextEdit = 've_apply_text_edit';
+
+export const kVEHostApplyVisualEdit = 've_host_apply_visual_edit';
+
 
 export interface VisualEditor {
   applyTextEdit: (text: string) => Promise<void>;
 }
 
-export interface VisualEditorHost {
+export interface VisualEditorContainer {
   applyVisualEdit: (text: string) => Promise<void>;
 }
 

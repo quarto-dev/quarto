@@ -28,18 +28,14 @@ import { codeMirrorExtension } from "editor-codemirror";
 
 import { editorDialogs } from "editor-ui";
 
-import { WebviewApi } from "vscode-webview";
 
-import { editorServer } from "./server";
-import { EditorState } from "./state";
+import { EditorHost } from "./host";
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorContext(vscode: WebviewApi<EditorState>) {
+export function editorContext(host: EditorHost) {
 
   const uiTools = new UITools();
-  const server = editorServer(vscode);
-
   const ui = {
     dialogs: editorDialogs(uiTools.attr),
     display: editorDisplay(),
@@ -49,7 +45,7 @@ export function editorContext(vscode: WebviewApi<EditorState>) {
   };
 
   const context : EditorContext = { 
-    server, 
+    server: host.server, 
     ui, 
     codeViewExtension: codeMirrorExtension 
   };

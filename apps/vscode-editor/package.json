@@ -28,7 +28,8 @@
     "editor": "*",
     "editor-codemirror": "*",
     "editor-ui": "*",
-    "normalize.css": "^8.0.1"
+    "normalize.css": "^8.0.1",
+    "vscode-types": "*"
   },
   "devDependencies": {
     "@types/vscode-webview": "^1.57.0",

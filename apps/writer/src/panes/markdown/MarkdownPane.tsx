@@ -26,15 +26,14 @@ import { markdown as markdownLang } from "@codemirror/lang-markdown"
 
 import { editorMarkdown } from '../../store/editor';
 
-import { CommandManagerContext } from '../../commands/CommandManager';
-import { WorkbenchCommandId } from '../../commands/commands';
+import { CommandManagerContext, Toolbar, ToolbarText, ToolbarButton  } from 'editor-ui';
 
 import { Pane } from '../../widgets/Pane';
-import { Toolbar, ToolbarText, ToolbarButton } from '../../widgets/Toolbar';
 
 import styles from './MarkdownPane.module.scss';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
 import { defaultPrefs } from 'writer-types';
+import { WorkbenchCommandId } from '../../workbench/commands';
 
 const MarkdownPane: React.FC = () => {
 

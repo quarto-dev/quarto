@@ -16,9 +16,10 @@
 
 import React from "react";
 
-import { EditorMenuItem } from "editor";
+import { EditorMenuItem } from "editor-types";
 
-import { MenubarMenu } from "../Menu";
+import { MenubarMenu } from "../menu/Menu";
+
 import { CommandMenuItems } from "./CommandMenuItems";
 
 export interface CommandMenubarMenuProps {

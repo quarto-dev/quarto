@@ -18,10 +18,10 @@ import React, { useContext } from 'react';
 import { Button } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { CommandManagerContext } from '../../../commands/CommandManager';
-import { WorkbenchCommandId, commandTooltipText } from '../../../commands/commands';
+import { CommandManagerContext, commandTooltipText } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
+import { WorkbenchCommandId } from '../../../workbench/commands';
 
 export interface EditorOutlineButtonProps {
   visible: boolean;

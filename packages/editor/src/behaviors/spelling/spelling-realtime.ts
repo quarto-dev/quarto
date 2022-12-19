@@ -21,7 +21,7 @@ import { ChangeSet } from 'prosemirror-changeset';
 
 import { setTextSelection } from 'prosemirror-utils';
 
-import { EditorUISpelling } from 'editor-types';
+import { EditorMenuItem, EditorUISpelling } from 'editor-types';
 
 import { FocusEvent } from '../../api/event-types';
 import { PandocMark } from '../../api/mark';
@@ -30,7 +30,7 @@ import {
 } from '../../api/spelling';
 import { EditorEvents } from '../../api/event-types';
 import { kAddToHistoryTransaction } from '../../api/transaction';
-import { EditorMenuItem, EditorUIPrefs } from '../../api/ui-types';
+import { EditorUIPrefs } from '../../api/ui-types';
 
 import { excludedMarks, getWords, spellcheckerWord, findBeginWord, findEndWord, charAt } from './spelling';
 import { WordBreaker, kCharClassWord, wordBreaker } from 'core';

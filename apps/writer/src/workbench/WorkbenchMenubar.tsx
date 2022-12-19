@@ -20,15 +20,20 @@ import { ButtonGroup, MenuDivider } from '@blueprintjs/core';
 
 import { EditorCommandId } from 'editor';
 
-import { MainMenu, MenubarMenu } from '../widgets/Menu';
-import { WithCommand } from '../widgets/command/WithCommand';
-import { CommandMenuItem, CommandMenuItemActive } from '../widgets/command/CommandMenuItem';
-import { WorkbenchCommandId } from '../commands/commands';
+import { 
+  MainMenu, 
+  MenubarMenu, 
+  WithCommand, 
+  CommandMenuItem, 
+  CommandMenuItemActive, 
+  CommandManagerContext, 
+  CommandMenubarMenu 
+} from 'editor-ui';
 
-import { CommandManagerContext } from '../commands/CommandManager';
-import { CommandMenubarMenu } from '../widgets/command/CommandMenubarMenu';
+import { WorkbenchCommandId } from './commands';
 
 import styles from './WorkbenchMenubar.module.scss';
+
 
 const CommandId = { ...EditorCommandId, ...WorkbenchCommandId };
 

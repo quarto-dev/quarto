@@ -15,12 +15,13 @@
 
 import React, { PropsWithChildren } from 'react';
 
-
-import { CommandId, Command } from './commands';
-import { EditorMenus } from 'editor';
 import { Props } from '@blueprintjs/core';
 
-export type Commands = { [id in CommandId]?: Command };
+import { EditorMenus } from 'editor-types';
+
+import { Command } from './commands';
+
+export type Commands = { [id: string]: Command };
 
 export interface CommandManagerContextState {
   selection: unknown;
@@ -32,7 +33,7 @@ export type CommandManagerAction =
    | { type: "SET_SELECTION", payload: unknown }
    | { type: "ADD_COMMANDS", payload: Command[] }
    | { type: "SET_MENUS", payload: EditorMenus }
-   | { type: "EXEC_COMMAND", payload: CommandId };
+   | { type: "EXEC_COMMAND", payload: string };
 
 export type CommandManagerContextInstance = [CommandManagerContextState, React.Dispatch<CommandManagerAction>];
 

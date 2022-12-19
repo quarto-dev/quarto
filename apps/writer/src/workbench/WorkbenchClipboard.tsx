@@ -17,12 +17,11 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { WorkbenchCommandId, CommandId, Command } from '../commands/commands';
-import { CommandManagerContext } from '../commands/CommandManager';
-import { keyCodeString } from '../commands/keycodes';
+import { CommandManagerContext, Command, keyCodeString } from 'editor-ui';
 
 import { AlertDialog } from '../widgets/dialog/AlertDialog';
 import { kAlertTypeWarning } from 'editor';
+import { WorkbenchCommandId } from './commands';
 
 interface WorkbenchClipboardState {
   dialogIsOpen: boolean;
@@ -46,7 +45,7 @@ const WorkbenchClipboard: React.FC = () => {
     focusEditor();
   }
 
-  const clipboardCommand = (id: CommandId, domId: string, menuText: string, keymap: string) : Command => {
+  const clipboardCommand = (id: string, domId: string, menuText: string, keymap: string) : Command => {
 
     const openDialog = () => {
       setState({

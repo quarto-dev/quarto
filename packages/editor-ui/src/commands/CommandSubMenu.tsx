@@ -15,11 +15,11 @@
 
 import React, { PropsWithChildren, useContext } from 'react';
 
-import { SubMenuProps, SubMenu } from '../../widgets/Menu';
+import { SubMenuProps, SubMenu } from '../menu/Menu';
 
 import { CommandMenuItem } from './CommandMenuItem';
-import { CommandManagerContext } from '../../commands/CommandManager';
-import { CommandId } from '../../commands/commands';
+
+import { CommandManagerContext } from './CommandManager';
 
 export const CommandSubMenu: React.FC<PropsWithChildren<SubMenuProps>> = props => {
   // get command manager for command lookup
@@ -31,7 +31,7 @@ export const CommandSubMenu: React.FC<PropsWithChildren<SubMenuProps>> = props =
     if (
       React.isValidElement(child) &&
       child.type === CommandMenuItem &&
-      cmState.commands[child.props.id as CommandId]
+      cmState.commands[child.props.id]
     ) {
       haveCommands = true;
       break;

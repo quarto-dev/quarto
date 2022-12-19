@@ -14,3 +14,6 @@
  */
 
 export * from './dialogs';
+export * from './commands';
+export * from './menu';
+

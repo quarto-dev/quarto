@@ -26,8 +26,8 @@ import { kAlertTypeInfo, UITools } from 'editor';
 
 import { editorDialogs } from "editor-ui";
 
-import { CommandManagerContext } from '../../commands/CommandManager';
-import { WorkbenchCommandId } from '../../commands/commands';
+import { CommandManagerContext } from 'editor-ui';
+import { WorkbenchCommandId } from '../../workbench/commands';
 import { focusInput } from '../../widgets/utils';
 import { EditorActionsContext } from './EditorActionsContext';
 

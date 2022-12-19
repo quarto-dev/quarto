@@ -24,10 +24,11 @@ import { EditableText } from '@blueprintjs/core';
 
 import { editorLoading, editorTitle, setEditorTitle } from '../store/editor';
 
-import { CommandManagerContext } from '../commands/CommandManager';
-import { WorkbenchCommandId } from '../commands/commands';
+import { CommandManagerContext } from 'editor-ui';
 
 import { focusInput } from '../widgets/utils';
+
+import { WorkbenchCommandId } from './commands';
 
 import styles from './WorkbenchNavbar.module.scss';
 

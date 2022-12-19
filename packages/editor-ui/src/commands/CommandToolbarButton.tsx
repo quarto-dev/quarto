@@ -17,12 +17,12 @@ import React, { useContext } from 'react';
 
 import { Props } from '@blueprintjs/core';
 
-import { ToolbarButton } from '../../widgets/Toolbar';
-import { CommandId, commandTooltipText } from '../../commands/commands';
-import { CommandManagerContext } from '../../commands/CommandManager';
+import { ToolbarButton } from '../menu/Toolbar';
+import { commandTooltipText } from './commands';
+import { CommandManagerContext } from 'editor-ui/src/commands/CommandManager';
 
 export interface CommandToolbarButtonProps extends Props {
-  command: CommandId;
+  command: string;
 }
 
 export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props: CommandToolbarButtonProps) => {

@@ -19,7 +19,7 @@ import { MenuDivider } from '@blueprintjs/core';
 
 import { EditorCommandId } from 'editor';
 
-import { CommandMenuItem, CommandMenuItemActive } from '../../widgets/command/CommandMenuItem';
+import { CommandMenuItem, CommandMenuItemActive } from 'editor-ui';
 
 const EditorParagraphStyleMenuItems: React.FC = () => {
   return (

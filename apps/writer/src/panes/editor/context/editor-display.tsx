@@ -21,9 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ContextMenu, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { EditorDisplay, EditorMenuItem, XRef } from "editor";
 
-import { Commands } from "../../../commands/CommandManager";
-import { CommandMenuItem } from "../../../widgets/command/CommandMenuItem";
-import { CommandId } from "../../../commands/commands";
+import { Commands, CommandMenuItem } from "editor-ui";
 
 
 export function editorDisplay(commands: () => Commands) : EditorDisplay {
@@ -49,7 +47,7 @@ export function editorDisplay(commands: () => Commands) : EditorDisplay {
           if (item.separator) {
             return <MenuDivider key={uuidv4()}/>;
           } else if (item.command) {
-            return <CommandMenuItem id={item.command as CommandId} key={item.command} text={item.text} commands={cmds}/>;
+            return <CommandMenuItem id={item.command} key={item.command} text={item.text} commands={cmds}/>;
           } else {
             return <MenuItem text={item.text} key={uuidv4()} onClick={item.exec}/>
           }

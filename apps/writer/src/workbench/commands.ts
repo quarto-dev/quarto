@@ -13,11 +13,6 @@
  *
  */
 
-import { IconName, MaybeElement } from '@blueprintjs/core';
-
-import { EditorCommandId } from 'editor';
-
-import { toKeyCode, keyCodeString } from './keycodes';
 
 export enum WorkbenchCommandId {
   Cut = '2A311A8B-0302-4CC7-A635-2778CA5006B8',
@@ -37,54 +32,3 @@ export enum WorkbenchCommandId {
   EnableDevTools = '87902997-C95B-4DF1-85C5-303DC0FA33B8',
 }
 
-export type CommandId = EditorCommandId | WorkbenchCommandId;
-
-export interface Command {
-  // unique  id
-  readonly id: CommandId;
-
-  // text for menu
-  readonly menuText: string;
-
-  // group (for display in keyboard shortcuts dialog)
-  readonly group: string;
-
-  // optional blueprint icon for toolbar/menu
-  readonly icon?: IconName | MaybeElement;
-
-  // keys to bind to
-  readonly keymap: readonly string[];
-
-  // don't bind the keys (they are handled by another component e.g. prosemirror)
-  readonly keysUnbound?: boolean;
-
-  // don't show the keys in the keyboard shortcuts dialogs
-  readonly keysHidden?: boolean;
-
-  // is the command available?
-  isEnabled: () => boolean;
-
-  // is it active/latched
-  isActive: () => boolean;
-
-  // execute the command
-  execute: () => void;
-}
-
-export function commandKeymapText(command: Command, pretty: boolean) {
-  if (command.keymap.length) {
-    const keyCode = toKeyCode(command.keymap[0]);
-    return keyCodeString(keyCode, pretty);
-  } else {
-    return '';
-  }
-}
-
-export function commandTooltipText(command: Command) {
-  let text = command.menuText;
-  const keymapText = commandKeymapText(command, true);
-  if (keymapText) {
-    text = `${text} (${keymapText})`;
-  }
-  return text;
-}

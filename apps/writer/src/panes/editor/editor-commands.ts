@@ -21,7 +21,8 @@ import { IconName, IconNames } from '@blueprintjs/icons';
 
 import { Editor, EditorCommand, EditorCommandId } from 'editor';
 
-import { Command, WorkbenchCommandId } from '../../commands/commands';
+import { Command } from 'editor-ui';
+import { WorkbenchCommandId } from '../../workbench/commands';
 
 interface CommandDefs {
   [group: string]: {

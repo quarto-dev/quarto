@@ -16,7 +16,8 @@
 import { ResolvedPos } from "prosemirror-model";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { EditorMenuItem } from "./ui-types";
+
+import { EditorMenuItem } from "editor-types";
 
 
 export interface ContextMenuSource {

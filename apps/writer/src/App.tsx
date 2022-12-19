@@ -22,7 +22,7 @@ import { FocusStyleManager, HotkeysProvider } from '@blueprintjs/core';
 
 import { WorkbenchState } from './store/store';
 import Workbench from './workbench/Workbench';
-import { CommandManagerProvider } from './commands/CommandManager';
+import { CommandManagerProvider } from 'editor-ui';
 
 interface AppProps {
   store: Store<WorkbenchState>;

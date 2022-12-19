@@ -21,10 +21,10 @@ import { defaultPrefs } from 'writer-types';
 import { useGetAvailableDictionariesQuery } from '../store/dictionary';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../store/prefs';
 
-import { CommandManagerContext } from '../commands/CommandManager';
-import { WorkbenchCommandId } from '../commands/commands';
+import { CommandManagerContext } from 'editor-ui';
 
 import { Dialog } from '../widgets/dialog/Dialog';
+import { WorkbenchCommandId } from './commands';
 
 export const WorkbenchPrefsDialog: React.FC = () => {
 

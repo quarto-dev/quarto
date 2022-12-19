@@ -26,8 +26,7 @@ import { defaultPrefs } from 'writer-types';
 import { editorOutline } from '../../../store/editor';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../../../store/prefs';
 
-import { CommandManagerContext } from '../../../commands/CommandManager';
-import { WorkbenchCommandId } from '../../../commands/commands';
+import { CommandManagerContext } from 'editor-ui';
 
 import { EditorOutlineButton } from './EditorOutlineButton';
 import { EditorOutlineHeader } from './EditorOutlineHeader';
@@ -35,6 +34,7 @@ import { EditorOutlineTree } from './EditorOutlineTree';
 import { EditorOutlineEmpty } from './EditorOutlineEmpty';
 
 import styles from './EditorOutlineSidebar.module.scss';
+import { WorkbenchCommandId } from '../../../workbench/commands';
 
 const EditorOutlineSidebar: React.FC = () => {
 

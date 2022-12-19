@@ -17,9 +17,9 @@ import React, { useContext } from 'react';
 
 import { Props, MenuDivider } from '@blueprintjs/core';
 
-import { CommandManagerContext } from '../../commands/CommandManager';
-import { Command, CommandId } from '../../commands/commands';
-import { ToolbarMenu } from '../../widgets/Toolbar';
+import { CommandManagerContext } from './CommandManager';
+import { Command } from './commands';
+import { ToolbarMenu } from '../menu/Toolbar';
 
 import { CommandMenuItem, CommandMenuItemActive } from './CommandMenuItem';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,7 +27,7 @@ import { v4 as uuidv4 } from 'uuid';
 const kSeparator = '---';
 
 export interface CommandToolbarMenuProps extends Props {
-  commands: Array<CommandId | '---'>;
+  commands: Array<string | '---'>;
 }
 
 export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props: CommandToolbarMenuProps) => {

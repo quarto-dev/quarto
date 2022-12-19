@@ -39,7 +39,7 @@ import {
 } from "editor";
 import { editorDisplay } from "./editor-display";
 
-import { Commands } from '../../../commands/CommandManager';
+import { Commands } from 'editor-ui';
 
 export interface EditorPrefs {
   prefs: () => Prefs, 

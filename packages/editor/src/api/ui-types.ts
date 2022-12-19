@@ -15,7 +15,7 @@
 
 import { SkinTone } from './emoji';
 
-import { XRef, EditorUISpelling, EditorDialogs } from 'editor-types';
+import { XRef, EditorUISpelling, EditorDialogs, EditorMenuItem } from 'editor-types';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
@@ -110,22 +110,6 @@ export interface EditorUIContext {
 
   // are we running in windows desktop mode?
   isWindowsDesktop: () => boolean;
-}
-
-export interface EditorMenus {
-  format: EditorMenuItem[];
-  insert: EditorMenuItem[];
-  table: EditorMenuItem[];
-}
-
-export interface EditorMenuItem {
-  text?: string;
-  exec?: VoidFunction;
-  command?: string;
-  separator?: boolean;
-  subMenu?: {
-    items: EditorMenuItem[];
-  };
 }
 
 export interface EditorUIMath {

@@ -17,11 +17,10 @@ import React, { PropsWithChildren, useContext } from 'react';
 
 import { IProps } from '@blueprintjs/core';
 
-import { CommandId } from '../../commands/commands';
-import { CommandManagerContext } from '../../commands/CommandManager';
+import { CommandManagerContext } from 'editor-ui/src/commands/CommandManager';
 
 export interface WithCommandProps extends IProps {
-  id: CommandId;
+  id: string;
 }
 
 export const WithCommand: React.FC<PropsWithChildren<WithCommandProps>> = props => {

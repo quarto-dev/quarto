@@ -27,12 +27,13 @@ import { setTextSelection } from 'prosemirror-utils';
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
-import { EditorMenus, EditorUI, EditorUIImages } from '../api/ui-types';
+import { EditorUI, EditorUIImages } from '../api/ui-types';
 import {
   InsertCiteProps,
   InsertCiteUI,
   UIToolsAttr,
   UIToolsImage,
+  EditorMenus
 } from 'editor-types';
 import {
   attrPropsToInput,

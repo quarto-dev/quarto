@@ -49,7 +49,7 @@ import {
   setEditorLoading,
 } from '../../store/editor';
 
-import { CommandManagerContext, Commands } from '../../commands/CommandManager';
+import { CommandManagerContext, Commands } from 'editor-ui';
 
 import { Pane } from '../../widgets/Pane';
 

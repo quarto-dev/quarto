@@ -19,9 +19,9 @@ import React, { useContext } from 'react';
 import { MenuItem } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { keyCodeString } from '../../commands/keycodes';
-import { commandKeymapText, CommandId } from '../../commands/commands';
-import { CommandManagerContext, Commands } from '../../commands/CommandManager';
+import { keyCodeString } from './keycodes';
+import { commandKeymapText } from './commands';
+import { CommandManagerContext, Commands } from 'editor-ui';
 
 export enum CommandMenuItemActive {
   Check = 'check',
@@ -30,7 +30,7 @@ export enum CommandMenuItemActive {
 }
 
 export interface CommandMenuItemProps {
-  id: CommandId;
+  id: string;
   text?: string;
   keyCode?: string;
   active?: CommandMenuItemActive;

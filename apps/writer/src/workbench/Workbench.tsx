@@ -19,9 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 
-import { CommandManagerContext } from '../commands/CommandManager';
-import { commandHotkeys } from '../commands/hotkeys';
-import { WorkbenchCommandId } from '../commands/commands';
+import { CommandManagerContext, commandHotkeys } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
 import MarkdownPane from '../panes/markdown/MarkdownPane';
@@ -31,6 +29,8 @@ import WorkbenchClipboard from './WorkbenchClipboard';
 
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
 import WorkbenchToolbar from './WorkbenchToolbar';
+
+import { WorkbenchCommandId } from './commands';
 
 import './Workbench.scss';
 

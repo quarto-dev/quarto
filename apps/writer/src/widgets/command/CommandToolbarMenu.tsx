@@ -15,12 +15,9 @@
 
 import React, { useContext } from 'react';
 
-import { useSelector } from 'react-redux';
-
 import { Props, MenuDivider } from '@blueprintjs/core';
 
 import { CommandManagerContext } from '../../commands/CommandManager';
-import { editorSelection } from '../../store/editor';
 import { Command, CommandId } from '../../commands/commands';
 import { ToolbarMenu } from '../../widgets/Toolbar';
 
@@ -35,11 +32,10 @@ export interface CommandToolbarMenuProps extends Props {
 
 export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props: CommandToolbarMenuProps) => {
   // force re-render when the selection changes
-  useSelector(editorSelection);
+  const [cmState] = useContext(CommandManagerContext);
 
   // read command instances
   type CommandItem = Command | '---';
-  const [cmState] = useContext(CommandManagerContext);
   const commands: CommandItem[] = props.commands.reduce((allCmds, command) => {
     if (command === kSeparator) {
       allCmds.push(kSeparator);

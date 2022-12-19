@@ -13,13 +13,12 @@
  *
  */
 
-import { useSelector } from 'react-redux';
+
 import React, { useContext } from 'react';
 
 import { MenuItem } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { editorSelection } from '../../store/editor';
 import { keyCodeString } from '../../commands/keycodes';
 import { commandKeymapText, CommandId } from '../../commands/commands';
 import { CommandManagerContext, Commands } from '../../commands/CommandManager';
@@ -42,14 +41,11 @@ export const CommandMenuItem: React.FC<CommandMenuItemProps> = props => {
   const { id, keyCode, active = CommandMenuItemActive.None } = props;
 
   // force re-render when the selection changes
-  if (!props.commands) {
-    useSelector(editorSelection);
-  }
+  const [cmState] = useContext(CommandManagerContext);
   
   // get command
   let command = props.commands?.[id];
   if (!command) {
-    const [cmState] = useContext(CommandManagerContext);
     command = cmState.commands[id];
   }
   

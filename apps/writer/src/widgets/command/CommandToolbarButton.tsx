@@ -15,11 +15,8 @@
 
 import React, { useContext } from 'react';
 
-import { useSelector } from 'react-redux';
-
 import { Props } from '@blueprintjs/core';
 
-import { editorSelection } from '../../store/editor';
 import { ToolbarButton } from '../../widgets/Toolbar';
 import { CommandId, commandTooltipText } from '../../commands/commands';
 import { CommandManagerContext } from '../../commands/CommandManager';
@@ -30,10 +27,9 @@ export interface CommandToolbarButtonProps extends Props {
 
 export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props: CommandToolbarButtonProps) => {
   // force re-render when the selection changes
-  useSelector(editorSelection);
+  const [cmState] = useContext(CommandManagerContext);
 
   // get command
-  const [cmState] = useContext(CommandManagerContext);
   const command = cmState.commands[props.command];
   if (command) {
     return (

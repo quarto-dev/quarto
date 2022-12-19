@@ -200,7 +200,9 @@ const EditorPane : React.FC = () => {
 
   // dispatch selection changes (allows command manager to update)
   const onEditorStateChanged = () => {
-    dispatch(setEditorSelection(editorRef.current!.getSelection()));
+    const selection = editorRef.current!.getSelection();
+    cmDispatch( { type: "SET_SELECTION", payload: selection } );
+    dispatch(setEditorSelection(selection));
   }
 
   // save editor markdown to the redux store

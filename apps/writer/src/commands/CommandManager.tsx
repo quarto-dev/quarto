@@ -23,11 +23,13 @@ import { Props } from '@blueprintjs/core';
 export type Commands = { [id in CommandId]?: Command };
 
 export interface CommandManagerContextState {
+  selection: unknown;
   commands: Commands;
   menus: EditorMenus;
 }
 
 export type CommandManagerAction = 
+   | { type: "SET_SELECTION", payload: unknown }
    | { type: "ADD_COMMANDS", payload: Command[] }
    | { type: "SET_MENUS", payload: EditorMenus }
    | { type: "EXEC_COMMAND", payload: CommandId };
@@ -35,13 +37,16 @@ export type CommandManagerAction =
 export type CommandManagerContextInstance = [CommandManagerContextState, React.Dispatch<CommandManagerAction>];
 
 const initialCommandManagerState: CommandManagerContextState = 
-  { commands: {}, menus: { format: [], insert: [], table: []} };
+  { selection: {}, commands: {}, menus: { format: [], insert: [], table: []} };
 const noOpDispatch: React.Dispatch<CommandManagerAction> = () => null;
 
 export const CommandManagerContext = React.createContext<CommandManagerContextInstance>([initialCommandManagerState, noOpDispatch]);
 
 const commandManagerReducer = (state: CommandManagerContextState, action: CommandManagerAction) : CommandManagerContextState => {
   switch(action.type) {
+    case "SET_SELECTION": {
+      return { ...state, selection: action.payload }
+    }
     case "ADD_COMMANDS": {
       const newCommandsById: Commands = {};
       action.payload.forEach(command => {

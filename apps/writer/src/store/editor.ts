@@ -14,8 +14,8 @@
  */
 
 import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
+
 import { EditorOutline } from 'editor';
-import { WorkbenchState } from './store';
 
 export interface EditorState {
   readonly loading: boolean;
@@ -55,7 +55,7 @@ export const editorSlice = createSlice({
   },
 })
 
-const editorSelector = (state: WorkbenchState) => state.editor;
+const editorSelector = (state: { editor: EditorState }) => state.editor;
 export const editorLoading = createSelector(editorSelector, (state) => state.loading);
 export const editorTitle = createSelector(editorSelector, (state) => state.title);
 export const editorMarkdown = createSelector(editorSelector, (state) => state.markdown);

@@ -18,10 +18,18 @@ import { EditorState } from 'prosemirror-state';
 
 import { NodeWithPos, findChildrenByType, findChildren } from 'prosemirror-utils';
 
+import { 
+  EditingOutlineLocation, 
+  EditingOutlineLocationItem, 
+  kHeadingOutlineItemType, 
+  kRmdchunkOutlineItemType, 
+  kYamlMetadataOutlineItemType 
+} from 'editor-types';
+
 import { findTopLevelBodyNodes } from './node';
 import { titleFromYamlMetadataNode } from './yaml';
 import { rmdChunkEngineAndLabel } from './rmd';
-import { EditingOutlineLocation, EditingOutlineLocationItem, kHeadingOutlineItemType, kRmdchunkOutlineItemType, kYamlMetadataOutlineItemType } from './outline-types';
+
 
 
 export function getEditingOutlineLocation(state: EditorState): EditingOutlineLocation {

@@ -24,7 +24,6 @@ export type { ListSpacing } from './api/ui-types';
 export * from './api/format';
 export * from './api/command-types';
 export * from './api/basekeys-types';
-export * from './api/outline-types';
 export * from './api/navigation-types';
 export * from './api/event-types';
 export * from './api/extension-types'

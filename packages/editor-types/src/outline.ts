@@ -1,5 +1,5 @@
 /*
- * outline-types.ts
+ * outline.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *

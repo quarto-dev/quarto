@@ -32,5 +32,6 @@ export * from './dialogs'
 export * from './math'
 export * from './dictionary'
 export * from './services'
+export * from './outline'
 
 

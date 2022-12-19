@@ -19,6 +19,8 @@ import { EditorView } from 'prosemirror-view';
 
 import { NodeWithPos } from 'prosemirror-utils';
 
+import { EditorOutline, EditorOutlineItem, EditorOutlineItemType } from 'editor-types';
+
 import { Extension } from '../api/extension';
 import { transactionsHaveChange, kSetMarkdownTransaction } from '../api/transaction';
 import { findTopLevelBodyNodes } from '../api/node';
@@ -30,7 +32,6 @@ import {
 import { navigateToPos } from '../api/navigation';
 import { ProsemirrorCommand, EditorCommandId } from '../api/command';
 import { rmdChunkEngineAndLabel } from '../api/rmd';
-import { EditorOutline, EditorOutlineItem, EditorOutlineItemType } from '../api/outline-types';
 
 const kOutlineIdsTransaction = 'OutlineIds';
 

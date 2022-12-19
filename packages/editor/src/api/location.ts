@@ -2,13 +2,21 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 import { NodeWithPos } from 'prosemirror-utils';
 
+import { 
+  EditingOutlineLocation, 
+  EditingOutlineLocationItem, 
+  kHeadingOutlineItemType, 
+  kRmdchunkOutlineItemType, 
+  kYamlMetadataOutlineItemType 
+} from 'editor-types';
+
+
 import { bodyElement } from './dom';
 import {
   getDocumentOutline,
 } from './outline';
 import { restoreSelection } from './selection';
 import { scrollToPos } from './scroll';
-import { EditingOutlineLocation, EditingOutlineLocationItem, kHeadingOutlineItemType, kRmdchunkOutlineItemType, kYamlMetadataOutlineItemType } from './outline-types';
 
 export interface EditingLocation {
   pos: number;

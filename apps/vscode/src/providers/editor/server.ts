@@ -15,64 +15,46 @@
 
 import * as path from "path";
 
-import { ExtensionContext, TextDocument, WebviewPanel, workspace, WorkspaceEdit } from "vscode";
+import { Disposable, ExtensionContext, TextDocument, WebviewPanel, workspace, WorkspaceEdit } from "vscode";
 import { defaultEditorServerOptions, editorServerMethods } from "editor-server";
-import { kVEHostApplyVisualEdit, VisualEditorContainer } from "vscode-types";
+import { kVEHostApplyVisualEdit, kVEHostEditorReady, VisualEditorContainer } from "vscode-types";
 import { QuartoContext } from "quarto-core";
 import { jsonRpcPostMessageServer, JsonRpcPostMessageTarget, JsonRpcServerMethod } from "core";
 
 import { getWholeRange } from "../../core/doc";
+import { webviewPanelPostMessageTarget } from "./jsonrpc";
 
 // setup postMessage server on webview panel
 export function editorServer(
   context: ExtensionContext, 
   quartoContext: QuartoContext,
-  document: TextDocument,
-  webviewPanel: WebviewPanel) 
-: VoidFunction {
+  webviewPanel: WebviewPanel,
+  container: VisualEditorContainer
+) : Disposable {
   
   const options = defaultEditorServerOptions(
     context.asAbsolutePath(path.join("assets", "editor", "resources")),
     quartoContext.pandocPath
   );
   
-  const target: JsonRpcPostMessageTarget = {
-    postMessage: (data) => {
-      webviewPanel.webview.postMessage(data);
-    },
-    onMessage: (handler: (data: unknown) => void) => {
-      const disposable = webviewPanel.webview.onDidReceiveMessage(ev => {
-        handler(ev);
-      });
-      return () => {
-        disposable.dispose();
-      };
-    }
-  };
+  const target = webviewPanelPostMessageTarget(webviewPanel);
 
-  return jsonRpcPostMessageServer(target, {
+  const stopServer = jsonRpcPostMessageServer(target, {
     ...editorServerMethods(options),
-    ...editorContainerMethods(document)
+    ...editorContainerMethods(container)
   });
+  return {
+    dispose: stopServer
+  };
 }
 
 
 
-function editorContainerMethods(document: TextDocument) : Record<string,JsonRpcServerMethod> {
-  const host = editorContainer(document);
+function editorContainerMethods(container: VisualEditorContainer) : Record<string,JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kVEHostApplyVisualEdit]: args => host.applyVisualEdit(args[0])
+    [kVEHostEditorReady]: () => container.editorReady(),
+    [kVEHostApplyVisualEdit]: args => container.applyVisualEdit(args[0])
   };
   return methods;
 }
 
-function editorContainer(document: TextDocument) : VisualEditorContainer {
-  return {
-    applyVisualEdit: async (text: string) => {
-      const wholeDocRange = getWholeRange(document);
-      const edit = new WorkspaceEdit();
-      edit.replace(document.uri, wholeDocRange, text);
-      await workspace.applyEdit(edit);
-    }
-  };
-}

@@ -22,6 +22,7 @@ import { sliceContentLength } from './slice';
 
 export const kPasteTransaction = 'paste';
 export const kSetMarkdownTransaction = 'setMarkdown';
+export const kNoUpdateTransaction = 'noUpdateTransaction';
 export const kAddToHistoryTransaction = 'addToHistory';
 export const kFixupTransaction = 'docFixup';
 export const kRestoreLocationTransaction = 'restoreLocation';

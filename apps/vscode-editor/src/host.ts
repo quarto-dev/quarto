@@ -21,7 +21,7 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 
 import { editorJsonRpcServer, EditorServer } from "editor";
 
-import { kVEHostApplyVisualEdit, VisualEditorContainer } from "vscode-types";
+import { kVEHostApplyVisualEdit, kVEHostEditorReady, VisualEditorContainer } from "vscode-types";
 
 import { EditorState } from "./state";
 
@@ -43,6 +43,7 @@ export function editorHost(vscode: WebviewApi<EditorState>) : EditorHost {
 
 export function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VisualEditorContainer {
   return {
+    editorReady: () => request(kVEHostEditorReady, []),
     applyVisualEdit: (text: string) => request(kVEHostApplyVisualEdit, [text])
   };
 }

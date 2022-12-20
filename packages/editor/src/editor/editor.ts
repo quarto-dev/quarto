@@ -75,6 +75,7 @@ import {
   kFixupTransaction,
   kAddToHistoryTransaction,
   kSetMarkdownTransaction,
+  kNoUpdateTransaction,
 } from '../api/transaction';
 import { getOutlineNodes, getEditingOutlineLocation } from '../api/outline';
 import { EditingLocation, getEditingLocation, setEditingLocation } from '../api/location';
@@ -540,6 +541,9 @@ export class Editor {
       // replace the top level nodes in the doc
       const tr = this.state.tr;
       tr.setMeta(kSetMarkdownTransaction, true);
+      if (!emitUpdate) {
+        tr.setMeta(kNoUpdateTransaction, true);
+      }
       let i = 0;
       tr.doc.descendants((node, pos) => {
         const mappedPos = tr.mapping.map(pos);
@@ -741,6 +745,10 @@ export class Editor {
     this.view.focus();
   }
 
+  public hasFocus() {
+    return this.view.hasFocus();
+  }
+
   public blur() {
     (this.view.dom as HTMLElement).blur();
   }
@@ -879,7 +887,7 @@ export class Editor {
     // notify listeners of updates
     if (tr.docChanged || tr.storedMarksSet) {
       // fire updated (unless this was a fixup)
-      if (!tr.getMeta(kFixupTransaction)) {
+      if (!tr.getMeta(kFixupTransaction) && !tr.getMeta(kNoUpdateTransaction)) {
         this.emitEvent(UpdateEvent);
       }
 

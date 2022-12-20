@@ -78,10 +78,10 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
       const request = requests.get(response.id);
       if (request) {
         requests.delete(response.id);
-        if (response.result) {
-          request.resolve(response.result);
-        } else if (response.error) {
+        if (response.error) {
           request.reject(response.error);
+        } else {
+          request.resolve(response.result);
         }
       }
     }
@@ -93,13 +93,12 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
       return new Promise((resolve, reject) => {
         
         // track request
-        const id = ++requestId;
-        requests.set(id, { resolve, reject });
+        requests.set(++requestId, { resolve, reject });
   
         // make request
         const request: JsonRpcRequest = {
           jsonrpc: kJsonRpcVersion,
-          id,
+          id: requestId,
           method,
           params
         };
@@ -169,8 +168,8 @@ interface JsonRpcResponse extends JsonRpcMessage {
 }
 
 function isJsonRpcResponse(message: JsonRpcMessage): message is JsonRpcResponse {
-  const response = message as JsonRpcResponse;
-  return response.result !== undefined || response.error !== undefined; 
+  // a message w/ an undefined result is a valid response (for methods that return nothing)
+  return true;
 }
 
 function asJsonRpcMessage(data: unknown) : JsonRpcMessage | null {
@@ -218,7 +217,7 @@ function jsonRpcErrorResponse(request: JsonRpcRequest, code: number, message: st
 function methodNotFoundResponse(request: JsonRpcRequest) {
   return jsonRpcErrorResponse(
     request, kJsonRpcMethodNotFound, 
-    `Method '${request.method} not found.`
+    `Method '${request.method}' not found.`
   );
 }
 

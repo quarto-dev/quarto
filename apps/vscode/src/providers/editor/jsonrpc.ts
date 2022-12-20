@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * jsonrpc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,30 +13,23 @@
  *
  */
 
-import 'vscode-webview';
 
-import { EditorState } from './state';
-import { createEditor } from './editor';
-
-import "editor-ui/src/styles";
-
-// editor div
-const editorDiv = window.document.createElement("div");
-editorDiv.style.position = 'absolute';
-editorDiv.style.top = '0';
-editorDiv.style.left = '0';
-editorDiv.style.right = '0';
-editorDiv.style.bottom = '0';
-window.document.body.appendChild(editorDiv);
-
-// create editor
-createEditor(editorDiv, acquireVsCodeApi<EditorState>());
+import { JsonRpcPostMessageTarget } from "core";
+import { WebviewPanel } from "vscode";
 
 
-
-
-
-
-
-
-
+export function webviewPanelPostMessageTarget(webviewPanel: WebviewPanel) : JsonRpcPostMessageTarget {
+  return {
+    postMessage: (data) => {
+      webviewPanel.webview.postMessage(data);
+    },
+    onMessage: (handler: (data: unknown) => void) => {
+      const disposable = webviewPanel.webview.onDidReceiveMessage(ev => {
+        handler(ev);
+      });
+      return () => {
+        disposable.dispose();
+      };
+    }
+  };
+}

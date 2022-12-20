@@ -13,16 +13,20 @@
  *
  */
 
+export const kVEInit = 've_init';
 export const kVEApplyTextEdit = 've_apply_text_edit';
 
+export const kVEHostEditorReady = 've_host_editor_ready';
 export const kVEHostApplyVisualEdit = 've_host_apply_visual_edit';
 
 
 export interface VisualEditor {
-  applyTextEdit: (text: string) => Promise<void>;
+  init: (markdown: string) => Promise<void>; 
+  applyTextEdit: (markdown: string) => Promise<void>;
 }
 
 export interface VisualEditorContainer {
+  editorReady: () => Promise<void>; 
   applyVisualEdit: (text: string) => Promise<void>;
 }
 

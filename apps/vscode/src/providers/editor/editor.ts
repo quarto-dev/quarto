@@ -23,13 +23,17 @@ import {
   WebviewPanel, 
   CancellationToken, 
   Uri, 
-  Webview 
+  Webview, 
+  WorkspaceEdit
 } from "vscode";
 
 import { QuartoContext } from "quarto-core";
 
 import { getNonce } from "../../core/nonce";
 import { editorServer } from "./server";
+import { visualEditorClient } from "./client";
+import { VisualEditorContainer } from "vscode-types";
+import { getWholeRange } from "../../core/doc";
 
 
 export function activateEditor(
@@ -47,7 +51,6 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       provider,
       {
         webviewOptions: {
-          // 50 mb overhead per tab
           retainContextWhenHidden: true,
         }
       }
@@ -66,42 +69,84 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     webviewPanel: WebviewPanel,
     _token: CancellationToken
   ): Promise<void> {
-    // Setup initial content for the webview
-    webviewPanel.webview.options = {
-      enableScripts: true
+
+    // track disposables
+    const disposables: Disposable[] = [];
+
+    // get visual editor client
+    const client = visualEditorClient(webviewPanel);
+    disposables.push(client);
+
+    // sync current document state to visual editor
+    const updateVisualEditor = async () => {
+      client.editor.applyTextEdit(document.getText());
     };
-    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-    function updateWebview() {
-      webviewPanel.webview.postMessage({
-        type: "update",
-        text: document.getText(),
-      });
-    }
+    // editor container implementation
+    let suppressNextUpdate = false;
+    const container: VisualEditorContainer = {
+      editorReady: async () => {
+         // call init w/ markdown
+        await client.editor.init(document.getText());
 
-    const changeDocumentSubscription = workspace.onDidChangeTextDocument(
-      (e) => {
-        if (e.document.uri.toString() === document.uri.toString()) {
-          updateWebview();
-        }
+        // subscribe to changes and update when they occur
+        disposables.push(workspace.onDidChangeTextDocument(
+          async (e) => {
+            if (e.document.uri.toString() === document.uri.toString()) {
+              if (suppressNextUpdate) {
+                suppressNextUpdate = false;
+              } else {
+                await updateVisualEditor();
+              }
+            }
+          }
+        ));
+      },
+      applyVisualEdit: async (text: string) => {
+        const wholeDocRange = getWholeRange(document);
+        const edit = new WorkspaceEdit();
+        edit.replace(document.uri, wholeDocRange, text);
+        suppressNextUpdate = true;
+        await workspace.applyEdit(edit);
       }
-    );
+    };
+
+    // callback for when editor is ready
+    const onEditorReady = async () => {
+
+      // call init w/ markdown
+      await client.editor.init(document.getText());
+
+      // subscribe to changes and update when they occur
+      disposables.push(workspace.onDidChangeTextDocument(
+        async (e) => {
+          if (e.document.uri.toString() === document.uri.toString()) {
+            await updateVisualEditor();
+          }
+        }
+      ));
+    };
 
     // setup server on webview iframe
-    const serverDisconnect = editorServer(
+    disposables.push(editorServer(
       this.context, 
       this.quartoContext,
-      document,
-      webviewPanel
-    );
+      webviewPanel,
+      container
+    ));
+
+    // load editor webview
+    webviewPanel.webview.options = { enableScripts: true };
+    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+
   
     // dispose/disconnect when editor is closed
     webviewPanel.onDidDispose(() => {
-      changeDocumentSubscription.dispose();
-      serverDisconnect();
+      for (const disposable of disposables) {
+        disposable.dispose();
+      }
     });
-
-    updateWebview();
+   
   }
 
   private editorAssetUri(webview: Webview, file: string) {

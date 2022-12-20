@@ -14,7 +14,7 @@
  */
 
 import { jsonRpcPostMessageServer, JsonRpcPostMessageTarget } from "core";
-import { BlurEvent, Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent } from "editor";
+import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent } from "editor";
 import throttle from "lodash.throttle";
 import { kVEApplyTextEdit, kVEInit, VisualEditor } from "vscode-types";
 import { WebviewApi } from "vscode-webview";
@@ -42,17 +42,25 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
 
   Editor.create(parent, context, quartoEditorFormat()).then(async (editor) => {
     
-     // sync to text editor
-     const applyEdit = async () => {
-      const code = await editor.getMarkdown(quartoWriterOptions());
-      await host.container.applyVisualEdit(code.code);
-    };
+    // throttle updates both ways
+    const kThrottleDelayMs = 1000;
+
+    // sync to text editor
+    const applyEdit = throttle(() => {
+      editor.getMarkdown(quartoWriterOptions())
+        .then(code => {
+          host.container.applyVisualEdit(code.code)
+        });
+    }, kThrottleDelayMs, { leading: false, trailing: true});
 
     // sync from text editor
-    const receiveEdit = async (markdown: string) : Promise<void> => {
-      editor.setMarkdown(markdown, quartoWriterOptions(), false);
-    };
-
+    const receiveEdit = throttle((markdown) => {
+      editor.setMarkdown(markdown, quartoWriterOptions(), false)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .then(_result => {
+            //
+        });
+    }, kThrottleDelayMs, { leading: false, trailing: true});
 
     // setup communication channel for host
     editorContainerServer(vscode, {
@@ -65,15 +73,17 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
         const result = await editor.setMarkdown(markdown, quartoWriterOptions(), false);
         await host.container.applyVisualEdit(result.canonical);
         
-        // propagate changes on update (throttled)
-        editor.subscribe(UpdateEvent, asyncThrottle(applyEdit, 1000));
+        // visual editor => text editor (throttled)
+        editor.subscribe(UpdateEvent, applyEdit);
   
-        // immediately propagate changes on blur
-        editor.subscribe(BlurEvent, () => applyEdit);
-
-
       },
-      applyTextEdit: asyncThrottle(receiveEdit, 1000)
+      
+      async applyTextEdit(markdown: string) {
+        // only apply external edits if we don't have focus
+        if (!editor.hasFocus()) {
+          receiveEdit(markdown);
+        } 
+      }
     })
 
     // let the host know we are ready
@@ -81,27 +91,6 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
 
   });
 
-}
-
-/**
- * Throttles an async function in a way that can be awaited.
- * By default throttle doesn't return a promise for async functions unless it's invoking them immediately. See CUR-4769 for details.
- * @param func async function to throttle calls for.
- * @param wait same function as lodash.throttle's wait parameter.
- *             Call this function at most this often.
- * @returns a promise which will be resolved/ rejected only if the function is executed, with the result of the underlying call.
- */
-function asyncThrottle<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  F extends (...args: any[]) => Promise<any>
->(func: F, wait?: number) {
-  const throttled = throttle((resolve, reject, args: Parameters<F>) => {
-    func(...args).then(resolve).catch(reject);
-  }, wait);
-  return (...args: Parameters<F>): ReturnType<F> =>
-    new Promise((resolve, reject) => {
-      throttled(resolve, reject, args);
-    }) as ReturnType<F>;
 }
 
 

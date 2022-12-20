@@ -17,7 +17,7 @@ import 'vscode-webview';
 
 import throttle from "lodash.throttle";
 
-import { Editor, EditorFormat, kQuartoDocType, UpdateEvent } from 'editor';
+import { BlurEvent, Editor, EditorFormat, kQuartoDocType, UpdateEvent } from 'editor';
 
 import { EditorState } from './state';
 
@@ -61,14 +61,28 @@ const format: EditorFormat = {
 }
 Editor.create(editorDiv, context, format).then(async (editor) => {
   
-  const applyEdit = throttle(async () => {
-    const code = await editor.getMarkdown( { atxHeaders: true });
+  // writer options
+
+  // TODO: handle the various warning states here
+  const writerOptions = { atxHeaders: true };
+  const result = await editor.setMarkdown(kEditorContent, writerOptions, false);
+  // TODO: for some reason calling this prevents subsequent updates!
+  //await host.container.applyVisualEdit(result.canonical);
+
+  const applyEdit = async () => {
+    const code = await editor.getMarkdown(writerOptions);
     await host.container.applyVisualEdit(code.code);
-  }, 1000, { leading: false, trailing: true }); 
+  };
 
-  await editor.setMarkdown(kEditorContent, {}, false);
+  // propagate changes on update (throttled)
+  editor.subscribe(
+    UpdateEvent, 
+    throttle(applyEdit, 1000, { leading: false, trailing: true })
+  );
 
-  editor.subscribe(UpdateEvent, applyEdit);
+  // immediately propagate changes on blur
+  // NOTE: this doesn't seem to prevent losing changes on a tab switch
+  editor.subscribe(BlurEvent, applyEdit);
 
 });
 

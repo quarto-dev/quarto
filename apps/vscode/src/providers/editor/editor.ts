@@ -45,7 +45,12 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
-      { supportsMultipleEditorsPerDocument: false }
+      {
+        webviewOptions: {
+          // 50 mb overhead per tab
+          retainContextWhenHidden: true,
+        }
+      }
     );
     return providerRegistration;
   }

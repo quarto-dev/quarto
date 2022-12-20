@@ -111,22 +111,6 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       }
     };
 
-    // callback for when editor is ready
-    const onEditorReady = async () => {
-
-      // call init w/ markdown
-      await client.editor.init(document.getText());
-
-      // subscribe to changes and update when they occur
-      disposables.push(workspace.onDidChangeTextDocument(
-        async (e) => {
-          if (e.document.uri.toString() === document.uri.toString()) {
-            await updateVisualEditor();
-          }
-        }
-      ));
-    };
-
     // setup server on webview iframe
     disposables.push(editorServer(
       this.context, 

@@ -13,16 +13,46 @@
  *
  */
 
-import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent } from "editor";
+/* Strategy for managing synchronization of edits between source and visual mode. 
+
+This is made more complicated by the fact that getting/setting visual editor markdown 
+is expensive (requires a pandoc round trip) so is throttled by 1 second. We also need
+to guard against edits pinging back and forth (esp. w/ the requirement on flushing all 
+pending edits on save)
+
+We will adopt this strategy for the visual editor syncing to external changes:
+
+1) Only accept external edits when NOT focused (once the visual editor is focused it
+   is the definitive source of changes to the document)
+
+2) These external edits are throttled by 1 second so we don't get constant (expensive) 
+   refreshing of the visual editor when users type in the text editor.
+
+3) The throttled edits are _flushed_ immediately when the visual editor gains focus
+   (this ensures that it is fully up to date before it takes control of all changes)
+
+We will adopt this strategy for the visual editor propagating its own changes:
+
+1) The visual editor will continuously send the JSON version of the editor AST
+   to the host as updates occur (this is very cheap and doesn't involve pandoc)
+
+2) The host will apply these changes throttled by 1 second so we don't get constant
+   (expensive) refreshing of the text document when users type in the visual editor
+
+3) The throttled edits are _flushed_ immediately when the visual editor loses focus
+   or when the user saves the document.
+
+*/
+
 import throttle from "lodash.throttle";
 
-import { editorContext } from "./context";
+import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent, FocusEvent } from "editor";
+
 import { VisualEditorHostClient, visualEditorHostServer } from "../connection";
 
+import { editorContext } from "./context";
 
-
-
-export function createEditor(parent: HTMLElement, host: VisualEditorHostClient){
+export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) {
 
   // editable hook (update after we get initial payload)
   let loaded = false;
@@ -37,14 +67,6 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient){
     
     // throttle updates both ways
     const kThrottleDelayMs = 1000;
-
-
-    // save might mess it up by saving a version that isn't quite up to date
-    // (then it bounces that version back -- we prevent this w/ focus but 
-    // we are still effectively out of sync)
-
-    // do we need a fully custom editor to get save right? but it seems like
-    // that would have conflicts w/ the text editor state
 
     // sync to text editor
     const applyEdit = throttle(() => {
@@ -77,7 +99,9 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient){
         
         // visual editor => text editor (throttled)
         editor.subscribe(UpdateEvent, applyEdit);
-  
+
+        // flush received edits when getting focus
+        editor.subscribe(FocusEvent, () => { receiveEdit.flush(); })
       },
 
       async getMarkdown() {
@@ -86,7 +110,7 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient){
       },
 
       async applyTextEdit(markdown: string) {
-        // only apply external edits if we don't have focus
+        // only apply external text edits if we don't have focus
         if (!editor.hasFocus()) {
           receiveEdit(markdown);
         } 

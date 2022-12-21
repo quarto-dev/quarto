@@ -23,9 +23,7 @@ import {
   WebviewPanel, 
   CancellationToken, 
   Uri, 
-  Webview, 
-  WorkspaceEdit,
-  TextEdit,
+  Webview
 } from "vscode";
 
 import { QuartoContext } from "quarto-core";
@@ -33,9 +31,9 @@ import { QuartoContext } from "quarto-core";
 import { VisualEditorHost } from "vscode-types";
 
 import { getNonce } from "../../core/nonce";
-import { getWholeRange } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
+import { editorSyncManager } from "./sync";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -78,48 +76,8 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     const client = visualEditorClient(webviewPanel);
     disposables.push(client);
 
-    // function to set model markdown
-    const updateModel = async (markdown: string) => {
-      const wholeDocRange = getWholeRange(document);
-      const edit = new WorkspaceEdit();
-      edit.replace(document.uri, wholeDocRange, markdown);
-      await workspace.applyEdit(edit);
-    };
-
-    // we are notified of state changes as they occur in the editor, we 
-    // periodically collect the state into markdown (expensive) and use
-    // it to update the model. we also force this collection when the
-    // editor tells us to flush the update or when the user saves
-    let suppressNextUpdate = false;
-    let pendingVisualEdit: unknown | undefined;
-    const collectPendingVisualEdit = async () : Promise<string | undefined> => {
-      if (pendingVisualEdit) {
-        suppressNextUpdate = true;
-        const state = pendingVisualEdit;
-        pendingVisualEdit = undefined;
-        return client.editor.getMarkdownFromState(state);
-      } else {
-        return undefined;
-      }
-    };
-    const collectAndApplyPendingVisualEdit = async () => {
-      const markdown = await collectPendingVisualEdit();
-      if (markdown) {
-        await updateModel(markdown);
-      }
-    };
-    setInterval(collectAndApplyPendingVisualEdit, 1500);
-
-    // syncing state between model and visual editor. use supressNextUpdate
-    // flag to prevent visual editor => model from pinging back off of itself
-    const updateVisualEditorFromModel = async () => {
-      if (suppressNextUpdate) {
-        suppressNextUpdate = false;
-      } else {
-        await client.editor.applyTextEdit(document.getText());
-      }
-    };
-
+    // sync manager
+    const syncManager = editorSyncManager(document, client.editor);
 
     // editor container implementation   
     const host: VisualEditorHost = {
@@ -127,48 +85,30 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       // editor is fully loaded and ready for communication
       editorReady: async () => {
 
-        // call init w/ document markdown then update the model 
-        // with the canonical markdown produced by the editor
-        const markdown = await client.editor.init(document.getText());
-        await updateModel(markdown);
-       
-        // subscribe to model changes and update the visual editor when they occur
-        // (note that the visual editor throttles these changes internally)
+        // initialize sync manager
+        await syncManager.init();
+
+        // notify for document changes
         disposables.push(workspace.onDidChangeTextDocument(
           async (e) => {
             if (e.document.uri.toString() === document.uri.toString()) {
-              await updateVisualEditorFromModel();
+              await syncManager.onDocumentChanged();
             }
           }
         ));
 
-        // ensure latest markdown before saving
+        // notify for saves (ensure we get latest changes applied)
         disposables.push(workspace.onWillSaveTextDocument(
           (e) => {
             if (e.document.uri.toString() === document.uri.toString()) {
-              if (pendingVisualEdit) {
-                const applyPending = async () : Promise<TextEdit[]> => {
-                  const edits: TextEdit[] = [];
-                  const markdown = await collectPendingVisualEdit();
-                  if (markdown) {
-                    edits.push(TextEdit.replace(getWholeRange(document), markdown));
-                  }
-                  return edits;
-                };
-                e.waitUntil(applyPending());
-              }
+              e.waitUntil(syncManager.onDocumentSaving());
             }
           }
         ));
       },
 
-      // editor has been updated -- throttle updates unless flush specified
-      editorUpdated: async (state: unknown, flush: boolean) => {
-        pendingVisualEdit = state;
-        if (flush) {
-          await collectAndApplyPendingVisualEdit();
-        }
-      },
+      // notify sync manager when visual editor is updated
+      editorUpdated: syncManager.onVisualEditorChanged,
     };
 
     // setup server on webview iframe
@@ -183,7 +123,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-    // dispose/disconnect when editor is closed
+    // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
       for (const disposable of disposables) {
         disposable.dispose();

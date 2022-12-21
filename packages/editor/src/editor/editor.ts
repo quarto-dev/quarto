@@ -600,16 +600,11 @@ export class Editor {
   }
 
   public getStateJson() : unknown {
-    return this.state.toJSON(this.pluginFields(this.state.plugins));
+    return this.state.toJSON();
   }
 
   public async getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) {
-    const plugins = this.createPlugins();
-    const state = EditorState.fromJSON(
-      { schema: this.schema, plugins }, 
-      stateJson,
-      this.pluginFields(plugins)
-    );
+    const state = EditorState.fromJSON({ schema: this.schema }, stateJson);
     const tr = state.tr;
     return this.getMarkdownCode(tr, options);
   }

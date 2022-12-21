@@ -167,11 +167,6 @@ interface JsonRpcResponse extends JsonRpcMessage {
   error?: JsonRpcError;
 }
 
-function isJsonRpcResponse(message: JsonRpcMessage): message is JsonRpcResponse {
-  // a message w/ an undefined result is a valid response (for methods that return nothing)
-  return true;
-}
-
 function asJsonRpcMessage(data: unknown) : JsonRpcMessage | null {
   if (isJsonRpcMessage(data) && data.jsonrpc === kJsonRpcVersion) {
     return data;
@@ -191,7 +186,7 @@ function asJsonRpcRequest(data: unknown) : JsonRpcRequest | null {
 
 function asJsonRpcResponse(data: unknown) : JsonRpcResponse | null {
   const message = asJsonRpcMessage(data);
-  if (message && isJsonRpcResponse(message)) {
+  if (message) {
     return message;
   } else {
     return null;

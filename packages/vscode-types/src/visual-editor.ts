@@ -14,6 +14,7 @@
  */
 
 export const kVEInit = 've_init';
+export const kVEGetMarkdown = 've_get_markdown';
 export const kVEApplyTextEdit = 've_apply_text_edit';
 
 export const kVEHostEditorReady = 've_host_editor_ready';
@@ -22,10 +23,11 @@ export const kVEHostApplyVisualEdit = 've_host_apply_visual_edit';
 
 export interface VisualEditor {
   init: (markdown: string) => Promise<void>; 
+  getMarkdown: () => Promise<string>;
   applyTextEdit: (markdown: string) => Promise<void>;
 }
 
-export interface VisualEditorContainer {
+export interface VisualEditorHost {
   editorReady: () => Promise<void>; 
   applyVisualEdit: (text: string) => Promise<void>;
 }

@@ -24,17 +24,18 @@ import {
   CancellationToken, 
   Uri, 
   Webview, 
-  WorkspaceEdit
+  WorkspaceEdit,
+  TextEdit
 } from "vscode";
 
 import { QuartoContext } from "quarto-core";
 
+import { VisualEditorHost } from "vscode-types";
+
 import { getNonce } from "../../core/nonce";
-import { editorServer } from "./server";
-import { visualEditorClient } from "./client";
-import { VisualEditorContainer } from "vscode-types";
 import { getWholeRange } from "../../core/doc";
 
+import { visualEditorClient, visualEditorServer } from "./connection";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -84,7 +85,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
     // editor container implementation
     let suppressNextUpdate = false;
-    const container: VisualEditorContainer = {
+    const host: VisualEditorHost = {
       editorReady: async () => {
          // call init w/ markdown
         await client.editor.init(document.getText());
@@ -101,7 +102,25 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             }
           }
         ));
+
+        disposables.push(workspace.onWillSaveTextDocument(
+          (e) => {
+            // get latest markdown before saving if we are focused
+            if (e.document.uri.toString() === document.uri.toString() &&
+                webviewPanel.active) {
+              const getMarkdown = async ()  => {
+                const markdown = await client.editor.getMarkdown();
+                const wholeDocRange = getWholeRange(document);
+                suppressNextUpdate = true;
+                return [TextEdit.replace(wholeDocRange, markdown)];
+              };
+              e.waitUntil(getMarkdown());
+            }
+          }
+        ));
       },
+
+
       applyVisualEdit: async (text: string) => {
         const wholeDocRange = getWholeRange(document);
         const edit = new WorkspaceEdit();
@@ -112,11 +131,11 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     };
 
     // setup server on webview iframe
-    disposables.push(editorServer(
+    disposables.push(visualEditorServer(
       this.context, 
       this.quartoContext,
       webviewPanel,
-      container
+      host
     ));
 
     // load editor webview

@@ -22,7 +22,8 @@ import {
   ListSpacing, 
   SkinTone, 
   XRef, 
-  EditorHooks
+  EditorHooks,
+  EditorServer
 } from "editor";
 
 import { codeMirrorExtension } from "editor-codemirror";
@@ -30,11 +31,8 @@ import { codeMirrorExtension } from "editor-codemirror";
 import { editorDialogs } from "editor-ui";
 
 
-import { EditorHost } from "./host";
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorContext(host: EditorHost, hooks?: EditorHooks) {
+export function editorContext(server: EditorServer, hooks?: EditorHooks) {
 
   const uiTools = new UITools();
   const ui = {
@@ -46,7 +44,7 @@ export function editorContext(host: EditorHost, hooks?: EditorHooks) {
   };
 
   const context : EditorContext = { 
-    server: host.server, 
+    server, 
     ui, 
     hooks,
     codeViewExtension: codeMirrorExtension 

@@ -13,22 +13,16 @@
  *
  */
 
-import { jsonRpcPostMessageServer, JsonRpcPostMessageTarget } from "core";
 import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent } from "editor";
 import throttle from "lodash.throttle";
-import { kVEApplyTextEdit, kVEInit, VisualEditor } from "vscode-types";
-import { WebviewApi } from "vscode-webview";
 
 import { editorContext } from "./context";
-import { editorHost } from "./host";
-import { EditorState } from "./state";
+import { VisualEditorHostClient, visualEditorHostServer } from "../connection";
 
 
 
-export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState>) {
 
-  // connection to host + context
-  const host = editorHost(vscode);
+export function createEditor(parent: HTMLElement, host: VisualEditorHostClient){
 
   // editable hook (update after we get initial payload)
   let loaded = false;
@@ -36,22 +30,30 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
     isEditable: () => loaded 
   }
 
-
   // create context
-  const context = editorContext(host, hooks);
+  const context = editorContext(host.server, hooks);
 
   Editor.create(parent, context, quartoEditorFormat()).then(async (editor) => {
     
     // throttle updates both ways
     const kThrottleDelayMs = 1000;
 
+
+    // save might mess it up by saving a version that isn't quite up to date
+    // (then it bounces that version back -- we prevent this w/ focus but 
+    // we are still effectively out of sync)
+
+    // do we need a fully custom editor to get save right? but it seems like
+    // that would have conflicts w/ the text editor state
+
     // sync to text editor
     const applyEdit = throttle(() => {
       editor.getMarkdown(quartoWriterOptions())
         .then(code => {
-          host.container.applyVisualEdit(code.code)
+          host.applyVisualEdit(code.code)
         });
     }, kThrottleDelayMs, { leading: false, trailing: true});
+  
 
     // sync from text editor
     const receiveEdit = throttle((markdown) => {
@@ -63,7 +65,7 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
     }, kThrottleDelayMs, { leading: false, trailing: true});
 
     // setup communication channel for host
-    editorContainerServer(vscode, {
+    visualEditorHostServer(host.vscode, {
       async init(markdown: string) {
       
         // put editor in writeable mode
@@ -71,13 +73,18 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
 
         // init editor contents and sync cannonical version back to text editor
         const result = await editor.setMarkdown(markdown, quartoWriterOptions(), false);
-        await host.container.applyVisualEdit(result.canonical);
+        await host.applyVisualEdit(result.canonical);
         
         // visual editor => text editor (throttled)
         editor.subscribe(UpdateEvent, applyEdit);
   
       },
-      
+
+      async getMarkdown() {
+        const result = await editor.getMarkdown(quartoWriterOptions());
+        return result.code;
+      },
+
       async applyTextEdit(markdown: string) {
         // only apply external edits if we don't have focus
         if (!editor.hasFocus()) {
@@ -87,40 +94,11 @@ export function createEditor(parent: HTMLElement, vscode: WebviewApi<EditorState
     })
 
     // let the host know we are ready
-    await host.container.editorReady();    
+    await host.editorReady();    
 
   });
 
 }
-
-
-function editorContainerServer(vscode: WebviewApi<EditorState>, editor: VisualEditor) {
-
-  // target for message bus
-  const target: JsonRpcPostMessageTarget = {
-    postMessage: (data) => {
-      vscode.postMessage(data);
-    },
-    onMessage: (handler: (data: unknown) => void) => {
-      const messageListener = (event: MessageEvent) => {
-        const message = event.data; // The json data that the extension sent
-        handler(message);
-      };
-      window.addEventListener('message', messageListener);
-      return () => {
-        window.removeEventListener('message', messageListener);
-      }
-    }
-  };
-
-  // create a server
-  return jsonRpcPostMessageServer(target, {
-    [kVEInit]: args => editor.init(args[0]),
-    [kVEApplyTextEdit]: args => editor.applyTextEdit(args[0])
-  })
-
-}
-
 
 function quartoWriterOptions() {
   return { 

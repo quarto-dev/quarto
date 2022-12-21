@@ -20,8 +20,9 @@ import { Disposable, ExtensionContext, WebviewPanel } from "vscode";
 import { 
   kVEInit,
   kVEGetMarkdown, 
+  kVEGetMarkdownFromState,
   kVEApplyTextEdit, 
-  kVEHostApplyVisualEdit, 
+  kVEHostEditorUpdated,
   kVEHostEditorReady, 
   VisualEditor,
   VisualEditorHost 
@@ -49,6 +50,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
     editor: {
       init: (markdown: string) => request(kVEInit, [markdown]),
       getMarkdown: () => request(kVEGetMarkdown, []),
+      getMarkdownFromState: (state: unknown) => request(kVEGetMarkdownFromState, [state]),
       applyTextEdit: (markdown: string) => request(kVEApplyTextEdit, [markdown])
     },
     dispose: disconnect
@@ -85,7 +87,7 @@ export function visualEditorServer(
 function editorContainerMethods(host: VisualEditorHost) : Record<string,JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
     [kVEHostEditorReady]: () => host.editorReady(),
-    [kVEHostApplyVisualEdit]: args => host.applyVisualEdit(args[0])
+    [kVEHostEditorUpdated]: args => host.editorUpdated(args[0], args[1]),
   };
   return methods;
 }

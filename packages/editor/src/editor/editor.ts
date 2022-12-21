@@ -599,6 +599,21 @@ export class Editor {
     return this.state.doc.attrs.initial;
   }
 
+  public getStateJson() : unknown {
+    return this.state.toJSON(this.pluginFields(this.state.plugins));
+  }
+
+  public async getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) {
+    const plugins = this.createPlugins();
+    const state = EditorState.fromJSON(
+      { schema: this.schema, plugins }, 
+      stateJson,
+      this.pluginFields(plugins)
+    );
+    const tr = state.tr;
+    return this.getMarkdownCode(tr, options);
+  }
+
   public async getMarkdown(options: PandocWriterOptions): Promise<EditorCode> {
     // get the code
     const tr = this.state.tr;
@@ -980,6 +995,16 @@ export class Editor {
       this.domEventsPlugin(),
     ];
   }
+
+  // used for state.toJSON / state.fromJSON serialization
+  private pluginFields(plugins: readonly Plugin[]) {
+    const pluginFields: Record<string,Plugin> = {};
+    plugins.forEach((plugin, index) => {
+      pluginFields[`Plugin${index}`] = plugin; 
+    });
+    return pluginFields;
+  }
+  
 
   private editablePlugin() {
     const hooks = this.context.hooks || {};

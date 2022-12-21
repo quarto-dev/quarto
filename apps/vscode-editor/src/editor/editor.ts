@@ -46,7 +46,7 @@ We will adopt this strategy for the visual editor propagating its own changes:
 
 import throttle from "lodash.throttle";
 
-import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent, FocusEvent } from "editor";
+import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent, FocusEvent, BlurEvent } from "editor";
 
 import { VisualEditorHostClient, visualEditorHostServer } from "../connection";
 
@@ -65,19 +65,8 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
 
   Editor.create(parent, context, quartoEditorFormat()).then(async (editor) => {
     
-    // throttle updates both ways
+    // sync from text editor (throttled, flushed when we get focus)
     const kThrottleDelayMs = 1000;
-
-    // sync to text editor
-    const applyEdit = throttle(() => {
-      editor.getMarkdown(quartoWriterOptions())
-        .then(code => {
-          host.applyVisualEdit(code.code)
-        });
-    }, kThrottleDelayMs, { leading: false, trailing: true});
-  
-
-    // sync from text editor
     const receiveEdit = throttle((markdown) => {
       editor.setMarkdown(markdown, quartoWriterOptions(), false)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -89,32 +78,42 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
     // setup communication channel for host
     visualEditorHostServer(host.vscode, {
       async init(markdown: string) {
-      
+
         // put editor in writeable mode
         loaded = true;
 
         // init editor contents and sync cannonical version back to text editor
         const result = await editor.setMarkdown(markdown, quartoWriterOptions(), false);
-        await host.applyVisualEdit(result.canonical);
         
-        // visual editor => text editor (throttled)
-        editor.subscribe(UpdateEvent, applyEdit);
+        // visual editor => text editor (just send the state, host will call back for markdown)
+        editor.subscribe(UpdateEvent, () => host.editorUpdated(editor.getStateJson(), false));
 
-        // flush received edits when getting focus
-        editor.subscribe(FocusEvent, () => { receiveEdit.flush(); })
-      },
+        // when we lose focus do an update w/ flush = true
+        editor.subscribe(BlurEvent, () => host.editorUpdated(editor.getStateJson(), true));
 
-      async getMarkdown() {
-        const result = await editor.getMarkdown(quartoWriterOptions());
-        return result.code;
+        // when we gain focus flush any received edits (they are queued just below in applyTextEdit)
+        editor.subscribe(FocusEvent, () => { receiveEdit.flush(); });
+
+        // return canonical markdown
+        return result.canonical;
+        
       },
 
       async applyTextEdit(markdown: string) {
         // only apply external text edits if we don't have focus
         if (!editor.hasFocus()) {
           receiveEdit(markdown);
-        } 
-      }
+        }
+      },
+
+      async getMarkdown() : Promise<string> {
+        const result = await editor.getMarkdown(quartoWriterOptions());
+        return result.code;
+      },
+
+      async getMarkdownFromState(state: unknown) : Promise<string> {
+        return editor.getMarkdownFromStateJson(state, quartoWriterOptions());
+      },
     })
 
     // let the host know we are ready

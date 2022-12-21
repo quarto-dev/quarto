@@ -28,7 +28,8 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 import { 
   kVEApplyTextEdit, 
   kVEGetMarkdown, 
-  kVEHostApplyVisualEdit, 
+  kVEGetMarkdownFromState,
+  kVEHostEditorUpdated,
   kVEHostEditorReady, 
   kVEInit, 
   VisualEditor, 
@@ -77,6 +78,7 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: Visu
   return jsonRpcPostMessageServer(target, {
     [kVEInit]: args => editor.init(args[0]),
     [kVEGetMarkdown]: () => editor.getMarkdown(),
+    [kVEGetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [kVEApplyTextEdit]: args => editor.applyTextEdit(args[0])
   })
 
@@ -88,6 +90,6 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: Visu
 function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VisualEditorHost {
   return {
     editorReady: () => request(kVEHostEditorReady, []),
-    applyVisualEdit: (text: string) => request(kVEHostApplyVisualEdit, [text])
+    editorUpdated: (state: unknown, flush: boolean) => request(kVEHostEditorUpdated, [state, flush]),
   };
 }

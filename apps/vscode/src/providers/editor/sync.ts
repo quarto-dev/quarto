@@ -13,7 +13,7 @@
  *
  */
 
-import { TextDocument, TextEdit, workspace, WorkspaceEdit } from "vscode";
+import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode";
 import { VisualEditor } from "vscode-types";
 import { getWholeRange } from "../../core/doc";
 
@@ -40,13 +40,24 @@ export function editorSyncManager(
   // (as the change actually resulted from a visual editor sync)
   let supressNextUpdate = false; 
 
-  // collect a pending edit, converting it to markdown and setting the suppressNextUpdate bit
+  // collect a pending edit, converting it to markdown and setting the supressNextUpdate bit
+  // if we fail get the markdown then we neither clear the pending edit nor supress the update
   const collectPendingVisualEdit = async () : Promise<string | undefined> => {
     if (pendingVisualEdit) {
-      supressNextUpdate = true;
       const state = pendingVisualEdit;
-      pendingVisualEdit = undefined;
-      return visualEditor.getMarkdownFromState(state);
+      try {
+        pendingVisualEdit = undefined;
+        const markdown = await visualEditor.getMarkdownFromState(state);
+        supressNextUpdate = true;
+        return markdown;
+      } catch (error) {
+        if (pendingVisualEdit === undefined) {
+          pendingVisualEdit = state;
+        }
+        const message = error instanceof Error ? error.message : String(error);
+        console.log("Error getting visual editor markdown: " + message);
+        return undefined;
+      }
     } else {
       return undefined;
     }
@@ -56,7 +67,7 @@ export function editorSyncManager(
   const collectAndApplyPendingVisualEdit = async () => {
     const markdown = await collectPendingVisualEdit();
     if (markdown) {
-      await updateDocument(document, markdown);
+      await updateWorkspaceDocument(document, markdown);
     }
   };
 
@@ -65,7 +76,6 @@ export function editorSyncManager(
   // and when a save occurs
   setInterval(collectAndApplyPendingVisualEdit, 1500);
 
-
   return {
 
     // initialize the connection tot he visual editor by providing it
@@ -73,7 +83,7 @@ export function editorSyncManager(
     // back to the document
     init: async() => {
       const markdown = await visualEditor.init(document.getText());
-      await updateDocument(document, markdown);
+      await updateWorkspaceDocument(document, markdown);
     },
 
     // notification that the visual editor changed. enque the change
@@ -99,9 +109,25 @@ export function editorSyncManager(
 
     // notification that we are saving (allow flusing of visual editor changes)
     onDocumentSaving: async () : Promise<TextEdit[]> => {
+      
+      // if on onWillSaveTextDocument handler takes too long (> 1.5 sec) 
+      // then VS Code will ignore it or stop calling it altogether. In that 
+      // case we need a failsafe save to occur ~ 5 seconds after the save
+      // (as we have no way of knowing whether VS Code has ignored us)
+      setTimeout(async () => {
+        const markdown = await visualEditor.getMarkdown();
+        if (markdown !== document.getText()) {
+          updateWorkspaceDocument(document, markdown);
+        }
+      }, 5000);
+
+      // attempt to collect pending edit
       const markdown = await collectPendingVisualEdit();
       if (markdown) {
-        return [TextEdit.replace(getWholeRange(document), markdown)];
+        const edits: TextEdit[] = [];
+        const editor = documentEditor(edits);
+        updateDocument(editor, document, markdown);
+        return edits;
       } else {
         return [];
       }
@@ -109,10 +135,34 @@ export function editorSyncManager(
   };
 }
 
- 
-async function updateDocument(document: TextDocument, markdown: string) {
+
+
+
+interface DocumentEditor {
+  replace: (range: Range, newText: string) => void;
+}
+
+function updateDocument(editor: DocumentEditor, document: TextDocument, markdown: string) {
   const wholeDocRange = getWholeRange(document);
+  editor.replace(wholeDocRange, markdown);
+}
+
+function documentEditor(edits: TextEdit[]) {
+  return {
+    replace: (range: Range, text: string) => edits.push(TextEdit.replace(range, text))
+  };
+}
+
+function workspaceDocumentEditor(edit: WorkspaceEdit, document: TextDocument) {
+  return {
+    replace: (range: Range, text: string) => edit.replace(document.uri, range, text)
+  };
+}
+
+async function updateWorkspaceDocument(document: TextDocument, markdown: string) {
   const edit = new WorkspaceEdit();
-  edit.replace(document.uri, wholeDocRange, markdown);
+  const editor = workspaceDocumentEditor(edit, document);
+  updateDocument(editor, document, markdown);
   await workspace.applyEdit(edit);
 };
+

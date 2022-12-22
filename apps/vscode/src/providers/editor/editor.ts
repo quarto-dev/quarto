@@ -28,7 +28,7 @@ import {
 
 import { QuartoContext } from "quarto-core";
 
-import { VisualEditorHost } from "vscode-types";
+import { VSCodeVisualEditorHost } from "vscode-types";
 
 import { getNonce } from "../../core/nonce";
 
@@ -80,10 +80,10 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     const syncManager = editorSyncManager(document, client.editor);
 
     // editor container implementation   
-    const host: VisualEditorHost = {
+    const host: VSCodeVisualEditorHost = {
 
       // editor is fully loaded and ready for communication
-      editorReady: async () => {
+      onEditorReady: async () => {
 
         // initialize sync manager
         await syncManager.init();
@@ -117,7 +117,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       },
 
       // notify sync manager when visual editor is updated
-      editorUpdated: syncManager.onVisualEditorChanged,
+      onEditorUpdated: syncManager.onVisualEditorChanged,
     };
 
     // setup server on webview iframe

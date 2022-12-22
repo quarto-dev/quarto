@@ -18,14 +18,14 @@ import * as path from "path";
 import { Disposable, ExtensionContext, WebviewPanel } from "vscode";
 
 import { 
-  kVEInit,
-  kVEGetMarkdown, 
-  kVEGetMarkdownFromState,
-  kVEApplyTextEdit, 
-  kVEHostEditorUpdated,
-  kVEHostEditorReady, 
-  VisualEditor,
-  VisualEditorHost 
+  VSC_VE_Init,
+  VSC_VE_GetMarkdown, 
+  VSC_VE_GetMarkdownFromState,
+  VSC_VE_ApplyExternalEdit, 
+  VSC_VEH_OnEditorUpdated,
+  VSC_VEH_OnEditorReady, 
+  VSCodeVisualEditor,
+  VSCodeVisualEditorHost 
 } from "vscode-types";
 
 import { 
@@ -41,17 +41,17 @@ import { QuartoContext } from "quarto-core";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorClient(webviewPanel: WebviewPanel) 
-  : { editor: VisualEditor, dispose: VoidFunction } {
+  : { editor: VSCodeVisualEditor, dispose: VoidFunction } {
 
   const target = webviewPanelPostMessageTarget(webviewPanel);
   const { request, disconnect } = jsonRpcPostMessageRequestTransport(target);
 
   return {
     editor: {
-      init: (markdown: string) => request(kVEInit, [markdown]),
-      getMarkdown: () => request(kVEGetMarkdown, []),
-      getMarkdownFromState: (state: unknown) => request(kVEGetMarkdownFromState, [state]),
-      applyTextEdit: (markdown: string) => request(kVEApplyTextEdit, [markdown])
+      init: (markdown: string) => request(VSC_VE_Init, [markdown]),
+      getMarkdown: () => request(VSC_VE_GetMarkdown, []),
+      getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
+      applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
     },
     dispose: disconnect
   };
@@ -63,7 +63,7 @@ export function visualEditorServer(
   context: ExtensionContext, 
   quartoContext: QuartoContext,
   webviewPanel: WebviewPanel,
-  host: VisualEditorHost
+  host: VSCodeVisualEditorHost
 ) : Disposable {
   
   const options = defaultEditorServerOptions(
@@ -75,7 +75,7 @@ export function visualEditorServer(
 
   const stopServer = jsonRpcPostMessageServer(target, {
     ...editorServerMethods(options),
-    ...editorContainerMethods(host)
+    ...editorHostMethods(host)
   });
   return {
     dispose: stopServer
@@ -84,10 +84,10 @@ export function visualEditorServer(
 
 
 
-function editorContainerMethods(host: VisualEditorHost) : Record<string,JsonRpcServerMethod> {
+function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kVEHostEditorReady]: () => host.editorReady(),
-    [kVEHostEditorUpdated]: args => host.editorUpdated(args[0]),
+    [VSC_VEH_OnEditorReady]: () => host.onEditorReady(),
+    [VSC_VEH_OnEditorUpdated]: args => host.onEditorUpdated(args[0]),
   };
   return methods;
 }

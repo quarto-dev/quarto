@@ -26,19 +26,19 @@ import {
 import { windowJsonRpcPostMessageTarget } from "core-browser";
 
 import { 
-  kVEApplyTextEdit, 
-  kVEGetMarkdown, 
-  kVEGetMarkdownFromState,
-  kVEHostEditorUpdated,
-  kVEHostEditorReady, 
-  kVEInit, 
-  VisualEditor, 
-  VisualEditorHost 
+  VSC_VE_ApplyExternalEdit, 
+  VSC_VE_GetMarkdown, 
+  VSC_VE_GetMarkdownFromState,
+  VSC_VEH_OnEditorUpdated,
+  VSC_VEH_OnEditorReady, 
+  VSC_VE_Init, 
+  VSCodeVisualEditor, 
+  VSCodeVisualEditorHost 
 } from "vscode-types";
 
 import { editorJsonRpcServer, EditorServer } from "editor";
 
-export interface VisualEditorHostClient extends VisualEditorHost {
+export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
   vscode: WebviewApi<unknown>;
   server: EditorServer;
 }
@@ -55,7 +55,7 @@ export function visualEditorHostClient(vscode: WebviewApi<unknown>) : VisualEdit
 }
 
 // interface provided to visual editor host (vs code extension)
-export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VisualEditor) {
+export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisualEditor) {
 
   // target for message bus
   const target: JsonRpcPostMessageTarget = {
@@ -76,10 +76,10 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: Visu
 
   // create a server
   return jsonRpcPostMessageServer(target, {
-    [kVEInit]: args => editor.init(args[0]),
-    [kVEGetMarkdown]: () => editor.getMarkdown(),
-    [kVEGetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
-    [kVEApplyTextEdit]: args => editor.applyTextEdit(args[0])
+    [VSC_VE_Init]: args => editor.init(args[0]),
+    [VSC_VE_GetMarkdown]: () => editor.getMarkdown(),
+    [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
+    [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0])
   })
 
 }
@@ -87,9 +87,9 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: Visu
 
 
 
-function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VisualEditorHost {
+function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisualEditorHost {
   return {
-    editorReady: () => request(kVEHostEditorReady, []),
-    editorUpdated: (state: unknown) => request(kVEHostEditorUpdated, [state]),
+    onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
+    onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
   };
 }

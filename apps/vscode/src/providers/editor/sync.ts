@@ -14,7 +14,7 @@
  */
 
 import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode";
-import { VisualEditor } from "vscode-types";
+import { VSCodeVisualEditor } from "vscode-types";
 import { getWholeRange } from "../../core/doc";
 
 /* Strategy for managing synchronization of edits between source and visual mode. 
@@ -54,7 +54,7 @@ export interface EditorSyncManager {
 
 // sync the document model w/ the visual editor
 export function editorSyncManager(
-  document: TextDocument, visualEditor: VisualEditor
+  document: TextDocument, visualEditor: VSCodeVisualEditor
 ) : EditorSyncManager {
 
   // state: an update from the visual editor that we have yet to apply. we don't 
@@ -125,7 +125,7 @@ export function editorSyncManager(
       if (supressNextUpdate) {
         supressNextUpdate = false;
       } else {
-        await visualEditor.applyTextEdit(document.getText());
+        await visualEditor.applyExternalEdit(document.getText());
       }
     },
 

@@ -13,4 +13,4 @@
  *
  */
 
-export * from './visual-editor';
+export * from './vscode-editor';

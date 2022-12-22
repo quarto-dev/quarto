@@ -54,13 +54,13 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
         const result = await editor.setMarkdown(markdown, quartoWriterOptions(), false);
         
         // visual editor => text editor (just send the state, host will call back for markdown)
-        editor.subscribe(UpdateEvent, () => host.editorUpdated(editor.getStateJson()));
+        editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
 
         // return canonical markdown
         return result.canonical;        
       },
 
-      async applyTextEdit(markdown: string) {
+      async applyExternalEdit(markdown: string) {
         // only receive external text edits if we don't have focus (prevents circular updates)
         if (!editor.hasFocus()) {
           receiveEdit(markdown);
@@ -78,7 +78,7 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
     })
 
     // let the host know we are ready
-    await host.editorReady();    
+    await host.onEditorReady();    
 
   });
 

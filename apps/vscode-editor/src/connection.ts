@@ -90,6 +90,6 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: Visu
 function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VisualEditorHost {
   return {
     editorReady: () => request(kVEHostEditorReady, []),
-    editorUpdated: (state: unknown, flush: boolean) => request(kVEHostEditorUpdated, [state, flush]),
+    editorUpdated: (state: unknown) => request(kVEHostEditorUpdated, [state]),
   };
 }

@@ -87,7 +87,7 @@ export function visualEditorServer(
 function editorContainerMethods(host: VisualEditorHost) : Record<string,JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
     [kVEHostEditorReady]: () => host.editorReady(),
-    [kVEHostEditorUpdated]: args => host.editorUpdated(args[0], args[1]),
+    [kVEHostEditorUpdated]: args => host.editorUpdated(args[0]),
   };
   return methods;
 }

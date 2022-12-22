@@ -17,10 +17,36 @@ import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode"
 import { VisualEditor } from "vscode-types";
 import { getWholeRange } from "../../core/doc";
 
+/* Strategy for managing synchronization of edits between source and visual mode. 
+
+This is made more complicated by the fact that getting/setting visual editor markdown 
+is expensive (requires a pandoc round trip) so is throttled by 1 second. We also need
+to guard against edits pinging back and forth (esp. w/ the requirement on flushing all 
+pending edits on save)
+
+For the visual editor syncing to external changes:
+
+1) Only accept external edits when NOT focused (once the visual editor is focused it
+   is the definitive source of changes to the document)
+
+2) These external edits are throttled by 1 second so we don't get constant (expensive) 
+   refreshing of the visual editor when users type in the text editor.
+
+For the visual editor propagating its own changes:
+
+1) The visual editor will continuously send the JSON version of the editor AST
+   to the host as updates occur (this is very cheap and doesn't involve pandoc)
+
+2) The host will apply these changes throttled by 1 second so we don't get constant
+   (expensive) refreshing of the text document when users type in the visual editor
+
+3) The throttled edits are _flushed_ immediately when the user saves the document
+
+*/
 
 export interface EditorSyncManager {
   init: () => Promise<void>;  
-  onVisualEditorChanged: (state: unknown, flush: boolean) => Promise<void>;
+  onVisualEditorChanged: (state: unknown) => Promise<void>;
   onDocumentChanged: () => Promise<void>;
   onDocumentSaving: () => Promise<TextEdit[]>;
   onDocumentSaved: () => Promise<void>;
@@ -73,9 +99,8 @@ export function editorSyncManager(
   };
 
   // periodically collect and apply pending edits. note that we also
-  // collect and apply when the visual editor tells us to (e.g. losing focus)
-  // and when a save occurs
-  setInterval(collectAndApplyPendingVisualEdit, 1500);
+  // collect and apply automatically when a save occurs
+  setInterval(collectAndApplyPendingVisualEdit, 2000);
 
   return {
 
@@ -87,13 +112,9 @@ export function editorSyncManager(
       await updateWorkspaceDocument(document, markdown);
     },
 
-    // notification that the visual editor changed. enque the change
-    // for future application (unless we've been told to flush)
-    onVisualEditorChanged: async (state: unknown, flush: boolean) => {
+    // notification that the visual editor changed (enque the change)
+    onVisualEditorChanged: async (state: unknown) => {
       pendingVisualEdit = state;
-      if (flush) {
-        await collectAndApplyPendingVisualEdit();
-      }
     },
 
     // notification that the document changed, let the visual editor
@@ -123,7 +144,8 @@ export function editorSyncManager(
     },
 
     // notification that a document completed saving (failsafe for changes
-    // that didn't get applied b/c of onDocumentSaving timing out)
+    // that didn't get applied b/c of onDocumentSaving no longer being
+    // called b/c vscode deems that it is running for too long)
     onDocumentSaved: async () : Promise<void> => {
       collectAndApplyPendingVisualEdit();
     }

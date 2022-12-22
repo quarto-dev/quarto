@@ -30,7 +30,7 @@ export interface VisualEditor {
 
 export interface VisualEditorHost {
   editorReady: () => Promise<void>; 
-  editorUpdated: (state: unknown, flush: boolean) => Promise<void>;
+  editorUpdated: (state: unknown) => Promise<void>;
 }
 
 

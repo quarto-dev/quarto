@@ -13,40 +13,9 @@
  *
  */
 
-/* Strategy for managing synchronization of edits between source and visual mode. 
-
-This is made more complicated by the fact that getting/setting visual editor markdown 
-is expensive (requires a pandoc round trip) so is throttled by 1 second. We also need
-to guard against edits pinging back and forth (esp. w/ the requirement on flushing all 
-pending edits on save)
-
-We will adopt this strategy for the visual editor syncing to external changes:
-
-1) Only accept external edits when NOT focused (once the visual editor is focused it
-   is the definitive source of changes to the document)
-
-2) These external edits are throttled by 1 second so we don't get constant (expensive) 
-   refreshing of the visual editor when users type in the text editor.
-
-3) The throttled edits are _flushed_ immediately when the visual editor gains focus
-   (this ensures that it is fully up to date before it takes control of all changes)
-
-We will adopt this strategy for the visual editor propagating its own changes:
-
-1) The visual editor will continuously send the JSON version of the editor AST
-   to the host as updates occur (this is very cheap and doesn't involve pandoc)
-
-2) The host will apply these changes throttled by 1 second so we don't get constant
-   (expensive) refreshing of the text document when users type in the visual editor
-
-3) The throttled edits are _flushed_ immediately when the visual editor loses focus
-   or when the user saves the document.
-
-*/
-
 import throttle from "lodash.throttle";
 
-import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent, FocusEvent, BlurEvent } from "editor";
+import { Editor, EditorFormat, EditorHooks, kQuartoDocType, UpdateEvent } from "editor";
 
 import { VisualEditorHostClient, visualEditorHostServer } from "../connection";
 
@@ -55,9 +24,9 @@ import { editorContext } from "./context";
 export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) {
 
   // editable hook (update after we get initial payload)
-  let loaded = false;
+  let editable = false;
   const hooks: EditorHooks = {
-    isEditable: () => loaded 
+    isEditable: () => editable 
   }
 
   // create context
@@ -65,13 +34,12 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
 
   Editor.create(parent, context, quartoEditorFormat()).then(async (editor) => {
     
-    // sync from text editor (throttled, flushed when we get focus)
+    // sync from text editor (throttled)
     const kThrottleDelayMs = 1000;
     const receiveEdit = throttle((markdown) => {
       editor.setMarkdown(markdown, quartoWriterOptions(), false)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .then(_result => {
-            //
+        .finally(() => {
+          // done
         });
     }, kThrottleDelayMs, { leading: false, trailing: true});
 
@@ -80,27 +48,20 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
       async init(markdown: string) {
 
         // put editor in writeable mode
-        loaded = true;
+        editable = true;
 
         // init editor contents and sync cannonical version back to text editor
         const result = await editor.setMarkdown(markdown, quartoWriterOptions(), false);
         
         // visual editor => text editor (just send the state, host will call back for markdown)
-        editor.subscribe(UpdateEvent, () => host.editorUpdated(editor.getStateJson(), false));
-
-        // when we lose focus do an update w/ flush = true
-        editor.subscribe(BlurEvent, () => host.editorUpdated(editor.getStateJson(), true));
-
-        // when we gain focus flush any received edits (they are queued just below in applyTextEdit)
-        editor.subscribe(FocusEvent, () => { receiveEdit.flush(); });
+        editor.subscribe(UpdateEvent, () => host.editorUpdated(editor.getStateJson()));
 
         // return canonical markdown
-        return result.canonical;
-        
+        return result.canonical;        
       },
 
       async applyTextEdit(markdown: string) {
-        // only apply external text edits if we don't have focus
+        // only receive external text edits if we don't have focus (prevents circular updates)
         if (!editor.hasFocus()) {
           receiveEdit(markdown);
         }

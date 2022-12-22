@@ -105,6 +105,15 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             }
           }
         ));
+
+        // last ditch notification for saves (in case we didn't get our changes applied)
+        disposables.push(workspace.onDidSaveTextDocument(
+          (doc) => {
+            if (doc.uri.toString() === document.uri.toString()) {
+              syncManager.onDocumentSaved();
+            }
+          }
+        ));
       },
 
       // notify sync manager when visual editor is updated

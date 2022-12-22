@@ -23,6 +23,7 @@ export interface EditorSyncManager {
   onVisualEditorChanged: (state: unknown, flush: boolean) => Promise<void>;
   onDocumentChanged: () => Promise<void>;
   onDocumentSaving: () => Promise<TextEdit[]>;
+  onDocumentSaved: () => Promise<void>;
 }
 
 // sync the document model w/ the visual editor
@@ -109,18 +110,6 @@ export function editorSyncManager(
 
     // notification that we are saving (allow flusing of visual editor changes)
     onDocumentSaving: async () : Promise<TextEdit[]> => {
-      
-      // if on onWillSaveTextDocument handler takes too long (> 1.5 sec) 
-      // then VS Code will ignore it or stop calling it altogether. In that 
-      // case we need a failsafe save to occur ~ 5 seconds after the save
-      // (as we have no way of knowing whether VS Code has ignored us)
-      setTimeout(async () => {
-        const markdown = await visualEditor.getMarkdown();
-        if (markdown !== document.getText()) {
-          updateWorkspaceDocument(document, markdown);
-        }
-      }, 5000);
-
       // attempt to collect pending edit
       const markdown = await collectPendingVisualEdit();
       if (markdown) {
@@ -131,6 +120,12 @@ export function editorSyncManager(
       } else {
         return [];
       }
+    },
+
+    // notification that a document completed saving (failsafe for changes
+    // that didn't get applied b/c of onDocumentSaving timing out)
+    onDocumentSaved: async () : Promise<void> => {
+      collectAndApplyPendingVisualEdit();
     }
   };
 }

@@ -991,16 +991,6 @@ export class Editor {
     ];
   }
 
-  // used for state.toJSON / state.fromJSON serialization
-  private pluginFields(plugins: readonly Plugin[]) {
-    const pluginFields: Record<string,Plugin> = {};
-    plugins.forEach((plugin, index) => {
-      pluginFields[`Plugin${index}`] = plugin; 
-    });
-    return pluginFields;
-  }
-  
-
   private editablePlugin() {
     const hooks = this.context.hooks || {};
     return new Plugin({

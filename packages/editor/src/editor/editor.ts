@@ -756,7 +756,7 @@ export class Editor {
   }
 
   public hasFocus() {
-    return this.view.hasFocus();
+    return this.view.hasFocus() || this.view.dom.contains(window.document.activeElement);
   }
 
   public blur() {

@@ -20,12 +20,11 @@ import { Provider as StoreProvider } from 'react-redux';
 
 import { FocusStyleManager, HotkeysProvider } from '@blueprintjs/core';
 
-import { WorkbenchState } from './store/store';
 import Workbench from './workbench/Workbench';
 import { CommandManagerProvider } from 'editor-ui';
 
 interface AppProps {
-  store: Store<WorkbenchState>;
+  store: Store;
 }
 
 const App: React.FC<AppProps> = props => {

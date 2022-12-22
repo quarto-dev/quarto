@@ -18,7 +18,8 @@ import { JsonRpcError } from "core";
 import { jsonRpcBrowserRequestTransport } from "core-browser";
 import { Prefs, kWriterJsonRpcPath } from "writer-types";
 import { writerJsonRpcServer } from "../server/server";
-import { fakeBaseQuery, handleQuery } from "./util";
+
+import { rtkFakeBaseQuery, rtkHandleQuery } from "editor-ui";
 
 const kPrefsTag = "Prefs";
 
@@ -27,17 +28,17 @@ const server = writerJsonRpcServer(request);
 
 export const prefsApi = createApi({
   reducerPath: "prefs",
-  baseQuery: fakeBaseQuery<JsonRpcError>(),
+  baseQuery: rtkFakeBaseQuery<JsonRpcError>(),
   tagTypes: [kPrefsTag],
 
   endpoints(build) {
     return {
       getPrefs: build.query<Prefs,void>({
-        queryFn: () => handleQuery(server.prefs.getPrefs()),
+        queryFn: () => rtkHandleQuery(server.prefs.getPrefs()),
         providesTags: [kPrefsTag]
       }),
       setPrefs: build.mutation<void,Prefs>({
-        queryFn: (prefs: Prefs) => handleQuery(server.prefs.setPrefs(prefs)),
+        queryFn: (prefs: Prefs) => rtkHandleQuery(server.prefs.setPrefs(prefs)),
         // optmistic update 
         async onQueryStarted(prefs, { dispatch, queryFulfilled }) {
           dispatch(

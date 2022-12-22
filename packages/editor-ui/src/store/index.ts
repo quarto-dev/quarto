@@ -1,10 +1,10 @@
 /*
- * index.ts
+ * dictionary.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
+ * Unless you have received this program directly from RStudio pursuant
+ * to the terms of a commercial license agreement with RStudio, then
  * this program is licensed to you under the terms of version 3 of the
  * GNU Affero General Public License. This program is distributed WITHOUT
  * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
@@ -13,8 +13,5 @@
  *
  */
 
-export * from './dialogs';
-export * from './commands';
-export * from './menu';
-export * from './store';
-
+export * from './rtk';
+export * from './dictionary';

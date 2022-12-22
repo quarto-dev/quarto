@@ -29,7 +29,7 @@ import {
   useIgnoredWordsQuery, 
   useIgnoreWordMutation, 
   useUnignoreWordMutation 
-} from '../../../store/dictionary';
+} from 'editor-ui';
 
 export interface SpellingInvalidate {
   invalidateAllWords: () => void;

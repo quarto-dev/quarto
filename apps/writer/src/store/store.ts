@@ -14,28 +14,36 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit'
-import { dictionaryApi } from './dictionary';
+import { jsonRpcBrowserRequestTransport } from 'core-browser';
+import { editorJsonRpcServices } from 'editor';
+import { kWriterJsonRpcPath } from 'writer-types';
+import { dictionaryApi, initDictionaryApi } from 'editor-ui';
+
 import { editorSlice } from './editor';
 import { prefsApi } from './prefs';
 
-
-const store = configureStore({
-  reducer: {
-    editor: editorSlice.reducer,
-    [prefsApi.reducerPath]: prefsApi.reducer,
-    [dictionaryApi.reducerPath]: dictionaryApi.reducer
-  },
-  middleware: (getDefaultMiddleware) => {
-    return getDefaultMiddleware()
-        .prepend(prefsApi.middleware)
-        .prepend(dictionaryApi.middleware)
-  }
-});
-
-export type WorkbenchState = ReturnType<typeof store.getState>
-
 export async function initializeStore() {
 
+  // get editor services
+  const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
+  const editorServices = editorJsonRpcServices(request);
+
+  // initialize dictionary api
+  initDictionaryApi(editorServices.dictionary);
+
+  const store = configureStore({
+    reducer: {
+      editor: editorSlice.reducer,
+      [prefsApi.reducerPath]: prefsApi.reducer,
+      [dictionaryApi.reducerPath]: dictionaryApi.reducer
+    },
+    middleware: (getDefaultMiddleware) => {
+      return getDefaultMiddleware()
+          .prepend(prefsApi.middleware)
+          .prepend(dictionaryApi.middleware)
+    }
+  });
+  
   // prefech prefs
   store.dispatch(prefsApi.util.prefetch("getPrefs", undefined, {force: true}));
   await Promise.all(store.dispatch(prefsApi.util.getRunningQueriesThunk()));

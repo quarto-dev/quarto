@@ -14,4 +14,5 @@
  */
 
 export * from './rtk';
+export * from './editor';
 export * from './dictionary';

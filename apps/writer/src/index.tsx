@@ -16,13 +16,15 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { setEditorMarkdown } from 'editor-ui';
+
 import { initializeStore } from './store/store';
-import { setEditorMarkdown } from './store/editor';
 
 import { i18nInit } from './i18n';
 import App from './App';
 
 import "editor-ui/src/styles";
+
 
 async function runApp() {
   try {

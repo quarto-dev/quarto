@@ -26,7 +26,7 @@ import { focusInput } from 'core-browser';
 
 import { CommandManagerContext } from 'editor-ui';
 
-import { editorLoading, editorTitle, setEditorTitle } from '../store/editor';
+import { editorLoading, editorTitle, setEditorTitle } from 'editor-ui';
 
 import { WorkbenchCommandId } from './commands';
 

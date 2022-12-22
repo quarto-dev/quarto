@@ -17,9 +17,12 @@ import { configureStore } from '@reduxjs/toolkit'
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 import { editorJsonRpcServices } from 'editor';
 import { kWriterJsonRpcPath } from 'writer-types';
-import { dictionaryApi, initDictionaryApi } from 'editor-ui';
+import { 
+  dictionaryApi, 
+  initDictionaryApi,
+  editorSlice
+} from 'editor-ui';
 
-import { editorSlice } from './editor';
 import { prefsApi } from './prefs';
 
 export async function initializeStore() {

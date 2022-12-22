@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 
 import { defaultPrefs } from 'writer-types';
 
-import { editorOutline } from '../../../store/editor';
+import { editorOutline } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from '../../../store/prefs';
 
 import { CommandManagerContext } from 'editor-ui';

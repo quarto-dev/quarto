@@ -24,7 +24,7 @@ import { IconNames } from '@blueprintjs/icons';
 import { EditorView, basicSetup } from 'codemirror';
 import { markdown as markdownLang } from "@codemirror/lang-markdown"
 
-import { editorMarkdown } from '../../store/editor';
+import { editorMarkdown } from 'editor-ui';
 
 import { CommandManagerContext, Toolbar, ToolbarText, ToolbarButton  } from 'editor-ui';
 

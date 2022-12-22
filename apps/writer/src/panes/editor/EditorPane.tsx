@@ -47,7 +47,7 @@ import {
   setEditorOutline,
   setEditorTitle,
   setEditorLoading,
-} from '../../store/editor';
+} from 'editor-ui';
 
 import { CommandManagerContext, Commands } from 'editor-ui';
 

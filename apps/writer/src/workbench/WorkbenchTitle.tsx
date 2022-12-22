@@ -22,11 +22,11 @@ import { useTranslation } from 'react-i18next';
 
 import { EditableText } from '@blueprintjs/core';
 
-import { editorLoading, editorTitle, setEditorTitle } from '../store/editor';
+import { focusInput } from 'core-browser';
 
 import { CommandManagerContext } from 'editor-ui';
 
-import { focusInput } from '../widgets/utils';
+import { editorLoading, editorTitle, setEditorTitle } from '../store/editor';
 
 import { WorkbenchCommandId } from './commands';
 

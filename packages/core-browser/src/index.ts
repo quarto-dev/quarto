@@ -15,5 +15,6 @@
 
 export * from './jsonrpc/browser';
 export * from './jsonrpc/postmessage';
+export * from './input';
 
 

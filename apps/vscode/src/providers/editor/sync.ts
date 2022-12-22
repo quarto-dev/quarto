@@ -109,7 +109,9 @@ export function editorSyncManager(
     // back to the document
     init: async() => {
       const markdown = await visualEditor.init(document.getText());
-      await updateWorkspaceDocument(document, markdown);
+      if (markdown !== document.getText()) {
+        await updateWorkspaceDocument(document, markdown);
+      }
     },
 
     // notification that the visual editor changed (enque the change)

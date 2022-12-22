@@ -26,7 +26,7 @@ import {
   VSC_VEH_OnEditorReady, 
   VSCodeVisualEditor,
   VSCodeVisualEditorHost 
-} from "vscode-types";
+} from "editor-types";
 
 import { 
   jsonRpcPostMessageServer, 

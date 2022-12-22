@@ -34,7 +34,7 @@ import {
   VSC_VE_Init, 
   VSCodeVisualEditor, 
   VSCodeVisualEditorHost 
-} from "vscode-types";
+} from "editor-types";
 
 import { editorJsonRpcServer, EditorServer } from "editor";
 

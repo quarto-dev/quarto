@@ -34,5 +34,6 @@ export * from './dictionary'
 export * from './services'
 export * from './outline'
 export * from './menu'
+export * from './vscode'
 
 

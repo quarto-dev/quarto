@@ -974,6 +974,7 @@
     "core": "*",
     "core-node": "*",
     "editor-server": "*",
+    "editor-types": "*",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",
@@ -987,8 +988,7 @@
     "tmp": "^0.2.1",
     "uuid": "^9.0.0",
     "vscode-languageclient": "^8.0.2",
-    "vscode-nls": "^5.2.0",
-    "vscode-types": "*"
+    "vscode-nls": "^5.2.0"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",

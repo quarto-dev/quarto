@@ -14,7 +14,7 @@
  */
 
 import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode";
-import { VSCodeVisualEditor } from "vscode-types";
+import { VSCodeVisualEditor } from "editor-types";
 import { getWholeRange } from "../../core/doc";
 
 /* Strategy for managing synchronization of edits between source and visual mode. 

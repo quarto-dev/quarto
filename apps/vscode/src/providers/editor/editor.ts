@@ -28,7 +28,7 @@ import {
 
 import { QuartoContext } from "quarto-core";
 
-import { VSCodeVisualEditorHost } from "vscode-types";
+import { VSCodeVisualEditorHost } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 

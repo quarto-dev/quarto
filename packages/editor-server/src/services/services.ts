@@ -24,7 +24,6 @@ export interface EditorServicesOptions {
   dictionary: DictionaryServerOptions;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function editorServices(options: EditorServicesOptions) : EditorServices {
   return {
     math: mathServer(),
@@ -32,7 +31,6 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
   };
 } 
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function editorServicesMethods(options: EditorServicesOptions): Record<string,JsonRpcServerMethod> {
   return {
     ...mathServerMethods(),

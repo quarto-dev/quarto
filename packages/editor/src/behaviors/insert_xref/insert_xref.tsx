@@ -367,16 +367,16 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
       // There is no item selected
       props.ui.dialogs
         .alert(
-          props.ui.context.translateText("Please select a cross reference to insert."),
           props.ui.context.translateText('Validation Error'),
+          props.ui.context.translateText("Please select a cross reference to insert."),
           kAlertTypeError,
         );
     } else if (style.key === kStyleCustom && !prefix) {
       // Custom was selected, but no prefix provided
       props.ui.dialogs
         .alert(
-          props.ui.context.translateText("Please enter a custom prefix for this reference."),
           props.ui.context.translateText('Validation Error'),
+          props.ui.context.translateText("Please enter a custom prefix for this reference."),
           kAlertTypeError,
         )
         .then(() => {

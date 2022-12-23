@@ -143,8 +143,8 @@ const Tag: React.FC<TagProps> = props => {
         showingValidationError.current = true;
         props.ui.dialogs
           .alert(
-            props.ui.context.translateText(validationMessage),
             props.ui.context.translateText('Validation Error'),
+            props.ui.context.translateText(validationMessage),
             kAlertTypeError,
           )
           .then(() => {

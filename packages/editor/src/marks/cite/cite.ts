@@ -697,10 +697,10 @@ export async function insertCitation(
     if (result && result.id.length) {
       if (!result?.csl.title) {
         await ui.dialogs.alert(
+          ui.context.translateText('Invalid Citation'),
           ui.context.translateText(
             "This citation can't be added to the bibliography because it is missing required fields.",
           ),
-          ui.context.translateText('Invalid Citation'),
           kAlertTypeError,
         );
       } else {
@@ -795,8 +795,8 @@ export async function ensureSourcesInBibliography(
         const warning = bibManager.warningForProvider(withWarning);
         if (warning) {
           return await ui.dialogs.yesNoMessage(
+            ui.context.translateText('Warning'),
             warning,
-            'Warning',
             kAlertTypeWarning,
             ui.context.translateText('Insert Citation Anyway'),
             ui.context.translateText('Cancel'),

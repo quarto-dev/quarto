@@ -63,11 +63,11 @@ export const kAlertTypeInfo = 1;
 export const kAlertTypeWarning = 2;
 export const kAlertTypeError = 3;
 
-export type AlertFn = (message: string, title: string, type: number) => Promise<boolean>;
+export type AlertFn = (title: string, message: string, type: number) => Promise<boolean>;
 
 export type YesNoMessageFn = (
-  message: string,
   title: string,
+  message: string,
   type: number,
   yesLabel: string,
   noLabel: string,

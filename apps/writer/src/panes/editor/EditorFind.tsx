@@ -71,7 +71,7 @@ const EditorFind: React.FC = () => {
 
   // no more matches alert
   const noMoreMatchesAlert = () => {
-    dialogs.current.alert(t('find_no_more_matches'), t('find_alert_title'), kAlertTypeInfo);
+    dialogs.current.alert(t('find_alert_title'), t('find_no_more_matches'), kAlertTypeInfo);
   }
 
   // perform most up to date find
@@ -110,7 +110,7 @@ const EditorFind: React.FC = () => {
   // replace all
   const replaceAll = useCallback(() => {
     const replaced = performFind()?.replaceAll(replaceText);
-    dialogs.current.alert(`${(replaced || 0)} ${t('find_instances_replaced')}.`, t('find_alert_title'), kAlertTypeInfo);
+    dialogs.current.alert( t('find_alert_title'), `${(replaced || 0)} ${t('find_instances_replaced')}.`, kAlertTypeInfo);
   }, [performFind, replaceText]);
   
   // find and replace commands

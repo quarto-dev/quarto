@@ -102,7 +102,7 @@ const EditorPane : React.FC = () => {
   // general helper functions
   const errorAlert = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    dialogs.current.alert(message, t('error_alert_title') as string, kAlertTypeError);
+    dialogs.current.alert( t('error_alert_title') as string, message, kAlertTypeError);
   }
 
   // keep spelling provider up to date 

@@ -26,15 +26,15 @@ import { FormikDialog, showValueEditorDialog } from 'ui-widgets';
 
 import styles from './styles.module.scss';
 
-export function alert(message: string, title: string, type: number): Promise<boolean> {
-  return alertDialog(message, title, type, true);
+export function alert(title: string, message: string | JSX.Element, type: number): Promise<boolean> {
+  return alertDialog(title, message, type, true);
 }
 
-export async function yesNoMessage(message: string, title: string, type: number, yesLabel: string, noLabel: string): Promise<boolean> {
-  return alertDialog(message, title, type, false, yesLabel, noLabel);
+export async function yesNoMessage(title: string, message: string | JSX.Element, type: number, yesLabel: string, noLabel: string): Promise<boolean> {
+  return alertDialog(title, message, type, false, yesLabel, noLabel);
 }
 
-async function alertDialog(message: string, title: string, type: number, noCancelButton?: boolean, okLabel?: string, cancelLabel?: string) {
+async function alertDialog(title: string, message: string | JSX.Element, type: number, noCancelButton?: boolean, okLabel?: string, cancelLabel?: string) {
   const result = await showValueEditorDialog(AlertDialog, {}, { title, message, type, noCancelButton, okLabel, cancelLabel });
   return !!result;
 }
@@ -42,7 +42,7 @@ async function alertDialog(message: string, title: string, type: number, noCance
 interface AlertDialogOptions {
   type: number;
   title?: string;
-  message?: string;
+  message?: string | JSX.Element;
   noCancelButton?: boolean;
   okLabel?: string;
   cancelLabel?: string;
@@ -94,7 +94,10 @@ const AlertDialog: React.FC<{
     >
       <ControlGroup vertical={false} fill={true}>
         <Icon icon={icon} size={36} intent={intent} className={Classes.FIXED} />
-        <Label>{props.options.message}</Label>
+        {typeof(props.options.message) === "string" 
+          ? <Label>{props.options.message}</Label>
+          : props.options.message
+        }
       </ControlGroup>
      
     </FormikDialog>

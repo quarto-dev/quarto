@@ -13,7 +13,7 @@
  *
  */
 
-import { t } from 'editor-ui/src/i18n';
+import { t } from 'editor-ui';
 
 import { MaybeElement } from '@blueprintjs/core';
 

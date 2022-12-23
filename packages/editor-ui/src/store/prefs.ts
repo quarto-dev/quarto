@@ -15,16 +15,18 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
-import { jsonRpcBrowserRequestTransport } from "core-browser";
-import { Prefs, kWriterJsonRpcPath } from "writer-types";
-import { writerJsonRpcServer } from "../server/server";
+import { Prefs, PrefsServer } from "writer-types";
 
 import { rtkFakeBaseQuery, rtkHandleQuery } from "editor-ui";
 
 const kPrefsTag = "Prefs";
 
-const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
-const server = writerJsonRpcServer(request);
+// allow external initialization of the server endpoint
+let prefsServer: PrefsServer;
+export function initPrefsApi(server: PrefsServer) {
+  prefsServer = server;
+}
+
 
 export const prefsApi = createApi({
   reducerPath: "prefs",
@@ -34,11 +36,11 @@ export const prefsApi = createApi({
   endpoints(build) {
     return {
       getPrefs: build.query<Prefs,void>({
-        queryFn: () => rtkHandleQuery(server.prefs.getPrefs()),
+        queryFn: () => rtkHandleQuery(prefsServer.getPrefs()),
         providesTags: [kPrefsTag]
       }),
       setPrefs: build.mutation<void,Prefs>({
-        queryFn: (prefs: Prefs) => rtkHandleQuery(server.prefs.setPrefs(prefs)),
+        queryFn: (prefs: Prefs) => rtkHandleQuery(prefsServer.setPrefs(prefs)),
         // optmistic update 
         async onQueryStarted(prefs, { dispatch, queryFulfilled }) {
           dispatch(

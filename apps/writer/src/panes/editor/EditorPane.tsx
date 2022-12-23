@@ -59,7 +59,7 @@ import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands 
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorPane.module.scss';
-import { useGetPrefsQuery, useSetPrefsMutation } from '../../store/prefs';
+import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 import { defaultPrefs, Prefs } from 'writer-types';
 import { useEditorSpelling } from './context/editor-spelling';
 import EditorFind from './EditorFind';

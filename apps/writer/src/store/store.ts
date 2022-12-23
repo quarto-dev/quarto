@@ -18,20 +18,24 @@ import { jsonRpcBrowserRequestTransport } from 'core-browser';
 import { editorJsonRpcServices } from 'editor';
 import { kWriterJsonRpcPath } from 'writer-types';
 import { 
+  prefsApi,
+  initPrefsApi, 
   dictionaryApi, 
   initDictionaryApi,
   editorSlice
 } from 'editor-ui';
 
-import { prefsApi } from './prefs';
+import { writerJsonRpcServer } from '../server/server';
 
 export async function initializeStore() {
 
   // get editor services
   const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
   const editorServices = editorJsonRpcServices(request);
+  const writerServer = writerJsonRpcServer(request);
 
-  // initialize dictionary api
+  // connect prefs and dictionary apis to services endpoints
+  initPrefsApi(writerServer.prefs);
   initDictionaryApi(editorServices.dictionary);
 
   const store = configureStore({

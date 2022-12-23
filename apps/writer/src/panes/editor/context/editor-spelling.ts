@@ -21,7 +21,7 @@ import { EditorUISpelling } from 'editor';
 
 import { defaultPrefs } from 'writer-types';
 
-import { useGetPrefsQuery } from '../../../store/prefs';
+import { useGetPrefsQuery } from 'editor-ui';
 import { 
   useAddToUserDictionaryMutation, 
   useGetDictionaryQuery, 

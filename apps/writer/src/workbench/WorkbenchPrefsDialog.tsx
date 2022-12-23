@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { defaultPrefs } from 'writer-types';
 
 import { useGetAvailableDictionariesQuery } from 'editor-ui';
-import { useGetPrefsQuery, useSetPrefsMutation } from '../store/prefs';
+import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 
 import { CommandManagerContext } from 'editor-ui';
 

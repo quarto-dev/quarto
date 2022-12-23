@@ -22,7 +22,6 @@ import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 import { CommandManagerContext, commandHotkeys } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
-import MarkdownPane from '../panes/markdown/MarkdownPane';
 
 import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
@@ -70,7 +69,6 @@ const Workbench: React.FC = () => {
       <WorkbenchToolbar />
       <div className={'workspace'}>
         <EditorPane />
-        <MarkdownPane />
       </div>
       <WorkbenchClipboard />
       <WorkbenchPrefsDialog />

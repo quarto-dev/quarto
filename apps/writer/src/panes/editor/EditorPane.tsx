@@ -42,7 +42,6 @@ import {
   editorMarkdown,
   editorTitle,
   editorLoading,
-  setEditorMarkdown,
   setEditorSelection,
   setEditorOutline,
   setEditorTitle,
@@ -181,12 +180,8 @@ const EditorPane : React.FC = () => {
     }
   }
 
-  // when doc changes, propagate markdown only if showMarkdown is true (as
-  // (this is an incredibly expensive operation to run on every keystroke!)
+  // when doc changes propagate title
   const onEditorDocChanged = () => {
-    if (prefsRef.current?.showMarkdown) {
-      saveMarkdown();
-    }
     dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
   };
 
@@ -203,20 +198,6 @@ const EditorPane : React.FC = () => {
     const selection = editorRef.current!.getSelection();
     cmDispatch( { type: "SET_SELECTION", payload: selection } );
     dispatch(setEditorSelection(selection));
-  }
-
-  // save editor markdown to the redux store
-  const saveMarkdown = async () => {
-    try {
-      // generate markdown
-      const markdown = await editorRef.current!.getMarkdown(panmirrorWriterOptions());
-     
-      // set markdown into redux
-      dispatch(setEditorMarkdown(markdown.code));
-     
-    } catch (error) {
-      errorAlert(error);
-    }
   }
 
   // propagate window resize to editor
@@ -248,13 +229,9 @@ const EditorPane : React.FC = () => {
     commandsRef.current = cmState.commands;
   }, [cmState.commands])
 
-  // update out of band ref to prefs when they change 
-  // (also propagate markdown if that pref is enabled)
+  // update out of band ref to prefs when they change
   useEffect(() => {
     prefsRef.current = prefs;
-    if (editorRef.current && prefs.showMarkdown) {
-      saveMarkdown();
-    }
   }, [prefs]);
 
   // render

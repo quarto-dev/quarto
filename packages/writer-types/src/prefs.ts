@@ -19,7 +19,6 @@ export const kPrefsSetPrefs = "prefs_set_prefs";
 export interface Prefs {
   // view
   readonly showOutline: boolean;
-  readonly showMarkdown: boolean;
 
    // theme
    readonly darkMode: boolean;
@@ -44,7 +43,6 @@ export interface Prefs {
 export function defaultPrefs() : Prefs {
   return {
     // view
-    showMarkdown: false,
     showOutline: false,
 
     // theme

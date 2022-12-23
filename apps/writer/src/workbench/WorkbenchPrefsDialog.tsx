@@ -13,17 +13,20 @@
  *
  */
 
-import { FormGroup, HTMLSelect } from '@blueprintjs/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultPrefs } from 'writer-types';
 
-import { useGetAvailableDictionariesQuery } from 'editor-ui';
-import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
+import { FormikDialog, FormikHTMLSelect } from 'ui-widgets';
 
-import { CommandManagerContext } from 'editor-ui';
+import { 
+  CommandManagerContext, 
+  useGetPrefsQuery, 
+  useSetPrefsMutation, 
+  useGetAvailableDictionariesQuery 
+} from 'editor-ui';
 
-import { Dialog } from '../widgets/dialog/Dialog';
+import { defaultPrefs, Prefs } from 'writer-types';
+
 import { WorkbenchCommandId } from './commands';
 
 export const WorkbenchPrefsDialog: React.FC = () => {
@@ -55,44 +58,35 @@ export const WorkbenchPrefsDialog: React.FC = () => {
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
   const [ setPrefs ] = useSetPrefsMutation();
   const { data: dictionaries } = useGetAvailableDictionariesQuery();
-
-  // state for controlled components
-  const [dictionaryLocale, setDictionaryLocale] = useState(prefs.dictionaryLocale);
-
-  // close dialog
-  const closeDialog = () => {
+ 
+  const close = (prefs?: Prefs) => {
     setIsOpen(false);
+    if (prefs) {
+      setPrefs(prefs)
+    }
     cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
   }
 
-  // ok handler (save state to prefs)
-  const onOK = () => {
-    setPrefs( { ...prefs, dictionaryLocale })
-    closeDialog();
-  }
-
   return (
-    <Dialog
+    <FormikDialog
       isOpen={isOpen}
       title={t('prefs_dialog_caption') as string}
-      onCancel={closeDialog}
-      onOK={onOK}
+      initialValues={prefs}
+      onSubmit={close}
+      onReset={() => close()}
     >
-       <FormGroup label={t('prefs_dialog_dictionary_locale')}>
-          <HTMLSelect 
-            fill={true} 
-            value={dictionaryLocale}
-            onChange={ev => setDictionaryLocale(ev.currentTarget.value)}
-            options={dictionaries 
-              ? dictionaries.map(dictionary => ({
-                  value: dictionary.locale,
-                  label: dictionary.name
-                }))
-              : [ { value: prefs.dictionaryLocale } ]
-            } 
-          />
-       </FormGroup>
-    </Dialog>
+      <FormikHTMLSelect 
+        name={'dictionaryLocale'} 
+        label={t('prefs_dialog_dictionary_locale')} 
+        options={dictionaries 
+          ? dictionaries.map(dictionary => ({
+              value: dictionary.locale,
+              label: dictionary.name
+            }))
+          : [ { value: prefs.dictionaryLocale } ]
+        } 
+      />
+    </FormikDialog>
   );
 };
 

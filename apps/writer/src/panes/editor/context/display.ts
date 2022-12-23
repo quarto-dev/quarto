@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /*
- * editor-display.ts
+ * display.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *

@@ -13,4 +13,5 @@
  *
  */
 
+export * from './context';
 export * from './spelling';

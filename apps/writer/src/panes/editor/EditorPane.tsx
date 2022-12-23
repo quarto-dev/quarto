@@ -50,10 +50,9 @@ import {
   setEditorLoading,
 } from 'editor-ui';
 
-import { CommandManagerContext, Commands, Pane } from 'editor-ui';
+import { CommandManagerContext, Commands, Pane,  editorContext, EditorProviders } from 'editor-ui';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
-import { editorContext, EditorProviders } from './context/editor-context';
 
 import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands } from './editor-commands';
 import { EditorActions, EditorActionsContext } from './EditorActionsContext';
@@ -62,6 +61,10 @@ import styles from './EditorPane.module.scss';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 import { defaultPrefs, Prefs } from 'editor-types';
 import EditorFind from './EditorFind';
+import { jsonRpcBrowserRequestTransport } from 'core-browser';
+import { kWriterJsonRpcPath } from '../../store';
+import { editorDisplay } from './context/display';
+import { editorUIContext } from './context/ui-context';
 
 
 const EditorPane : React.FC = () => {
@@ -129,9 +132,11 @@ const EditorPane : React.FC = () => {
     editorRef.current = await createEditor(
       parentRef.current!, 
       {
-        commands: () => commandsRef.current!, 
-        dialogs: () => dialogs.current,
         prefs: editorPrefs,
+        request: jsonRpcBrowserRequestTransport(kWriterJsonRpcPath),
+        uiContext: editorUIContext(),
+        display: () => editorDisplay(() => commandsRef.current!), 
+        dialogs: () => dialogs.current,
         spelling: () => spellingRef.current!
       }
     );

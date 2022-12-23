@@ -94,10 +94,7 @@ const AlertDialog: React.FC<{
     >
       <ControlGroup vertical={false} fill={true}>
         <Icon icon={icon} size={36} intent={intent} className={Classes.FIXED} />
-        {typeof(props.options.message) === "string" 
-          ? <Label>{props.options.message}</Label>
-          : props.options.message
-        }
+        <Label>{props.options.message}</Label>
       </ControlGroup>
      
     </FormikDialog>

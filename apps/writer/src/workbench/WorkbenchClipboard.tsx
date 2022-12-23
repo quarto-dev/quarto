@@ -13,25 +13,16 @@
  *
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { CommandManagerContext, Command, keyCodeString } from 'editor-ui';
+import { CommandManagerContext, Command, keyCodeString, alert } from 'editor-ui';
 
-import { AlertDialog } from '../widgets/dialog/AlertDialog';
-import { kAlertTypeWarning } from 'editor';
 import { WorkbenchCommandId } from './commands';
-
-interface WorkbenchClipboardState {
-  dialogIsOpen: boolean;
-  commandMenuText?: string;
-  commandKeycode?: string;
-}
+import { kAlertTypeWarning } from 'editor';
 
 const WorkbenchClipboard: React.FC = () => {
-
-  const [state, setState] = useState<WorkbenchClipboardState>({ dialogIsOpen: false });
    
   const { t } = useTranslation();
   const [, cmDispatch] = useContext(CommandManagerContext);
@@ -40,20 +31,7 @@ const WorkbenchClipboard: React.FC = () => {
     cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
   }
 
-  const onDialogClosed = () => {
-    setState({ dialogIsOpen: false });
-    focusEditor();
-  }
-
   const clipboardCommand = (id: string, domId: string, menuText: string, keymap: string) : Command => {
-
-    const openDialog = () => {
-      setState({
-        dialogIsOpen: true,
-        commandMenuText: menuText,
-        commandKeycode: keyCodeString(keymap),
-      });
-    };
 
     return {
       id,
@@ -67,7 +45,17 @@ const WorkbenchClipboard: React.FC = () => {
         if (document.queryCommandSupported(domId) && document.execCommand(domId)) {
           focusEditor();
         } else {
-          openDialog();
+          const message =
+            <div>
+              <p>{t('clipboard_dialog_title')}</p>
+              <p>
+                {t('clipboard_dialog_message', {
+                  keycode: keyCodeString(keymap),
+                  command: menuText,
+                })}
+              </p>
+            </div>;
+          alert(t('clipboard_dialog_caption'), message, kAlertTypeWarning);
         }
       },
     };
@@ -81,24 +69,7 @@ const WorkbenchClipboard: React.FC = () => {
     ]});
   }, []);
 
-  return (
-    <AlertDialog
-      title={'Use Keyboard Shortcut'}
-      message={'the message'}
-      type={kAlertTypeWarning}
-      isOpen={state.dialogIsOpen}
-      onClosed={onDialogClosed}
-    >
-      <p>{t('clipboard_dialog_title')}</p>
-      <p>
-        {t('clipboard_dialog_message', {
-          keycode: state.commandKeycode,
-          command: state.commandMenuText,
-        })}
-      </p>
-    </AlertDialog>
-  );
-
+  return <></>;
 };
 
 export default WorkbenchClipboard;

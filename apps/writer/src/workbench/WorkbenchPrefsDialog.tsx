@@ -25,7 +25,7 @@ import {
   useGetAvailableDictionariesQuery 
 } from 'editor-ui';
 
-import { defaultPrefs, Prefs } from 'writer-types';
+import { defaultPrefs, Prefs } from 'editor-types';
 
 import { WorkbenchCommandId } from './commands';
 

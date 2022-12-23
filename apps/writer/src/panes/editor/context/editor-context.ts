@@ -20,26 +20,25 @@ import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
 import { codeMirrorExtension } from "editor-codemirror";
 
-import { kWriterJsonRpcPath, Prefs } from 'writer-types';
+import { EditorDialogs, Prefs, EditorUISpelling,  MathjaxTypesetResult,
+  MathServer,  } from 'editor-types';
 
 import {
   EditorContext,
-  EditorDialogs,
   EditorMath,
   EditorUIContext,
   EditorUIPrefs,
-  EditorUISpelling,
   ListSpacing,
-  MathjaxTypesetResult,
-  MathServer,
   SkinTone,
   UITools,
   editorJsonRpcServer,
   editorJsonRpcServices
 } from "editor";
+
 import { editorDisplay } from "./editor-display";
 
 import { Commands } from 'editor-ui';
+import { kWriterJsonRpcPath } from '../../../store';
 
 export interface EditorPrefs {
   prefs: () => Prefs, 

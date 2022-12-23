@@ -16,9 +16,11 @@
 
 import { DictionaryServer } from "./dictionary";
 import { MathServer } from "./math";
+import { PrefsServer } from "./prefs";
 
 
 export interface EditorServices {
   readonly math: MathServer;
   readonly dictionary: DictionaryServer;
+  readonly prefs: PrefsServer;
 }

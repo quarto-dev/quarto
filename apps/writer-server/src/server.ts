@@ -26,13 +26,11 @@ import jayson from 'jayson'
 
 import { appConfigDir, jaysonServerMethods } from 'core-node';
 
-import { kWriterJsonRpcPath } from 'writer-types';
-import { editorServerMethods, editorServicesMethods } from 'editor-server';
-import { prefsServerMethods } from './prefs';
-import { defaultEditorServerOptions } from 'editor-server';
+import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from 'editor-server';
 
 // constants
 const kPayloadLimitMb = 100;
+const kWriterJsonRpcPath = "/rpc";
 
 export function createServer(resourcesDir: string, editorResourcesDir: string) {
 
@@ -45,8 +43,7 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
 
   const writerRpcServer = jayson.Server(jaysonServerMethods({
     ...editorServerMethods(defaultEditorServerOptions(editorResourcesDir, "pandoc", kPayloadLimitMb)),
-    ...editorServicesMethods({ dictionary: dictionaryOptions }),
-    ...writerServerMethods()
+    ...editorServicesMethods({ dictionary: dictionaryOptions })
   }));
 
   const server = express()
@@ -58,8 +55,4 @@ export function createServer(resourcesDir: string, editorResourcesDir: string) {
     .use(`${kWriterJsonRpcPath}/*`, writerRpcServer.middleware());
 
   return server;
-}
-
-function writerServerMethods() {
-  return prefsServerMethods();
 }

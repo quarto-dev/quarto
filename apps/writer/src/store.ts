@@ -15,7 +15,6 @@
 
 import { configureStore } from '@reduxjs/toolkit'
 
-import { JsonRpcRequestTransport } from "core";
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
 import { editorJsonRpcServices } from 'editor';
@@ -28,17 +27,17 @@ import {
   editorSlice
 } from 'editor-ui';
 
-import { kWriterJsonRpcPath, Prefs, kPrefsGetPrefs, kPrefsSetPrefs, WriterServer } from 'writer-types';
+
+export const kWriterJsonRpcPath = "/rpc";
 
 export async function initializeStore() {
 
   // get editor services
   const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
   const editorServices = editorJsonRpcServices(request);
-  const writerServer = writerJsonRpcServer(request);
 
   // connect prefs and dictionary apis to services endpoints
-  initPrefsApi(writerServer.prefs);
+  initPrefsApi(editorServices.prefs);
   initDictionaryApi(editorServices.dictionary);
 
   const store = configureStore({
@@ -62,18 +61,5 @@ export async function initializeStore() {
   return store;
 }
 
-
-function writerJsonRpcServer(request: JsonRpcRequestTransport) : WriterServer {
-  return {
-    prefs: {
-      getPrefs() : Promise<Prefs> {
-        return request(kPrefsGetPrefs, []);
-      },
-      setPrefs(prefs: Prefs) : Promise<void> {
-        return request(kPrefsSetPrefs, [prefs]);
-      }
-    }
-  }
-}
 
 

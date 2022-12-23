@@ -13,6 +13,7 @@
  *
  */
 
+export * from './context';
 export * from './dialogs';
 export * from './commands';
 export * from './widgets';

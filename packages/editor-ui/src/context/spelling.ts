@@ -19,10 +19,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { EditorUISpelling } from 'editor';
 
-import { defaultPrefs } from 'writer-types';
+import { defaultPrefs } from 'editor-types';
 
-import { useGetPrefsQuery } from 'editor-ui';
 import { 
+  useGetPrefsQuery,
   useAddToUserDictionaryMutation, 
   useGetDictionaryQuery, 
   useGetUserDictionaryQuery, 

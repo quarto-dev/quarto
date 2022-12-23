@@ -1,5 +1,5 @@
 /*
- * server.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,4 @@
  *
  */
 
-import { PrefsServer } from "./prefs";
-
-export interface WriterServer {
-  readonly prefs: PrefsServer;
-}
-
+export * from './spelling';

@@ -15,7 +15,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
-import { Prefs, PrefsServer } from "writer-types";
+import { Prefs, PrefsServer } from "editor-types";
 
 import { rtkFakeBaseQuery, rtkHandleQuery } from "editor-ui";
 

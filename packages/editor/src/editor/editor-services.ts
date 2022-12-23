@@ -29,6 +29,9 @@ import {
   kDictionaryIgnoreWord,
   kDictionaryUnignoreWord,
   kMathMathjaxTypesetSvg,
+  kPrefsGetPrefs,
+  kPrefsSetPrefs,
+  Prefs,
   
 } from "editor-types";
 
@@ -63,6 +66,16 @@ export function editorJsonRpcServices(request: JsonRpcRequestTransport) : Editor
       unignoreWord(word: IgnoredWord) : Promise<string[]> {
         return request(kDictionaryUnignoreWord, [word]);
       }
+    },
+    prefs: {
+      getPrefs() : Promise<Prefs> {
+        return request(kPrefsGetPrefs, []);
+      },
+      setPrefs(prefs: Prefs) : Promise<void> {
+        return request(kPrefsSetPrefs, [prefs]);
+      }
     }
   };
 }
+
+

@@ -21,7 +21,7 @@ import { CSSTransition } from 'react-transition-group';
 
 import { useTranslation } from 'react-i18next';
 
-import { defaultPrefs } from 'writer-types';
+import { defaultPrefs } from 'editor-types';
 
 import { editorOutline } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';

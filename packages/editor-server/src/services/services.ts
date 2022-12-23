@@ -19,6 +19,7 @@ import { EditorServices } from "editor-types";
 import { mathServer, mathServerMethods } from "./math/math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
 import { JsonRpcServerMethod } from 'core';
+import { prefsServer, prefsServerMethods } from "./prefs";
 
 export interface EditorServicesOptions {
   dictionary: DictionaryServerOptions;
@@ -27,13 +28,15 @@ export interface EditorServicesOptions {
 export function editorServices(options: EditorServicesOptions) : EditorServices {
   return {
     math: mathServer(),
-    dictionary: dictionaryServer(options.dictionary)
+    dictionary: dictionaryServer(options.dictionary),
+    prefs: prefsServer()
   };
 } 
 
 export function editorServicesMethods(options: EditorServicesOptions): Record<string,JsonRpcServerMethod> {
   return {
     ...mathServerMethods(),
-    ...dictionaryServerMethods(options.dictionary)
+    ...dictionaryServerMethods(options.dictionary),
+    ...prefsServerMethods()
   }
 }

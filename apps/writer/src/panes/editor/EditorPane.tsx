@@ -21,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Intent, Spinner } from '@blueprintjs/core';
 
+import { useEditorSpelling } from 'editor-ui';
+
 import { 
   Editor, 
   EventType, 
@@ -58,8 +60,7 @@ import { EditorActions, EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorPane.module.scss';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
-import { defaultPrefs, Prefs } from 'writer-types';
-import { useEditorSpelling } from './context/editor-spelling';
+import { defaultPrefs, Prefs } from 'editor-types';
 import EditorFind from './EditorFind';
 
 

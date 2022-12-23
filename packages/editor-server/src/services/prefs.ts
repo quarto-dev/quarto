@@ -16,10 +16,10 @@
 import path from "path";
 import fs from "fs";
 
+import { JsonRpcServerMethod } from "core";
 import { appConfigDir } from "core-node";
 
-import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, PrefsServer, defaultPrefs } from "writer-types";
-import { JsonRpcServerMethod } from "core";
+import { Prefs, kPrefsGetPrefs, kPrefsSetPrefs, PrefsServer, defaultPrefs } from "editor-types";
 
 
 const prefsDir = appConfigDir("quarto-writer", "prefs");

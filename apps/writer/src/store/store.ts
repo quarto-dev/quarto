@@ -14,9 +14,12 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit'
+
+import { JsonRpcRequestTransport } from "core";
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
+
 import { editorJsonRpcServices } from 'editor';
-import { kWriterJsonRpcPath } from 'writer-types';
+
 import { 
   prefsApi,
   initPrefsApi, 
@@ -25,7 +28,7 @@ import {
   editorSlice
 } from 'editor-ui';
 
-import { writerJsonRpcServer } from '../server/server';
+import { kWriterJsonRpcPath, Prefs, kPrefsGetPrefs, kPrefsSetPrefs, WriterServer } from 'writer-types';
 
 export async function initializeStore() {
 
@@ -59,5 +62,18 @@ export async function initializeStore() {
   return store;
 }
 
+
+function writerJsonRpcServer(request: JsonRpcRequestTransport) : WriterServer {
+  return {
+    prefs: {
+      getPrefs() : Promise<Prefs> {
+        return request(kPrefsGetPrefs, []);
+      },
+      setPrefs(prefs: Prefs) : Promise<void> {
+        return request(kPrefsSetPrefs, [prefs]);
+      }
+    }
+  }
+}
 
 

@@ -13,10 +13,5 @@
  *
  */
 
-export * from './dialogs';
-export * from './commands';
-export * from './widgets';
-export * from './menu';
-export * from './store';
-export * from './i18n';
 
+export * from './Pane';

@@ -48,9 +48,7 @@ import {
   setEditorLoading,
 } from 'editor-ui';
 
-import { CommandManagerContext, Commands } from 'editor-ui';
-
-import { Pane } from '../../widgets/Pane';
+import { CommandManagerContext, Commands, Pane } from 'editor-ui';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import { editorContext, EditorProviders } from './context/editor-context';

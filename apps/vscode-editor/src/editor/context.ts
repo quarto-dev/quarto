@@ -161,7 +161,7 @@ function editorPrefs(): EditorUIPrefs {
       return 'tight';
     },
     equationPreview(): boolean {
-      return false;
+      return true;
     },
     packageListingEnabled(): boolean {
       return false;

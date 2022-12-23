@@ -71,7 +71,6 @@ const ViewMenu: React.FC = () => {
   return (
     <MenubarMenu>
       <CommandMenuItem id={WorkbenchCommandId.ShowOutline} active={CommandMenuItemActive.Check} />
-      <CommandMenuItem id={WorkbenchCommandId.ShowMarkdown} active={CommandMenuItemActive.Check} />
       <MenuDivider />
       <CommandMenuItem id={WorkbenchCommandId.ActivateEditor} />
     </MenubarMenu>

@@ -18,7 +18,7 @@ import { createRoot } from 'react-dom/client';
 
 import { setEditorMarkdown, initEditorTranslations } from 'editor-ui';
 
-import { initializeStore } from './store/store';
+import { initializeStore } from './store';
 import App from './App';
 
 import "editor-ui/src/styles";

@@ -1,5 +1,5 @@
 /*
- * jsonrp.ts
+ * jsonrpc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *

@@ -14,15 +14,10 @@
  *
  */
 
-import React from "react";
 
-import { v4 as uuidv4 } from 'uuid';
-
-import { ContextMenu, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { EditorDisplay, EditorMenuItem, XRef } from "editor";
 
-import { Commands, CommandMenuItem } from "editor-ui";
-
+import { Commands, showContextMenu } from "editor-ui";
 
 export function editorDisplay(commands: () => Commands) : EditorDisplay {
   return {
@@ -41,21 +36,7 @@ export function editorDisplay(commands: () => Commands) : EditorDisplay {
       clientX: number,
       clientY: number
     ): Promise<boolean> {
-      return new Promise(resolve => {    
-        const cmds = commands();
-        const menuItems = items.map(item => {
-          if (item.separator) {
-            return <MenuDivider key={uuidv4()}/>;
-          } else if (item.command) {
-            return <CommandMenuItem id={item.command} key={item.command} text={item.text} commands={cmds}/>;
-          } else {
-            return <MenuItem text={item.text} key={uuidv4()} onClick={item.exec}/>
-          }
-        });
-        ContextMenu.show(<Menu>{menuItems}</Menu>, { left: clientX, top: clientY }, () => {
-          resolve(true);
-        });
-      }); 
+      return showContextMenu(commands(), items, clientX, clientY);
     }
   };
 }

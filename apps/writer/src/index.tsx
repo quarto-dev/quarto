@@ -16,11 +16,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { setEditorMarkdown } from 'editor-ui';
+import { setEditorMarkdown, initEditorTranslations } from 'editor-ui';
 
 import { initializeStore } from './store/store';
-
-import { i18nInit } from './i18n';
 import App from './App';
 
 import "editor-ui/src/styles";
@@ -35,7 +33,7 @@ async function runApp() {
     store.dispatch(setEditorMarkdown(markdown));
 
      // init localization
-     await i18nInit();
+     await initEditorTranslations();
 
     // create root element and render
     const root = createRoot(document.getElementById('root')!);

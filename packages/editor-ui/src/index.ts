@@ -17,4 +17,5 @@ export * from './dialogs';
 export * from './commands';
 export * from './menu';
 export * from './store';
+export * from './i18n';
 

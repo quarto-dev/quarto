@@ -1,5 +1,5 @@
 /*
- * i18n.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -14,28 +14,32 @@
  */
 
 import i18n, { TFunction } from 'i18next';
-import Backend from 'i18next-http-backend';
-import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-export async function i18nInit(): Promise<TFunction> {
+import enCommands from "./locales/en/commands.json";
+import enTranslations from "./locales/en/translations.json";
+
+export async function initEditorTranslations(): Promise<TFunction> {
   t = await i18n
-    .use(Backend)
-    .use(LanguageDetector)
     .use(initReactI18next)
     .init({
       fallbackLng: 'en',
       debug: false,
       ns: ['translations', 'commands'],
       defaultNS: 'translations',
-      backend: {
-        loadPath: '/locales/en/{{ns}}.json',
+      resources: {
+        en: {
+          commands: enCommands,
+          translations: enTranslations
+        }
       },
       keySeparator: false,
       interpolation: {
         escapeValue: false,
       },
     });
+  
+  
 
   return t;
 }

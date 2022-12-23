@@ -35,9 +35,11 @@ import {
   jsonRpcPostMessageRequestTransport
 } from "core";
 
-import { defaultEditorServerOptions, editorServerMethods } from "editor-server";
+import { appConfigDir } from "core-node";
 
-import { QuartoContext } from "quarto-core";
+import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from "editor-server";
+
+import { QuartoContext, userDictionaryDir } from "quarto-core";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorClient(webviewPanel: WebviewPanel) 
@@ -66,15 +68,23 @@ export function visualEditorServer(
   host: VSCodeVisualEditorHost
 ) : Disposable {
   
+  const resourcesDir = context.asAbsolutePath(path.join("assets", "editor", "resources"));
+
   const options = defaultEditorServerOptions(
-    context.asAbsolutePath(path.join("assets", "editor", "resources")),
+    resourcesDir,
     quartoContext.pandocPath
   );
+
+  const dictionary = {
+    dictionariesDir: path.join(resourcesDir, "dictionaries"),
+    userDictionaryDir: userDictionaryDir()
+  };
   
   const target = webviewPanelPostMessageTarget(webviewPanel);
 
   const stopServer = jsonRpcPostMessageServer(target, {
     ...editorServerMethods(options),
+    ...editorServicesMethods({ dictionary }),
     ...editorHostMethods(host)
   });
   return {

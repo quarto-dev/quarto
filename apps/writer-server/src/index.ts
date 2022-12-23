@@ -25,12 +25,9 @@ const development = process.env.NODE_ENV !== 'production';
 const cwd = process.cwd();
 const editorDevResourcesDir = path.normalize(path.join(cwd, "../../packages/editor-server/src/resources"));
 const editorResourcesDir = development ? editorDevResourcesDir : editorDevResourcesDir;
-const devResourcesDir = path.normalize(path.join(cwd, "src", "resources"));
-const resourcesDir = development ? devResourcesDir : devResourcesDir;
-
 
 // configure server
-const server = createServer(resourcesDir, editorResourcesDir);
+const server = createServer(editorResourcesDir);
 
 // listen
 const port = process.env.PORT || 5001;

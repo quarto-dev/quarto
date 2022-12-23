@@ -80,7 +80,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
 }
 
 
-function editorMath(server: MathServer): EditorMath {
+export function editorMath(server: MathServer): EditorMath {
 
   const mathQueue = new PromiseQueue<MathjaxTypesetResult>();
 

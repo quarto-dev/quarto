@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * dictionaries.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,9 @@
  *
  */
 
-export * from './context';
-export * from './metadata';
-export * from './appdirs';
-export * from './markdownit';
-export * from './storage';
-export * from './dictionaries';
+import { appConfigDir } from "core-node";
+
+export function userDictionaryDir() {
+  return appConfigDir("quarto-writer", "user-dictionary")
+}
+

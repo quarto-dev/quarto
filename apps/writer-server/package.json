@@ -17,6 +17,7 @@
     "express": "^4.17.1",
     "jayson": "^4.0.0",
     "morgan": "^1.10.0",
+    "quarto-core": "*",
     "tmp": "^0.2.1"
   },
   "devDependencies": {

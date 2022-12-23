@@ -24,21 +24,20 @@ import cors from "cors";
 
 import jayson from 'jayson'
 
-import { appConfigDir, jaysonServerMethods } from 'core-node';
+import { jaysonServerMethods } from 'core-node';
 
 import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from 'editor-server';
+import { userDictionaryDir } from 'quarto-core';
 
 // constants
 const kPayloadLimitMb = 100;
 const kWriterJsonRpcPath = "/rpc";
 
-export function createServer(resourcesDir: string, editorResourcesDir: string) {
-
-  const userDictionaryDir = appConfigDir("quarto-writer", "user-dictionary");
+export function createServer(editorResourcesDir: string) {
 
   const dictionaryOptions = {
-    dictionariesDir: path.join(resourcesDir, "dictionaries"),
-    userDictionaryDir
+    dictionariesDir: path.join(editorResourcesDir, "dictionaries"),
+    userDictionaryDir: userDictionaryDir()
   };
 
   const writerRpcServer = jayson.Server(jaysonServerMethods({

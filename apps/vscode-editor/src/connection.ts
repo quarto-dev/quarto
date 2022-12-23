@@ -33,14 +33,16 @@ import {
   VSC_VEH_OnEditorReady, 
   VSC_VE_Init, 
   VSCodeVisualEditor, 
-  VSCodeVisualEditorHost 
+  VSCodeVisualEditorHost, 
+  EditorServices
 } from "editor-types";
 
-import { editorJsonRpcServer, EditorServer } from "editor";
+import { editorJsonRpcServer, editorJsonRpcServices, EditorServer } from "editor";
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
   vscode: WebviewApi<unknown>;
   server: EditorServer;
+  services: EditorServices;
 }
 
 // interface to visual editor host (vs code extension)
@@ -50,6 +52,7 @@ export function visualEditorHostClient(vscode: WebviewApi<unknown>) : VisualEdit
   return {
     vscode,
     server: editorJsonRpcServer(request),
+    services: editorJsonRpcServices(request),
     ...editorJsonRpcContainer(request)
   }
 }

@@ -30,7 +30,7 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
   }
 
   // create context
-  const context = editorContext(host.server, hooks);
+  const context = editorContext(host.server, host.services, hooks);
 
   Editor.create(parent, context, quartoEditorFormat()).then(async (editor) => {
     

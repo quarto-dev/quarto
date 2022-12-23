@@ -23,21 +23,26 @@ import {
   SkinTone, 
   XRef, 
   EditorHooks,
-  EditorServer
+  EditorServer,
+  EditorServices
 } from "editor";
 
 import { codeMirrorExtension } from "editor-codemirror";
 
-import { editorDialogs } from "editor-ui";
+import { editorDialogs, editorMath } from "editor-ui";
 
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorContext(server: EditorServer, hooks?: EditorHooks) {
+export function editorContext(
+  server: EditorServer, 
+  services: EditorServices,
+  hooks?: EditorHooks
+) {
 
   const uiTools = new UITools();
   const ui = {
     dialogs: editorDialogs(uiTools.attr),
     display: editorDisplay(),
+    math: editorMath(services.math),
     context: editorUIContext(),
     prefs: editorPrefs(),
     images: uiTools.context.defaultUIImages()

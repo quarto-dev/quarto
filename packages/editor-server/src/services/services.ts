@@ -21,6 +21,16 @@ import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } fr
 import { JsonRpcServerMethod } from 'core';
 import { prefsServer, prefsServerMethods } from "./prefs";
 
+export {
+  mathServer, 
+  mathServerMethods, 
+  dictionaryServer, 
+  dictionaryServerMethods,
+  prefsServer,
+  prefsServerMethods
+};
+export type { DictionaryServerOptions };
+
 export interface EditorServicesOptions {
   dictionary: DictionaryServerOptions;
 }

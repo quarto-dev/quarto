@@ -13,6 +13,7 @@
   "dependencies": {
     "core": "*",
     "core-node": "*",
+    "editor-server": "*",
     "file-url": "^4.0.0",
     "js-yaml": "^4.1.0",
     "markdown-it": "^12.3.2",

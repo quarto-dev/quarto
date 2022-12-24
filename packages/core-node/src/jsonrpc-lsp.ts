@@ -16,21 +16,23 @@
 
 import { asJsonRpcError, JsonRpcRequestTransport, JsonRpcServerMethod } from "core";
 
-import { Connection, ResponseError } from "vscode-languageserver/node";
+import { ResponseError } from "vscode-languageserver";
 
 import { LanguageClient} from "vscode-languageclient/node";
 
+
+export interface LspConnection {
+  onRequest: (method: string, handler: (params: unknown[]) => Promise<unknown>) => void;
+}
+
 export function registerLspServerMethods(
-  connection: Connection, 
+  connection: LspConnection,
   methods: Record<string,JsonRpcServerMethod>
 ) {
   Object.keys(methods).forEach(methodName => {
     const method = methods[methodName];
-    connection.onRequest(methodName, (params) => {
-      method(params)
-        .then(value => {
-          return Promise.resolve(value);
-        })
+    connection.onRequest(methodName, async (params: unknown[]) => {
+      return method(params)
         .catch(error => {
           return Promise.reject(asResponseError(error));
         })
@@ -39,8 +41,7 @@ export function registerLspServerMethods(
 }
 
 export function lspClientTransport(client: LanguageClient) : JsonRpcRequestTransport {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (method: string, params: unknown[] | undefined) : Promise<any> => {
+  return async (method: string, params: unknown[] | undefined) : Promise<unknown> => {
     return client.sendRequest(method, params)
       .catch(error => {
         return Promise.reject(asJsonRpcError(error));

@@ -37,6 +37,7 @@ import { provideDiagnostics } from "./providers/diagnostics";
 
 import { initializeQuarto } from "./quarto/quarto";
 import { mathjaxLoadExtensions } from "./core/mathjax";
+import { registerCustomMethods } from "./custom";
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
@@ -157,9 +158,16 @@ function sendDiagnostics(doc: TextDocument, diagnostics: Diagnostic[]) {
   });
 }
 
+// register custom methods
+registerCustomMethods({
+  onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
+    return connection.onRequest(method, handler);
+  }
+});
+
 // ensure that the deno runtime won't exit b/c of the event queue being empty
 setInterval(() => { /* */ }, 1000);
 
-// listen
+// listen 
 documents.listen(connection);
 connection.listen();

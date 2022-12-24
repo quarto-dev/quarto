@@ -13,18 +13,18 @@
  *
  */
 
- 
-export type { EditorServerOptions } from './server/server';
-export type { PubMedServerOptions } from './server/pubmed';
-export type { CrossrefServerOptions } from './server/crossref';
 
-export { 
-  editorServer, 
-  editorServerMethods,
-  defaultEditorServerOptions 
-} from './server/server';
+import { mathServerMethods } from "editor-server"
 
-export * from './services/services';
+import { LspConnection, registerLspServerMethods } from "core-node";
 
 
+export function registerCustomMethods(connection: LspConnection) {
 
+  const methods = {
+    ...mathServerMethods()
+  };
+
+  registerLspServerMethods(connection, methods);
+
+}

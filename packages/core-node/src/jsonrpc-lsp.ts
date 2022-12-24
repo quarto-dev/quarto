@@ -16,8 +16,6 @@
 
 import { asJsonRpcError, JsonRpcRequestTransport, JsonRpcServerMethod } from "core";
 
-import { ResponseError } from "vscode-languageserver";
-
 import { LanguageClient} from "vscode-languageclient/node";
 
 
@@ -33,12 +31,19 @@ export function registerLspServerMethods(
     const method = methods[methodName];
     connection.onRequest(methodName, async (params: unknown[]) => {
       return method(params)
-        .then(value => {
-          return Promise.resolve({ result: value });
-        })
         .catch(error => {
-          const respError = asResponseError(error);
-          return Promise.resolve({ error: respError });
+          // our specific jsonrpc error code and data field are going to get lost 
+          // by the request handling supervisor so we pack the data (if any)
+          // into the message. note that 'data' with just a string uses a 
+          // 'description' field by convention which we take advantage of here
+          const jrpcError = asJsonRpcError(error);
+          const message = jrpcError.message + 
+            (jrpcError.data
+              ? typeof(jrpcError.data?.description) === "string"
+                ? ` (${jrpcError.data?.description})`
+                : ` (${JSON.stringify(jrpcError.data)})`
+              : "");
+          return Promise.reject(new Error(message));
         })
     });
   });
@@ -47,22 +52,10 @@ export function registerLspServerMethods(
 export function lspClientTransport(client: LanguageClient) : JsonRpcRequestTransport {
   return async (method: string, params: unknown[] | undefined) : Promise<unknown> => {
     return client.sendRequest<{ result?: unknown, error?: Error }>(method, params)
-      .then(response => {
-        if (response.error) {
-          return Promise.reject(response.error);
-        } else {
-          return Promise.resolve(response.result);
-        }
-      })
       .catch(error => {
         return Promise.reject(asJsonRpcError(error));
       })
   };
 }
 
-
-function asResponseError(error: unknown) {
-  const jrpcError = asJsonRpcError(error);
-  return new ResponseError(jrpcError.code, jrpcError.message, jrpcError.data).toJson();
-}
 

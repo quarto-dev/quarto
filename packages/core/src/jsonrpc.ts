@@ -28,10 +28,10 @@ export const kJsonRpcInternalError = -32603;
 export interface JsonRpcError {
   code: number;
   message: string;
-  data?: object;
+  data?: Record<string,unknown>;
 }
 
-export function jsonRpcError(message: string, data?: string | object, code?: number) : JsonRpcError {
+export function jsonRpcError(message: string, data?: string | Record<string,unknown>, code?: number) : JsonRpcError {
   if (typeof(data) === "string") {
     data = { description: data };
   } 
@@ -48,7 +48,7 @@ export function asJsonRpcError(error: unknown) {
     if (typeof(err.message) === "string") {
       return jsonRpcError(
         err.message, 
-        err.data as string | object | undefined, 
+        err.data as string | Record<string,unknown> | undefined, 
         err.code as number | undefined)
       ;
     }

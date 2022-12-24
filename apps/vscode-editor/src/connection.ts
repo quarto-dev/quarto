@@ -88,9 +88,6 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCo
 
 }
 
-
-
-
 function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisualEditorHost {
   return {
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),

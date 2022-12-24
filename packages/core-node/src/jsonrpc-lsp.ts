@@ -33,8 +33,12 @@ export function registerLspServerMethods(
     const method = methods[methodName];
     connection.onRequest(methodName, async (params: unknown[]) => {
       return method(params)
+        .then(value => {
+          return Promise.resolve({ result: value });
+        })
         .catch(error => {
-          return Promise.reject(asResponseError(error));
+          const respError = asResponseError(error);
+          return Promise.resolve({ error: respError });
         })
     });
   });
@@ -42,7 +46,14 @@ export function registerLspServerMethods(
 
 export function lspClientTransport(client: LanguageClient) : JsonRpcRequestTransport {
   return async (method: string, params: unknown[] | undefined) : Promise<unknown> => {
-    return client.sendRequest(method, params)
+    return client.sendRequest<{ result?: unknown, error?: Error }>(method, params)
+      .then(response => {
+        if (response.error) {
+          return Promise.reject(response.error);
+        } else {
+          return Promise.resolve(response.result);
+        }
+      })
       .catch(error => {
         return Promise.reject(asJsonRpcError(error));
       })
@@ -52,6 +63,6 @@ export function lspClientTransport(client: LanguageClient) : JsonRpcRequestTrans
 
 function asResponseError(error: unknown) {
   const jrpcError = asJsonRpcError(error);
-  return new ResponseError(jrpcError.code, jrpcError.message, jrpcError.data);
+  return new ResponseError(jrpcError.code, jrpcError.message, jrpcError.data).toJson();
 }
 

@@ -973,6 +973,7 @@
     "axios": "^1.2.1",
     "core": "*",
     "core-node": "*",
+    "editor-core": "*",
     "editor-server": "*",
     "editor-types": "*",
     "highlight.js": "^11.7.0",

@@ -47,6 +47,7 @@ import {
   ProvideCompletionItemsSignature,
   ProvideHoverSignature,
   ProvideSignatureHelpSignature,
+  State,
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import { virtualDoc, virtualDocUri } from "../vdoc/vdoc";
@@ -54,6 +55,8 @@ import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { deactivateVirtualDocTempFiles } from "../vdoc/vdoc-tempfile";
 import { imageHover } from "../providers/hover-image";
 import { EmbeddedLanguage } from "../vdoc/languages";
+import { lspClientTransport } from "core-node";
+import { editorMathJsonRpcServer } from "editor-core";
 
 let client: LanguageClient;
 
@@ -115,6 +118,24 @@ export async function activateLsp(
     serverOptions,
     clientOptions
   );
+
+  // custom method transport
+  const lspRequest = lspClientTransport(client);
+  const math = editorMathJsonRpcServer(lspRequest);
+  client.onDidChangeState(async (e) => {
+    if (e.newState === State.Running) {
+      try {
+        await math.mathjaxTypeset("x + 1", {
+          format: "svg",
+          theme: "light",
+          scale: 1.0,
+          extensions: []
+        });;
+      } catch(error) {
+        console.log(error);
+      }
+    }
+  });
 
   // Start the client. This will also launch the server
   client.start();

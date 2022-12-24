@@ -130,7 +130,7 @@ export async function activateLsp(
           theme: "light",
           scale: 1.0,
           extensions: []
-        });;
+        });
       } catch(error) {
         console.log(error);
       }

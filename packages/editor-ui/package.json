@@ -12,6 +12,7 @@
     "@blueprintjs/select": "^4.8.11",
     "@types/yup": "^0.32.0",
     "core": "*",
+    "editor-core": "*",
     "editor-types": "*",
     "formik": "^2.2.9",
     "i18next": "^22.4.6",

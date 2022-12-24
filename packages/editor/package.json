@@ -11,6 +11,7 @@
     "core": "*",
     "core-browser": "*",
     "diff-match-patch": "^1.0.5",
+    "editor-core": "*",
     "editor-types": "*",
     "fuse.js": "^6.4.6",
     "jayson": "^4.0.0",

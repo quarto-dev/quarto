@@ -35,8 +35,6 @@ import {
   jsonRpcPostMessageRequestTransport
 } from "core";
 
-import { appConfigDir } from "core-node";
-
 import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from "editor-server";
 
 import { QuartoContext, userDictionaryDir } from "quarto-core";

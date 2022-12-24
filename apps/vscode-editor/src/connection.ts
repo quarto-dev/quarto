@@ -34,10 +34,11 @@ import {
   VSC_VE_Init, 
   VSCodeVisualEditor, 
   VSCodeVisualEditorHost, 
+  EditorServer,
   EditorServices
 } from "editor-types";
 
-import { editorJsonRpcServer, editorJsonRpcServices, EditorServer } from "editor";
+import { editorJsonRpcServer, editorJsonRpcServices } from "editor-core";
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
   vscode: WebviewApi<unknown>;

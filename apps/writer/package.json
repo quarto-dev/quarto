@@ -22,6 +22,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
+    "editor-core": "*",
     "editor-types": "*",
     "editor-ui": "*",
     "formik": "^2.2.9",

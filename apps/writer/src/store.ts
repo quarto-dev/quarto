@@ -17,7 +17,7 @@ import { configureStore } from '@reduxjs/toolkit'
 
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { editorJsonRpcServices } from 'editor';
+import { editorJsonRpcServices } from 'editor-core';
 
 import { 
   prefsApi,

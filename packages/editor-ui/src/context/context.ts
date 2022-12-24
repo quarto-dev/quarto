@@ -26,6 +26,11 @@ import {
 } from 'editor-types';
 
 import {
+  editorJsonRpcServer,
+  editorJsonRpcServices
+} from 'editor-core'
+
+import {
   EditorContext,
   EditorMath,
   EditorUIContext,
@@ -33,8 +38,6 @@ import {
   ListSpacing,
   SkinTone,
   UITools,
-  editorJsonRpcServer,
-  editorJsonRpcServices,
   EditorDisplay
 } from "editor";
 

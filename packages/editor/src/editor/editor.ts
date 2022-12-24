@@ -129,8 +129,6 @@ import './styles/frame.css';
 import './styles/styles.css';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { EditorServer, EditingOutlineLocation, EditorOutline  } from 'editor-types';
-import { editorJsonRpcServer } from './editor-server';
-import { editorJsonRpcServices } from './editor-services';
 import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/extension-types';
 import { editingRootNodeClosestToPos } from '../api/node';
@@ -139,9 +137,6 @@ import { viewHasFocus } from '../api/view';
 
 // re-export editor ui
 export * from '../api/ui-types';
-
-// re-export json-rpc server and services
-export { editorJsonRpcServer, editorJsonRpcServices };
 
 export interface EditorCode {
   code: string;

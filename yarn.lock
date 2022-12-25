@@ -4841,7 +4841,7 @@ markdown-it@^13.0.1:
     mdurl "^1.0.1"
     uc.micro "^1.0.5"
 
-mathjax-full@^3.2.0, mathjax-full@^3.2.2:
+mathjax-full@^3.2.2:
   version "3.2.2"
   resolved "https://registry.npmjs.org/mathjax-full/-/mathjax-full-3.2.2.tgz"
   integrity sha512-+LfG9Fik+OuI8SLwsiR02IVdjcnRCy5MufYLi0C3TdMT56L/pjB0alMVGgoWJF8pN9Rc7FESycZB9BMNWIid5w==

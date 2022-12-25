@@ -29,88 +29,52 @@ import type { LiteDocument } from "mathjax-full/js/adaptors/lite/Document.js";
 import type { LiteText } from "mathjax-full/js/adaptors/lite/Text.js";
 import "mathjax-full/js/input/tex/AllPackages.js";
 
-type SupportedExtension =
-    | "action"
-    | "ams"
-    | "amscd"
-    | "autoload"
-    | "base"
-    | "bbox"
-    | "boldsymbol"
-    | "braket"
-    | "bussproofs"
-    | "cancel"
-    | "cases"
-    | "centernot"
-    | "color"
-    | "colortbl"
-    | "colorv2"
-    | "configmacros"
-    | "empheq"
-    | "enclose"
-    | "extpfeil"
-    | "gensymb"
-    | "html"
-    | "mathtools"
-    | "mhchem"
-    | "newcommand"
-    | "noerrors"
-    | "noundefined"
-    | "physics"
-    | "require"
-    | "setoptions"
-    | "tagformat"
-    | "textcomp"
-    | "textmacros"
-    | "unicode"
-    | "upgreek"
-    | "verb";
 
-  type TexOption = {
-    packages?: readonly SupportedExtension[];
-    inlineMath?: readonly [string, string][];
-    displayMath?: readonly [string, string][];
-    processEscapes?: boolean;
-    processEnvironments?: boolean;
-    processRefs?: boolean;
-    digits?: RegExp;
-    tags?: "all" | "ams" | "none";
-    tagSide?: "right" | "left";
-    tagIndent?: string;
-    useLabelIds?: boolean;
-    maxMacros?: number;
-    maxBuffer?: number;
-    baseURL?: string;
-    formatError?: (
-      jax: TeX<LiteElement, LiteText, LiteDocument>,
-      message: TexError
-    ) => unknown;
-  };
+type TexOption = {
+  packages?: readonly MathjaxSupportedExtension[];
+  inlineMath?: readonly [string, string][];
+  displayMath?: readonly [string, string][];
+  processEscapes?: boolean;
+  processEnvironments?: boolean;
+  processRefs?: boolean;
+  digits?: RegExp;
+  tags?: "all" | "ams" | "none";
+  tagSide?: "right" | "left";
+  tagIndent?: string;
+  useLabelIds?: boolean;
+  maxMacros?: number;
+  maxBuffer?: number;
+  baseURL?: string;
+  formatError?: (
+    jax: TeX<LiteElement, LiteText, LiteDocument>,
+    message: TexError
+  ) => unknown;
+};
 
- type SvgOption = {
-    scale?: number;
-    minScale?: number;
-    mtextInheritFont?: boolean;
-    merrorInheritFont?: boolean;
-    mathmlSpacing?: boolean;
-    skipAttributes?: { [attrname: string]: boolean };
-    exFactor?: number;
-    displayAlign?: "left" | "center" | "right";
-    displayIndent?: number;
-    fontCache?: "local" | "global" | "none";
-    internalSpeechTitles?: boolean;
-  };
+type SvgOption = {
+  scale?: number;
+  minScale?: number;
+  mtextInheritFont?: boolean;
+  merrorInheritFont?: boolean;
+  mathmlSpacing?: boolean;
+  skipAttributes?: { [attrname: string]: boolean };
+  exFactor?: number;
+  displayAlign?: "left" | "center" | "right";
+  displayIndent?: number;
+  fontCache?: "local" | "global" | "none";
+  internalSpeechTitles?: boolean;
+};
 
  type ConvertOption = {
-    display?: boolean;
-    em?: number;
-    ex?: number;
-    containerWidth?: number;
-    lineWidth?: number;
-    scale?: number;
-  };
+  display?: boolean;
+  em?: number;
+  ex?: number;
+  containerWidth?: number;
+  lineWidth?: number;
+  scale?: number;
+};
 
-import { MathjaxTypesetOptions, MathjaxTypesetResult } from "editor-types";
+import { MathjaxSupportedExtension, MathjaxTypesetOptions, MathjaxTypesetResult } from "editor-types";
 import TexError from "mathjax-full/js/input/tex/TexError";
 
 export function mathjaxTypeset(tex: string, options: MathjaxTypesetOptions): MathjaxTypesetResult {
@@ -139,6 +103,12 @@ export function mathjaxTypeset(tex: string, options: MathjaxTypesetOptions): Mat
     return { error: message };
   }
 }
+
+export function mathjaxLoadedExtensions(extensionConfig: MathjaxSupportedExtension[]) {
+  ensureExtensionsLoaded(extensionConfig);
+  return loadedExtensions;
+}
+
 
 function typesetToSvg(
   arg: string,
@@ -181,7 +151,7 @@ function svgToDataUrl(xml: string): string {
 }
 
 
-const baseExtensions: SupportedExtension[] = [
+const baseExtensions: MathjaxSupportedExtension[] = [
   "ams",
   "base",
   "color",
@@ -225,7 +195,7 @@ let html = createHtmlConverter(loadedExtensions);
 function ensureExtensionsLoaded(extensions: string[]) {
   // if the extension list doesn't match exactly then reload it
   const targetExtensions = baseExtensions.concat(
-    extensions.filter((ex) => supportedExtensionList.includes(ex)) as SupportedExtension[]
+    extensions.filter((ex) => supportedExtensionList.includes(ex)) as MathjaxSupportedExtension[]
   );
   if (targetExtensions.length !== loadedExtensions.length ||
       !targetExtensions.every((v, i) => v === loadedExtensions[i])) {
@@ -234,7 +204,7 @@ function ensureExtensionsLoaded(extensions: string[]) {
   }
 }
 
-function createHtmlConverter(extensions: SupportedExtension[]) {
+function createHtmlConverter(extensions: MathjaxSupportedExtension[]) {
   const baseTexOption: TexOption = {
     packages: extensions,
     formatError: (_jax, error) => {

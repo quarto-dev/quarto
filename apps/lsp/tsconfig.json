@@ -4,9 +4,6 @@
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": "./src",
-    "paths": {
-      "mathjax-full": ["./types/mathjax-full"]
-    },
     "sourceMap": true,
     "resolveJsonModule": true,
   },

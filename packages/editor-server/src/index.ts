@@ -26,5 +26,7 @@ export {
 
 export * from './services/services';
 
+export * from './mathjax';
+
 
 

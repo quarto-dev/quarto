@@ -13,14 +13,14 @@
  *
  */
 
-import type { SupportedExtension } from "mathjax-full";
+import type { MathjaxSupportedExtension } from "editor-types";
 
 export class ExtensionConfig {
   public quartoPath(): string {
     return this.quartoPath_;
   }
 
-  public mathJaxExtensions(): SupportedExtension[] {
+  public mathJaxExtensions(): MathjaxSupportedExtension[] {
     return this.mathJaxExtensions_;
   }
 
@@ -42,7 +42,7 @@ export class ExtensionConfig {
   }
 
   private quartoPath_ = "";
-  private mathJaxExtensions_: SupportedExtension[] = [];
+  private mathJaxExtensions_: MathjaxSupportedExtension[] = [];
   private mathJaxScale_ = 1;
   private mathJaxTheme_: "light" | "dark" = "dark";
 }

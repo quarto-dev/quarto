@@ -36,7 +36,6 @@ import { kSignatureCapabilities, onSignatureHelp } from "./providers/signature";
 import { provideDiagnostics } from "./providers/diagnostics";
 
 import { initializeQuarto } from "./quarto/quarto";
-import { mathjaxLoadExtensions } from "./core/mathjax";
 import { registerCustomMethods } from "./custom";
 
 // Create a simple text document manager. The text document manager
@@ -85,7 +84,6 @@ connection.onInitialized(async () => {
         section: "quarto",
       });
       config.update(configuration);
-      mathjaxLoadExtensions();
     };
     await syncConfiguration();
 

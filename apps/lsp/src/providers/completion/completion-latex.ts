@@ -28,6 +28,8 @@ import {
 
 import { isLatexPosition } from "../../core/markdown";
 
+import { config } from "../../core/config";
+
 interface LatexCommand {
   command: string;
   snippet?: string;
@@ -38,7 +40,8 @@ import mathjaxImport from "./mathjax.json";
 const kMathjaxCommands = mathjaxImport as Record<string, string[]>;
 
 import mathjaxCompletions from "./mathjax-completions.json";
-import { mathjaxLoadedExtensions } from "../../core/mathjax";
+import { mathjaxLoadedExtensions } from "editor-server";
+import { MathjaxSupportedExtension } from "editor-types";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;
 for (const key of Object.keys(kMathjaxCompletions)) {
   if (key.match(/\{.*?\}/)) {
@@ -75,7 +78,7 @@ export async function latexCompletions(
   const backslashPos = text.lastIndexOf("\\");
   const spacePos = text.lastIndexOf(" ");
   if (backslashPos !== -1 && backslashPos > spacePos) {
-    const loadedExtensions = mathjaxLoadedExtensions();
+    const loadedExtensions = mathjaxLoadedExtensions(config.mathJaxExtensions());
     const token = text.slice(backslashPos + 1);
     const completions: CompletionItem[] = Object.keys(kMathjaxCommands)
       .filter((cmdName) => {
@@ -84,7 +87,7 @@ export async function latexCompletions(
           const pkgs = kMathjaxCommands[cmdName];
           return (
             pkgs.length === 0 ||
-            pkgs.some((pkg) => loadedExtensions.includes(pkg))
+            pkgs.some((pkg) => loadedExtensions.includes(pkg as MathjaxSupportedExtension))
           );
         } else {
           return false;

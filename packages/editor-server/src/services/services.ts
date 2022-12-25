@@ -16,7 +16,7 @@
 
 import { EditorServices } from "editor-types";
 
-import { mathServer, mathServerMethods } from "./math/math";
+import { mathServer, mathServerMethods } from "./math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
 import { JsonRpcServerMethod } from 'core';
 import { prefsServer, prefsServerMethods } from "./prefs";

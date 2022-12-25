@@ -14,11 +14,15 @@
  *
  */
 
-import { Hover, Position } from "vscode-languageserver/node";
+import { Hover, MarkupContent, MarkupKind, Position } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
+import { MathjaxTypesetOptions } from "editor-types";
+import { mathjaxTypeset } from "editor-server";
+
+import { config } from "../../core/config";
 import { mathRange } from "../../core/markdown";
-import { mathjaxTypesetToMarkdown } from "../../core/mathjax";
+
 
 export function mathHover(doc: TextDocument, pos: Position): Hover | null {
   const range = mathRange(doc, pos);
@@ -69,3 +73,25 @@ function stripComments(text: string): string {
   const reg = /(^|[^\\]|(?:(?<!\\)(?:\\\\)+))%.*$/gm;
   return text.replace(reg, "$1");
 }
+
+function mathjaxTypesetToMarkdown(tex: string) :  MarkupContent | null  {
+  const options: MathjaxTypesetOptions = {
+    format: "data-uri",
+    theme: config.mathJaxTheme(),
+    scale: config.mathJaxScale(),
+    extensions: config.mathJaxExtensions()
+  }
+  const result = mathjaxTypeset(tex, options);
+  if (result.math) {
+    return {
+      kind: MarkupKind.Markdown,
+      value: `![equation](${result.math})`,
+    };
+  } else {
+    return {
+      kind: MarkupKind.Markdown,
+      value: `**LaTeX Error**:\n" + ${result.error || "Unknown error"}`,
+    };
+  }
+}
+

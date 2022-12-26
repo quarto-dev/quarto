@@ -63,7 +63,10 @@ export async function activate(context: vscode.ExtensionContext) {
     await activateLuaTypes(context, quartoContext);
 
     // lsp
-    activateLsp(context, engine);
+    const lspClient = await activateLsp(context, engine);
+
+    // provide visual editor
+    activateEditor(context, quartoContext, lspClient);
 
     // assist panel
     const assistCommands = activateQuartoAssistPanel(context, engine);
@@ -76,9 +79,6 @@ export async function activate(context: vscode.ExtensionContext) {
   // provide preview
   const previewCommands = activatePreview(context, quartoContext, engine);
   commands.push(...previewCommands);
-
-  // provide visual editor
-  activateEditor(context, quartoContext);
 
   // provide create
   const createCommands = await activateCreate(context, quartoContext);

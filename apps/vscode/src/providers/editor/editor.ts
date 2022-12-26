@@ -26,6 +26,8 @@ import {
   Webview
 } from "vscode";
 
+import { LanguageClient } from "vscode-languageclient/node";
+
 import { QuartoContext } from "quarto-core";
 
 import { VSCodeVisualEditorHost } from "editor-types";
@@ -37,14 +39,19 @@ import { editorSyncManager } from "./sync";
 
 export function activateEditor(
   context: ExtensionContext,
-  quartoContext: QuartoContext
+  quartoContext: QuartoContext,
+  lspClient: LanguageClient
 ) {
-  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext));
+  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient));
 }
 
 class VisualEditorProvider implements CustomTextEditorProvider {
-  public static register(context: ExtensionContext, quartoContext: QuartoContext): Disposable {
-    const provider = new VisualEditorProvider(context, quartoContext);
+  public static register(
+    context: ExtensionContext, 
+    quartoContext: QuartoContext, 
+    lspClient: LanguageClient
+  ) : Disposable {
+    const provider = new VisualEditorProvider(context, quartoContext, lspClient);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -60,7 +67,8 @@ class VisualEditorProvider implements CustomTextEditorProvider {
   private static readonly viewType = "quarto.visualEditor";
 
   constructor(private readonly context: ExtensionContext,
-              private readonly quartoContext: QuartoContext) {}
+              private readonly quartoContext: QuartoContext,
+              private readonly lspClient: LanguageClient) {}
 
  
   public async resolveCustomTextEditor(
@@ -125,6 +133,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       this.context, 
       this.quartoContext,
       webviewPanel,
+      this.lspClient,
       host
     ));
 

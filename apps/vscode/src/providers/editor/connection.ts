@@ -17,6 +17,9 @@ import * as path from "path";
 
 import { Disposable, ExtensionContext, WebviewPanel } from "vscode";
 
+
+import { LanguageClient } from "vscode-languageclient/node";
+
 import { 
   VSC_VE_Init,
   VSC_VE_GetMarkdown, 
@@ -35,9 +38,17 @@ import {
   jsonRpcPostMessageRequestTransport
 } from "core";
 
-import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from "editor-server";
+
+import { lspClientTransport } from "core-node";
 
 import { QuartoContext, userDictionaryDir } from "quarto-core";
+
+import { 
+  defaultEditorServerOptions, 
+  dictionaryServerMethods, 
+  editorServerMethods,
+  prefsServerMethods 
+} from "editor-server";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorClient(webviewPanel: WebviewPanel) 
@@ -63,6 +74,7 @@ export function visualEditorServer(
   context: ExtensionContext, 
   quartoContext: QuartoContext,
   webviewPanel: WebviewPanel,
+  lspClient: LanguageClient,
   host: VSCodeVisualEditorHost
 ) : Disposable {
   
@@ -78,13 +90,27 @@ export function visualEditorServer(
     userDictionaryDir: userDictionaryDir()
   };
   
-  const target = webviewPanelPostMessageTarget(webviewPanel);
-
-  const stopServer = jsonRpcPostMessageServer(target, {
+  // table of methods we implement directly
+  const extensionMethods = {
     ...editorServerMethods(options),
-    ...editorServicesMethods({ dictionary }),
+    ...dictionaryServerMethods(dictionary),
+    ...prefsServerMethods(),
     ...editorHostMethods(host)
-  });
+  };
+
+  // proxy unknown methods to the lsp
+  const lspRequest = lspClientTransport(lspClient);
+  const methods = (name: string) => {
+    if (extensionMethods[name]) {
+      return extensionMethods[name];
+    } else {
+      return (params: unknown[]) => lspRequest(name, params);
+    }
+  };
+
+  // create server
+  const target = webviewPanelPostMessageTarget(webviewPanel);
+  const stopServer = jsonRpcPostMessageServer(target, methods);
   return {
     dispose: stopServer
   };

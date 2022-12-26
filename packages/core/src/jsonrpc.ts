@@ -112,17 +112,23 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
 
 export function jsonRpcPostMessageServer(
   target: JsonRpcPostMessageTarget, 
-  methods: Record<string,JsonRpcServerMethod>
+  methods: Record<string,JsonRpcServerMethod> | ((name: string) => JsonRpcServerMethod  | undefined)
 ) {
+  // method lookup function
+  const lookupMethod = typeof(methods) === "function" 
+    ? methods
+    : (name: string) => methods[name];
+  
   // listen for messages
   return target.onMessage(data => {
     const request = asJsonRpcRequest(data);
     if (request) {
 
       // lookup method
-      const method = methods[request.method];
+      const method = lookupMethod(request.method);
       if (!method) {
         target.postMessage(methodNotFoundResponse(request));
+        return;
       }
       
       // dispatch method

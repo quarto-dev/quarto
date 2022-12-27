@@ -28,8 +28,6 @@ import {
 
 import { LanguageClient } from "vscode-languageclient/node";
 
-import { QuartoContext } from "quarto-core";
-
 import { VSCodeVisualEditorHost } from "editor-types";
 
 import { getNonce } from "../../core/nonce";

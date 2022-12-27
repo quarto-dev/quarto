@@ -1,5 +1,5 @@
 /*
- * EditorPane.tsx
+ * Editor.module.scss
  *
  * Copyright (C) 2019-20 by RStudio, PBC
  *
@@ -13,25 +13,13 @@
  *
  */
 
-import React from 'react';
+ @import 'editor-ui/src/theme.scss';
 
-import { Pane } from 'editor-ui';
-
-import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
-import EditorFind from './EditorFind';
-import Editor from './Editor';
-
-import styles from './EditorPane.module.scss';
-
-const EditorPane : React.FC = () => {
-  return (
-    <Pane className={'editor-pane'}>
-      <Editor className={styles.editorParent}>
-        <EditorOutlineSidebar />
-        <EditorFind />
-      </Editor>
-    </Pane>
-  );
+.editorLoading {
+  background-color: $editorBackgroundColor;
 }
 
-export default EditorPane;
+.editorLoadingSpinner {
+  margin-top: 200px;
+}
+

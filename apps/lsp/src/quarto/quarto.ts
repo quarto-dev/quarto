@@ -16,7 +16,7 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Position, Range, CompletionItem } from "vscode-languageserver-types";
 
-import { initQuartoContext } from "quarto-core";
+import { QuartoContext } from "quarto-core";
 
 import {
   filePathForDoc,
@@ -136,11 +136,7 @@ export interface Quarto {
 
 export let quarto: Quarto | undefined;
 
-export function initializeQuarto(
-  quartoPath?: string,
-  workspaceFolder?: string
-) {
-  const quartoContext = initQuartoContext(quartoPath, workspaceFolder);
+export function initializeQuarto(quartoContext: QuartoContext) {
   initializeQuartoYamlModule(quartoContext.resourcePath)
     .then((mod) => {
       const quartoModule = mod as QuartoYamlModule;

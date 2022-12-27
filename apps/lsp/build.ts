@@ -22,9 +22,8 @@ const dev = args[2] === "dev";
 runBuild({
   entryPoints: ['./src/server.ts'],
   outfile: './dist/lsp.js',
-  assets: [{
-    from: ['./dist/lsp.js*'],
-    to: ['../vscode/out'],
-  }],
+  assets: [
+    { from: ['../../packages/editor-server/src/resources/**'], to: './dist/resources/' },
+    { from: ['./dist/**'], to: ['../vscode/out/lsp/'] }],
   dev
 })

@@ -13,9 +13,8 @@
  *
  */
 
-import * as path from "path";
 
-import { Disposable, ExtensionContext, WebviewPanel } from "vscode";
+import { Disposable, WebviewPanel } from "vscode";
 
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -41,12 +40,7 @@ import {
 
 import { lspClientTransport } from "core-node";
 
-import { QuartoContext, userDictionaryDir } from "quarto-core";
-
 import { 
-  defaultEditorServerOptions, 
-  dictionaryServerMethods, 
-  editorServerMethods,
   prefsServerMethods 
 } from "editor-server";
 
@@ -71,29 +65,14 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 
 // host interface provided to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorServer(
-  context: ExtensionContext, 
-  quartoContext: QuartoContext,
   webviewPanel: WebviewPanel,
   lspClient: LanguageClient,
   host: VSCodeVisualEditorHost
 ) : Disposable {
   
-  const resourcesDir = context.asAbsolutePath(path.join("assets", "editor", "resources"));
-
-  const options = defaultEditorServerOptions(
-    resourcesDir,
-    quartoContext.pandocPath
-  );
-
-  const dictionary = {
-    dictionariesDir: path.join(resourcesDir, "dictionaries"),
-    userDictionaryDir: userDictionaryDir()
-  };
   
   // table of methods we implement directly
   const extensionMethods = {
-    ...editorServerMethods(options),
-    ...dictionaryServerMethods(dictionary),
     ...prefsServerMethods(),
     ...editorHostMethods(host)
   };

@@ -129,13 +129,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     };
 
     // setup server on webview iframe
-    disposables.push(visualEditorServer(
-      this.context, 
-      this.quartoContext,
-      webviewPanel,
-      this.lspClient,
-      host
-    ));
+    disposables.push(visualEditorServer(webviewPanel, this.lspClient, host));
 
     // load editor webview
     webviewPanel.webview.options = { enableScripts: true };

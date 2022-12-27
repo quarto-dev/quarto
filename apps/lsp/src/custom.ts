@@ -13,18 +13,34 @@
  *
  */
 
+import path from "path";
 
-import { mathServerMethods } from "editor-server"
+import { defaultEditorServerOptions, dictionaryServerMethods, editorServerMethods, mathServerMethods } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
+import { QuartoContext, userDictionaryDir } from "quarto-core";
 
+export function registerCustomMethods(
+  quartoContext: QuartoContext, 
+  connection: LspConnection
+) {
 
-export function registerCustomMethods(connection: LspConnection) {
+  const resourcesDir = path.join(__dirname, "resources");
 
-  const methods = {
-    ...mathServerMethods()
+  const options = defaultEditorServerOptions(
+    resourcesDir,
+    quartoContext.pandocPath
+  );
+
+  const dictionary = {
+    dictionariesDir: path.join(resourcesDir, "dictionaries"),
+    userDictionaryDir: userDictionaryDir()
   };
 
-  registerLspServerMethods(connection, methods);
+  registerLspServerMethods(connection, {
+    ...editorServerMethods(options),
+    ...dictionaryServerMethods(dictionary),
+    ...mathServerMethods()
+  });
 
 }

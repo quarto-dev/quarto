@@ -37,6 +37,8 @@ import { provideDiagnostics } from "./providers/diagnostics";
 
 import { initializeQuarto } from "./quarto/quarto";
 import { registerCustomMethods } from "./custom";
+import { LspConnection } from "core-node";
+import { initQuartoContext } from "quarto-core";
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
@@ -77,6 +79,9 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 connection.onInitialized(async () => {
+
+  let workspaceDir: string | undefined;
+
   if (hasConfigurationCapability) {
     // sync configuration
     const syncConfiguration = async () => {
@@ -96,11 +101,24 @@ connection.onInitialized(async () => {
 
     // initialize connection to quarto
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const workspaceDir = workspaceFolders?.length
+    workspaceDir = workspaceFolders?.length
       ? URI.parse(workspaceFolders[0].uri).fsPath
       : undefined;
-    initializeQuarto(config.quartoPath(), workspaceDir);
   }
+  // initialize quarto
+  const quartoContext = initQuartoContext(config.quartoPath(), workspaceDir);
+  initializeQuarto(quartoContext);
+
+  // create lsp connection (jsonrpc bridge) 
+  const lspConnection: LspConnection = {
+    onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
+      return connection.onRequest(method, handler);
+    }
+  }
+
+  // register custom methods
+  registerCustomMethods(quartoContext, lspConnection);
+
 });
 
 connection.onCompletion(async (textDocumentPosition) => {
@@ -155,13 +173,6 @@ function sendDiagnostics(doc: TextDocument, diagnostics: Diagnostic[]) {
     diagnostics,
   });
 }
-
-// register custom methods
-registerCustomMethods({
-  onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
-    return connection.onRequest(method, handler);
-  }
-});
 
 // ensure that the deno runtime won't exit b/c of the event queue being empty
 setInterval(() => { /* */ }, 1000);

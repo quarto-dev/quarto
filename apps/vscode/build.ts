@@ -23,9 +23,5 @@ runBuild({
   outfile: './out/main.js',
   external: ['vscode'],
   minify: dev,
-  assets: [{
-    from: ['../../packages/editor-server/src/resources/**'],
-    to: ['./assets/editor/resources'],
-  }],
   dev
 });

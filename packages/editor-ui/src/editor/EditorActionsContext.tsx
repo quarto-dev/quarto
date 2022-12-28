@@ -15,11 +15,11 @@
 
 import React from 'react';
 
-import { EditorFindReplace } from 'editor';
+import { EditorFindReplace, NavigationType } from 'editor';
 
 export interface EditorActions {
   focus(): void;
-  navigate(id: string): void;
+  navigate(type: NavigationType, id: string): void;
   findReplace() : EditorFindReplace | undefined
 }
 

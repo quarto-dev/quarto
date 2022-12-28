@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Props, Tree, TreeNodeInfo } from '@blueprintjs/core';
 
-import { EditorOutline, EditorOutlineItem } from 'editor';
+import { EditorOutline, EditorOutlineItem, NavigationType } from 'editor';
 
 import { EditorActionsContext } from 'editor-ui';
 
@@ -64,7 +64,7 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   // drive editor selection from outline
   // const dispatch = useDispatch();
   const onNodeClick = (treeNode: TreeNodeInfo<number>) => {
-    editorActions.navigate(treeNode.id as string);
+    editorActions.navigate(NavigationType.Id, treeNode.id as string);
     editorActions.focus();
   };
 

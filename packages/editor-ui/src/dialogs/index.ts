@@ -13,7 +13,14 @@
  *
  */
 
-import { EditorDialogs, EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn, InsertCiteProps, InsertCiteResult, UIToolsAttr } from "editor-types";
+import { 
+  EditorDialogs, 
+  EditorHTMLDialogCreateFn, 
+  EditorHTMLDialogValidateFn, 
+  InsertCiteProps, 
+  InsertCiteResult, 
+  UIToolsAttr 
+} from "editor-types";
 
 import { alert, yesNoMessage } from "./alert";
 import { editAttr, editDiv, editSpan } from "./edit-attr";
@@ -26,7 +33,6 @@ import { editCodeBlock } from "./edit-codeblock";
 import { editCallout } from "./edit-callout";
 import { insertTable } from "./insert-table";
 import { insertTabset } from "./insert-tabset";
-
 
 export { 
   alert, 

@@ -62,7 +62,7 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
 
       async applyExternalEdit(markdown: string) {
         // only receive external text edits if we don't have focus (prevents circular updates)
-        if (!editor.hasFocus()) {
+        if (!editor.hasFocus() && !window.document.hasFocus()) {
           receiveEdit(markdown);
         }
       },

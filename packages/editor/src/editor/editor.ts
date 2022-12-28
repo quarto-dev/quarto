@@ -133,7 +133,6 @@ import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/extension-types';
 import { editingRootNodeClosestToPos } from '../api/node';
 import { ContextMenuSource } from '../api/menu';
-import { viewHasFocus } from '../api/view';
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -752,7 +751,8 @@ export class Editor {
   }
 
   public hasFocus() {
-    return viewHasFocus(this.view);
+    return this.view.hasFocus() || 
+      (window.document.hasFocus() && this.parent.contains(window.document.activeElement))
   }
 
   public blur() {

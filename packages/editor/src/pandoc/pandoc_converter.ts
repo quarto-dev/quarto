@@ -25,7 +25,6 @@ import {
   PandocBlockReaderFn,
   PandocPostprocessorFn,
   PandocInlineHTMLReaderFn,
-  PandocWriterOptions,
   PandocTokensFilterFn,
 } from '../api/pandoc';
 
@@ -40,7 +39,7 @@ import { ExtensionManager } from '../editor/editor-extensions';
 import { pandocToProsemirror } from './pandoc_to_prosemirror';
 import { pandocFromProsemirror } from './pandoc_from_prosemirror';
 import { isParagraphNode } from '../api/paragraph';
-import { PandocFormat } from '../api/pandoc-types';
+import { PandocFormat, PandocWriterOptions } from '../api/pandoc-types';
 
 export type PandocLineWrapping = 'none' | 'column' | 'sentence';
 

@@ -14,4 +14,4 @@
  */
 
 export * from './EditorFrame';
-export * from './EditorActionsContext';
+export * from './EditorOperationsContext';

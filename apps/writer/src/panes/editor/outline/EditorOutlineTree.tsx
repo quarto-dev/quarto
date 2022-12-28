@@ -21,7 +21,7 @@ import { Props, Tree, TreeNodeInfo } from '@blueprintjs/core';
 
 import { EditorOutline, EditorOutlineItem, NavigationType } from 'editor';
 
-import { EditorActionsContext } from 'editor-ui';
+import { EditorOperationsContext } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
 
@@ -33,8 +33,8 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   // use translation
   const { t } = useTranslation();
 
-  // editor actions context
-  const editorActions = useContext(EditorActionsContext);
+  // editor operaitons context
+  const editor = useContext(EditorOperationsContext);
 
   // get label for node
   const label = (outlineNode: EditorOutlineItem) => {
@@ -64,8 +64,8 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   // drive editor selection from outline
   // const dispatch = useDispatch();
   const onNodeClick = (treeNode: TreeNodeInfo<number>) => {
-    editorActions.navigate(NavigationType.Id, treeNode.id as string);
-    editorActions.focus();
+    editor.navigate(NavigationType.Id, treeNode.id as string);
+    editor.focus();
   };
 
   // render truee

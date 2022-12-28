@@ -115,3 +115,15 @@ export interface PandocExtensions {
   // attributes: boolean; (not yet)
   [key: string]: boolean;
 }
+
+export interface PandocWriterReferencesOptions {
+  location?: string; // block | section | document
+  prefix?: string;
+}
+
+export interface PandocWriterOptions {
+  atxHeaders?: boolean;
+  references?: PandocWriterReferencesOptions;
+  wrap?: string;
+  dpi?: number;
+}

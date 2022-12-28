@@ -27,18 +27,6 @@ import { PandocExtensions } from './pandoc-types';
 export type { BibliographyResult, PandocServer,PandocApiVersion, PandocAst, PandocToken, PandocExtensions };
 
 
-export interface PandocWriterReferencesOptions {
-  location?: string; // block | section | document
-  prefix?: string;
-}
-
-export interface PandocWriterOptions {
-  atxHeaders?: boolean;
-  references?: PandocWriterReferencesOptions;
-  wrap?: string;
-  dpi?: number;
-}
-
 export function imageAttributesAvailable(pandocExtensions: PandocExtensions) {
   return pandocExtensions.link_attributes || pandocExtensions.raw_html;
 }

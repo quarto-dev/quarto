@@ -41,7 +41,7 @@ import {
 } from '../api/ui';
 
 import { Extension, ExtensionFn } from '../api/extension';
-import { PandocWriterOptions } from '../api/pandoc';
+import { PandocWriterOptions } from '../api/pandoc-types';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
 import { EventType, EventHandler } from '../api/event-types';
@@ -260,7 +260,34 @@ export class UITools {
 
 const keybindingsPlugin = new PluginKey('keybindings');
 
-export class Editor {
+
+// narrower interface for clients
+export interface EditorOperations {
+  // set content
+  setTitle(title: string): void;
+  setMarkdown(
+    markdown: string,
+    options: PandocWriterOptions,
+    emitUpdate: boolean,
+  ): Promise<EditorSetMarkdownResult>;
+
+  // get content
+  getStateJson() : unknown;
+  getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) : Promise<string>;
+  getMarkdown(options: PandocWriterOptions) : Promise<EditorCode>;
+
+  // subsystems
+  getFindReplace() : EditorFindReplace | undefined
+
+  // activation/navigation
+  focus(): void;
+  navigate(type: NavigationType, id: string): void;
+ 
+  // events
+  subscribe<TDetail>(event: EventType<TDetail> | string, handler: EventHandler<TDetail>): VoidFunction;
+}
+
+export class Editor implements EditorOperations {
   // core context passed from client
   private readonly parent: HTMLElement;
   private readonly context: EditorContext;

@@ -26,7 +26,7 @@ import { focusInput } from 'core-browser';
 
 import { kAlertTypeInfo, UITools } from 'editor';
 
-import { EditorActionsContext, editorDialogs, EditorUICommandId } from "editor-ui";
+import { EditorOperationsContext, editorDialogs, EditorUICommandId } from "editor-ui";
 
 import { CommandManagerContext } from 'editor-ui';
 
@@ -40,7 +40,7 @@ const EditorFind: React.FC = () => {
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   // contexts
-  const editorActions = useContext(EditorActionsContext);
+  const editor = useContext(EditorOperationsContext);
 
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -73,7 +73,7 @@ const EditorFind: React.FC = () => {
 
   // perform most up to date find
   const performFind = useCallback(() => {
-    const find = editorActions.findReplace();
+    const find = editor.getFindReplace();
     find?.find(findText, {
       caseSensitive: matchCase,
       regex: matchRegex,
@@ -170,7 +170,7 @@ const EditorFind: React.FC = () => {
 
   // clear search when we go inactive
   useEffect(() => {
-    editorActions.findReplace()?.clear();
+    editor.getFindReplace()?.clear();
   }, [active])
 
   // keyboard shortcuts

@@ -40,7 +40,10 @@ import {
   EditorUISpelling,
   UITools,
   EditorDisplay,
-  EditorUIContext
+  EditorUIContext,
+  EditorOperations,
+  EventHandler,
+  PandocWriterOptions
 } from 'editor';
 
 import { 
@@ -74,10 +77,7 @@ import {
   editorDebugCommands 
 } from './editor-commands';
 
-import { 
-  EditorActions, 
-  EditorActionsContext 
-} from './EditorActionsContext';
+import { EditorOperationsContext } from './EditorOperationsContext';
 
 import styles from './EditorFrame.module.scss';
 
@@ -192,16 +192,37 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
      
   }, []);
 
-  // provide EditorActionsContext from editor 
-  const editorActions: EditorActions = {
+  // provide EditorOperations -- we need to provide a fully bound instance
+  // of EditorOperations to EditorOperationsContext _before_ we've actually
+  // created the editor -- this bit of indirection handles this by delegating
+  // to editorRef.current!  
+  const editor: EditorOperations = {
+    setTitle(title: string) {
+     editorRef.current!.setTitle(title)
+    },
+    setMarkdown(markdown: string, options: PandocWriterOptions, emitUpdate: boolean) {
+      return editorRef.current!.setMarkdown(markdown, options, emitUpdate);
+    },
+    getStateJson() {
+      return editorRef.current!.getStateJson();
+    },
+    getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) {
+      return editorRef.current!.getMarkdownFromStateJson(stateJson, options);
+    },
+    getMarkdown(options: PandocWriterOptions) {
+      return editorRef.current!.getMarkdown(options);
+    },
+    getFindReplace() {
+      return editorRef.current?.getFindReplace();
+    },
     focus() {
       editorRef.current?.focus();
     },
-    navigate(id: string) {
-      editorRef.current?.navigate(NavigationType.Id, id);
+    navigate(type: NavigationType, id: string) {
+      editorRef.current?.navigate(type, id);
     },
-    findReplace() {
-      return editorRef.current?.getFindReplace();
+    subscribe<TDetail>(event: string | EventType<TDetail>, handler: EventHandler<TDetail>) {
+      return editorRef.current!.subscribe(event, handler);
     }
   }
 
@@ -261,12 +282,12 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
 
   // render
   return (
-    <EditorActionsContext.Provider value={editorActions}> 
+    <EditorOperationsContext.Provider value={editor}> 
       <div id="editor" className={props.className} ref={parentRef}>
         {editorLoadingUI(loading)}
         {props.children}
       </div>
-    </EditorActionsContext.Provider>
+    </EditorOperationsContext.Provider>
   );
 }
 

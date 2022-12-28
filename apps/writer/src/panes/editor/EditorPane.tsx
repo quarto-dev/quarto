@@ -13,23 +13,39 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { Pane } from 'editor-ui';
+import { jsonRpcBrowserRequestTransport } from 'core-browser';
+
+import { EditorFrame, Pane } from 'editor-ui';
+
+import { kWriterJsonRpcPath } from '../../store';
+
+import { editorDisplay } from './context/display';
+import { editorUIContext } from './context/ui-context';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import EditorFind from './EditorFind';
-import Editor from './Editor';
 
 import styles from './EditorPane.module.scss';
 
 const EditorPane : React.FC = () => {
+
+  // one time init of editor frame props
+  const [request] = useState(() => jsonRpcBrowserRequestTransport(kWriterJsonRpcPath));
+  const [uiContext] = useState(() => editorUIContext());
+  
   return (
     <Pane className={'editor-pane'}>
-      <Editor className={styles.editorParent}>
+      <EditorFrame
+        className={styles.editorParent} 
+        request={request}
+        uiContext={uiContext}
+        display={editorDisplay}
+      >
         <EditorOutlineSidebar />
         <EditorFind />
-      </Editor>
+      </EditorFrame>
     </Pane>
   );
 }

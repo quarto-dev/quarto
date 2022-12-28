@@ -13,7 +13,7 @@
  *
  */
 
-import { t } from 'editor-ui';
+import { Command, EditorUICommandId, t } from 'editor-ui';
 
 import { MaybeElement } from '@blueprintjs/core';
 
@@ -21,8 +21,59 @@ import { IconName, IconNames } from '@blueprintjs/icons';
 
 import { Editor, EditorCommand, EditorCommandId } from 'editor';
 
-import { Command } from 'editor-ui';
-import { WorkbenchCommandId } from '../../workbench/commands';
+export function editorProsemirrorCommands(editorCommands: EditorCommand[]): Command[] {
+  const commandDefs = editorCommandDefs();
+  const commands: Command[] = [];
+  Object.keys(commandDefs).forEach(group => {
+    const groupCommands = commandDefs[group];
+    for (const [id, groupedCommand] of Object.entries(groupCommands)) {
+      const editorCommand = editorCommands.find(cmd => cmd.id === id)!;
+      const command: Command = {
+        ...editorCommand,
+        ...groupedCommand!,
+        group,
+        keysUnbound: true,
+      };
+      commands.push(command);
+    }
+  });
+
+  return commands;
+}
+
+export function editorExternalCommands(editor: Editor): Command[] {
+  return [
+    {
+      id: EditorUICommandId.ActivateEditor,
+      menuText: t('commands:activate_editor_menu_text'),
+      group: t('commands:group_view'),
+      keymap: [],
+      isEnabled: () => true,
+      isActive: () => false,
+      execute: () => {
+        editor.focus();
+      },
+    }
+  ];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function editorDebugCommands(editor: Editor): Command[] {
+  return [
+    {
+      id: EditorUICommandId.EnableDevTools,
+      menuText: t('commands:enable_dev_tools_menu_text'),
+      group: t('commands:group_utilities'),
+      keymap: [],
+      isEnabled: () => true,
+      isActive: () => false,
+      execute: () => {
+        editor.enableDevTools();
+      },
+    },
+  ];
+}
+
 
 interface CommandDefs {
   [group: string]: {
@@ -372,55 +423,3 @@ function editorCommandDefs(): CommandDefs {
   };
 }
 
-export function editorProsemirrorCommands(editorCommands: EditorCommand[]): Command[] {
-  const commandDefs = editorCommandDefs();
-  const commands: Command[] = [];
-  Object.keys(commandDefs).forEach(group => {
-    const groupCommands = commandDefs[group];
-    for (const [id, groupedCommand] of Object.entries(groupCommands)) {
-      const editorCommand = editorCommands.find(cmd => cmd.id === id)!;
-      const command: Command = {
-        ...editorCommand,
-        ...groupedCommand!,
-        group,
-        keysUnbound: true,
-      };
-      commands.push(command);
-    }
-  });
-
-  return commands;
-}
-
-export function editorExternalCommands(editor: Editor): Command[] {
-  return [
-    {
-      id: WorkbenchCommandId.ActivateEditor,
-      menuText: t('commands:activate_editor_menu_text'),
-      group: t('commands:group_view'),
-      keymap: [],
-      isEnabled: () => true,
-      isActive: () => false,
-      execute: () => {
-        editor.focus();
-      },
-    }
-  ];
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function editorDebugCommands(editor: Editor): Command[] {
-  return [
-    {
-      id: WorkbenchCommandId.EnableDevTools,
-      menuText: t('commands:enable_dev_tools_menu_text'),
-      group: t('commands:group_utilities'),
-      keymap: [],
-      isEnabled: () => true,
-      isActive: () => false,
-      execute: () => {
-        editor.enableDevTools();
-      },
-    },
-  ];
-}

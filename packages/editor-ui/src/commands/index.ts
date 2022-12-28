@@ -18,6 +18,7 @@ export * from './CommandMenubarMenu';
 export * from './CommandMenuItem';
 export * from './CommandMenuItems';
 export * from './commands';
+export * from './commands-ui';
 export * from './CommandSubMenu';
 export * from './CommandToolbarButton';
 export * from './CommandToolbarMenu';

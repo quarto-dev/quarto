@@ -24,7 +24,7 @@ import { EditableText } from '@blueprintjs/core';
 
 import { focusInput } from 'core-browser';
 
-import { CommandManagerContext } from 'editor-ui';
+import { CommandManagerContext, EditorUICommandId } from 'editor-ui';
 
 import { editorLoading, editorTitle, setEditorTitle } from 'editor-ui';
 
@@ -55,7 +55,7 @@ const WorkbenchTitle: React.FC = () => {
   const focusEditor = () => {
     // delay so the enter key doesn't go to the editor
     setTimeout(() => {
-      cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
+      cmDispatch({ type: "EXEC_COMMAND", payload: EditorUICommandId.ActivateEditor });
     }, 0);
   }
 

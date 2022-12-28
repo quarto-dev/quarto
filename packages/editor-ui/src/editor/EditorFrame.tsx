@@ -22,12 +22,12 @@ import { useTranslation } from 'react-i18next';
 
 import { Intent, Spinner } from '@blueprintjs/core';
 
-import { jsonRpcBrowserRequestTransport } from 'core-browser';
+import { JsonRpcRequestTransport } from 'core';
 
 import { defaultPrefs, Prefs } from 'editor-types';
 
 import { 
-  Editor as PMEditor, 
+  Editor, 
   EventType, 
   kAlertTypeError, 
   NavigationType,
@@ -38,46 +38,57 @@ import {
   kQuartoDocType,
   PandocFormat,
   EditorUISpelling,
-  UITools
+  UITools,
+  EditorDisplay,
+  EditorUIContext
 } from 'editor';
 
-
-import {
-  useEditorSpelling,
-  editorMarkdown,
-  editorTitle,
-  editorLoading,
-  setEditorSelection,
-  setEditorOutline,
-  setEditorTitle,
-  setEditorLoading,
-  editorDialogs,
+import { 
   CommandManagerContext, 
-  Commands, 
-  editorContext, 
-  EditorProviders,
+  Commands 
+} from '../commands';
+
+import { editorDialogs } from '../dialogs';
+
+import { 
+  editorLoading, 
+  editorMarkdown, 
+  editorTitle, 
+  setEditorLoading, 
+  setEditorOutline, 
+  setEditorSelection, 
+  setEditorTitle, 
   useGetPrefsQuery, 
-  useSetPrefsMutation
-} from 'editor-ui';
+  useSetPrefsMutation 
+} from '../store';
 
+import { 
+  editorContext, 
+  EditorProviders, 
+  useEditorSpelling 
+} from '../context';
 
-import { editorProsemirrorCommands, editorExternalCommands, editorDebugCommands } from './editor-commands';
+import { 
+  editorProsemirrorCommands, 
+  editorExternalCommands, 
+  editorDebugCommands 
+} from './editor-commands';
 
-import { EditorActions, EditorActionsContext } from './EditorActionsContext';
+import { 
+  EditorActions, 
+  EditorActionsContext 
+} from './EditorActionsContext';
 
-import { kWriterJsonRpcPath } from '../../store';
+import styles from './EditorFrame.module.scss';
 
-import { editorDisplay } from './context/display';
-import { editorUIContext } from './context/ui-context';
-
-import styles from './Editor.module.scss';
-
-
-export interface EditorProps {
+export interface EditorFrameProps {
   className: string;
+  display: (commands: () => Commands) => EditorDisplay;
+  uiContext: EditorUIContext;
+  request: JsonRpcRequestTransport;
 }
 
-const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
+export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (props) => {
 
   // global services
   const { t } = useTranslation();
@@ -99,7 +110,7 @@ const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
 
   // refs that hold out of band state 
   // https://stackoverflow.com/questions/57847594/react-hooks-accessing-up-to-date-state-from-within-a-callback
-  const editorRef = useRef<PMEditor | null>(null);
+  const editorRef = useRef<Editor | null>(null);
   const commandsRef = useRef<Commands | null>(null);
   const prefsRef = useRef<Prefs | null>(defaultPrefs());
   const spellingRef = useRef<EditorUISpelling | null>(null);
@@ -143,9 +154,9 @@ const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
       parentRef.current!, 
       {
         prefs: editorPrefs,
-        request: jsonRpcBrowserRequestTransport(kWriterJsonRpcPath),
-        uiContext: editorUIContext(),
-        display: () => editorDisplay(() => commandsRef.current!), 
+        request: props.request,
+        uiContext: props.uiContext,
+        display: () => props.display(() => commandsRef.current!), 
         dialogs: () => dialogs.current,
         spelling: () => spellingRef.current!
       }
@@ -293,7 +304,7 @@ const editorLoadingUI = (loading: boolean) => {
 const createEditor = async (
   parent: HTMLElement, 
   providers: EditorProviders
-) : Promise<PMEditor> => {
+) : Promise<Editor> => {
   const context = editorContext(providers);
   const format: EditorFormat = {
     pandocMode: 'markdown',
@@ -308,12 +319,11 @@ const createEditor = async (
     },
     docTypes: [kQuartoDocType]
   }
-  return await PMEditor.create(parent, context, format, { 
+  return await Editor.create(parent, context, format, { 
     browserSpellCheck: false,
     commenting: false,
     outerScrollContainer: true 
   });
 }
 
-export default Editor;
 

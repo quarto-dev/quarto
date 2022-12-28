@@ -15,14 +15,15 @@
 
 import React, { useContext } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { Props, Tree, TreeNodeInfo } from '@blueprintjs/core';
 
 import { EditorOutline, EditorOutlineItem } from 'editor';
 
-import { EditorActionsContext } from '../EditorActionsContext';
+import { EditorActionsContext } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
-import { useTranslation } from 'react-i18next';
 
 export interface EditorOutlineTreeProps extends Props {
   outline: EditorOutline;

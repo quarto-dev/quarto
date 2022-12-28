@@ -22,7 +22,8 @@ import {
   CommandManagerContext, 
   useGetPrefsQuery, 
   useSetPrefsMutation, 
-  useGetAvailableDictionariesQuery 
+  useGetAvailableDictionariesQuery, 
+  EditorUICommandId
 } from 'editor-ui';
 
 import { defaultPrefs, Prefs } from 'editor-types';
@@ -64,7 +65,7 @@ export const WorkbenchPrefsDialog: React.FC = () => {
     if (prefs) {
       setPrefs(prefs)
     }
-    cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
+    cmDispatch({ type: "EXEC_COMMAND", payload: EditorUICommandId.ActivateEditor });
   }
 
   return (

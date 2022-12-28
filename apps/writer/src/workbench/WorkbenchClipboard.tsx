@@ -17,7 +17,7 @@ import React, { useContext, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { CommandManagerContext, Command, keyCodeString, alert } from 'editor-ui';
+import { CommandManagerContext, Command, keyCodeString, alert, EditorUICommandId } from 'editor-ui';
 
 import { WorkbenchCommandId } from './commands';
 import { kAlertTypeWarning } from 'editor';
@@ -28,7 +28,7 @@ const WorkbenchClipboard: React.FC = () => {
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const focusEditor = () => {
-    cmDispatch({ type: "EXEC_COMMAND", payload: WorkbenchCommandId.ActivateEditor });
+    cmDispatch({ type: "EXEC_COMMAND", payload: EditorUICommandId.ActivateEditor });
   }
 
   const clipboardCommand = (id: string, domId: string, menuText: string, keymap: string) : Command => {

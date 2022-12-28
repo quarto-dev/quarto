@@ -27,7 +27,8 @@ import {
   CommandMenuItem, 
   CommandMenuItemActive, 
   CommandManagerContext, 
-  CommandMenubarMenu 
+  CommandMenubarMenu, 
+  EditorUICommandId
 } from 'editor-ui';
 
 import { WorkbenchCommandId } from './commands';
@@ -35,12 +36,12 @@ import { WorkbenchCommandId } from './commands';
 import styles from './WorkbenchMenubar.module.scss';
 
 
-const CommandId = { ...EditorCommandId, ...WorkbenchCommandId };
+const CommandId = { ...EditorCommandId,  ...EditorUICommandId, ...WorkbenchCommandId };
 
 const FileMenu: React.FC = () => {
   return (
     <MenubarMenu>
-      <CommandMenuItem id={WorkbenchCommandId.Rename} />
+      <CommandMenuItem id={CommandId.Rename} />
     </MenubarMenu>
   );
 };
@@ -57,12 +58,12 @@ const EditMenu: React.FC = () => {
       <MenuDivider />
       <CommandMenuItem id={CommandId.SelectAll} />
       <MenuDivider />
-      <CommandMenuItem id={WorkbenchCommandId.Find} />
-      <CommandMenuItem id={WorkbenchCommandId.FindNext} />
-      <CommandMenuItem id={WorkbenchCommandId.FindPrevious} />
-      <CommandMenuItem id={WorkbenchCommandId.ReplaceAndFind} />
+      <CommandMenuItem id={CommandId.Find} />
+      <CommandMenuItem id={CommandId.FindNext} />
+      <CommandMenuItem id={CommandId.FindPrevious} />
+      <CommandMenuItem id={CommandId.ReplaceAndFind} />
       <MenuDivider />
-      <CommandMenuItem id={WorkbenchCommandId.Prefs} />
+      <CommandMenuItem id={CommandId.Prefs} />
     </MenubarMenu>
   );
 };
@@ -70,9 +71,9 @@ const EditMenu: React.FC = () => {
 const ViewMenu: React.FC = () => {
   return (
     <MenubarMenu>
-      <CommandMenuItem id={WorkbenchCommandId.ShowOutline} active={CommandMenuItemActive.Check} />
+      <CommandMenuItem id={CommandId.ShowOutline} active={CommandMenuItemActive.Check} />
       <MenuDivider />
-      <CommandMenuItem id={WorkbenchCommandId.ActivateEditor} />
+      <CommandMenuItem id={CommandId.ActivateEditor} />
     </MenubarMenu>
   );
 };

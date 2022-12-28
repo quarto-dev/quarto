@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 
 import { defaultPrefs } from 'editor-types';
 
-import { editorOutline } from 'editor-ui';
+import { editorOutline, EditorUICommandId } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 
 import { CommandManagerContext } from 'editor-ui';
@@ -34,7 +34,6 @@ import { EditorOutlineTree } from './EditorOutlineTree';
 import { EditorOutlineEmpty } from './EditorOutlineEmpty';
 
 import styles from './EditorOutlineSidebar.module.scss';
-import { WorkbenchCommandId } from '../../../workbench/commands';
 
 const EditorOutlineSidebar: React.FC = () => {
 
@@ -55,7 +54,7 @@ const EditorOutlineSidebar: React.FC = () => {
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
-        id: WorkbenchCommandId.ShowOutline,
+        id: EditorUICommandId.ShowOutline,
         menuText: t('commands:show_outline_menu_text'),
         group: t('commands:group_view'),
         keymap: ['Ctrl-Alt-O'],

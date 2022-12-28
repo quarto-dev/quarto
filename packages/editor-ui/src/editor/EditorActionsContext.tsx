@@ -13,8 +13,9 @@
  *
  */
 
-import { EditorFindReplace } from 'editor';
 import React from 'react';
+
+import { EditorFindReplace } from 'editor';
 
 export interface EditorActions {
   focus(): void;

@@ -26,12 +26,9 @@ import { focusInput } from 'core-browser';
 
 import { kAlertTypeInfo, UITools } from 'editor';
 
-import { editorDialogs } from "editor-ui";
+import { EditorActionsContext, editorDialogs, EditorUICommandId } from "editor-ui";
 
 import { CommandManagerContext } from 'editor-ui';
-import { WorkbenchCommandId } from '../../workbench/commands';
-
-import { EditorActionsContext } from './EditorActionsContext';
 
 import styles from './EditorFind.module.scss';
 
@@ -117,7 +114,7 @@ const EditorFind: React.FC = () => {
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
-        id: WorkbenchCommandId.Find,
+        id: EditorUICommandId.Find,
         menuText: t('commands:find_menu_text'),
         group: t('commands:group_utilities'),
         keymap: ['Mod-f'],
@@ -131,7 +128,7 @@ const EditorFind: React.FC = () => {
         }
       },
       {
-        id: WorkbenchCommandId.FindNext,
+        id: EditorUICommandId.FindNext,
         menuText: t('commands:find_next_menu_text'),
         group: t('commands:group_utilities'),
         keymap: ['Ctrl-g'],
@@ -140,7 +137,7 @@ const EditorFind: React.FC = () => {
         execute: findNext
       },
       {
-        id: WorkbenchCommandId.FindPrevious,
+        id: EditorUICommandId.FindPrevious,
         menuText: t('commands:find_previous_menu_text'),
         group: t('commands:group_utilities'),
         keymap: ['Mod-Shift-g'],
@@ -154,7 +151,7 @@ const EditorFind: React.FC = () => {
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
       {
-        id: WorkbenchCommandId.ReplaceAndFind,
+        id: EditorUICommandId.ReplaceAndFind,
         menuText: t('commands:replace_and_find_menu_text'),
         group: t('commands:group_utilities'),
         keymap: ['Mod-Shift-j'],

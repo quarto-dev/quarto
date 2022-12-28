@@ -18,10 +18,9 @@ import React, { useContext } from 'react';
 import { Button } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 
-import { CommandManagerContext, commandTooltipText } from 'editor-ui';
+import { CommandManagerContext, commandTooltipText, EditorUICommandId } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
-import { WorkbenchCommandId } from '../../../workbench/commands';
 
 export interface EditorOutlineButtonProps {
   visible: boolean;
@@ -30,7 +29,7 @@ export interface EditorOutlineButtonProps {
 
 export const EditorOutlineButton: React.FC<EditorOutlineButtonProps> = props => {
   const [cmState] = useContext(CommandManagerContext);
-  const command = cmState.commands[WorkbenchCommandId.ShowOutline];
+  const command = cmState.commands[EditorUICommandId.ShowOutline];
   const title = command ? commandTooltipText(command) : '';
 
   if (props.visible) {

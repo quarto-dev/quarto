@@ -23,7 +23,6 @@ export const VSC_VEH_OnEditorUpdated = 'vsc_veh_on_editor_updated';
 
 export interface VSCodeVisualEditor {
   init: (markdown: string) => Promise<string>; 
-  getMarkdown: () => Promise<string>;
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
 }

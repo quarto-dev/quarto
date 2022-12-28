@@ -104,7 +104,7 @@ export function editorSyncManager(
 
   return {
 
-    // initialize the connection tot he visual editor by providing it
+    // initialize the connection to the visual editor by providing it
     // with its initial contents and syncing the canonnical markdown
     // back to the document
     init: async() => {

@@ -54,7 +54,6 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
   return {
     editor: {
       init: (markdown: string) => request(VSC_VE_Init, [markdown]),
-      getMarkdown: () => request(VSC_VE_GetMarkdown, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
     },

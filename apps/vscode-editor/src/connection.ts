@@ -27,7 +27,6 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 
 import { 
   VSC_VE_ApplyExternalEdit, 
-  VSC_VE_GetMarkdown, 
   VSC_VE_GetMarkdownFromState,
   VSC_VEH_OnEditorUpdated,
   VSC_VEH_OnEditorReady, 
@@ -81,7 +80,6 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCo
   // create a server
   return jsonRpcPostMessageServer(target, {
     [VSC_VE_Init]: args => editor.init(args[0]),
-    [VSC_VE_GetMarkdown]: () => editor.getMarkdown(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0])
   })

@@ -67,11 +67,6 @@ export function createEditor(parent: HTMLElement, host: VisualEditorHostClient) 
         }
       },
 
-      async getMarkdown() : Promise<string> {
-        const result = await editor.getMarkdown(quartoWriterOptions());
-        return result.code;
-      },
-
       async getMarkdownFromState(state: unknown) : Promise<string> {
         return editor.getMarkdownFromStateJson(state, quartoWriterOptions());
       },

@@ -18,6 +18,7 @@ import 'vscode-webview';
 import { createEditor } from './Editor';
 
 import "editor-ui/src/styles";
+import "./styles.scss"
 
 const vscode = acquireVsCodeApi<unknown>();
 createEditor(window.document.body, vscode);

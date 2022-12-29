@@ -15,6 +15,8 @@
 
 @import 'editor-ui/src/theme.scss';
  
+$editorToolbarHeight: 30px;
+
 .editorParent {
   position: absolute;
   top: 0;
@@ -28,12 +30,40 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: $toolbarHeight;
+  bottom: $editorToolbarHeight;
+  height: $editorToolbarHeight;
+  padding-top: 2px;
+  padding-bottom: 3px;
+}
+
+.editorToolbar {
+  :global {
+    .bp4-button {
+      padding: 0;
+      min-width: 20px !important;
+      min-height: auto !important;
+    }
+    .bp4-button-text {
+      font-size: 0.8rem;
+    }
+    .bp4-icon svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+}
+
+.toolbarBlockFormatMenu {
+  :global {
+    .bp4-button-text {
+      min-width: 70px;
+    }
+  }
 }
 
 .editorFrame {
   position: absolute;
-  top: calc(#{$toolbarHeight} + 1px);
+  top: calc(#{$editorToolbarHeight} + 1px);
   left: 0;
   right: 0;
   bottom: 0;

@@ -15,6 +15,8 @@
 
 import React, { useContext } from 'react';
 
+import { useSelector } from 'react-redux';
+
 import { EditorCommandId } from 'editor';
 
 import {
@@ -30,9 +32,7 @@ import {
   t
 } from 'editor-ui';
 
-
 import styles from './Editor.module.scss';
-import { useSelector } from 'react-redux';
 
 const CommandId = { ...EditorCommandId };
 
@@ -44,10 +44,6 @@ const EditorToolbar: React.FC = () => {
   if (!loading) {
     return (
       <Toolbar className={styles.editorToolbar}>
-        <CommandToolbarButton command={CommandId.Strong} />
-        <CommandToolbarButton command={CommandId.Em} />
-        <CommandToolbarButton command={CommandId.Code} />
-        <ToolbarDivider />
         <CommandToolbarMenu
           className={styles.toolbarBlockFormatMenu}
           commands={[
@@ -63,6 +59,10 @@ const EditorToolbar: React.FC = () => {
             CommandId.CodeBlock,
           ]}
         />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Strong} />
+        <CommandToolbarButton command={CommandId.Em} />
+        <CommandToolbarButton command={CommandId.Code} />
         <ToolbarDivider />
         <CommandToolbarButton command={CommandId.BulletList} />
         <CommandToolbarButton command={CommandId.OrderedList} />

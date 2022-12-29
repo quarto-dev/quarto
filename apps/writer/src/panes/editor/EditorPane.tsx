@@ -19,13 +19,15 @@ import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
 import { EditorFrame, Pane } from 'editor-ui';
 
-import { kWriterJsonRpcPath } from '../../store';
+import { EditorOperations } from 'editor';
 
 import { editorDisplay } from './context/display';
 import { editorUIContext } from './context/ui-context';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import EditorFind from './EditorFind';
+
+import { kWriterJsonRpcPath } from '../../constants';
 
 import styles from './EditorPane.module.scss';
 
@@ -35,6 +37,13 @@ const EditorPane : React.FC = () => {
   const [request] = useState(() => jsonRpcBrowserRequestTransport(kWriterJsonRpcPath));
   const [uiContext] = useState(() => editorUIContext());
   
+  // editor init handler
+  const onEditorInit = async (editor: EditorOperations) => {
+    const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
+    const markdown = await (await fetch(contentUrl)).text();
+    await editor.setMarkdown(markdown, {}, false);
+  };
+
   return (
     <Pane className={'editor-pane'}>
       <EditorFrame
@@ -42,6 +51,7 @@ const EditorPane : React.FC = () => {
         request={request}
         uiContext={uiContext}
         display={editorDisplay}
+        onEditorInit={onEditorInit}
       >
         <EditorOutlineSidebar />
         <EditorFind />

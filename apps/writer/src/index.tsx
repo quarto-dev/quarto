@@ -16,24 +16,25 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { setEditorMarkdown, initEditorTranslations } from 'editor-ui';
+import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { initializeStore } from './store';
+import { initEditorTranslations, initializeStore } from 'editor-ui';
+
 import App from './App';
+
+import { kWriterJsonRpcPath } from './constants';
 
 import "editor-ui/src/styles";
 
 
 async function runApp() {
   try {
-    // initialize content
-    const store = await initializeStore();
-    const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
-    const markdown = await (await fetch(contentUrl)).text();
-    store.dispatch(setEditorMarkdown(markdown));
-
-     // init localization
-     await initEditorTranslations();
+    // initialize store
+    const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
+    const store = await initializeStore(request);
+    
+    // init localization
+    await initEditorTranslations();
 
     // create root element and render
     const root = createRoot(document.getElementById('root')!);

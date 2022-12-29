@@ -55,7 +55,6 @@ import { editorDialogs } from '../dialogs';
 
 import { 
   editorLoading, 
-  editorMarkdown, 
   editorTitle, 
   setEditorLoading, 
   setEditorOutline, 
@@ -86,6 +85,7 @@ export interface EditorFrameProps {
   display: (commands: () => Commands) => EditorDisplay;
   uiContext: EditorUIContext;
   request: JsonRpcRequestTransport;
+  onEditorInit?: (editor: EditorOperations) => Promise<void>;
 }
 
 export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (props) => {
@@ -99,7 +99,6 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
   // redux state
   const title = useSelector(editorTitle);
   const loading = useSelector(editorLoading);
-  const markdown = useSelector(editorMarkdown);
   const dispatch = useDispatch();
 
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
@@ -182,13 +181,19 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
     cmDispatch({ type: "SET_MENUS", payload: editorRef.current!.getMenus()});
 
     // load editor
-    await editorRef.current!.setMarkdown(markdown, panmirrorWriterOptions(), false);
+    if (props.onEditorInit) {
+      await props.onEditorInit(editor);
+    } 
+
+    // set title and outline
     dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
     onEditorOutlineChanged();
+
+    // clear loading status
     if (loading) {
       dispatch(setEditorLoading(false));
       editorRef.current?.focus();
-    }
+    }  
      
   }, []);
 
@@ -217,6 +222,9 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
     },
     focus() {
       editorRef.current?.focus();
+    },
+    hasFocus() {
+      return editorRef.current?.hasFocus() || false;
     },
     navigate(type: NavigationType, id: string) {
       editorRef.current?.navigate(type, id);
@@ -289,13 +297,6 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
       </div>
     </EditorOperationsContext.Provider>
   );
-}
-
-
-const panmirrorWriterOptions = () => {
-  return {
-    atxHeaders: true
-  };
 }
 
 const showPandocWarnings = (pandocFormat?: PandocFormat) => {

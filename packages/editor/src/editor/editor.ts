@@ -281,6 +281,7 @@ export interface EditorOperations {
 
   // activation/navigation
   focus(): void;
+  hasFocus(): boolean;
   navigate(type: NavigationType, id: string): void;
  
   // events
@@ -543,6 +544,10 @@ export class Editor implements EditorOperations {
     options: PandocWriterOptions,
     emitUpdate: boolean,
   ): Promise<EditorSetMarkdownResult> {
+
+    // provide option defaults
+    options = pandocWriterOptions(options);
+   
     // get the result
     const result = await this.pandocConverter.toProsemirror(markdown, this.pandocFormat);
     const { doc, line_wrapping, unrecognized, example_lists, unparsed_meta } = result;
@@ -626,6 +631,8 @@ export class Editor implements EditorOperations {
   }
 
   public async getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) {
+    // provide option defaults
+    options = pandocWriterOptions(options);
     const state = EditorState.fromJSON({ schema: this.schema }, stateJson);
     const tr = state.tr;
     return this.getMarkdownCode(tr, options);
@@ -1259,6 +1266,13 @@ function navigationIdForSelection(state: EditorState): string | null {
     return outlineNode.node.attrs.navigation_id;
   } else {
     return null;
+  }
+}
+
+function pandocWriterOptions(options: PandocWriterOptions) : PandocWriterOptions {
+  return {
+    atxHeaders: true,
+    ...options
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * dictionary.ts
+ * Editor.module.scss
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,8 +13,10 @@
  *
  */
 
-export * from './rtk';
-export * from './editor';
-export * from './prefs';
-export * from './dictionary';
-export * from './store';
+.editorParent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+} 

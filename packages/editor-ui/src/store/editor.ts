@@ -20,7 +20,6 @@ import { EditorOutline } from 'editor';
 export interface EditorState {
   readonly loading: boolean;
   readonly title: string;
-  readonly markdown: string;
   readonly outline: EditorOutline;
   readonly selection: unknown;
 }
@@ -28,7 +27,6 @@ export interface EditorState {
 const initialState: EditorState = {
   loading: true,
   title: '',
-  markdown: '',
   outline: [],
   selection: {},
 };
@@ -43,9 +41,6 @@ export const editorSlice = createSlice({
     setEditorTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;
     },
-    setEditorMarkdown: (state, action: PayloadAction<string>) => {
-      state.markdown = action.payload;
-    },
     setEditorOutline: (state, action: PayloadAction<EditorOutline>) => {
       state.outline = action.payload;
     },
@@ -58,14 +53,12 @@ export const editorSlice = createSlice({
 const editorSelector = (state: { editor: EditorState }) => state.editor;
 export const editorLoading = createSelector(editorSelector, (state) => state.loading);
 export const editorTitle = createSelector(editorSelector, (state) => state.title);
-export const editorMarkdown = createSelector(editorSelector, (state) => state.markdown);
 export const editorOutline = createSelector(editorSelector, (state) => state.outline);
 export const editorSelection = createSelector(editorSelector, (state) => state.selection);
 
 export const { 
   setEditorLoading, 
   setEditorTitle, 
-  setEditorMarkdown, 
   setEditorOutline, 
   setEditorSelection 
 } = editorSlice.actions

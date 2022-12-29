@@ -1,5 +1,5 @@
 /*
- * context.ts
+ * Editor.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,66 +13,75 @@
  *
  */
 
+import React, { useState } from "react";
+import { createRoot } from "react-dom/client";
+
+import { Store } from 'redux';
+import { Provider as StoreProvider } from 'react-redux';
+
+import { WebviewApi } from "vscode-webview";
+
+import { JsonRpcRequestTransport } from "core";
+import { CommandManagerProvider, Commands, EditorFrame, initEditorTranslations, initializeStore, showContextMenu } from "editor-ui";
+import { EditorDisplay, EditorMenuItem, EditorOperations, EditorUIContext, XRef } from "editor";
+
 import { 
-  UITools, 
-  EditorContext, 
-  EditorDisplay,
-  EditorUIContext, 
-  EditorUIPrefs, 
-  ListSpacing, 
-  SkinTone, 
-  XRef, 
-  EditorHooks,
-  EditorServer,
-  EditorServices
-} from "editor";
+  visualEditorHostClient, 
+  VisualEditorHostClient, 
+  visualEditorJsonRpcRequestTransport,
+  syncEditorToHost
+} from "./sync";
 
-import { codeMirrorExtension } from "editor-codemirror";
-
-import { editorDialogs, editorMath } from "editor-ui";
+import styles from './Editor.module.scss';
 
 
-export function editorContext(
-  server: EditorServer, 
-  services: EditorServices,
-  hooks?: EditorHooks
-) {
+export async function createEditor(parent: HTMLElement, vscode: WebviewApi<unknown>) {
 
-  const uiTools = new UITools();
-  const ui = {
-    dialogs: editorDialogs(uiTools.attr),
-    display: editorDisplay(),
-    math: editorMath(services.math),
-    context: editorUIContext(),
-    prefs: editorPrefs(),
-    images: uiTools.context.defaultUIImages()
-  };
+  // connection to host
+  const request = visualEditorJsonRpcRequestTransport(vscode)
+  const host = visualEditorHostClient(vscode, request);
 
-  const context : EditorContext = { 
-    server, 
-    ui, 
-    hooks,
-    codeViewExtension: codeMirrorExtension 
-  };
+  // initialize store
+  const store = await initializeStore(request);
+    
+  // init localization
+  await initEditorTranslations();
+  
+  // create and render editor
+  const root = createRoot(parent);
+  root.render(<Editor store={store} host={host} request={request}/>);
 
-  return context;
 }
 
-function editorDisplay(): EditorDisplay {
-  return  {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    openURL(_url: string) {
-      //
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    navigateToXRef(_file: string, _xref: XRef) {
-      //
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    navigateToFile(_file: string) {
-      //
-    }
-  }
+interface EditorProps {
+  host: VisualEditorHostClient;
+  request: JsonRpcRequestTransport;
+  store: Store;
+}
+
+const Editor : React.FC<EditorProps> = (props) => {
+
+  // one time init of display/context
+  const [uiContext] = useState(editorUIContext());
+  
+  // pair editor w/ host on on init
+  const onEditorInit = async (editor: EditorOperations) => {
+    syncEditorToHost(editor, props.host);
+  };
+
+  return (
+    <StoreProvider store={props.store}>
+      <CommandManagerProvider>
+        <EditorFrame
+          className={styles.editorParent} 
+          request={props.request}
+          uiContext={uiContext}
+          display={editorDisplay}
+          onEditorInit={onEditorInit}
+        />
+      </CommandManagerProvider>
+    </StoreProvider>
+  );
 }
 
 function editorUIContext(): EditorUIContext {
@@ -149,52 +158,29 @@ function editorUIContext(): EditorUIContext {
   };
 }
 
-function editorPrefs(): EditorUIPrefs {
+export function editorDisplay(commands: () => Commands) : EditorDisplay {
   return {
-    realtimeSpelling() : boolean {
-      return false;
-    },
-    darkMode(): boolean {
-      return false;
-    },
-    listSpacing(): ListSpacing {
-      return 'tight';
-    },
-    equationPreview(): boolean {
-      return true;
-    },
-    packageListingEnabled(): boolean {
-      return false;
-    },
-    tabKeyMoveFocus(): boolean {
-      return false;
-    },
-    emojiSkinTone(): SkinTone {
-      return SkinTone.Default;
-    },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setEmojiSkinTone(_emojiSkinTone: SkinTone) {
+    openURL(_url: string) {
       //
     },
-    zoteroUseBetterBibtex(): boolean {
-      return false;
-    },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setBibliographyDefaultType(_bibliographyDefaultType: string) {
+    navigateToXRef(_file: string, _xref: XRef) {
       //
     },
-    bibliographyDefaultType(): string {
-      return 'bib';
-    },
-    citationDefaultInText(): boolean {
-      return false;
-    },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setCitationDefaultInText(_citationDefaultInText: boolean) {
+    navigateToFile(_file: string) {
       //
     },
+
+    async showContextMenu(
+      items: EditorMenuItem[],
+      clientX: number,
+      clientY: number
+    ): Promise<boolean> {
+      return showContextMenu(commands(), items, clientX, clientY);
+    }
   };
 }
-
 
 

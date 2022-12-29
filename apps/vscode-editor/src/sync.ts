@@ -13,6 +13,7 @@
  *
  */
 
+import throttle from "lodash.throttle";
 
 import { WebviewApi } from "vscode-webview";
 
@@ -37,7 +38,16 @@ import {
   EditorServices
 } from "editor-types";
 
-import { editorJsonRpcServer, editorJsonRpcServices } from "editor-core";
+import { 
+  editorJsonRpcServer, 
+  editorJsonRpcServices 
+} from "editor-core";
+
+import { 
+  EditorOperations, 
+  UpdateEvent 
+} from "editor";
+
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
   vscode: WebviewApi<unknown>;
@@ -45,10 +55,18 @@ export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
   services: EditorServices;
 }
 
-// interface to visual editor host (vs code extension)
-export function visualEditorHostClient(vscode: WebviewApi<unknown>) : VisualEditorHostClient {
+// json rpc request client
+export function visualEditorJsonRpcRequestTransport(vscode: WebviewApi<unknown>) {
   const target = windowJsonRpcPostMessageTarget(vscode, window);
   const { request } = jsonRpcPostMessageRequestTransport(target);
+  return request;
+}
+
+// interface to visual editor host (vs code extension)
+export function visualEditorHostClient(
+  vscode: WebviewApi<unknown>, 
+  request: JsonRpcRequestTransport
+) : VisualEditorHostClient {
   return {
     vscode,
     server: editorJsonRpcServer(request),
@@ -57,8 +75,49 @@ export function visualEditorHostClient(vscode: WebviewApi<unknown>) : VisualEdit
   }
 }
 
+export async function syncEditorToHost(editor: EditorOperations, host: VisualEditorHostClient) {
+
+  // sync from text editor (throttled)
+  const kThrottleDelayMs = 1000;
+  const receiveEdit = throttle((markdown) => {
+    editor.setMarkdown(markdown, {}, false)
+      .finally(() => {
+        // done
+      });
+  }, kThrottleDelayMs, { leading: false, trailing: true});
+
+  // setup communication channel for host
+  visualEditorHostServer(host.vscode, {
+    async init(markdown: string) {
+
+      // init editor contents and sync cannonical version back to text editor
+      const result = await editor.setMarkdown(markdown, {}, false);
+      
+      // visual editor => text editor (just send the state, host will call back for markdown)
+      editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+
+      // return canonical markdown
+      return result.canonical;        
+    },
+
+    async applyExternalEdit(markdown: string) {
+      // only receive external text edits if we don't have focus (prevents circular updates)
+      if (!editor.hasFocus() && !window.document.hasFocus()) {
+        receiveEdit(markdown);
+      }
+    },
+
+    async getMarkdownFromState(state: unknown) : Promise<string> {
+      return editor.getMarkdownFromStateJson(state, {});
+    },
+  })
+
+  // let the host know we are ready
+  await host.onEditorReady();  
+}
+
 // interface provided to visual editor host (vs code extension)
-export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisualEditor) {
+function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisualEditor) {
 
   // target for message bus
   const target: JsonRpcPostMessageTarget = {
@@ -83,8 +142,8 @@ export function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCo
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0])
   })
-
 }
+
 
 function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisualEditorHost {
   return {

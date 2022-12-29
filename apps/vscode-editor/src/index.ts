@@ -15,31 +15,11 @@
 
 import 'vscode-webview';
 
-import { createEditor } from './editor/editor';
-
-import { visualEditorHostClient } from './connection';
+import { createEditor } from './Editor';
 
 import "editor-ui/src/styles";
 
-// editor div
-const editorDiv = window.document.createElement("div");
-editorDiv.style.position = 'absolute';
-editorDiv.style.top = '0';
-editorDiv.style.left = '0';
-editorDiv.style.right = '0';
-editorDiv.style.bottom = '0';
-window.document.body.appendChild(editorDiv);
-
-// create host and editor
-const host = visualEditorHostClient( acquireVsCodeApi<unknown>());
-createEditor(editorDiv, host);
-
-
-
-
-
-
-
-
+const vscode = acquireVsCodeApi<unknown>();
+createEditor(window.document.body, vscode);
 
 

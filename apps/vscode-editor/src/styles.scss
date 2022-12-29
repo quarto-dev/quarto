@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * styles.scss
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,27 +13,15 @@
  *
  */
 
-// base shared types
-export * from 'editor-types';
 
-// ui types
-export * from './api/ui-types'
-export type { ListSpacing } from './api/ui-types';
+@import '@blueprintjs/core/lib/scss/variables.scss';
 
-// more types
-export * from './api/format';
-export * from './api/command-types';
-export * from './api/basekeys-types';
-export * from './api/navigation-types';
-export * from './api/event-types';
-export * from './api/extension-types'
-export * from './api/pandoc-types';
-export * from './api/options';
+.bp4-menu-item {
+  padding: 1px 7px;
+  font-size: 0.8rem;
+}
 
-// main editor module
-export * from './editor/editor';
-
-
-
-
-
+.bp4-menu-item-icon svg {
+  width: 12px;
+  height: 12px;
+}

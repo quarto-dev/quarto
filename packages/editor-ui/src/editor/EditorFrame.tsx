@@ -43,7 +43,8 @@ import {
   EditorUIContext,
   EditorOperations,
   EventHandler,
-  PandocWriterOptions
+  PandocWriterOptions,
+  EditorOptions
 } from 'editor';
 
 import { 
@@ -85,6 +86,7 @@ export interface EditorFrameProps {
   display: (commands: () => Commands) => EditorDisplay;
   uiContext: EditorUIContext;
   request: JsonRpcRequestTransport;
+  options?: EditorOptions;
   onEditorInit?: (editor: EditorOperations) => Promise<void>;
 }
 
@@ -151,6 +153,7 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
 
     editorRef.current = await createEditor(
       parentRef.current!, 
+      props.options || {},
       {
         prefs: editorPrefs,
         request: props.request,
@@ -325,7 +328,8 @@ const editorLoadingUI = (loading: boolean) => {
 
 const createEditor = async (
   parent: HTMLElement, 
-  providers: EditorProviders
+  options: EditorOptions,
+  providers: EditorProviders,
 ) : Promise<Editor> => {
   const context = editorContext(providers);
   const format: EditorFormat = {
@@ -342,9 +346,8 @@ const createEditor = async (
     docTypes: [kQuartoDocType]
   }
   return await Editor.create(parent, context, format, { 
-    browserSpellCheck: false,
-    commenting: false,
-    outerScrollContainer: true 
+    outerScrollContainer: true, 
+    ...options
   });
 }
 

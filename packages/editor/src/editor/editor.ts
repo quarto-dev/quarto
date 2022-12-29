@@ -341,6 +341,7 @@ export class Editor implements EditorOperations {
       autoFocus: false,
       browserSpellCheck: false,
       commenting: false,
+      outerScrollContainer: false,
       codeEditor: '',
       rmdImagePreview: false,
       hideFormatComment: false,

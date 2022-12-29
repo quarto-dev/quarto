@@ -67,7 +67,7 @@ const Editor : React.FC<EditorProps> = (props) => {
   
   // pair editor w/ host on on init
   const onEditorInit = async (editor: EditorOperations) => {
-    syncEditorToHost(editor, props.host);
+    syncEditorToHost(editor, props.host, uiContext.isActiveTab());
   };
 
   return (

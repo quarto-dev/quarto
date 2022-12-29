@@ -75,7 +75,11 @@ export function visualEditorHostClient(
   }
 }
 
-export async function syncEditorToHost(editor: EditorOperations, host: VisualEditorHostClient) {
+export async function syncEditorToHost(
+  editor: EditorOperations, 
+  host: VisualEditorHostClient,
+  focus: boolean
+) {
 
   // sync from text editor (throttled)
   const kThrottleDelayMs = 1000;
@@ -92,6 +96,11 @@ export async function syncEditorToHost(editor: EditorOperations, host: VisualEdi
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, {}, false);
+
+      // focus if requested
+      if (focus) {
+        editor.focus();
+      }
       
       // visual editor => text editor (just send the state, host will call back for markdown)
       editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));

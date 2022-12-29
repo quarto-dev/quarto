@@ -15,9 +15,6 @@
 
 import React, { useContext } from 'react';
 
-import { IconNames } from '@blueprintjs/icons';
-
-
 import { EditorCommandId } from 'editor';
 
 import {
@@ -29,7 +26,8 @@ import {
   CommandToolbarButton,
   CommandToolbarMenu,
   WithCommand,
-  editorLoading
+  editorLoading,
+  t
 } from 'editor-ui';
 
 
@@ -40,13 +38,16 @@ const CommandId = { ...EditorCommandId };
 
 const EditorToolbar: React.FC = () => {
 
-  const loading = useSelector(editorLoading);
-
   const [cmState] = useContext(CommandManagerContext);
+  const loading = useSelector(editorLoading);
 
   if (!loading) {
     return (
       <Toolbar className={styles.editorToolbar}>
+        <CommandToolbarButton command={CommandId.Strong} />
+        <CommandToolbarButton command={CommandId.Em} />
+        <CommandToolbarButton command={CommandId.Code} />
+        <ToolbarDivider />
         <CommandToolbarMenu
           className={styles.toolbarBlockFormatMenu}
           commands={[
@@ -63,22 +64,27 @@ const EditorToolbar: React.FC = () => {
           ]}
         />
         <ToolbarDivider />
-        <CommandToolbarButton command={CommandId.Strong} />
-        <CommandToolbarButton command={CommandId.Em} />
-        <CommandToolbarButton command={CommandId.Code} />
-        <ToolbarDivider />
         <CommandToolbarButton command={CommandId.BulletList} />
         <CommandToolbarButton command={CommandId.OrderedList} />
-        <CommandToolbarButton command={CommandId.Blockquote} />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Link} />
+        <CommandToolbarButton command={CommandId.Image} />
+        <ToolbarDivider />
+        <ToolbarMenu text={t('format_menu') as string}>
+          <CommandMenuItems menu={cmState.menus.format} />
+        </ToolbarMenu>
+        <ToolbarDivider />
+        <ToolbarMenu text={t('insert_menu') as string}>
+          <CommandMenuItems menu={cmState.menus.insert} />
+        </ToolbarMenu>
         <ToolbarDivider />
         <WithCommand id={CommandId.TableInsertTable}>
-          <ToolbarMenu icon={IconNames.TH}>
+          <ToolbarMenu text={t('table_menu') as string}>
             <CommandMenuItems menu={cmState.menus.table} />
           </ToolbarMenu>
           <ToolbarDivider />
         </WithCommand>
-        <CommandToolbarButton command={CommandId.Link} />
-        <CommandToolbarButton command={CommandId.Image} />
+       
       </Toolbar>
     );
   } else {

@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 import { Store } from 'redux';
@@ -34,6 +34,7 @@ import {
 
 import styles from './Editor.module.scss';
 import EditorToolbar from "./EditorToolbar";
+import { FocusStyleManager } from "@blueprintjs/core";
 
 
 export async function createEditor(parent: HTMLElement, vscode: WebviewApi<unknown>) {
@@ -62,8 +63,13 @@ interface EditorProps {
 
 const Editor : React.FC<EditorProps> = (props) => {
 
+  // only show focus on key navigation
+  useEffect(() => {
+    FocusStyleManager.onlyShowFocusOnTabs();
+  }, []);
+  
   // one time init of display/context
-  const [uiContext] = useState(editorUIContext());
+  const [uiContext] = useState(() => editorUIContext());
   
   // pair editor w/ host on on init
   const onEditorInit = async (editor: EditorOperations) => {

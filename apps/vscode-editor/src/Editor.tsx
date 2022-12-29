@@ -33,6 +33,7 @@ import {
 } from "./sync";
 
 import styles from './Editor.module.scss';
+import EditorToolbar from "./EditorToolbar";
 
 
 export async function createEditor(parent: HTMLElement, vscode: WebviewApi<unknown>) {
@@ -72,13 +73,16 @@ const Editor : React.FC<EditorProps> = (props) => {
   return (
     <StoreProvider store={props.store}>
       <CommandManagerProvider>
-        <EditorFrame
-          className={styles.editorParent} 
-          request={props.request}
-          uiContext={uiContext}
-          display={editorDisplay}
-          onEditorInit={onEditorInit}
-        />
+        <div className={styles.editorParent}>
+          <EditorToolbar/>
+          <EditorFrame
+            className={styles.editorFrame} 
+            request={props.request}
+            uiContext={uiContext}
+            display={editorDisplay}
+            onEditorInit={onEditorInit}
+          />
+         </div>
       </CommandManagerProvider>
     </StoreProvider>
   );

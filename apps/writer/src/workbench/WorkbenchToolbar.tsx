@@ -30,9 +30,10 @@ import {
   WithCommand 
 } from 'editor-ui';
 
+import { WorkbenchCommandId } from './commands';
+
 
 import styles from './WorkbenchToolbar.module.scss';
-import { WorkbenchCommandId } from './commands';
 
 const CommandId = { ...EditorCommandId, ...WorkbenchCommandId };
 

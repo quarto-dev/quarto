@@ -13,6 +13,8 @@
  *
  */
 
+@import 'editor-ui/src/theme.scss';
+ 
 .editorParent {
   position: absolute;
   top: 0;
@@ -20,3 +22,19 @@
   right: 0;
   bottom: 0;
 } 
+
+.editorToolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: $toolbarHeight;
+}
+
+.editorFrame {
+  position: absolute;
+  top: calc(#{$toolbarHeight} + 1px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+}

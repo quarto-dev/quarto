@@ -13,54 +13,22 @@
  *
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React from 'react';
 
-import { useTranslation } from 'react-i18next';
-
-import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
-
-import { CommandManagerContext, commandHotkeys } from 'editor-ui';
+import { useEditorHotkeys } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
 
 import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
-
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
 import WorkbenchToolbar from './WorkbenchToolbar';
-
-import { WorkbenchCommandId } from './commands';
 
 import './Workbench.scss';
 
 const Workbench: React.FC = () => {
  
-  const { t } = useTranslation();
-  const [cmState, cmDispatch] = useContext(CommandManagerContext);
-
-  // register hotkeys
-  const hotkeys = useMemo(() => {
-    return commandHotkeys(cmState.commands);
-  }, [cmState.commands]);
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: 'Ctrl+Alt+K' });
-
-  // hotkeys command
-  const [, hkDispatch] = useContext(HotkeysContext);
-  useEffect(() => {
-    cmDispatch({ type: "ADD_COMMANDS", payload: [
-      {
-        id: WorkbenchCommandId.KeyboardShortcuts,
-        menuText: t('commands:keyboard_shortcuts_menu_text'),
-        group: t('commands:group_utilities'),
-        keymap: ['Ctrl+Alt+K'],
-        isEnabled: () => true,
-        isActive: () => false,
-        execute: () => {
-          hkDispatch({ type: "OPEN_DIALOG"});
-        },
-      },
-    ]});
-  }, []); 
+  const { handleKeyDown, handleKeyUp } = useEditorHotkeys();
 
   // render workbench
   return (

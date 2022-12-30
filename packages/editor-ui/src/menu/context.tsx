@@ -20,7 +20,7 @@ import { ContextMenu, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
 import { v4 as uuidv4 } from 'uuid';
 
 import { EditorMenuItem } from "editor-types";
-import { CommandMenuItem, Commands } from "editor-ui";
+import { CommandMenuItem, Commands, CommandSubMenu } from "editor-ui";
 
 export async function showContextMenu(
   commands: Commands,
@@ -28,16 +28,21 @@ export async function showContextMenu(
   clientX: number,
   clientY: number
 ): Promise<boolean> {
-  return new Promise(resolve => {    
-    const menuItems = items.map(item => {
+  return new Promise(resolve => { 
+    const menuItem = (item: EditorMenuItem) => {
       if (item.separator) {
         return <MenuDivider key={uuidv4()}/>;
       } else if (item.command) {
         return <CommandMenuItem id={item.command} key={item.command} text={item.text} commands={commands}/>;
-      } else {
+      } else if (item.subMenu && item.text) {
+        return <CommandSubMenu text={item.text} key={uuidv4()} commands={commands}>{item.subMenu.items.map(menuItem)}</CommandSubMenu>;
+      } else if (item.text && item.exec) {
         return <MenuItem text={item.text} key={uuidv4()} onClick={item.exec}/>
+      } else {
+        return null;
       }
-    });
+    }  
+    const menuItems = items.map(menuItem);
     ContextMenu.show(<Menu>{menuItems}</Menu>, { left: clientX, top: clientY }, () => {
       resolve(true);
     });

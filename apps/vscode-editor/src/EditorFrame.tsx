@@ -22,7 +22,7 @@ import { Provider as StoreProvider } from 'react-redux';
 import { WebviewApi } from "vscode-webview";
 
 import { JsonRpcRequestTransport } from "core";
-import { CommandManagerProvider, Commands, EditorFrame, initEditorTranslations, initializeStore, showContextMenu } from "editor-ui";
+import { CommandManagerProvider, Commands, Editor, initEditorTranslations, initializeStore, showContextMenu } from "editor-ui";
 import { EditorDisplay, EditorMenuItem, EditorOperations, EditorUIContext, XRef } from "editor";
 
 import { 
@@ -51,17 +51,17 @@ export async function createEditor(parent: HTMLElement, vscode: WebviewApi<unkno
   
   // create and render editor
   const root = createRoot(parent);
-  root.render(<Editor store={store} host={host} request={request}/>);
+  root.render(<EditorFrame store={store} host={host} request={request}/>);
 
 }
 
-interface EditorProps {
+interface EditorFrameProps {
   host: VisualEditorHostClient;
   request: JsonRpcRequestTransport;
   store: Store;
 }
 
-const Editor : React.FC<EditorProps> = (props) => {
+const EditorFrame : React.FC<EditorFrameProps> = (props) => {
 
   // only show focus on key navigation
   useEffect(() => {
@@ -81,7 +81,7 @@ const Editor : React.FC<EditorProps> = (props) => {
       <CommandManagerProvider>
         <div className={styles.editorParent}>
           <EditorToolbar/>
-          <EditorFrame
+          <Editor
             className={styles.editorFrame} 
             request={props.request}
             uiContext={uiContext}

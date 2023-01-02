@@ -13,5 +13,5 @@
  *
  */
 
-export * from './EditorFrame';
+export * from './Editor';
 export * from './EditorOperationsContext';

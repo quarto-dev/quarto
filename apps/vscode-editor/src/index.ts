@@ -15,7 +15,7 @@
 
 import 'vscode-webview';
 
-import { createEditor } from './Editor';
+import { createEditor } from './EditorFrame';
 
 import "editor-ui/src/styles";
 import "./styles.scss"

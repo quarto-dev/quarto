@@ -27,7 +27,7 @@ import { JsonRpcRequestTransport } from 'core';
 import { defaultPrefs, Prefs } from 'editor-types';
 
 import { 
-  Editor, 
+  Editor as PMEditor, 
   EventType, 
   kAlertTypeError, 
   NavigationType,
@@ -79,9 +79,9 @@ import {
 
 import { EditorOperationsContext } from './EditorOperationsContext';
 
-import styles from './EditorFrame.module.scss';
+import styles from './Editor.module.scss';
 
-export interface EditorFrameProps {
+export interface EditorProps {
   className: string;
   display: (commands: () => Commands) => EditorDisplay;
   uiContext: EditorUIContext;
@@ -90,7 +90,7 @@ export interface EditorFrameProps {
   onEditorInit?: (editor: EditorOperations) => Promise<void>;
 }
 
-export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (props) => {
+export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
 
   // global services
   const { t } = useTranslation();
@@ -111,7 +111,7 @@ export const EditorFrame : React.FC<PropsWithChildren<EditorFrameProps>> = (prop
 
   // refs that hold out of band state 
   // https://stackoverflow.com/questions/57847594/react-hooks-accessing-up-to-date-state-from-within-a-callback
-  const editorRef = useRef<Editor | null>(null);
+  const editorRef = useRef<PMEditor | null>(null);
   const commandsRef = useRef<Commands | null>(null);
   const prefsRef = useRef<Prefs | null>(defaultPrefs());
   const spellingRef = useRef<EditorUISpelling | null>(null);
@@ -330,7 +330,7 @@ const createEditor = async (
   parent: HTMLElement, 
   options: EditorOptions,
   providers: EditorProviders,
-) : Promise<Editor> => {
+) : Promise<PMEditor> => {
   const context = editorContext(providers);
   const format: EditorFormat = {
     pandocMode: 'markdown',
@@ -345,7 +345,7 @@ const createEditor = async (
     },
     docTypes: [kQuartoDocType]
   }
-  return await Editor.create(parent, context, format, { 
+  return await PMEditor.create(parent, context, format, { 
     outerScrollContainer: true, 
     ...options
   });

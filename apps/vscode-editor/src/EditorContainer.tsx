@@ -13,11 +13,20 @@
  *
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
+
+import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
 import { JsonRpcRequestTransport } from 'core';
 
-import { Commands, Editor, showContextMenu, useEditorHotkeys } from 'editor-ui';
+import { 
+  commandHotkeys, 
+  CommandManagerContext, 
+  Commands, 
+  Editor, 
+  keyboardShortcutsCommand, 
+  showContextMenu
+} from 'editor-ui';
 
 import { EditorDisplay, EditorMenuItem, EditorOperations, EditorUIContext, XRef } from 'editor';
 
@@ -32,18 +41,29 @@ export interface EditorContainerProps {
 }
 
 const EditorContainer: React.FC<EditorContainerProps> = (props) => {
+  
+  // register keyboard shortcuts and get handlers
+  const showHotkeysKeyCombo = 'Ctrl+Alt+K';
+  const [cmState, cmDispatch] = useContext(CommandManagerContext);
+  const hotkeys = useMemo(() => { return commandHotkeys(cmState.commands); }, [cmState.commands]);
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: showHotkeysKeyCombo });
 
-  // bind hotkeys
-  const { handleKeyDown, handleKeyUp } = useEditorHotkeys();
-
+  // register show keyboard shortcuts command
+  const [, hkDispatch] = useContext(HotkeysContext);
+  useEffect(() => {
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
+      keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
+    ]});
+  }); 
+ 
   // one time creation of editorUIContext
   const [uiContext] = useState(() => editorUIContext());
 
   // pair editor w/ host on on init
-  const onEditorInit = useCallback((editor: EditorOperations) => {
+  const onEditorInit = (editor: EditorOperations) => {
     syncEditorToHost(editor, props.host, uiContext.isActiveTab());
     return Promise.resolve();
-  }, [props.host, uiContext]);
+  };
 
   return (
     <div className={styles.editorParent} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>

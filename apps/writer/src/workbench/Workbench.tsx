@@ -13,9 +13,11 @@
  *
  */
 
-import React from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 
-import { useEditorHotkeys } from 'editor-ui';
+import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
+
+import { commandHotkeys, CommandManagerContext, keyboardShortcutsCommand } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
 
@@ -28,8 +30,20 @@ import './Workbench.scss';
 
 const Workbench: React.FC = () => {
  
-  const { handleKeyDown, handleKeyUp } = useEditorHotkeys();
+  // register keyboard shortcuts and get handlers
+  const showHotkeysKeyCombo = 'Ctrl+Alt+K';
+  const [cmState, cmDispatch] = useContext(CommandManagerContext);
+  const hotkeys = useMemo(() => { return commandHotkeys(cmState.commands); }, [cmState.commands]);
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: showHotkeysKeyCombo });
 
+  // register show keyboard shortcuts command
+  const [, hkDispatch] = useContext(HotkeysContext);
+  useEffect(() => {
+    cmDispatch({ type: "ADD_COMMANDS", payload: [
+      keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
+    ]});
+  }); 
+   
   // render workbench
   return (
     <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>

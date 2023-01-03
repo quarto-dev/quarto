@@ -13,15 +13,23 @@
  *
  */
 
-import { HotkeyConfig, HotkeysContext, useHotkeys } from "@blueprintjs/core";
 import { useContext, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+
+import { HotkeyConfig, HotkeysContext, useHotkeys, UseHotkeysOptions } from "@blueprintjs/core";
+
 import { CommandManagerContext, Commands } from "./CommandManager";
 import { Command } from "./commands";
 import { EditorUICommandId } from "./commands-ui";
 import { toBlueprintHotkeyCombo } from "./keycodes";
 
-export function useEditorHotkeys() {
+export function useEditorHotkeys(options?: UseHotkeysOptions) {
+
+  // options defaults
+  options = {
+    showDialogKeyCombo: 'Ctrl+Alt+K',
+    ...options
+  }
   
   const { t } = useTranslation();
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
@@ -34,7 +42,7 @@ export function useEditorHotkeys() {
         id: EditorUICommandId.KeyboardShortcuts,
         menuText: t('commands:keyboard_shortcuts_menu_text'),
         group: t('commands:group_utilities'),
-        keymap: ['Ctrl+Alt+K'],
+        keymap: [options!.showDialogKeyCombo!],
         isEnabled: () => true,
         isActive: () => false,
         execute: () => {
@@ -49,7 +57,7 @@ export function useEditorHotkeys() {
   const hotkeys = useMemo(() => {
     return commandHotkeys(cmState.commands);
   }, [cmState.commands]);
-  return useHotkeys(hotkeys, { showDialogKeyCombo: 'Ctrl+Alt+K' });
+  return useHotkeys(hotkeys, options);
 }
 
 function commandHotkeys(commands: Commands) : HotkeyConfig[] {

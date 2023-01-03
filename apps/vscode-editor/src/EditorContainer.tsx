@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { JsonRpcRequestTransport } from 'core';
 
@@ -40,9 +40,10 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   const [uiContext] = useState(() => editorUIContext());
 
   // pair editor w/ host on on init
-  const onEditorInit = async (editor: EditorOperations) => {
+  const onEditorInit = useCallback((editor: EditorOperations) => {
     syncEditorToHost(editor, props.host, uiContext.isActiveTab());
-  }
+    return Promise.resolve();
+  }, [props.host, uiContext]);
 
   return (
     <div className={styles.editorParent} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>

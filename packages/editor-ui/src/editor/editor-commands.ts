@@ -63,7 +63,7 @@ export function editorDebugCommands(editor: Editor): Command[] {
       id: EditorUICommandId.EnableDevTools,
       menuText: t('commands:enable_dev_tools_menu_text'),
       group: t('commands:group_utilities'),
-      keymap: [],
+      keymap: ['Ctrl+Alt+P'],
       isEnabled: () => true,
       isActive: () => false,
       execute: () => {

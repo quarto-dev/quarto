@@ -18,8 +18,6 @@ import React, { PropsWithChildren, useCallback, useContext, useEffect, useRef } 
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { useTranslation } from 'react-i18next';
-
 import { Intent, Spinner } from '@blueprintjs/core';
 
 import { JsonRpcRequestTransport } from 'core';
@@ -79,7 +77,10 @@ import {
 
 import { EditorOperationsContext } from './EditorOperationsContext';
 
+import { t } from '../i18n';
+
 import styles from './Editor.module.scss';
+
 
 export interface EditorProps {
   className: string;
@@ -93,7 +94,6 @@ export interface EditorProps {
 export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
 
   // global services
-  const { t } = useTranslation();
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
   const uiToolsRef = useRef<UITools>(new UITools());
   const dialogs = useRef(editorDialogs(uiToolsRef.current.attr));

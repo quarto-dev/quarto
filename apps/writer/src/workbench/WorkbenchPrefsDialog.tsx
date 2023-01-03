@@ -14,7 +14,6 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { FormikDialog, FormikHTMLSelect } from 'ui-widgets';
 
@@ -23,7 +22,8 @@ import {
   useGetPrefsQuery, 
   useSetPrefsMutation, 
   useGetAvailableDictionariesQuery, 
-  EditorUICommandId
+  EditorUICommandId,
+  t
 } from 'editor-ui';
 
 import { defaultPrefs, Prefs } from 'editor-types';
@@ -31,10 +31,6 @@ import { defaultPrefs, Prefs } from 'editor-types';
 import { WorkbenchCommandId } from './commands';
 
 export const WorkbenchPrefsDialog: React.FC = () => {
-
-  // translations
-  const { t } = useTranslation();
-
   // command to show dialog
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [, cmDispatch] = useContext(CommandManagerContext);

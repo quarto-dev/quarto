@@ -15,16 +15,13 @@
 
 import React, { useContext, useEffect } from 'react';
 
-import { useTranslation } from 'react-i18next';
-
-import { CommandManagerContext, Command, keyCodeString, alert, EditorUICommandId } from 'editor-ui';
+import { CommandManagerContext, Command, keyCodeString, alert, EditorUICommandId, t } from 'editor-ui';
 
 import { WorkbenchCommandId } from './commands';
 import { kAlertTypeWarning } from 'editor';
 
 const WorkbenchClipboard: React.FC = () => {
    
-  const { t } = useTranslation();
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const focusEditor = () => {

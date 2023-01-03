@@ -14,14 +14,12 @@
  */
 
 import i18n, { TFunction } from 'i18next';
-import { initReactI18next } from 'react-i18next';
 
 import enCommands from "./locales/en/commands.json";
 import enTranslations from "./locales/en/translations.json";
 
 export async function initEditorTranslations(): Promise<TFunction> {
   t = await i18n
-    .use(initReactI18next)
     .init({
       fallbackLng: 'en',
       debug: false,

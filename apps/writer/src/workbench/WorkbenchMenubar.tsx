@@ -14,11 +14,12 @@
  */
 
 import React, { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { ButtonGroup, MenuDivider } from '@blueprintjs/core';
 
 import { EditorCommandId } from 'editor';
+
+import { t } from "editor-ui"
 
 import { 
   MainMenu, 
@@ -89,7 +90,6 @@ const HelpMenu: React.FC = () => {
 };
 
 const WorkbenchMenubar: React.FC = () => {
-  const { t } = useTranslation();
 
   const [cmState] = useContext(CommandManagerContext);
 

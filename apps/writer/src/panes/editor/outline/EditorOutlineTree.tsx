@@ -15,13 +15,11 @@
 
 import React, { useContext } from 'react';
 
-import { useTranslation } from 'react-i18next';
-
 import { Props, Tree, TreeNodeInfo } from '@blueprintjs/core';
 
 import { EditorOutline, EditorOutlineItem, NavigationType } from 'editor';
 
-import { EditorOperationsContext } from 'editor-ui';
+import { EditorOperationsContext, t } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
 
@@ -30,8 +28,6 @@ export interface EditorOutlineTreeProps extends Props {
 }
 
 export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
-  // use translation
-  const { t } = useTranslation();
 
   // editor operaitons context
   const editor = useContext(EditorOperationsContext);

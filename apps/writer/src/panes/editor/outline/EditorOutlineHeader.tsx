@@ -15,10 +15,11 @@
 
 import React from 'react';
 
-import { useTranslation } from 'react-i18next';
 
 import { Icon } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
+
+import { t } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
 
@@ -27,7 +28,6 @@ export interface EditorOutlineHeaderProps {
 }
 
 export const EditorOutlineHeader: React.FC<EditorOutlineHeaderProps> = props => {
-  const { t } = useTranslation();
 
   return (
     <div className={styles.outlineHeader}>

@@ -15,7 +15,6 @@
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-import { useTranslation } from 'react-i18next';
 import { CSSTransition } from 'react-transition-group';
 import { useDebounce } from 'use-debounce';
 
@@ -26,7 +25,7 @@ import { focusInput } from 'core-browser';
 
 import { kAlertTypeInfo, UITools } from 'editor';
 
-import { EditorOperationsContext, editorDialogs, EditorUICommandId } from "editor-ui";
+import { EditorOperationsContext, editorDialogs, EditorUICommandId, t } from "editor-ui";
 
 import { CommandManagerContext } from 'editor-ui';
 
@@ -36,7 +35,6 @@ import styles from './EditorFind.module.scss';
 const EditorFind: React.FC = () => {
 
   // translations and commands
-  const { t } = useTranslation();
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   // contexts

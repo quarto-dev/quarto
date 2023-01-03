@@ -15,8 +15,6 @@
 
 import React, { useState, useRef } from 'react';
 
-import { useTranslation } from 'react-i18next';
-
 import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
 
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
@@ -40,8 +38,6 @@ export interface FormikDialogProps<Values extends FormikValues = FormikValues> e
 }
 
 function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikDialogProps<Values>) {
-
-  const { t } = useTranslation();
 
   const [validateOnChange, setValidateOnChange] = useState(false);
 
@@ -83,10 +79,10 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
                 <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
                 <div className={styles.dialogFooterActionsRight}>
                   {!props.noCancelButton 
-                      ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || t('Cancel')}</Button>
+                      ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || 'Cancel'}</Button>
                       : null
                   }
-                  <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || t('OK')}</Button>
+                  <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || 'OK'}</Button>
                 </div>
               </div>
             </div>

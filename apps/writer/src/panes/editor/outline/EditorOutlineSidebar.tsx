@@ -19,14 +19,12 @@ import { useSelector } from 'react-redux';
 
 import { CSSTransition } from 'react-transition-group';
 
-import { useTranslation } from 'react-i18next';
-
 import { defaultPrefs } from 'editor-types';
 
 import { editorOutline, EditorUICommandId } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 
-import { CommandManagerContext } from 'editor-ui';
+import { CommandManagerContext, t } from 'editor-ui';
 
 import { EditorOutlineButton } from './EditorOutlineButton';
 import { EditorOutlineHeader } from './EditorOutlineHeader';
@@ -37,7 +35,6 @@ import styles from './EditorOutlineSidebar.module.scss';
 
 const EditorOutlineSidebar: React.FC = () => {
 
-  const { t } = useTranslation();
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const outline = useSelector(editorOutline);

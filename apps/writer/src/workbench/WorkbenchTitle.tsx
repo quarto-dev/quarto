@@ -18,13 +18,11 @@ import ReactDOM from 'react-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { useTranslation } from 'react-i18next';
-
 import { EditableText } from '@blueprintjs/core';
 
 import { focusInput } from 'core-browser';
 
-import { CommandManagerContext, EditorUICommandId } from 'editor-ui';
+import { CommandManagerContext, EditorUICommandId, t } from 'editor-ui';
 
 import { editorLoading, editorTitle, setEditorTitle } from 'editor-ui';
 
@@ -34,7 +32,6 @@ import styles from './WorkbenchNavbar.module.scss';
 
 const WorkbenchTitle: React.FC = () => {
 
-  const { t } = useTranslation();
   const [, cmDispatch] = useContext(CommandManagerContext);
   const loading = useSelector(editorLoading);
   const title = useSelector(editorTitle);

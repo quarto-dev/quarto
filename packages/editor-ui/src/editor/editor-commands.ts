@@ -57,7 +57,6 @@ export function editorExternalCommands(editor: Editor): Command[] {
   ];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function editorDebugCommands(editor: Editor): Command[] {
   return [
     {

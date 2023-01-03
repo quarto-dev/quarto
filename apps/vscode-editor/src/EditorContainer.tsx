@@ -65,8 +65,22 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
     return Promise.resolve();
   }, []);
 
+  // ensure that keys we handle aren't propagated to vscode
+  const keyboardEventHandler = (handler: React.KeyboardEventHandler) => {
+    return (event: React.KeyboardEvent<HTMLElement>) => {
+      handler(event);
+      if (event.isDefaultPrevented()) {
+        event.stopPropagation();
+      }
+    };
+  }
+
   return (
-    <div className={styles.editorParent} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
+    <div 
+      className={styles.editorParent} 
+      onKeyDown={keyboardEventHandler(handleKeyDown)} 
+      onKeyUp={keyboardEventHandler(handleKeyUp)}
+    >
       <EditorToolbar/>
       <Editor
         className={styles.editorFrame} 

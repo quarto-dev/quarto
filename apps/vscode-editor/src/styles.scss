@@ -16,6 +16,14 @@
 
 @import '@blueprintjs/core/lib/scss/variables.scss';
 
+#root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 .bp4-menu-item {
   padding: 1px 7px;
   font-size: 0.8rem;

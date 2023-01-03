@@ -173,6 +173,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             <title>Visual Editor</title>
         </head>
         <body>
+            <div id="root"></div>
             <script nonce="${nonce}" src="${scriptUri}"></script>
         </body>
         </html>`;

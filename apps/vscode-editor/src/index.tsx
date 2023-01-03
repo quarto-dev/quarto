@@ -13,14 +13,40 @@
  *
  */
 
+import React from "react";
+import { createRoot } from 'react-dom/client';
+
 import 'vscode-webview';
 
-import { createEditor } from './EditorFrame';
+import { initEditorTranslations, initializeStore } from 'editor-ui';
+
+import { App } from "./App";
+import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
 
 import "editor-ui/src/styles";
 import "./styles.scss"
 
-const vscode = acquireVsCodeApi<unknown>();
-createEditor(window.document.body, vscode);
+async function runEditor() {
+  try {
+    // connection to host
+    const vscode = acquireVsCodeApi<unknown>();
+    const request = visualEditorJsonRpcRequestTransport(vscode)
+    const host = visualEditorHostClient(vscode, request);
+
+    // initialize store
+    const store = await initializeStore(request);
+
+     // init localization
+     await initEditorTranslations();
+
+    // render
+    const root = createRoot(document.getElementById('root')!);
+    root.render(<App store={store} host={host} request={request}/>);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+runEditor();
 
 

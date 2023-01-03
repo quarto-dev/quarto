@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useState, useMemo, useEffect, useContext } from 'react';
+import React, { useState, useMemo, useEffect, useContext, useCallback } from 'react';
 
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
@@ -54,16 +54,16 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
       keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
     ]});
-  }); 
+  }, []); 
  
   // one time creation of editorUIContext
   const [uiContext] = useState(() => editorUIContext());
 
   // pair editor w/ host on on init
-  const onEditorInit = (editor: EditorOperations) => {
+  const onEditorInit = useCallback((editor: EditorOperations) => {
     syncEditorToHost(editor, props.host, uiContext.isActiveTab());
     return Promise.resolve();
-  };
+  }, []);
 
   return (
     <div className={styles.editorParent} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>

@@ -26,7 +26,7 @@ export default defineConfig(env => {
     build: {
       watch: dev ? {} : null,
       lib: {
-        entry: 'src/index.ts',
+        entry: 'src/index.tsx',
         formats: ['umd'],
         name: "QuartoVisualEditor",
         fileName: () => 'index.js' 

@@ -24,6 +24,7 @@ import {
   CommandManagerContext, 
   Commands, 
   Editor, 
+  EditorFind, 
   keyboardShortcutsCommand, 
   showContextMenu
 } from 'editor-ui';
@@ -88,7 +89,9 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         uiContext={uiContext}
         display={editorDisplay}
         onEditorInit={onEditorInit}
-      />
+      >
+        <EditorFind />
+      </Editor>
     </div>
   );
 }

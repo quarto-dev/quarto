@@ -51,6 +51,7 @@ const EditorPane : React.FC = () => {
         uiContext={uiContext}
         display={editorDisplay}
         onEditorInit={onEditorInit}
+        options={{outerScrollContainer: true}}
       >
         <EditorOutlineSidebar />
         <EditorFind />

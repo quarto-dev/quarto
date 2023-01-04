@@ -346,7 +346,6 @@ const createEditor = async (
     docTypes: [kQuartoDocType]
   }
   return await PMEditor.create(parent, context, format, { 
-    outerScrollContainer: true, 
     ...options
   });
 }

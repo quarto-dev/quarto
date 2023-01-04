@@ -12,16 +12,19 @@
     "@blueprintjs/select": "^4.8.11",
     "@types/yup": "^0.32.0",
     "core": "*",
+    "core-browser": "*",
     "editor-core": "*",
     "editor-types": "*",
     "formik": "^2.2.9",
     "i18next": "^22.4.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-transition-group": "^4.4.5",
     "redux": "^4.2.0",
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "ui-widgets": "*",
+    "use-debounce": "^9.0.2",
     "yup": "^0.32.11"
   }
 }

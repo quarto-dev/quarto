@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { Editor, Pane } from 'editor-ui';
+import { Editor, Pane, EditorFind } from 'editor-ui';
 
 import { EditorOperations } from 'editor';
 
@@ -25,7 +25,6 @@ import { editorDisplay } from './context/display';
 import { editorUIContext } from './context/ui-context';
 
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
-import EditorFind from './EditorFind';
 
 import { kWriterJsonRpcPath } from '../../constants';
 

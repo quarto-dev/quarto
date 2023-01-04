@@ -25,14 +25,16 @@ import { focusInput } from 'core-browser';
 
 import { kAlertTypeInfo, UITools } from 'editor';
 
-import { EditorOperationsContext, editorDialogs, EditorUICommandId, t } from "editor-ui";
+import { CommandManagerContext, EditorUICommandId } from '../commands';
+import { editorDialogs } from '../dialogs';
+import { t } from '../i18n';
 
-import { CommandManagerContext } from 'editor-ui';
+import { EditorOperationsContext } from './EditorOperationsContext';
 
 import styles from './EditorFind.module.scss';
 
 
-const EditorFind: React.FC = () => {
+export const EditorFind: React.FC = () => {
 
   // translations and commands
   const [, cmDispatch] = useContext(CommandManagerContext);
@@ -203,7 +205,7 @@ const EditorFind: React.FC = () => {
 
   // component
   return (
-    <CSSTransition nodeRef={nodeRef} in={active} timeout={300} classNames={{ ...styles }}
+    <CSSTransition nodeRef={nodeRef} in={active} timeout={50} classNames={{ ...styles }}
       onEntered={() =>focusInput(findInputRef.current)}
     >          
       <div ref={nodeRef} className={styles.findContainer}>
@@ -238,5 +240,3 @@ const EditorFind: React.FC = () => {
     </CSSTransition>
   );
 }
-
-export default EditorFind;

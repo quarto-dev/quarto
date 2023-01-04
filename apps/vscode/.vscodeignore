@@ -1,5 +1,6 @@
 .vscode/**
 .vscode-test/**
+.turbo/**
 node_modules/**
 src/**
 .gitignore

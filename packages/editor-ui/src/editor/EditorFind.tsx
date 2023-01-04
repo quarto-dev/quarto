@@ -116,7 +116,7 @@ export const EditorFind: React.FC = () => {
       {
         id: EditorUICommandId.Find,
         menuText: t('commands:find_menu_text'),
-        group: t('commands:group_utilities'),
+        group: t('commands:group_find'),
         keymap: ['Mod-f'],
         isEnabled: () => true,
         isActive: () => false,
@@ -130,7 +130,7 @@ export const EditorFind: React.FC = () => {
       {
         id: EditorUICommandId.FindNext,
         menuText: t('commands:find_next_menu_text'),
-        group: t('commands:group_utilities'),
+        group: t('commands:group_find'),
         keymap: ['Ctrl-g'],
         isEnabled: () => active,
         isActive: () => false,
@@ -139,7 +139,7 @@ export const EditorFind: React.FC = () => {
       {
         id: EditorUICommandId.FindPrevious,
         menuText: t('commands:find_previous_menu_text'),
-        group: t('commands:group_utilities'),
+        group: t('commands:group_find'),
         keymap: ['Mod-Shift-g'],
         isEnabled: () => active,
         isActive: () => false,
@@ -153,7 +153,7 @@ export const EditorFind: React.FC = () => {
       {
         id: EditorUICommandId.ReplaceAndFind,
         menuText: t('commands:replace_and_find_menu_text'),
-        group: t('commands:group_utilities'),
+        group: t('commands:group_find'),
         keymap: ['Mod-Shift-j'],
         isEnabled: () => active && replaceText.length > 0,
         isActive: () => false,

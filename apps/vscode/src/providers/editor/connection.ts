@@ -30,7 +30,8 @@ import {
   VSC_VEH_NavigateToXRef,
   VSC_VEH_NavigateToFile,
   VSCodeVisualEditor,
-  VSCodeVisualEditorHost, 
+  VSCodeVisualEditorHost,
+  EditorInit, 
 } from "editor-types";
 
 import { 
@@ -56,7 +57,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 
   return {
     editor: {
-      init: (markdown: string) => request(VSC_VE_Init, [markdown]),
+      init: (init: EditorInit) => request(VSC_VE_Init, [init]),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
     },

@@ -16,6 +16,7 @@
 import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode";
 import { VSCodeVisualEditor } from "editor-types";
 import { getWholeRange } from "../../core/doc";
+import { isRStudioWorkbench, isWindows } from "../../core/platform";
 
 /* Strategy for managing synchronization of edits between source and visual mode. 
 
@@ -109,7 +110,11 @@ export function editorSyncManager(
     // with its initial contents and syncing the canonnical markdown
     // back to the document
     init: async() => {
-      const markdown = await visualEditor.init(document.getText());
+      const markdown = await visualEditor.init({
+        documentPath: document.isUntitled ? null : document.fileName,
+        markdown: document.getText(),
+        isWindowsDesktop: isWindows()
+      });
       if (markdown !== document.getText()) {
         await updateWorkspaceDocument(document, markdown);
       }

@@ -29,8 +29,14 @@ export const VSC_VEH_NavigateToXRef = 'vsc_veh_navigate_to_xref';
 export const VSC_VEH_NavigateToFile = 'vsc_veh_navigate_to_file';
 
 
+export interface EditorInit {
+  documentPath: string | null;
+  markdown: string;
+  isWindowsDesktop: boolean;
+}
+
 export interface VSCodeVisualEditor {
-  init: (markdown: string) => Promise<string>; 
+  init: (init: EditorInit) => Promise<string>; 
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
 }

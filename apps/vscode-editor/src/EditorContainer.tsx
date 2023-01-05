@@ -108,8 +108,7 @@ function editorDisplay(host: VisualEditorHostClient)  {
       navigateToFile(file: string) {
         host.navigateToFile(file);
       },
-  
-      async showContextMenu(
+      showContextMenu(
         items: EditorMenuItem[],
         clientX: number,
         clientY: number
@@ -193,7 +192,5 @@ function editorUIContext(): EditorUIContext {
     },
   };
 }
-
-
 
 export default EditorContainer;

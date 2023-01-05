@@ -22,6 +22,7 @@ export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 
 export const VSC_VEH_OnEditorReady = 'vsc_veh_on_editor_ready';
 export const VSC_VEH_OnEditorUpdated = 'vsc_veh_on_editor_updated';
+export const VSC_VEH_FlushEditorUpdates = 'vsc_veh_flush_editor_updates';
 
 export const VSC_VEH_OpenURL = 'vsc_veh_open_url';
 export const VSC_VEH_NavigateToXRef = 'vsc_veh_navigate_to_xref';
@@ -37,6 +38,7 @@ export interface VSCodeVisualEditor {
 export interface VSCodeVisualEditorHost extends EditorDisplay {
   onEditorReady: () => Promise<void>; 
   onEditorUpdated: (state: unknown) => Promise<void>;
+  flushEditorUpdates: () => Promise<void>;
 }
 
 

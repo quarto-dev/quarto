@@ -58,7 +58,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }, []); 
  
   // one time creation of editorUIContext
-  const [uiContext] = useState(() => editorUIContext());
+  const [uiContext] = useState(() => editorUIContext(props.host));
 
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
@@ -119,7 +119,7 @@ function editorDisplay(host: VisualEditorHostClient)  {
   };
 }
 
-function editorUIContext(): EditorUIContext {
+function editorUIContext(host: VisualEditorHostClient): EditorUIContext {
   return {
     // check if we are the active tab
     isActiveTab(): boolean {
@@ -135,6 +135,7 @@ function editorUIContext(): EditorUIContext {
     // (note this just means that the server has a copy of it for e.g.
     // indexing xrefs, from the user's standpoint the doc is still dirty)
     async withSavedDocument(): Promise<boolean> {
+      await host.flushEditorUpdates();
       return true;
     },
 

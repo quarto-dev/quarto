@@ -24,6 +24,7 @@ import {
   VSC_VE_GetMarkdownFromState,
   VSC_VE_ApplyExternalEdit, 
   VSC_VEH_OnEditorUpdated,
+  VSC_VEH_FlushEditorUpdates,
   VSC_VEH_OnEditorReady, 
   VSC_VEH_OpenURL,
   VSC_VEH_NavigateToXRef,
@@ -102,6 +103,7 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
   const methods: Record<string, JsonRpcServerMethod> = {
     [VSC_VEH_OnEditorReady]: () => host.onEditorReady(),
     [VSC_VEH_OnEditorUpdated]: args => host.onEditorUpdated(args[0]),
+    [VSC_VEH_FlushEditorUpdates]: () => host.flushEditorUpdates(),
     [VSC_VEH_OpenURL]: args => voidPromise(host.openURL(args[0])),
     [VSC_VEH_NavigateToXRef]: args => voidPromise(host.navigateToXRef(args[0], args[1])),
     [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0]))

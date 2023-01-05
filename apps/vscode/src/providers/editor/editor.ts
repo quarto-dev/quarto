@@ -125,6 +125,9 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       // notify sync manager when visual editor is updated
       onEditorUpdated: syncManager.onVisualEditorChanged,
 
+      // flush any pending updates
+      flushEditorUpdates: syncManager.flushPendingUpdates,
+
       openURL: function (url: string): void {
         env.openExternal(Uri.parse(url));
       },

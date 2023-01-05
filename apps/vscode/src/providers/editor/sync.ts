@@ -47,6 +47,7 @@ For the visual editor propagating its own changes:
 export interface EditorSyncManager {
   init: () => Promise<void>;  
   onVisualEditorChanged: (state: unknown) => Promise<void>;
+  flushPendingUpdates: () => Promise<void>;
   onDocumentChanged: () => Promise<void>;
   onDocumentSaving: () => Promise<TextEdit[]>;
   onDocumentSaved: () => Promise<void>;
@@ -118,6 +119,9 @@ export function editorSyncManager(
     onVisualEditorChanged: async (state: unknown) => {
       pendingVisualEdit = state;
     },
+
+    // flush
+    flushPendingUpdates: collectAndApplyPendingVisualEdit,
 
     // notification that the document changed, let the visual editor
     // know about the change unless the next update is supressed. note that

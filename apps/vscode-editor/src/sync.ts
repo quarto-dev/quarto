@@ -39,7 +39,8 @@ import {
   VSCodeVisualEditorHost, 
   EditorServer,
   EditorServices,
-  XRef
+  XRef,
+  VSC_VEH_FlushEditorUpdates
 } from "editor-types";
 
 import { 
@@ -121,7 +122,8 @@ export async function syncEditorToHost(
     },
 
     async getMarkdownFromState(state: unknown) : Promise<string> {
-      return editor.getMarkdownFromStateJson(state, {});
+      const markdown = await editor.getMarkdownFromStateJson(state, {});
+      return markdown;
     },
   })
 
@@ -162,6 +164,7 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
   return {
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
+    flushEditorUpdates: () => request(VSC_VEH_FlushEditorUpdates, []),
     openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),
     navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file])

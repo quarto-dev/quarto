@@ -1,5 +1,5 @@
 /*
- * link-auto.ts
+ * link-input.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -19,7 +19,6 @@ import { EditorState } from 'prosemirror-state';
 import { setTextSelection } from 'prosemirror-utils';
 
 import { markInputRule, MarkInputRuleFilter } from '../../api/input_rule';
-import { markPasteHandler } from '../../api/clipboard';
 
 export function linkInputRules(autoLink: boolean) {
   return (schema: Schema, filter: MarkInputRuleFilter) => {
@@ -82,6 +81,3 @@ export function linkInputRules(autoLink: boolean) {
   };
 }
 
-export function linkPasteHandler(schema: Schema) {
-  return markPasteHandler(/(?:<)?([a-z]+:\/\/[^\s>]+)(?:>)?/g, schema.marks.link, url => ({ href: url }));
-}

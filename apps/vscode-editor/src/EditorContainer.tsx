@@ -29,7 +29,7 @@ import {
   showContextMenu
 } from 'editor-ui';
 
-import { EditorDisplay, EditorMenuItem, EditorOperations, EditorUIContext, XRef } from 'editor';
+import { EditorMenuItem, EditorOperations, EditorUIContext, XRef } from 'editor';
 
 import { syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
@@ -87,7 +87,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         className={styles.editorFrame} 
         request={props.request}
         uiContext={uiContext}
-        display={editorDisplay}
+        display={editorDisplay(props.host)}
         onEditorInit={onEditorInit}
       >
         <EditorFind />
@@ -96,6 +96,29 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   );
 }
 
+function editorDisplay(host: VisualEditorHostClient)  {
+  return (commands: () => Commands) => {
+    return {
+      openURL(url: string) {
+        host.openURL(url);
+      },
+      navigateToXRef(file: string, xref: XRef) {
+        host.navigateToXRef(file, xref);
+      },
+      navigateToFile(file: string) {
+        host.navigateToFile(file);
+      },
+  
+      async showContextMenu(
+        items: EditorMenuItem[],
+        clientX: number,
+        clientY: number
+      ): Promise<boolean> {
+        return showContextMenu(commands(), items, clientX, clientY);
+      }
+    };
+  };
+}
 
 function editorUIContext(): EditorUIContext {
   return {
@@ -171,29 +194,6 @@ function editorUIContext(): EditorUIContext {
   };
 }
 
-function editorDisplay(commands: () => Commands) : EditorDisplay {
-  return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    openURL(_url: string) {
-      //
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    navigateToXRef(_file: string, _xref: XRef) {
-      //
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    navigateToFile(_file: string) {
-      //
-    },
 
-    async showContextMenu(
-      items: EditorMenuItem[],
-      clientX: number,
-      clientY: number
-    ): Promise<boolean> {
-      return showContextMenu(commands(), items, clientX, clientY);
-    }
-  };
-}
 
 export default EditorContainer;

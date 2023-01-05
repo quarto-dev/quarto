@@ -15,10 +15,11 @@
 
 import { SkinTone } from './emoji';
 
-import { XRef, EditorUISpelling, EditorDialogs, EditorMenuItem } from 'editor-types';
+import { EditorUISpelling, EditorDialogs, EditorDisplay } from 'editor-types';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
+export type { EditorDisplay };
 
 export interface EditorUI {
   dialogs: EditorDialogs;
@@ -114,13 +115,6 @@ export interface EditorUIContext {
 
 export interface EditorUIMath {
   typeset: (el: HTMLElement, text: string, priority: boolean) => Promise<boolean>;
-}
-
-export interface EditorDisplay {
-  openURL: (url: string) => void;
-  navigateToXRef: (file: string, xref: XRef) => void;
-  navigateToFile: (file: string) => void;
-  showContextMenu?: (items: EditorMenuItem[], clientX: number, clientY: number) => Promise<boolean>;
 }
 
 export const kListSpacingTight = 'tight';

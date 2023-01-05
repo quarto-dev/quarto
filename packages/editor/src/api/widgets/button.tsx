@@ -46,7 +46,7 @@ export const LinkButton: React.FC<LinkButtonProps> = props => {
 
   return (
     <a
-      href={props.text}
+      href={"#0"}
       tabIndex={0}
       onClick={onClick}
       onKeyDown={onKeyDown}

@@ -13,6 +13,8 @@
  *
  */
 
+import { EditorDisplay } from "./display";
+
 export const VSC_VE_Init = 'vsc_ve_init';
 export const VSC_VE_GetMarkdown = 'vsc_ve_get_markdown';
 export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
@@ -21,15 +23,21 @@ export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 export const VSC_VEH_OnEditorReady = 'vsc_veh_on_editor_ready';
 export const VSC_VEH_OnEditorUpdated = 'vsc_veh_on_editor_updated';
 
+export const VSC_VEH_OpenURL = 'vsc_veh_open_url';
+export const VSC_VEH_NavigateToXRef = 'vsc_veh_navigate_to_xref';
+export const VSC_VEH_NavigateToFile = 'vsc_veh_navigate_to_file';
+
+
 export interface VSCodeVisualEditor {
   init: (markdown: string) => Promise<string>; 
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
 }
 
-export interface VSCodeVisualEditorHost {
+export interface VSCodeVisualEditorHost extends EditorDisplay {
   onEditorReady: () => Promise<void>; 
   onEditorUpdated: (state: unknown) => Promise<void>;
 }
+
 
 

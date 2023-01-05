@@ -456,7 +456,7 @@ export class AceNodeView implements NodeView {
         const tr = this.view.state.tr.replaceWith(
           start + change.from,
           start + change.to,
-          change.text ? this.node.type.schema.text(change.text) : null,
+          change.text ? this.node.type.schema.text(change.text) : [],
         );
         this.view.dispatch(tr);
       }

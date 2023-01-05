@@ -54,7 +54,7 @@ export class UserCommentViewPlugin extends Plugin {
               ignoreMutation: () => true,
             };
           },
-          user_comment_begin(node, view, _getPos, decorations) {
+          user_comment_begin(node, view, _getPos, decorations, innerDecorations) {
 
             const el = document.createElement("div");
             const root = createRoot(el);
@@ -125,7 +125,7 @@ export class UserCommentViewPlugin extends Plugin {
               }
             };
 
-            nodeView.update!(node, decorations);
+            nodeView.update!(node, decorations, innerDecorations);
 
             return nodeView;
           },

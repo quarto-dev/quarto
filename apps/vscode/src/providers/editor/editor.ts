@@ -23,12 +23,13 @@ import {
   WebviewPanel, 
   CancellationToken, 
   Uri, 
-  Webview
+  Webview,
+  env
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
 
-import { VSCodeVisualEditorHost } from "editor-types";
+import { VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 
@@ -84,7 +85,6 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
     // editor container implementation   
     const host: VSCodeVisualEditorHost = {
-
       // editor is fully loaded and ready for communication
       onEditorReady: async () => {
 
@@ -121,6 +121,16 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
       // notify sync manager when visual editor is updated
       onEditorUpdated: syncManager.onVisualEditorChanged,
+
+      openURL: function (url: string): void {
+        env.openExternal(Uri.parse(url));
+      },
+      navigateToXRef: function (file: string, xref: XRef): void {
+        throw new Error("Function not implemented.");
+      },
+      navigateToFile: function (file: string): void {
+        throw new Error("Function not implemented.");
+      }
     };
 
     // setup server on webview iframe
@@ -161,8 +171,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             <meta charset="UTF-8">
 
             <!-- Use a content security policy to only allow scripts that have a specific nonce. -->
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:;">
-          
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:; font-src data:;">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
             <link href="${stylesUri}" rel="stylesheet" />

@@ -30,7 +30,8 @@ import { kLinkTarget, kLinkTargetUrl, kLinkTargetTitle, kLinkAttr, kLinkChildren
 import { hasShortcutHeadingLinks } from '../../api/pandoc_format';
 
 import { linkCommand, removeLinkCommand, linkOmniInsert } from './link-command';
-import { linkInputRules, linkPasteHandler } from './link-auto';
+import { linkInputRules } from './link-input';
+import { linkPasteHandler, linkCopyPlugin } from './link-clipboard';
 import { linkHeadingsPostprocessor, syncHeadingLinksAppendTransaction } from './link-headings';
 import { linkPopupPlugin } from './link-popup';
 
@@ -57,6 +58,7 @@ const extension = (context: ExtensionContext): Extension => {
         spec: {
           attrs: {
             href: {},
+            clipboardhref: { default: null },
             heading: { default: null },
             title: { default: null },
             ...(linkAttr ? pandocAttrSpec : {}),
@@ -96,7 +98,7 @@ const extension = (context: ExtensionContext): Extension => {
             return [
               'a',
               {
-                href: mark.attrs.href,
+                href: mark.attrs.clipboardhref || '#0',
                 title: mark.attrs.title,
                 'data-heading': mark.attrs.heading,
                 ...extraAttr,
@@ -172,6 +174,7 @@ const extension = (context: ExtensionContext): Extension => {
           linkCommand(schema.marks.link, ui.dialogs.editLink, capabilities),
           removeLinkCommand(schema.marks.link),
         ),
+        linkCopyPlugin(schema)
       ];
       if (autoLink) {
         plugins.push(

@@ -35,6 +35,7 @@ export * from './prefs';
 export * from './services'
 export * from './outline'
 export * from './menu'
+export * from './display'
 export * from './vscode'
 
 

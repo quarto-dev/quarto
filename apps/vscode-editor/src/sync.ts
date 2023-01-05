@@ -29,13 +29,17 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 import { 
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_GetMarkdownFromState,
+  VSC_VE_Init, 
   VSC_VEH_OnEditorUpdated,
   VSC_VEH_OnEditorReady, 
-  VSC_VE_Init, 
+  VSC_VEH_OpenURL,
+  VSC_VEH_NavigateToXRef,
+  VSC_VEH_NavigateToFile,
   VSCodeVisualEditor, 
   VSCodeVisualEditorHost, 
   EditorServer,
-  EditorServices
+  EditorServices,
+  XRef
 } from "editor-types";
 
 import { 
@@ -158,5 +162,8 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
   return {
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
+    openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
+    navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),
+    navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file])
   };
 }

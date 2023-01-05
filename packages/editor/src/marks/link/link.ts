@@ -28,10 +28,10 @@ import {
 import { Extension, ExtensionContext } from '../../api/extension';
 import { kLinkTarget, kLinkTargetUrl, kLinkTargetTitle, kLinkAttr, kLinkChildren } from '../../api/link';
 import { hasShortcutHeadingLinks } from '../../api/pandoc_format';
+import { markPasteHandler } from '../../api/clipboard';
 
 import { linkCommand, removeLinkCommand, linkOmniInsert } from './link-command';
 import { linkInputRules } from './link-input';
-import { linkPasteHandler, linkCopyPlugin } from './link-clipboard';
 import { linkHeadingsPostprocessor, syncHeadingLinksAppendTransaction } from './link-headings';
 import { linkPopupPlugin } from './link-popup';
 
@@ -58,10 +58,10 @@ const extension = (context: ExtensionContext): Extension => {
         spec: {
           attrs: {
             href: {},
-            clipboardhref: { default: null },
             heading: { default: null },
             title: { default: null },
             ...(linkAttr ? pandocAttrSpec : {}),
+            clipboard: { default: false }
           },
           inclusive: false,
           ...excludes,
@@ -98,7 +98,7 @@ const extension = (context: ExtensionContext): Extension => {
             return [
               'a',
               {
-                href: mark.attrs.clipboardhref || '#0',
+                href: mark.attrs.clipboard ? mark.attrs.href : '#0',
                 title: mark.attrs.title,
                 'data-heading': mark.attrs.heading,
                 ...extraAttr,
@@ -173,15 +173,18 @@ const extension = (context: ExtensionContext): Extension => {
           navigation,
           linkCommand(schema.marks.link, ui.dialogs.editLink, capabilities),
           removeLinkCommand(schema.marks.link),
-        ),
-        linkCopyPlugin(schema)
+        )
       ];
       if (autoLink) {
         plugins.push(
           new Plugin({
             key: new PluginKey('link-auto'),
             props: {
-              transformPasted: linkPasteHandler(schema),
+              transformPasted: markPasteHandler(
+                /(?:<)?([a-z]+:\/\/[^\s>]+)(?:>)?/g, 
+                schema.marks.link, 
+                url => ({ href: url })
+              )
             },
           }),
         );

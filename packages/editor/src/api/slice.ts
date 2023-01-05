@@ -14,6 +14,7 @@
  */
 
 import { Slice, Node as ProsemirrorNode } from 'prosemirror-model';
+import { mapFragment } from './fragment';
 
 export function sliceContentLength(slice: Slice) {
   let length = 0;
@@ -35,3 +36,12 @@ export function sliceHasNode(slice: Slice, predicate: (node: ProsemirrorNode) =>
   });
   return hasNode;
 }
+
+
+export const mapSlice = (
+  slice: Slice,
+  map: (node: ProsemirrorNode) => ProsemirrorNode | null
+): Slice => {
+  const fragment = mapFragment(slice.content, map);
+  return new Slice(fragment, slice.openStart, slice.openEnd);
+};

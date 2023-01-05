@@ -15,7 +15,7 @@
 
 import { inputRules } from 'prosemirror-inputrules';
 import { keydownHandler } from 'prosemirror-keymap';
-import { Node as ProsemirrorNode, Schema, DOMParser, ParseOptions } from 'prosemirror-model';
+import { Node as ProsemirrorNode, Schema, DOMParser, ParseOptions, Slice } from 'prosemirror-model';
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import 'prosemirror-view/style/prosemirror.css';
@@ -33,8 +33,12 @@ import {
   InsertCiteUI,
   UIToolsAttr,
   UIToolsImage,
-  EditorMenus
+  EditorMenus,
+  EditorServer, 
+  EditingOutlineLocation, 
+  EditorOutline 
 } from 'editor-types';
+
 import {
   attrPropsToInput,
   attrInputToProps,
@@ -94,6 +98,12 @@ import { pandocAutoIdentifier } from '../api/pandoc_id';
 import { wrapSentences } from '../api/wrap';
 import { yamlFrontMatter, applyYamlFrontMatter } from '../api/yaml';
 import { EditorSpellingDoc } from '../api/spelling';
+import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
+import { kPmScrollContainer } from '../api/scroll';
+import { CodeViewExtensionFn } from '../api/extension-types';
+import { editingRootNodeClosestToPos } from '../api/node';
+import { ContextMenuSource } from '../api/menu';
+import { mapSlice } from '../api/slice';
 
 import { getTitle, setTitle } from '../nodes/yaml_metadata/yaml_metadata-title';
 import { getOutline } from '../behaviors/outline';
@@ -118,8 +128,6 @@ import { realtimeSpellingPlugin, invalidateAllWords, invalidateWord, spellingCon
 
 import { PandocConverter, PandocLineWrapping } from '../pandoc/pandoc_converter';
 
-import { ExtensionManager, initExtensions } from './editor-extensions';
-import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
 import { defaultEditorUIImages } from './editor-images';
 import { editorMenus } from './editor-menus';
 import { editorSchema } from './editor-schema';
@@ -127,12 +135,8 @@ import { editorSchema } from './editor-schema';
 // import styles before extensions so they can be overridden by extensions
 import './styles/frame.css';
 import './styles/styles.css';
-import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
-import { EditorServer, EditingOutlineLocation, EditorOutline  } from 'editor-types';
-import { kPmScrollContainer } from '../api/scroll';
-import { CodeViewExtensionFn } from '../api/extension-types';
-import { editingRootNodeClosestToPos } from '../api/node';
-import { ContextMenuSource } from '../api/menu';
+import { ExtensionManager, initExtensions } from './editor-extensions';
+import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -1019,6 +1023,7 @@ export class Editor implements EditorOperations {
       this.editablePlugin(),
       this.preventSelectionChangePlugin(),
       this.domEventsPlugin(),
+      this.clipboardToDOMPlugin()
     ];
   }
 
@@ -1120,6 +1125,34 @@ export class Editor implements EditorOperations {
         }
       },
     })
+  }
+
+  private clipboardToDOMPlugin() : Plugin {
+    const schema = this.schema;
+    return new Plugin({
+      key: new PluginKey('clipboard-to-dom'),
+      props: { 
+        transformCopied(slice: Slice) : Slice {
+          const newSlice = mapSlice(slice, node => {
+            if (node.isText) {
+              const clipboardMark = node.marks.find(mark => !!mark.type.spec.attrs?.clipboard);
+              if (clipboardMark) {
+                let marks = clipboardMark.removeFromSet(node.marks);
+                const attrs = { ...clipboardMark.attrs, clipboard: true };
+                const newMark = clipboardMark.type.create(attrs);
+                marks = newMark.addToSet(marks);
+                return  schema.text(node.textContent, marks);
+              } else {
+                return null;
+              }
+            } else {
+              return null;
+            }
+          }); 
+          return newSlice;
+        }
+       }
+    });
   }
 
   private keybindingsPlugin(): Plugin {

@@ -23,6 +23,7 @@ import { transactionsAreTypingChange, transactionsHaveChange } from '../../api/t
 import { EditorUIContext } from '../../api/ui-types';
 import { stripQuotes } from '../../api/text';
 import { onElementRemoved } from '../../api/dom';
+import { mapResourceToURL } from '../../api/resource';
 
 const key = new PluginKey<DecorationSet>('rmd-chunk-image-preview');
 
@@ -101,12 +102,16 @@ function imagePreviewDecorations(state: EditorState, uiContext: EditorUIContext)
             img.classList.add('pm-image-centered');
           }
 
-          img.src = uiContext.mapResourceToURL(imagePath);
+          mapResourceToURL(uiContext, imagePath).then(url => {
+            img.src = url;
+          });
           img.setAttribute('draggable', 'false');
 
           // watch for changes to the file
           const unsubscribe = uiContext.watchResource(imagePath, () => {
-            img.src = uiContext.mapResourceToURL(imagePath);
+            mapResourceToURL(uiContext, imagePath).then(url => {
+              img.src = url;
+            });
           });
           onElementRemoved(view.dom, container, unsubscribe);
 

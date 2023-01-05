@@ -89,7 +89,7 @@ export interface EditorUIContext {
   mapPathToResource: (path: string) => string;
 
   // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
-  mapResourceToURL: (path: string) => string;
+  mapResourceToURL: (path: string) => string | Promise<string>;
 
   // watch a resource for changes (returns an unsubscribe function)
   watchResource: (path: string, notify: VoidFunction) => VoidFunction;

@@ -33,15 +33,18 @@ async function runEditor() {
     const request = visualEditorJsonRpcRequestTransport(vscode)
     const host = visualEditorHostClient(vscode, request);
 
+    // get host context
+    const context = await host.getHostContext();
+
     // initialize store
     const store = await initializeStore(request);
 
-     // init localization
-     await initEditorTranslations();
+    // init localization
+    await initEditorTranslations();
 
     // render
     const root = createRoot(document.getElementById('root')!);
-    root.render(<App store={store} host={host} request={request}/>);
+    root.render(<App store={store} host={host} context={context} request={request}/>);
   } catch (error) {
     console.error(error);
   }

@@ -39,6 +39,7 @@ import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
 import path, { extname } from "path";
 import { QuartoContext } from "quarto-core";
+import { isWindows } from "../../core/platform";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -92,6 +93,19 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
     // editor container implementation   
     const host: VSCodeVisualEditorHost = {
+
+      // editor is querying for context
+      getHostContext: async () => {
+        return {
+          documentPath: document.isUntitled ? null : document.fileName,
+          resourceDir: document.isUntitled 
+            ? (this.quartoContext.workspaceDir || process.cwd())
+            : path.dirname(document.fileName),
+          markdown: document.getText(),
+          isWindowsDesktop: isWindows()
+        };
+      },
+
       // editor is fully loaded and ready for communication
       onEditorReady: async () => {
 
@@ -131,6 +145,12 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
       // flush any pending updates
       flushEditorUpdates: syncManager.flushPendingUpdates,
+
+      // map resources to uris valid in the editor
+      editorResourceUri: async (path: string) => {
+        const uri = webviewPanel.webview.asWebviewUri(Uri.parse(path)).toString();
+        return uri;
+      },
 
       openURL: function (url: string): void {
         env.openExternal(Uri.parse(url));
@@ -181,7 +201,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             <meta charset="UTF-8">
 
             <!-- Use a content security policy to only allow scripts that have a specific nonce. -->
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:; font-src data:;">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src https: data: ${webview.cspSource}; font-src data:;">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
             <link href="${stylesUri}" rel="stylesheet" />

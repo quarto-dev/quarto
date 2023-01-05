@@ -114,14 +114,7 @@ export function editorSyncManager(
     // with its initial contents and syncing the canonnical markdown
     // back to the document
     init: async() => {
-      const markdown = await visualEditor.init({
-        documentPath: document.isUntitled ? null : document.fileName,
-        resourceDir: document.isUntitled 
-          ? (quartoContext.workspaceDir || process.cwd())
-          : path.dirname(document.fileName),
-        markdown: document.getText(),
-        isWindowsDesktop: isWindows()
-      });
+      const markdown = await visualEditor.init(document.getText());
       if (markdown !== document.getText()) {
         await updateWorkspaceDocument(document, markdown);
       }

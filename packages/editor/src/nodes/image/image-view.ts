@@ -24,6 +24,7 @@ import { isElementVisible } from '../../api/dom';
 import { EditorEvents } from '../../api/event-types';
 import { ResizeEvent } from '../../api/event-types';
 import { EditorFormat } from '../../api/format';
+import { mapResourceToURL } from '../../api/resource';
 
 import { imageDialog } from './image-dialog';
 import {
@@ -250,21 +251,23 @@ class ImageNodeView implements NodeView {
 
     // set new node and update the image
     this.node = node;
-    this.updateImg();
-
-    // if we already have resize UI then either update it
-    // or detach it (if e.g. the units are no longer compatible)
-    if (this.resizeUI) {
-      if (isResizeUICompatible(this.img!)) {
-        this.resizeUI.update();
-      } else {
-        this.resizeUI.detach();
-        this.resizeUI = null;
+    this.updateImg().then(() => {
+      // if we already have resize UI then either update it
+      // or detach it (if e.g. the units are no longer compatible)
+      if (this.resizeUI) {
+        if (isResizeUICompatible(this.img!)) {
+          this.resizeUI.update();
+        } else {
+          this.resizeUI.detach();
+          this.resizeUI = null;
+        }
+        // attach if the node is selected
+      } else if (this.isNodeSelected()) {
+        this.attachResizeUI();
       }
-      // attach if the node is selected
-    } else if (this.isNodeSelected()) {
-      this.attachResizeUI();
-    }
+    });
+
+   
     return true;
   }
 
@@ -274,20 +277,23 @@ class ImageNodeView implements NodeView {
   }
 
   // map node to img tag
-  private updateImg() {
+  private async updateImg() {
+
     // unsubscribe from any existing resource watcher
     if (this.unregisterWatchImg) {
       this.unregisterWatchImg();
     }
 
-    // map to path reachable within current editing frame
+    // if the image has a protocol then just set it
     const src = this.node.attrs.src;
-    this.img.src = this.editorUI.context.mapResourceToURL(src);
-
-    // if this is a local resource then watch it and update when it changes
-    if (!src.match(/^\w+:\/\//)) {
-      this.unregisterWatchImg = this.editorUI.context.watchResource(src, () => {
-        this.img.src = this.editorUI.context.mapResourceToURL(src);
+    if (src.match(/^\w+:\/\//)) {
+      this.img.src = src;
+    } else {
+      // otherwise map to path reachable within current editing frame
+      // (and watch for future changes)
+      this.img.src = await mapResourceToURL(this.editorUI.context, src);
+      this.unregisterWatchImg = this.editorUI.context.watchResource(src, async () => {
+        this.img.src = await mapResourceToURL(this.editorUI.context, src);
       });
     }
 

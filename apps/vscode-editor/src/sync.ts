@@ -42,7 +42,8 @@ import {
   EditorServices,
   XRef,
   VSC_VEH_FlushEditorUpdates,
-  EditorInit
+  VSC_VEH_EditorResourceUri,
+  VSC_VEH_GetHostContext
 } from "editor-types";
 
 import { 
@@ -52,7 +53,6 @@ import {
 
 import { 
   EditorOperations, 
-  EditorUIContext, 
   UpdateEvent 
 } from "editor";
 
@@ -89,12 +89,7 @@ export async function syncEditorToHost(
   editor: EditorOperations, 
   host: VisualEditorHostClient,
   focus: boolean
-) : Promise<EditorUIContext> {
-
-  // volitile vars used to provide EditorUIContext
-  let documentPath: string | null = null;
-  let resourceDir = "";
-  let isWindowsDesktop = false;
+)  {
 
   // sync from text editor (throttled)
   const kThrottleDelayMs = 1000;
@@ -107,14 +102,10 @@ export async function syncEditorToHost(
 
   // setup communication channel for host
   visualEditorHostServer(host.vscode, {
-    async init(init: EditorInit) {
-
-      // set paths
-      documentPath = init.documentPath;
-      resourceDir = init.resourceDir;
+    async init(markdown: string) {
 
       // init editor contents and sync cannonical version back to text editor
-      const result = await editor.setMarkdown(init.markdown, {}, false);
+      const result = await editor.setMarkdown(markdown, {}, false);
 
       // focus if requested
       if (focus) {
@@ -143,80 +134,6 @@ export async function syncEditorToHost(
 
   // let the host know we are ready
   await host.onEditorReady();  
-
-  return {
-
-    // check if we are the active tab
-    isActiveTab(): boolean {
-      return true;
-    },
-
-    // get the path to the current document
-    getDocumentPath(): string | null {
-      return documentPath;
-    },
-
-    // ensure the edited document is saved on the server before proceeding
-    // (note this just means that the server has a copy of it for e.g.
-    // indexing xrefs, from the user's standpoint the doc is still dirty)
-    async withSavedDocument(): Promise<boolean> {
-      await host.flushEditorUpdates();
-      return true;
-    },
-
-    // get the default directory for resources (e.g. where relative links point to)
-    getDefaultResourceDir(): string {
-      return resourceDir;
-    },
-
-    // map from a filesystem path to a resource reference
-    mapPathToResource(path: string): string {
-      return path;
-    },
-
-    // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
-    mapResourceToURL(path: string): string {
-      return path;
-    },
-
-    // watch a resource for changes (returns an unsubscribe function)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    watchResource(_path: string, _notify: VoidFunction): VoidFunction {
-      return () => {
-        /* */
-      };
-    },
-
-    // translate a string
-    translateText(text: string): string {
-      return text;
-    },
-
-    // are there dropped uris available?
-    droppedUris(): string[] | null {
-      return null;
-    },
-
-    // uris from the clipboard
-    async clipboardUris(): Promise<string[] | null> {
-      return null;
-    },
-
-    // image from the clipboard (returned as file path)
-    async clipboardImage(): Promise<string | null> {
-      return null;
-    },
-
-    // resolve image uris (make relative, copy to doc local 'images' dir, etc)
-    async resolveImageUris(uris: string[]): Promise<string[]> {
-      return uris;
-    },
-
-    // are we running in windows desktop mode?
-    isWindowsDesktop(): boolean {
-      return isWindowsDesktop;
-    }
-  };
 }
 
 // interface provided to visual editor host (vs code extension)
@@ -250,9 +167,11 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
 
 function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisualEditorHost {
   return {
+    getHostContext: () => request(VSC_VEH_GetHostContext, []),
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
     flushEditorUpdates: () => request(VSC_VEH_FlushEditorUpdates, []),
+    editorResourceUri: (path: string) => request(VSC_VEH_EditorResourceUri, [path]),
     openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),
     navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file])

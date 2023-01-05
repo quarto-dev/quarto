@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useMemo, useEffect, useContext, useCallback, useRef } from 'react';
+import React, { useMemo, useEffect, useContext, useCallback } from 'react';
 
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
@@ -29,7 +29,7 @@ import {
   showContextMenu
 } from 'editor-ui';
 
-import { EditorMenuItem, EditorOperations, EditorUIContext, XRef } from 'editor';
+import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
 
 import { syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
@@ -37,6 +37,7 @@ import EditorToolbar from './EditorToolbar';
 import styles from './Editor.module.scss';
 
 export interface EditorContainerProps {
+  context: HostContext;
   host: VisualEditorHostClient;
   request: JsonRpcRequestTransport;  
 }
@@ -58,12 +59,11 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }, []); 
  
   // one time creation of editorUIContext
-  const uiContextRef = useRef<HostEditorUIContext>(new HostEditorUIContext());
-
+  const uiContext = new HostEditorUIContext(props.context, props.host);
+ 
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, props.host, true)
-      .then(hostContext => uiContextRef.current.setHostContext(hostContext));
+    syncEditorToHost(editor, props.host, true);
     return Promise.resolve();
   }, []);
 
@@ -87,7 +87,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       <Editor
         className={styles.editorFrame} 
         request={props.request}
-        uiContext={uiContextRef.current}
+        uiContext={uiContext}
         display={editorDisplay(props.host)}
         onEditorInit={onEditorInit}
       >
@@ -123,78 +123,80 @@ function editorDisplay(host: VisualEditorHostClient)  {
 
 class HostEditorUIContext implements EditorUIContext {
   
-  private hostContext?: EditorUIContext;
-
-  public setHostContext(context: EditorUIContext) {
-    this.hostContext = context;
+  constructor(
+    private readonly context: HostContext, 
+    private readonly host: VisualEditorHostClient) 
+  {
   }
   
   // check if we are the active tab
   public isActiveTab(): boolean {
-    return this.hostContext?.isActiveTab() || true;
+    return true;
   }
 
   // get the path to the current document
   public getDocumentPath(): string | null {
-    return this.hostContext?.getDocumentPath() || null;
+    return this.context.documentPath;
   }
 
   // ensure the edited document is saved on the server before proceeding
   // (note this just means that the server has a copy of it for e.g.
   // indexing xrefs, from the user's standpoint the doc is still dirty)
   public async withSavedDocument(): Promise<boolean> {
-    return this.hostContext?.withSavedDocument() || true;
+    await this.host.flushEditorUpdates();
+    return true;
   }
 
   // get the default directory for resources (e.g. where relative links point to)
   public getDefaultResourceDir(): string {
-    return this.hostContext?.getDefaultResourceDir() || "";
+    return this.context.resourceDir;
   }
 
   // map from a filesystem path to a resource reference
   public mapPathToResource(path: string): string {
-    return this.hostContext?.mapPathToResource(path) || path;
+    return path;
   }
 
   // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
-  public mapResourceToURL(path: string): string {
-    return this.hostContext?.mapResourceToURL(path) || path;
+  public mapResourceToURL(path: string): string | Promise<string> {
+    path = `${this.context.resourceDir}/${path}`;
+    return this.host.editorResourceUri(path);
   }
 
   // watch a resource for changes (returns an unsubscribe function)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public watchResource(path: string, notify: VoidFunction): VoidFunction {
-    return this.hostContext?.watchResource(path, notify) || (() => { /* */ });
+  public watchResource(_path: string, _notify: VoidFunction): VoidFunction {
+    return () => { /* */ };
   }
 
   // translate a string
   public translateText(text: string): string {
-    return this.hostContext?.translateText(text) || text;
+    return text;
   }
 
   // are there dropped uris available?
   public droppedUris(): string[] | null {
-    return this.hostContext?.droppedUris() || null;
+    return null;
   }
 
   // uris from the clipboard
   public async clipboardUris(): Promise<string[] | null> {
-    return this.hostContext?.clipboardUris() || null;
+    return null;
   }
 
   // image from the clipboard (returned as file path)
   public async clipboardImage(): Promise<string | null> {
-    return this.hostContext?.clipboardImage() || null;
+    return null;
   }
 
   // resolve image uris (make relative, copy to doc local 'images' dir, etc)
   public async resolveImageUris(uris: string[]): Promise<string[]> {
-    return this.hostContext?.resolveImageUris(uris) || uris;
+    return uris;
   }
 
   // are we running in windows desktop mode?
   public isWindowsDesktop(): boolean {
-    return this.hostContext?.isWindowsDesktop() || false;
+    return this.context.isWindowsDesktop;
   }
 }
 

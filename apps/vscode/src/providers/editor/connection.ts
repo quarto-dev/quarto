@@ -23,6 +23,8 @@ import {
   VSC_VE_Init,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_ApplyExternalEdit, 
+  VSC_VEH_EditorResourceUri,
+  VSC_VEH_GetHostContext, 
   VSC_VEH_OnEditorUpdated,
   VSC_VEH_FlushEditorUpdates,
   VSC_VEH_OnEditorReady, 
@@ -30,8 +32,7 @@ import {
   VSC_VEH_NavigateToXRef,
   VSC_VEH_NavigateToFile,
   VSCodeVisualEditor,
-  VSCodeVisualEditorHost,
-  EditorInit, 
+  VSCodeVisualEditorHost
 } from "editor-types";
 
 import { 
@@ -57,7 +58,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 
   return {
     editor: {
-      init: (init: EditorInit) => request(VSC_VE_Init, [init]),
+      init: (markdown: string) => request(VSC_VE_Init, [markdown]),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
     },
@@ -102,9 +103,11 @@ export function visualEditorServer(
 
 function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
+    [VSC_VEH_GetHostContext]: () => host.getHostContext(),
     [VSC_VEH_OnEditorReady]: () => host.onEditorReady(),
     [VSC_VEH_OnEditorUpdated]: args => host.onEditorUpdated(args[0]),
     [VSC_VEH_FlushEditorUpdates]: () => host.flushEditorUpdates(),
+    [VSC_VEH_EditorResourceUri]: args => host.editorResourceUri(args[0]),
     [VSC_VEH_OpenURL]: args => voidPromise(host.openURL(args[0])),
     [VSC_VEH_NavigateToXRef]: args => voidPromise(host.navigateToXRef(args[0], args[1])),
     [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0]))

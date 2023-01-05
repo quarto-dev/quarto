@@ -41,18 +41,18 @@ export function initQuartoContext(
   // default warning to log
   showWarning = showWarning || console.log;
 
-  // first look on the path
-  let quartoInstall = detectQuarto("quarto");
-
-  // if not found, look for a user specified quarto
-  if (!quartoInstall) {
-    // check for user setting (resolving workspace relative paths)
-    if (quartoPath) {
-      if (!path.isAbsolute(quartoPath) && workspaceFolder) {
-        quartoPath = path.join(workspaceFolder, quartoPath);
-      }
-      quartoInstall = detectUserSpecifiedQuarto(quartoPath, showWarning);
+  // check for user setting (resolving workspace relative paths)
+  let quartoInstall: QuartoInstallation | undefined;
+  if (quartoPath) {
+    if (!path.isAbsolute(quartoPath) && workspaceFolder) {
+      quartoPath = path.join(workspaceFolder, quartoPath);
     }
+    quartoInstall = detectUserSpecifiedQuarto(quartoPath, showWarning);
+  }
+
+  // next look on the path
+  if (!quartoInstall) {
+    quartoInstall = detectQuarto("quarto");
   }
 
   // if still not found, scan for versions of quarto in known locations

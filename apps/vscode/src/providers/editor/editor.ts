@@ -24,7 +24,9 @@ import {
   CancellationToken, 
   Uri, 
   Webview,
-  env
+  env,
+  commands,
+  ViewColumn
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -35,6 +37,7 @@ import { getNonce } from "../../core/nonce";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
+import path, { extname } from "path";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -61,7 +64,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     return providerRegistration;
   }
 
-  private static readonly viewType = "quarto.visualEditor";
+  public static readonly viewType = "quarto.visualEditor";
 
   constructor(private readonly context: ExtensionContext,
               private readonly lspClient: LanguageClient) {}
@@ -126,10 +129,10 @@ class VisualEditorProvider implements CustomTextEditorProvider {
         env.openExternal(Uri.parse(url));
       },
       navigateToXRef: function (file: string, xref: XRef): void {
-        throw new Error("Function not implemented.");
+        navigateToFile(document, file, xref);
       },
       navigateToFile: function (file: string): void {
-        throw new Error("Function not implemented.");
+        navigateToFile(document, file);
       }
     };
 
@@ -183,5 +186,32 @@ class VisualEditorProvider implements CustomTextEditorProvider {
             <script nonce="${nonce}" src="${scriptUri}"></script>
         </body>
         </html>`;
+  }
+}
+
+async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) {
+  
+  const docDir = path.dirname(baseDoc.uri.fsPath);
+  const filePath = path.normalize(path.join(docDir, file));
+  const uri = Uri.parse(filePath);
+  const ext = extname(filePath).toLowerCase();
+
+  const openWith = async (viewType: string) => {
+    await commands.executeCommand("vscode.openWith", uri, viewType);
+  };
+
+  if (ext === ".qmd") {
+
+    await openWith(VisualEditorProvider.viewType);
+  
+  } else if (ext === ".ipynb") {
+    
+    await openWith("jupyter-notebook");
+  
+  } else {
+
+    const doc = await workspace.openTextDocument(uri);
+    await window.showTextDocument(doc, ViewColumn.Active, false);
+
   }
 }

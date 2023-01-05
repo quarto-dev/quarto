@@ -17,6 +17,8 @@ import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode"
 import { VSCodeVisualEditor } from "editor-types";
 import { getWholeRange } from "../../core/doc";
 import { isRStudioWorkbench, isWindows } from "../../core/platform";
+import { QuartoContext } from "quarto-core";
+import path from "path";
 
 /* Strategy for managing synchronization of edits between source and visual mode. 
 
@@ -56,7 +58,9 @@ export interface EditorSyncManager {
 
 // sync the document model w/ the visual editor
 export function editorSyncManager(
-  document: TextDocument, visualEditor: VSCodeVisualEditor
+  quartoContext: QuartoContext,
+  document: TextDocument, 
+  visualEditor: VSCodeVisualEditor
 ) : EditorSyncManager {
 
   // state: an update from the visual editor that we have yet to apply. we don't 
@@ -112,6 +116,9 @@ export function editorSyncManager(
     init: async() => {
       const markdown = await visualEditor.init({
         documentPath: document.isUntitled ? null : document.fileName,
+        resourceDir: document.isUntitled 
+          ? (quartoContext.workspaceDir || process.cwd())
+          : path.dirname(document.fileName),
         markdown: document.getText(),
         isWindowsDesktop: isWindows()
       });

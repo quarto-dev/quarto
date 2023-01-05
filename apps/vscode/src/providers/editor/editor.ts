@@ -38,20 +38,23 @@ import { getNonce } from "../../core/nonce";
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
 import path, { extname } from "path";
+import { QuartoContext } from "quarto-core";
 
 export function activateEditor(
   context: ExtensionContext,
+  quartoContext: QuartoContext,
   lspClient: LanguageClient
 ) {
-  context.subscriptions.push(VisualEditorProvider.register(context, lspClient));
+  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient));
 }
 
 class VisualEditorProvider implements CustomTextEditorProvider {
   public static register(
     context: ExtensionContext, 
+    quartoContext: QuartoContext,
     lspClient: LanguageClient
   ) : Disposable {
-    const provider = new VisualEditorProvider(context, lspClient);
+    const provider = new VisualEditorProvider(context, quartoContext, lspClient);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -67,14 +70,15 @@ class VisualEditorProvider implements CustomTextEditorProvider {
   public static readonly viewType = "quarto.visualEditor";
 
   constructor(private readonly context: ExtensionContext,
+              private readonly quartoContext: QuartoContext,
               private readonly lspClient: LanguageClient) {}
 
  
-  public async resolveCustomTextEditor(
+  public resolveCustomTextEditor(
     document: TextDocument,
     webviewPanel: WebviewPanel,
     _token: CancellationToken
-  ): Promise<void> {
+  ) {
 
     // track disposables
     const disposables: Disposable[] = [];
@@ -84,7 +88,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     disposables.push(client);
 
     // sync manager
-    const syncManager = editorSyncManager(document, client.editor);
+    const syncManager = editorSyncManager(this.quartoContext, document, client.editor);
 
     // editor container implementation   
     const host: VSCodeVisualEditorHost = {

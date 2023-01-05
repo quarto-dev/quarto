@@ -31,6 +31,7 @@ export const VSC_VEH_NavigateToFile = 'vsc_veh_navigate_to_file';
 
 export interface EditorInit {
   documentPath: string | null;
+  resourceDir: string;
   markdown: string;
   isWindowsDesktop: boolean;
 }

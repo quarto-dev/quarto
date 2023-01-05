@@ -93,6 +93,7 @@ export async function syncEditorToHost(
 
   // volitile vars used to provide EditorUIContext
   let documentPath: string | null = null;
+  let resourceDir = "";
   let isWindowsDesktop = false;
 
   // sync from text editor (throttled)
@@ -108,8 +109,9 @@ export async function syncEditorToHost(
   visualEditorHostServer(host.vscode, {
     async init(init: EditorInit) {
 
-      // set doc path
+      // set paths
       documentPath = init.documentPath;
+      resourceDir = init.resourceDir;
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(init.markdown, {}, false);
@@ -164,7 +166,7 @@ export async function syncEditorToHost(
 
     // get the default directory for resources (e.g. where relative links point to)
     getDefaultResourceDir(): string {
-      return "";
+      return resourceDir;
     },
 
     // map from a filesystem path to a resource reference

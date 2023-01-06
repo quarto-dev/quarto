@@ -216,8 +216,14 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     // setup server on webview iframe
     disposables.push(visualEditorServer(webviewPanel, this.lspClient, host));
 
-    // load editor webview
-    webviewPanel.webview.options = { enableScripts: true };
+    // load editor webview (include current doc path in localResourceRoots)
+    webviewPanel.webview.options = { 
+      localResourceRoots: [
+        ...(webviewPanel.webview.options.localResourceRoots || []),
+        ...(!document.isUntitled ? [Uri.parse(path.dirname(document.fileName))] : [])
+      ],
+      enableScripts: true 
+    };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
     // handle disposables when editor is closed

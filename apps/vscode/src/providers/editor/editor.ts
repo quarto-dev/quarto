@@ -219,7 +219,8 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     // load editor webview (include current doc path in localResourceRoots)
     webviewPanel.webview.options = { 
       localResourceRoots: [
-        ...(webviewPanel.webview.options.localResourceRoots || []),
+        this.context.extensionUri,
+        ...(workspace.workspaceFolders ? workspace.workspaceFolders.map(folder => folder.uri) : []),
         ...(!document.isUntitled ? [Uri.parse(path.dirname(document.fileName))] : [])
       ],
       enableScripts: true 

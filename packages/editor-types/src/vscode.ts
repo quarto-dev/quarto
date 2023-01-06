@@ -21,6 +21,7 @@ export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 
 export const VSC_VEH_GetHostContext = 'vsc_ve_get_host_context';
+export const VSC_VEH_ReopenSourceMode = 'vsc_ve_reopen_source_mode';
 export const VSC_VEH_OnEditorReady = 'vsc_veh_on_editor_ready';
 export const VSC_VEH_OnEditorUpdated = 'vsc_veh_on_editor_updated';
 export const VSC_VEH_FlushEditorUpdates = 'vsc_veh_flush_editor_updates';
@@ -44,6 +45,7 @@ export interface HostContext {
 
 export interface VSCodeVisualEditorHost extends EditorDisplay {
   getHostContext: () => Promise<HostContext>;
+  reopenSourceMode: () => Promise<void>;
   onEditorReady: () => Promise<void>; 
   onEditorUpdated: (state: unknown) => Promise<void>;
   flushEditorUpdates: () => Promise<void>;

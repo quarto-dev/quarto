@@ -31,6 +31,10 @@ import {
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_GetMarkdownFromState,
   VSC_VE_Init, 
+  VSC_VEH_FlushEditorUpdates,
+  VSC_VEH_EditorResourceUri,
+  VSC_VEH_GetHostContext,
+  VSC_VEH_ReopenSourceMode,
   VSC_VEH_OnEditorUpdated,
   VSC_VEH_OnEditorReady, 
   VSC_VEH_OpenURL,
@@ -40,10 +44,7 @@ import {
   VSCodeVisualEditorHost, 
   EditorServer,
   EditorServices,
-  XRef,
-  VSC_VEH_FlushEditorUpdates,
-  VSC_VEH_EditorResourceUri,
-  VSC_VEH_GetHostContext
+  XRef
 } from "editor-types";
 
 import { 
@@ -168,6 +169,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
 function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisualEditorHost {
   return {
     getHostContext: () => request(VSC_VEH_GetHostContext, []),
+    reopenSourceMode: () => request(VSC_VEH_ReopenSourceMode, []),
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
     flushEditorUpdates: () => request(VSC_VEH_FlushEditorUpdates, []),

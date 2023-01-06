@@ -40,6 +40,7 @@ import { editorSyncManager } from "./sync";
 import path, { extname } from "path";
 import { QuartoContext } from "quarto-core";
 import { isWindows } from "../../core/platform";
+import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -50,11 +51,27 @@ export function activateEditor(
 }
 
 class VisualEditorProvider implements CustomTextEditorProvider {
+  
+  private static activeUntitled?: { uri: Uri, content: string };
+  
   public static register(
     context: ExtensionContext, 
     quartoContext: QuartoContext,
     lspClient: LanguageClient
   ) : Disposable {
+
+    // track edits in the active editor if its untitled. this enables us to recover the
+    // content when we switch to an untitled document, which otherwise are just dropped
+    // on the floor by vscode 
+    context.subscriptions.push(workspace.onDidChangeTextDocument(e => {
+      const doc = window.activeTextEditor?.document;
+      if (doc && isQuartoDoc(doc) && doc.isUntitled && (doc.uri.toString() === e.document.uri.toString())) {
+        this.activeUntitled = { uri: doc.uri, content: doc.getText() };
+      } else {
+        this.activeUntitled = undefined;
+      }
+    }));
+
     const provider = new VisualEditorProvider(context, quartoContext, lspClient);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
@@ -81,6 +98,14 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     _token: CancellationToken
   ) {
 
+    // if the document is untitled then capture its contents (as vscode throws it on the floor
+    // and we may need it to do a re-open)
+    const untitledContent = 
+      (document.isUntitled && 
+      VisualEditorProvider.activeUntitled?.uri.toString() === document.uri.toString())
+        ? VisualEditorProvider.activeUntitled.content
+        : undefined;
+    
     // track disposables
     const disposables: Disposable[] = [];
 
@@ -104,6 +129,31 @@ class VisualEditorProvider implements CustomTextEditorProvider {
           markdown: document.getText(),
           isWindowsDesktop: isWindows()
         };
+      },
+
+      reopenSourceMode: async () => {
+
+        // save if required
+        if (!document.isUntitled) {
+          await commands.executeCommand("workbench.action.files.save");
+        }
+
+        // close editor (return immediately as if we don't then this 
+        // rpc method's return will result in an error b/c the webview
+        // has been torn down by the time we return)
+        const viewColumn = webviewPanel.viewColumn;
+        commands.executeCommand('workbench.action.closeActiveEditor').then(async () => {
+          if (document.isUntitled) {
+            const doc = await workspace.openTextDocument({
+              language: kQuartoLanguageId,
+              content: untitledContent || '',
+            });
+            await window.showTextDocument(doc, viewColumn, false);
+          } else {
+            const doc = await workspace.openTextDocument(document.uri);
+            await window.showTextDocument(doc, viewColumn, false);
+          }
+        });
       },
 
       // editor is fully loaded and ready for communication

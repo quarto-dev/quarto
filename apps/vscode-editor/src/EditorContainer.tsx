@@ -159,8 +159,7 @@ class HostEditorUIContext implements EditorUIContext {
 
   // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
   public mapResourceToURL(path: string): string | Promise<string> {
-    path = `${this.context.resourceDir}/${path}`;
-    return this.host.editorResourceUri(path);
+    return this.host.editorResourceUri(this.resolvePath(path));
   }
 
   // watch a resource for changes (returns an unsubscribe function)
@@ -197,6 +196,14 @@ class HostEditorUIContext implements EditorUIContext {
   // are we running in windows desktop mode?
   public isWindowsDesktop(): boolean {
     return this.context.isWindowsDesktop;
+  }
+
+  private resolvePath(path: string): string {
+    if (path.startsWith("/")) {
+      return `${this.context.workspaceDir}/${path.slice(1)}`;
+    } else {
+      return `${this.context.resourceDir}/${path}`;
+    }
   }
 }
 

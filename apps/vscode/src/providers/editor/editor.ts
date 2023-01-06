@@ -121,11 +121,11 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
       // editor is querying for context
       getHostContext: async () => {
+        const workspaceDir = this.quartoContext.workspaceDir || process.cwd();
         return {
           documentPath: document.isUntitled ? null : document.fileName,
-          resourceDir: document.isUntitled 
-            ? (this.quartoContext.workspaceDir || process.cwd())
-            : path.dirname(document.fileName),
+          workspaceDir,
+          resourceDir: document.isUntitled ? workspaceDir : path.dirname(document.fileName),
           markdown: document.getText(),
           isWindowsDesktop: isWindows()
         };

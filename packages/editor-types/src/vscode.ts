@@ -39,6 +39,7 @@ export interface VSCodeVisualEditor {
 
 export interface HostContext {
   documentPath: string | null;
+  workspaceDir: string;
   resourceDir: string;
   isWindowsDesktop: boolean;
 }

@@ -17,7 +17,6 @@ const editorOptions = {
 const ui: EditorUI = {
   context: {
     getDefaultResourceDir: () => "./",
-    mapPathToResource: (path: string) => path,
     mapResourceToURL: (path: string) => path,
     translateText: (text: string) => text,
     getUsername: () => "TEST"

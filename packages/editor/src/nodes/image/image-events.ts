@@ -19,6 +19,7 @@ import { Plugin, PluginKey } from 'prosemirror-state';
 import { EditorUI } from '../../api/ui-types';
 
 const kTextUriList = 'text/uri-list';
+const kImagePng = "image/png";
 const kApplicationQtImage = 'application/x-qt-image';
 
 const pluginKey = new PluginKey('image-events');
@@ -40,14 +41,26 @@ function imagePaste(ui: EditorUI) {
     const clipboardEvent = event as ClipboardEvent;
 
     if (clipboardEvent.clipboardData) {
+
+      // see if our stock image handling can take care of it
+      if (handleImageDataTransfer(
+        event, 
+        clipboardEvent.clipboardData, 
+        view,
+        view.state.selection.from,
+        ui)
+      ) {
+        return true;
+      }
+
       // detect file pastes where there is no payload, in that case check to see
       // if there is clipboard data we can get from our context (e.g. from Qt)
-      if (clipboardEvent.clipboardData.types.includes(kTextUriList)) {
+      else if (clipboardEvent.clipboardData.types.includes(kTextUriList)) {
         const uriList = clipboardEvent.clipboardData.getData(kTextUriList);
         if (uriList.length === 0) {
           ui.context.clipboardUris().then(uris => {
             if (uris) {
-              handleImageUris(view, view.state.selection.from, event, uris, ui);
+              handleImageUris(view, view.state.selection.from, uris, ui);
             }
           });
           event.preventDefault();
@@ -65,7 +78,7 @@ function imagePaste(ui: EditorUI) {
        
         ui.context.clipboardImage().then(image => {
           if (image) {
-            handleImageUris(view, view.state.selection.from, event, [image], ui);
+            handleImageUris(view, view.state.selection.from, [image], ui);
           }
         });
         event.preventDefault();
@@ -96,29 +109,67 @@ function imageDrop(ui: EditorUI) {
       return false;
     }
 
-    // array of uris
-    let uris: string[] | null = null;
+    return handleImageDataTransfer(dragEvent, dragEvent.dataTransfer, view, coordinates.pos, ui);
+  }
+}
 
+
+function handleImageDataTransfer(event: Event, dataTransfer: DataTransfer, view: EditorView, pos: number, ui: EditorUI) {
+  // array of uris
+  let uris: string[] | null = null;
+
+  // check for files w/ path (vscode provides full path in undocumented 'path' property)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (dataTransfer.files?.length && (dataTransfer.files[0] as any).path) {
+    uris = [];
+    for (const file of dataTransfer.files) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const path = (file as any).path;
+      if (path) {
+        uris.push(path);
+      } 
+    }
+  } else  {
     // see if this is a drag of uris
-    const uriList = dragEvent.dataTransfer.getData(kTextUriList);
+    const uriList = dataTransfer.getData(kTextUriList);
     if (uriList) {
       uris = uriList.split('\r?\n');
     } else {
       // see if the ui context has some dropped uris
       uris = ui.context.droppedUris();
     }
-
-    // process uris if we have them
-    if (uris && handleImageUris(view, coordinates.pos, event, uris, ui)) {
-      event.preventDefault();
-      return true;
-    } else {
-      return false;
+  }
+ 
+  // process uris if we have them
+  if (uris && handleImageUris(view, pos, uris, ui)) {
+    event.preventDefault();
+    return true;
+  }
+  
+  // now look for png file blobs
+  const files: File[] = [];
+  if (dataTransfer.files.length) {
+    for (const file of dataTransfer.files) {
+      if (file.type === kImagePng) {
+        files.push(file);
+      }
     }
-  };
+  }
+
+  // if we have at least one then handle
+  if (files.length && ui.context.resolveBase64Images) {
+    Promise.all(files.map(blobToBase64)).then(async (base64Files) => {
+      const images = await ui.context.resolveBase64Images!(base64Files);
+      insertImageFiles(view, pos, images);
+    });
+    event.preventDefault();
+    return true;
+  } else {
+    return false
+  }
 }
 
-function handleImageUris(view: EditorView, pos: number, _event: Event, uris: string[], ui: EditorUI): boolean {
+function handleImageUris(view: EditorView, pos: number, uris: string[], ui: EditorUI): boolean {
   // filter out images
   const imageUris = uris.filter(uri => {
     // get extension and check it it's an image
@@ -156,14 +207,58 @@ function handleImageUris(view: EditorView, pos: number, _event: Event, uris: str
   // async so we return true indicating we've handled the drop and
   // then we actually do the insertion once it returns
   ui.context.resolveImageUris(imageUris).then(images => {
-    const tr = view.state.tr;
-    images.forEach(image => {
-      const node = view.state.schema.nodes.image.create({ src: image });
-      tr.insert(pos, node);
-    });
-    view.dispatch(tr);
+    insertImageFiles(view, pos, images);
   });
 
   // indicate that we will handle the event
   return true;
 }
+
+function insertImageFiles(view: EditorView, pos: number, images: string[]) {
+  const tr = view.state.tr;
+  images.forEach(image => {
+    const node = view.state.schema.nodes.image.create({ src: image });
+    tr.insert(pos, node);
+  });
+  view.dispatch(tr);
+}
+
+const blobToBase64 = (blob: File) => new Promise<string>((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  reader.onload = () => resolve(reader.result as string);
+  reader.onerror = error => reject(error);
+});
+
+
+/* 
+ // this works, but async..... maybe see if we can read the data from the file directly
+// (handler must also take care of base64)
+
+// if no other image handling method worked, look for base64 images in the slice
+const hasBase64Image = (node: ProsemirrorNode) => {
+  return node.type === node.type.schema.nodes.image &&
+        (node.attrs.src as string)?.startsWith("data:image/png;base64");
+};
+if (sliceHasNode(slice, hasBase64Image)) {
+  const mappedSlice = mapSlice(slice, node => {
+    if (hasBase64Image(node)) {
+      const attrs = { ...node.attrs, src: 'foo' };
+      return node.type.create(attrs, node.content, node.marks);
+    } else {
+      return node;
+    }
+  });
+  const tr = view.state.tr.replaceSelection(mappedSlice);
+  view.dispatch(
+    tr
+      .scrollIntoView()
+      .setMeta('paste', true)
+      .setMeta('uiEvent', 'paste'),
+  );
+  return true;
+} else {
+  return false;
+        }
+
+*/

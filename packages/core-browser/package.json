@@ -8,7 +8,7 @@
   "dependencies": {
     "core": "*",
     "jayson": "^4.0.0",
-    "typescript": "^4.5.2",
-    "tsconfig": "*"
+    "tsconfig": "*",
+    "typescript": "^4.5.2"
   }
 }

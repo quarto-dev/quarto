@@ -71,6 +71,9 @@ export interface EditorUIContext {
   // get the current username
   getUsername?: () => string;
 
+  // are we running in windows desktop mode?
+  isWindowsDesktop: () => boolean;
+
   // check if we are the active tab
   isActiveTab: () => boolean;
 
@@ -84,9 +87,6 @@ export interface EditorUIContext {
 
   // get the default directory for resources (e.g. where relative links point to)
   getDefaultResourceDir: () => string;
-
-  // map from a filesystem path to a resource reference
-  mapPathToResource: (path: string) => string;
 
   // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
   mapResourceToURL: (path: string) => string | Promise<string>;
@@ -109,8 +109,9 @@ export interface EditorUIContext {
   // resolve image uris (make relative, copy to doc local 'images' dir, etc)
   resolveImageUris: (uris: string[]) => Promise<string[]>;
 
-  // are we running in windows desktop mode?
-  isWindowsDesktop: () => boolean;
+  // resolve base64 images (copy to doc local 'images' dir)
+  resolveBase64Images?: (base64Images: string[]) => Promise<string[]>;
+
 }
 
 export interface EditorUIMath {

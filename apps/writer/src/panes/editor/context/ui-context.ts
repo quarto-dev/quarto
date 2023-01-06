@@ -39,11 +39,6 @@ export function editorUIContext(): EditorUIContext {
       return "";
     },
 
-    // map from a filesystem path to a resource reference
-    mapPathToResource(path: string): string {
-      return path;
-    },
-
     // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
     mapResourceToURL(path: string): string {
       return path;
@@ -80,6 +75,10 @@ export function editorUIContext(): EditorUIContext {
     // resolve image uris (make relative, copy to doc local 'images' dir, etc)
     async resolveImageUris(uris: string[]): Promise<string[]> {
       return uris;
+    },
+
+    async resolveBase64Images(base64Images: string[]) : Promise<string[]> {
+      return base64Images;
     },
 
     // are we running in windows desktop mode?

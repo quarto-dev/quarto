@@ -152,25 +152,38 @@ class HostEditorUIContext implements EditorUIContext {
     return this.context.resourceDir;
   }
 
-  // map from a filesystem path to a resource reference
-  public mapPathToResource(path: string): string {
-    return path;
-  }
-
   // map from a resource reference (e.g. images/foo.png) to a URL we can use in the document
   public mapResourceToURL(path: string): string | Promise<string> {
     return this.host.editorResourceUri(this.resolvePath(path));
+  }
+
+  // are we running in windows desktop mode?
+  public isWindowsDesktop(): boolean {
+    return this.context.isWindowsDesktop;
+  }
+
+  // translate a string
+  public translateText(text: string): string {
+    return text;
+  }
+
+  // resolve image uris (make relative, copy to doc local 'images' dir, etc)
+  public async resolveImageUris(uris: string[]): Promise<string[]> {
+    // TODO: resolution
+    console.log(uris);
+    return uris;
+  }
+
+  public async resolveBase64Images(base64Images: string[]) : Promise<string[]> {
+    // TODO: resolution
+    console.log(base64Images);
+    return base64Images;
   }
 
   // watch a resource for changes (returns an unsubscribe function)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public watchResource(_path: string, _notify: VoidFunction): VoidFunction {
     return () => { /* */ };
-  }
-
-  // translate a string
-  public translateText(text: string): string {
-    return text;
   }
 
   // are there dropped uris available?
@@ -186,16 +199,6 @@ class HostEditorUIContext implements EditorUIContext {
   // image from the clipboard (returned as file path)
   public async clipboardImage(): Promise<string | null> {
     return null;
-  }
-
-  // resolve image uris (make relative, copy to doc local 'images' dir, etc)
-  public async resolveImageUris(uris: string[]): Promise<string[]> {
-    return uris;
-  }
-
-  // are we running in windows desktop mode?
-  public isWindowsDesktop(): boolean {
-    return this.context.isWindowsDesktop;
   }
 
   private resolvePath(path: string): string {

@@ -45,12 +45,13 @@ export function documentImageResolver(
     return imagesDir;
   };
 
-  const uniquePngPath = (stem: string) => {
+  const uniqueImagePath = (stem: string, ext: string, preserveStem?: boolean) => {
 
     // try for a short name w/ integer, fallback to a longer one
+    ext = ext || ".png";
     const imagesDir = ensureImagesDir();
     for (let i=0; i<100; i++) {
-      const imagePath = path.join(imagesDir, `${stem}${i > 0 ? ('-' + i + 1) : ''}.png`);
+      const imagePath = path.join(imagesDir, `${stem}${(i > 0 || !preserveStem) ? ('-' + (i + 1)) : ''}${ext}`);
       if (!fs.existsSync(imagePath)) {
         return imagePath;
       }
@@ -73,7 +74,8 @@ export function documentImageResolver(
             return `/${path.relative(projectDir, uri)}`;
           // otherwise copy to images dir
           } else {
-            const imagePath = uniquePngPath(path.parse(uri).name);
+            const parsedPath = path.parse(uri);
+            const imagePath = uniqueImagePath(parsedPath.name, parsedPath.ext, true);
             fs.copyFileSync(uri, imagePath);
             return path.relative(docDir, imagePath);
           }
@@ -82,12 +84,19 @@ export function documentImageResolver(
     },
     resolveBase64Images: async (base64Images: string[]) : Promise<string[]> => {
       return base64Images.map(base64 => {
-        const base64Data = base64.replace(/^data:image\/png;base64,/, "");
-        const imageBuffer = Buffer.from(base64Data, "base64");
-        const imagePath = uniquePngPath("paste");
-        fs.writeFileSync(imagePath, imageBuffer);
-        return ensureForwardSlashes(path.relative(docDir, imagePath));
-      });
+        const kImgRegex = /^data:image\/(\w+);base64,/;
+        const match = base64.match(kImgRegex);
+        if (match) {
+          const base64Data = base64.replace(kImgRegex, "");
+          const imageBuffer = Buffer.from(base64Data, "base64");
+          const imagePath = uniqueImagePath("paste", `.${match[1]}`);
+          fs.writeFileSync(imagePath, imageBuffer);
+          return ensureForwardSlashes(path.relative(docDir, imagePath));
+        } else {
+          return null;
+        }
+       ;
+      }).filter(image => image !== null) as string[];
     }
   };
 }

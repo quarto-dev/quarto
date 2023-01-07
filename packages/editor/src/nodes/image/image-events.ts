@@ -19,7 +19,6 @@ import { Plugin, PluginKey } from 'prosemirror-state';
 import { EditorUI } from '../../api/ui-types';
 
 const kTextUriList = 'text/uri-list';
-const kImagePng = "image/png";
 const kApplicationQtImage = 'application/x-qt-image';
 
 const pluginKey = new PluginKey('image-events');
@@ -150,7 +149,7 @@ function handleImageDataTransfer(event: Event, dataTransfer: DataTransfer, view:
   if (dataTransfer.files.length) {
     for (let i=0; i<dataTransfer.files.length; i++) {
       const file = dataTransfer.files.item(i);
-      if (file && file.type === kImagePng) {
+      if (file && kImageExtensions.some(ext => file.type === `image/${ext}`)) {
         files.push(file);
       }
     }
@@ -174,23 +173,6 @@ function handleImageUris(view: EditorView, pos: number, uris: string[], ui: Edit
   const imageUris = uris.filter(uri => {
     // get extension and check it it's an image
     // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types#Common_image_file_types
-    const kImageExtensions = [
-      'apng',
-      'bmp',
-      'gif',
-      'ico',
-      'cur',
-      'jpg',
-      'jpeg',
-      'jfif',
-      'pjpeg',
-      'pjp',
-      'png',
-      'svg',
-      'tif',
-      'tiff',
-      'webp',
-    ];
     const extension = uri
       .split(/\./)
       .pop()!
@@ -230,35 +212,20 @@ const blobToBase64 = (blob: File) => new Promise<string>((resolve, reject) => {
   reader.onerror = error => reject(error);
 });
 
-
-/* 
- // this works, but async..... maybe see if we can read the data from the file directly
-// (handler must also take care of base64)
-
-// if no other image handling method worked, look for base64 images in the slice
-const hasBase64Image = (node: ProsemirrorNode) => {
-  return node.type === node.type.schema.nodes.image &&
-        (node.attrs.src as string)?.startsWith("data:image/png;base64");
-};
-if (sliceHasNode(slice, hasBase64Image)) {
-  const mappedSlice = mapSlice(slice, node => {
-    if (hasBase64Image(node)) {
-      const attrs = { ...node.attrs, src: 'foo' };
-      return node.type.create(attrs, node.content, node.marks);
-    } else {
-      return node;
-    }
-  });
-  const tr = view.state.tr.replaceSelection(mappedSlice);
-  view.dispatch(
-    tr
-      .scrollIntoView()
-      .setMeta('paste', true)
-      .setMeta('uiEvent', 'paste'),
-  );
-  return true;
-} else {
-  return false;
-        }
-
-*/
+const kImageExtensions = [
+  'apng',
+  'bmp',
+  'gif',
+  'ico',
+  'cur',
+  'jpg',
+  'jpeg',
+  'jfif',
+  'pjpeg',
+  'pjp',
+  'png',
+  'svg',
+  'tif',
+  'tiff',
+  'webp',
+];

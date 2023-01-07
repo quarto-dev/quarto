@@ -101,9 +101,9 @@ export function getWholeRange(doc: vscode.TextDocument) {
   return new vscode.Range(begin, end);
 }
 
-export function preserveEditorFocus(editor?: vscode.TextEditor) {
+export function preserveEditorFocus(editor?: QuartoEditor) {
   // focus the editor (sometimes the terminal steals focus)
-  editor = editor || vscode.window.activeTextEditor;
+  editor = editor || (vscode.window.activeTextEditor ? quartoEditor(vscode.window.activeTextEditor) : undefined);
   if (editor) {
     if (!isNotebook(editor?.document)) {
       setTimeout(() => {
@@ -119,25 +119,22 @@ export function preserveEditorFocus(editor?: vscode.TextEditor) {
   }
 }
 
-export function findEditor(
-  filter: (doc: vscode.TextDocument) => boolean,
-  includeVisible = true
-) {
-  const activeDoc = vscode.window.activeTextEditor?.document;
-  if (activeDoc && filter(activeDoc)) {
-    return vscode.window.activeTextEditor;
-  } else if (includeVisible) {
-    const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
-      filter(editor.document)
-    );
-    if (visibleEditor) {
-      return visibleEditor;
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
-  }
+export interface QuartoEditor {
+  document: vscode.TextDocument;
+  activate: () => Promise<void>;
+  viewColumn?: vscode.ViewColumn;
+  textEditor?: vscode.TextEditor;
+}
+
+export function quartoEditor(editor: vscode.TextEditor) {
+  return { 
+    document: editor.document, 
+    activate: async () => {
+      await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+    },
+    viewColumn: editor.viewColumn, 
+    textEditor: editor 
+  };
 }
 
 async function tryResolveUriToQuartoDoc(

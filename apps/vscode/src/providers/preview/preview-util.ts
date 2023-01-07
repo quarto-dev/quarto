@@ -16,7 +16,7 @@
 import semver from "semver";
 
 import vscode from "vscode";
-import { TextDocument, TextEditor, Uri, workspace } from "vscode";
+import { TextDocument, Uri, workspace } from "vscode";
 import { parseFrontMatterStr, projectDirForDocument } from "quarto-core";
 
 import { MarkdownEngine } from "../../markdown/engine";
@@ -24,7 +24,39 @@ import {
   metadataFilesForDocument,
   yamlFromMetadataFile,
 } from "quarto-core";
-import { isNotebook } from "../../core/doc";
+import { isNotebook, quartoEditor, QuartoEditor } from "../../core/doc";
+import { VisualEditorProvider } from "../editor/editor";
+
+
+export function findEditor(
+  filter: (doc: vscode.TextDocument) => boolean,
+  includeVisible = true
+) : QuartoEditor | undefined {
+
+  // first check for an active visual editor
+  const activeVisualEditor = VisualEditorProvider.activeEditor();
+  if (activeVisualEditor && filter(activeVisualEditor.document)) {
+    return activeVisualEditor;
+  }
+
+  // active text editor
+  const textEditor = vscode.window.activeTextEditor;
+  if (textEditor && filter(textEditor.document)) {
+    return quartoEditor(textEditor);
+  // check visible text editors
+  } else if (includeVisible) {
+    const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
+      filter(editor.document)
+    );
+    if (visibleEditor) {
+      return quartoEditor(visibleEditor);
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
+}
 
 export function previewDirForDocument(uri: Uri) {
   // first check for a quarto project
@@ -80,29 +112,29 @@ export async function documentFrontMatter(
   }
 }
 
-export async function renderOnSave(engine: MarkdownEngine, editor: TextEditor) {
+export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
   // if its a notebook and we don't have a save hook for notebooks then don't
   // allow renderOnSave (b/c we can't detect the saves)
-  if (isNotebook(editor.document) && !haveNotebookSaveEvents()) {
+  if (isNotebook(document) && !haveNotebookSaveEvents()) {
     return false;
   }
 
   // notebooks automatically get renderOnSave
-  if (isNotebook(editor.document)) {
+  if (isNotebook(document)) {
     return true;
   }
 
   // first look for document level editor setting
-  const docYaml = await documentFrontMatter(engine, editor.document);
+  const docYaml = await documentFrontMatter(engine, document);
   const docSetting = readRenderOnSave(docYaml);
   if (docSetting !== undefined) {
     return docSetting;
   }
 
   // now project level (take the first metadata file with a setting)
-  const projectDir = projectDirForDocument(editor.document.uri.fsPath);
+  const projectDir = projectDirForDocument(document.uri.fsPath);
   if (projectDir) {
-    const metadataFiles = metadataFilesForDocument(editor.document.uri.fsPath);
+    const metadataFiles = metadataFilesForDocument(document.uri.fsPath);
     if (metadataFiles) {
       for (const metadataFile of metadataFiles) {
         const yaml = yamlFromMetadataFile(metadataFile);

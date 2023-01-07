@@ -28,9 +28,9 @@ import {
   previewProject,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { findEditor, isNotebook } from "../../core/doc";
+import { isNotebook } from "../../core/doc";
 import { promptForQuartoInstallation } from "../../core/quarto";
-import { renderOnSave } from "./preview-util";
+import { findEditor, renderOnSave } from "./preview-util";
 
 export function previewCommands(
   quartoContext: QuartoContext,
@@ -82,7 +82,7 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
     const targetEditor = findEditor(canPreviewDoc);
     if (targetEditor) {
       const render =
-        !(await renderOnSave(this.engine_, targetEditor)) ||
+        !(await renderOnSave(this.engine_, targetEditor.document)) ||
         !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
         await previewDoc(targetEditor, format, false, this.engine_, onShow);

@@ -491,19 +491,19 @@
       "editor/title/run": [
         {
           "command": "quarto.render",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.previewShortcut",
@@ -572,7 +572,7 @@
         },
         {
           "command": "quarto.render",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.previewDiagram",
@@ -591,15 +591,15 @@
         },
         {
           "command": "quarto.renderHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.clearCache",

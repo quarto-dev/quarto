@@ -26,7 +26,6 @@ import vscode, {
   Terminal,
   TerminalOptions,
   TextDocument,
-  TextEditor,
   Selection,
   Range,
   Uri,
@@ -45,10 +44,10 @@ import { fileCrossrefIndexStorage, QuartoContext } from "quarto-core";
 import { previewCommands } from "./commands";
 import { Command } from "../../core/command";
 import {
-  findEditor,
   isNotebook,
   isQuartoDoc,
   preserveEditorFocus,
+  QuartoEditor,
   validatateQuartoExtension,
 } from "../../core/doc";
 import { PreviewOutputSink } from "./preview-output";
@@ -70,6 +69,7 @@ import {
   QuartoPreviewWebviewManager,
 } from "./preview-webview";
 import {
+  findEditor,
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
   previewDirForDocument,
@@ -115,7 +115,7 @@ export function activatePreview(
     if (editor) {
       if (
         canPreviewDoc(editor.document) &&
-        (await renderOnSave(engine, editor)) &&
+        (await renderOnSave(engine, editor.document)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine);
@@ -156,7 +156,7 @@ export function isPreviewRunningForDoc(doc: TextDocument) {
 }
 
 export async function previewDoc(
-  editor: TextEditor,
+  editor: QuartoEditor,
   format: string | null | undefined,
   renderOnSave: boolean,
   engine?: MarkdownEngine,
@@ -166,9 +166,9 @@ export async function previewDoc(
   if (engine !== undefined) {
     // set the slide index from the source editor so we can
     // navigate to it in the preview frame
-    if (!isNotebook(editor.document)) {
+    if (!isNotebook(editor.document) && editor.textEditor) {
       previewManager.setSlideIndex(
-        await revealSlideIndex(editor.selection.active, editor.document, engine)
+        await revealSlideIndex(editor.textEditor.selection.active, editor.document, engine)
       );
     } else {
       previewManager.setSlideIndex(undefined);
@@ -181,7 +181,7 @@ export async function previewDoc(
 
   // activate the editor
   if (!isNotebook(editor.document)) {
-    await window.showTextDocument(editor.document, editor.viewColumn, false);
+    await editor.activate();
   }
 
   // if this wasn't a renderOnSave then save
@@ -192,11 +192,13 @@ export async function previewDoc(
     }
   }
 
-  // execute the preview
-  const doc = window.activeTextEditor?.document;
-  if (doc) {
+  // execute the preview (rerefresh the reference after save)
+  const previewEditor = findEditor(
+    (editorDoc) => editorDoc.uri.fsPath === editor.document.uri.fsPath
+  );
+  if (previewEditor) {
     // error if we didn't save using a valid quarto extension
-    if (!isNotebook(doc) && !validatateQuartoExtension(doc)) {
+    if (!isNotebook(previewEditor.document) && !validatateQuartoExtension(previewEditor.document)) {
       window.showErrorMessage("Unsupported File Extension", {
         modal: true,
         detail:
@@ -207,11 +209,11 @@ export async function previewDoc(
     }
 
     // run the preview
-    await previewManager.preview(doc.uri, doc, format);
+    await previewManager.preview(previewEditor.document.uri, previewEditor.document, format);
 
     // focus the editor (sometimes the terminal steals focus)
-    if (!isNotebook(doc)) {
-      await window.showTextDocument(doc, editor.viewColumn, false);
+    if (!isNotebook(previewEditor.document)) {
+      await previewEditor.activate();
     }
   }
 }
@@ -603,17 +605,18 @@ class PreviewManager {
       // find existing visible instance
       const fileUri = Uri.file(errorLoc.file);
       const editor = findEditor((doc) => doc.uri.fsPath === fileUri.fsPath);
-      if (editor) {
+      if (editor && editor.textEditor) {
         // if the current selection is outside of the error region then
         // navigate to the top of the error region
         const errPos = new Position(errorLoc.lineBegin - 1, 0);
         const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
+        const textEditor = editor.textEditor;
         if (
-          editor.selection.active.isBefore(errPos) ||
-          editor.selection.active.isAfter(errEndPos)
+          textEditor.selection.active.isBefore(errPos) ||
+          textEditor.selection.active.isAfter(errEndPos)
         ) {
-          editor.selection = new Selection(errPos, errPos);
-          editor.revealRange(
+          textEditor.selection = new Selection(errPos, errPos);
+          textEditor.revealRange(
             new Range(errPos, errPos),
             TextEditorRevealType.InCenterIfOutsideViewport
           );

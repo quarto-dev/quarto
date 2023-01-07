@@ -39,7 +39,7 @@ import { HostContext, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
+import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
@@ -53,7 +53,7 @@ export function activateEditor(
   context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient));
 }
 
-class VisualEditorProvider implements CustomTextEditorProvider {
+export class VisualEditorProvider implements CustomTextEditorProvider {
   
   // track the last contents of any active untitled docs (used
   // for recovering from attempt to edit )
@@ -95,8 +95,19 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static readonly viewType = "quarto.visualEditor";
 
-  public static activeEditor() {
-    return this.visualEditors.activeEditor()?.document;
+  public static activeEditor() : QuartoEditor | undefined {
+    const editor = this.visualEditors.activeEditor();
+    if (editor) {
+      return { 
+        document: editor.document, 
+        activate: async () => {
+          editor.webviewPanel.reveal(editor.webviewPanel.viewColumn, false);
+        },
+        viewColumn: editor.webviewPanel.viewColumn 
+      };
+    } else {
+      return undefined;
+    }
   }
 
   constructor(private readonly context: ExtensionContext,

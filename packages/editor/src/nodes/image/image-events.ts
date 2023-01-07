@@ -16,6 +16,9 @@
 import { EditorView } from 'prosemirror-view';
 
 import { Plugin, PluginKey } from 'prosemirror-state';
+
+import { kImageExtensions } from 'core';
+
 import { EditorUI } from '../../api/ui-types';
 
 const kTextUriList = 'text/uri-list';
@@ -211,21 +214,3 @@ const blobToBase64 = (blob: File) => new Promise<string>((resolve, reject) => {
   reader.onload = () => resolve(reader.result as string);
   reader.onerror = error => reject(error);
 });
-
-const kImageExtensions = [
-  'apng',
-  'bmp',
-  'gif',
-  'ico',
-  'cur',
-  'jpg',
-  'jpeg',
-  'jfif',
-  'pjpeg',
-  'pjp',
-  'png',
-  'svg',
-  'tif',
-  'tiff',
-  'webp',
-];

@@ -46,7 +46,8 @@ import {
   VSCodeVisualEditorHost, 
   EditorServer,
   EditorServices,
-  XRef
+  XRef,
+  VSC_VEH_SelectImage
 } from "editor-types";
 
 import { 
@@ -180,6 +181,7 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),
     navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file]),
     resolveImageUris: (uris: string[]) => request(VSC_VEH_ResolveImageUris, [uris]),
-    resolveBase64Images: (base64Images: string[]) => request(VSC_VEH_ResolveBase64Images, [base64Images])
+    resolveBase64Images: (base64Images: string[]) => request(VSC_VEH_ResolveBase64Images, [base64Images]),
+    selectImage: () => request(VSC_VEH_SelectImage, [])
   };
 }

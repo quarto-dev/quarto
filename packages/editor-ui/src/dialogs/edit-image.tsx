@@ -15,11 +15,13 @@
 
 import React, { useState } from "react";
 
-import { ControlGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
+import { useFormikContext } from "formik";
+
+import { Button, Classes, ControlGroup, FormGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
 
 import { capitalizeWord } from "core"
 import { FormikDialog, FormikRadioGroup, FormikTextInput, showValueEditorDialog} from "ui-widgets";
-import { AttrEditInput, ImageDimensions, ImageProps, UIToolsAttr } from "editor-types";
+import { AttrEditInput, EditorUIImageResolver, ImageDimensions, ImageProps, UIToolsAttr } from "editor-types";
 
 import { editAttrFields } from "./edit-attr";
 
@@ -27,7 +29,7 @@ import { t } from './translate';
 
 import styles from "./styles.module.scss";
 
-export function editImage(attrUITools: UIToolsAttr) {
+export function editImage(attrUITools: UIToolsAttr, imageResolver?: EditorUIImageResolver) {
   return async (image: ImageProps, dims: ImageDimensions | null, figure: boolean, editAttributes: boolean): Promise<ImageProps | null> => {
     const { id, classes, keyvalue, ...imageAttr } = image;
     const values: EditImageDialogValues = { 
@@ -43,7 +45,8 @@ export function editImage(attrUITools: UIToolsAttr) {
     const result = await showValueEditorDialog(EditImageDialog, values, { 
       dims, 
       figure, 
-      editAttributes
+      editAttributes,
+      imageResolver
     });
     if (result && result.src) {
       const { id, classes, style, keyvalue, ...imageProps } = result;
@@ -84,6 +87,7 @@ interface EditImageDialogOptions {
   dims?: ImageDimensions | null;
   figure: boolean;
   editAttributes: boolean;
+  imageResolver?: EditorUIImageResolver
 }
 
 
@@ -101,43 +105,6 @@ const EditImageDialog: React.FC<{
     setIsOpen(false);
     props.onClosed(values);
   }
-
-  const sizingUI =
-    props.options.editAttributes && 
-    props.options.dims && 
-    props.options.dims.naturalHeight !== null &&
-    props.options.dims.naturalWidth !== null &&
-    !props.values.keyvalue?.includes("width=") &&
-    !props.values.keyvalue?.includes("height=")
-
-  const imagePanel = 
-    <div className={styles.editAttributesPanel}>
-      <FormikTextInput name="src" label={t("Image")} labelInfo={t("(File or URL)")} autoFocus={true}/>
-      {sizingUI ?
-        <ControlGroup vertical={false}>
-
-
-        </ControlGroup>
-      : null}
-      {props.values.align !== undefined
-        ? <FormikRadioGroup 
-            name={"align"} label={"Alignment:"} inline={true} 
-            options={["default", "left", "center", "right"].map(value => { 
-              return {
-                value,
-                label: capitalizeWord(value)
-              }
-            })} 
-          />
-        : null
-      }
-      <FormikTextInput name="caption" label={t("Caption")} placeholder={t("(Optional)")}/>
-      {props.values.alt !== undefined
-        ? <FormikTextInput name="alt" label={t("Alternative text")} placeholder={t("(Optional)")}/>
-        : null
-      }
-      <FormikTextInput name="linkTo" label={t("Link to")} placeholder={t("(Optional)")}/>
-    </div>;
 
   const attributesPanel = 
     <div className={styles.editAttributesPanel}>
@@ -161,19 +128,82 @@ const EditImageDialog: React.FC<{
       onSubmit={(values) => close(values) }
       onReset={() => close() }
     >
-       <Tabs
+      <Tabs
         id="edit-callout" 
         selectedTabId={selectedTabId} 
         onChange={tabId => setSelectedTabId(tabId)}
       >
-        <Tab id="image" title={t("Image")} panel={imagePanel}/>
+        <Tab id="image" title={t("Image")} panel={<ImagePanel options={props.options}/>} />
         {props.options.editAttributes 
           ? <Tab id="attributes" title={t("Attributes")} panel={attributesPanel} /> 
           : null
         }
         <Tab id="advanced" title={t("Advanced")} panel={advancedPanel}/>
       </Tabs>
-      
     </FormikDialog>
   )
 }
+
+const ImagePanel: React.FC<{options: EditImageDialogOptions }> = props => {
+
+  const formik = useFormikContext<EditImageDialogValues>();
+ 
+  return (
+    <div className={styles.editAttributesPanel}>
+      <ImageField {...props} />
+     
+      {formik.values.align !== undefined
+        ? <FormikRadioGroup 
+            name={"align"} label={"Alignment:"} inline={true} 
+            options={["default", "left", "center", "right"].map(value => { 
+              return {
+                value,
+                label: capitalizeWord(value)
+              }
+            })} 
+          />
+        : null
+      }
+      <FormikTextInput name="caption" label={t("Caption")} placeholder={t("(Optional)")}/>
+      {formik.values.alt !== undefined
+        ? <FormikTextInput name="alt" label={t("Alternative text")} placeholder={t("(Optional)")}/>
+        : null
+      }
+      <FormikTextInput name="linkTo" label={t("Link to")} placeholder={t("(Optional)")}/>
+    </div>
+  );
+}
+
+const ImageField: React.FC<{options: EditImageDialogOptions }> = props => {
+
+  const formik = useFormikContext();
+
+  // image input 
+  const imageInput = 
+    <FormikTextInput 
+      name="src" 
+      fill={true}
+      label={t("Image")} 
+      labelInfo={t("(File or URL)")} 
+      autoFocus={true}
+    />;
+
+  // pair with browse button if we have a selectImage function
+  return props.options.imageResolver?.selectImage 
+    ? <ControlGroup vertical={false} fill={true}>
+        {imageInput}
+        <FormGroup label={<span>&nbsp;</span>} className={Classes.FIXED}>
+          <Button onClick={async () => {
+            const image = await props.options.imageResolver?.selectImage?.();
+            if (image) {
+              formik.setFieldValue("src", image);
+            }
+          }}> 
+            {t("Browse...")}
+          </Button>
+        </FormGroup>
+        
+      </ControlGroup>
+    : imageInput;
+
+};

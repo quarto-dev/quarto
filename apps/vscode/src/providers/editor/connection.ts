@@ -34,6 +34,7 @@ import {
   VSC_VEH_NavigateToFile,
   VSC_VEH_ResolveImageUris,
   VSC_VEH_ResolveBase64Images,
+  VSC_VEH_SelectImage,
   VSCodeVisualEditor,
   VSCodeVisualEditorHost,
 } from "editor-types";
@@ -116,7 +117,8 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
     [VSC_VEH_NavigateToXRef]: args => voidPromise(host.navigateToXRef(args[0], args[1])),
     [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0])),
     [VSC_VEH_ResolveImageUris]: args => host.resolveImageUris(args[0]),
-    [VSC_VEH_ResolveBase64Images]: args => host.resolveBase64Images!(args[0])
+    [VSC_VEH_ResolveBase64Images]: args => host.resolveBase64Images!(args[0]),
+    [VSC_VEH_SelectImage]: args => host.selectImage!()
   };
   return methods;
 }

@@ -17,6 +17,7 @@ import {
   EditorDialogs, 
   EditorHTMLDialogCreateFn, 
   EditorHTMLDialogValidateFn, 
+  EditorUIImageResolver, 
   InsertCiteProps, 
   InsertCiteResult, 
   UIToolsAttr 
@@ -51,12 +52,12 @@ export {
 };
 
 
-export function editorDialogs(uiToolsAttr: UIToolsAttr) : EditorDialogs {
+export function editorDialogs(uiToolsAttr: UIToolsAttr, imageResolver?: EditorUIImageResolver) : EditorDialogs {
   return {
     alert,
     yesNoMessage,
     editLink: editLink(uiToolsAttr),
-    editImage: editImage(uiToolsAttr),
+    editImage: editImage(uiToolsAttr, imageResolver),
     editCodeBlock: editCodeBlock(uiToolsAttr),
     editList,
     editAttr: editAttr(uiToolsAttr),

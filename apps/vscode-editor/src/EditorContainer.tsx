@@ -176,6 +176,10 @@ class HostEditorUIContext implements EditorUIContext {
     return this.host.resolveBase64Images!(base64Images);
   }
 
+  public async selectImage() : Promise<string | null> {
+    return this.host.selectImage!();
+  }
+
   // watch a resource for changes (returns an unsubscribe function)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public watchResource(_path: string, _notify: VoidFunction): VoidFunction {

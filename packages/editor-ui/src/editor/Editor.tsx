@@ -96,7 +96,7 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
   // global services
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
   const uiToolsRef = useRef<UITools>(new UITools());
-  const dialogs = useRef(editorDialogs(uiToolsRef.current.attr));
+  const dialogs = useRef(editorDialogs(uiToolsRef.current.attr, props.uiContext));
 
   // redux state
   const title = useSelector(editorTitle);

@@ -25,6 +25,9 @@ export interface EditorUIImageResolver {
 
   // resolve base64 images (copy to doc local 'images' dir)
   resolveBase64Images?: (base64Images: string[]) => Promise<string[]>; 
+
+  // prompt for a local image using a dialog
+  selectImage?: () => Promise<string | null>;
 }
 
 

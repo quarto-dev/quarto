@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * image.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,17 +13,21 @@
  *
  */
 
-
-export * from './promise';
-export * from './wordbreak';
-export * from './jsonrpc';
-export * from './text';
-export * from './path';
-export * from './strings';
-export * from './lazy';
-export * from './png';
-export * from './wait';
-export * from './auto-id';
-export * from './url';
-export * from './image';
-
+// https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types#Common_image_file_types
+export const kImageExtensions = [
+  'png',
+  'svg',
+  'jpg',
+  'jpeg',
+  'apng',
+  'bmp',
+  'gif',
+  'ico',
+  'cur',
+  'jfif',
+  'pjpeg',
+  'pjp',
+  'tif',
+  'tiff',
+  'webp',
+];

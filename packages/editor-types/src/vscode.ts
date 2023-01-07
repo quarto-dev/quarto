@@ -34,6 +34,7 @@ export const VSC_VEH_NavigateToFile = 'vsc_veh_navigate_to_file';
 
 export const VSC_VEH_ResolveImageUris = 'vsc_veh_resolve_image_uris';
 export const VSC_VEH_ResolveBase64Images = 'vsc_veh_resolve_base64_images';
+export const VSC_VEH_SelectImage = 'vsc_veh_select_image';
 
 export interface VSCodeVisualEditor {
   init: (markdown: string) => Promise<string>; 

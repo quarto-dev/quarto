@@ -19,10 +19,11 @@ import path from "path";
 
 import { nanoid } from "nanoid";
 
-import { TextDocument } from "vscode";
+import vscode, { TextDocument, Uri } from "vscode";
 
 import { EditorUIImageResolver } from "editor-types";
-import { isHttpUrl } from "core";
+import { isHttpUrl, kImageExtensions } from "core";
+import { URI } from "vscode-languageclient";
 
 
 export function documentImageResolver(
@@ -59,28 +60,32 @@ export function documentImageResolver(
     return path.join(docDir, `${stem}-${nanoid()}`);
   };
 
+  const resolveImage = (uri: string) => {
+    uri = path.normalize(uri);
+    // doc dir relative
+    if (uri.startsWith(docDir)) {
+      return path.relative(docDir, uri);
+    // project dir relative (start w/ slash)
+    } else if (projectDir && uri.startsWith(projectDir)) {
+      return `/${path.relative(projectDir, uri)}`;
+    // otherwise copy to images dir
+    } else {
+      const parsedPath = path.parse(uri);
+      const imagePath = uniqueImagePath(parsedPath.name, parsedPath.ext, true);
+      fs.copyFileSync(uri, imagePath);
+      return path.relative(docDir, imagePath);
+    }
+  };
+
   return {
     resolveImageUris: async (uris: string[]) : Promise<string[]> => {
       return uris.map(uri => {
         if (isHttpUrl(uri)) {
           return uri;
         } else {
-          uri = path.normalize(uri);
-          // doc dir relative
-          if (uri.startsWith(docDir)) {
-            return path.relative(docDir, uri);
-          // project dir relative (start w/ slash)
-          } else if (projectDir && uri.startsWith(projectDir)) {
-            return `/${path.relative(projectDir, uri)}`;
-          // otherwise copy to images dir
-          } else {
-            const parsedPath = path.parse(uri);
-            const imagePath = uniqueImagePath(parsedPath.name, parsedPath.ext, true);
-            fs.copyFileSync(uri, imagePath);
-            return path.relative(docDir, imagePath);
-          }
+          return ensureForwardSlashes(resolveImage(uri));
         }
-      }).map(ensureForwardSlashes);
+      });
     },
     resolveBase64Images: async (base64Images: string[]) : Promise<string[]> => {
       return base64Images.map(base64 => {
@@ -97,8 +102,22 @@ export function documentImageResolver(
         }
        ;
       }).filter(image => image !== null) as string[];
+    },
+    selectImage: async () : Promise<string | null> => {
+      const file = await vscode.window.showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        filters: { ["Images"]: kImageExtensions },
+        title: "Select Image",
+        defaultUri: Uri.file(docDir)
+      });
+      if (file) {
+        return resolveImage(file[0].fsPath);
+      } else {
+        return null;
+      }
     }
   };
 }
-
 

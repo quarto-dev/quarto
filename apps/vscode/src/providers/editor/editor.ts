@@ -55,8 +55,13 @@ export function activateEditor(
 
 class VisualEditorProvider implements CustomTextEditorProvider {
   
+  // track the last contents of any active untitled docs (used
+  // for recovering from attempt to edit )
   private static activeUntitled?: { uri: Uri, content: string };
-  
+
+  // track visual editors
+  private static visualEditors = visualEditorTracker();
+
   public static register(
     context: ExtensionContext, 
     quartoContext: QuartoContext,
@@ -90,6 +95,10 @@ class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static readonly viewType = "quarto.visualEditor";
 
+  public static activeEditor() {
+    return this.visualEditors.activeEditor()?.document;
+  }
+
   constructor(private readonly context: ExtensionContext,
               private readonly quartoContext: QuartoContext,
               private readonly lspClient: LanguageClient) {}
@@ -120,7 +129,7 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     disposables.push(client);
 
     // sync manager
-    const syncManager = editorSyncManager(this.quartoContext, document, client.editor);
+    const syncManager = editorSyncManager(document, client.editor);
 
     // editor container implementation   
     const host: VSCodeVisualEditorHost = {
@@ -235,6 +244,9 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
+    // track visual editors
+    disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel));
+
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
       for (const disposable of disposables) {
@@ -306,4 +318,31 @@ async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) 
     await window.showTextDocument(doc, ViewColumn.Active, false);
 
   }
+}
+
+interface VisualEditorTracker {
+  track: (document: TextDocument, webviewPanel: WebviewPanel) => Disposable;
+  activeEditor: () => { document: TextDocument, webviewPanel: WebviewPanel } | undefined;
+}
+
+function visualEditorTracker() : VisualEditorTracker {
+
+  const activeEditors = new Array<{ document: TextDocument, webviewPanel: WebviewPanel }>();
+
+  return {
+    track: (document: TextDocument, webviewPanel: WebviewPanel) : Disposable => {
+      activeEditors.push({document, webviewPanel});
+      return {
+        dispose: () => {
+          const idx = activeEditors.findIndex(editor => editor.document === document);
+          if (idx !== -1) {
+            activeEditors.splice(idx, 1);
+          }
+        }
+      };
+    },
+    activeEditor: () => {
+      return activeEditors.find(editor => editor.webviewPanel.active);
+    }
+  };
 }

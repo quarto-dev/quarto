@@ -31,8 +31,12 @@ export function documentImageResolver(
   projectDir?: string
 ) : EditorUIImageResolver {
   
+  // compute doc and project dirs
   const docDir = path.normalize(path.dirname(doc.fileName));
   projectDir = projectDir ? path.normalize(projectDir) : undefined;
+
+  // sticky images dir (start out w/ docDir)
+  let imagesDir = docDir;
 
   const ensureForwardSlashes = (path: string) => {
     return path.replace(/\\/, "/");
@@ -78,6 +82,7 @@ export function documentImageResolver(
   };
 
   return {
+
     resolveImageUris: async (uris: string[]) : Promise<string[]> => {
       return uris.map(uri => {
         if (isHttpUrl(uri)) {
@@ -110,10 +115,12 @@ export function documentImageResolver(
         canSelectMany: false,
         filters: { ["Images"]: kImageExtensions },
         title: "Select Image",
-        defaultUri: Uri.file(docDir)
+        defaultUri: Uri.file(imagesDir)
       });
       if (file) {
-        return resolveImage(file[0].fsPath);
+        const image = file[0].fsPath;
+        imagesDir = path.dirname(image);
+        return resolveImage(image);
       } else {
         return null;
       }

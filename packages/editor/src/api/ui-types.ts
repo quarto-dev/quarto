@@ -15,7 +15,7 @@
 
 import { SkinTone } from './emoji';
 
-import { EditorUISpelling, EditorDialogs, EditorDisplay } from 'editor-types';
+import { EditorUISpelling, EditorDialogs, EditorDisplay, EditorUIImageResolver } from 'editor-types';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
@@ -65,8 +65,7 @@ export interface EditorMath {
   typeset: (el: HTMLElement, math: string, priority: boolean) => Promise<boolean>;
 }
 
-
-export interface EditorUIContext {
+export interface EditorUIContext extends EditorUIImageResolver {
 
   // get the current username
   getUsername?: () => string;
@@ -105,13 +104,6 @@ export interface EditorUIContext {
 
   // image from the clipboard (returned as file path)
   clipboardImage: () => Promise<string | null>;
-
-  // resolve image uris (make relative, copy to doc local 'images' dir, etc)
-  resolveImageUris: (uris: string[]) => Promise<string[]>;
-
-  // resolve base64 images (copy to doc local 'images' dir)
-  resolveBase64Images?: (base64Images: string[]) => Promise<string[]>;
-
 }
 
 export interface EditorUIMath {

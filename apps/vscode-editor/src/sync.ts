@@ -40,6 +40,8 @@ import {
   VSC_VEH_OpenURL,
   VSC_VEH_NavigateToXRef,
   VSC_VEH_NavigateToFile,
+  VSC_VEH_ResolveImageUris,
+  VSC_VEH_ResolveBase64Images,
   VSCodeVisualEditor, 
   VSCodeVisualEditorHost, 
   EditorServer,
@@ -176,6 +178,8 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     editorResourceUri: (path: string) => request(VSC_VEH_EditorResourceUri, [path]),
     openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),
-    navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file])
+    navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file]),
+    resolveImageUris: (uris: string[]) => request(VSC_VEH_ResolveImageUris, [uris]),
+    resolveBase64Images: (base64Images: string[]) => request(VSC_VEH_ResolveBase64Images, [base64Images])
   };
 }

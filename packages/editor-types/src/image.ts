@@ -19,4 +19,13 @@ export interface ImageDimensions {
   containerWidth: number;
 }
 
+export interface EditorUIImageResolver {
+  // resolve image uris (make relative, copy to doc local 'images' dir, etc)
+  resolveImageUris: (uris: string[]) => Promise<string[]>;
+
+  // resolve base64 images (copy to doc local 'images' dir)
+  resolveBase64Images?: (base64Images: string[]) => Promise<string[]>; 
+}
+
+
 

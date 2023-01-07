@@ -18,8 +18,9 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { TextDocument, window, Uri, workspace, commands } from "vscode";
+import { hasQuartoProject, projectDirForDocument, QuartoContext } from "quarto-core";
+
 import { Command } from "../../core/command";
-import { QuartoContext } from "quarto-core";
 import {
   canPreviewDoc,
   isPreviewRunningForDoc,
@@ -29,11 +30,7 @@ import {
 import { MarkdownEngine } from "../../markdown/engine";
 import { findEditor, isNotebook } from "../../core/doc";
 import { promptForQuartoInstallation } from "../../core/quarto";
-import {
-  hasQuartoProject,
-  projectDirForDocument,
-  renderOnSave,
-} from "./preview-util";
+import { renderOnSave } from "./preview-util";
 
 export function previewCommands(
   quartoContext: QuartoContext,
@@ -192,7 +189,7 @@ class RenderProjectCommand extends RenderCommand implements Command {
     // start by using the currently active or visible source files
     const targetEditor = findEditor(canPreviewDoc);
     if (targetEditor) {
-      const projectDir = projectDirForDocument(targetEditor.document.uri);
+      const projectDir = projectDirForDocument(targetEditor.document.uri.fsPath);
       if (projectDir) {
         previewProject(Uri.file(projectDir));
         return;

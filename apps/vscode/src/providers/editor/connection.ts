@@ -32,8 +32,10 @@ import {
   VSC_VEH_OpenURL,
   VSC_VEH_NavigateToXRef,
   VSC_VEH_NavigateToFile,
+  VSC_VEH_ResolveImageUris,
+  VSC_VEH_ResolveBase64Images,
   VSCodeVisualEditor,
-  VSCodeVisualEditorHost
+  VSCodeVisualEditorHost,
 } from "editor-types";
 
 import { 
@@ -112,7 +114,9 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
     [VSC_VEH_EditorResourceUri]: args => host.editorResourceUri(args[0]),
     [VSC_VEH_OpenURL]: args => voidPromise(host.openURL(args[0])),
     [VSC_VEH_NavigateToXRef]: args => voidPromise(host.navigateToXRef(args[0], args[1])),
-    [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0]))
+    [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0])),
+    [VSC_VEH_ResolveImageUris]: args => host.resolveImageUris(args[0]),
+    [VSC_VEH_ResolveBase64Images]: args => host.resolveBase64Images!(args[0])
   };
   return methods;
 }

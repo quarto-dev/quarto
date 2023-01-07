@@ -168,16 +168,12 @@ class HostEditorUIContext implements EditorUIContext {
   }
 
   // resolve image uris (make relative, copy to doc local 'images' dir, etc)
-  public async resolveImageUris(uris: string[]): Promise<string[]> {
-    // TODO: resolution
-    console.log(uris);
-    return uris;
+  resolveImageUris(uris: string[]): Promise<string[]> {
+    return this.host.resolveImageUris(uris);
   }
 
   public async resolveBase64Images(base64Images: string[]) : Promise<string[]> {
-    // TODO: resolution
-    console.log(base64Images);
-    return base64Images;
+    return this.host.resolveBase64Images!(base64Images);
   }
 
   // watch a resource for changes (returns an unsubscribe function)
@@ -202,8 +198,8 @@ class HostEditorUIContext implements EditorUIContext {
   }
 
   private resolvePath(path: string): string {
-    if (path.startsWith("/")) {
-      return `${this.context.workspaceDir}/${path.slice(1)}`;
+    if (path.startsWith("/") && this.context.projectDir) {
+      return `${this.context.projectDir}/${path.slice(1)}`;
     } else {
       return `${this.context.resourceDir}/${path}`;
     }

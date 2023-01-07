@@ -13,6 +13,8 @@
  *
  */
 
+import path, { extname } from "path";
+
 import { 
   window,
   workspace, 
@@ -31,16 +33,17 @@ import {
 
 import { LanguageClient } from "vscode-languageclient/node";
 
-import { VSCodeVisualEditorHost, XRef } from "editor-types";
+import { projectDirForDocument, QuartoContext } from "quarto-core";
+
+import { HostContext, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
+import { isWindows } from "../../core/platform";
+import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
-import path, { extname } from "path";
-import { QuartoContext } from "quarto-core";
-import { isWindows } from "../../core/platform";
-import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
+import { documentImageResolver } from "./images";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -106,6 +109,9 @@ class VisualEditorProvider implements CustomTextEditorProvider {
         ? VisualEditorProvider.activeUntitled.content
         : undefined;
     
+    const projectDir = document.isUntitled ? undefined : projectDirForDocument(document.fileName);
+    const workspaceDir = this.quartoContext.workspaceDir;
+
     // track disposables
     const disposables: Disposable[] = [];
 
@@ -120,13 +126,13 @@ class VisualEditorProvider implements CustomTextEditorProvider {
     const host: VSCodeVisualEditorHost = {
 
       // editor is querying for context
-      getHostContext: async () => {
-        const workspaceDir = this.quartoContext.workspaceDir || process.cwd();
+      getHostContext: async () : Promise<HostContext> => {
         return {
           documentPath: document.isUntitled ? null : document.fileName,
-          workspaceDir,
-          resourceDir: document.isUntitled ? workspaceDir : path.dirname(document.fileName),
-          markdown: document.getText(),
+          projectDir,
+          resourceDir: document.isUntitled 
+            ? (projectDir || workspaceDir || process.cwd()) 
+            : path.dirname(document.fileName),
           isWindowsDesktop: isWindows()
         };
       },
@@ -210,7 +216,9 @@ class VisualEditorProvider implements CustomTextEditorProvider {
       },
       navigateToFile: function (file: string): void {
         navigateToFile(document, file);
-      }
+      },
+
+      ...documentImageResolver(document, projectDir)
     };
 
     // setup server on webview iframe

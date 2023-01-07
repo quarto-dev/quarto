@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * url.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,16 +13,11 @@
  *
  */
 
-
-export * from './promise';
-export * from './wordbreak';
-export * from './jsonrpc';
-export * from './text';
-export * from './path';
-export * from './strings';
-export * from './lazy';
-export * from './png';
-export * from './wait';
-export * from './auto-id';
-export * from './url';
-
+export function isHttpUrl(path: string) {
+  try {
+    const url = new URL(path);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_) {
+    return false;
+  }
+}

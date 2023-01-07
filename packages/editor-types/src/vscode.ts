@@ -14,6 +14,7 @@
  */
 
 import { EditorDisplay } from "./display";
+import { EditorUIImageResolver } from "./image";
 
 export const VSC_VE_Init = 'vsc_ve_init';
 export const VSC_VE_GetMarkdown = 'vsc_ve_get_markdown';
@@ -31,6 +32,9 @@ export const VSC_VEH_OpenURL = 'vsc_veh_open_url';
 export const VSC_VEH_NavigateToXRef = 'vsc_veh_navigate_to_xref';
 export const VSC_VEH_NavigateToFile = 'vsc_veh_navigate_to_file';
 
+export const VSC_VEH_ResolveImageUris = 'vsc_veh_resolve_image_uris';
+export const VSC_VEH_ResolveBase64Images = 'vsc_veh_resolve_base64_images';
+
 export interface VSCodeVisualEditor {
   init: (markdown: string) => Promise<string>; 
   getMarkdownFromState: (state: unknown) => Promise<string>;
@@ -39,12 +43,12 @@ export interface VSCodeVisualEditor {
 
 export interface HostContext {
   documentPath: string | null;
-  workspaceDir: string;
+  projectDir?: string;
   resourceDir: string;
   isWindowsDesktop: boolean;
 }
 
-export interface VSCodeVisualEditorHost extends EditorDisplay {
+export interface VSCodeVisualEditorHost extends EditorDisplay, EditorUIImageResolver {
   getHostContext: () => Promise<HostContext>;
   reopenSourceMode: () => Promise<void>;
   onEditorReady: () => Promise<void>; 

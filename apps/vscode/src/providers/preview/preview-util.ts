@@ -13,14 +13,11 @@
  *
  */
 
-import * as path from "path";
-import * as fs from "fs";
-
 import semver from "semver";
 
 import vscode from "vscode";
 import { TextDocument, TextEditor, Uri, workspace } from "vscode";
-import { parseFrontMatterStr } from "quarto-core";
+import { parseFrontMatterStr, projectDirForDocument } from "quarto-core";
 
 import { MarkdownEngine } from "../../markdown/engine";
 import {
@@ -31,7 +28,7 @@ import { isNotebook } from "../../core/doc";
 
 export function previewDirForDocument(uri: Uri) {
   // first check for a quarto project
-  const projectDir = projectDirForDocument(uri);
+  const projectDir = projectDirForDocument(uri.fsPath);
   if (projectDir) {
     return projectDir;
   } else {
@@ -42,34 +39,6 @@ export function previewDirForDocument(uri: Uri) {
     }
   }
   return undefined;
-}
-
-export function projectDirForDocument(uri: Uri) {
-  let dir = path.dirname(uri.fsPath);
-  while (true) {
-    if (hasQuartoProject(dir)) {
-      return dir;
-    } else {
-      const nextDir = path.dirname(dir);
-      if (nextDir !== dir) {
-        dir = nextDir;
-      } else {
-        break;
-      }
-    }
-  }
-  return undefined;
-}
-
-export function hasQuartoProject(dir?: string) {
-  if (dir) {
-    return (
-      fs.existsSync(path.join(dir, "_quarto.yml")) ||
-      fs.existsSync(path.join(dir, "_quarto.yaml"))
-    );
-  } else {
-    return false;
-  }
 }
 
 export async function isQuartoShinyDoc(
@@ -131,7 +100,7 @@ export async function renderOnSave(engine: MarkdownEngine, editor: TextEditor) {
   }
 
   // now project level (take the first metadata file with a setting)
-  const projectDir = projectDirForDocument(editor.document.uri);
+  const projectDir = projectDirForDocument(editor.document.uri.fsPath);
   if (projectDir) {
     const metadataFiles = metadataFilesForDocument(editor.document.uri.fsPath);
     if (metadataFiles) {

@@ -122,11 +122,10 @@ function handleImageDataTransfer(event: Event, dataTransfer: DataTransfer, view:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (dataTransfer.files?.length && (dataTransfer.files[0] as any).path) {
     uris = [];
-    for (const file of dataTransfer.files) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const path = (file as any).path;
-      if (path) {
-        uris.push(path);
+    for (let i=0; i<dataTransfer.files.length; i++) {
+      const file = dataTransfer.files.item(i) as (File & { path: string } | null);
+      if (file && file.path) {
+        uris.push(file.path);
       } 
     }
   } else  {
@@ -149,8 +148,9 @@ function handleImageDataTransfer(event: Event, dataTransfer: DataTransfer, view:
   // now look for png file blobs
   const files: File[] = [];
   if (dataTransfer.files.length) {
-    for (const file of dataTransfer.files) {
-      if (file.type === kImagePng) {
+    for (let i=0; i<dataTransfer.files.length; i++) {
+      const file = dataTransfer.files.item(i);
+      if (file && file.type === kImagePng) {
         files.push(file);
       }
     }

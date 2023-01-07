@@ -982,6 +982,7 @@
     "markdown-it": "^13.0.1",
     "markdown-it-container": "^3.0.0",
     "markdown-it-highlightjs": "^4.0.1",
+    "nanoid": "^4.0.0",
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-vscode-editor": "*",

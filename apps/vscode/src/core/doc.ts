@@ -108,11 +108,7 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
     if (!isNotebook(editor?.document)) {
       setTimeout(() => {
         if (editor) {
-          vscode.window.showTextDocument(
-            editor.document,
-            editor.viewColumn,
-            false
-          );
+          editor.activate();
         }
       }, 200);
     }

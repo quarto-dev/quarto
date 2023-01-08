@@ -31,7 +31,9 @@ import {
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_GetMarkdownFromState,
   VSC_VE_Init, 
+  VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
+  VSC_VEH_SelectImage,
   VSC_VEH_EditorResourceUri,
   VSC_VEH_GetHostContext,
   VSC_VEH_ReopenSourceMode,
@@ -47,7 +49,6 @@ import {
   EditorServer,
   EditorServices,
   XRef,
-  VSC_VEH_SelectImage
 } from "editor-types";
 
 import { 
@@ -123,6 +124,10 @@ export async function syncEditorToHost(
       return result.canonical;        
     },
 
+    async focus() {
+      editor.focus();
+    },
+
     async applyExternalEdit(markdown: string) {
       // only receive external text edits if we don't have focus (prevents circular updates)
       if (!editor.hasFocus() && !window.document.hasFocus()) {
@@ -163,6 +168,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
   // create a server
   return jsonRpcPostMessageServer(target, {
     [VSC_VE_Init]: args => editor.init(args[0]),
+    [VSC_VE_Focus]: () => editor.focus(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0])
   })

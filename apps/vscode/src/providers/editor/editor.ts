@@ -35,11 +35,11 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
-import { HostContext, VSCodeVisualEditorHost, XRef } from "editor-types";
+import { HostContext, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
+import { isQuartoDoc, kQuartoLanguageId, preserveEditorFocus, QuartoEditor } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
@@ -102,6 +102,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         document: editor.document, 
         activate: async () => {
           editor.webviewPanel.reveal(editor.webviewPanel.viewColumn, false);
+          // delay required to circumvent other focus activity
+          setTimeout(() => {
+            editor.editor.focus();
+          }, 200);
         },
         viewColumn: editor.webviewPanel.viewColumn 
       };
@@ -256,7 +260,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
     // track visual editors
-    disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel));
+    disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel, client.editor));
 
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
@@ -331,18 +335,24 @@ async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) 
   }
 }
 
+interface TrackedEditor {
+  document: TextDocument;
+  webviewPanel: WebviewPanel;
+  editor: VSCodeVisualEditor;
+}
+
 interface VisualEditorTracker {
-  track: (document: TextDocument, webviewPanel: WebviewPanel) => Disposable;
-  activeEditor: () => { document: TextDocument, webviewPanel: WebviewPanel } | undefined;
+  track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) => Disposable;
+  activeEditor: () => TrackedEditor | undefined;
 }
 
 function visualEditorTracker() : VisualEditorTracker {
 
-  const activeEditors = new Array<{ document: TextDocument, webviewPanel: WebviewPanel }>();
+  const activeEditors = new Array<TrackedEditor>();
 
   return {
-    track: (document: TextDocument, webviewPanel: WebviewPanel) : Disposable => {
-      activeEditors.push({document, webviewPanel});
+    track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : Disposable => {
+      activeEditors.push({document, webviewPanel, editor});
       return {
         dispose: () => {
           const idx = activeEditors.findIndex(editor => editor.document === document);

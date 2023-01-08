@@ -21,6 +21,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { 
   VSC_VE_Init,
+  VSC_VE_Focus,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_ApplyExternalEdit, 
   VSC_VEH_EditorResourceUri,
@@ -63,6 +64,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
   return {
     editor: {
       init: (markdown: string) => request(VSC_VE_Init, [markdown]),
+      focus: () => request(VSC_VE_Focus, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
     },

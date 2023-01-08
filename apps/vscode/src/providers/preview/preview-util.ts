@@ -45,6 +45,13 @@ export function findEditor(
     return quartoEditor(textEditor);
   // check visible text editors
   } else if (includeVisible) {
+    // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
+    const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
+    if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
+      return visibleVisualEditor;
+    }
+
+    // visible text editors
     const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
       filter(editor.document)
     );

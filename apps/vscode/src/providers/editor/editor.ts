@@ -95,8 +95,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static readonly viewType = "quarto.visualEditor";
 
-  public static activeEditor() : QuartoEditor | undefined {
-    const editor = this.visualEditors.activeEditor();
+  public static activeEditor(includeVisible?: boolean) : QuartoEditor | undefined {
+    const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
       return { 
         document: editor.document, 
@@ -343,7 +343,7 @@ interface TrackedEditor {
 
 interface VisualEditorTracker {
   track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) => Disposable;
-  activeEditor: () => TrackedEditor | undefined;
+  activeEditor: (includeVisible?: boolean) => TrackedEditor | undefined;
 }
 
 function visualEditorTracker() : VisualEditorTracker {
@@ -362,8 +362,10 @@ function visualEditorTracker() : VisualEditorTracker {
         }
       };
     },
-    activeEditor: () => {
-      return activeEditors.find(editor => editor.webviewPanel.active);
+    activeEditor: (includeVisible?: boolean) => {
+      return activeEditors.find(editor => {
+        return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
+      });
     }
   };
 }

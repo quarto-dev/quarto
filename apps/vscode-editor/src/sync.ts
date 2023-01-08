@@ -49,6 +49,7 @@ import {
   EditorServer,
   EditorServices,
   XRef,
+  VSC_VE_IsFocused,
 } from "editor-types";
 
 import { 
@@ -124,8 +125,12 @@ export async function syncEditorToHost(
       return result.canonical;        
     },
 
-    async focus() {
+    async focus() {      
       editor.focus();
+    },
+
+    async isFocused() {
+      return editor.hasFocus();
     },
 
     async applyExternalEdit(markdown: string) {
@@ -169,6 +174,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
   return jsonRpcPostMessageServer(target, {
     [VSC_VE_Init]: args => editor.init(args[0]),
     [VSC_VE_Focus]: () => editor.focus(),
+    [VSC_VE_IsFocused]: () => editor.isFocused(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0])
   })

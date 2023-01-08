@@ -284,6 +284,7 @@ export interface EditorOperations {
   getFindReplace() : EditorFindReplace | undefined
 
   // activation/navigation
+  blur(): void;
   focus(): void;
   hasFocus(): boolean;
   navigate(type: NavigationType, id: string): void;

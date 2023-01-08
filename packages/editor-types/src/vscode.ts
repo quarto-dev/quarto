@@ -18,6 +18,7 @@ import { EditorUIImageResolver } from "./image";
 
 export const VSC_VE_Init = 'vsc_ve_init';
 export const VSC_VE_Focus = 'vsc_ve_focus';
+export const VSC_VE_IsFocused = 'vsc_ve_is_focused';
 export const VSC_VE_GetMarkdown = 'vsc_ve_get_markdown';
 export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
@@ -40,6 +41,7 @@ export const VSC_VEH_SelectImage = 'vsc_veh_select_image';
 export interface VSCodeVisualEditor {
   init: (markdown: string) => Promise<string>; 
   focus: () => Promise<void>;
+  isFocused: () => Promise<boolean>;
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
 }

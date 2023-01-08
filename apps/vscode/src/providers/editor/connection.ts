@@ -38,6 +38,7 @@ import {
   VSC_VEH_SelectImage,
   VSCodeVisualEditor,
   VSCodeVisualEditorHost,
+  VSC_VE_IsFocused,
 } from "editor-types";
 
 import { 
@@ -65,6 +66,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
     editor: {
       init: (markdown: string) => request(VSC_VE_Init, [markdown]),
       focus: () => request(VSC_VE_Focus, []),
+      isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
     },

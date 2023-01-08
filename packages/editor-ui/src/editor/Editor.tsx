@@ -223,6 +223,9 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
     getFindReplace() {
       return editorRef.current?.getFindReplace();
     },
+    blur() {
+      editorRef.current?.blur();
+    },
     focus() {
       editorRef.current?.focus();
     },

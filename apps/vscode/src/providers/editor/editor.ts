@@ -44,6 +44,7 @@ import { isQuartoDoc, kQuartoLanguageId, preserveEditorFocus, QuartoEditor } fro
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
 import { documentImageResolver } from "./images";
+import { clearInterval } from "timers";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -262,6 +263,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     // track visual editors
     disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel, client.editor));
 
+    // poll for focus (and fix if it gets out of sync)
+    disposables.push(focusTracker(webviewPanel, client.editor));
+
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
       for (const disposable of disposables) {
@@ -368,4 +372,23 @@ function visualEditorTracker() : VisualEditorTracker {
       });
     }
   };
+}
+
+function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : Disposable {
+
+  const timer = setInterval(async () => {
+    if (!webviewPanel.active) {
+      const hasFocus = await editor.isFocused();
+      if (hasFocus) {
+        await commands.executeCommand('workbench.action.focusNextGroup');
+        webviewPanel.reveal(webviewPanel.viewColumn, false);
+        editor.focus();
+      }
+    }
+  }, 1000);
+
+  return {
+    dispose: () => clearInterval(timer)
+  };
+
 }

@@ -19,13 +19,21 @@ import {
   CompletionItemKind,
   MarkupKind,
 } from "vscode-languageserver/node";
-import { biblioRefs } from "../../../core/biblio";
+import { biblioRefs } from "editor-server";
 
-export function biblioCompletions(
+import { filePathForDoc } from "../../../core/doc";
+import { documentFrontMatter } from "../../../core/markdown";
+import { quartoContext } from "../../../quarto/quarto";
+
+export async function biblioCompletions(
   token: string,
   doc: TextDocument
-): CompletionItem[] | null {
-  const refs = biblioRefs(doc);
+): Promise<CompletionItem[] | null> {
+  if (!quartoContext) {
+    return null;
+  }
+
+  const refs = await biblioRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
   if (refs) {
     return refs
       .filter((ref) => ref.id.startsWith(token))

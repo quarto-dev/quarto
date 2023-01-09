@@ -62,7 +62,7 @@ export async function refsCompletions(
         // construct path
         const path = filePathForDoc(doc);
         const projectDir = projectDirForDocument(path);
-        const biblioItems = biblioCompletions(tokenText, doc);
+        const biblioItems = await biblioCompletions(tokenText, doc);
         const crossrefItems = await crossrefCompletions(
           tokenText,
           doc.getText(),

@@ -29,6 +29,6 @@ export async function onHover(
   pos: Position
 ): Promise<Hover | null> {
   return (
-    refHover(doc, pos) || mathHover(doc, pos) || (await yamlHover(doc, pos))
+    (await refHover(doc, pos)) || mathHover(doc, pos) || (await yamlHover(doc, pos))
   );
 }

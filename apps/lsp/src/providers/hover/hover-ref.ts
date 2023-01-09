@@ -15,13 +15,19 @@
 
 import { Hover, Position, Range } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { biblioRefs, CslRef } from "editor-server";
+
 import { bypassRefIntelligence } from "../../core/refs";
-import { biblioRefs, CslRef } from "../../core/biblio";
+import { documentFrontMatter } from "../../core/markdown";
+import { filePathForDoc } from "../../core/doc";
+
+import { quartoContext } from "../../quarto/quarto";
+
 
 // cache the last ref lookup
 let lastRef: CslRef | undefined;
 
-export function refHover(doc: TextDocument, pos: Position): Hover | null {
+export async function refHover(doc: TextDocument, pos: Position): Promise<Hover | null> {
   // compute the line
   const line = doc
     .getText(Range.create(pos.line, 0, pos.line + 1, 0))
@@ -48,8 +54,8 @@ export function refHover(doc: TextDocument, pos: Position): Hover | null {
       );
       if (citeId === lastRef?.id && lastRef.cite) {
         return hoverFromCslRef(lastRef.cite, range);
-      } else {
-        const refs = biblioRefs(doc);
+      } else if (quartoContext) {
+        const refs = await biblioRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
         if (refs) {
           const ref = refs.find((x) => x.id === citeId);
           if (ref?.cite) {

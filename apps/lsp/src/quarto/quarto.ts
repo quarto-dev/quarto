@@ -135,10 +135,12 @@ export interface Quarto {
 }
 
 export let quarto: Quarto | undefined;
+export let quartoContext: QuartoContext | undefined;
 
-export function initializeQuarto(quartoContext: QuartoContext) {
-  initializeQuartoYamlModule(quartoContext.resourcePath)
+export function initializeQuarto(context: QuartoContext) {
+  initializeQuartoYamlModule(context.resourcePath)
     .then((mod) => {
+      quartoContext = context;
       const quartoModule = mod as QuartoYamlModule;
       quarto = {
         getYamlCompletions: quartoModule.getCompletions,

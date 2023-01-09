@@ -20,26 +20,26 @@ tmp.setGracefulCleanup();
 
 import * as yaml from "js-yaml";
 
-import { quarto } from "../quarto/quarto";
-import { shQuote } from "core";
+import { shQuote, pathWithForwardSlashes } from "core";
 import {
   metadataFilesForDocument,
   projectDirForDocument,
+  QuartoContext,
 } from "quarto-core";
-import { filePathForDoc } from "./doc";
-import { TextDocument } from "vscode-languageserver-textdocument";
-import { documentFrontMatter } from "./markdown";
-import { pathWithForwardSlashes } from "core";
+
 
 export type CslRef = {
   id: string;
   cite?: string;
 };
 
-export function biblioRefs(doc: TextDocument): CslRef[] | null {
-  const docPath = filePathForDoc(doc);
+export async function biblioRefs(
+  quarto: QuartoContext,
+  docPath: string, 
+  frontMatter: Record<string,unknown>
+): Promise<CslRef[] | null> {
+
   const projectDir = projectDirForDocument(docPath);
-  const frontMatter = documentFrontMatter(doc);
 
   // bibliography in document metadata
   const biblioOptions = bibliographyOptions(path.dirname(docPath), frontMatter);
@@ -58,7 +58,7 @@ export function biblioRefs(doc: TextDocument): CslRef[] | null {
 
   if (biblioOptions.bibliographies.length > 0) {
     const cslRefs = biblioOptions.bibliographies.reduce((refs, file) => {
-      const bibFile = biblioFile(file, biblioOptions.csl);
+      const bibFile = biblioFile(quarto, file, biblioOptions.csl);
       if (bibFile) {
         refs.push(
           ...bibFile.refs.filter((ref) => !refs.find((x) => x.id === ref.id))
@@ -86,11 +86,10 @@ type BiblioFile = {
 // cache of biblio files
 const biblioFiles = new Map<string, BiblioFile>();
 
-function biblioFile(path: string, csl?: string) {
+function biblioFile(quarto: QuartoContext, path: string, csl?: string) {
   // check cache
   const mtimeMs = fs.statSync(path).mtimeMs;
   if (
-    quarto &&
     (!biblioFiles.has(path) || (biblioFiles.get(path)?.cached || 0) < mtimeMs)
   ) {
     // call pandoc to get refs

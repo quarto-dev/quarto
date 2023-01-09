@@ -19,6 +19,7 @@ import { kXRefIndexForFile, kXRefQuartoIndexForFile, kXRefQuartoXRefForId, kXRef
 
 export function xrefServer() : XRefServer {
   return {
+    // bookdown xrefs, we don't implement these
     indexForFile(file: string) : Promise<XRefs> {
       throw new Error("not implemented");
     },

@@ -138,7 +138,7 @@ export const codeMirrorBlockNodeView: (
             return false;
           },
         },
-        ...defaultKeymap,
+        ...(defaultKeymap.filter(mapping => mapping.key !== 'Shift-Mod-k')),
         ...closeBracketsKeymap,
         indentWithTab
       ]),

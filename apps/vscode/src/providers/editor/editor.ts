@@ -359,7 +359,7 @@ function visualEditorTracker() : VisualEditorTracker {
       activeEditors.push({document, webviewPanel, editor});
       return {
         dispose: () => {
-          const idx = activeEditors.findIndex(editor => editor.document === document);
+          const idx = activeEditors.findIndex(editor => editor.document.uri.toString() === document.uri.toString());
           if (idx !== -1) {
             activeEditors.splice(idx, 1);
           }

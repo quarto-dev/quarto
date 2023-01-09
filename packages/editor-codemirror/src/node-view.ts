@@ -35,7 +35,7 @@ import {
 import { indentOnInput } from "@codemirror/language";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
-import { Compartment, EditorState } from "@codemirror/state";
+import { Compartment, EditorState, SelectionRange } from "@codemirror/state";
 import { exitCode, selectAll } from "prosemirror-commands";
 
 import {
@@ -147,6 +147,11 @@ export const codeMirrorBlockNodeView: (
     doc: node.textContent,
   });
 
+  // track the last user selection in this code view so we can make it 
+  // sticky for when prosemirror calls setSelection (e.g. on a refocus,
+  // where by default it passes 0,0)
+  let lastUserSelection: SelectionRange | undefined;
+
   const codeMirrorView = new EditorView({
     state,
     dispatch: (tr) => {
@@ -155,6 +160,10 @@ export const codeMirrorBlockNodeView: (
         const textUpdate = tr.state.toJSON().doc;
         valueChanged(textUpdate, node, getPos, view);
         forwardSelection(codeMirrorView, view, getPos);
+        // track last user selection that isn't at the origin
+        if (codeMirrorView.state.selection.main.anchor !== 0) {
+          lastUserSelection = codeMirrorView.state.selection.main;
+        } 
       }
     },
   });
@@ -175,6 +184,12 @@ export const codeMirrorBlockNodeView: (
     },
     stopEvent: () => true,
     setSelection: (anchor, head) => {
+      // if prosemirror attempts to set us to 0,0 (which it does on focus)
+      // just restore our last user selection
+      if (anchor === 0 && head === 0 && lastUserSelection) {
+        anchor = lastUserSelection.anchor;
+        head = lastUserSelection.head;
+      }
       codeMirrorView.focus();
       forwardSelection(codeMirrorView, view, getPos);
       updating = true;

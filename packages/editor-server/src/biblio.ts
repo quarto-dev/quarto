@@ -20,53 +20,103 @@ tmp.setGracefulCleanup();
 
 import * as yaml from "js-yaml";
 
-import { shQuote, pathWithForwardSlashes } from "core";
+import { pathWithForwardSlashes } from "core";
+import { hasExtension } from "core-node";
+
 import {
   metadataFilesForDocument,
   projectDirForDocument,
   QuartoContext,
 } from "quarto-core";
 
+import { Bibliography, CSL } from "editor-types";
 
 export type CslRef = {
   id: string;
   cite?: string;
 };
 
-export async function biblioRefs(
+export interface BiblioRefs {
+  cslRefs: CslRef[];
+  csl: CSL[];
+  project_biblios: string[];
+}
+
+export function cslRefs(
   quarto: QuartoContext,
-  docPath: string, 
-  frontMatter: Record<string,unknown>
-): Promise<CslRef[] | null> {
-
-  const projectDir = projectDirForDocument(docPath);
-
-  // bibliography in document metadata
+  docPath: string,
+  frontMatter: Record<string, unknown>
+) : CslRef[] | null {
   const biblioOptions = bibliographyOptions(path.dirname(docPath), frontMatter);
+  return biblioRefs(quarto, docPath, biblioOptions)?.cslRefs || null;
+}
+
+export function cslBibliography(
+  quarto: QuartoContext,
+  docPath: string | null,
+  bibliographies: string[],
+  refBlock: string | null,
+) : Bibliography {
+
+  const refs = biblioRefs(quarto, docPath, { bibliographies });
+  const bibliography : Bibliography = {
+    sources: refs?.csl || [],
+    project_biblios: refs?.project_biblios || []
+  }
+
+  // parse ref block
+  if (refBlock) {
+    try {
+      const refBlockYaml = yaml.load(refBlock) as { references: CSL[] };
+      bibliography.sources.push(...refBlockYaml.references);
+    } catch(err) {
+      console.log("Error parsing refBlock yaml");
+      console.log(err);
+    }
+  }
+
+  return bibliography;
+}
+
+function biblioRefs(
+  quarto: QuartoContext,
+  docPath: string | null,
+  biblioOptions: BiblioOptions
+): BiblioRefs | null {
+  const projectDir = docPath ? projectDirForDocument(docPath) : undefined;
 
   // bibliographies from project/dir level metadata
-  if (projectDir) {
+  const projectBiblios: string[] = [];
+  if (docPath && projectDir) {
     const metadataFiles = metadataFilesForDocument(docPath);
     if (metadataFiles) {
       metadataFiles.forEach((file) => {
         const fileOptions = biblioOptionsFromMetadataFile(file);
         biblioOptions.bibliographies.push(...fileOptions.bibliographies);
         biblioOptions.csl = biblioOptions.csl || fileOptions.csl;
+        projectBiblios.push(...fileOptions.bibliographies);
       });
     }
   }
 
   if (biblioOptions.bibliographies.length > 0) {
-    const cslRefs = biblioOptions.bibliographies.reduce((refs, file) => {
+
+    // process bibliographies
+    const biblioRefs = biblioOptions.bibliographies.reduce((refs, file) => {
       const bibFile = biblioFile(quarto, file, biblioOptions.csl);
       if (bibFile) {
-        refs.push(
-          ...bibFile.refs.filter((ref) => !refs.find((x) => x.id === ref.id))
+        refs.cslRefs.push(
+          ...bibFile.refs.filter((ref) => !refs.cslRefs.find((x) => x.id === ref.id))
         );
+        refs.csl.push(...bibFile.csl);
       }
       return refs;
-    }, new Array<CslRef>());
-    return cslRefs;
+    }, { cslRefs: new Array<CslRef>, csl: new Array<CSL>});
+
+    return  {
+      ...biblioRefs,
+      project_biblios: projectDir ? projectBiblios.map(biblio => path.relative(projectDir, biblio)) : []
+    }
   } else {
     return null;
   }
@@ -81,6 +131,7 @@ type BiblioFile = {
   path: string;
   cached: number;
   refs: CslRef[];
+  csl: CSL[];
 };
 
 // cache of biblio files
@@ -90,47 +141,87 @@ function biblioFile(quarto: QuartoContext, path: string, csl?: string) {
   // check cache
   const mtimeMs = fs.statSync(path).mtimeMs;
   if (
-    (!biblioFiles.has(path) || (biblioFiles.get(path)?.cached || 0) < mtimeMs)
+    !biblioFiles.has(path) ||
+    (biblioFiles.get(path)?.cached || 0) < mtimeMs
   ) {
     // call pandoc to get refs
-   
-    // create a temp file used as a target document for rendering citations
-    const tmpDocPath = tmp.tmpNameSync();
-    const tempDoc = [
-      "---",
-      `bibliography: "${pathWithForwardSlashes(path)}"`,
-      `nocite: "@*"`,
-    ];
-    if (csl) {
-      tempDoc.push(`csl: "${pathWithForwardSlashes(csl)}"`);
-    }
-    tempDoc.push("---\n");
-    fs.writeFileSync(tmpDocPath, tempDoc.join("\n"), { encoding: "utf-8" });
-    try {
-      const output = quarto.runPandoc(
-        {},
-        shQuote(tmpDocPath),
-        "--from",
-        "markdown",
-        "--to",
-        "gfm",
-        "--citeproc"
-      );
-      // update cache
+    const cslRefs = renderCslRefs(quarto, path, csl);
+    const cslJson = renderCslJson(quarto, path);
+    if (cslRefs && cslJson) {
       biblioFiles.set(path, {
         path,
         cached: mtimeMs,
-        refs: parseCslRefs(output),
+        refs: cslRefs,
+        csl: cslJson
       });
-    } catch (err) {
-      console.log("Error reading bibliography:");
-      console.error(err);
-    } finally {
-      fs.unlinkSync(tmpDocPath);
     }
   }
   return biblioFiles.get(path);
 }
+
+function renderCslRefs(
+  quarto: QuartoContext,
+  file: string,
+  csl?: string
+): CslRef[] | undefined {
+  // create a temp file used as a target document for rendering citations
+  const tmpDocPath = tmp.tmpNameSync();
+  const tempDoc = [
+    "---",
+    `bibliography: "${pathWithForwardSlashes(file)}"`,
+    `nocite: "@*"`,
+  ];
+  if (csl) {
+    tempDoc.push(`csl: "${pathWithForwardSlashes(csl)}"`);
+  }
+  tempDoc.push("---\n");
+  fs.writeFileSync(tmpDocPath, tempDoc.join("\n"), { encoding: "utf-8" });
+  try {
+    const output = quarto.runPandoc(
+      {},
+      tmpDocPath,
+      "--from",
+      "markdown",
+      "--to",
+      "gfm",
+      "--citeproc"
+    );
+    return parseCslRefs(output);
+  } catch (err) {
+    console.log("Error reading bibliography:");
+    console.error(err);
+  } finally {
+    fs.unlinkSync(tmpDocPath);
+  }
+}
+
+function renderCslJson(quarto: QuartoContext, file: string) : CSL[] | undefined {
+  const args = [file, "--standalone"];
+  if (isYamlBibliography(file)) {
+    args.push(...["--from", "markdown"]);
+  } else if (isJsonBibliography(file)) {
+    args.push(...["--from", "csljson"]);
+  }
+  args.push(...["--to", "csljson"]);
+  try {
+    const output = quarto.runPandoc({}, ...args);
+    return JSON.parse(output) as CSL[];
+  } catch(err) {
+    console.log("Error converting bibliography:");
+    console.error(err);
+  }
+}
+
+function isYamlBibliography(file: string) {
+  return hasExtension(file, [".yml", ".yaml"]);
+}
+
+function isJsonBibliography(file: string) {
+  return hasExtension(file, ".json");
+}
+
+
+
 
 function parseCslRefs(output: string): CslRef[] {
   const refs: CslRef[] = [];

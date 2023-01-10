@@ -27,13 +27,13 @@ import jayson from 'jayson'
 import { jaysonServerMethods } from 'core-node';
 
 import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from 'editor-server';
-import { userDictionaryDir } from 'quarto-core';
+import { QuartoContext, userDictionaryDir } from 'quarto-core';
 
 // constants
 const kPayloadLimitMb = 100;
 const kWriterJsonRpcPath = "/rpc";
 
-export function createServer(editorResourcesDir: string) {
+export function createServer(quartoContext: QuartoContext, editorResourcesDir: string) {
 
   const dictionaryOptions = {
     dictionariesDir: path.join(editorResourcesDir, "dictionaries"),
@@ -41,7 +41,7 @@ export function createServer(editorResourcesDir: string) {
   };
 
   const writerRpcServer = jayson.Server(jaysonServerMethods({
-    ...editorServerMethods(defaultEditorServerOptions(editorResourcesDir, "pandoc", kPayloadLimitMb)),
+    ...editorServerMethods(defaultEditorServerOptions(quartoContext, editorResourcesDir, "pandoc", kPayloadLimitMb)),
     ...editorServicesMethods({ dictionary: dictionaryOptions })
   }));
 

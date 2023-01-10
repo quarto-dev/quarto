@@ -156,7 +156,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
           documentPath: document.isUntitled ? null : document.fileName,
           projectDir,
           resourceDir: document.isUntitled 
-            ? (projectDir || workspaceDir || process.cwd()) 
+            ? (workspaceDir || process.cwd()) 
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows()
         };

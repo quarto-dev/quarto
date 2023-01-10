@@ -19,7 +19,7 @@ import {
   CompletionItemKind,
   MarkupKind,
 } from "vscode-languageserver/node";
-import { biblioRefs } from "editor-server";
+import { cslRefs } from "editor-server";
 
 import { filePathForDoc } from "../../../core/doc";
 import { documentFrontMatter } from "../../../core/markdown";
@@ -33,7 +33,7 @@ export async function biblioCompletions(
     return null;
   }
 
-  const refs = await biblioRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
+  const refs = cslRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
   if (refs) {
     return refs
       .filter((ref) => ref.id.startsWith(token))

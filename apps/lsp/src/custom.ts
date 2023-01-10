@@ -28,6 +28,7 @@ export function registerCustomMethods(
   const resourcesDir = path.join(__dirname, "resources");
 
   const options = defaultEditorServerOptions(
+    quartoContext,
     resourcesDir,
     quartoContext.pandocPath
   );

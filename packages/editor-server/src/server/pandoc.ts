@@ -18,6 +18,7 @@
 import stream from 'stream';
 import path from 'path';
 import * as child_process from "child_process";
+import * as uuid from 'uuid';
 
 import { JsonRpcServerMethod } from 'core';
 
@@ -35,6 +36,8 @@ import {
   kPandocCitationHtml, 
 } from "editor-types";
 
+import { cslBibliography } from '../biblio';
+
 import { EditorServerOptions } from './server';
 
 
@@ -44,13 +47,13 @@ export interface PandocServerOptions {
   payloadLimitMb: number;
 }
 
-export function pandocServer(options: PandocServerOptions) : PandocServer {
+export function pandocServer(options: EditorServerOptions) : PandocServer {
 
   async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
     return new Promise((resolve, reject) => {
-      const child = child_process.execFile(options.pandocPath, args, { 
+      const child = child_process.execFile(options.pandoc.pandocPath, args, { 
         encoding: "utf-8", 
-        maxBuffer: options.payloadLimitMb * 1024 * 1024 }, 
+        maxBuffer: options.pandoc.payloadLimitMb * 1024 * 1024 }, 
         (error, stdout, stderr) => {
           if (error) {
             reject(error);
@@ -93,7 +96,7 @@ export function pandocServer(options: PandocServerOptions) : PandocServer {
       // ast
       const ast = JSON.parse(await runPandoc(
         ["--from", format,
-         "--abbreviations", path.join(options.resourcesDir, 'abbreviations'),
+         "--abbreviations", path.join(options.pandoc.resourcesDir, 'abbreviations'),
          "--to", "json", ...mdOptions],
          markdown)
       ) as PandocAst;
@@ -104,7 +107,7 @@ export function pandocServer(options: PandocServerOptions) : PandocServer {
       const headingIds = await runPandoc(
         ["--from", format,
          "--to", "plain",
-         "--lua-filter", path.join(options.resourcesDir, 'heading-ids.lua'),
+         "--lua-filter", path.join(options.pandoc.resourcesDir, 'heading-ids.lua'),
         ],
         markdown
       );
@@ -134,14 +137,12 @@ export function pandocServer(options: PandocServerOptions) : PandocServer {
       file: string | null,
       bibliography: string[],
       refBlock: string | null,
-      etag: string | null,
+      _etag: string | null,
     ): Promise<BibliographyResult> {
+      const cslBiblio = cslBibliography(options.quartoContext, file, bibliography, refBlock);
       return {
-        etag: 'foo',
-        bibliography: {
-          sources: [],
-          project_biblios: []
-        }
+        etag: uuid.v4(),
+        bibliography: cslBiblio
       }
     },
 
@@ -161,7 +162,7 @@ export function pandocServer(options: PandocServerOptions) : PandocServer {
 }
 
 export function pandocServerMethods(options: EditorServerOptions) : Record<string, JsonRpcServerMethod> {
-  const server = pandocServer(options.pandoc);
+  const server = pandocServer(options);
   const methods: Record<string, JsonRpcServerMethod> = {
     [kPandocGetCapabilities]: () => server.getCapabilities(),
     [kPandocMarkdownToAst]: args => server.markdownToAst(args[0], args[1], args[2]),

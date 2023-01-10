@@ -24,19 +24,23 @@ import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
 import { JsonRpcServerMethod } from 'core';
+import { QuartoContext } from "quarto-core";
 
 export interface EditorServerOptions {
+  quartoContext: QuartoContext;
   pandoc: PandocServerOptions;
   pubmed: PubMedServerOptions;
   crossref: CrossrefServerOptions;
 }
 
 export function defaultEditorServerOptions(
+  quartoContext: QuartoContext,
   resourcesDir: string, 
   pandocPath?: string,
   payloadLimitMb = 100
 ) {
   return {
+    quartoContext,
     pandoc: {
       resourcesDir,
       pandocPath: pandocPath || "pandoc",
@@ -55,7 +59,7 @@ export function defaultEditorServerOptions(
 
 export function editorServer(options: EditorServerOptions) : EditorServer {
   return {
-    pandoc: pandocServer(options.pandoc),               // partial
+    pandoc: pandocServer(options),               // partial
     doi: doiServer(),                            // done
     crossref: crossrefServer(options.crossref),  // done
     datacite: dataCiteServer(),                  // done

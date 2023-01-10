@@ -14,6 +14,8 @@
  *
  */
 
+import path from "path";
+
 import { JsonRpcServerMethod } from "core";
 import { kXRefIndexForFile, kXRefQuartoIndexForFile, kXRefQuartoXRefForId, kXRefXRefForId, XRefs, XRefServer } from "editor-types";
 
@@ -26,11 +28,17 @@ export function xrefServer() : XRefServer {
     xrefForId(file: string, id: string) : Promise<XRefs> {
       throw new Error("not implemented");
     },
-    quartoIndexForFile(file: string) : Promise<XRefs> {
-      throw new Error("not implemented");
+    async quartoIndexForFile(file: string) : Promise<XRefs> {
+      return {
+        baseDir: path.dirname(file),
+        refs: []
+      }
     },
-    quartoXrefForId(file: string, id: string) : Promise<XRefs> {
-      throw new Error("not implemented");
+    async quartoXrefForId(file: string, id: string) : Promise<XRefs> {
+      return {
+        baseDir: path.dirname(file),
+        refs: []
+      }
     }
   }
 }

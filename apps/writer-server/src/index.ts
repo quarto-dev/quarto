@@ -15,6 +15,7 @@
 
 import path from 'path';
 import process from 'process';
+import { initQuartoContext } from 'quarto-core';
 import { createServer } from './server';
 
 
@@ -27,7 +28,8 @@ const editorDevResourcesDir = path.normalize(path.join(cwd, "../../packages/edit
 const editorResourcesDir = development ? editorDevResourcesDir : editorDevResourcesDir;
 
 // configure server
-const server = createServer(editorResourcesDir);
+const quartoContext = initQuartoContext();
+const server = createServer(quartoContext, editorResourcesDir);
 
 // listen
 const port = process.env.PORT || 5001;

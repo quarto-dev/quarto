@@ -15,7 +15,7 @@
 
 import { Hover, Position, Range } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { biblioRefs, CslRef } from "editor-server";
+import { cslRefs, CslRef } from "editor-server";
 
 import { bypassRefIntelligence } from "../../core/refs";
 import { documentFrontMatter } from "../../core/markdown";
@@ -55,7 +55,7 @@ export async function refHover(doc: TextDocument, pos: Position): Promise<Hover 
       if (citeId === lastRef?.id && lastRef.cite) {
         return hoverFromCslRef(lastRef.cite, range);
       } else if (quartoContext) {
-        const refs = await biblioRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
+        const refs = cslRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
         if (refs) {
           const ref = refs.find((x) => x.id === citeId);
           if (ref?.cite) {

@@ -20,6 +20,7 @@
 
 .pm-completion-list {
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .pm-completion-list > table {

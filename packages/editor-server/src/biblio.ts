@@ -78,6 +78,58 @@ export function cslBibliography(
   return bibliography;
 }
 
+
+export function bibliographyOptions(
+  dir: string,
+  options: Record<string, unknown>
+): BiblioOptions {
+  const readBibliographyOption = () => {
+    const option = options["bibliography"];
+    if (typeof option === "string") {
+      return [option];
+    } else if (Array.isArray(option)) {
+      return option.map((value) => String(value));
+    } else {
+      return [];
+    }
+  };
+  const readCsl = () => {
+    const csl = options["csl"];
+    return typeof csl === "string" ? csl : undefined;
+  };
+  return {
+    bibliographies: normalizeOptions(dir, readBibliographyOption()) || [],
+    csl: normalizeOptions(dir, readCsl())?.[0],
+  };
+}
+
+export function generateBibliography(
+  quartoContext: QuartoContext,
+  biblioJson: string, 
+  cslPath?: string, 
+  extraArgs?: string[]) {
+
+  // prepare document for rendering
+  const biblioJsonPath = tmp.tmpNameSync({ postfix: ".json" });
+  try {
+    // generate the doc
+    const csl = cslPath ? `\ncsl: "${cslPath}"` : "";
+    const doc = `---\nbibliography: "${biblioJsonPath}"${csl}\nnocite: |\n  @*\n---\n`;
+
+    // write the biblio 
+    fs.writeFileSync(biblioJsonPath, biblioJson, { encoding: "utf-8" });
+
+    // call pandoc
+    const args = ["--from", "markdown", "--citeproc", ...(extraArgs || [])];
+    return quartoContext.runPandoc({ input: doc }, ...args);
+    
+  } finally {
+    if (fs.existsSync(biblioJsonPath)) {
+      fs.unlinkSync(biblioJsonPath);
+    }
+  }
+}
+
 function biblioRefs(
   quarto: QuartoContext,
   docPath: string | null,
@@ -191,7 +243,9 @@ function renderCslRefs(
     console.log("Error reading bibliography:");
     console.error(err);
   } finally {
-    fs.unlinkSync(tmpDocPath);
+    if (fs.existsSync(tmpDocPath)) {
+      fs.unlinkSync(tmpDocPath);
+    }
   }
 }
 
@@ -260,30 +314,6 @@ function biblioOptionsFromMetadataFile(file: string): BiblioOptions {
   }
   return {
     bibliographies: [],
-  };
-}
-
-function bibliographyOptions(
-  dir: string,
-  options: Record<string, unknown>
-): BiblioOptions {
-  const readBibliographyOption = () => {
-    const option = options["bibliography"];
-    if (typeof option === "string") {
-      return [option];
-    } else if (Array.isArray(option)) {
-      return option.map((value) => String(value));
-    } else {
-      return [];
-    }
-  };
-  const readCsl = () => {
-    const csl = options["csl"];
-    return typeof csl === "string" ? csl : undefined;
-  };
-  return {
-    bibliographies: normalizeOptions(dir, readBibliographyOption()) || [],
-    csl: normalizeOptions(dir, readCsl())?.[0],
   };
 }
 

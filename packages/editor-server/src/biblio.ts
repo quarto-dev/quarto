@@ -217,7 +217,6 @@ function renderCslRefs(
   csl?: string
 ): CslRef[] | undefined {
   // create a temp file used as a target document for rendering citations
-  const tmpDocPath = tmp.tmpNameSync();
   const tempDoc = [
     "---",
     `bibliography: "${pathWithForwardSlashes(file)}"`,
@@ -227,11 +226,10 @@ function renderCslRefs(
     tempDoc.push(`csl: "${pathWithForwardSlashes(csl)}"`);
   }
   tempDoc.push("---\n");
-  fs.writeFileSync(tmpDocPath, tempDoc.join("\n"), { encoding: "utf-8" });
+ 
   try {
     const output = quarto.runPandoc(
-      {},
-      tmpDocPath,
+      { input: tempDoc.join("\n") },
       "--from",
       "markdown",
       "--to",
@@ -242,11 +240,7 @@ function renderCslRefs(
   } catch (err) {
     console.log("Error reading bibliography:");
     console.error(err);
-  } finally {
-    if (fs.existsSync(tmpDocPath)) {
-      fs.unlinkSync(tmpDocPath);
-    }
-  }
+  } 
 }
 
 function renderCslJson(quarto: QuartoContext, file: string) : CSL[] | undefined {

@@ -148,14 +148,18 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
       }
     },
 
-    addToBibliography(
+    async addToBibliography(
       bibliography: string,
       project: boolean,
       id: string,
       sourceAsJson: string,
       sourceAsBibTeX: string,
     ): Promise<boolean> {
-      throw new Error("not implemented");
+
+
+
+      return true;
+
     },
 
     async citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string> {

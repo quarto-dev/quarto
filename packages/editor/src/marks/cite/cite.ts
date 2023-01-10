@@ -782,7 +782,7 @@ export async function ensureSourcesInBibliography(
 
   // Is this a bibtex bibliography?
   const bibliographyFileExtension = getExtension(bibliographyFile.fullPath);
-  const isBibTexBibliography = bibliographyFileExtension === 'bib' || bibliographyFileExtension === 'bibtex';
+  const isBibTexBibliography = !['yaml', 'yml', 'json'].includes(bibliographyFileExtension);
 
   // If there is a warning message and we're exporting to BibTeX, show the warning
   // message to the user and confirm that they'd like to proceed. This would ideally

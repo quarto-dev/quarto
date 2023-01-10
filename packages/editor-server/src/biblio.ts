@@ -79,30 +79,6 @@ export function cslBibliography(
 }
 
 
-export function bibliographyOptions(
-  dir: string,
-  options: Record<string, unknown>
-): BiblioOptions {
-  const readBibliographyOption = () => {
-    const option = options["bibliography"];
-    if (typeof option === "string") {
-      return [option];
-    } else if (Array.isArray(option)) {
-      return option.map((value) => String(value));
-    } else {
-      return [];
-    }
-  };
-  const readCsl = () => {
-    const csl = options["csl"];
-    return typeof csl === "string" ? csl : undefined;
-  };
-  return {
-    bibliographies: normalizeOptions(dir, readBibliographyOption()) || [],
-    csl: normalizeOptions(dir, readCsl())?.[0],
-  };
-}
-
 export function generateBibliography(
   quartoContext: QuartoContext,
   biblioJson: string, 
@@ -130,29 +106,34 @@ export function generateBibliography(
   }
 }
 
+export function resolveBiblioOptions(docPath: string, docBiblioOptions: BiblioOptions) {
+  const biblioOptions = docBiblioOptions;
+  const projectBiblios: string[] = [];
+  const metadataFiles = metadataFilesForDocument(docPath);
+  if (metadataFiles) {
+    metadataFiles.forEach((file) => {
+      const fileOptions = biblioOptionsFromMetadataFile(file);
+      biblioOptions.bibliographies.push(...fileOptions.bibliographies);
+      biblioOptions.csl = biblioOptions.csl || fileOptions.csl;
+      projectBiblios.push(...fileOptions.bibliographies);
+    });
+  }
+  return { biblioOptions, projectBiblios };
+}
+
 function biblioRefs(
   quarto: QuartoContext,
   docPath: string | null,
-  biblioOptions: BiblioOptions
+  docBiblioOptions: BiblioOptions
 ): BiblioRefs | null {
   const projectDir = docPath ? projectDirForDocument(docPath) : undefined;
 
   // bibliographies from project/dir level metadata
-  const projectBiblios: string[] = [];
-  if (docPath && projectDir) {
-    const metadataFiles = metadataFilesForDocument(docPath);
-    if (metadataFiles) {
-      metadataFiles.forEach((file) => {
-        const fileOptions = biblioOptionsFromMetadataFile(file);
-        biblioOptions.bibliographies.push(...fileOptions.bibliographies);
-        biblioOptions.csl = biblioOptions.csl || fileOptions.csl;
-        projectBiblios.push(...fileOptions.bibliographies);
-      });
-    }
-  }
+  const { biblioOptions, projectBiblios } = (docPath && projectDir) 
+    ? resolveBiblioOptions(docPath, docBiblioOptions)
+    : { biblioOptions: docBiblioOptions, projectBiblios: [] };
 
   if (biblioOptions.bibliographies.length > 0) {
-
     // process bibliographies
     const biblioRefs = biblioOptions.bibliographies.reduce((refs, file) => {
       const bibFile = biblioFile(quarto, file, biblioOptions.csl);
@@ -173,6 +154,32 @@ function biblioRefs(
     return null;
   }
 }
+
+
+function bibliographyOptions(
+  dir: string,
+  options: Record<string, unknown>
+): BiblioOptions {
+  const readBibliographyOption = () => {
+    const option = options["bibliography"];
+    if (typeof option === "string") {
+      return [option];
+    } else if (Array.isArray(option)) {
+      return option.map((value) => String(value));
+    } else {
+      return [];
+    }
+  };
+  const readCsl = () => {
+    const csl = options["csl"];
+    return typeof csl === "string" ? csl : undefined;
+  };
+  return {
+    bibliographies: normalizeOptions(dir, readBibliographyOption()) || [],
+    csl: normalizeOptions(dir, readCsl())?.[0],
+  };
+}
+
 
 type BiblioOptions = {
   bibliographies: string[];

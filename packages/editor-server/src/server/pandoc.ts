@@ -36,7 +36,9 @@ import {
   kPandocCitationHtml, 
 } from "editor-types";
 
-import { bibliographyOptions, cslBibliography, generateBibliography } from '../biblio';
+import { projectDirForDocument } from 'quarto-core';
+
+import { cslBibliography, generateBibliography, resolveBiblioOptions } from '../biblio';
 
 import { EditorServerOptions } from './server';
 
@@ -155,15 +157,18 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
     ): Promise<boolean> {
       throw new Error("not implemented");
     },
-    
+
     async citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string> {
 
       // compute csl path if we can
       let cslPath = (csl && file) ? path.join(path.dirname(file), csl) : undefined;
       // if we don't have one and we have a file then try to compute from project
       if (!cslPath && file) {
-        const bibOptions = bibliographyOptions(path.dirname(file), {});
-        cslPath = bibOptions.csl;
+        const projectDir = projectDirForDocument(file);
+        if (projectDir) {
+          const { biblioOptions } = resolveBiblioOptions(file, { bibliographies: [] })
+          cslPath = biblioOptions.csl;
+        }
       }
 
       // generate bibliography

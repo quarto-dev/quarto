@@ -20,7 +20,7 @@ tmp.setGracefulCleanup();
 
 import * as yaml from "js-yaml";
 
-import { pathWithForwardSlashes } from "core";
+import { lines, pathWithForwardSlashes, removeYamlDelimiters } from "core";
 import { hasExtension } from "core-node";
 
 import {
@@ -67,7 +67,8 @@ export function cslBibliography(
   // parse ref block
   if (refBlock) {
     try {
-      const refBlockYaml = yaml.load(refBlock) as { references: CSL[] };
+      const cleanedYaml = lines(removeYamlDelimiters(refBlock)).map((x) => x.trimEnd()).join("\n");
+      const refBlockYaml = yaml.load(cleanedYaml) as { references: CSL[] };
       bibliography.sources.push(...refBlockYaml.references);
     } catch(err) {
       console.log("Error parsing refBlock yaml");

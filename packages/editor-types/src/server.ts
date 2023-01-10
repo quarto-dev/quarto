@@ -33,7 +33,7 @@ export interface EditorServer {
   readonly crossref: CrossrefServer;
   readonly datacite: DataCiteServer;
   readonly pubmed: PubMedServer;
-  readonly zotero: ZoteroServer;
   readonly xref: XRefServer;
+  readonly zotero?: ZoteroServer;
   readonly environment?: EnvironmentServer;
 }

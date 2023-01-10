@@ -64,8 +64,8 @@ export function editorServer(options: EditorServerOptions) : EditorServer {
     crossref: crossrefServer(options.crossref),  // done
     datacite: dataCiteServer(),                  // done
     pubmed: pubMedServer(options.pubmed),        // done
-    zotero: zoteroServer(),
     xref: xrefServer(),
+    zotero: undefined,
     environment: undefined                       // done
   };
 }

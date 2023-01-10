@@ -67,9 +67,9 @@ export function editorJsonRpcServer(request: JsonRpcRequestTransport) : EditorSe
     crossref: editorCrossrefJsonRpcServer(request),
     datacite: editorDateCiteJsonRpcServer(request),
     pubmed: editorPubMedJsonRpcServer(request),
-    zotero: editorZoteroJsonRpcServer(request),
     xref: editorXRefJsonRpcServer(request),
     // not currently implemented by our server
+    zotero: undefined,
     environment: undefined
   };
 }

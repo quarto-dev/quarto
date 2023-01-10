@@ -137,8 +137,11 @@ export class BibliographyManager {
   private writable?: boolean;
   private searchIndex?: Fuse<BibliographySourceWithCollections>;
 
-  public constructor(server: PandocServer, zoteroServer: ZoteroServer) {
-    this.providers = [new BibliographyDataProviderLocal(server), new BibliographyDataProviderZotero(zoteroServer)];
+  public constructor(server: PandocServer, zoteroServer?: ZoteroServer) {
+    this.providers = [new BibliographyDataProviderLocal(server)];
+    if (zoteroServer) {
+      this.providers.push(new BibliographyDataProviderZotero(zoteroServer));
+    }
   }
 
   public async prime(ui: EditorUI, doc: ProsemirrorNode) {

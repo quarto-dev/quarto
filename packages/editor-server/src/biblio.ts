@@ -125,6 +125,8 @@ function biblioFile(quarto: QuartoContext, path: string, csl?: string) {
     } catch (err) {
       console.log("Error reading bibliography:");
       console.error(err);
+    } finally {
+      fs.unlinkSync(tmpDocPath);
     }
   }
   return biblioFiles.get(path);

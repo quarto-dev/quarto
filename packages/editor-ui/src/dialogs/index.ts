@@ -18,7 +18,8 @@ import {
   EditorHTMLDialogCreateFn, 
   EditorHTMLDialogValidateFn, 
   EditorServer, 
-  EditorUIImageResolver,  
+  EditorUIImageResolver,
+  PrefsProvider,  
 } from "editor-types";
 
 import { alert, yesNoMessage } from "./alert";
@@ -54,6 +55,7 @@ export {
 
 
 export function editorDialogs(
+  prefs: PrefsProvider,
   uiTools: UITools, 
   server: EditorServer,
   imageResolver: EditorUIImageResolver) : EditorDialogs {
@@ -73,7 +75,7 @@ export function editorDialogs(
     editMath,
     insertTable,
     insertTabset: insertTabset(uiTools.attr),
-    insertCite: insertCite(server.doi, uiTools.citation),
+    insertCite: insertCite(prefs, server.doi, uiTools.citation),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async htmlDialog(_title: string, _okText: string | null, _create: EditorHTMLDialogCreateFn, _focus: VoidFunction, _validate: EditorHTMLDialogValidateFn): Promise<boolean> {
       return false;

@@ -16,12 +16,17 @@
 export const kPrefsGetPrefs = "prefs_get_prefs";
 export const kPrefsSetPrefs = "prefs_set_prefs";
 
+export interface PrefsProvider {
+  prefs() : Prefs;
+  setPrefs(prefs: Record<string,unknown>) : void;
+}
+
 export interface Prefs {
   // view
   readonly showOutline: boolean;
 
-   // theme
-   readonly darkMode: boolean;
+  // theme
+  readonly darkMode: boolean;
 
   // spelling
   readonly realtimeSpelling: boolean;

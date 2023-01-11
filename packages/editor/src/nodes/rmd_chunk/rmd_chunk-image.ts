@@ -21,9 +21,9 @@ import { findChildrenByType, setTextSelection } from 'prosemirror-utils';
 
 import { transactionsAreTypingChange, transactionsHaveChange } from '../../api/transaction';
 import { EditorUIContext } from '../../api/ui-types';
-import { stripQuotes } from '../../api/text';
 import { onElementRemoved } from '../../api/dom';
 import { mapResourceToURL } from '../../api/resource';
+import { stripQuotes } from 'core';
 
 const key = new PluginKey<DecorationSet>('rmd-chunk-image-preview');
 

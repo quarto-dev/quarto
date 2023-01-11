@@ -53,18 +53,3 @@ export function mergedTextNodes(
   return textNodes;
 }
 
-export function stripQuotes(text: string) {
-  return text.replace(/["']/g, '');
-}
-
-export function equalsIgnoreCase(str1: string, str2: string) {
-  if (!str1 && !!str2) {
-    return false;
-  } else if (!!str1 && !str2) {
-    return false;
-  } else if (str1 === str2) {
-    return true;
-  } else {
-    return str1.localeCompare(str2, undefined, { sensitivity: 'accent' }) === 0;
-  }
-}

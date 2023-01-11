@@ -47,8 +47,8 @@ import { PandocToProsemirrorResult, PandocLineWrapping } from './pandoc_converte
 import { kLinkTarget, kLinkTargetUrl, kLinkChildren, kLinkAttr, kLinkTargetTitle } from '../api/link';
 import { kHeadingAttr, kHeadingLevel, kHeadingChildren } from '../api/heading';
 import { pandocAutoIdentifier, gfmAutoIdentifier } from '../api/pandoc_id';
-import { equalsIgnoreCase } from '../api/text';
 import { hasShortcutHeadingLinks } from '../api/pandoc_format';
+import { equalsIgnoreCase } from 'core';
 
 export function pandocToProsemirror(
   ast: PandocAst,

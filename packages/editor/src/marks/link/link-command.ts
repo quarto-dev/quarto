@@ -24,7 +24,7 @@ import { markIsActive, getMarkAttrs, getSelectionMarkRange, getMarkRange } from 
 
 import { linkTargets, LinkCapabilities, LinkType } from '../../api/link';
 import { OmniInsertGroup } from '../../api/omni_insert';
-import { equalsIgnoreCase } from '../../api/text';
+import { equalsIgnoreCase } from 'core';
 
 export function linkCommand(markType: MarkType, onEditLink: LinkEditorFn, capabilities: LinkCapabilities) {
   return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {

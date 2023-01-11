@@ -15,25 +15,46 @@
 
 import React, { useEffect, useState } from "react"
 
-import { FormGroup, Intent, NonIdealState, Spinner, TextArea } from "@blueprintjs/core";
+import { Card, ControlGroup, FormGroup, HTMLSelect, HTMLTable, Intent, NonIdealState, Spinner } from "@blueprintjs/core";
 
-import { FormikProps, useFormikContext } from "formik";
+import { FormikProps, useField, useFormikContext } from "formik";
 
-import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import * as yup from "yup"
 
-import { CiteField, DOIServer, InsertCiteProps, InsertCiteResult, kStatusOK } from "editor-types";
+import { ensureExtension, equalsIgnoreCase } from "core";
+
+import { FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+
+import { CiteField, DOIServer, InsertCiteProps, InsertCiteResult, kAlertTypeError, kStatusNoHost, kStatusNotFound, kStatusOK, PrefsProvider } from "editor-types";
 import { UIToolsCitation } from "editor";
 
 import { t } from './translate';
+import { alert } from "./alert";
 
 import styles from './styles.module.scss';
 
-export function insertCite(server: DOIServer, citationTools: UIToolsCitation) {
+const kIdNone = "71896BB2-16CD-4AB5-B523-6372EEB84D5D";
+
+
+export function insertCite(prefs: PrefsProvider, server: DOIServer, citationTools: UIToolsCitation) {
   return async (citeProps: InsertCiteProps): Promise<InsertCiteResult | null> => {
+    const defaultBiblioFile = `references.${prefs.prefs().bibliographyDefaultType}`
     const values : InsertCiteDialogValues = citeProps.citeUI && citeProps.csl
-      ? { id: citeProps.citeUI.suggestedId, bibliographyFile: "", csl: citeProps.csl, previewFields: citeProps.citeUI.previewFields }
-      : { id: "", bibliographyFile: "", csl: { type: "other" }, previewFields: [] };
-    const options = { citeProps, server, citationTools };
+      ? { 
+          id: citeProps.citeUI.suggestedId, 
+          bibliographyFile: citeProps.bibliographyFiles[0] || defaultBiblioFile, 
+          csl: citeProps.csl, 
+          previewFields: citeProps.citeUI.previewFields,
+          bibliographyType: prefs.prefs().bibliographyDefaultType 
+        }
+      : { 
+          id: kIdNone, 
+          bibliographyFile: citeProps.bibliographyFiles[0] || defaultBiblioFile, 
+          csl: { type: "other" }, 
+          previewFields: [],
+          bibliographyType: prefs.prefs().bibliographyDefaultType 
+        };
+    const options = { citeProps, server, citationTools, prefs };
     const result = await showValueEditorDialog(InsertCiteDialog, values, options);
     return result || null;
   };
@@ -41,12 +62,14 @@ export function insertCite(server: DOIServer, citationTools: UIToolsCitation) {
 
 interface InsertCiteDialogValues extends InsertCiteResult {
   previewFields: CiteField[];
+  bibliographyType: string;
 }
 
 interface InsertCiteDialogOptions  {
   citeProps: InsertCiteProps;
   server: DOIServer;
   citationTools: UIToolsCitation;
+  prefs: PrefsProvider;
 }
 
 const InsertCiteDialog: React.FC<{
@@ -55,6 +78,9 @@ const InsertCiteDialog: React.FC<{
   onClosed: (values?: InsertCiteDialogValues) => void
 }
 > = props => {
+
+  const kInvalidCiteIdChars = t('Invalid characters in citation id');
+  const kNonUniqueCiteId = t('This citation id already exists in your bibliography');
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
@@ -68,22 +94,49 @@ const InsertCiteDialog: React.FC<{
 
   return (
     <FormikDialog
-      title={`${t("Citation from DOI: ")} ${citeProps.doi}`}
+      title={props.options.citeProps.provider 
+              ? `${t('Citation from')} ${props.options.citeProps.provider}` 
+              : `${t("Citation from DOI: ")} ${citeProps.doi}`}
       isOpen={isOpen}
       initialValues={props.values}
-      onSubmit={(values) => close(values.id ? values : undefined)}
+      onSubmit={(values) => close(values.id !== kIdNone ? values : undefined)}
       onReset={() => close()}
       className={styles.insertCiteDialog}
+      validationSchema={
+        yup.object().shape({
+          id: yup.string()
+            .required(t('Please specify a citation id'))
+            .test(kInvalidCiteIdChars, kInvalidCiteIdChars, 
+                  value => !/.*[@;[\]\s!,].*/.test(value || ""))
+            .test(kNonUniqueCiteId, kNonUniqueCiteId, 
+                  value => !props.options.citeProps.existingIds.find(id => equalsIgnoreCase(id, value || "")) ),
+          bibliographyFile: yup.string()
+            .required(t('You must provide a bibliography file name.'))
+        })
+      }
     >
         {(formikProps: FormikProps<InsertCiteDialogValues>) => {
-          if (formikProps.values.id) {
+          if (formikProps.values.id !== kIdNone) {
             return (
               <div className={styles.insertCitePanel}>
-                <FormikTextInput name={"id"} label={t('Citation Id')} required={true} autoFocus={true} />
+                <FormikTextInput name={"id"} label={t('Citation Id')} autoFocus={true} />
                 <FormGroup label={t('Citation')}>
-                  <TextArea value={formikProps.values.previewFields.map(fld => `${fld.name}: ${fld.value}`).join('\n')}> 
-                  </TextArea>
+                  <Card className={styles.insertCitePreview}>
+                    <HTMLTable condensed={true} >
+                      <tbody>
+                        {formikProps.values.previewFields.map(field => {
+                          return (
+                            <tr key={field.name}>
+                              <td>{field.name}</td>
+                              <td>{field.value}</td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </HTMLTable>
+                  </Card>
                 </FormGroup>
+                <SelectBibliography {...props.options} />
               </div>
             )
           } else {
@@ -97,10 +150,61 @@ const InsertCiteDialog: React.FC<{
 };
 
 
+const SelectBibliography: React.FC<InsertCiteDialogOptions> = (props) => {
+
+  const formik = useFormikContext<InsertCiteResult>();
+
+  if (props.citeProps.bibliographyFiles.length > 0) {
+    return (
+      <FormikHTMLSelect 
+         name={"bibliographyFile"} 
+         label={t('Add to bibliography')} 
+         options={props.citeProps.bibliographyFiles}
+      />
+    );
+  } else {
+
+    const [ typeField ] = useField("bibliographyType");
+
+    return (
+      <ControlGroup vertical={false} fill={true}>
+        <FormikTextInput name="bibliographyFile" label={t('Create bibliography file')} fill={true} />
+        <FormGroup label={t('Format')}>
+          <HTMLSelect {...typeField} multiple={undefined} fill={true} 
+            onChange={event => {
+              typeField.onChange(event);
+              const extension = event.currentTarget.value;
+              formik.setFieldValue(
+                "bibliographyFile", 
+                ensureExtension(formik.values.bibliographyFile, extension)
+              );
+              props.prefs.setPrefs({
+                bibliographyDefaultType: extension
+              });
+            }}
+            options={[
+              { value: 'bib', label: 'BibLaTeX'},
+              { value: 'yaml', label: 'CSL-YAML' },
+              { value: 'json', label: 'CSL-JSON' }
+            ]}
+          />
+        </FormGroup>
+      </ControlGroup>
+    );
+  }
+  
+};
+
 
 const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
 
   const formik = useFormikContext<InsertCiteResult>();
+
+  // show error and dismiss dialog
+  const displayError = (title: string, message: string) => {
+    formik.resetForm();
+    alert(title, message, kAlertTypeError);
+  };
 
   // initialize query after the first render
   useEffect(() => {
@@ -112,12 +216,28 @@ const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
           formik.setFieldValue("id", citeUI.suggestedId);
           formik.setFieldValue("csl", citeProps.csl);
           formik.setFieldValue("previewFields", citeUI.previewFields);
+        } else if (result.status === kStatusNotFound) {
+          displayError(
+            t('DOI Not Found'), 
+            `${t('The specified DOI')} (${props.citeProps.doi}) ${t('was not found. Are you sure this is a valid DOI?')}`
+          );
+        } else if (result.status === kStatusNoHost) {
+          displayError(
+            t('Unable to Lookup DOI'), 
+            `${t('Unable to connect to DOI lookup service (this may be due to an unstable or offline internet connection).')}`
+          );
         } else {
-          //
+          displayError(
+            t('Error Looking up DOI'),
+            result.error
+          )
         }
       });
     } catch (err) {
-      //
+      displayError(
+        t('Error Looking up DOI'),
+        err instanceof Error ? err.message : String(err)
+      )
     }
   }, []);
 

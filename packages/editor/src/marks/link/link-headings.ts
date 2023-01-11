@@ -18,7 +18,7 @@ import { findChildrenByType, findChildrenByMark } from 'prosemirror-utils';
 
 import { getMarkRange, getMarkAttrs } from '../../api/mark';
 import { Transaction } from 'prosemirror-state';
-import { equalsIgnoreCase } from '../../api/text';
+import { equalsIgnoreCase } from 'core';
 
 // detect links to headings within the doc read from pandoc and update the doc
 // to note those headings in the link attributes

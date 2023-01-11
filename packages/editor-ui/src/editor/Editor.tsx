@@ -22,7 +22,7 @@ import { Intent, Spinner } from '@blueprintjs/core';
 
 import { JsonRpcRequestTransport } from 'core';
 
-import { defaultPrefs, EditorServer, EditorServices, Prefs } from 'editor-types';
+import { defaultPrefs, EditorServer, EditorServices, Prefs, PrefsProvider } from 'editor-types';
 
 import { 
   Editor as PMEditor, 
@@ -51,7 +51,7 @@ import {
   Commands 
 } from '../commands';
 
-import { editorDialogs } from '../dialogs';
+import { editorDialogs, alert } from '../dialogs';
 
 import { 
   editorLoading, 
@@ -94,21 +94,32 @@ export interface EditorProps {
 
 export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
 
+  // prefs
+  const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
+  const [setPrefs] = useSetPrefsMutation();
+  // out of band prefs ref and provider (as non-react code needs to read and write prefs)
+  const prefsRef = useRef<Prefs | null>(defaultPrefs());
+  const editorPrefs : PrefsProvider = { 
+    prefs(): Prefs {
+      return prefsRef.current || defaultPrefs();
+    },
+    setPrefs: function (prefs: Record<string,unknown>): void {
+      setPrefs({ ...prefsRef.current!, ...prefs });
+    }
+  };
+
   // global services
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
   const uiToolsRef = useRef<UITools>(new UITools());
   const server = useRef<EditorServer>(editorJsonRpcServer(props.request));
   const services = useRef<EditorServices>(editorJsonRpcServices(props.request));
-  const dialogs = useRef(editorDialogs(uiToolsRef.current, server.current, props.uiContext));
+  const dialogs = useRef(editorDialogs(editorPrefs, uiToolsRef.current, server.current, props.uiContext));
 
   // redux state
   const title = useSelector(editorTitle);
   const loading = useSelector(editorLoading);
   const dispatch = useDispatch();
 
-  const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
-  const [setPrefs] = useSetPrefsMutation();
- 
   // refs we get from rendering
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +127,6 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
   // https://stackoverflow.com/questions/57847594/react-hooks-accessing-up-to-date-state-from-within-a-callback
   const editorRef = useRef<PMEditor | null>(null);
   const commandsRef = useRef<Commands | null>(null);
-  const prefsRef = useRef<Prefs | null>(defaultPrefs());
   const spellingRef = useRef<EditorUISpelling | null>(null);
  
   // subscribe/unsubscribe from editor events
@@ -131,7 +141,7 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
   // general helper functions
   const errorAlert = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    dialogs.current.alert( t('error_alert_title') as string, message, kAlertTypeError);
+    alert( t('error_alert_title') as string, message, kAlertTypeError);
   }
 
   // keep spelling provider up to date 
@@ -144,15 +154,6 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    // create prefs provider
-    const editorPrefs = { 
-      prefs(): Prefs {
-        return prefsRef.current || defaultPrefs();
-      },
-      setPrefs: function (prefs: Record<string,unknown>): void {
-        setPrefs({ ...prefsRef.current!, ...prefs });
-      }
-    };
 
     const context = editorContext({
       prefs: editorPrefs,

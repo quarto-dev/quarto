@@ -42,6 +42,7 @@ export interface PandocServer {
     id: string,
     sourceAsJson: string,
     sourceAsBibTeX: string,
+    documentPath: string | null
   ): Promise<boolean>;
   citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string>;
 }

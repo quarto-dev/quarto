@@ -17,6 +17,7 @@
 
 import stream from 'stream';
 import path from 'path';
+import * as fs from "fs";
 import * as child_process from "child_process";
 import * as uuid from 'uuid';
 
@@ -38,9 +39,19 @@ import {
 
 import { projectDirForDocument } from 'quarto-core';
 
-import { cslBibliography, generateBibliography, resolveBiblioOptions } from '../biblio';
+import { 
+  appendToJSONBibliography, 
+  appendToYAMLBibliography, 
+  cslBibliography, 
+  generateHTMLBibliography, 
+  generateCSLBibliography,
+  isJsonBibliography, 
+  isYamlBibliography, 
+  resolveBiblioOptions 
+} from '../biblio';
 
 import { EditorServerOptions } from './server';
+
 
 
 export interface PandocServerOptions {
@@ -154,12 +165,39 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
       id: string,
       sourceAsJson: string,
       sourceAsBibTeX: string,
+      documentPath: string | null
     ): Promise<boolean> {
 
+      // if this is a project then resolve it against the the project dir
+      if (project) {
+        const projDir = documentPath ? projectDirForDocument(documentPath) : undefined;
+        if (!projDir) {
+          throw new Error(`Attempted to add to project bibliography but no project context found (${documentPath})`);
+        }
+        bibliography = path.join(projDir, bibliography);
+      }
 
+      // write to the requisite format
+      const isYAML = isYamlBibliography(bibliography);
+      const isJSON = isJsonBibliography(bibliography);
+      if (isYAML || isJSON) {
+        const args = ["--standalone", "--to"];
+        if (isYAML) {
+          args.push("markdown");
+        } else {
+          args.push("csljson");
+        }
+        const entry = generateCSLBibliography(options.quartoContext, sourceAsJson, isYAML ? 'yaml' : 'json');
+        if (isYAML) {
+          appendToYAMLBibliography(bibliography, id, entry);
+        } else {
+          appendToJSONBibliography(bibliography, id, entry);
+        }
+      } else {
+        fs.appendFileSync(bibliography, `\n${sourceAsBibTeX}\n`, { encoding: "utf-8" });
+      }
 
       return true;
-
     },
 
     async citationHTML(file: string | null, sourceAsJson: string, csl: string | null): Promise<string> {
@@ -176,7 +214,7 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
       }
 
       // generate bibliography
-      return generateBibliography(options.quartoContext, sourceAsJson, cslPath, ["--to", "html"]);
+      return generateHTMLBibliography(options.quartoContext, sourceAsJson, cslPath);
 
     }
   };
@@ -190,7 +228,7 @@ export function pandocServerMethods(options: EditorServerOptions) : Record<strin
     [kPandocAstToMarkdown]: args => server.astToMarkdown(args[0], args[1], args[2]),
     [kPandocListExtensions]: args => server.listExtensions(args[0]),
     [kPandocGetBibliography]: args => server.getBibliography(args[0], args[1], args[2], args[3]),
-    [kPandocAddtoBibliography]: args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4]),
+    [kPandocAddtoBibliography]: args => server.addToBibliography(args[0], args[1], args[2], args[3], args[4], args[5]),
     [kPandocCitationHtml]: args => server.citationHTML(args[0], args[1], args[2])
   };
   return methods;

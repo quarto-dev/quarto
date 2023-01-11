@@ -826,6 +826,7 @@ export async function ensureSourcesInBibliography(
               source.id,
               JSON.stringify([cslToWrite]),
               sourceAsBibTex || '',
+              ui.context.getDocumentPath()
             );
           }
 

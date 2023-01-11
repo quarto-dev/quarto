@@ -114,7 +114,8 @@ export function editorPandocJsonRpcServer(request: JsonRpcRequestTransport) : Pa
       project: boolean,
       id: string,
       sourceAsJson: string,
-      sourceAsBibTeX: string
+      sourceAsBibTeX: string,
+      documentPath: string | null,
     ): Promise<boolean> {
       return request(kPandocAddtoBibliography, [
         bibliography,
@@ -122,6 +123,7 @@ export function editorPandocJsonRpcServer(request: JsonRpcRequestTransport) : Pa
         id,
         sourceAsJson,
         sourceAsBibTeX,
+        documentPath
       ]);
     },
     citationHTML(

@@ -51,6 +51,14 @@ export function cslRefs(
   return biblioRefs(quarto, docPath, biblioOptions)?.cslRefs || null;
 }
 
+export function isYamlBibliography(file: string) {
+  return hasExtension(file, [".yml", ".yaml"]);
+}
+
+export function isJsonBibliography(file: string) {
+  return hasExtension(file, ".json");
+}
+
 export function cslBibliography(
   quarto: QuartoContext,
   docPath: string | null,
@@ -79,12 +87,26 @@ export function cslBibliography(
   return bibliography;
 }
 
+export function generateCSLBibliography(
+  quartoContext: QuartoContext,
+  biblioJson: string,
+  format: 'yaml' | 'json'
+) {
 
-export function generateBibliography(
+  const args = ["--from", "csljson", "--standalone", "--to"];
+  if (format === 'yaml') {
+    args.push('markdown');
+  } else {
+    args.push('csljson');
+  }
+  return quartoContext.runPandoc( { input: biblioJson }, ...args);
+}
+
+
+export function generateHTMLBibliography(
   quartoContext: QuartoContext,
   biblioJson: string, 
-  cslPath?: string, 
-  extraArgs?: string[]) {
+  cslPath?: string) {
 
   // prepare document for rendering
   const biblioJsonPath = tmp.tmpNameSync({ postfix: ".json" });
@@ -97,7 +119,7 @@ export function generateBibliography(
     fs.writeFileSync(biblioJsonPath, biblioJson, { encoding: "utf-8" });
 
     // call pandoc
-    const args = ["--from", "markdown", "--citeproc", ...(extraArgs || [])];
+    const args = ["--from", "markdown", "--citeproc", "--to", "html"];
     return quartoContext.runPandoc({ input: doc }, ...args);
     
   } finally {
@@ -105,6 +127,65 @@ export function generateBibliography(
       fs.unlinkSync(biblioJsonPath);
     }
   }
+}
+
+export function appendToYAMLBibliography(bibliography: string, id: string, biblio: string) {
+  
+  // read the existing biblio if it exists
+  const biblioFileContents = fs.existsSync(bibliography)
+   ? fs.readFileSync(bibliography, { encoding: "utf-8" })
+   : "";
+
+  // strip the yaml envelope from both biblios 
+  const stripYamlEnvelope = (yaml: string) => {
+    const match = yaml.match(/^---.*?\nreferences:([\S\s]+)(\.\.\.|---)\s*$/s);
+    if (match) {
+      return match[1];
+    } else {
+      return yaml
+    }
+  }
+  let biblioFile = stripYamlEnvelope(biblioFileContents);
+  if (biblioFile.length > 0 && !biblioFile.endsWith("\n")) {
+    biblioFile += "\n";
+  }
+  let biblioAppend = stripYamlEnvelope(biblio);
+
+  // add the id to the biblio
+  biblioAppend = biblioAppend.replace("- ", "- id: " + id + "\n  ");
+  if (!biblioAppend.endsWith("\n")) {
+    biblioAppend += "\n";
+  }
+
+  // write the biblio
+  fs.writeFileSync(bibliography, `---\nreferences:\n${biblioFile.trimStart()}${biblioAppend.trimStart()}...\n`, { encoding: "utf-8"} );
+}
+
+
+
+export function appendToJSONBibliography(bibliography: string, id: string, biblio: string) {
+  
+  // read existing biblio
+  const biblioJSON = (fs.existsSync(bibliography)
+    ? JSON.parse(fs.readFileSync(bibliography, { encoding: "utf-8"}))
+    : []) as Array<Record<string,unknown>>;
+
+
+  // parse the passed biblio and apply the id
+  const parsedJSON = (JSON.parse(biblio) as Array<Record<string,unknown>>)[0];
+  delete parsedJSON["id"];
+  const entryJSON : Record<string,unknown> = {};
+  entryJSON["id"] = id;
+  for (const key of Object.keys(parsedJSON)) {
+    entryJSON[key] = parsedJSON[key];
+  }
+
+  // append 
+  biblioJSON.push(entryJSON);
+
+  // re-write
+  fs.writeFileSync(bibliography, JSON.stringify(biblioJSON, undefined, 2));
+
 }
 
 export function resolveBiblioOptions(docPath: string, docBiblioOptions: BiblioOptions) {
@@ -266,14 +347,6 @@ function renderCslJson(quarto: QuartoContext, file: string) : CSL[] | undefined 
     console.log("Error converting bibliography:");
     console.error(err);
   }
-}
-
-function isYamlBibliography(file: string) {
-  return hasExtension(file, [".yml", ".yaml"]);
-}
-
-function isJsonBibliography(file: string) {
-  return hasExtension(file, ".json");
 }
 
 

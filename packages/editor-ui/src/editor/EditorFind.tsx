@@ -23,10 +23,10 @@ import { IconNames } from '@blueprintjs/icons';
 
 import { focusInput } from 'core-browser';
 
-import { kAlertTypeInfo, UITools } from 'editor';
+import { kAlertTypeInfo } from 'editor';
 
 import { CommandManagerContext, EditorUICommandId } from '../commands';
-import { editorDialogs } from '../dialogs';
+import { alert } from '../dialogs';
 import { t } from '../i18n';
 
 import { EditorOperationsContext } from './EditorOperationsContext';
@@ -45,8 +45,6 @@ export const EditorFind: React.FC = () => {
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
   const findInputRef = useRef<HTMLInputElement>(null);
-  const uiToolsRef = useRef<UITools>(new UITools());
-  const dialogs = useRef(editorDialogs(uiToolsRef.current.attr));
 
   // state
   const [active, setActive] = useState(false);
@@ -68,7 +66,7 @@ export const EditorFind: React.FC = () => {
 
   // no more matches alert
   const noMoreMatchesAlert = () => {
-    dialogs.current.alert(t('find_alert_title'), t('find_no_more_matches'), kAlertTypeInfo);
+    alert(t('find_alert_title'), t('find_no_more_matches') as string, kAlertTypeInfo);
   }
 
   // perform most up to date find
@@ -107,7 +105,7 @@ export const EditorFind: React.FC = () => {
   // replace all
   const replaceAll = useCallback(() => {
     const replaced = performFind()?.replaceAll(replaceText);
-    dialogs.current.alert( t('find_alert_title'), `${(replaced || 0)} ${t('find_instances_replaced')}.`, kAlertTypeInfo);
+    alert( t('find_alert_title'), `${(replaced || 0)} ${t('find_instances_replaced')}.`, kAlertTypeInfo);
   }, [performFind, replaceText]);
   
   // find and replace commands

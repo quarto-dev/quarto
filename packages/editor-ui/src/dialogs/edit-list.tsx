@@ -24,7 +24,6 @@ import { FormGroup } from "@blueprintjs/core";
 import { t } from './translate';
 
 export function editList(list: ListProps, capabilities: ListCapabilities): Promise<ListProps | null> {
-  console.log(list);
   return showValueEditorDialog(EditListDialog, list, capabilities);
  }
 
@@ -38,7 +37,6 @@ const EditListDialog: React.FC<{
 
   const close = (values?: ListProps) => {
     setIsOpen(false);
-    console.log(values);
     props.onClosed(values);
   }
 

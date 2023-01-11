@@ -17,10 +17,8 @@ import {
   EditorDialogs, 
   EditorHTMLDialogCreateFn, 
   EditorHTMLDialogValidateFn, 
-  EditorUIImageResolver, 
-  InsertCiteProps, 
-  InsertCiteResult, 
-  UIToolsAttr 
+  EditorServer, 
+  EditorUIImageResolver,  
 } from "editor-types";
 
 import { alert, yesNoMessage } from "./alert";
@@ -34,6 +32,8 @@ import { editCodeBlock } from "./edit-codeblock";
 import { editCallout } from "./edit-callout";
 import { insertTable } from "./insert-table";
 import { insertTabset } from "./insert-tabset";
+import { insertCite } from "./insert-cite";
+import { UITools } from "editor";
 
 export { 
   alert, 
@@ -47,32 +47,33 @@ export {
   editRawInline, 
   editRawBlock, 
   editCodeBlock, 
-  editCallout, 
-  insertTable 
+  editCallout,
+  insertTable,
+  insertCite
 };
 
 
-export function editorDialogs(uiToolsAttr: UIToolsAttr, imageResolver?: EditorUIImageResolver) : EditorDialogs {
+export function editorDialogs(
+  uiTools: UITools, 
+  server: EditorServer,
+  imageResolver: EditorUIImageResolver) : EditorDialogs {
   return {
     alert,
     yesNoMessage,
-    editLink: editLink(uiToolsAttr),
-    editImage: editImage(uiToolsAttr, imageResolver),
-    editCodeBlock: editCodeBlock(uiToolsAttr),
+    editLink: editLink(uiTools.attr),
+    editImage: editImage(uiTools.attr, imageResolver),
+    editCodeBlock: editCodeBlock(uiTools.attr),
     editList,
-    editAttr: editAttr(uiToolsAttr),
-    editSpan: editSpan(uiToolsAttr),
-    editDiv: editDiv(uiToolsAttr),
-    editCallout: editCallout(uiToolsAttr),
+    editAttr: editAttr(uiTools.attr),
+    editSpan: editSpan(uiTools.attr),
+    editDiv: editDiv(uiTools.attr),
+    editCallout: editCallout(uiTools.attr),
     editRawInline,
     editRawBlock,
     editMath,
     insertTable,
-    insertTabset: insertTabset(uiToolsAttr),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async insertCite(_props: InsertCiteProps): Promise<InsertCiteResult | null> {
-      return null;
-    },
+    insertTabset: insertTabset(uiTools.attr),
+    insertCite: insertCite(server.doi, uiTools.citation),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async htmlDialog(_title: string, _okText: string | null, _create: EditorHTMLDialogCreateFn, _focus: VoidFunction, _validate: EditorHTMLDialogValidateFn): Promise<boolean> {
       return false;

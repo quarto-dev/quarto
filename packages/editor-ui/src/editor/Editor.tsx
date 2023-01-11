@@ -22,7 +22,7 @@ import { Intent, Spinner } from '@blueprintjs/core';
 
 import { JsonRpcRequestTransport } from 'core';
 
-import { defaultPrefs, Prefs } from 'editor-types';
+import { defaultPrefs, EditorServer, EditorServices, Prefs } from 'editor-types';
 
 import { 
   Editor as PMEditor, 
@@ -42,7 +42,8 @@ import {
   EditorOperations,
   EventHandler,
   PandocWriterOptions,
-  EditorOptions
+  EditorOptions,
+  EditorContext
 } from 'editor';
 
 import { 
@@ -65,7 +66,6 @@ import {
 
 import { 
   editorContext, 
-  EditorProviders, 
   useEditorSpelling 
 } from '../context';
 
@@ -80,6 +80,7 @@ import { EditorOperationsContext } from './EditorOperationsContext';
 import { t } from '../i18n';
 
 import styles from './Editor.module.scss';
+import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 
 
 export interface EditorProps {
@@ -96,7 +97,9 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
   // global services
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
   const uiToolsRef = useRef<UITools>(new UITools());
-  const dialogs = useRef(editorDialogs(uiToolsRef.current.attr, props.uiContext));
+  const server = useRef<EditorServer>(editorJsonRpcServer(props.request));
+  const services = useRef<EditorServices>(editorJsonRpcServices(props.request));
+  const dialogs = useRef(editorDialogs(uiToolsRef.current, server.current, props.uiContext));
 
   // redux state
   const title = useSelector(editorTitle);
@@ -151,17 +154,21 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
       }
     };
 
+    const context = editorContext({
+      prefs: editorPrefs,
+      server: server.current,
+      services: services.current,
+      request: props.request,
+      uiContext: props.uiContext,
+      display: () => props.display(() => commandsRef.current!), 
+      dialogs: () => dialogs.current,
+      spelling: () => spellingRef.current!
+    })
+
     editorRef.current = await createEditor(
       parentRef.current!, 
       props.options || {},
-      {
-        prefs: editorPrefs,
-        request: props.request,
-        uiContext: props.uiContext,
-        display: () => props.display(() => commandsRef.current!), 
-        dialogs: () => dialogs.current,
-        spelling: () => spellingRef.current!
-      }
+      context
     );
     
     window.addEventListener("resize", onResize);
@@ -332,9 +339,8 @@ const editorLoadingUI = (loading: boolean) => {
 const createEditor = async (
   parent: HTMLElement, 
   options: EditorOptions,
-  providers: EditorProviders,
+  context: EditorContext
 ) : Promise<PMEditor> => {
-  const context = editorContext(providers);
   const format: EditorFormat = {
     pandocMode: 'markdown',
     pandocExtensions: '',

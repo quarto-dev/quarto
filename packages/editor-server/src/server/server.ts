@@ -65,7 +65,7 @@ export function editorServer(options: EditorServerOptions) : EditorServer {
     datacite: dataCiteServer(),                  // done
     pubmed: pubMedServer(options.pubmed),        // done
     xref: xrefServer(),
-    zotero: undefined,
+    zotero: zoteroServer(),
     environment: undefined                       // done
   };
 }

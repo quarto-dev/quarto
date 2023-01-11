@@ -22,13 +22,11 @@ import {
   Prefs, 
   EditorUISpelling, 
   MathjaxTypesetResult,
-  MathServer
+  MathServer,
+  EditorServer,
+  EditorServices
 } from 'editor-types';
 
-import {
-  editorJsonRpcServer,
-  editorJsonRpcServices
-} from 'editor-core'
 
 import {
   EditorContext,
@@ -49,6 +47,8 @@ export interface EditorPrefs {
 
 export interface EditorProviders {
   prefs: EditorPrefs,
+  server: EditorServer,
+  services: EditorServices,
   request: JsonRpcRequestTransport, 
   uiContext: EditorUIContext,
   dialogs: () => EditorDialogs,
@@ -59,13 +59,11 @@ export interface EditorProviders {
 export function editorContext(providers: EditorProviders) : EditorContext {
   
   const uiTools = new UITools();
-  const server = editorJsonRpcServer(providers.request);
-  const { math: mathServer } = editorJsonRpcServices(providers.request);
   
   const ui = {
     dialogs: providers.dialogs(),
     display: providers.display(),
-    math: editorMath(mathServer),
+    math: editorMath(providers.services.math),
     context: providers.uiContext,
     prefs: editorPrefs(providers.prefs),
     spelling: editorSpelling(providers.spelling),
@@ -74,7 +72,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
 
 
   const context : EditorContext = { 
-    server, 
+    server: providers.server, 
     ui, 
     codeViewExtension: codeMirrorExtension 
   };

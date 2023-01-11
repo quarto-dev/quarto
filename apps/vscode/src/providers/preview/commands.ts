@@ -89,11 +89,7 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
       } else {
         // show the editor
         if (!isNotebook(targetEditor.document)) {
-          await window.showTextDocument(
-            targetEditor.document,
-            targetEditor.viewColumn,
-            false
-          );
+          await targetEditor.activate();
         }
 
         // save (will trigger render b/c renderOnSave is enabled)

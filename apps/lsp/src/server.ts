@@ -117,7 +117,7 @@ connection.onInitialized(async () => {
   }
 
   // register custom methods
-  registerCustomMethods(quartoContext, lspConnection);
+  registerCustomMethods(quartoContext, lspConnection, documents);
 
 });
 

@@ -13,25 +13,48 @@
  *
  */
 
+import * as fs from "fs";
 import path from "path";
 
-import { defaultEditorServerOptions, dictionaryServerMethods, editorServerMethods, mathServerMethods } from "editor-server"
+import { 
+  defaultEditorServerOptions, 
+  dictionaryServerMethods, 
+  editorServerMethods, 
+  mathServerMethods 
+} from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
 import { QuartoContext, userDictionaryDir } from "quarto-core";
+import { TextDocuments } from "vscode-languageserver/node";
+import { TextDocument } from "vscode-languageserver-textdocument";
+import { URI } from "vscode-uri";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
-  connection: LspConnection
+  connection: LspConnection,
+  documents: TextDocuments<TextDocument>
 ) {
 
   const resourcesDir = path.join(__dirname, "resources");
 
-  const options = defaultEditorServerOptions(
-    quartoContext,
-    resourcesDir,
-    quartoContext.pandocPath
-  );
+  const options = {
+    ...defaultEditorServerOptions(
+      quartoContext,
+      resourcesDir,
+      quartoContext.pandocPath
+    ),
+    documents: {
+      getCode(filePath: string) {
+        const uri = URI.file(filePath).toString();
+        const doc = documents.get(uri);
+        if (doc) {
+          return doc.getText();
+        } else {
+          return fs.readFileSync(filePath, { encoding: "utf-8" });
+        }
+      }
+    }
+  };
 
   const dictionary = {
     dictionariesDir: path.join(resourcesDir, "dictionaries"),

@@ -13,6 +13,7 @@
  *
  */
 
+import * as fs from "fs";
 
 import { EditorServer } from "editor-types";
 
@@ -26,11 +27,16 @@ import { zoteroServer, zoteroServerMethods } from "./zotero";
 import { JsonRpcServerMethod } from 'core';
 import { QuartoContext } from "quarto-core";
 
+export interface EditorServerDocuments {
+  getCode(filePath: string) : string;
+}
+
 export interface EditorServerOptions {
   quartoContext: QuartoContext;
   pandoc: PandocServerOptions;
   pubmed: PubMedServerOptions;
   crossref: CrossrefServerOptions;
+  documents: EditorServerDocuments;
 }
 
 export function defaultEditorServerOptions(
@@ -38,7 +44,7 @@ export function defaultEditorServerOptions(
   resourcesDir: string, 
   pandocPath?: string,
   payloadLimitMb = 100
-) {
+) : EditorServerOptions {
   return {
     quartoContext,
     pandoc: {
@@ -53,20 +59,25 @@ export function defaultEditorServerOptions(
     crossref: {
       userAgent: "Quarto",
       email: "crossref@rstudio.com"
-    }
+    },
+    documents: {
+      getCode(filePath: string) {
+        return fs.readFileSync(filePath, { encoding: "utf-8" });
+      }
+    } 
   }
 }
 
 export function editorServer(options: EditorServerOptions) : EditorServer {
   return {
-    pandoc: pandocServer(options),               // partial
-    doi: doiServer(),                            // done
-    crossref: crossrefServer(options.crossref),  // done
-    datacite: dataCiteServer(),                  // done
-    pubmed: pubMedServer(options.pubmed),        // done
-    xref: xrefServer(),
+    pandoc: pandocServer(options),
+    doi: doiServer(),
+    crossref: crossrefServer(options.crossref),
+    datacite: dataCiteServer(),
+    pubmed: pubMedServer(options.pubmed),
+    xref: xrefServer(options),
     zotero: zoteroServer(),
-    environment: undefined                       // done
+    environment: undefined
   };
 }
 
@@ -78,6 +89,6 @@ export function editorServerMethods(options: EditorServerOptions): Record<string
     ...dataCiteServerMethods(),
     ...pubMedServerMethods(options.pubmed),
     ...zoteroServerMethods(),
-    ...xrefServerMethods()
+    ...xrefServerMethods(options)
   }
 }

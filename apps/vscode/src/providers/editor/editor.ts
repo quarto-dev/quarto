@@ -315,7 +315,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) {
   
   const docDir = path.dirname(baseDoc.uri.fsPath);
-  const filePath = path.normalize(path.join(docDir, file));
+  const filePath = path.normalize(path.isAbsolute(file) ? file : path.join(docDir, file));
   const uri = Uri.parse(filePath);
   const ext = extname(filePath).toLowerCase();
 

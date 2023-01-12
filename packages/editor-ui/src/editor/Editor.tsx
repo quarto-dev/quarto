@@ -199,13 +199,6 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
     // set title and outline
     dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
     onEditorOutlineChanged();
-
-    // clear loading status
-    if (loading) {
-      dispatch(setEditorLoading(false));
-      editorRef.current?.focus();
-    }  
-     
   }, []);
 
   // provide EditorOperations -- we need to provide a fully bound instance
@@ -217,7 +210,11 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
      editorRef.current!.setTitle(title)
     },
     setMarkdown(markdown: string, options: PandocWriterOptions, emitUpdate: boolean) {
-      return editorRef.current!.setMarkdown(markdown, options, emitUpdate);
+      const result = editorRef.current!.setMarkdown(markdown, options, emitUpdate);
+      if (loading) {
+        dispatch(setEditorLoading(false));
+      }  
+      return result;
     },
     getStateJson() {
       return editorRef.current!.getStateJson();

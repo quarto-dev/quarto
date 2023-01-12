@@ -141,7 +141,7 @@ export const SymbolEmojiPreferencesPanel = React.forwardRef<HTMLDivElement, Symb
   const currentSkinToneButton = () => {
     return (
       <TextButton
-        classes={['pm-emoji-skintone-picker-button', 'pm-light-text-color']}
+        classes={['pm-text-button', 'pm-input-button', 'pm-emoji-skintone-picker-button', 'pm-light-text-color']}
         title={
           selectedSkinTone === SkinTone.None
             ? props.context.translateText(`${previewEmoji.emoji} Skin tone`)

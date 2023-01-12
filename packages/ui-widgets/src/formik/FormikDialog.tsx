@@ -19,6 +19,8 @@ import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
 
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 
+import { modalDialogProps } from '../dialog';
+
 import FormikFocusError from './FormikFocusError';
 
 import styles from './Formik.module.scss';
@@ -58,16 +60,9 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
           isOpen={props.isOpen}
           onOpening={props.onOpening}
           onOpened={props.onOpened}
-          className={[styles.dialog].concat(props.className || []).join(' ')}
-          autoFocus={true}
-          enforceFocus={true}
-          canEscapeKeyClose={true}
-          canOutsideClickClose={false}
-          isCloseButtonShown={true}
-          shouldReturnFocusOnClose={true}
           onClose={() => formikProps.resetForm()}
-          transitionDuration={150}
-          style={{userSelect: 'none'}}
+          className={[styles.dialog].concat(props.className || []).join(' ')}
+          {...modalDialogProps()}
         >
           <Form onSubmit={onSubmit} ref={formRef}>
             <FormikFocusError formRef={formRef}/>

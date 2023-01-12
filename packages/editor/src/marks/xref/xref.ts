@@ -33,6 +33,7 @@ import { xrefCompletionHandler } from './xref-completion';
 import { xrefPopupPlugin } from './xref-popup';
 import { kQuartoDocType } from '../../api/format';
 import { insertXref } from '../../behaviors/insert_xref/insert_xref';
+import { EditorView } from 'prosemirror-view';
 
 const kRefRegExDetectAndApply = /(?:^|[^`])(\\?@ref\([ A-Za-z0-9:-]*\))/g;
 
@@ -189,7 +190,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           new ProsemirrorCommand(
             EditorCommandId.CrossReference,
             ['Shift-Mod-F10'],
-            (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+            (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
               // enable/disable command
               if (!canInsertNode(state, schema.nodes.text) || !toggleMarkType(schema.marks.cite_id)(state)) {
                 return false;
@@ -232,6 +233,8 @@ const extension = (context: ExtensionContext): Extension | null => {
                     setTextSelection(tr.selection.from)(tr);
                     dispatch(tr);
                   }
+                }).then(() =>{
+                  view?.focus();
                 });
               }
               return true;

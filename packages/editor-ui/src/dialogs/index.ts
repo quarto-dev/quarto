@@ -15,12 +15,12 @@
 
 import { 
   EditorDialogs, 
-  EditorHTMLDialogCreateFn, 
-  EditorHTMLDialogValidateFn, 
   EditorServer, 
   EditorUIImageResolver,
   PrefsProvider,  
 } from "editor-types";
+
+import { UITools } from "editor";
 
 import { alert, yesNoMessage } from "./alert";
 import { editAttr, editDiv, editSpan } from "./edit-attr";
@@ -34,7 +34,7 @@ import { editCallout } from "./edit-callout";
 import { insertTable } from "./insert-table";
 import { insertTabset } from "./insert-tabset";
 import { insertCite } from "./insert-cite";
-import { UITools } from "editor";
+import { htmlDialog } from "./html-dialog";
 
 export { 
   alert, 
@@ -50,7 +50,8 @@ export {
   editCodeBlock, 
   editCallout,
   insertTable,
-  insertCite
+  insertCite,
+  htmlDialog
 };
 
 
@@ -76,10 +77,7 @@ export function editorDialogs(
     insertTable,
     insertTabset: insertTabset(uiTools.attr),
     insertCite: insertCite(prefs, server.doi, uiTools.citation),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async htmlDialog(_title: string, _okText: string | null, _create: EditorHTMLDialogCreateFn, _focus: VoidFunction, _validate: EditorHTMLDialogValidateFn): Promise<boolean> {
-      return false;
-    }
+    htmlDialog
   };
 } 
 

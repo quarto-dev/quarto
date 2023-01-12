@@ -138,10 +138,12 @@ export class InsertCitationCommand extends ProsemirrorCommand {
                 dispatch(tr);
 
                 return Promise.resolve();
-              }
+              } 
             },
             this.initialSelectionKey,
-          );
+          ).then(() => {
+            view.focus();
+          });
         }
         return true;
       },

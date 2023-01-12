@@ -4,6 +4,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
+  height: 37px;
+  align-content: center;
 }
 
 .pm-tag-input-placeholder {

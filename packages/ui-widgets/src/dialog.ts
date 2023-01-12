@@ -16,6 +16,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+import { DialogProps } from "@blueprintjs/core";
+
 export function showValueEditorDialog<T,O = undefined>(
   dialog: React.FC<{ values: T, options: O, onClosed: (values?: T) => void}>,
   values: T,
@@ -33,3 +35,15 @@ export function showValueEditorDialog<T,O = undefined>(
   });
 }
 
+export function modalDialogProps(style?: React.CSSProperties) : Omit<DialogProps, "isOpen"> {
+  return {
+    autoFocus: true,
+    enforceFocus: true,
+    canEscapeKeyClose: true,
+    canOutsideClickClose: false,
+    isCloseButtonShown: true,
+    shouldReturnFocusOnClose: true,
+    transitionDuration: 150,
+    style: { userSelect: 'none', ...style}
+  };
+}

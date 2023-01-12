@@ -96,7 +96,7 @@ export interface TextButtonProps extends WidgetProps {
 }
 
 export const TextButton = React.forwardRef<HTMLButtonElement, TextButtonProps>((props: TextButtonProps, ref) => {
-  const className = ['pm-text-button', 'pm-input-button'].concat(props.classes || []).join(' ');
+  const className = props.classes?.join(' ');
   const onClick = (e: React.MouseEvent) => {
     if (props.onClick) {
       e.preventDefault();

@@ -139,7 +139,7 @@ export const CitationSourceLatentSearchPanel = React.forwardRef<HTMLDivElement, 
 
           <TextButton
             title={props.ui.context.translateText('Search')}
-            classes={['pm-insert-citation-panel-latent-search-button']}
+            classes={['pm-text-button', 'pm-input-button', 'pm-insert-citation-panel-latent-search-button']}
             onClick={handleButtonClick}
             disabled={props.status === CitationSourceListStatus.inProgress}
           />

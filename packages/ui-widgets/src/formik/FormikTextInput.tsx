@@ -13,7 +13,7 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useField } from 'formik';
 
@@ -24,29 +24,41 @@ import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (props) => {
   const { name, label, labelInfo, helperText, ...inputProps } = props;
   const [ field, meta ] = useField(name);
-    return (
-      <FormikFormGroup 
-        name={name}
-        label={label}
-        labelInfo={labelInfo}
-        helperText={helperText}
-      >
-        {({ onFocus, onBlur }) => {
-          return (
-            <InputGroup
-              autoComplete={"off"}
-              intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-              type="text"
-              fill={true}
-              {...field}
-              {...inputProps}
-              onFocus={onFocus}
-              onBlur={onBlur}
-            /> 
-          );
-        }}
-      </FormikFormGroup>
-    );
+
+  const autoFocusRef = useRef<HTMLInputElement>(null);
+
+  if (props.autoFocus) {
+    useEffect(() => {
+      setTimeout(() => {
+        autoFocusRef.current?.focus();
+      }, 0);
+    }, []);
+  }
+
+  return (
+    <FormikFormGroup 
+      name={name}
+      label={label}
+      labelInfo={labelInfo}
+      helperText={helperText}
+    >
+      {({ onFocus, onBlur }) => {
+        return (
+          <InputGroup
+            inputRef={autoFocusRef}
+            autoComplete={"off"}
+            intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+            type="text"
+            fill={true}
+            {...field}
+            {...inputProps}
+            onFocus={onFocus}
+            onBlur={onBlur}
+          /> 
+        );
+      }}
+    </FormikFormGroup>
+  );
 };
 
 export default FormikTextInput;

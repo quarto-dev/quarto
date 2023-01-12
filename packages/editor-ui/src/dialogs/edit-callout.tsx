@@ -90,6 +90,7 @@ const EditCalloutDialog: React.FC<{
         <FormikHTMLSelect 
           name="type" label={t("Type")} 
           options={["note", "tip", "important", "caution", "warning"]}
+          autoFocus={true}
         />
         <FormikHTMLSelect 
           name="appearance" label={t("Appearance")} 

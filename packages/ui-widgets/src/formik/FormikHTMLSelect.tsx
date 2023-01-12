@@ -13,7 +13,7 @@
  *
  */
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 import { FormGroup, HTMLSelect, HTMLSelectProps } from "@blueprintjs/core";
 import { useField } from "formik";
@@ -22,8 +22,18 @@ import { FormikFormGroupProps } from "./FormikFormGroup";
 const FormikHTMLSelect: React.FC<FormikFormGroupProps & HTMLSelectProps> = (props) => {
   const [ field ] = useField(props.name);
   const { label, labelInfo, helperText, ...selectProps } = props;
+
+  const autoFocusRef = useRef<HTMLSelectElement>(null);
+
+  if (props.autoFocus) {
+    useEffect(() => {
+      setTimeout(() => {
+        autoFocusRef.current?.focus();
+      }, 0);
+    }, []);
+  }
   
-  const htmlSelect = <HTMLSelect fill={true} {...selectProps} {...field} multiple={undefined} />
+  const htmlSelect = <HTMLSelect elementRef={autoFocusRef} fill={true} {...selectProps} {...field} multiple={undefined} />
 
   if (label || labelInfo || helperText) {
     return (

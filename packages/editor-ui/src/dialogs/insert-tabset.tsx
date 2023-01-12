@@ -14,7 +14,7 @@
  *
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FormGroup, InputGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
 
 import { useField } from "formik";
@@ -71,14 +71,24 @@ const InsertTabsetDialog: React.FC<{
 
   const close = (values?: InsertTabsetDialogValues) => {
     setIsOpen(false);
-    console.log(values);
     props.onClosed(values);  
   }
 
   const TabNameInput: React.FC<{tab: string, optional?: boolean, autoFocus?: boolean}> = props => {
     const [field] = useField(props.tab);
+
+    const autoFocusRef = useRef<HTMLInputElement>(null);
+    if (props.autoFocus) {
+      useEffect(() => {
+        setTimeout(() => {
+          autoFocusRef.current?.focus();
+        }, 0);
+      }, []);
+    }
+
     return (
       <InputGroup 
+        inputRef={autoFocusRef}
         {...field}
         fill={true} 
         autoComplete={"off"}

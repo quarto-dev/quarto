@@ -219,6 +219,13 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             }
           }
         ));
+
+        // track visual editors
+        disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel, client.editor));
+
+        // poll for focus (and fix if it gets out of sync)
+        disposables.push(focusTracker(webviewPanel, client.editor));
+
       },
 
       // notify sync manager when visual editor is updated
@@ -259,12 +266,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       enableScripts: true 
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-
-    // track visual editors
-    disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel, client.editor));
-
-    // poll for focus (and fix if it gets out of sync)
-    disposables.push(focusTracker(webviewPanel, client.editor));
 
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
@@ -376,8 +377,10 @@ function visualEditorTracker() : VisualEditorTracker {
 
 function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : Disposable {
 
+  let cancelled = false;
+
   const timer = setInterval(async () => {
-    if (!webviewPanel.active) {
+    if (!webviewPanel.active && !cancelled) {
       const hasFocus = await editor.isFocused();
       if (hasFocus) {
         await commands.executeCommand('workbench.action.focusNextGroup');
@@ -388,7 +391,10 @@ function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : 
   }, 1000);
 
   return {
-    dispose: () => clearInterval(timer)
+    dispose: () => {
+      cancelled = true;
+      clearInterval(timer);
+    }
   };
 
 }

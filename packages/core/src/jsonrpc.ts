@@ -68,7 +68,6 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
 } {
   
   // track in-flight requests
-  let requestId = 0;
   const requests = new Map<number, { resolve: (value: unknown) => void, reject: (reason: unknown) => void }>();
 
   // listen for responses
@@ -92,8 +91,11 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
     request: (method: string, params: unknown[] | undefined) => {
       return new Promise((resolve, reject) => {
         
+        // provision id
+        const requestId = Math.random();
+
         // track request
-        requests.set(++requestId, { resolve, reject });
+        requests.set(requestId, { resolve, reject });
   
         // make request
         const request: JsonRpcRequest = {

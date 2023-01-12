@@ -189,8 +189,9 @@ export function pandocAttrToDomAttr(attrs: any, marker = true) {
 }
 
 export function pandocAttrParseDom(el: Element, attrs: { [key: string]: string | null }, forceAttrs = false) {
-  // exclude any keys passed to us
-  const excludedNames = Object.keys(attrs);
+  
+  // exclude any keys passed to us as well as always exclude the spellcheck attribute
+  const excludedNames = [...Object.keys(attrs), "spellcheck"];
 
   // if this isn't from a prosemirror pandoc node then include only src and alt
   const includedNames: string[] = [];

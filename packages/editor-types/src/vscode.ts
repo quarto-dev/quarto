@@ -29,7 +29,7 @@ export const VSC_VEH_OnEditorReady = 'vsc_veh_on_editor_ready';
 export const VSC_VEH_OnEditorUpdated = 'vsc_veh_on_editor_updated';
 export const VSC_VEH_FlushEditorUpdates = 'vsc_veh_flush_editor_updates';
 export const VSC_VEH_SaveDocument = 'vsc_veh_save_document';
-
+export const VSC_VEH_RenderDocument = 'vsc_veh_render_document';
 export const VSC_VEH_EditorResourceUri = 'vsc_veh_editor_resource_url';
 
 export const VSC_VEH_OpenURL = 'vsc_veh_open_url';
@@ -62,6 +62,7 @@ export interface VSCodeVisualEditorHost extends EditorDisplay, EditorUIImageReso
   onEditorUpdated: (state: unknown) => Promise<void>;
   flushEditorUpdates: () => Promise<void>;
   saveDocument: () => Promise<void>;
+  renderDocument: () => Promise<void>;
   editorResourceUri: (path: string) => Promise<string>;
 }
 

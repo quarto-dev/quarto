@@ -34,6 +34,7 @@ import {
   VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
   VSC_VEH_SaveDocument,
+  VSC_VEH_RenderDocument,
   VSC_VEH_SelectImage,
   VSC_VEH_EditorResourceUri,
   VSC_VEH_GetHostContext,
@@ -120,7 +121,7 @@ export async function syncEditorToHost(
       if (focus) {
         editor.focus();
       }
-      
+
       // visual editor => text editor (just send the state, host will call back for markdown)
       editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
 
@@ -154,22 +155,35 @@ export async function syncEditorToHost(
 }
 
 export enum EditorHostCommands {
-  Save = "33AFE7B9-24B0-42B4-8ED0-BE9C0015773D"
+  Save = "33AFE7B9-24B0-42B4-8ED0-BE9C0015773D",
+  Render = "297E16BF-B801-4DBB-BC1F-7F9C603B4456"
 }
 
 export function editorHostCommands(host: VisualEditorHostClient) {
-  const commands: Command[] = [];
-  commands.push({
-    id: EditorHostCommands.Save,
-    menuText: t('commands:save_menu_text'),
-    group: t('commands:group_text_editing'),
-    keymap: ['Mod-s'],
-    isEnabled: () => true,
-    isActive: () => false,
-    execute: async () => {
-      await host.saveDocument();
+  const commands: Command[] = [
+    {
+      id: EditorHostCommands.Save,
+      menuText: t('commands:save_menu_text'),
+      group: t('commands:group_file'),
+      keymap: ['Mod-s'],
+      isEnabled: () => true,
+      isActive: () => false,
+      execute: async () => {
+        await host.saveDocument();
+      },
     },
-  });
+    {
+      id: EditorHostCommands.Render,
+      menuText: t('commands:render_menu_text'),
+      group: t('commands:group_file'),
+      keymap: ['Mod-Shift-k'],
+      isEnabled: () => true,
+      isActive: () => false,
+      execute: async () => {
+        await host.renderDocument();
+      },
+    }
+  ];
   return commands;
 }
 
@@ -212,6 +226,7 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
     flushEditorUpdates: () => request(VSC_VEH_FlushEditorUpdates, []),
     saveDocument: () => request(VSC_VEH_SaveDocument, []),
+    renderDocument: () => request(VSC_VEH_RenderDocument, []),
     editorResourceUri: (path: string) => request(VSC_VEH_EditorResourceUri, [path]),
     openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),

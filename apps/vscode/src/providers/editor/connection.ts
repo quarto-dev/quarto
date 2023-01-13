@@ -40,6 +40,7 @@ import {
   VSCodeVisualEditorHost,
   VSC_VE_IsFocused,
   VSC_VEH_SaveDocument,
+  VSC_VEH_RenderDocument
 } from "editor-types";
 
 import { 
@@ -118,6 +119,7 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
     [VSC_VEH_OnEditorUpdated]: args => host.onEditorUpdated(args[0]),
     [VSC_VEH_FlushEditorUpdates]: () => host.flushEditorUpdates(),
     [VSC_VEH_SaveDocument]: () => host.saveDocument(),
+    [VSC_VEH_RenderDocument]: () => host.renderDocument(),
     [VSC_VEH_EditorResourceUri]: args => host.editorResourceUri(args[0]),
     [VSC_VEH_OpenURL]: args => voidPromise(host.openURL(args[0])),
     [VSC_VEH_NavigateToXRef]: args => voidPromise(host.navigateToXRef(args[0], args[1])),

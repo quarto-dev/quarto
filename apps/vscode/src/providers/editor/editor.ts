@@ -239,6 +239,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         await commands.executeCommand("workbench.action.files.save");
       },
 
+      renderDocument: async () => {
+        await commands.executeCommand("quarto.renderShortcut");
+      },
+
       // map resources to uris valid in the editor
       editorResourceUri: async (path: string) => {
         const uri = webviewPanel.webview.asWebviewUri(Uri.parse(path)).toString();

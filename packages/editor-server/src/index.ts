@@ -21,7 +21,8 @@ export type { CrossrefServerOptions } from './server/crossref';
 export { 
   editorServer, 
   editorServerMethods,
-  defaultEditorServerOptions 
+  defaultEditorServerOptions,
+  fsEditorServerDocuments
 } from './server/server';
 
 export * from './services/services';

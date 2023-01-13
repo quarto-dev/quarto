@@ -26,7 +26,7 @@ import jayson from 'jayson'
 
 import { jaysonServerMethods } from 'core-node';
 
-import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods } from 'editor-server';
+import { defaultEditorServerOptions, editorServerMethods, editorServicesMethods, fsEditorServerDocuments } from 'editor-server';
 import { QuartoContext, userDictionaryDir } from 'quarto-core';
 
 // constants
@@ -42,7 +42,7 @@ export function createServer(quartoContext: QuartoContext, editorResourcesDir: s
 
   const writerRpcServer = jayson.Server(jaysonServerMethods({
     ...editorServerMethods(defaultEditorServerOptions(quartoContext, editorResourcesDir, "pandoc", kPayloadLimitMb)),
-    ...editorServicesMethods({ dictionary: dictionaryOptions })
+    ...editorServicesMethods({ dictionary: dictionaryOptions, documents: fsEditorServerDocuments() })
   }));
 
   const server = express()

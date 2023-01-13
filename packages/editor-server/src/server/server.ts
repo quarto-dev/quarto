@@ -60,11 +60,15 @@ export function defaultEditorServerOptions(
       userAgent: "Quarto",
       email: "crossref@rstudio.com"
     },
-    documents: {
-      getCode(filePath: string) {
-        return fs.readFileSync(filePath, { encoding: "utf-8" });
-      }
-    } 
+    documents: fsEditorServerDocuments()
+  }
+}
+
+export function fsEditorServerDocuments() {
+  return {
+    getCode(filePath: string) {
+      return fs.readFileSync(filePath, { encoding: "utf-8" });
+    }
   }
 }
 

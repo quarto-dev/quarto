@@ -30,6 +30,9 @@ export * from './api/extension-types'
 export * from './api/pandoc-types';
 export * from './api/options';
 
+// some api helpers
+export * from './api/cursor';
+
 // main editor module
 export * from './editor/editor';
 

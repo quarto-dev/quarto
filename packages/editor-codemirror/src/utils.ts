@@ -30,7 +30,7 @@ import { EditorView } from "@codemirror/view";
 import { setBlockType } from "prosemirror-commands";
 import { Compartment, EditorSelection } from "@codemirror/state";
 
-import { handleArrowToAdjacentNode } from "editor/src/api/cursor";
+import { handleArrowToAdjacentNode } from "editor";
 
 import { languageMode } from "./languages";
 

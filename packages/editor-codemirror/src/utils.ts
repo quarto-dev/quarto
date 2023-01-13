@@ -28,7 +28,7 @@ import { Node } from "prosemirror-model";
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from "@codemirror/view";
 import { setBlockType } from "prosemirror-commands";
-import { Compartment } from "@codemirror/state";
+import { Compartment, EditorSelection } from "@codemirror/state";
 import { languageMode } from "./languages";
 
 export function computeChange(oldVal: string, newVal: string) {
@@ -62,6 +62,25 @@ export const asProseMirrorSelection = (
   const head = cmView.state.selection.main.to + offset;
   return TextSelection.create(pmDoc, anchor, head);
 };
+
+// returns undefined if the selection is not within us or not a range
+export const asCodeMirrorSelection = (
+  pmView: PMEditorView,
+  getPos: (() => number) | boolean
+) => {
+  if (typeof(getPos) === "function") {
+    const offset = getPos() + 1;
+    const node = pmView.state.doc.nodeAt(getPos());
+    if (node) {
+      const nodeSize = node.nodeSize;
+      const selection = pmView.state.selection;
+      const isWithinCm = (pos: number) => pos >= offset && pos < (offset + nodeSize);
+      if (isWithinCm(selection.from) || isWithinCm(selection.to)) {
+        return EditorSelection.single(selection.from - offset, selection.to - offset);
+      }
+    }
+  }
+}
 
 export const forwardSelection = (
   cmView: EditorView,

@@ -35,10 +35,11 @@ import {
 import { indentOnInput } from "@codemirror/language";
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
-import { Compartment, EditorState, SelectionRange } from "@codemirror/state";
+import { Compartment, EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
 import { exitCode, selectAll } from "prosemirror-commands";
 
 import {
+  asCodeMirrorSelection,
   backspaceHandler,
   computeChange,
   forwardSelection,
@@ -79,7 +80,7 @@ export const codeMirrorBlockNodeView: (
       ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
       closeBrackets(),
       highlightSelectionMatches(),
-      indentUnit.of(' '),
+      indentUnit.of('  '),
       drawSelection({ cursorBlinkRate: 1000 }),
       syntaxHighlighting(defaultHighlightStyle),
       languageConf.of([]),
@@ -218,7 +219,17 @@ export const codeMirrorBlockNodeView: (
           selection: { anchor: change.from + change.text.length },
         });
         updating = false;
+      } else {
+        const cmSelection = asCodeMirrorSelection(view, getPos);
+        updating = true;
+        if (cmSelection) {
+          codeMirrorView.dispatch({ selection: cmSelection });
+        } else {
+          codeMirrorView.dispatch({ selection: EditorSelection.single(0)})
+        } 
+        updating = false;
       }
+    
       return true;
     },
     ignoreMutation: () => true,

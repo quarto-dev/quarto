@@ -30,7 +30,8 @@ import {
   EditorView,
   keymap,
   KeyBinding,
-  lineNumbers
+  lineNumbers,
+  Decoration
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
@@ -39,11 +40,11 @@ import {
 import { indentOnInput } from "@codemirror/language";
 import { indentWithTab } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
-import { Compartment, EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
+import { Compartment, EditorState, SelectionRange, EditorSelection, Range, RangeSet } from "@codemirror/state";
 
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
-import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
+import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext, findPluginState } from "editor";
 
 import {
   asCodeMirrorSelection,
@@ -153,7 +154,8 @@ export const codeMirrorBlockNodeView: (
   ];
 
   // bring in vscode keybindings (but remove ones we already have bound + Shift-Mod-k)
-  const baseKeys = keys.map(key => key.key!).concat('Shift-Mod-k');
+  const excludeKeys = ['Shift-Mod-k', 'Mod-f'];
+  const baseKeys = keys.map(key => key.key!).concat(excludeKeys);
   const vscodeKeys = vscodeKeymap.filter(binding => !binding.key || !baseKeys.includes(binding.key));
 
   // setup dom
@@ -166,7 +168,12 @@ export const codeMirrorBlockNodeView: (
     codeViewOptions.classes.forEach(className => dom.classList.add(className));
   }
 
+  // aspects of the editor we want to dynamically reconfigure
+  const findDecoratorMark = Decoration.mark({class: "pm-find-text"})
+  const findDecorators = new Compartment();
   const languageConf = new Compartment();
+
+  // editor state
   const state = EditorState.create({
     extensions: [
       ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
@@ -184,6 +191,7 @@ export const codeMirrorBlockNodeView: (
         indentWithTab
       ] as KeyBinding[]),
       theme,
+      findDecorators.of([])
     ],
     doc: node.textContent,
   });
@@ -289,7 +297,26 @@ export const codeMirrorBlockNodeView: (
         });
         updating = false;
       } 
-  
+
+      // update find markers
+      const findMarkers: Range<Decoration>[] = [];
+      const decorations = findPluginState(view.state);      
+      if (decorations && typeof getPos === "function") {
+        const decos = decorations?.find(getPos(), getPos() + node.nodeSize - 1);
+        if (decos) {
+          decos.forEach((deco) => {
+            if (deco.from !== view.state.selection.from && deco.to !== view.state.selection.to) {
+              findMarkers.push(findDecoratorMark.range(deco.from - getPos() - 1, deco.to - getPos() -1));
+            }
+          })
+        }
+      }
+      const ranges = RangeSet.of<Decoration>(findMarkers);
+      codeMirrorView.dispatch({
+        effects: findDecorators.reconfigure(EditorView.decorations.of(ranges))
+      });
+
+
       return true;
     },
     ignoreMutation: () => true,

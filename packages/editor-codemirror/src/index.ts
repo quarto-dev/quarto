@@ -29,7 +29,7 @@ export const codeMirrorPluginKey = new PluginKey("codemirror");
 export function codeMirrorExtension(
   codeViews: { [key: string]: CodeViewOptions })
 : ExtensionFn {
-  return () => {
+  return (context) => {
 
     // build nodeViews
     const nodeTypes = Object.keys(codeViews);
@@ -41,7 +41,7 @@ export function codeMirrorExtension(
       ) => NodeView;
     } = {};
     nodeTypes.forEach((name) => {
-      nodeViews[name] = codeMirrorBlockNodeView(codeViews[name]);
+      nodeViews[name] = codeMirrorBlockNodeView(context, codeViews[name]);
     });
 
     // return plugin

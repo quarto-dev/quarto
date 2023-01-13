@@ -66,6 +66,7 @@ export const asProseMirrorSelection = (
 // returns undefined if the selection is not within us or not a range
 export const asCodeMirrorSelection = (
   pmView: PMEditorView,
+  cmView: EditorView,
   getPos: (() => number) | boolean
 ) => {
   if (typeof(getPos) === "function") {
@@ -74,9 +75,12 @@ export const asCodeMirrorSelection = (
     if (node) {
       const nodeSize = node.nodeSize;
       const selection = pmView.state.selection;
-      const isWithinCm = (pos: number) => pos >= offset && pos < (offset + nodeSize);
+      const cmRange = { from: offset, to: offset + nodeSize };
+      const isWithinCm = (pos: number) => pos >= cmRange.from && pos < cmRange.to;
       if (isWithinCm(selection.from) || isWithinCm(selection.to)) {
         return EditorSelection.single(selection.from - offset, selection.to - offset);
+      } else if (selection.from <= cmRange.from && selection.to >= cmRange.to) {
+        return EditorSelection.single(0, cmView.state.doc.length);
       }
     }
   }

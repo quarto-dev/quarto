@@ -47,15 +47,17 @@ import {
   setMode,
   valueChanged,
 } from "./utils";
-import { CodeViewOptions } from "editor";
+import { CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
+import { Transaction } from "prosemirror-state";
 
 export const codeMirrorBlockNodeView: (
+  context: ExtensionContext,
   codeViewOptions: CodeViewOptions
 ) => (
   pmNode: Node,
   view: PMEditorView,
   getPos: (() => number) | boolean
-) => NodeView = (codeViewOptions) => (pmNode, view, getPos) => {
+) => NodeView = (context, codeViewOptions) => (pmNode, view, getPos) => {
 
   // create theme
   const theme = EditorView.theme({
@@ -178,6 +180,24 @@ export const codeMirrorBlockNodeView: (
     languageConf
   );
 
+  // subscribe to dispatches
+  const cleanup: VoidFunction[] = [];
+  cleanup.push(context.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
+    if (tr) {
+      // track selection changes that occur when we don't have focus
+      if (!codeMirrorView.hasFocus && tr.selectionSet && !tr.docChanged) {
+        const cmSelection = asCodeMirrorSelection(view, codeMirrorView, getPos);
+        updating = true;
+        if (cmSelection) {
+          codeMirrorView.dispatch({ selection: cmSelection });
+        } else {
+          codeMirrorView.dispatch({ selection: EditorSelection.single(0)})
+        } 
+        updating = false;
+      }
+    }
+  }));
+
   return {
     dom,
     selectNode() {
@@ -219,22 +239,14 @@ export const codeMirrorBlockNodeView: (
           selection: { anchor: change.from + change.text.length },
         });
         updating = false;
-      } else {
-        const cmSelection = asCodeMirrorSelection(view, getPos);
-        updating = true;
-        if (cmSelection) {
-          codeMirrorView.dispatch({ selection: cmSelection });
-        } else {
-          codeMirrorView.dispatch({ selection: EditorSelection.single(0)})
-        } 
-        updating = false;
-      }
-    
+      } 
+  
       return true;
     },
     ignoreMutation: () => true,
     destroy: () => {
-      // 
+      cleanup.forEach(clean => clean());
+      codeMirrorView.destroy();
     },
   };
 };

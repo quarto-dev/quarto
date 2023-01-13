@@ -17,19 +17,21 @@ import { JsonRpcServerMethod } from "core";
 import { kMathMathjaxTypesetSvg, MathjaxTypesetOptions, MathServer } from "editor-types";
 
 import { mathjaxTypeset } from "../mathjax";
+import { EditorServerDocuments } from "../server/server";
 
-export function mathServer() : MathServer {
+export function mathServer(documents: EditorServerDocuments) : MathServer {
   return {
-    async mathjaxTypeset(tex: string, options: MathjaxTypesetOptions) {
-      return mathjaxTypeset(tex, options);
+    async mathjaxTypeset(tex: string, options: MathjaxTypesetOptions, docPath: string | null) {
+      const docText = docPath ? documents.getCode(docPath) : undefined;
+      return mathjaxTypeset(tex, options, docText);
     },
   };
 }
 
-export function mathServerMethods() : Record<string, JsonRpcServerMethod> {
-  const server = mathServer();
+export function mathServerMethods(documents: EditorServerDocuments) : Record<string, JsonRpcServerMethod> {
+  const server = mathServer(documents);
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kMathMathjaxTypesetSvg]: args => server.mathjaxTypeset(args[0], args[1]),
+    [kMathMathjaxTypesetSvg]: args => server.mathjaxTypeset(args[0], args[1], args[2]),
   }
   return methods;
 }

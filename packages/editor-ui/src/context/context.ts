@@ -63,7 +63,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
   const ui = {
     dialogs: providers.dialogs(),
     display: providers.display(),
-    math: editorMath(providers.services.math),
+    math: editorMath(providers.services.math, providers.uiContext),
     context: providers.uiContext,
     prefs: editorPrefs(providers.prefs),
     spelling: editorSpelling(providers.spelling),
@@ -81,7 +81,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
 }
 
 
-export function editorMath(server: MathServer): EditorMath {
+export function editorMath(server: MathServer, uiContext: EditorUIContext): EditorMath {
 
   const mathQueue = new PromiseQueue<MathjaxTypesetResult>();
 
@@ -95,12 +95,16 @@ export function editorMath(server: MathServer): EditorMath {
       // typeset function
       const typesetFn = () => {
         text = text.replace(/^\$\$?/, "").replace(/\$\$?$/, "");
-        return server.mathjaxTypeset(text, { 
-          format: "data-uri",
-          theme: "light",
-          scale: 1,
-          extensions: []
-        });
+        return server.mathjaxTypeset(
+          text, 
+          { 
+            format: "data-uri",
+            theme: "light",
+            scale: 1,
+            extensions: []
+          },
+          uiContext.getDocumentPath()
+        );
       }
 
       // execute immediately or enque depending on priority

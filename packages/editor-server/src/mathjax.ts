@@ -27,8 +27,10 @@ import type { LiteElement } from "mathjax-full/js/adaptors/lite/Element.js";
 import type { MathDocument } from "mathjax-full/js/core/MathDocument.js";
 import type { LiteDocument } from "mathjax-full/js/adaptors/lite/Document.js";
 import type { LiteText } from "mathjax-full/js/adaptors/lite/Text.js";
+import TexError from "mathjax-full/js/input/tex/TexError";
 import "mathjax-full/js/input/tex/AllPackages.js";
 
+import { MathjaxSupportedExtension, MathjaxTypesetOptions, MathjaxTypesetResult } from "editor-types";
 
 type TexOption = {
   packages?: readonly MathjaxSupportedExtension[];
@@ -74,11 +76,13 @@ type SvgOption = {
   scale?: number;
 };
 
-import { MathjaxSupportedExtension, MathjaxTypesetOptions, MathjaxTypesetResult } from "editor-types";
-import TexError from "mathjax-full/js/input/tex/TexError";
-
-export function mathjaxTypeset(tex: string, options: MathjaxTypesetOptions): MathjaxTypesetResult {
+export function mathjaxTypeset(tex: string, options: MathjaxTypesetOptions, docText?: string): MathjaxTypesetResult {
   
+  // if docText is specified then first define any commands found therin
+  if (docText) {
+    defineNewCommands(docText, options);
+  }
+
   // reload extensions as required
   ensureExtensionsLoaded(options.extensions);
   
@@ -218,4 +222,43 @@ function createHtmlConverter(extensions: MathjaxSupportedExtension[]) {
     InputJax: texInput,
     OutputJax: svgOutput,
   }) as MathDocument<LiteElement, LiteText, LiteDocument>;
+}
+
+
+// defining commands from elewhere in the document
+// newcommand macros we have already typeset
+const newCommandsDefined = new Set<string>();
+function defineNewCommands(content: string, options: MathjaxTypesetOptions) {
+  // define any commands that haven't beeen already
+  for (const command of newCommands(content)) {
+    if (!newCommandsDefined.has(command)) {
+      // called purely for its side effect of making the command
+      // available to subsequent user facing math typesetting
+      mathjaxTypeset(command, options);
+      newCommandsDefined.add(command);
+    }
+  }
+}
+
+// based on https://github.com/James-Yu/LaTeX-Workshop/blob/b5ea2a626be7d4e5a2ebe0ec93a4012f42bf931a/src/providers/preview/mathpreviewlib/newcommandfinder.ts#L92
+function* newCommands(content: string) {
+  const regex =
+    /(\\(?:(?:(?:(?:re)?new|provide)command|DeclareMathOperator)(\*)?{\\[a-zA-Z]+}(?:\[[^[\]{}]*\])*{.*})|\\(?:def\\[a-zA-Z]+(?:#[0-9])*{.*})|\\DeclarePairedDelimiter{\\[a-zA-Z]+}{[^{}]*}{[^{}]*})/gm;
+  const noCommentContent = stripComments(content);
+  let result: RegExpExecArray | null;
+  do {
+    result = regex.exec(noCommentContent);
+    if (result) {
+      let command = result[1];
+      if (result[2]) {
+        command = command.replace(/\*/, "");
+      }
+      yield command;
+    }
+  } while (result);
+}
+
+function stripComments(text: string): string {
+  const reg = /(^|[^\\]|(?:(?<!\\)(?:\\\\)+))%.*$/gm;
+  return text.replace(reg, "$1");
 }

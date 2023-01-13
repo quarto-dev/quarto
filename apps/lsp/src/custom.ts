@@ -20,7 +20,8 @@ import {
   defaultEditorServerOptions, 
   dictionaryServerMethods, 
   editorServerMethods, 
-  mathServerMethods 
+  mathServerMethods,
+  EditorServerOptions
 } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
@@ -37,7 +38,7 @@ export function registerCustomMethods(
 
   const resourcesDir = path.join(__dirname, "resources");
 
-  const options = {
+  const options : EditorServerOptions = {
     ...defaultEditorServerOptions(
       quartoContext,
       resourcesDir,
@@ -64,7 +65,7 @@ export function registerCustomMethods(
   registerLspServerMethods(connection, {
     ...editorServerMethods(options),
     ...dictionaryServerMethods(dictionary),
-    ...mathServerMethods()
+    ...mathServerMethods(options.documents)
   });
 
 }

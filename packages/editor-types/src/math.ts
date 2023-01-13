@@ -67,6 +67,6 @@ export type MathjaxSupportedExtension =
 
 
 export interface MathServer {
-  mathjaxTypeset: (math: string, options: MathjaxTypesetOptions) => Promise<MathjaxTypesetResult>;
+  mathjaxTypeset: (math: string, options: MathjaxTypesetOptions, docPath: string | null) => Promise<MathjaxTypesetResult>;
 }
 

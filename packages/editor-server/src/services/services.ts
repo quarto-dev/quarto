@@ -20,6 +20,7 @@ import { mathServer, mathServerMethods } from "./math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
 import { JsonRpcServerMethod } from 'core';
 import { prefsServer, prefsServerMethods } from "./prefs";
+import { EditorServerDocuments } from "../server/server";
 
 export {
   mathServer, 
@@ -32,12 +33,13 @@ export {
 export type { DictionaryServerOptions };
 
 export interface EditorServicesOptions {
+  documents: EditorServerDocuments;
   dictionary: DictionaryServerOptions;
 }
 
 export function editorServices(options: EditorServicesOptions) : EditorServices {
   return {
-    math: mathServer(),
+    math: mathServer(options.documents),
     dictionary: dictionaryServer(options.dictionary),
     prefs: prefsServer()
   };
@@ -45,7 +47,7 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
 
 export function editorServicesMethods(options: EditorServicesOptions): Record<string,JsonRpcServerMethod> {
   return {
-    ...mathServerMethods(),
+    ...mathServerMethods(options.documents),
     ...dictionaryServerMethods(options.dictionary),
     ...prefsServerMethods()
   }

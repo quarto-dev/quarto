@@ -24,10 +24,11 @@ import 'prosemirror-gapcursor/style/gapcursor.css';
 import { findParentNodeOfTypeClosestToPos, findParentNodeOfType, findParentNode } from 'prosemirror-utils';
 
 import { Extension } from '../api/extension';
-import { BaseKey, verticalArrowCanAdvanceWithinTextBlock } from '../api/basekeys';
+import { BaseKey } from '../api/basekeys';
 import { isList } from '../api/list';
 
 import './cursor.css';
+import { verticalArrowCanAdvanceWithinTextBlock } from '../api/cursor';
 
 
 const extension: Extension = {

@@ -20,9 +20,8 @@ import { Plugin, PluginKey } from "prosemirror-state";
 import { Node as ProsemirrorNode } from "prosemirror-model";
 import { EditorView, NodeView } from "prosemirror-view";
 
-import { ExtensionFn, CodeViewOptions, BaseKey } from "editor";
+import { ExtensionFn, CodeViewOptions, BaseKey, arrowHandler } from "editor";
 import { codeMirrorBlockNodeView } from "./node-view";
-import { arrowHandler } from "./utils";
 
 export const codeMirrorPluginKey = new PluginKey("codemirror");
 

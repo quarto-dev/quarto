@@ -26,17 +26,18 @@ import {
   findParentNodeClosestToPos,
 } from 'prosemirror-utils';
 
-import { BaseKey, verticalArrowCanAdvanceWithinTextBlock } from '../../api/basekeys';
+import { BaseKey } from '../../api/basekeys';
 import { exitNode } from '../../api/command';
+import { verticalArrowCanAdvanceWithinTextBlock } from '../../api/cursor';
 
 export function figureKeys(schema: Schema) {
   return [
     { key: BaseKey.Enter, command: exitNode(schema.nodes.figure, -1, false) },
     { key: BaseKey.Backspace, command: backspaceHandler() },
-    { key: BaseKey.ArrowLeft, command: arrowHandler('left') },
-    { key: BaseKey.ArrowRight, command: arrowHandler('right') },
-    { key: BaseKey.ArrowUp, command: arrowHandler('up') },
-    { key: BaseKey.ArrowDown, command: arrowHandler('down') },
+    { key: BaseKey.ArrowLeft, command: figureArrowHandler('left') },
+    { key: BaseKey.ArrowRight, command: figureArrowHandler('right') },
+    { key: BaseKey.ArrowUp, command: figureArrowHandler('up') },
+    { key: BaseKey.ArrowDown, command: figureArrowHandler('down') },
   ];
 }
 
@@ -98,7 +99,7 @@ function backspaceHandler() {
   };
 }
 
-function arrowHandler(dir: 'up' | 'down' | 'left' | 'right') {
+function figureArrowHandler(dir: 'up' | 'down' | 'left' | 'right') {
   return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     // select figure
     const selectFigure = (figure: ContentNodeWithPos) => {

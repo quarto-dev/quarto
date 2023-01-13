@@ -15,6 +15,45 @@
 
 import { EditorState, Transaction, NodeSelection, Selection } from 'prosemirror-state';
 import { GapCursor } from 'prosemirror-gapcursor';
+import { EditorView } from 'prosemirror-view';
+
+export function arrowHandler(dir: 'up' | 'down' | 'left' | 'right', nodeTypes: string[]) {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
+    if (state.selection.empty && !(state.selection instanceof GapCursor) && view && view.endOfTextblock(dir)) {
+      const side = dir === 'left' || dir === 'up' ? -1 : 1;
+      const $head = state.selection.$head;
+      const nextPos = Selection.near(state.doc.resolve(side > 0 ? $head.after() : $head.before()), side);
+      if (nextPos.$head && nodeTypes.includes(nextPos.$head.parent.type.name)) {
+        // check for e.g. math where you can advance across embedded newlines
+        if ((dir === 'up' || dir === 'down') && verticalArrowCanAdvanceWithinTextBlock(state.selection, dir)) {
+          return false;
+        }
+        if (dispatch) {
+          dispatch(state.tr.setSelection(nextPos));
+        }
+        return true;
+      }
+    }
+    return false;
+  };
+}
+
+
+export function verticalArrowCanAdvanceWithinTextBlock(selection: Selection, dir: 'up' | 'down') {
+  const $head = selection.$head;
+  const node = $head.node();
+  if (node.isTextblock) {
+    const cursorOffset = $head.parentOffset;
+    const nodeText = node.textContent;
+    if (dir === 'down' && nodeText.substr(cursorOffset).includes('\n')) {
+      return true;
+    }
+    if (dir === 'up' && nodeText.substr(0, cursorOffset).includes('\n')) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export function handleArrowToAdjacentNode(
   nodePos: number,

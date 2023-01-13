@@ -28,7 +28,6 @@ import { undo, redo } from 'prosemirror-history';
 import { exitCode } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { undoInputRule } from 'prosemirror-inputrules';
-import { GapCursor } from 'prosemirror-gapcursor';
 
 import { editingRootNode } from '../../api/node';
 import { insertParagraph } from '../../api/paragraph';
@@ -36,8 +35,7 @@ import { ChunkEditor, EditorUIChunks } from '../../api/ui-types';
 import { EditorEvents } from '../../api/event-types';
 import { ExtensionContext, ExtensionFn } from '../../api/extension';
 import { DispatchEvent, ResizeEvent, ScrollEvent } from '../../api/event-types';
-import { verticalArrowCanAdvanceWithinTextBlock } from '../../api/basekeys';
-import { handleArrowToAdjacentNode } from '../../api/cursor';
+import { arrowHandler, handleArrowToAdjacentNode } from '../../api/cursor';
 
 import { selectAll } from '../../behaviors/select_all';
 import { findPluginState } from '../../behaviors/find';
@@ -985,23 +983,3 @@ function computeChange(oldVal: string, newVal: string) {
   };
 }
 
-function arrowHandler(dir: 'up' | 'down' | 'left' | 'right', nodeTypes: string[]) {
-  return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
-    if (state.selection.empty && !(state.selection instanceof GapCursor) && view && view.endOfTextblock(dir)) {
-      const side = dir === 'left' || dir === 'up' ? -1 : 1;
-      const $head = state.selection.$head;
-      const nextPos = Selection.near(state.doc.resolve(side > 0 ? $head.after() : $head.before()), side);
-      if (nextPos.$head && nodeTypes.includes(nextPos.$head.parent.type.name)) {
-        // check for e.g. math where you can advance across embedded newlines
-        if ((dir === 'up' || dir === 'down') && verticalArrowCanAdvanceWithinTextBlock(state.selection, dir)) {
-          return false;
-        }
-        if (dispatch) {
-          dispatch(state.tr.setSelection(nextPos));
-        }
-        return true;
-      }
-    }
-    return false;
-  };
-}

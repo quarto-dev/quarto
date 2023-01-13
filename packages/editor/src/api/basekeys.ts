@@ -108,21 +108,6 @@ export function baseKeysPlugin(keys: readonly BaseKeyBinding[]): Plugin {
   return keymap(bindings);
 }
 
-export function verticalArrowCanAdvanceWithinTextBlock(selection: Selection, dir: 'up' | 'down') {
-  const $head = selection.$head;
-  const node = $head.node();
-  if (node.isTextblock) {
-    const cursorOffset = $head.parentOffset;
-    const nodeText = node.textContent;
-    if (dir === 'down' && nodeText.substr(cursorOffset).includes('\n')) {
-      return true;
-    }
-    if (dir === 'up' && nodeText.substr(0, cursorOffset).includes('\n')) {
-      return true;
-    }
-  }
-  return false;
-}
 
 interface Coords {
   left: number;

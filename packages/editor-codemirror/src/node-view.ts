@@ -69,6 +69,17 @@ export const codeMirrorBlockNodeView: (
 
   let node = pmNode;
   let updating = false;
+  
+  let escaping = false;
+  const handleArrowKey = (unit: "char" | "line", dir: 1 | -1) => {
+    return (cmView: EditorView) => {
+      escaping = true;
+      const result = maybeEscape(unit, dir, cmView, view, getPos);
+      escaping = false;
+      return result;
+    };
+  };
+
   const dom = document.createElement("div");
   dom.classList.add('pm-code-editor');
   dom.classList.add('pm-codemirror-editor');
@@ -92,19 +103,19 @@ export const codeMirrorBlockNodeView: (
         { key: "Mod-d", run: selectNextOccurrence, preventDefault: true },
         {
           key: "ArrowUp",
-          run: (cmView) => maybeEscape("line", -1, cmView, view, getPos),
+          run: handleArrowKey("line", -1),
         },
         {
           key: "ArrowLeft",
-          run: (cmView) => maybeEscape("char", -1, cmView, view, getPos),
+          run: handleArrowKey("char", -1),
         },
         {
           key: "ArrowDown",
-          run: (cmView) => maybeEscape("line", 1, cmView, view, getPos),
+          run: handleArrowKey("line", 1),
         },
         {
           key: "ArrowRight",
-          run: (cmView) => maybeEscape("char", 1, cmView, view, getPos),
+          run: handleArrowKey("char", 1),
         },
         {
           key: "Mod-z",
@@ -212,7 +223,9 @@ export const codeMirrorBlockNodeView: (
         anchor = lastUserSelection.anchor;
         head = lastUserSelection.head;
       }
-      codeMirrorView.focus();
+      if (!escaping) {
+        codeMirrorView.focus();
+      }
       forwardSelection(codeMirrorView, view, getPos);
       updating = true;
       codeMirrorView.dispatch({

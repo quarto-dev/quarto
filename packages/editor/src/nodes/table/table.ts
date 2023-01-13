@@ -153,7 +153,7 @@ const extension = (context: ExtensionContext): Extension | null => {
       // turn enter key variations into tab if we don't support multi-line
       if (!capabilities.multiline) {
         keys.push({ key: BaseKey.Enter, command: goToNextCell(1) });
-        keys.push({ key: BaseKey.ShiftEnter, command: goToNextCell(-11) });
+        keys.push({ key: BaseKey.ShiftEnter, command: goToNextCell(1) });
         keys.push({ key: BaseKey.ModEnter, command: goToNextCell(1) });
       }
 

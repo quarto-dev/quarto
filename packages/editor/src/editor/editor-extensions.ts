@@ -114,7 +114,7 @@ import nodeHtmlPreserve from '../nodes/html_preserve';
 import { aceExtension } from '../optional/ace/ace';
 import { attrEditExtension } from '../behaviors/attr_edit/attr_edit';
 import { codeViewClipboardPlugin } from '../api/code';
-import { CodeViewExtensionFn, CodeViewOptions } from '../api/extension-types';
+import { CodeViewExtensionFn, CodeViewOptions } from '../api/codeview';
 import { ContextMenuHandlerFn } from '../api/menu';
 
 export function initExtensions(

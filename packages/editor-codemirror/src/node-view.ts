@@ -22,23 +22,26 @@ import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
 import { undo, redo } from "prosemirror-history";
 import { Transaction } from "prosemirror-state";
 import { GapCursor } from "prosemirror-gapcursor"
+import { exitCode, selectAll } from "prosemirror-commands";
 
-import { lineNumbers } from "@codemirror/view";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import {
   drawSelection,
   EditorView,
   keymap,
+  KeyBinding,
+  lineNumbers
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
   selectNextOccurrence,
 } from "@codemirror/search";
 import { indentOnInput } from "@codemirror/language";
-import { defaultKeymap, indentWithTab } from "@codemirror/commands";
+import { indentWithTab } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
 import { Compartment, EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
-import { exitCode, selectAll } from "prosemirror-commands";
+
+import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
 import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
 
@@ -92,6 +95,68 @@ export const codeMirrorBlockNodeView: (
     gapCursorPending = pending;
   }
 
+  // our baseline keys
+  const keys = [
+    { key: "Mod-d", run: selectNextOccurrence, preventDefault: true },
+    {
+      key: "ArrowUp",
+      run: handleArrowKey("line", -1),
+    },
+    {
+      key: "ArrowLeft",
+      run: handleArrowKey("char", -1),
+    },
+    {
+      key: "ArrowDown",
+      run: handleArrowKey("line", 1),
+    },
+    {
+      key: "ArrowRight",
+      run: handleArrowKey("char", 1),
+    },
+    {
+      key: "Mod-z",
+      run: () => undo(view.state, view.dispatch) || true,
+      shift: () => redo(view.state, view.dispatch) || true,
+    },
+    {
+      key: "Mod-y",
+      run: () => redo(view.state, view.dispatch) || true,
+    },
+    { key: "Backspace", run: (cmView: EditorView) => backspaceHandler(view, cmView) },
+    {
+      key: "Mod-Backspace",
+      run: (cmView: EditorView) => backspaceHandler(view, cmView),
+    },
+    {
+      key: "Mod-a",
+      run: () => {
+        const result = selectAll(view.state, view.dispatch);
+        view.focus();
+        return result;
+      },
+    },
+    {
+      key: "Shift-Enter",
+      run: (cmView: EditorView) => {
+        const sel = cmView.state.selection.main;
+        if (sel.from === sel.to &&
+            sel.from === cmView.state.doc.length
+        ) {
+          exitCode(view.state, view.dispatch);
+          view.focus();
+          return true;
+        }
+        return false;
+      },
+    },
+  ];
+
+  // bring in vscode keybindings (but remove ones we already have bound + Shift-Mod-k)
+  const baseKeys = keys.map(key => key.key!).concat('Shift-Mod-k');
+  const vscodeKeys = vscodeKeymap.filter(binding => !binding.key || !baseKeys.includes(binding.key));
+
+  // setup dom
   const dom = document.createElement("div");
   dom.classList.add('pm-code-editor');
   dom.classList.add('pm-codemirror-editor');
@@ -100,6 +165,7 @@ export const codeMirrorBlockNodeView: (
   if (codeViewOptions.classes) {
     codeViewOptions.classes.forEach(className => dom.classList.add(className));
   }
+
   const languageConf = new Compartment();
   const state = EditorState.create({
     extensions: [
@@ -112,63 +178,11 @@ export const codeMirrorBlockNodeView: (
       languageConf.of([]),
       indentOnInput(),
       keymap.of([
-        { key: "Mod-d", run: selectNextOccurrence, preventDefault: true },
-        {
-          key: "ArrowUp",
-          run: handleArrowKey("line", -1),
-        },
-        {
-          key: "ArrowLeft",
-          run: handleArrowKey("char", -1),
-        },
-        {
-          key: "ArrowDown",
-          run: handleArrowKey("line", 1),
-        },
-        {
-          key: "ArrowRight",
-          run: handleArrowKey("char", 1),
-        },
-        {
-          key: "Mod-z",
-          run: () => undo(view.state, view.dispatch) || true,
-          shift: () => redo(view.state, view.dispatch) || true,
-        },
-        {
-          key: "Mod-y",
-          run: () => redo(view.state, view.dispatch) || true,
-        },
-        { key: "Backspace", run: (cmView) => backspaceHandler(view, cmView) },
-        {
-          key: "Mod-Backspace",
-          run: (cmView) => backspaceHandler(view, cmView),
-        },
-        {
-          key: "Mod-a",
-          run: () => {
-            const result = selectAll(view.state, view.dispatch);
-            view.focus();
-            return result;
-          },
-        },
-        {
-          key: "Shift-Enter",
-          run: (cmView) => {
-            const sel = cmView.state.selection.main;
-            if (sel.from === sel.to &&
-                sel.from === cmView.state.doc.length
-            ) {
-              exitCode(view.state, view.dispatch);
-              view.focus();
-              return true;
-            }
-            return false;
-          },
-        },
-        ...(defaultKeymap.filter(mapping => mapping.key !== 'Shift-Mod-k')),
+        ...keys,
+        ...vscodeKeys,
         ...closeBracketsKeymap,
         indentWithTab
-      ]),
+      ] as KeyBinding[]),
       theme,
     ],
     doc: node.textContent,

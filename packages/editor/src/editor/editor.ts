@@ -100,7 +100,7 @@ import { yamlFrontMatter, applyYamlFrontMatter } from '../api/yaml';
 import { EditorSpellingDoc } from '../api/spelling';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { kPmScrollContainer } from '../api/scroll';
-import { CodeViewExtensionFn } from '../api/extension-types';
+import { CodeViewExtensionFn } from '../api/codeview';
 import { editingRootNodeClosestToPos } from '../api/node';
 import { ContextMenuSource } from '../api/menu';
 import { mapSlice } from '../api/slice';

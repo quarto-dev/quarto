@@ -41,7 +41,7 @@ import { PandocBlockCapsuleFilter } from './pandoc_capsule';
 
 import { AttrEditOptions } from './attr_edit';
 import { traverseNodes, TraverseResult } from './node-traverse';
-import { CodeViewOptions } from './extension-types';
+import { CodeViewOptions } from './codeview';
 
 export interface PandocNode {
   readonly name: string;

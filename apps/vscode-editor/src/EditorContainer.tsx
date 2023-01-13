@@ -31,7 +31,7 @@ import {
 
 import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
 
-import { syncEditorToHost, VisualEditorHostClient } from './sync';
+import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
 
 import styles from './Editor.module.scss';
@@ -57,6 +57,11 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
     ]});
   }, []); 
+
+  // register host oriented commands (e.g. save)
+  useEffect(() => {
+    cmDispatch({ type: "ADD_COMMANDS", payload: editorHostCommands(props.host) });
+  }, []);
  
   // one time creation of editorUIContext
   const uiContext = new HostEditorUIContext(props.context, props.host);
@@ -209,5 +214,6 @@ class HostEditorUIContext implements EditorUIContext {
     }
   }
 }
+
 
 export default EditorContainer;

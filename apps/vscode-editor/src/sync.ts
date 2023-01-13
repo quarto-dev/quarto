@@ -33,6 +33,7 @@ import {
   VSC_VE_Init, 
   VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
+  VSC_VEH_SaveDocument,
   VSC_VEH_SelectImage,
   VSC_VEH_EditorResourceUri,
   VSC_VEH_GetHostContext,
@@ -61,6 +62,8 @@ import {
   EditorOperations, 
   UpdateEvent 
 } from "editor";
+
+import { Command, t } from "editor-ui";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -150,6 +153,26 @@ export async function syncEditorToHost(
   await host.onEditorReady();  
 }
 
+export enum EditorHostCommands {
+  Save = "33AFE7B9-24B0-42B4-8ED0-BE9C0015773D"
+}
+
+export function editorHostCommands(host: VisualEditorHostClient) {
+  const commands: Command[] = [];
+  commands.push({
+    id: EditorHostCommands.Save,
+    menuText: t('commands:save_menu_text'),
+    group: t('commands:group_text_editing'),
+    keymap: ['Mod-s'],
+    isEnabled: () => true,
+    isActive: () => false,
+    execute: async () => {
+      await host.saveDocument();
+    },
+  });
+  return commands;
+}
+
 // interface provided to visual editor host (vs code extension)
 function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisualEditor) {
 
@@ -188,6 +211,7 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
     flushEditorUpdates: () => request(VSC_VEH_FlushEditorUpdates, []),
+    saveDocument: () => request(VSC_VEH_SaveDocument, []),
     editorResourceUri: (path: string) => request(VSC_VEH_EditorResourceUri, [path]),
     openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),

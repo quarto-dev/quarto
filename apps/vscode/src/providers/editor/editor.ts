@@ -234,6 +234,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       // flush any pending updates
       flushEditorUpdates: syncManager.flushPendingUpdates,
 
+      // save the document now
+      saveDocument: async () => {
+        await commands.executeCommand("workbench.action.files.save");
+      },
+
       // map resources to uris valid in the editor
       editorResourceUri: async (path: string) => {
         const uri = webviewPanel.webview.asWebviewUri(Uri.parse(path)).toString();

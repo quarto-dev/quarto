@@ -42,14 +42,14 @@ import { findPluginState } from '../../behaviors/find';
 
 import { AceRenderQueue } from './ace-render-queue';
 import { AcePlaceholder } from './ace-placeholder';
-import { AceNodeViews } from './ace-node-views';
 
 import zenscroll from 'zenscroll';
 
-import './ace.css';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { editorScrollContainer } from '../../api/scroll';
-import { CodeViewOptions } from '../../api/extension-types';
+import { CodeEditorNodeViews, CodeViewOptions } from '../../api/codeview';
+
+import './ace.css';
 
 const plugin = new PluginKey('ace');
 
@@ -64,7 +64,7 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
    
     // shared services
     const aceRenderQueue = new AceRenderQueue(context.events);
-    const aceNodeViews = new AceNodeViews();
+    const aceNodeViews = new CodeEditorNodeViews();
 
     // build nodeViews
     const nodeTypes = Object.keys(codeViews);
@@ -93,7 +93,7 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
           return false;
         }
         if (dispatch) {
-          fn(activeView);
+          fn(activeView as AceNodeView);
         }
         return true;
       };
@@ -145,7 +145,7 @@ export class AceNodeView implements NodeView {
 
   private readonly view: EditorView;
   private readonly chunks: EditorUIChunks;
-  private readonly nodeViews: AceNodeViews;
+  private readonly nodeViews: CodeEditorNodeViews;
   private readonly renderQueue: AceRenderQueue;
   private chunk?: ChunkEditor;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,7 +178,7 @@ export class AceNodeView implements NodeView {
     chunks: EditorUIChunks,
     options: CodeViewOptions,
     renderQueue: AceRenderQueue,
-    nodeViews: AceNodeViews,
+    nodeViews: CodeEditorNodeViews,
   ) {
     // Store for later
     this.node = node;

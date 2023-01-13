@@ -14,11 +14,11 @@
  */
 
 import { InputRule } from 'prosemirror-inputrules';
-import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';
+import { Schema } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
-import { CommandFn, ProsemirrorCommand } from './command';
+import { ProsemirrorCommand } from './command';
 import { PandocMark } from './mark';
 import { PandocNode } from './node';
 import { EditorMath, EditorUI } from './ui-types';
@@ -64,19 +64,5 @@ export interface ExtensionContext {
 }
 
 export type ExtensionFn = (context: ExtensionContext) => Extension | null;
-
-export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
-
-export interface CodeViewOptions {
-  lang: (attrs: ProsemirrorNode, content: string) => string | null;
-  attrEditFn?: CommandFn;
-  createFromPastePattern?: RegExp;
-  classes?: string[];
-  borderColorClass?: string;
-  firstLineMeta?: boolean;
-  lineNumbers?: boolean;
-  bookdownTheorems?: boolean;
-  lineNumberFormatter?: (lineNumber: number, lineCount?: number, line?: string) => string;
-}
 
 

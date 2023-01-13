@@ -20,6 +20,8 @@
 import { Node } from "prosemirror-model";
 import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
 import { undo, redo } from "prosemirror-history";
+import { Transaction } from "prosemirror-state";
+import { GapCursor } from "prosemirror-gapcursor"
 
 import { lineNumbers } from "@codemirror/view";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
@@ -38,6 +40,8 @@ import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirr
 import { Compartment, EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
 import { exitCode, selectAll } from "prosemirror-commands";
 
+import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
+
 import {
   asCodeMirrorSelection,
   backspaceHandler,
@@ -47,18 +51,16 @@ import {
   setMode,
   valueChanged,
 } from "./utils";
-import { CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
-import { Transaction } from "prosemirror-state";
-import { GapCursor } from "prosemirror-gapcursor";
 
 export const codeMirrorBlockNodeView: (
   context: ExtensionContext,
-  codeViewOptions: CodeViewOptions
+  codeViewOptions: CodeViewOptions,
+  nodeViews: CodeEditorNodeViews
 ) => (
   pmNode: Node,
   view: PMEditorView,
   getPos: (() => number) | boolean
-) => NodeView = (context, codeViewOptions) => (pmNode, view, getPos) => {
+) => NodeView = (context, codeViewOptions, nodeViews) => (pmNode, view, getPos) => {
 
   // create theme
   const theme = EditorView.theme({
@@ -67,9 +69,13 @@ export const codeMirrorBlockNodeView: (
     },
   }, {dark: false})
 
+  // track node
   let node = pmNode;
+
+  // updating state
   let updating = false;
   
+  // escaping state
   let escaping = false;
   const handleArrowKey = (unit: "char" | "line", dir: 1 | -1) => {
     return (cmView: EditorView) => {
@@ -79,6 +85,12 @@ export const codeMirrorBlockNodeView: (
       return result;
     };
   };
+
+  // gap cursor pending state
+  let gapCursorPending = false;
+  const setGapCursorPending = (pending: boolean) => {
+    gapCursorPending = pending;
+  }
 
   const dom = document.createElement("div");
   dom.classList.add('pm-code-editor');
@@ -210,6 +222,15 @@ export const codeMirrorBlockNodeView: (
     }
   }));
 
+  // track node view
+  const cmNodeView : CodeEditorNodeView = {
+    isFocused: () => codeMirrorView.hasFocus,
+    getPos: typeof(getPos) === "function" ? getPos : (() => 0),
+    dom,
+    setGapCursorPending
+  }; 
+  nodeViews.add(cmNodeView);
+
   return {
     dom,
     selectNode() {
@@ -223,10 +244,10 @@ export const codeMirrorBlockNodeView: (
         anchor = lastUserSelection.anchor;
         head = lastUserSelection.head;
       }
-      if (!escaping) {
+      if (!escaping && !gapCursorPending) {
         codeMirrorView.focus();
+        forwardSelection(codeMirrorView, view, getPos);
       }
-      forwardSelection(codeMirrorView, view, getPos);
       updating = true;
       codeMirrorView.dispatch({
         selection: { anchor: anchor, head: head },
@@ -260,6 +281,7 @@ export const codeMirrorBlockNodeView: (
     ignoreMutation: () => true,
     destroy: () => {
       cleanup.forEach(clean => clean());
+      nodeViews.remove(cmNodeView);
       codeMirrorView.destroy();
     },
   };

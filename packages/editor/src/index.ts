@@ -32,6 +32,7 @@ export * from './api/options';
 
 // some api helpers
 export * from './api/cursor';
+export * from './api/codeview';
 
 // main editor module
 export * from './editor/editor';

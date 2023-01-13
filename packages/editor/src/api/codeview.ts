@@ -1,5 +1,5 @@
 /*
- * ace-node-views.ts
+ * code.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,33 +13,58 @@
  *
  */
 
+import { Node as ProsemirrorNode } from 'prosemirror-model';
+
 import { GapCursor } from 'prosemirror-gapcursor';
-import { AceNodeView } from './ace';
 import { EditorView } from 'prosemirror-view';
 
+import { CommandFn } from "./command";
+import { ExtensionFn } from "./extension-types";
+
+export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
+
+export interface CodeViewOptions {
+  lang: (attrs: ProsemirrorNode, content: string) => string | null;
+  attrEditFn?: CommandFn;
+  createFromPastePattern?: RegExp;
+  classes?: string[];
+  borderColorClass?: string;
+  firstLineMeta?: boolean;
+  lineNumbers?: boolean;
+  bookdownTheorems?: boolean;
+  lineNumberFormatter?: (lineNumber: number, lineCount?: number, line?: string) => string;
+}
+
 /**
- * Track all Ace node view instances to implement additional behavior
+ * Track all code view node view instances to implement additional behavior
  * (e.g. gap cursor for clicks between editor instances)
  */
 
-export class AceNodeViews {
-  private nodeViews: AceNodeView[];
+export interface CodeEditorNodeView {
+  isFocused() : boolean;
+  getPos(): number;
+  dom: HTMLElement;
+  setGapCursorPending(pending: boolean): void;
+}
+
+export class CodeEditorNodeViews {
+  private nodeViews: CodeEditorNodeView[];
 
   constructor() {
     this.nodeViews = [];
   }
-  public add(nodeView: AceNodeView) {
+  public add(nodeView: CodeEditorNodeView) {
     this.nodeViews.push(nodeView);
   }
 
-  public remove(nodeView: AceNodeView) {
+  public remove(nodeView: CodeEditorNodeView) {
     const index = this.nodeViews.indexOf(nodeView);
     if (index >= 0) {
       this.nodeViews.splice(index, 1);
     }
   }
 
-  public activeNodeView() : AceNodeView | undefined {
+  public activeNodeView() : CodeEditorNodeView | undefined {
     return this.nodeViews.find(view => view.isFocused());
   }
 
@@ -113,3 +138,6 @@ export class AceNodeViews {
     return false;
   }
 }
+
+
+

@@ -29,6 +29,9 @@ import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from "@codemirror/view";
 import { setBlockType } from "prosemirror-commands";
 import { Compartment, EditorSelection } from "@codemirror/state";
+
+import { handleArrowToAdjacentNode } from "editor/src/api/cursor";
+
 import { languageMode } from "./languages";
 
 export function computeChange(oldVal: string, newVal: string) {
@@ -84,6 +87,7 @@ export const asCodeMirrorSelection = (
       }
     }
   }
+  return undefined;
 }
 
 export const forwardSelection = (
@@ -139,14 +143,12 @@ export const maybeEscape = (
     line.number !== (dir < 0 ? 1 : lastLine) ||
     (unit === "char" && sel.from !== (dir < 0 ? 0 : line.to)) ||
     typeof getPos !== "function"
-  )
+  ) {
     return false;
+  }
+
   view.focus();
-  const node = view.state.doc.nodeAt(getPos());
-  if (!node) return false;
-  const targetPos = getPos() + (dir < 0 ? 0 : node.nodeSize);
-  const selection = Selection.near(view.state.doc.resolve(targetPos), dir);
-  view.dispatch(view.state.tr.setSelection(selection).scrollIntoView());
+  handleArrowToAdjacentNode(getPos(), dir, view.state, view.dispatch);
   view.focus();
   return true;
 };

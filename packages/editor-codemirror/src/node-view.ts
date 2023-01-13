@@ -49,6 +49,7 @@ import {
 } from "./utils";
 import { CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
 import { Transaction } from "prosemirror-state";
+import { GapCursor } from "prosemirror-gapcursor";
 
 export const codeMirrorBlockNodeView: (
   context: ExtensionContext,
@@ -185,7 +186,7 @@ export const codeMirrorBlockNodeView: (
   cleanup.push(context.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
     if (tr) {
       // track selection changes that occur when we don't have focus
-      if (!codeMirrorView.hasFocus && tr.selectionSet && !tr.docChanged) {
+      if (!codeMirrorView.hasFocus && tr.selectionSet && !tr.docChanged && !(tr.selection instanceof GapCursor)) {
         const cmSelection = asCodeMirrorSelection(view, codeMirrorView, getPos);
         updating = true;
         if (cmSelection) {

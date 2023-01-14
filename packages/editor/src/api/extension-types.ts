@@ -35,6 +35,7 @@ import { CompletionHandler } from './completion';
 import { EditorNavigation } from './navigation-types';
 import { EditorServer } from 'editor-types';
 import { ContextMenuHandlerFn } from './menu';
+import { EditorFind } from './find-types';
 
 export interface Extension {
   view?: (view: EditorView) => void;
@@ -61,6 +62,7 @@ export interface ExtensionContext {
   options: EditorOptions;
   events: EditorEvents;
   navigation: EditorNavigation;
+  find: EditorFind;
 }
 
 export type ExtensionFn = (context: ExtensionContext) => Extension | null;

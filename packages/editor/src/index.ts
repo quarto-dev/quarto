@@ -34,9 +34,6 @@ export * from './api/options';
 export * from './api/cursor';
 export * from './api/codeview';
 
-// plugin state
-export { findPluginState } from './behaviors/find';
-
 // main editor module
 export * from './editor/editor';
 

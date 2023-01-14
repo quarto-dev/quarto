@@ -38,7 +38,6 @@ import { DispatchEvent, ResizeEvent, ScrollEvent } from '../../api/event-types';
 import { arrowHandler, handleArrowToAdjacentNode } from '../../api/cursor';
 
 import { selectAll } from '../../behaviors/select_all';
-import { findPluginState } from '../../behaviors/find';
 
 import { AceRenderQueue } from './ace-render-queue';
 import { AcePlaceholder } from './ace-placeholder';
@@ -48,6 +47,7 @@ import zenscroll from 'zenscroll';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { editorScrollContainer } from '../../api/scroll';
 import { CodeEditorNodeViews, CodeViewOptions } from '../../api/codeview';
+import { EditorFind } from '../../api/find-types';
 
 import './ace.css';
 
@@ -153,6 +153,7 @@ export class AceNodeView implements NodeView {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private editSession?: any;
   private readonly options: CodeViewOptions;
+  private readonly find: EditorFind;
   private readonly events: EditorEvents;
 
   private updating: boolean;
@@ -184,6 +185,7 @@ export class AceNodeView implements NodeView {
     this.node = node;
     this.view = view;
     this.chunks = chunks;
+    this.find = context.find;
     this.events = context.events;
     this.getPos = getPos;
 
@@ -301,7 +303,7 @@ export class AceNodeView implements NodeView {
     this.findMarkers = [];
 
     // Get all of the find results inside this node
-    const decorations = findPluginState(this.view.state);
+    const decorations = this.find.decorations();
     if (decorations) {
       const decos = decorations?.find(this.getPos(), this.getPos() + node.nodeSize - 1);
 

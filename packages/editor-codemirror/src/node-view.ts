@@ -44,7 +44,7 @@ import { Compartment, EditorState, SelectionRange, EditorSelection, Range, Range
 
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
-import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext, findPluginState } from "editor";
+import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
 
 import {
   asCodeMirrorSelection,
@@ -300,7 +300,7 @@ export const codeMirrorBlockNodeView: (
 
       // update find markers
       const findMarkers: Range<Decoration>[] = [];
-      const decorations = findPluginState(view.state);      
+      const decorations = context.find.decorations();      
       if (decorations && typeof getPos === "function") {
         const decos = decorations?.find(getPos(), getPos() + node.nodeSize - 1);
         if (decos) {

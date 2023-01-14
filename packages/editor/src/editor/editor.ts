@@ -118,6 +118,7 @@ import {
   replaceAll,
   clear,
   selectCurrent,
+  findPluginState,
 } from '../behaviors/find';
 
 import { omniInsertExtension } from '../behaviors/omni_insert/omni_insert';
@@ -969,6 +970,11 @@ export class Editor implements EditorOperations {
         navigation: {
           navigate: this.navigate.bind(this),
         },
+        find: {
+          decorations: () => {
+            return findPluginState(this.view.state) || null;
+          }
+        }
       },
       this.context.extensions,
       this.context.codeViewExtension

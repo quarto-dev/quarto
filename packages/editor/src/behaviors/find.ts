@@ -18,7 +18,7 @@ import { Plugin, PluginKey, EditorState, Transaction, TextSelection } from 'pros
 import { DecorationSet, Decoration, EditorView } from 'prosemirror-view';
 
 import { mergedTextNodes } from '../api/text';
-import { kAddToHistoryTransaction } from '../api/transaction';
+import { isEffectTransaction, kAddToHistoryTransaction } from '../api/transaction';
 import { editingRootNode } from '../api/node';
 import zenscroll from 'zenscroll';
 import { editorScrollContainer } from '../api/scroll';
@@ -47,7 +47,7 @@ class FindPlugin extends Plugin<DecorationSet> {
           return DecorationSet.empty;
         },
         apply: (tr: Transaction) => {
-          if (this.updating) {
+          if (this.updating || isEffectTransaction(tr)) {
             return this.resultDecorations(tr);
           } else {
             return DecorationSet.empty;

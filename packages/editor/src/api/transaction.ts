@@ -328,6 +328,12 @@ function changedDescendants(
   }
 }
 
+// effect transactions are applied for their side effect of updating decorations
+// (e.g. spelling and find decorators)
+export function isEffectTransaction(tr: Transaction) {
+  return !tr.docChanged && !tr.selectionSet && !tr.storedMarksSet;
+}
+
 export function transactionsAreTypingChange(transactions: readonly Transaction[]) {
   if (
     transactions.length === 1 &&

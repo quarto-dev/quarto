@@ -28,8 +28,7 @@ import {
   EditorView,
   keymap,
   KeyBinding,
-  lineNumbers,
-  Decoration
+  lineNumbers
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
@@ -37,9 +36,15 @@ import {
 import { indentOnInput } from "@codemirror/language";
 import { indentWithTab } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
-import { Compartment, EditorState, SelectionRange, EditorSelection, Range, RangeSet } from "@codemirror/state";
+import { EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
 
-import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
+import { 
+  CodeEditorNodeView, 
+  CodeEditorNodeViews, 
+  CodeViewOptions, 
+  DispatchEvent, 
+  ExtensionContext 
+} from "editor";
 
 import {
   asCodeMirrorSelection,
@@ -48,7 +53,7 @@ import {
   valueChanged,
 } from "./utils";
 import { 
-  codeMirrorBehaviors,
+  createBehaviors,
   behaviorExtensions, 
   behaviorInit, 
   behaviorPmUpdate, 
@@ -106,16 +111,13 @@ export const codeMirrorBlockNodeView: (
   }
 
   // behaviors
-  const behaviors = codeMirrorBehaviors({
+  const behaviors = createBehaviors({
     view,
     getPos,
     options: codeViewOptions,
+    pmContext: context,
     withState
   })
-
-  // aspects of the editor we want to dynamically reconfigure
-  const findDecoratorMark = Decoration.mark({class: "pm-find-text"})
-  const findDecorators = new Compartment();
 
   // editor state
   const state = EditorState.create({
@@ -130,12 +132,8 @@ export const codeMirrorBlockNodeView: (
       ...behaviorExtensions(behaviors),
       
       indentOnInput(),
-      keymap.of([
-        ...closeBracketsKeymap,
-        indentWithTab
-      ] as KeyBinding[]),
-      theme,
-      findDecorators.of([])
+      keymap.of([...closeBracketsKeymap, indentWithTab] as KeyBinding[]),
+      theme
     ],
     doc: node.textContent,
   });
@@ -217,11 +215,11 @@ export const codeMirrorBlockNodeView: (
     },
     update: (updateNode) => {
       if (updateNode.type.name !== node.type.name) return false;
-      behaviorPmUpdate(behaviors, node, updateNode, codeMirrorView);
-      node = updateNode;
+    
+      // apply change from update node
       const change = computeChange(
         codeMirrorView.state.doc.toString(),
-        node.textContent
+        updateNode.textContent
       );
       if (change) {
         updating = true;
@@ -236,24 +234,11 @@ export const codeMirrorBlockNodeView: (
         updating = false;
       } 
 
-      // update find markers
-      const findMarkers: Range<Decoration>[] = [];
-      const decorations = context.find.decorations();      
-      if (decorations && typeof getPos === "function") {
-        const decos = decorations?.find(getPos(), getPos() + node.nodeSize - 1);
-        if (decos) {
-          decos.forEach((deco) => {
-            if (deco.from !== view.state.selection.from && deco.to !== view.state.selection.to) {
-              findMarkers.push(findDecoratorMark.range(deco.from - getPos() - 1, deco.to - getPos() -1));
-            }
-          })
-        }
-      }
-      const ranges = RangeSet.of<Decoration>(findMarkers);
-      codeMirrorView.dispatch({
-        effects: findDecorators.reconfigure(EditorView.decorations.of(ranges))
-      });
+      // trigger update for behaviors
+      behaviorPmUpdate(behaviors, node, updateNode, codeMirrorView);
 
+      // reset node
+      node = updateNode;
 
       return true;
     },

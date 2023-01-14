@@ -22,24 +22,24 @@ import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
 import { Transaction } from "prosemirror-state";
 import { GapCursor } from "prosemirror-gapcursor"
 
+import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import {
   drawSelection,
   EditorView,
-  lineNumbers
+  keymap,
+  KeyBinding,
+  lineNumbers,
+  Decoration
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
 } from "@codemirror/search";
-import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
-import { EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
+import { indentOnInput } from "@codemirror/language";
+import { indentWithTab } from "@codemirror/commands";
+import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
+import { Compartment, EditorState, SelectionRange, EditorSelection, Range, RangeSet } from "@codemirror/state";
 
-import { 
-  CodeEditorNodeView, 
-  CodeEditorNodeViews, 
-  CodeViewOptions, 
-  DispatchEvent, 
-  ExtensionContext 
-} from "editor";
+import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
 
 import {
   asCodeMirrorSelection,
@@ -48,7 +48,7 @@ import {
   valueChanged,
 } from "./utils";
 import { 
-  createBehaviors,
+  codeMirrorBehaviors,
   behaviorExtensions, 
   behaviorInit, 
   behaviorPmUpdate, 
@@ -106,27 +106,36 @@ export const codeMirrorBlockNodeView: (
   }
 
   // behaviors
-  const behaviors = createBehaviors({
+  const behaviors = codeMirrorBehaviors({
     view,
     getPos,
     options: codeViewOptions,
-    pmContext: context,
     withState
   })
+
+  // aspects of the editor we want to dynamically reconfigure
+  const findDecoratorMark = Decoration.mark({class: "pm-find-text"})
+  const findDecorators = new Compartment();
 
   // editor state
   const state = EditorState.create({
     extensions: [
       ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
-     
+      closeBrackets(),
       highlightSelectionMatches(),
+      indentUnit.of('  '),
       drawSelection({ cursorBlinkRate: 1000 }),
       syntaxHighlighting(defaultHighlightStyle),
 
       ...behaviorExtensions(behaviors),
       
-     
-      theme
+      indentOnInput(),
+      keymap.of([
+        ...closeBracketsKeymap,
+        indentWithTab
+      ] as KeyBinding[]),
+      theme,
+      findDecorators.of([])
     ],
     doc: node.textContent,
   });
@@ -208,11 +217,11 @@ export const codeMirrorBlockNodeView: (
     },
     update: (updateNode) => {
       if (updateNode.type.name !== node.type.name) return false;
-    
-      // apply change from update node
+      behaviorPmUpdate(behaviors, node, updateNode, codeMirrorView);
+      node = updateNode;
       const change = computeChange(
         codeMirrorView.state.doc.toString(),
-        updateNode.textContent
+        node.textContent
       );
       if (change) {
         updating = true;
@@ -227,11 +236,24 @@ export const codeMirrorBlockNodeView: (
         updating = false;
       } 
 
-      // trigger update for behaviors
-      behaviorPmUpdate(behaviors, node, updateNode, codeMirrorView);
+      // update find markers
+      const findMarkers: Range<Decoration>[] = [];
+      const decorations = context.find.decorations();      
+      if (decorations && typeof getPos === "function") {
+        const decos = decorations?.find(getPos(), getPos() + node.nodeSize - 1);
+        if (decos) {
+          decos.forEach((deco) => {
+            if (deco.from !== view.state.selection.from && deco.to !== view.state.selection.to) {
+              findMarkers.push(findDecoratorMark.range(deco.from - getPos() - 1, deco.to - getPos() -1));
+            }
+          })
+        }
+      }
+      const ranges = RangeSet.of<Decoration>(findMarkers);
+      codeMirrorView.dispatch({
+        effects: findDecorators.reconfigure(EditorView.decorations.of(ranges))
+      });
 
-      // reset node
-      node = updateNode;
 
       return true;
     },

@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 /*
- * languages.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Emergence Engineering (ISC License)
  * https://gitlab.com/emergence-engineering/prosemirror-codemirror-block

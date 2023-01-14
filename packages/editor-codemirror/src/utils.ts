@@ -21,12 +21,10 @@ import { TextSelection } from "prosemirror-state";
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { Node } from "prosemirror-model";
 import { EditorView } from "@codemirror/view";
-import { setBlockType } from "prosemirror-commands";
-import { Compartment, EditorSelection } from "@codemirror/state";
+import { EditorSelection } from "@codemirror/state";
 
 import { handleArrowToAdjacentNode } from "editor";
 
-import { languageMode } from "./languages";
 
 export function computeChange(oldVal: string, newVal: string) {
   if (oldVal === newVal) return null;
@@ -146,29 +144,3 @@ export const maybeEscape = (
   view.focus();
   return true;
 };
-
-export const backspaceHandler = (pmView: PMEditorView, view: EditorView) => {
-  const { selection } = view.state;
-  if (selection.main.empty && selection.main.from === 0) {
-    setBlockType(pmView.state.schema.nodes.paragraph)(
-      pmView.state,
-      pmView.dispatch
-    );
-    setTimeout(() => pmView.focus(), 20);
-    return true;
-  }
-  return false;
-};
-
-export const setMode = (
-  lang: string,
-  cmView: EditorView,
-  languageConf: Compartment
-) => {
-  const support = languageMode(lang);
-  if (support)
-    cmView.dispatch({
-      effects: languageConf.reconfigure(support),
-    });
-};
-

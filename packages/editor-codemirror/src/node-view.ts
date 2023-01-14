@@ -19,10 +19,8 @@
 
 import { Node } from "prosemirror-model";
 import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
-import { undo, redo } from "prosemirror-history";
 import { Transaction } from "prosemirror-state";
 import { GapCursor } from "prosemirror-gapcursor"
-import { exitCode, selectAll } from "prosemirror-commands";
 
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import {
@@ -35,26 +33,27 @@ import {
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
-  selectNextOccurrence,
 } from "@codemirror/search";
 import { indentOnInput } from "@codemirror/language";
 import { indentWithTab } from "@codemirror/commands";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
 import { Compartment, EditorState, SelectionRange, EditorSelection, Range, RangeSet } from "@codemirror/state";
 
-import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
-
 import { CodeEditorNodeView, CodeEditorNodeViews, CodeViewOptions, DispatchEvent, ExtensionContext } from "editor";
 
 import {
   asCodeMirrorSelection,
-  backspaceHandler,
   computeChange,
   forwardSelection,
-  maybeEscape,
-  setMode,
   valueChanged,
 } from "./utils";
+import { 
+  codeMirrorBehaviors,
+  behaviorExtensions, 
+  behaviorInit, 
+  behaviorPmUpdate, 
+  BehaviorState, 
+} from "./behaviors";
 
 export const codeMirrorBlockNodeView: (
   context: ExtensionContext,
@@ -76,87 +75,25 @@ export const codeMirrorBlockNodeView: (
   // track node
   let node = pmNode;
 
-  // updating state
+  // state and function to allow behaviors to set it
   let updating = false;
-  
-  // escaping state
   let escaping = false;
-  const handleArrowKey = (unit: "char" | "line", dir: 1 | -1) => {
-    return (cmView: EditorView) => {
-      escaping = true;
-      const result = maybeEscape(unit, dir, cmView, view, getPos);
-      escaping = false;
-      return result;
-    };
-  };
+  const withState = (state: BehaviorState, fn: () => void) => {
+    const setState = (value: boolean) => {
+      if (state === BehaviorState.Updating) updating = value;
+      if (state === BehaviorState.Escaping) escaping = value;
+    }
+    setState(true);
+    fn();
+    setState(false);
+  }
+
 
   // gap cursor pending state
   let gapCursorPending = false;
   const setGapCursorPending = (pending: boolean) => {
     gapCursorPending = pending;
   }
-
-  // our baseline keys
-  const keys = [
-    { key: "Mod-d", run: selectNextOccurrence, preventDefault: true },
-    {
-      key: "ArrowUp",
-      run: handleArrowKey("line", -1),
-    },
-    {
-      key: "ArrowLeft",
-      run: handleArrowKey("char", -1),
-    },
-    {
-      key: "ArrowDown",
-      run: handleArrowKey("line", 1),
-    },
-    {
-      key: "ArrowRight",
-      run: handleArrowKey("char", 1),
-    },
-    {
-      key: "Mod-z",
-      run: () => undo(view.state, view.dispatch) || true,
-      shift: () => redo(view.state, view.dispatch) || true,
-    },
-    {
-      key: "Mod-y",
-      run: () => redo(view.state, view.dispatch) || true,
-    },
-    { key: "Backspace", run: (cmView: EditorView) => backspaceHandler(view, cmView) },
-    {
-      key: "Mod-Backspace",
-      run: (cmView: EditorView) => backspaceHandler(view, cmView),
-    },
-    {
-      key: "Mod-a",
-      run: () => {
-        const result = selectAll(view.state, view.dispatch);
-        view.focus();
-        return result;
-      },
-    },
-    {
-      key: "Shift-Enter",
-      run: (cmView: EditorView) => {
-        const sel = cmView.state.selection.main;
-        if (sel.from === sel.to &&
-            sel.from === cmView.state.doc.length
-        ) {
-          exitCode(view.state, view.dispatch);
-          view.focus();
-          return true;
-        }
-        return false;
-      },
-    },
-  ];
-
-  // bring in vscode keybindings (but remove ones we already have bound + Shift-Mod-k)
-  const excludeKeys = ['Shift-Mod-k', 'Mod-f'];
-  const baseKeys = keys.map(key => key.key!).concat(excludeKeys);
-  const vscodeKeys = vscodeKeymap.filter(binding => !binding.key || !baseKeys.includes(binding.key));
 
   // setup dom
   const dom = document.createElement("div");
@@ -168,10 +105,17 @@ export const codeMirrorBlockNodeView: (
     codeViewOptions.classes.forEach(className => dom.classList.add(className));
   }
 
+  // behaviors
+  const behaviors = codeMirrorBehaviors({
+    view,
+    getPos,
+    options: codeViewOptions,
+    withState
+  })
+
   // aspects of the editor we want to dynamically reconfigure
   const findDecoratorMark = Decoration.mark({class: "pm-find-text"})
   const findDecorators = new Compartment();
-  const languageConf = new Compartment();
 
   // editor state
   const state = EditorState.create({
@@ -182,11 +126,11 @@ export const codeMirrorBlockNodeView: (
       indentUnit.of('  '),
       drawSelection({ cursorBlinkRate: 1000 }),
       syntaxHighlighting(defaultHighlightStyle),
-      languageConf.of([]),
+
+      ...behaviorExtensions(behaviors),
+      
       indentOnInput(),
       keymap.of([
-        ...keys,
-        ...vscodeKeys,
         ...closeBracketsKeymap,
         indentWithTab
       ] as KeyBinding[]),
@@ -218,13 +162,8 @@ export const codeMirrorBlockNodeView: (
   });
   dom.append(codeMirrorView.dom);
 
-  const nodeLang = (nd: Node) => codeViewOptions.lang(nd, nd.textContent) || '';
-
-  setMode(
-    nodeLang(node), 
-    codeMirrorView, 
-    languageConf
-  );
+  // initialize behaviors
+  behaviorInit(behaviors, node, codeMirrorView);
 
   // subscribe to dispatches
   const cleanup: VoidFunction[] = [];
@@ -278,8 +217,7 @@ export const codeMirrorBlockNodeView: (
     },
     update: (updateNode) => {
       if (updateNode.type.name !== node.type.name) return false;
-      if (nodeLang(updateNode)!== nodeLang(node))
-        setMode(nodeLang(updateNode), codeMirrorView, languageConf);
+      behaviorPmUpdate(behaviors, node, updateNode, codeMirrorView);
       node = updateNode;
       const change = computeChange(
         codeMirrorView.state.doc.toString(),

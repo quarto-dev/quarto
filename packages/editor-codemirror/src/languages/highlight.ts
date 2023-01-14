@@ -19,7 +19,7 @@
 import { highlightTree, Highlighter } from "@lezer/highlight";
 import { Language, defaultHighlightStyle } from '@codemirror/language';
 
-import { languageMode } from "./languages";
+import { languageMode } from ".";
 import { lines } from "core";
 
 export type HighlightCallback = (text: string, style: string | null, from: number, to: number) => void;

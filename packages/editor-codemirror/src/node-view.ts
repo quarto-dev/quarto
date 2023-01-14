@@ -22,20 +22,15 @@ import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
 import { Transaction } from "prosemirror-state";
 import { GapCursor } from "prosemirror-gapcursor"
 
-import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import {
   drawSelection,
   EditorView,
-  keymap,
-  KeyBinding,
   lineNumbers
 } from "@codemirror/view";
 import {
   highlightSelectionMatches,
 } from "@codemirror/search";
-import { indentOnInput } from "@codemirror/language";
-import { indentWithTab } from "@codemirror/commands";
-import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
+import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
 
 import { 
@@ -123,16 +118,14 @@ export const codeMirrorBlockNodeView: (
   const state = EditorState.create({
     extensions: [
       ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
-      closeBrackets(),
+     
       highlightSelectionMatches(),
-      indentUnit.of('  '),
       drawSelection({ cursorBlinkRate: 1000 }),
       syntaxHighlighting(defaultHighlightStyle),
 
       ...behaviorExtensions(behaviors),
       
-      indentOnInput(),
-      keymap.of([...closeBracketsKeymap, indentWithTab] as KeyBinding[]),
+     
       theme
     ],
     doc: node.textContent,

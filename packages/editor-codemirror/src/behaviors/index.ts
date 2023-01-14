@@ -27,6 +27,8 @@ import { CodeViewOptions, ExtensionContext } from "editor";
 import { langModeBehavior } from './langmode';
 import { keybindingsBehavior } from './keybindings';
 import { findBehavior } from './find';
+import { indentBehavior } from './indent';
+import { bracketsExtension } from './brackets';
 
 export interface Behavior {
   extensions: Extension[];
@@ -49,7 +51,9 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
   return [
     langModeBehavior(context),
     keybindingsBehavior(context),
-    findBehavior(context)
+    findBehavior(context),
+    indentBehavior(),
+    bracketsExtension()
   ]
 }
 

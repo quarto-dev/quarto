@@ -22,11 +22,11 @@ import { EditorView as PMEditorView} from "prosemirror-view";
 import { Extension } from "@codemirror/state";
 import { EditorView } from '@codemirror/view';
 
-import { CodeViewOptions } from "editor";
+import { CodeViewOptions, ExtensionContext } from "editor";
 
 import { langModeBehavior } from './langmode';
 import { keybindingsBehavior } from './keybindings';
-
+import { findBehavior } from './find';
 
 export interface Behavior {
   extensions: Extension[];
@@ -38,16 +38,18 @@ export interface BehaviorContext {
   view: PMEditorView;
   getPos: boolean | (() => number);
   options: CodeViewOptions;
+  pmContext: ExtensionContext;
   withState: WithState
 }
 
 export enum BehaviorState { Updating, Escaping };
 export type WithState = (state: BehaviorState, fn: () => void) => void; 
 
-export function codeMirrorBehaviors(context: BehaviorContext) : Behavior[] {
+export function createBehaviors(context: BehaviorContext) : Behavior[] {
   return [
     langModeBehavior(context),
-    keybindingsBehavior(context)
+    keybindingsBehavior(context),
+    findBehavior(context)
   ]
 }
 

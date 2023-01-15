@@ -31,6 +31,7 @@ import { indentBehavior } from './indent';
 import { bracketsBehavior } from './brackets';
 import { trackSelectionBehavior } from './trackselection';
 import { themeBehavior } from './theme';
+import { prefsBehavior } from './prefs';
 
 export interface Behavior {
   extensions: Extension[];
@@ -58,6 +59,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     indentBehavior(),
     bracketsBehavior(),
     themeBehavior(),
+    prefsBehavior(context),
     trackSelectionBehavior(context)
   ]
 }

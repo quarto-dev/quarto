@@ -21,7 +21,7 @@ import { EditorView, KeyBinding, keymap } from "@codemirror/view";
 
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
-import { maybeEscape } from "../utils";
+import { handleArrowToAdjacentNode } from "editor";
 
 import { Behavior, BehaviorContext, State } from ".";
 
@@ -110,6 +110,32 @@ export function keybindingsBehavior(context: BehaviorContext) : Behavior {
   }
 }
 
+
+
+const maybeEscape = (
+  unit: "char" | "line",
+  dir: -1 | 1,
+  cm: EditorView,
+  view: PMEditorView,
+  getPos: boolean | (() => number)
+) => {
+  const sel = cm.state.selection.main;
+  const line = cm.state.doc.lineAt(sel.from);
+  const lastLine = cm.state.doc.lines;
+  if (
+    sel.to !== sel.from ||
+    line.number !== (dir < 0 ? 1 : lastLine) ||
+    (unit === "char" && sel.from !== (dir < 0 ? 0 : line.to)) ||
+    typeof getPos !== "function"
+  ) {
+    return false;
+  }
+
+  view.focus();
+  handleArrowToAdjacentNode(getPos(), dir, view.state, view.dispatch);
+  view.focus();
+  return true;
+};
 
 const backspaceHandler = (pmView: PMEditorView, view: EditorView) => {
   const { selection } = view.state;

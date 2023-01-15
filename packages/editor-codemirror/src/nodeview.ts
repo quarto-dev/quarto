@@ -19,13 +19,9 @@
 
 import { Node } from "prosemirror-model";
 import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
+import { TextSelection } from "prosemirror-state";
 
-import {
-  drawSelection,
-  EditorView,
-  lineNumbers
-} from "@codemirror/view";
-import { highlightSelectionMatches } from "@codemirror/search";
+import { EditorView } from "@codemirror/view";
 import { EditorState, SelectionRange } from "@codemirror/state";
 
 import { 
@@ -35,11 +31,6 @@ import {
   ExtensionContext 
 } from "editor";
 
-import {
-  computeChange,
-  forwardSelection,
-  valueChanged,
-} from "./utils";
 import { 
   createBehaviors,
   behaviorExtensions, 
@@ -49,7 +40,7 @@ import {
   behaviorCleanup, 
 } from "./behaviors";
 
-export const codeMirrorBlockNodeView: (
+export const codeMirrorNodeView: (
   context: ExtensionContext,
   codeViewOptions: CodeViewOptions,
   nodeViews: CodeEditorNodeViews
@@ -62,7 +53,7 @@ export const codeMirrorBlockNodeView: (
   // track node
   let node = pmNode;
 
-  // state and function to allow behaviors to set it
+  // scoped state and function to allow behaviors to set it
   let updating = false;
   let escaping = false;
   const withState = (state: State, fn: () => void) => {
@@ -75,12 +66,16 @@ export const codeMirrorBlockNodeView: (
     setState(false);
   }
 
-
-  // gap cursor pending state
+  // gap cursor pending state (set by the global nodeview click handler)
   let gapCursorPending = false;
   const setGapCursorPending = (pending: boolean) => {
     gapCursorPending = pending;
   }
+
+  // track the last user selection in this code view so we can make it 
+  // sticky for when prosemirror calls setSelection (e.g. on a refocus,
+  // where by default it passes 0,0)
+  let lastUserSelection: SelectionRange | undefined;
 
   // setup dom
   const dom = document.createElement("div");
@@ -92,7 +87,7 @@ export const codeMirrorBlockNodeView: (
     codeViewOptions.classes.forEach(className => dom.classList.add(className));
   }
 
-  // behaviors
+  // create behaviors
   const behaviors = createBehaviors({
     view,
     getPos,
@@ -101,22 +96,11 @@ export const codeMirrorBlockNodeView: (
     withState
   })
 
-  // editor state
+  // editor state/extensions
   const state = EditorState.create({
-    extensions: [
-      ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
-      highlightSelectionMatches(),
-      drawSelection({ cursorBlinkRate: 1000 }),
-
-      ...behaviorExtensions(behaviors),
-    ],
+    extensions: behaviorExtensions(behaviors),
     doc: node.textContent,
   });
-
-  // track the last user selection in this code view so we can make it 
-  // sticky for when prosemirror calls setSelection (e.g. on a refocus,
-  // where by default it passes 0,0)
-  let lastUserSelection: SelectionRange | undefined;
 
   const codeMirrorView = new EditorView({
     state,
@@ -147,7 +131,9 @@ export const codeMirrorBlockNodeView: (
   // initialize behaviors
   behaviorInit(behaviors, node, codeMirrorView);
 
-  // track node view
+  // track node view (this is done both so the outer editor can direct
+  // commands at the currently active nodeview, as well as for click
+  // detection between views for gap cursor handling)
   const cmNodeView : CodeEditorNodeView = {
     isFocused: () => codeMirrorView.hasFocus,
     getPos: typeof(getPos) === "function" ? getPos : (() => 0),
@@ -156,12 +142,17 @@ export const codeMirrorBlockNodeView: (
   }; 
   nodeViews.add(cmNodeView);
 
+  // return prosemirror nodeview 
   return {
+
     dom,
+    
     selectNode() {
       codeMirrorView.focus();
     },
+
     stopEvent: () => true,
+
     setSelection: (anchor, head) => {
 
       // if prosemirror attempts to set us to 0,0 (which it does on focus)
@@ -185,6 +176,7 @@ export const codeMirrorBlockNodeView: (
       });
      
     },
+
     update: (updateNode) => {
 
       // if the node type changed, no update (standard prosemirror boilerplate)
@@ -227,3 +219,76 @@ export const codeMirrorBlockNodeView: (
     },
   };
 };
+
+
+const computeChange = (oldVal: string, newVal: string) => {
+  if (oldVal === newVal) return null;
+  let start = 0;
+  let oldEnd = oldVal.length;
+  let newEnd = newVal.length;
+  while (
+    start < oldEnd &&
+    oldVal.charCodeAt(start) === newVal.charCodeAt(start)
+  )
+    start += 1;
+  while (
+    oldEnd > start &&
+    newEnd > start &&
+    oldVal.charCodeAt(oldEnd - 1) === newVal.charCodeAt(newEnd - 1)
+  ) {
+    oldEnd -= 1;
+    newEnd -= 1;
+  }
+  return { from: start, to: oldEnd, text: newVal.slice(start, newEnd) };
+}
+
+const asProseMirrorSelection = (
+  pmDoc: Node,
+  cmView: EditorView,
+  getPos: (() => number) | boolean
+) => {
+  const offset = (typeof getPos === "function" ? getPos() || 0 : 0) + 1;
+  const anchor = cmView.state.selection.main.from + offset;
+  const head = cmView.state.selection.main.to + offset;
+  return TextSelection.create(pmDoc, anchor, head);
+};
+
+
+const forwardSelection = (
+  cmView: EditorView,
+  pmView: PMEditorView,
+  getPos: (() => number) | boolean
+) => {
+  if (!cmView.hasFocus) return;
+  const selection = asProseMirrorSelection(pmView.state.doc, cmView, getPos);
+  if (!selection.eq(pmView.state.selection))
+    pmView.dispatch(pmView.state.tr.setSelection(selection));
+};
+
+const valueChanged = (
+  textUpdate: string,
+  node: Node,
+  getPos: (() => number) | boolean,
+  view: PMEditorView
+) => {
+  const change = computeChange(node.textContent, textUpdate);
+  if (change && typeof getPos === "function") {
+    const start = getPos() + 1;
+
+    const pmTr = view.state.tr;
+    if (change.text) {
+      pmTr.replaceWith(
+        start + change.from,
+        start + change.to,
+        view.state.schema.text(change.text)
+      );
+    } else {
+      pmTr.deleteRange(
+        start + change.from,
+        start + change.to
+      )
+    }
+    view.dispatch(pmTr);
+  }
+};
+

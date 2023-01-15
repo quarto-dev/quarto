@@ -21,7 +21,8 @@ import { Node as ProsemirrorNode } from "prosemirror-model";
 import { EditorView, NodeView } from "prosemirror-view";
 
 import { ExtensionFn, CodeViewOptions, BaseKey, arrowHandler, CodeEditorNodeViews } from "editor";
-import { codeMirrorBlockNodeView } from "./node-view";
+
+import { codeMirrorNodeView } from "./nodeview";
 
 export const codeMirrorPluginKey = new PluginKey("codemirror");
 
@@ -43,7 +44,7 @@ export function codeMirrorExtension(
       ) => NodeView;
     } = {};
     nodeTypes.forEach((name) => {
-      nodeViews[name] = codeMirrorBlockNodeView(context, codeViews[name], codeMirrorNodeViews);
+      nodeViews[name] = codeMirrorNodeView(context, codeViews[name], codeMirrorNodeViews);
     });
 
     // return plugin

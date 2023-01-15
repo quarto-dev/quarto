@@ -48,7 +48,7 @@ import {
   behaviorExtensions, 
   behaviorInit, 
   behaviorPmUpdate, 
-  BehaviorState,
+  State,
   behaviorCleanup, 
 } from "./behaviors";
 
@@ -75,10 +75,10 @@ export const codeMirrorBlockNodeView: (
   // state and function to allow behaviors to set it
   let updating = false;
   let escaping = false;
-  const withState = (state: BehaviorState, fn: () => void) => {
+  const withState = (state: State, fn: () => void) => {
     const setState = (value: boolean) => {
-      if (state === BehaviorState.Updating) updating = value;
-      if (state === BehaviorState.Escaping) escaping = value;
+      if (state === State.Updating) updating = value;
+      if (state === State.Escaping) escaping = value;
     }
     setState(true);
     fn();
@@ -115,9 +115,10 @@ export const codeMirrorBlockNodeView: (
   const state = EditorState.create({
     extensions: [
       ...(codeViewOptions.lineNumbers ? [lineNumbers()] : []),
-     
       highlightSelectionMatches(),
       drawSelection({ cursorBlinkRate: 1000 }),
+
+      
       syntaxHighlighting(defaultHighlightStyle),
 
       ...behaviorExtensions(behaviors),
@@ -136,15 +137,24 @@ export const codeMirrorBlockNodeView: (
   const codeMirrorView = new EditorView({
     state,
     dispatch: (tr) => {
+      
+      // apply the update to codemirror
       codeMirrorView.update([tr]);
+
+      // if this is a user operation (i.e. not initiated by us) then
+      // reflect the update back into prosemirror
       if (!updating) {
+
+        // perform prosemirror update
         const textUpdate = tr.state.toJSON().doc;
         valueChanged(textUpdate, node, getPos, view);
         forwardSelection(codeMirrorView, view, getPos);
+
         // track last user selection that isn't at the origin
         if (codeMirrorView.state.selection.main.anchor !== 0) {
           lastUserSelection = codeMirrorView.state.selection.main;
-        } 
+        }
+
       }
     },
   });
@@ -169,52 +179,63 @@ export const codeMirrorBlockNodeView: (
     },
     stopEvent: () => true,
     setSelection: (anchor, head) => {
+
       // if prosemirror attempts to set us to 0,0 (which it does on focus)
       // just restore our last user selection
       if (anchor === 0 && head === 0 && lastUserSelection) {
         anchor = lastUserSelection.anchor;
         head = lastUserSelection.head;
       }
+
+      // set focus and forward selection unless our state precludes this 
       if (!escaping && !gapCursorPending) {
         codeMirrorView.focus();
         forwardSelection(codeMirrorView, view, getPos);
       }
-      updating = true;
-      codeMirrorView.dispatch({
-        selection: { anchor: anchor, head: head },
+     
+      // reflect the prosemirror selection change into codemirror
+      withState(State.Updating, () => {
+        codeMirrorView.dispatch({
+          selection: { anchor: anchor, head: head },
+        });
       });
-      updating = false;
+     
     },
     update: (updateNode) => {
-      if (updateNode.type.name !== node.type.name) return false;
+
+      // if the node type changed, no update (standard prosemirror boilerplate)
+      if (updateNode.type.name !== node.type.name) {
+        return false;
+      }
     
+      // update node (track prevNode to pass to behaviors)
       const prevNode = node;
       node = updateNode;
 
       // apply change from update node
-      const change = computeChange(
-        codeMirrorView.state.doc.toString(),
-        updateNode.textContent
-      );
+      const change = computeChange(codeMirrorView.state.doc.toString(), node.textContent);
       if (change) {
-        updating = true;
-        codeMirrorView.dispatch({
-          changes: {
-            from: change.from,
-            to: change.to,
-            insert: change.text,
-          },
-          selection: { anchor: change.from + change.text.length },
+        withState(State.Updating, () => {
+          codeMirrorView.dispatch({
+            changes: {
+              from: change.from,
+              to: change.to,
+              insert: change.text,
+            },
+            selection: { anchor: change.from + change.text.length },
+          });
         });
-        updating = false;
       } 
 
       // trigger update for behaviors
       behaviorPmUpdate(behaviors, prevNode, updateNode, codeMirrorView);
 
+      // success
       return true;
     },
+
     ignoreMutation: () => true,
+    
     destroy: () => {
       behaviorCleanup(behaviors);
       nodeViews.remove(cmNodeView);

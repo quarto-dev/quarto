@@ -46,8 +46,8 @@ export interface BehaviorContext {
   withState: WithState
 }
 
-export enum BehaviorState { Updating, Escaping };
-export type WithState = (state: BehaviorState, fn: () => void) => void; 
+export enum State { Updating, Escaping };
+export type WithState = (state: State, fn: () => void) => void; 
 
 export function createBehaviors(context: BehaviorContext) : Behavior[] {
   return [

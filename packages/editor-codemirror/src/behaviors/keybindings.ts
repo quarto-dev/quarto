@@ -23,7 +23,7 @@ import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
 import { maybeEscape } from "../utils";
 
-import { Behavior, BehaviorContext, BehaviorState } from ".";
+import { Behavior, BehaviorContext, State } from ".";
 
 export function keybindingsBehavior(context: BehaviorContext) : Behavior {
 
@@ -34,7 +34,7 @@ export function keybindingsBehavior(context: BehaviorContext) : Behavior {
   const handleArrowKey = (unit: "char" | "line", dir: 1 | -1) => {
     return (cmView: EditorView) => {
       let result = false;
-      context.withState(BehaviorState.Escaping, () => {
+      context.withState(State.Escaping, () => {
         result = maybeEscape(unit, dir, cmView, view, getPos);
       });
       return result;

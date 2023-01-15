@@ -22,7 +22,7 @@ import { EditorView } from "@codemirror/view";
 
 import { DispatchEvent } from "editor";
 
-import { Behavior, BehaviorContext, BehaviorState } from ".";
+import { Behavior, BehaviorContext, State } from ".";
 
 // track the selection in prosemirror
 export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
@@ -39,7 +39,7 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
           // track selection changes that occur when we don't have focus
           if (!cmView.hasFocus && tr.selectionSet && !tr.docChanged && !(tr.selection instanceof GapCursor)) {
             const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
-            context.withState(BehaviorState.Updating, () => {
+            context.withState(State.Updating, () => {
               if (cmSelection) {
                 cmView.dispatch({ selection: cmSelection });
               } else {

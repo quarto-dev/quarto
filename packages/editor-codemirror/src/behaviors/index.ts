@@ -28,12 +28,14 @@ import { langModeBehavior } from './langmode';
 import { keybindingsBehavior } from './keybindings';
 import { findBehavior } from './find';
 import { indentBehavior } from './indent';
-import { bracketsExtension } from './brackets';
+import { bracketsBehavior } from './brackets';
+import { trackSelectionBehavior } from './trackselection';
 
 export interface Behavior {
   extensions: Extension[];
   init?: (pmNode: ProsemirrorNode, cmView: EditorView) => void;
   pmUpdate?: (prevNode: ProsemirrorNode, updateNode: ProsemirrorNode, cmView: EditorView) => void;
+  cleanup?: VoidFunction;
 }
 
 export interface BehaviorContext {
@@ -53,7 +55,8 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     keybindingsBehavior(context),
     findBehavior(context),
     indentBehavior(),
-    bracketsExtension()
+    bracketsBehavior(),
+    trackSelectionBehavior(context)
   ]
 }
 
@@ -75,6 +78,12 @@ export function behaviorPmUpdate(
   prevNode: ProsemirrorNode, updateNode: ProsemirrorNode, cmView: EditorView
 ) {
   behaviors.forEach(behavior => behavior.pmUpdate?.(prevNode, updateNode, cmView));
+}
+
+export function behaviorCleanup(
+  behaviors: Behavior[]
+) {
+  behaviors.forEach(behavior =>  behavior.cleanup?.());
 }
 
 

@@ -21,7 +21,6 @@ import { TextSelection } from "prosemirror-state";
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { Node } from "prosemirror-model";
 import { EditorView } from "@codemirror/view";
-import { EditorSelection } from "@codemirror/state";
 
 import { handleArrowToAdjacentNode } from "editor";
 
@@ -58,29 +57,6 @@ export const asProseMirrorSelection = (
   return TextSelection.create(pmDoc, anchor, head);
 };
 
-// returns undefined if the selection is not within us or not a range
-export const asCodeMirrorSelection = (
-  pmView: PMEditorView,
-  cmView: EditorView,
-  getPos: (() => number) | boolean
-) => {
-  if (typeof(getPos) === "function") {
-    const offset = getPos() + 1;
-    const node = pmView.state.doc.nodeAt(getPos());
-    if (node) {
-      const nodeSize = node.nodeSize;
-      const selection = pmView.state.selection;
-      const cmRange = { from: offset, to: offset + nodeSize };
-      const isWithinCm = (pos: number) => pos >= cmRange.from && pos < cmRange.to;
-      if (isWithinCm(selection.from) || isWithinCm(selection.to)) {
-        return EditorSelection.single(selection.from - offset, selection.to - offset);
-      } else if (selection.from <= cmRange.from && selection.to >= cmRange.to) {
-        return EditorSelection.single(0, cmView.state.doc.length);
-      }
-    }
-  }
-  return undefined;
-}
 
 export const forwardSelection = (
   cmView: EditorView,

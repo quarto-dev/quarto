@@ -19,7 +19,7 @@ import { keymap } from "@codemirror/view";
 
 import { Behavior } from ".";
 
-export function bracketsExtension() : Behavior {
+export function bracketsBehavior() : Behavior {
   return {
     extensions: [
       closeBrackets(),

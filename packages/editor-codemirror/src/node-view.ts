@@ -19,8 +19,6 @@
 
 import { Node } from "prosemirror-model";
 import { EditorView as PMEditorView, NodeView } from "prosemirror-view";
-import { Transaction } from "prosemirror-state";
-import { GapCursor } from "prosemirror-gapcursor"
 
 import {
   drawSelection,
@@ -31,18 +29,16 @@ import {
   highlightSelectionMatches,
 } from "@codemirror/search";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
-import { EditorState, SelectionRange, EditorSelection } from "@codemirror/state";
+import { EditorState, SelectionRange } from "@codemirror/state";
 
 import { 
   CodeEditorNodeView, 
   CodeEditorNodeViews, 
   CodeViewOptions, 
-  DispatchEvent, 
   ExtensionContext 
 } from "editor";
 
 import {
-  asCodeMirrorSelection,
   computeChange,
   forwardSelection,
   valueChanged,
@@ -52,7 +48,8 @@ import {
   behaviorExtensions, 
   behaviorInit, 
   behaviorPmUpdate, 
-  BehaviorState, 
+  BehaviorState,
+  behaviorCleanup, 
 } from "./behaviors";
 
 export const codeMirrorBlockNodeView: (
@@ -156,24 +153,6 @@ export const codeMirrorBlockNodeView: (
   // initialize behaviors
   behaviorInit(behaviors, node, codeMirrorView);
 
-  // subscribe to dispatches
-  const cleanup: VoidFunction[] = [];
-  cleanup.push(context.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
-    if (tr) {
-      // track selection changes that occur when we don't have focus
-      if (!codeMirrorView.hasFocus && tr.selectionSet && !tr.docChanged && !(tr.selection instanceof GapCursor)) {
-        const cmSelection = asCodeMirrorSelection(view, codeMirrorView, getPos);
-        updating = true;
-        if (cmSelection) {
-          codeMirrorView.dispatch({ selection: cmSelection });
-        } else {
-          codeMirrorView.dispatch({ selection: EditorSelection.single(0)})
-        } 
-        updating = false;
-      }
-    }
-  }));
-
   // track node view
   const cmNodeView : CodeEditorNodeView = {
     isFocused: () => codeMirrorView.hasFocus,
@@ -237,7 +216,7 @@ export const codeMirrorBlockNodeView: (
     },
     ignoreMutation: () => true,
     destroy: () => {
-      cleanup.forEach(clean => clean());
+      behaviorCleanup(behaviors);
       nodeViews.remove(cmNodeView);
       codeMirrorView.destroy();
     },

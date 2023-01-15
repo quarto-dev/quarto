@@ -25,10 +25,7 @@ import {
   EditorView,
   lineNumbers
 } from "@codemirror/view";
-import {
-  highlightSelectionMatches,
-} from "@codemirror/search";
-import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
+import { highlightSelectionMatches } from "@codemirror/search";
 import { EditorState, SelectionRange } from "@codemirror/state";
 
 import { 
@@ -61,13 +58,6 @@ export const codeMirrorBlockNodeView: (
   view: PMEditorView,
   getPos: (() => number) | boolean
 ) => NodeView = (context, codeViewOptions, nodeViews) => (pmNode, view, getPos) => {
-
-  // create theme
-  const theme = EditorView.theme({
-    "&.cm-editor.cm-focused": {
-      outline: "none"
-    },
-  }, {dark: false})
 
   // track node
   let node = pmNode;
@@ -118,13 +108,7 @@ export const codeMirrorBlockNodeView: (
       highlightSelectionMatches(),
       drawSelection({ cursorBlinkRate: 1000 }),
 
-      
-      syntaxHighlighting(defaultHighlightStyle),
-
       ...behaviorExtensions(behaviors),
-      
-     
-      theme
     ],
     doc: node.textContent,
   });

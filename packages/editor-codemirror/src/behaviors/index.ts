@@ -30,6 +30,7 @@ import { findBehavior } from './find';
 import { indentBehavior } from './indent';
 import { bracketsBehavior } from './brackets';
 import { trackSelectionBehavior } from './trackselection';
+import { themeBehavior } from './theme';
 
 export interface Behavior {
   extensions: Extension[];
@@ -56,6 +57,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     findBehavior(context),
     indentBehavior(),
     bracketsBehavior(),
+    themeBehavior(),
     trackSelectionBehavior(context)
   ]
 }

@@ -1,5 +1,5 @@
 /*
- * keybindings.ts
+ * keyboard.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -25,7 +25,7 @@ import { handleArrowToAdjacentNode } from "editor";
 
 import { Behavior, BehaviorContext, State } from ".";
 
-export function keybindingsBehavior(context: BehaviorContext) : Behavior {
+export function keyboardBehavior(context: BehaviorContext) : Behavior {
 
   // alias context
   const { view, getPos } = context;

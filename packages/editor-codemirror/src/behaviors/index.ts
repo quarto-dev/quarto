@@ -25,7 +25,7 @@ import { EditorView } from '@codemirror/view';
 import { CodeViewOptions, ExtensionContext } from "editor";
 
 import { langModeBehavior } from './langmode';
-import { keybindingsBehavior } from './keybindings';
+import { keyboardBehavior } from './keyboard';
 import { findBehavior } from './find';
 import { indentBehavior } from './indent';
 import { bracketsBehavior } from './brackets';
@@ -54,7 +54,7 @@ export type WithState = (state: State, fn: () => void) => void;
 export function createBehaviors(context: BehaviorContext) : Behavior[] {
   return [
     langModeBehavior(context),
-    keybindingsBehavior(context),
+    keyboardBehavior(context),
     findBehavior(context),
     indentBehavior(),
     bracketsBehavior(),

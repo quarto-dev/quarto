@@ -220,9 +220,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
           }
         ));
 
-        // track visual editors
-        disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel, client.editor));
-
         // poll for focus (and fix if it gets out of sync)
         disposables.push(focusTracker(webviewPanel, client.editor));
 
@@ -275,6 +272,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       enableScripts: true 
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+
+    // track visual editors
+    disposables.push(VisualEditorProvider.visualEditors.track(document, webviewPanel, client.editor));
 
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
@@ -369,7 +369,7 @@ function visualEditorTracker() : VisualEditorTracker {
       activeEditors.push({document, webviewPanel, editor});
       return {
         dispose: () => {
-          const idx = activeEditors.findIndex(editor => editor.document.uri.toString() === document.uri.toString());
+          const idx = activeEditors.findIndex(editor => editor.webviewPanel === webviewPanel);
           if (idx !== -1) {
             activeEditors.splice(idx, 1);
           }
@@ -378,7 +378,16 @@ function visualEditorTracker() : VisualEditorTracker {
     },
     activeEditor: (includeVisible?: boolean) => {
       return activeEditors.find(editor => {
-        return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
+        try {
+          return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
+        } catch(err) {
+          // we've seen activeEditors hold on to references to disposed editors (can't on the 
+          // surface see how this would occur as we subscribe to dispose, but as an insurance
+          // policy let's eat any exception that occurs, since a single zombie webviewPanel
+          // would prevent rendering of other panels
+          return false;
+        } 
+        
       });
     }
   };

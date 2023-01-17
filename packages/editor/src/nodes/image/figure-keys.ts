@@ -19,16 +19,17 @@ import { EditorView } from 'prosemirror-view';
 
 import {
   findParentNodeOfTypeClosestToPos,
-  findSelectedNodeOfType,
   setTextSelection,
   ContentNodeWithPos,
   findParentNodeOfType,
   findParentNodeClosestToPos,
+  NodeWithPos,
 } from 'prosemirror-utils';
 
 import { BaseKey } from '../../api/basekeys';
 import { exitNode } from '../../api/command';
 import { verticalArrowCanAdvanceWithinTextBlock } from '../../api/cursor';
+import { findSelectedNodeOfType } from '../../api/node';
 
 export function figureKeys(schema: Schema) {
   return [
@@ -112,7 +113,7 @@ function figureArrowHandler(dir: 'up' | 'down' | 'left' | 'right') {
     };
 
     // select figure caption
-    const selectFigureCaption = (figure: ContentNodeWithPos, atEnd = false) => {
+    const selectFigureCaption = (figure: NodeWithPos, atEnd = false) => {
       if (dispatch) {
         const tr = state.tr;
         setTextSelection(figure.pos + (atEnd ? figure.node.textContent.length + 1 : 0), 1)(tr);
@@ -129,7 +130,7 @@ function figureArrowHandler(dir: 'up' | 'down' | 'left' | 'right') {
       selection instanceof NodeSelection &&
       selection.node.type === schema.nodes.figure
     ) {
-      const figure = findSelectedNodeOfType(schema.nodes.figure)(selection);
+      const figure = findSelectedNodeOfType(schema.nodes.figure,selection);
       if (figure && figure.node.childCount > 0) {
         selectFigureCaption(figure);
         return true;

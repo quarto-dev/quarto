@@ -17,8 +17,6 @@ import { Node as ProsemirrorNode, NodeSpec, NodeType, ResolvedPos } from 'prosem
 import { EditorState, Selection, NodeSelection, Transaction } from 'prosemirror-state';
 import {
   findParentNode,
-  findSelectedNodeOfType,
-  ContentNodeWithPos,
   NodeWithPos,
   findParentNodeOfType,
   findChildrenByType,
@@ -74,8 +72,8 @@ export function findTopLevelBodyNodes(doc: ProsemirrorNode, predicate: (node: Pr
   return nodes.map(value => ({ ...value, pos: value.pos + offset }));
 }
 
-export function findNodeOfTypeInSelection(selection: Selection, type: NodeType): ContentNodeWithPos | undefined {
-  return findSelectedNodeOfType(type)(selection) || findParentNode((n: ProsemirrorNode) => n.type === type)(selection);
+export function findNodeOfTypeInSelection(selection: Selection, type: NodeType): NodeWithPos | undefined {
+  return findSelectedNodeOfType(type, selection) || findParentNode((n: ProsemirrorNode) => n.type === type)(selection);
 }
 
 export function firstNode(parent: NodeWithPos, predicate: (node: ProsemirrorNode) => boolean) {
@@ -113,7 +111,7 @@ export function lastNode(parent: NodeWithPos, predicate: (node: ProsemirrorNode)
 
 export function nodeIsActive(state: EditorState, type: NodeType, attrs = {}) {
   const predicate = (n: ProsemirrorNode) => n.type === type;
-  const node = findSelectedNodeOfType(type)(state.selection) || findParentNode(predicate)(state.selection);
+  const node = findSelectedNodeOfType(type,state.selection) || findParentNode(predicate)(state.selection);
 
   if (!Object.keys(attrs).length || !node) {
     return !!node;
@@ -205,6 +203,13 @@ export function findOneNode(node: ProsemirrorNode, from: number, to: number, pre
     }
   });
   return result;
+}
+
+export function findSelectedNodeOfType(nodeType: NodeType, selection: Selection) {
+  if (selection instanceof NodeSelection && nodeType === selection.node.type) {
+    const { node, $from } = selection;
+    return { node, pos: $from.pos };
+  }
 }
 
 function asSelection(context: EditorState | Selection) {

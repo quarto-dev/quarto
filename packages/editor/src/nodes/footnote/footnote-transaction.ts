@@ -18,7 +18,6 @@ import { Transaction, EditorState, TextSelection } from 'prosemirror-state';
 import {
   findChildrenByType,
   NodeWithPos,
-  findSelectedNodeOfType,
   ContentNodeWithPos,
   findParentNodeOfType,
 } from 'prosemirror-utils';
@@ -28,6 +27,7 @@ import { uuidv4 } from '../../api/util';
 
 import { findNoteNode, selectedNote } from './footnote';
 import { trTransform } from '../../api/transaction';
+import { findSelectedNodeOfType } from '../../api/node';
 
 // examine transactions and filter out attempts to place foonotes within note bodies
 // (this is not allowed by pandoc markdown)
@@ -158,7 +158,7 @@ function footnoteFixupTransform(activeNote: ContentNodeWithPos | undefined) {
 export function footnoteSelectNoteAppendTransaction() {
   return (_transactions: readonly Transaction[], _oldState: EditorState, newState: EditorState) => {
     const schema = newState.schema;
-    const footnoteNode: NodeWithPos | undefined = findSelectedNodeOfType(schema.nodes.footnote)(newState.selection);
+    const footnoteNode: NodeWithPos | undefined = findSelectedNodeOfType(schema.nodes.footnote,newState.selection);
     if (footnoteNode) {
       const tr = newState.tr;
       const ref = footnoteNode.node.attrs.ref;

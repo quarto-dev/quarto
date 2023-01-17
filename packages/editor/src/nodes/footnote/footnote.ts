@@ -14,11 +14,10 @@
  */
 
 import { Node as ProsemirrorNode, Schema, Fragment, NodeType, DOMOutputSpec } from 'prosemirror-model';
-import { Plugin, PluginKey, EditorState, Transaction, TextSelection, Selection } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, Transaction, TextSelection, Selection, NodeSelection } from 'prosemirror-state';
 import {
   findChildrenByType,
   findParentNodeOfType,
-  findSelectedNodeOfType,
   NodeWithPos,
   findChildren,
 } from 'prosemirror-utils';
@@ -217,9 +216,14 @@ function insertFootnote(
   return ref;
 }
 
+
+
 export function selectedFootnote(selection: Selection): NodeWithPos | undefined {
   const schema = selection.$head.node().type.schema;
-  return findSelectedNodeOfType(schema.nodes.footnote)(selection);
+  if (selection instanceof NodeSelection && schema.nodes.footnote === selection.node.type) {
+    const { node, $from } = selection;
+    return { node, pos: $from.pos };
+  }
 }
 
 export function selectedNote(selection: Selection): NodeWithPos | undefined {

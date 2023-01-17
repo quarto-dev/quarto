@@ -18,51 +18,11 @@
 
 
 .editorParent {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-color: $backgroundColor;
-}
-
-
-.editorParent {
-  :global {
-    .ProseMirror {
-      position: static;
-      height: 100%;
-      overflow-y: scroll;
-    }
-    .ProseMirror .pm-editing-root-node { 
-      width: 900px;
-      max-width: calc(100% - (2 * #{$sidebarWidth}) - 20px);
-      margin: 12px auto;  
-      padding: 10px 30px;
-      overflow-y: initial;
-    }
-    .ProseMirror .pm-editing-root-node .pm-content {
-      position: static;
-    }
-    .ProseMirror .body {
-      position: relative;
-      box-shadow: $paneBoxShadow;
-      min-height: 100%;
-    }
-    .ProseMirror .notes {
-      position: absolute;
-      padding-bottom: 0;
-      margin-bottom: 0;
-      visibility: hidden;
-      overflow-y: scroll;
-    }
-    .ProseMirror .body.editing-footnote {
-      margin-bottom: 0;
-    }
-    .ProseMirror .notes.editing-footnote {
-      border-top: 1px solid;
-      visibility: visible;
-      top: calc(100% - 90px - 10px);
-    }
-  }
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .editorParent {

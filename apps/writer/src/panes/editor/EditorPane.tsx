@@ -24,8 +24,6 @@ import { EditorOperations } from 'editor';
 import { editorDisplay } from './context/display';
 import { editorUIContext } from './context/ui-context';
 
-import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
-
 import { kWriterJsonRpcPath } from '../../constants';
 
 import styles from './EditorPane.module.scss';
@@ -51,9 +49,7 @@ const EditorPane : React.FC = () => {
         uiContext={uiContext}
         display={editorDisplay}
         onEditorInit={onEditorInit}
-        options={{outerScrollContainer: true}}
       >
-        <EditorOutlineSidebar />
         <EditorFind />
       </Editor>
     </Pane>

@@ -45,6 +45,7 @@ export const EditorFind: React.FC = () => {
   // refs
   const nodeRef = useRef<HTMLDivElement>(null);
   const findInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   // state
   const [active, setActive] = useState(false);
@@ -65,8 +66,11 @@ export const EditorFind: React.FC = () => {
   }
 
   // no more matches alert
-  const noMoreMatchesAlert = () => {
-    alert(t('find_alert_title'), t('find_no_more_matches') as string, kAlertTypeInfo);
+  const noMoreMatchesAlert = (focusAfter?: HTMLInputElement | null) => {
+    setTimeout(async () => {
+      await alert(t('find_alert_title'), t('find_no_more_matches') as string, kAlertTypeInfo);
+      focusInput(focusAfter || findInputRef.current);
+    }, 150);
   }
 
   // perform most up to date find
@@ -98,7 +102,7 @@ export const EditorFind: React.FC = () => {
   // replace and find
   const replaceAndFind = useCallback(() => {
     if (!performFind()?.replace(replaceText)) {
-      noMoreMatchesAlert();
+      noMoreMatchesAlert(replaceInputRef.current);
     }
   }, [performFind, replaceText]);
 
@@ -174,7 +178,6 @@ export const EditorFind: React.FC = () => {
     }
   }, [active])
 
-  // keyboard shortcuts
   const handleFindKeyDown = useCallback((ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
       findNext();
@@ -226,6 +229,7 @@ export const EditorFind: React.FC = () => {
             <Button icon={IconNames.Cross} title={t('find_close_panel') as string} minimal={true} small={true} onClick={close} />
           </ControlGroup>
           <InputGroup
+            inputRef={replaceInputRef}
             className={[styles.findInput, styles.findRow].join(' ')}
             value={replaceText}
             onChange={ev => setReplaceText(ev.target.value)}

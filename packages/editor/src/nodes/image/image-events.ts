@@ -44,6 +44,16 @@ function imagePaste(ui: EditorUI) {
 
     if (clipboardEvent.clipboardData) {
 
+      // don't handle office images (we want to use their html representation)
+      const kTextHtml = "text/html";
+      const kOfficeSchema = "urn:schemas-microsoft-com:office:office";
+      if (clipboardEvent.clipboardData.types.includes(kTextHtml)) {
+        const html = clipboardEvent.clipboardData.getData(kTextHtml);
+        if (html.includes(kOfficeSchema)) {
+          return false;
+        }
+      }
+      
       // see if our stock image handling can take care of it
       if (handleImageDataTransfer(
         event, 
@@ -68,16 +78,8 @@ function imagePaste(ui: EditorUI) {
           event.preventDefault();
           return true;
         }
-        // raw image paste (e.g. from an office doc)
+        // raw image paste from qt
       } else if (clipboardEvent.clipboardData.types.includes(kApplicationQtImage)) {
-
-        // don't process excel sheets (we want to use their html representation)
-        const kTextHtml = "text/html";
-        if (clipboardEvent.clipboardData.types.includes(kTextHtml) &&
-            clipboardEvent.clipboardData.getData(kTextHtml).includes("content=Excel.Sheet")) {
-          return false;
-        }
-       
         ui.context.clipboardImage().then(image => {
           if (image) {
             handleImageUris(view, view.state.selection.from, [image], ui);

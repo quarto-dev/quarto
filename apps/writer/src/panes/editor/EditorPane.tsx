@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { Editor, Pane, EditorFind } from 'editor-ui';
+import { Editor, Pane } from 'editor-ui';
 
 import { EditorOperations } from 'editor';
 
@@ -49,9 +49,7 @@ const EditorPane : React.FC = () => {
         uiContext={uiContext}
         display={editorDisplay}
         onEditorInit={onEditorInit}
-      >
-        <EditorFind />
-      </Editor>
+      />
     </Pane>
   );
 }

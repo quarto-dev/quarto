@@ -14,7 +14,7 @@
  */
 
 
-import React, { PropsWithChildren, useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -81,6 +81,7 @@ import { t } from '../i18n';
 
 import styles from './Editor.module.scss';
 import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
+import { EditorFind } from './EditorFind';
 
 
 export interface EditorProps {
@@ -92,7 +93,7 @@ export interface EditorProps {
   onEditorInit?: (editor: EditorOperations) => Promise<void>;
 }
 
-export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
+export const Editor : React.FC<EditorProps> = (props) => {
 
   // prefs
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
@@ -304,7 +305,7 @@ export const Editor : React.FC<PropsWithChildren<EditorProps>> = (props) => {
     <EditorOperationsContext.Provider value={editor}> 
       <div id="editor" className={props.className} ref={parentRef}>
         {editorLoadingUI(loading)}
-        {props.children}
+        <EditorFind />
       </div>
     </EditorOperationsContext.Provider>
   );

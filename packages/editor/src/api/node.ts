@@ -209,6 +209,8 @@ export function findSelectedNodeOfType(nodeType: NodeType, selection: Selection)
   if (selection instanceof NodeSelection && nodeType === selection.node.type) {
     const { node, $from } = selection;
     return { node, pos: $from.pos };
+  } else {
+    return undefined;
   }
 }
 

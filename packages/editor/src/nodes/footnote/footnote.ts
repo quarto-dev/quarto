@@ -14,7 +14,7 @@
  */
 
 import { Node as ProsemirrorNode, Schema, Fragment, NodeType, DOMOutputSpec } from 'prosemirror-model';
-import { Plugin, PluginKey, EditorState, Transaction, TextSelection, Selection, NodeSelection } from 'prosemirror-state';
+import { Plugin, PluginKey, EditorState, Transaction, TextSelection, Selection } from 'prosemirror-state';
 import {
   findChildrenByType,
   findParentNodeOfType,
@@ -26,7 +26,7 @@ import { ExtensionContext } from '../../api/extension';
 import { uuidv4 } from '../../api/util';
 import { PandocOutput, PandocTokenType, ProsemirrorWriter, PandocToken } from '../../api/pandoc';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { canInsertNode } from '../../api/node';
+import { canInsertNode, findSelectedNodeOfType } from '../../api/node';
 import { EditorUI } from '../../api/ui-types';
 import { OmniInsertGroup } from '../../api/omni_insert';
 
@@ -220,10 +220,7 @@ function insertFootnote(
 
 export function selectedFootnote(selection: Selection): NodeWithPos | undefined {
   const schema = selection.$head.node().type.schema;
-  if (selection instanceof NodeSelection && schema.nodes.footnote === selection.node.type) {
-    const { node, $from } = selection;
-    return { node, pos: $from.pos };
-  }
+  return findSelectedNodeOfType(schema.nodes.footnote, selection);
 }
 
 export function selectedNote(selection: Selection): NodeWithPos | undefined {

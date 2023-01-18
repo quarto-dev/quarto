@@ -15,9 +15,9 @@
 
 @import '@blueprintjs/core/lib/scss/variables.scss';
 
-@import 'editor-ui/src/theme.scss';
+@import 'editor-ui/src/variables.scss';
 
-$verticalPadding: 20px;
+$verticalPadding: 1px;
 
 .outline {
   position: absolute;
@@ -25,11 +25,10 @@ $verticalPadding: 20px;
   top: $verticalPadding;
   bottom: $verticalPadding;
   width: 0;
+  border-right: $paneBorder;
+  z-index: $pt-z-index-overlay;
   display: none;
-  box-shadow: $paneBoxShadow;
-  border-bottom-right-radius: $sidebarBottomBorderRadius;
-  border-top-right-radius: $sidebarBottomBorderRadius;
-  background-color: $editorBackgroundColor;
+
 }
 
 .outlineVisible {
@@ -42,8 +41,8 @@ $verticalPadding: 20px;
   display: inline-flex;
   width: 100%;
   color: $dark-gray4 !important;
-  padding: 20px 18px;
-  font-size: 16px;
+  padding: 12px 12px;
+  font-size: 14px;
   border-bottom: $paneBorder;
   flex: 0 1 auto;
 }
@@ -55,10 +54,13 @@ $verticalPadding: 20px;
   }
 }
 
+.outlineHeaderToggle {
+  cursor: pointer;
+}
+
 .outlineHeaderText {
   visibility: hidden;
   margin-left: 12px;
-  margin-top: -2px;
 }
 
 .outlineCloseIcon {
@@ -76,11 +78,10 @@ $verticalPadding: 20px;
 
 .outlineTreeContainer {
   flex: 1 1 auto;
-  overflow-y: scroll;
 }
 
 .outlineTree {
-  padding: 10px 0;
+  padding: 5px 0;
   color: $dark-gray4;
 }
 
@@ -91,25 +92,26 @@ $verticalPadding: 20px;
     }
     .bp4-tree-node-content {
       padding-right: 15px;
+      height: 1.7em;
     }
     .bp4-tree-node-content-0 {
       font-weight: 500 !important;
-      padding-left: 8px;
+      padding-left: 3px;
     }
     .bp4-tree-node-content-1 {
-      padding-left: 20px !important;
+      padding-left: 15px !important;
     }
     .bp4-tree-node-content-2 {
-      padding-left: 30px;
+      padding-left: 25px;
     }
     .bp4-tree-node-content-3 {
-      padding-left: 40px;
+      padding-left: 35px;
     }
     .bp4-tree-node-content-4 {
-      padding-left: 50px;
+      padding-left: 45px;
     }
     .bp4-tree-node-content-5 {
-      padding-left: 60px;
+      padding-left: 55px;
     }
   }
 }
@@ -118,13 +120,11 @@ $verticalPadding: 20px;
 .showOutlineButton {
   position: absolute;
   left: 0;
-  top: $verticalPadding + 8px;
+  top: $verticalPadding;
+  z-index: $pt-z-index-overlay;
   color: $gray1 !important;
-  background-color: white !important;
-  box-shadow: $paneBoxShadow !important;
-  border-bottom-right-radius: 30px !important;
-  border-top-right-radius: 30px !important;
-  padding: 10px 25px !important;
+  background-color: transparent!important;
+  padding: 0 !important;
 }
 
 .showOutlineButton {
@@ -137,44 +137,4 @@ $verticalPadding: 20px;
   padding: 18px 18px;
   color: $gray1;
 }
-
-
-.enter {
-  width: 0;
-}
-
-.enterActive {
-  width: $sidebarWidth;
-  transition: width $sidebarTransitionTime;
-}
-
-.enterDone {
-  width: $sidebarWidth;
-}
-
-.exit {
-  width: $sidebarWidth;
-  display: initial;
-}
-
-.exitActive {
-  width: 0;
-  transition: width  $sidebarTransitionTime;
-}
-
-.exitDone {
-  width: 0;
-  display: none;
-}
-
-.enter .outlineEmpty,
-.exit .outlineEmpty {
-  display: none;
-}
-
-.enterDone .outlineEmpty,
-.exitDone .outlineEmpty {
-  display: initial;
-}
-
 

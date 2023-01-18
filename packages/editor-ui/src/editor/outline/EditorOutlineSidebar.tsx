@@ -13,15 +13,14 @@
  *
  */
 
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import { useSelector } from 'react-redux';
 
-import { CSSTransition } from 'react-transition-group';
 
 import { defaultPrefs } from 'editor-types';
 
-import { editorOutline, EditorUICommandId } from 'editor-ui';
+import { editorLoading, editorOutline, EditorUICommandId } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 
 import { CommandManagerContext, t } from 'editor-ui';
@@ -38,6 +37,7 @@ const EditorOutlineSidebar: React.FC = () => {
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const outline = useSelector(editorOutline);
+  const loading = useSelector(editorLoading);
 
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
   const [setPrefs] = useSetPrefsMutation();
@@ -64,23 +64,20 @@ const EditorOutlineSidebar: React.FC = () => {
     ]})
   }, [prefs.showOutline])
 
+
   const outlineClassName = [styles.outline];
-    if (prefs.showOutline) {
+    if (prefs.showOutline && !loading) {
       outlineClassName.push(styles.outlineVisible);
     }
 
-  const nodeRef = useRef<HTMLDivElement>(null);
-
   return (
     <>
-        <EditorOutlineButton visible={!prefs.showOutline} onClick={onOpenClicked} />
-        <CSSTransition nodeRef={nodeRef} in={prefs.showOutline} timeout={300} classNames={{ ...styles }}>            
-          <div ref={nodeRef} className={outlineClassName.join(' ')}>
-            <EditorOutlineHeader onCloseClicked={onCloseClicked} />
-            {outline.length ? <EditorOutlineTree outline={outline} /> : <EditorOutlineEmpty /> }
-          </div>
-        </CSSTransition>
-      </>
+      <EditorOutlineButton visible={!prefs.showOutline && !loading} onClick={onOpenClicked} />
+      <div className={outlineClassName.join(' ')}>
+        <EditorOutlineHeader onCloseClicked={onCloseClicked} />
+        {outline.length ? <EditorOutlineTree outline={outline} /> : <EditorOutlineEmpty /> }
+      </div>
+    </>
   );
 }
 

@@ -82,6 +82,7 @@ import { t } from '../i18n';
 import styles from './Editor.module.scss';
 import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 import { EditorFind } from './EditorFind';
+import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 
 
 export interface EditorProps {
@@ -146,8 +147,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
   }
 
   // keep spelling provider up to date 
-  // TODO: add context once we have a relationship to the filesystem
-  spellingRef.current = useEditorSpelling("(Untitled)", { 
+  spellingRef.current = useEditorSpelling(props.uiContext.getDocumentPath() ||"(Untitled)", { 
     invalidateWord: (word: string) => editorRef.current?.spellingInvalidateWord(word),
     invalidateAllWords: () => editorRef.current?.spellingInvalidateAllWords() 
   });
@@ -210,9 +210,11 @@ export const Editor : React.FC<EditorProps> = (props) => {
     setTitle(title: string) {
      editorRef.current!.setTitle(title)
     },
-    setMarkdown(markdown: string, options: PandocWriterOptions, emitUpdate: boolean) {
-      const result = editorRef.current!.setMarkdown(markdown, options, emitUpdate);
+    async setMarkdown(markdown: string, options: PandocWriterOptions, emitUpdate: boolean) {
+      const editor = editorRef.current!;
+      const result = await editor.setMarkdown(markdown, options, emitUpdate)
       if (loading) {
+        dispatch(setEditorOutline(editor.getOutline()));
         dispatch(setEditorLoading(false));
       }  
       return result;
@@ -300,12 +302,19 @@ export const Editor : React.FC<EditorProps> = (props) => {
     prefsRef.current = prefs;
   }, [prefs]);
 
+  // classes
+  const classes = [props.className];
+  if (prefs.showOutline) {
+    classes.push(styles.outlineVisible);
+  }
+
   // render
   return (
     <EditorOperationsContext.Provider value={editor}> 
-      <div id="editor" className={props.className} ref={parentRef}>
-        {editorLoadingUI(loading)}
+      {editorLoadingUI(loading)}
+      <div id="editor" className={classes.join(' ')} ref={parentRef}>
         <EditorFind />
+        <EditorOutlineSidebar /> 
       </div>
     </EditorOperationsContext.Provider>
   );
@@ -323,13 +332,13 @@ const showPandocWarnings = (pandocFormat?: PandocFormat) => {
 
 const editorLoadingUI = (loading: boolean) => {
   if (loading) {
-    return loading && (
+    return (
       <div className={['ProseMirror', styles.editorLoading].join(' ')}>
         <div className='body pm-editing-root-node pm-text-color pm-background-color'>
           <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
         </div>
       </div>
-    )
+    );
   } else {
     return <div/>;
   }

@@ -1,7 +1,7 @@
 /*
- * Editor.module.scss
+ * EditorSidebar.module.scss
  *
- * Copyright (C) 2019-20 by RStudio, PBC
+ * Copyright (C) 2022 by Posit Software, PBC
  *
  * Unless you have received this program directly from RStudio pursuant
  * to the terms of a commercial license agreement with RStudio, then
@@ -13,39 +13,31 @@
  *
  */
 
- @import '../variables.scss';
+@import '@blueprintjs/core/lib/scss/variables.scss';
 
-.editorLoading {
-  background-color: $editorBackgroundColor;
+@import '../variables.scss';
+
+$sidebarInset: 4px;
+
+.editorSidebar {
+  position: absolute;
+  top:  $sideGutterMargin;
+  left: $sidebarInset;
+  width: $sideGutterWidth;
+  bottom: 0;
+  z-index: $pt-z-index-overlay;
 }
 
-.editorLoadingSpinner {
-  margin-top: 200px;
-}
-
-:global {
-  .ProseMirror {
-    position: absolute;
-    width: initial;
-    height: initial;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-  .ProseMirror .body, .ProseMirror .notes {
-    padding-left: $sideGutterWidth;
-    padding-right:  $sideGutterWidth;
-  }
-}
-
-
-
-.outlineVisible {
+.editorSidebar {
   :global {
-    .ProseMirror {
-      left: 230px;
+    .bp4-button {
+      min-height: 20px;
     }
   }
 }
+
+.editorLoading {
+  display: none;
+}
+
 

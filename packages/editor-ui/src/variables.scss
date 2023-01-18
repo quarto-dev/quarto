@@ -1,5 +1,5 @@
 /*
- * theme.scss
+ * variables.scss
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -17,6 +17,9 @@
 
  $navbarHeight: 64px;
  $toolbarHeight: 42px;
+
+ $sideGutterWidth: 42px;
+ $sideGutterMargin: 12px;
  
  $sidebarWidth: 240px;
  $sidebarBottomBorderRadius: 10px;

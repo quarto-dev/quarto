@@ -216,16 +216,22 @@ class RealtimeSpellingPlugin extends Plugin<DecorationSet> {
       if (this.view) {
         focusUnsubscribe();
         this.hasBeenFocused = true;
-        updateSpelling(this.view);
 
-        // call a second time as no words will be cached initially, this simplifies the
-        // need for threading a callback through the entire plugin system
+        // delayed update callback (checks for still connected)
         const v = this.view;
-        window.setTimeout(() => {
+        const doUpdate = () => {
           if (v.dom?.isConnected) {
             updateSpelling(v);
           }
-        }, 5000); 
+        };
+
+        // update (bounced out of focus event tick so that it doesn't
+        // interfere with normal editor focus management)
+        setTimeout(doUpdate, 100);
+
+        // call a second time as no words will be cached initially, this simplifies the
+        // need for threading a callback through the entire plugin system
+        setTimeout(doUpdate, 5000);
       }
     });
   }

@@ -128,7 +128,8 @@ export async function syncEditorToHost(
         onLoaded({
           icon: IconNames.Issue,
           title: kUnableToActivateVisualMode,
-          description: [t('Unsupported front matter format or non top-level YAML block.')]
+          description: [t('Unsupported front matter format or '), 
+                        t('non top-level YAML block.')]
         });
         return null;
       } else if (hasSourceCapsule(result.canonical)) {

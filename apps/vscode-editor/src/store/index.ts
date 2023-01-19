@@ -1,5 +1,5 @@
 /*
- * store.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -17,19 +17,10 @@ import { configureStore } from '@reduxjs/toolkit'
 import { JsonRpcRequestTransport } from 'core';
 
 import { editorJsonRpcServices } from 'editor-core';
-import { dictionaryApi, initDictionaryApi } from './dictionary';
-import { editorSlice } from './editor';
-import { initPrefsApi, prefsApi } from './prefs';
+import { dictionaryApi, initDictionaryApi, editorSlice, initPrefsApi, prefsApi } from 'editor-ui';
 
 
 export async function initializeStore(request: JsonRpcRequestTransport) {
-
-  // get editor services
-  const editorServices = editorJsonRpcServices(request);
-
-  // connect prefs and dictionary apis to services endpoints
-  initPrefsApi(editorServices.prefs);
-  initDictionaryApi(editorServices.dictionary);
 
   const store = configureStore({
     reducer: {
@@ -43,6 +34,13 @@ export async function initializeStore(request: JsonRpcRequestTransport) {
           .prepend(dictionaryApi.middleware)
     }
   });
+
+  // get editor services
+  const editorServices = editorJsonRpcServices(request);
+
+  // connect prefs and dictionary apis to services endpoints
+  initPrefsApi(editorServices.prefs);
+  initDictionaryApi(editorServices.dictionary);
   
   // prefech prefs
   store.dispatch(prefsApi.util.prefetch("getPrefs", undefined, {force: true}));
@@ -51,6 +49,4 @@ export async function initializeStore(request: JsonRpcRequestTransport) {
   // return store
   return store;
 }
-
-
 

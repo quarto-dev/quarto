@@ -18,10 +18,11 @@ import { createRoot } from 'react-dom/client';
 
 import 'vscode-webview';
 
-import { initEditorTranslations, initializeStore } from 'editor-ui';
+import { initEditorTranslations } from 'editor-ui';
 
 import { App } from "./App";
 import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
+import { initializeStore } from "./store";
 
 import "editor-ui/src/styles";
 import "./styles.scss"

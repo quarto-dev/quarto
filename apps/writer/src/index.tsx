@@ -18,7 +18,9 @@ import { createRoot } from 'react-dom/client';
 
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { initEditorTranslations, initializeStore } from 'editor-ui';
+import { initEditorTranslations } from 'editor-ui';
+
+import { initializeStore } from './store';
 
 import App from './App';
 

@@ -14,7 +14,7 @@
  */
 
 import { highlightSelectionMatches } from "@codemirror/search";
-import { drawSelection, lineNumbers } from "@codemirror/view";
+import { drawSelection, EditorView, lineNumbers } from "@codemirror/view";
 import { Behavior, BehaviorContext } from ".";
 
 export function prefsBehavior(context: BehaviorContext) : Behavior {
@@ -23,6 +23,7 @@ export function prefsBehavior(context: BehaviorContext) : Behavior {
       ...(context.options.lineNumbers ? [lineNumbers()] : []),
       highlightSelectionMatches(),
       drawSelection({ cursorBlinkRate: 1000 }),
+      EditorView.lineWrapping
     ]
   }
 }

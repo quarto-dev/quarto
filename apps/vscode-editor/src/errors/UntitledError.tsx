@@ -15,39 +15,31 @@
 
 import React from "react";
 
-import { Button, Intent, NonIdealState } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
-
-import { HostContext } from "editor-types";
 
 import { t } from "editor-ui";
 
 import { VisualEditorHostClient } from "../sync";
+import EditorError from "./EditorError";
 
 interface UntitledErrorProps {
-  context: HostContext;
   host: VisualEditorHostClient;
 }
 
 const UntitledError:  React.FC<UntitledErrorProps> = (props) => {
 
-  const editAction = <Button 
-   outlined={true} text={t('untitled_document_edit_in_source_mode')} 
-   icon={IconNames.Code} intent={Intent.PRIMARY} 
-   onClick={() => props.host.reopenSourceMode()}
-  />;
-
   return (
-    <NonIdealState
-      icon={IconNames.Document}
-      title={t("untitled_document")}
-      description={
-        <p>{t('untitled_document_cannot_be_edited')}<br/>
+    <EditorError
+    icon={IconNames.Document}
+    title={t("untitled_document")} 
+    {...props}>
+      <p>
+        {t('untitled_document_cannot_be_edited')}<br/>
         {t('untitled_document_switch_and_save')}<br/>
-        {t('untitled_document_reopen_visual')}</p>}
-      action={editAction}
-    />
-  )
+        {t('untitled_document_reopen_visual')}
+      </p>
+    </EditorError> 
+  );
 };
 
 export default UntitledError;

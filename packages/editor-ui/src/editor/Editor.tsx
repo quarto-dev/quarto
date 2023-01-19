@@ -317,6 +317,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
   );
 }
 
+// we don't currently have a dynamic editor format (we always assume quarto
+// markdown as-per createEditor function below) so there is no need to show 
+// these warnings.
 const showPandocWarnings = (pandocFormat?: PandocFormat) => {
   const warnings = pandocFormat?.warnings;
   if (warnings?.invalidFormat) {

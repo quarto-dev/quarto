@@ -18,6 +18,7 @@ import { JsonRpcRequestTransport } from 'core';
 
 import { editorJsonRpcServices } from 'editor-core';
 import { dictionaryApi, initDictionaryApi, editorSlice, initPrefsApi, prefsApi } from 'editor-ui';
+import { errorSlice } from './error';
 
 
 export async function initializeStore(request: JsonRpcRequestTransport) {
@@ -25,6 +26,7 @@ export async function initializeStore(request: JsonRpcRequestTransport) {
   const store = configureStore({
     reducer: {
       editor: editorSlice.reducer,
+      error: errorSlice.reducer,
       [prefsApi.reducerPath]: prefsApi.reducer,
       [dictionaryApi.reducerPath]: dictionaryApi.reducer
     },

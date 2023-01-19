@@ -113,7 +113,7 @@ export function editorSyncManager(
     // back to the document
     init: async() => {
       const markdown = await visualEditor.init(document.getText());
-      if (markdown !== document.getText()) {
+      if (markdown && (markdown !== document.getText())) {
         await updateWorkspaceDocument(document, markdown);
       }
     },

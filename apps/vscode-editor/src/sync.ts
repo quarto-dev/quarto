@@ -14,6 +14,8 @@
  *
  */
 
+import { IconNames } from "@blueprintjs/icons";
+
 import throttle from "lodash.throttle";
 
 import { WebviewApi } from "vscode-webview";
@@ -66,6 +68,7 @@ import {
 
 import { Command, t } from "editor-ui";
 
+import { ErrorInfo } from "./store/error";
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
   vscode: WebviewApi<unknown>;
@@ -98,7 +101,8 @@ export function visualEditorHostClient(
 export async function syncEditorToHost(
   editor: EditorOperations, 
   host: VisualEditorHostClient,
-  focus: boolean
+  focus: boolean,
+  onLoaded: (error?: ErrorInfo) => void
 )  {
 
   // sync from text editor (throttled)
@@ -117,16 +121,49 @@ export async function syncEditorToHost(
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, {}, false);
 
-      // focus if requested
-      if (focus) {
-        editor.focus();
+      // if there was an error then set it
+      const kUnableToActivateVisualMode =  t('Unable to Activate Visual Mode');
+  
+      if (Object.keys(result.unparsed_meta).length > 0) {
+        onLoaded({
+          icon: IconNames.Issue,
+          title: kUnableToActivateVisualMode,
+          description: [t('Unsupported front matter format or non top-level YAML block.')]
+        });
+        return null;
+      } else if (hasSourceCapsule(result.canonical)) {
+        onLoaded({
+          icon: IconNames.Issue,
+          title: kUnableToActivateVisualMode,
+          description: [t('Error parsing code chunks out of document.')]
+        })
+        return null;
+      } else if (result.example_lists) {
+        onLoaded({
+          icon: IconNames.Issue,
+          title: kUnableToActivateVisualMode,
+          description: [t('Document contains example lists which are'),
+                        t('not currently supported by the visual editor.')]
+        });
+        return null;
+      } else {
+
+        // indicate successfully loaded
+        onLoaded();
+     
+        // focus if requested
+        if (focus) {
+          editor.focus();
+        }
+
+        // visual editor => text editor (just send the state, host will call back for markdown)
+        editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+
+        // return canonical markdown
+        return result.canonical;     
       }
+     
 
-      // visual editor => text editor (just send the state, host will call back for markdown)
-      editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
-
-      // return canonical markdown
-      return result.canonical;        
     },
 
     async focus() {      
@@ -235,4 +272,10 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     resolveBase64Images: (base64Images: string[]) => request(VSC_VEH_ResolveBase64Images, [base64Images]),
     selectImage: () => request(VSC_VEH_SelectImage, [])
   };
+}
+
+
+function hasSourceCapsule(markdown: string) {
+  const kRmdBlockCapsuleType = "f3175f2a-e8a0-4436-be12-b33925b6d220".toLowerCase();
+  return markdown.includes(kRmdBlockCapsuleType);
 }

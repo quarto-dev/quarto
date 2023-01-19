@@ -16,13 +16,17 @@
 import React from "react";
 import { createRoot } from 'react-dom/client';
 
+import { IconNames } from "@blueprintjs/icons";
+
 import 'vscode-webview';
 
-import { initEditorTranslations } from 'editor-ui';
+import { initEditorTranslations, t} from 'editor-ui';
 
 import { App } from "./App";
 import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
+
 import { initializeStore } from "./store";
+import { setLoadError } from "./store/error";
 
 import "editor-ui/src/styles";
 import "./styles.scss"
@@ -42,6 +46,20 @@ async function runEditor() {
 
     // init localization
     await initEditorTranslations();
+
+    // detect untitled doc
+    if (!context.documentPath) {
+      store.dispatch(setLoadError({
+        icon: IconNames.Document,
+        title: t("untitled_document"),
+        description: [
+          t('untitled_document_cannot_be_edited'),
+          t('untitled_document_switch_and_save'),
+          t('untitled_document_reopen_visual')
+        ]
+      }));
+    }
+  
 
     // render
     const root = createRoot(document.getElementById('root')!);

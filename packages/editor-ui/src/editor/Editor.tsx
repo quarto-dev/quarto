@@ -56,7 +56,6 @@ import { editorDialogs, alert } from '../dialogs';
 import { 
   editorLoading, 
   editorTitle, 
-  setEditorLoading, 
   setEditorOutline, 
   setEditorSelection, 
   setEditorTitle, 
@@ -155,7 +154,6 @@ export const Editor : React.FC<EditorProps> = (props) => {
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-
     const context = editorContext({
       prefs: editorPrefs,
       server: server.current,
@@ -215,7 +213,6 @@ export const Editor : React.FC<EditorProps> = (props) => {
       const result = await editor.setMarkdown(markdown, options, emitUpdate)
       if (loading) {
         dispatch(setEditorOutline(editor.getOutline()));
-        dispatch(setEditorLoading(false));
       }  
       return result;
     },

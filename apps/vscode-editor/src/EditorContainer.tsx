@@ -15,6 +15,8 @@
 
 import React, { useMemo, useEffect, useContext, useCallback } from 'react';
 
+import { useDispatch, useSelector } from 'react-redux';
+
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
 import { JsonRpcRequestTransport } from 'core';
@@ -25,13 +27,18 @@ import {
   Commands, 
   Editor, 
   keyboardShortcutsCommand, 
+  setEditorLoading, 
   showContextMenu
 } from 'editor-ui';
 
 import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
 
+import { ErrorInfo, loadError, setLoadError } from './store/error';
+
 import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
+import EditorError from './EditorError';
+
 
 import styles from './Editor.module.scss';
 
@@ -65,9 +72,24 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   // one time creation of editorUIContext
   const uiContext = new HostEditorUIContext(props.context, props.host);
  
+  // check for loading errors
+  const error = useSelector(loadError);
+
+  // enable editor init to report loading errors
+  const dispatch = useDispatch();
+  const onLoaded = useCallback((error?: ErrorInfo) => {
+    if (error) {
+      dispatch(setLoadError(error))
+    } else {
+      dispatch(setEditorLoading(false));
+    }
+  }, []);
+
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, props.host, true);
+    if (!error) {
+      syncEditorToHost(editor, props.host, true, onLoaded);
+    } 
     return Promise.resolve();
   }, []);
 
@@ -80,21 +102,29 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       }
     };
   }
-
+  
   return (
     <div 
       className={styles.editorParent} 
       onKeyDown={keyboardEventHandler(handleKeyDown)} 
       onKeyUp={keyboardEventHandler(handleKeyUp)}
     >
-      <EditorToolbar/>
-      <Editor
-        className={styles.editorFrame} 
-        request={props.request}
-        uiContext={uiContext}
-        display={editorDisplay(props.host)}
-        onEditorInit={onEditorInit}
-      />
+      {!error 
+       
+       ? <>
+          <EditorToolbar/>
+          <Editor
+            className={styles.editorFrame} 
+            request={props.request}
+            uiContext={uiContext}
+            display={editorDisplay(props.host)}
+            onEditorInit={onEditorInit}
+          />
+        </>
+    
+      : <EditorError {...props} />}
+      
+     
     </div>
   );
 }

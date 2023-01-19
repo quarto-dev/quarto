@@ -24,7 +24,6 @@ import { CommandManagerProvider } from "editor-ui";
 
 import EditorContainer, { EditorContainerProps } from "./EditorContainer";
 
-import UntitledError from "./errors/UntitledError";
 
 interface AppProps extends EditorContainerProps {
   store: Store;
@@ -37,21 +36,15 @@ export const App : React.FC<AppProps> = (props) => {
     FocusStyleManager.onlyShowFocusOnTabs();
   }, []);
 
-  if (props.context.documentPath) {
-    return (
-      <StoreProvider store={props.store}>
-        <CommandManagerProvider>
-          <HotkeysProvider>
-            <EditorContainer {...props} />
-          </HotkeysProvider>
-        </CommandManagerProvider>
-      </StoreProvider>
-    );
-  } else {
-    return (
-      <UntitledError {...props} />
-    )
-  }
-  
+  return (
+    <StoreProvider store={props.store}>
+      <CommandManagerProvider>
+        <HotkeysProvider>
+          <EditorContainer {...props} />
+        </HotkeysProvider>
+      </CommandManagerProvider>
+    </StoreProvider>
+  );
 }
+  
 

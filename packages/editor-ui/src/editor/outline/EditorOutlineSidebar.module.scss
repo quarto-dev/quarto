@@ -25,6 +25,8 @@ $verticalPadding: 1px;
   top: $verticalPadding;
   bottom: $verticalPadding;
   width: 0;
+  font-size: 0.9em;
+  color: $gray1;
   border-right: $paneBorder;
   z-index: $pt-z-index-overlay;
   display: none;
@@ -40,10 +42,10 @@ $verticalPadding: 1px;
 .outlineHeader {
   display: inline-flex;
   width: 100%;
-  color: $dark-gray4 !important;
-  padding: 12px 12px;
-  font-size: 14px;
-  border-bottom: $paneBorder;
+  color: $gray1 !important;
+  padding: 9px 12px;
+  padding-bottom: 5px;
+  padding-right: 7px;
   flex: 0 1 auto;
 }
 
@@ -95,23 +97,22 @@ $verticalPadding: 1px;
       height: 1.7em;
     }
     .bp4-tree-node-content-0 {
-      font-weight: 500 !important;
       padding-left: 3px;
     }
     .bp4-tree-node-content-1 {
-      padding-left: 15px !important;
+      padding-left: 10px !important;
     }
     .bp4-tree-node-content-2 {
-      padding-left: 25px;
+      padding-left: 17px;
     }
     .bp4-tree-node-content-3 {
-      padding-left: 35px;
+      padding-left: 24px;
     }
     .bp4-tree-node-content-4 {
-      padding-left: 45px;
+      padding-left: 31px;
     }
     .bp4-tree-node-content-5 {
-      padding-left: 55px;
+      padding-left: 38px;
     }
   }
 }
@@ -128,6 +129,8 @@ $verticalPadding: 1px;
 }
 
 .showOutlineButton {
+  min-height: 34px !important;
+  max-height: 34px !important;
   :global(.bp4-icon) {
     color: $gray1  !important;
   }

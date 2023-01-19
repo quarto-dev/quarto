@@ -40,11 +40,14 @@
 }
 
 
-
 .outlineVisible {
   :global {
     .ProseMirror {
-      left: 230px;
+      left: calc(#{$sidebarWidth});
+    }
+    .ProseMirror .body, .ProseMirror .notes {
+      padding-left: $sideGutterNarrowWidth;
+      padding-right: $sideGutterNarrowWidth;;
     }
   }
 }

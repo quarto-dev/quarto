@@ -21,7 +21,7 @@ $sidebarInset: 4px;
 
 .editorSidebar {
   position: absolute;
-  top:  $sideGutterMargin;
+  top:  $sideGutterTopMargin;
   left: $sidebarInset;
   width: $sideGutterWidth;
   bottom: 0;

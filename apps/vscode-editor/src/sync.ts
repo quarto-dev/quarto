@@ -66,7 +66,7 @@ import {
   UpdateEvent 
 } from "editor";
 
-import { Command, EditorLoadError, t } from "editor-ui";
+import { Command, EditorError, t } from "editor-ui";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -101,7 +101,7 @@ export async function syncEditorToHost(
   editor: EditorOperations, 
   host: VisualEditorHostClient,
   focus: boolean,
-  onLoaded: (error?: EditorLoadError) => void
+  onLoaded: (error?: EditorError) => void
 )  {
 
   // sync from text editor (throttled)

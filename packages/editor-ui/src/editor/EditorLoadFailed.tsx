@@ -1,5 +1,5 @@
 /*
- * EditorError.tsx
+ * EditorLoadFailed.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -19,17 +19,15 @@ import { useSelector } from 'react-redux';
 
 import { Button, Intent, NonIdealState } from "@blueprintjs/core";
 import { IconName, IconNames } from "@blueprintjs/icons";
-
-import { editorLoadError, t } from "editor-ui";
-
-import { VisualEditorHostClient } from "./sync";
+import { editorLoadError } from '../store';
+import { t } from '../i18n';
 
 
-interface EditorErrorProps {
-  host: VisualEditorHostClient;
+export interface EditorLoadFailedProps {
+  onReopenSource: VoidFunction;
 }
 
-const EditorError:  React.FC<EditorErrorProps> = (props) => {
+export const EditorLoadFailed:  React.FC<EditorLoadFailedProps> = (props) => {
 
   const loadError = useSelector(editorLoadError);
 
@@ -38,7 +36,7 @@ const EditorError:  React.FC<EditorErrorProps> = (props) => {
     const editAction = <Button 
       outlined={true} text={t('return_to_source_mode')} 
       icon={IconNames.Code} intent={Intent.PRIMARY} 
-      onClick={() => props.host.reopenSourceMode()}
+      onClick={() => props.onReopenSource()}
     />;
 
     return (
@@ -59,6 +57,4 @@ const EditorError:  React.FC<EditorErrorProps> = (props) => {
   }
   
 };
-
-export default EditorError;
 

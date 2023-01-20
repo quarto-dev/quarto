@@ -16,3 +16,4 @@
 export * from './Editor';
 export * from './EditorFind';
 export * from './EditorOperationsContext';
+export * from './EditorLoadFailed'

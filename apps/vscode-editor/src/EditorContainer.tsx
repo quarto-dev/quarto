@@ -26,7 +26,8 @@ import {
   CommandManagerContext, 
   Commands, 
   Editor, 
-  EditorLoadError, 
+  EditorError, 
+  EditorLoadFailed,
   editorLoadError, 
   keyboardShortcutsCommand, 
   setEditorLoadError, 
@@ -39,10 +40,9 @@ import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } 
 
 import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
-import EditorError from './EditorError';
-
 
 import styles from './Editor.module.scss';
+
 
 export interface EditorContainerProps {
   context: HostContext;
@@ -79,7 +79,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
 
   // enable editor init to report loading errors
   const dispatch = useDispatch();
-  const onLoaded = useCallback((error?: EditorLoadError) => {
+  const onLoaded = useCallback((error?: EditorError) => {
     if (error) {
       dispatch(setEditorLoadError(error))
     } else {
@@ -104,6 +104,10 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       }
     };
   }
+
+  const reopenSource = () => {
+    props.host.reopenSourceMode();
+  }
   
   return (
     <div 
@@ -124,7 +128,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
           />
         </>
     
-      : <EditorError {...props} />}
+      : <EditorLoadFailed onReopenSource={reopenSource}/>}
       
      
     </div>

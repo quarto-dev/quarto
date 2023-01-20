@@ -26,14 +26,16 @@ import {
   CommandManagerContext, 
   Commands, 
   Editor, 
+  EditorLoadError, 
+  editorLoadError, 
   keyboardShortcutsCommand, 
+  setEditorLoadError, 
   setEditorLoading, 
   showContextMenu
 } from 'editor-ui';
 
 import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
 
-import { ErrorInfo, loadError, setLoadError } from './store/error';
 
 import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
@@ -73,13 +75,13 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   const uiContext = new HostEditorUIContext(props.context, props.host);
  
   // check for loading errors
-  const error = useSelector(loadError);
+  const error = useSelector(editorLoadError);
 
   // enable editor init to report loading errors
   const dispatch = useDispatch();
-  const onLoaded = useCallback((error?: ErrorInfo) => {
+  const onLoaded = useCallback((error?: EditorLoadError) => {
     if (error) {
-      dispatch(setLoadError(error))
+      dispatch(setEditorLoadError(error))
     } else {
       dispatch(setEditorLoading(false));
     }

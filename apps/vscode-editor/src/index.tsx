@@ -20,13 +20,10 @@ import { IconNames } from "@blueprintjs/icons";
 
 import 'vscode-webview';
 
-import { initEditorTranslations, t} from 'editor-ui';
+import { initEditorTranslations, initializeStore, setEditorLoadError, t} from 'editor-ui';
 
 import { App } from "./App";
 import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
-
-import { initializeStore } from "./store";
-import { setLoadError } from "./store/error";
 
 import "editor-ui/src/styles";
 import "./styles.scss"
@@ -49,7 +46,7 @@ async function runEditor() {
 
     // detect untitled doc
     if (!context.documentPath) {
-      store.dispatch(setLoadError({
+      store.dispatch(setEditorLoadError({
         icon: IconNames.Document,
         title: t("untitled_document"),
         description: [

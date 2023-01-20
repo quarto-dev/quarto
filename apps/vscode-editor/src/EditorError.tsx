@@ -18,12 +18,11 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { Button, Intent, NonIdealState } from "@blueprintjs/core";
-import { IconNames } from "@blueprintjs/icons";
+import { IconName, IconNames } from "@blueprintjs/icons";
 
-import { t } from "editor-ui";
+import { editorLoadError, t } from "editor-ui";
 
 import { VisualEditorHostClient } from "./sync";
-import { loadError } from "./store/error";
 
 
 interface EditorErrorProps {
@@ -32,9 +31,9 @@ interface EditorErrorProps {
 
 const EditorError:  React.FC<EditorErrorProps> = (props) => {
 
-  const error = useSelector(loadError);
+  const loadError = useSelector(editorLoadError);
 
-  if (error) {
+  if (loadError) {
 
     const editAction = <Button 
       outlined={true} text={t('return_to_source_mode')} 
@@ -44,12 +43,12 @@ const EditorError:  React.FC<EditorErrorProps> = (props) => {
 
     return (
       <NonIdealState
-        icon={error.icon}
-        title={error.title}
+        icon={(loadError.icon || IconNames.Error) as IconName}
+        title={loadError.title}
         action={editAction}
       >
        <p>
-        {error.description.map(line => {
+        {loadError.description.map(line => {
           return <><span>{line}</span><br/></>;
         })}
        </p>

@@ -17,8 +17,16 @@ import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 
 import { EditorOutline } from 'editor';
 
+
+export interface EditorLoadError {
+  title: string;
+  description: string[];
+  icon?: string;
+}
+
 export interface EditorState {
   readonly loading: boolean;
+  readonly loadError?: EditorLoadError;
   readonly title: string;
   readonly outline: EditorOutline;
   readonly selection: unknown;
@@ -38,6 +46,9 @@ export const editorSlice = createSlice({
     setEditorLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    setEditorLoadError: (state, action: PayloadAction<EditorLoadError>) => {
+      state.loadError = action.payload;
+    },
     setEditorTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;
     },
@@ -52,12 +63,14 @@ export const editorSlice = createSlice({
 
 const editorSelector = (state: { editor: EditorState }) => state.editor;
 export const editorLoading = createSelector(editorSelector, (state) => state.loading);
+export const editorLoadError = createSelector(editorSelector, (state) => state.loadError);
 export const editorTitle = createSelector(editorSelector, (state) => state.title);
 export const editorOutline = createSelector(editorSelector, (state) => state.outline);
 export const editorSelection = createSelector(editorSelector, (state) => state.selection);
 
 export const { 
   setEditorLoading, 
+  setEditorLoadError,
   setEditorTitle, 
   setEditorOutline, 
   setEditorSelection 

@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux';
 
 import { defaultPrefs } from 'editor-types';
 
-import { editorLoading, editorOutline, EditorUICommandId } from 'editor-ui';
+import { editorLoaded, editorOutline, EditorUICommandId } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 
 import { CommandManagerContext, t } from 'editor-ui';
@@ -37,7 +37,7 @@ const EditorOutlineSidebar: React.FC = () => {
   const [, cmDispatch] = useContext(CommandManagerContext);
 
   const outline = useSelector(editorOutline);
-  const loading = useSelector(editorLoading);
+  const loaded = useSelector(editorLoaded);
 
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
   const [setPrefs] = useSetPrefsMutation();
@@ -66,13 +66,13 @@ const EditorOutlineSidebar: React.FC = () => {
 
 
   const outlineClassName = [styles.outline];
-    if (prefs.showOutline && !loading) {
+    if (prefs.showOutline && loaded) {
       outlineClassName.push(styles.outlineVisible);
     }
 
   return (
     <>
-      <EditorOutlineButton visible={!prefs.showOutline && !loading} onClick={onOpenClicked} />
+      <EditorOutlineButton visible={!prefs.showOutline && loaded} onClick={onOpenClicked} />
       <div className={outlineClassName.join(' ')}>
         <EditorOutlineHeader onCloseClicked={onCloseClicked} />
         {outline.length ? <EditorOutlineTree outline={outline} /> : <EditorOutlineEmpty /> }

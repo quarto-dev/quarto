@@ -15,46 +15,40 @@
 
 import React from 'react';
 
-import { useSelector } from 'react-redux';
-
 import { Button, Intent, NonIdealState } from "@blueprintjs/core";
 import { IconName, IconNames } from "@blueprintjs/icons";
-import { editorLoadError } from '../store';
+import { EditorError } from '../store';
 import { t } from '../i18n';
+import { EditorUIContext } from 'editor';
 
 
 export interface EditorLoadFailedProps {
-  onReopenSource: VoidFunction;
+  error: EditorError;
+  uiContext: EditorUIContext
 }
 
 export const EditorLoadFailed:  React.FC<EditorLoadFailedProps> = (props) => {
 
-  const loadError = useSelector(editorLoadError);
+  const editAction = props.uiContext.reopenInSourceMode 
+    ? <Button outlined={true} text={t('return_to_source_mode')} 
+              icon={IconNames.Code} intent={Intent.PRIMARY} 
+              onClick={() => props.uiContext.reopenInSourceMode!()}/>
+    : undefined;
 
-  if (loadError) {
+  return (
+    <NonIdealState
+      icon={(props.error.icon || IconNames.Error) as IconName}
+      title={props.error.title}
+      action={editAction}
+    >
+      <p>
+      {props.error.description.map(line => {
+        return <><span>{line}</span><br/></>;
+      })}
+      </p>
+    </NonIdealState>
+  )
 
-    const editAction = <Button 
-      outlined={true} text={t('return_to_source_mode')} 
-      icon={IconNames.Code} intent={Intent.PRIMARY} 
-      onClick={() => props.onReopenSource()}
-    />;
-
-    return (
-      <NonIdealState
-        icon={(loadError.icon || IconNames.Error) as IconName}
-        title={loadError.title}
-        action={editAction}
-      >
-       <p>
-        {loadError.description.map(line => {
-          return <><span>{line}</span><br/></>;
-        })}
-       </p>
-      </NonIdealState>
-    )
-  } else {
-    return null;
-  }
   
 };
 

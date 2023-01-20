@@ -65,7 +65,7 @@ import {
   UpdateEvent 
 } from "editor";
 
-import { Command, EditorError, t } from "editor-ui";
+import { Command, t } from "editor-ui";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -99,8 +99,7 @@ export function visualEditorHostClient(
 export async function syncEditorToHost(
   editor: EditorOperations, 
   host: VisualEditorHostClient,
-  focus: boolean,
-  onLoaded: (error?: EditorError) => void
+  focus: boolean
 )  {
 
   // sync from text editor (throttled)
@@ -118,51 +117,24 @@ export async function syncEditorToHost(
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, {}, false);
+      
+      if (result) {
+        
+          // focus if requested
+          if (focus) {
+            editor.focus();
+          }
 
-      // if there was an error then set it
-      const kUnableToActivateVisualMode =  t('Unable to Activate Visual Mode');
-  
-      if (Object.keys(result.unparsed_meta).length > 0) {
-        onLoaded({
-          icon: "issue",
-          title: kUnableToActivateVisualMode,
-          description: [t('Unsupported front matter format or '), 
-                        t('non top-level YAML block.')]
-        });
-        return null;
-      } else if (hasSourceCapsule(result.canonical)) {
-        onLoaded({
-          icon: "issue",
-          title: kUnableToActivateVisualMode,
-          description: [t('Error parsing code chunks out of document.')]
-        })
-        return null;
-      } else if (result.example_lists) {
-        onLoaded({
-          icon: "issue",
-          title: kUnableToActivateVisualMode,
-          description: [t('Document contains example lists which are'),
-                        t('not currently supported by the visual editor.')]
-        });
-        return null;
+          // visual editor => text editor (just send the state, host will call back for markdown)
+          editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+
+          // return canonical markdown
+          return result.canonical;     
       } else {
-
-        // indicate successfully loaded
-        onLoaded();
-     
-        // focus if requested
-        if (focus) {
-          editor.focus();
-        }
-
-        // visual editor => text editor (just send the state, host will call back for markdown)
-        editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
-
-        // return canonical markdown
-        return result.canonical;     
+      
+        return null;
+      
       }
-     
-
     },
 
     async focus() {      
@@ -274,7 +246,3 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
 }
 
 
-function hasSourceCapsule(markdown: string) {
-  const kRmdBlockCapsuleType = "f3175f2a-e8a0-4436-be12-b33925b6d220".toLowerCase();
-  return markdown.includes(kRmdBlockCapsuleType);
-}

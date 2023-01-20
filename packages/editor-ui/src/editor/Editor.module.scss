@@ -19,6 +19,10 @@
   background-color: $editorBackgroundColor;
 }
 
+.editorLoadError {
+  display: none;
+}
+
 .editorLoadingSpinner {
   margin-top: 200px;
 }

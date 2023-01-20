@@ -28,8 +28,8 @@ import {
   CommandToolbarButton,
   CommandToolbarMenu,
   WithCommand,
-  editorLoading,
-  t
+  t,
+  editorLoaded
 } from 'editor-ui';
 
 import styles from './Editor.module.scss';
@@ -39,9 +39,9 @@ const CommandId = { ...EditorCommandId };
 const EditorToolbar: React.FC = () => {
 
   const [cmState] = useContext(CommandManagerContext);
-  const loading = useSelector(editorLoading);
+  const loaded = useSelector(editorLoaded);
 
-  if (!loading) {
+  if (loaded) {
     return (
       <Toolbar className={styles.editorToolbar}>
         <CommandToolbarMenu

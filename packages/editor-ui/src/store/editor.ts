@@ -24,6 +24,13 @@ export interface EditorError {
   description: string[];
 }
 
+export function isEditorError(error: unknown): error is EditorError {
+  const editorError = error as EditorError;
+  return editorError.description !== undefined &&
+         editorError.icon !== undefined &&
+         editorError.title !== undefined;
+}
+
 export interface EditorState {
   readonly loading: boolean;
   readonly loadError?: EditorError;
@@ -64,6 +71,7 @@ export const editorSlice = createSlice({
 const editorSelector = (state: { editor: EditorState }) => state.editor;
 export const editorLoading = createSelector(editorSelector, (state) => state.loading);
 export const editorLoadError = createSelector(editorSelector, (state) => state.loadError);
+export const editorLoaded = createSelector(editorSelector, (state) => !state.loading &&  !state.loadError);
 export const editorTitle = createSelector(editorSelector, (state) => state.title);
 export const editorOutline = createSelector(editorSelector, (state) => state.outline);
 export const editorSelection = createSelector(editorSelector, (state) => state.selection);

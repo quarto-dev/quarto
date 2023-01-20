@@ -23,4 +23,5 @@ export interface EditorOptions {
   readonly hideFormatComment?: boolean;
   readonly className?: string;
   readonly outerScrollContainer?: boolean;
+  readonly cannotEditUntitled?: boolean;
 }

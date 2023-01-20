@@ -13,9 +13,7 @@
  *
  */
 
-import React, { useMemo, useEffect, useContext, useCallback } from 'react';
-
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useMemo, useEffect, useContext, useCallback, useState } from 'react';
 
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
@@ -25,13 +23,8 @@ import {
   commandHotkeys, 
   CommandManagerContext, 
   Commands, 
-  Editor, 
-  EditorError, 
-  EditorLoadFailed,
-  editorLoadError, 
+  Editor,  
   keyboardShortcutsCommand, 
-  setEditorLoadError, 
-  setEditorLoading, 
   showContextMenu
 } from 'editor-ui';
 
@@ -42,7 +35,6 @@ import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './
 import EditorToolbar from './EditorToolbar';
 
 import styles from './Editor.module.scss';
-
 
 export interface EditorContainerProps {
   context: HostContext;
@@ -72,26 +64,11 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }, []);
  
   // one time creation of editorUIContext
-  const uiContext = new HostEditorUIContext(props.context, props.host);
+  const [uiContext] = useState(() => new HostEditorUIContext(props.context, props.host));
  
-  // check for loading errors
-  const error = useSelector(editorLoadError);
-
-  // enable editor init to report loading errors
-  const dispatch = useDispatch();
-  const onLoaded = useCallback((error?: EditorError) => {
-    if (error) {
-      dispatch(setEditorLoadError(error))
-    } else {
-      dispatch(setEditorLoading(false));
-    }
-  }, []);
-
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    if (!error) {
-      syncEditorToHost(editor, props.host, true, onLoaded);
-    } 
+    syncEditorToHost(editor, props.host, true);
     return Promise.resolve();
   }, []);
 
@@ -104,10 +81,6 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       }
     };
   }
-
-  const reopenSource = () => {
-    props.host.reopenSourceMode();
-  }
   
   return (
     <div 
@@ -115,22 +88,17 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       onKeyDown={keyboardEventHandler(handleKeyDown)} 
       onKeyUp={keyboardEventHandler(handleKeyUp)}
     >
-      {!error 
-       
-       ? <>
-          <EditorToolbar/>
-          <Editor
-            className={styles.editorFrame} 
-            request={props.request}
-            uiContext={uiContext}
-            display={editorDisplay(props.host)}
-            onEditorInit={onEditorInit}
-          />
-        </>
-    
-      : <EditorLoadFailed onReopenSource={reopenSource}/>}
-      
-     
+      <EditorToolbar/>
+      <Editor
+        className={styles.editorFrame} 
+        request={props.request}
+        uiContext={uiContext}
+        display={editorDisplay(props.host)}
+        onEditorInit={onEditorInit}
+        options={{
+          cannotEditUntitled: true 
+        }}
+      />
     </div>
   );
 }
@@ -183,6 +151,10 @@ class HostEditorUIContext implements EditorUIContext {
   public async withSavedDocument(): Promise<boolean> {
     await this.host.flushEditorUpdates();
     return true;
+  }
+
+  public reopenInSourceMode(): void {
+    this.host.reopenSourceMode();
   }
 
   // get the default directory for resources (e.g. where relative links point to)

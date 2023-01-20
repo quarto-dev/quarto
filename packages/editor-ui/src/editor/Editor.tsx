@@ -27,7 +27,6 @@ import { defaultPrefs, EditorServer, EditorServices, Prefs, PrefsProvider } from
 import { 
   Editor as PMEditor, 
   EventType, 
-  kAlertTypeError, 
   NavigationType,
   UpdateEvent, 
   OutlineChangeEvent, 
@@ -51,11 +50,16 @@ import {
   Commands 
 } from '../commands';
 
-import { editorDialogs, alert } from '../dialogs';
+import { editorDialogs } from '../dialogs';
 
 import { 
+  EditorError,
+  editorLoadError,
   editorLoading, 
   editorTitle, 
+  isEditorError, 
+  setEditorLoadError, 
+  setEditorLoading, 
   setEditorOutline, 
   setEditorSelection, 
   setEditorTitle, 
@@ -82,6 +86,7 @@ import styles from './Editor.module.scss';
 import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 import { EditorFind } from './EditorFind';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
+import { EditorLoadFailed } from './EditorLoadFailed';
 
 
 export interface EditorProps {
@@ -119,6 +124,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
   // redux state
   const title = useSelector(editorTitle);
   const loading = useSelector(editorLoading);
+  const loadError = useSelector(editorLoadError);
   const dispatch = useDispatch();
 
   // refs we get from rendering
@@ -140,9 +146,19 @@ export const Editor : React.FC<EditorProps> = (props) => {
   }
 
   // general helper functions
-  const errorAlert = (error: unknown) => {
-    const message = error instanceof Error ? error.message : String(error);
-    alert( t('error_alert_title') as string, message, kAlertTypeError);
+  const editorLoadFailed = (error: EditorError | unknown) => {
+    console.log(error);
+    dispatch(setEditorLoading(false));
+    if (isEditorError(error)) {
+      dispatch(setEditorLoadError(error));
+    } else {
+      const message = (error as Error).message || String(error);
+      dispatch(setEditorLoadError({
+        icon: "error",
+        title: t('Unexpected Error Loading Editor'),
+        description: [message]
+      }));
+    }  
   }
 
   // keep spelling provider up to date 
@@ -209,12 +225,54 @@ export const Editor : React.FC<EditorProps> = (props) => {
      editorRef.current!.setTitle(title)
     },
     async setMarkdown(markdown: string, options: PandocWriterOptions, emitUpdate: boolean) {
+
+      // if we don't support untitled and this is untitled then show that error
+      if (props.uiContext.getDocumentPath() === null && props.options?.cannotEditUntitled) {
+        editorLoadFailed({
+          icon: "document",
+          title: t("untitled_document"),
+          description: [
+            t('untitled_document_cannot_be_edited'),
+            t('untitled_document_switch_and_save'),
+            t('untitled_document_reopen_visual')
+          ]
+        });
+        return null;
+      }
+
+      // attempt to set markdown
       const editor = editorRef.current!;
-      const result = await editor.setMarkdown(markdown, options, emitUpdate)
-      if (loading) {
+      const result = await editor.setMarkdown(markdown, options, emitUpdate);
+
+      // check for load error
+      const kUnableToActivateVisualMode =  t('Unable to Activate Visual Mode');
+      if (Object.keys(result.unparsed_meta).length > 0) {
+        editorLoadFailed({
+          icon: "issue",
+          title: kUnableToActivateVisualMode,
+          description: [t('Error parsing code chunks out of document.')]
+        });
+        return null;
+      } else if (hasSourceCapsule(result.canonical)) {
+        editorLoadFailed({
+          icon: "issue",
+          title: kUnableToActivateVisualMode,
+          description: [t('Error parsing code chunks out of document.')]
+        });
+        return null;
+      } else if (result.example_lists) {
+        editorLoadFailed({
+          icon: "issue",
+          title: kUnableToActivateVisualMode,
+          description: [t('Document contains example lists which are'),
+                        t('not currently supported by the visual editor.')]
+        });
+        return null;
+      } else {
+        dispatch(setEditorLoading(false));
         dispatch(setEditorOutline(editor.getOutline()));
-      }  
-      return result;
+        return result;
+      }
     },
     getStateJson() {
       return editorRef.current!.getStateJson();
@@ -273,7 +331,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
   // editor initialization
   useEffect(() => {
     initEditor().catch(error => {
-      errorAlert(error);
+      editorLoadFailed(error);
     });
 
     return () => {
@@ -304,11 +362,14 @@ export const Editor : React.FC<EditorProps> = (props) => {
   if (prefs.showOutline) {
     classes.push(styles.outlineVisible);
   }
+  if (loadError) {
+    classes.push(styles.editorLoadError);
+  }
 
   // render
   return (
     <EditorOperationsContext.Provider value={editor}> 
-      {editorLoadingUI(loading)}
+      {editorLoadingUI(props.uiContext, loading, loadError)}
       <div id="editor" className={classes.join(' ')} ref={parentRef}>
         <EditorFind />
         <EditorOutlineSidebar /> 
@@ -330,8 +391,10 @@ const showPandocWarnings = (pandocFormat?: PandocFormat) => {
   }
 }
 
-const editorLoadingUI = (loading: boolean) => {
-  if (loading) {
+const editorLoadingUI = (uiContext: EditorUIContext, loading: boolean, loadError?: EditorError) => {
+  if (loadError) {
+    return <EditorLoadFailed uiContext={uiContext} error={loadError} />
+  } if (loading) {
     return (
       <div className={['ProseMirror', styles.editorLoading].join(' ')}>
         <div className='body pm-editing-root-node pm-text-color pm-background-color'>
@@ -343,7 +406,6 @@ const editorLoadingUI = (loading: boolean) => {
     return <div/>;
   }
 }
-
 const createEditor = async (
   parent: HTMLElement, 
   options: EditorOptions,
@@ -362,9 +424,13 @@ const createEditor = async (
     },
     docTypes: [kQuartoDocType]
   }
-  return await PMEditor.create(parent, context, format, { 
-    ...options
-  });
+  return await PMEditor.create(parent, context, format, options);
+}
+
+
+function hasSourceCapsule(markdown: string) {
+  const kRmdBlockCapsuleType = "f3175f2a-e8a0-4436-be12-b33925b6d220".toLowerCase();
+  return markdown.includes(kRmdBlockCapsuleType);
 }
 
 

@@ -274,7 +274,7 @@ export interface EditorOperations {
     markdown: string,
     options: PandocWriterOptions,
     emitUpdate: boolean,
-  ): Promise<EditorSetMarkdownResult>;
+  ): Promise<EditorSetMarkdownResult | null>;
 
   // get content
   getStateJson() : unknown;
@@ -348,6 +348,7 @@ export class Editor implements EditorOperations {
       browserSpellCheck: false,
       commenting: false,
       outerScrollContainer: false,
+      cannotEditUntitled: false,
       codeEditor: '',
       rmdImagePreview: false,
       hideFormatComment: false,

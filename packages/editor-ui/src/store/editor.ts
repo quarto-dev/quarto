@@ -19,9 +19,9 @@ import { EditorOutline } from 'editor';
 
 
 export interface EditorError {
+  icon: "document" | "issue" | "error" ;
   title: string;
   description: string[];
-  icon?: string;
 }
 
 export interface EditorState {

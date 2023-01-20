@@ -14,7 +14,6 @@
  *
  */
 
-import { IconNames } from "@blueprintjs/icons";
 
 import throttle from "lodash.throttle";
 
@@ -125,7 +124,7 @@ export async function syncEditorToHost(
   
       if (Object.keys(result.unparsed_meta).length > 0) {
         onLoaded({
-          icon: IconNames.Issue,
+          icon: "issue",
           title: kUnableToActivateVisualMode,
           description: [t('Unsupported front matter format or '), 
                         t('non top-level YAML block.')]
@@ -133,14 +132,14 @@ export async function syncEditorToHost(
         return null;
       } else if (hasSourceCapsule(result.canonical)) {
         onLoaded({
-          icon: IconNames.Issue,
+          icon: "issue",
           title: kUnableToActivateVisualMode,
           description: [t('Error parsing code chunks out of document.')]
         })
         return null;
       } else if (result.example_lists) {
         onLoaded({
-          icon: IconNames.Issue,
+          icon: "issue",
           title: kUnableToActivateVisualMode,
           description: [t('Document contains example lists which are'),
                         t('not currently supported by the visual editor.')]

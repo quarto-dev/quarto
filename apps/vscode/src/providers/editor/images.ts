@@ -23,7 +23,6 @@ import vscode, { TextDocument, Uri } from "vscode";
 
 import { EditorUIImageResolver } from "editor-types";
 import { isHttpUrl, kImageExtensions } from "core";
-import { URI } from "vscode-languageclient";
 
 
 export function documentImageResolver(

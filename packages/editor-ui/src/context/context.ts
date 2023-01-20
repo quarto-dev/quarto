@@ -46,11 +46,11 @@ export interface EditorPrefs {
 }
 
 export interface EditorProviders {
-  prefs: EditorPrefs,
   server: EditorServer,
   services: EditorServices,
   request: JsonRpcRequestTransport, 
   uiContext: EditorUIContext,
+  prefs: () => EditorPrefs,
   dialogs: () => EditorDialogs,
   display: () => EditorDisplay,
   spelling: () => EditorUISpelling
@@ -124,70 +124,70 @@ export function editorMath(server: MathServer, uiContext: EditorUIContext): Edit
   };
 }
 
-function editorPrefs(provider: EditorPrefs): EditorUIPrefs {
+function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
   return {
     realtimeSpelling() : boolean {
-      return provider.prefs().realtimeSpelling;
+      return provider().prefs().realtimeSpelling;
     },
     darkMode(): boolean {
-      return provider.prefs().darkMode;
+      return provider().prefs().darkMode;
     },
     listSpacing(): ListSpacing {
-      return provider.prefs().listSpacing;
+      return provider().prefs().listSpacing;
     },
     equationPreview(): boolean {
-      return provider.prefs().equationPreview;
+      return provider().prefs().equationPreview;
     },
     packageListingEnabled(): boolean {
-      return provider.prefs().packageListingEnabled;
+      return provider().prefs().packageListingEnabled;
     },
     tabKeyMoveFocus(): boolean {
-      return provider.prefs().tabKeyMoveFocus;
+      return provider().prefs().tabKeyMoveFocus;
     },
     emojiSkinTone(): SkinTone {
-      return provider.prefs().emojiSkinTone;
+      return provider().prefs().emojiSkinTone;
     },
     setEmojiSkinTone(emojiSkinTone: SkinTone) {
-      provider.setPrefs({ emojiSkinTone });
+      provider().setPrefs({ emojiSkinTone });
     },
     zoteroUseBetterBibtex(): boolean {
-      return provider.prefs().zoteroUseBetterBibtex;
+      return provider().prefs().zoteroUseBetterBibtex;
     },
     setBibliographyDefaultType(bibliographyDefaultType: string) {
-      provider.setPrefs({ bibliographyDefaultType });
+      provider().setPrefs({ bibliographyDefaultType });
     },
     bibliographyDefaultType(): string {
-      return provider.prefs().bibliographyDefaultType;
+      return provider().prefs().bibliographyDefaultType;
     },
     citationDefaultInText(): boolean {
-      return provider.prefs().citationDefaultInText;
+      return provider().prefs().citationDefaultInText;
     },
     setCitationDefaultInText(citationDefaultInText: boolean) {
-      provider.setPrefs({ citationDefaultInText });
+      provider().setPrefs({ citationDefaultInText });
     },
     spacesForTab: ()=> {
-      return provider.prefs().spacesForTab;
+      return provider().prefs().spacesForTab;
     },
     tabWidth: () => {
-      return provider.prefs().tabWidth;
+      return provider().prefs().tabWidth;
     },
     autoClosingBrackets: () => {
-      return provider.prefs().autoClosingBrackets;
+      return provider().prefs().autoClosingBrackets;
     },
     highlightSelectedWord: () => {
-      return provider.prefs().highlightSelectedWord;
+      return provider().prefs().highlightSelectedWord;
     },
     highlightSelectedLine: () => {
-      return provider.prefs().highlightSelectedLine;
+      return provider().prefs().highlightSelectedLine;
     },
     lineNumbers: () => {
-      return provider.prefs().lineNumbers;
+      return provider().prefs().lineNumbers;
     },
     showWhitespace: () => {
-      return provider.prefs().showWhitespace;
+      return provider().prefs().showWhitespace;
     },
     blinkingCursor: () => {
-      return provider.prefs().blinkingCursor;
+      return provider().prefs().blinkingCursor;
     }
   };
 }

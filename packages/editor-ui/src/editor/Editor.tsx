@@ -170,7 +170,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
   const initEditor = useCallback(async () => {
     
     const context = editorContext({
-      prefs: editorPrefs,
+      prefs: () => editorPrefs,
       server: server.current,
       services: services.current,
       request: props.request,

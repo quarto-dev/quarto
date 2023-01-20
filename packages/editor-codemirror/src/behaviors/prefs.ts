@@ -13,17 +13,87 @@
  *
  */
 
+import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
+import { indentUnit } from "@codemirror/language";
 import { highlightSelectionMatches } from "@codemirror/search";
-import { drawSelection, EditorView, lineNumbers } from "@codemirror/view";
+import { Compartment, Extension } from "@codemirror/state";
+import { drawSelection, EditorView, highlightActiveLine, highlightTrailingWhitespace, highlightWhitespace, keymap, lineNumbers } from "@codemirror/view";
+import { CodePrefsChangedEvent } from "editor";
 import { Behavior, BehaviorContext } from ".";
 
 export function prefsBehavior(context: BehaviorContext) : Behavior {
+
+  const prefsCompartment = new Compartment();
+
+  const configurePrefs = (cmView: EditorView) => {
+
+    // alias prefs
+    const prefs = context.pmContext.ui.prefs;
+
+    // line wrapping
+    const extensions: Extension[] = [EditorView.lineWrapping];
+
+    // show line numbers
+    const showLineNumbers = context.options.lineNumbers && prefs.lineNumbers();
+    if (showLineNumbers) {
+      extensions.push(lineNumbers());
+    }
+
+    // highlight selected word
+    if (prefs.highlightSelectedWord()) {
+      extensions.push(highlightSelectionMatches());
+    }
+
+    // highlight selected line
+    if (prefs.highlightSelectedLine()) {
+      extensions.push(highlightActiveLine());
+    }
+
+    // show whitespace
+    if (prefs.showWhitespace()) {
+      extensions.push(
+        highlightWhitespace(),
+        highlightTrailingWhitespace()
+      )
+    }
+
+    // close brackets
+    if (prefs.autoClosingBrackets()) {
+      extensions.push(
+        closeBrackets(),
+        keymap.of(closeBracketsKeymap)
+      );
+    }
+
+    // indentation
+    const indent = prefs.spacesForTab() ? ' '.repeat(prefs.tabWidth()) : '\t';
+    extensions.push(indentUnit.of(indent));
+
+    // blinking cursor
+    const cursorBlinkRate = prefs.blinkingCursor() ? 1000 : 0;
+    extensions.push(drawSelection({ cursorBlinkRate }));
+
+    // reconfigure
+    cmView.dispatch({
+      effects: prefsCompartment.reconfigure(extensions)
+    });
+  }
+
+  let unsubscribe: VoidFunction;
+
   return {
-    extensions: [
-      ...(context.options.lineNumbers ? [lineNumbers()] : []),
-      highlightSelectionMatches(),
-      drawSelection({ cursorBlinkRate: 1000 }),
-      EditorView.lineWrapping
-    ]
+
+    init(_pmNode, cmView) {
+      configurePrefs(cmView)
+      unsubscribe = context.pmContext.events.subscribe(CodePrefsChangedEvent, () => {
+        configurePrefs(cmView);
+      });
+    },
+
+    extensions: [prefsCompartment.of([])],
+
+    cleanup: () => {
+      unsubscribe?.();
+    }
   }
 }

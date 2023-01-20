@@ -28,7 +28,6 @@ import { langModeBehavior } from './langmode';
 import { keyboardBehavior } from './keyboard';
 import { findBehavior } from './find';
 import { indentBehavior } from './indent';
-import { bracketsBehavior } from './brackets';
 import { trackSelectionBehavior } from './trackselection';
 import { themeBehavior } from './theme';
 import { prefsBehavior } from './prefs';
@@ -57,7 +56,6 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     keyboardBehavior(context),
     findBehavior(context),
     indentBehavior(),
-    bracketsBehavior(),
     themeBehavior(),
     prefsBehavior(context),
     trackSelectionBehavior(context)

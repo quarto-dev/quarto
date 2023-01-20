@@ -15,7 +15,7 @@
 
 import { indentWithTab } from "@codemirror/commands";
 
-import { indentOnInput, indentUnit } from "@codemirror/language";
+import { indentOnInput } from "@codemirror/language";
 import { keymap } from "@codemirror/view";
 
 import { Behavior } from ".";
@@ -23,7 +23,6 @@ import { Behavior } from ".";
 export function indentBehavior() : Behavior {
   return {
     extensions: [
-      indentUnit.of('  '),
       indentOnInput(),
       keymap.of([indentWithTab])
     ]

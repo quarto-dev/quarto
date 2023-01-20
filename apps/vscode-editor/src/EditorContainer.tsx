@@ -211,6 +211,19 @@ class HostEditorUIContext implements EditorUIContext {
     return null;
   }
 
+  codePrefs() {
+    return {
+      spacesForTab: () => true,
+      tabWidth: () => 2,
+      autoClosingBrackets: () => true,
+      highlightSelectedWord: () => true,
+      highlightSelectedLine: () => false,
+      lineNumbers: () => true,
+      showWhitespace: () => false,
+      blinkingCursor: () => true
+    }
+  }
+
   private resolvePath(path: string): string {
     if (path.startsWith("/") && this.context.projectDir) {
       return `${this.context.projectDir}/${path.slice(1)}`;

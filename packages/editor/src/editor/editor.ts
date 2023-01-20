@@ -48,7 +48,7 @@ import { Extension, ExtensionFn } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc-types';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
-import { EventType, EventHandler } from '../api/event-types';
+import { EventType, EventHandler, CodePrefsChangedEvent } from '../api/event-types';
 import { DOMEditorEvents } from '../api/events';
 
 import {
@@ -292,6 +292,9 @@ export interface EditorOperations {
  
   // events
   subscribe<TDetail>(event: EventType<TDetail> | string, handler: EventHandler<TDetail>): VoidFunction;
+
+  // notify the editor that code prefs have changed
+  codePrefsChanged(): void;
 }
 
 export class Editor implements EditorOperations {
@@ -916,6 +919,12 @@ export class Editor implements EditorOperations {
 
   public contextMenuDismissed() {
     this.preventSelectionChange = undefined;
+  }
+
+  // notify the editor that the code prefs (accessed via
+  // the uiContext) have changed
+  public codePrefsChanged() {
+    this.emitEvent(CodePrefsChangedEvent);
   }
 
   private dispatchTransaction(tr: Transaction) {

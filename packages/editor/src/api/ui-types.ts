@@ -15,7 +15,7 @@
 
 import { SkinTone } from './emoji';
 
-import { EditorUISpelling, EditorDialogs, EditorDisplay, EditorUIImageResolver } from 'editor-types';
+import { EditorUISpelling, EditorDialogs, EditorDisplay, EditorUIImageResolver, CodePrefs } from 'editor-types';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
@@ -107,6 +107,9 @@ export interface EditorUIContext extends EditorUIImageResolver {
 
   // image from the clipboard (returned as file path)
   clipboardImage: () => Promise<string | null>;
+
+  // code block editing preferences
+  codePrefs: () => CodePrefs;
 }
 
 export interface EditorUIMath {
@@ -117,7 +120,8 @@ export const kListSpacingTight = 'tight';
 export const kListSpacingSpaced = 'spaced';
 export type ListSpacing = 'tight' | 'spaced';
 
-export interface EditorUIPrefs {
+
+export interface EditorUIPrefs extends CodePrefs  {
   realtimeSpelling: () => boolean;
   darkMode: () => boolean;
   listSpacing: () => ListSpacing;
@@ -132,7 +136,6 @@ export interface EditorUIPrefs {
   citationDefaultInText: () => boolean;
   setCitationDefaultInText: (value: boolean) => void;
 }
-
 
 
 export interface EditorUIImages {

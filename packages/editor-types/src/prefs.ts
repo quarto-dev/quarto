@@ -45,6 +45,17 @@ export interface Prefs {
   readonly packageListingEnabled: boolean;
 }
 
+export interface CodePrefs {
+  spacesForTab: () => boolean;
+  tabWidth: () => number;
+  autoClosingBrackets: () => boolean;
+  highlightSelectedWord: () => boolean;
+  highlightSelectedLine: () => boolean;
+  lineNumbers: () => boolean;
+  showWhitespace: () => boolean;
+  blinkingCursor: () => boolean;
+}
+
 export function defaultPrefs() : Prefs {
   return {
     // view

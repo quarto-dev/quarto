@@ -29,6 +29,7 @@ export const BlurEvent = makeEventType('Blur');
 export const FocusEvent = makeEventType<ProsemirrorNode>('Focus');
 export const DispatchEvent = makeEventType<Transaction>('Dispatch');
 export const NavigateEvent = makeEventType<Navigation>('Navigate');
+export const CodePrefsChangedEvent =  makeEventType('CodePrefsChanged');
 
 /**
  * Represents an event type; only a single instance of this should exist per

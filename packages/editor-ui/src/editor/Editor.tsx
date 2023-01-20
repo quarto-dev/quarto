@@ -147,7 +147,6 @@ export const Editor : React.FC<EditorProps> = (props) => {
 
   // general helper functions
   const editorLoadFailed = (error: EditorError | unknown) => {
-    console.log(error);
     dispatch(setEditorLoading(false));
     if (isEditorError(error)) {
       dispatch(setEditorLoadError(error));
@@ -300,7 +299,10 @@ export const Editor : React.FC<EditorProps> = (props) => {
     },
     subscribe<TDetail>(event: string | EventType<TDetail>, handler: EventHandler<TDetail>) {
       return editorRef.current!.subscribe(event, handler);
-    }
+    },
+    codePrefsChanged() {
+      editorRef.current?.codePrefsChanged();
+    },
   }
 
   // when doc changes propagate title

@@ -293,8 +293,8 @@ export interface EditorOperations {
   // events
   subscribe<TDetail>(event: EventType<TDetail> | string, handler: EventHandler<TDetail>): VoidFunction;
 
-  // notify the editor that code prefs have changed
-  codePrefsChanged(): void;
+  // notify the editor that prefs have changed
+  onPrefsChanged(): void;
 }
 
 export class Editor implements EditorOperations {
@@ -923,7 +923,7 @@ export class Editor implements EditorOperations {
 
   // notify the editor that the code prefs (accessed via
   // the uiContext) have changed
-  public codePrefsChanged() {
+  public onPrefsChanged() {
     this.emitEvent(PrefsChangedEvent);
   }
 

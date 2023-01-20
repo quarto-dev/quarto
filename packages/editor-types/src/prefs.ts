@@ -18,7 +18,7 @@ export const kPrefsSetPrefs = "prefs_set_prefs";
 
 export interface PrefsProvider {
   prefs() : Prefs;
-  setPrefs(prefs: Record<string,unknown>) : void;
+  setPrefs(prefs: Record<keyof Prefs,unknown>) : void;
 }
 
 export interface Prefs {

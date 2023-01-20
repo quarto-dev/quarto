@@ -109,8 +109,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
     prefs(): Prefs {
       return prefsRef.current || defaultPrefs();
     },
-    setPrefs: function (prefs: Record<string,unknown>): void {
-      setPrefs({ ...prefsRef.current!, ...prefs });
+    setPrefs: function (prefs: Record<keyof Prefs,unknown>): void {
+      setPrefs({ ...prefsRef.current!, ...prefs as Prefs});
     }
   };
 
@@ -300,8 +300,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
     subscribe<TDetail>(event: string | EventType<TDetail>, handler: EventHandler<TDetail>) {
       return editorRef.current!.subscribe(event, handler);
     },
-    codePrefsChanged() {
-      editorRef.current?.codePrefsChanged();
+    onPrefsChanged() {
+      editorRef.current?.onPrefsChanged();
     },
   }
 
@@ -357,6 +357,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
   // update out of band ref to prefs when they change
   useEffect(() => {
     prefsRef.current = prefs;
+    editor.onPrefsChanged();
   }, [prefs]);
 
   // classes

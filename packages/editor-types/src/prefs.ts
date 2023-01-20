@@ -43,17 +43,16 @@ export interface Prefs {
   readonly bibliographyDefaultType: 'bib' | 'yaml' | 'json';
   readonly citationDefaultInText: boolean;
   readonly packageListingEnabled: boolean;
-}
 
-export interface CodePrefs {
-  spacesForTab: () => boolean;
-  tabWidth: () => number;
-  autoClosingBrackets: () => boolean;
-  highlightSelectedWord: () => boolean;
-  highlightSelectedLine: () => boolean;
-  lineNumbers: () => boolean;
-  showWhitespace: () => boolean;
-  blinkingCursor: () => boolean;
+  // code editing
+  readonly spacesForTab: boolean;
+  readonly tabWidth: number;
+  readonly autoClosingBrackets: boolean;
+  readonly highlightSelectedWord: boolean;
+  readonly highlightSelectedLine: boolean;
+  readonly lineNumbers: boolean;
+  readonly showWhitespace: boolean;
+  readonly blinkingCursor: boolean;
 }
 
 export function defaultPrefs() : Prefs {
@@ -78,7 +77,17 @@ export function defaultPrefs() : Prefs {
     zoteroUseBetterBibtex: false,
     bibliographyDefaultType: 'bib',
     citationDefaultInText: false,
-    packageListingEnabled: false
+    packageListingEnabled: false,
+
+    // code editing
+    spacesForTab: true,
+    tabWidth: 2,
+    autoClosingBrackets: true,
+    highlightSelectedWord: true,
+    highlightSelectedLine: false,
+    lineNumbers: true,
+    showWhitespace: false,
+    blinkingCursor: true
   }
 }
 

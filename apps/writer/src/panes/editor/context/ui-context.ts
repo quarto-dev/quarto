@@ -84,19 +84,6 @@ export function editorUIContext(): EditorUIContext {
     // are we running in windows desktop mode?
     isWindowsDesktop(): boolean {
       return false;
-    },
-
-    codePrefs() {
-      return {
-        spacesForTab: () => true,
-        tabWidth: () => 2,
-        autoClosingBrackets: () => true,
-        highlightSelectedWord: () => false,
-        highlightSelectedLine: () => false,
-        lineNumbers: () => true,
-        showWhitespace: () => false,
-        blinkingCursor: () => true
-      }
     }
   };
 }

@@ -18,7 +18,7 @@ import { indentUnit } from "@codemirror/language";
 import { highlightSelectionMatches } from "@codemirror/search";
 import { Compartment, Extension } from "@codemirror/state";
 import { drawSelection, EditorView, highlightActiveLine, highlightTrailingWhitespace, highlightWhitespace, keymap, lineNumbers } from "@codemirror/view";
-import { CodePrefsChangedEvent } from "editor";
+import { PrefsChangedEvent } from "editor";
 import { Behavior, BehaviorContext } from ".";
 
 export function prefsBehavior(context: BehaviorContext) : Behavior {
@@ -85,7 +85,7 @@ export function prefsBehavior(context: BehaviorContext) : Behavior {
 
     init(_pmNode, cmView) {
       configurePrefs(cmView)
-      unsubscribe = context.pmContext.events.subscribe(CodePrefsChangedEvent, () => {
+      unsubscribe = context.pmContext.events.subscribe(PrefsChangedEvent, () => {
         configurePrefs(cmView);
       });
     },

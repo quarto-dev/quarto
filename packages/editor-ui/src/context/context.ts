@@ -24,8 +24,7 @@ import {
   MathjaxTypesetResult,
   MathServer,
   EditorServer,
-  EditorServices,
-  CodePrefs
+  EditorServices
 } from 'editor-types';
 
 
@@ -66,7 +65,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
     display: providers.display(),
     math: editorMath(providers.services.math, providers.uiContext),
     context: providers.uiContext,
-    prefs: editorPrefs(providers.prefs, providers.uiContext.codePrefs()),
+    prefs: editorPrefs(providers.prefs),
     spelling: editorSpelling(providers.spelling),
     images: uiTools.context.defaultUIImages()
   };
@@ -125,7 +124,7 @@ export function editorMath(server: MathServer, uiContext: EditorUIContext): Edit
   };
 }
 
-function editorPrefs(provider: EditorPrefs, codePrefs: CodePrefs): EditorUIPrefs {
+function editorPrefs(provider: EditorPrefs): EditorUIPrefs {
   return {
     realtimeSpelling() : boolean {
       return provider.prefs().realtimeSpelling;
@@ -166,7 +165,30 @@ function editorPrefs(provider: EditorPrefs, codePrefs: CodePrefs): EditorUIPrefs
     setCitationDefaultInText(citationDefaultInText: boolean) {
       provider.setPrefs({ citationDefaultInText });
     },
-    ...codePrefs,
+    spacesForTab: ()=> {
+      return provider.prefs().spacesForTab;
+    },
+    tabWidth: () => {
+      return provider.prefs().tabWidth;
+    },
+    autoClosingBrackets: () => {
+      return provider.prefs().autoClosingBrackets;
+    },
+    highlightSelectedWord: () => {
+      return provider.prefs().highlightSelectedWord;
+    },
+    highlightSelectedLine: () => {
+      return provider.prefs().highlightSelectedLine;
+    },
+    lineNumbers: () => {
+      return provider.prefs().lineNumbers;
+    },
+    showWhitespace: () => {
+      return provider.prefs().showWhitespace;
+    },
+    blinkingCursor: () => {
+      return provider.prefs().blinkingCursor;
+    }
   };
 }
 

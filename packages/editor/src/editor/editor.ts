@@ -48,7 +48,7 @@ import { Extension, ExtensionFn } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc-types';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
-import { EventType, EventHandler, CodePrefsChangedEvent } from '../api/event-types';
+import { EventType, EventHandler, PrefsChangedEvent } from '../api/event-types';
 import { DOMEditorEvents } from '../api/events';
 
 import {
@@ -924,7 +924,7 @@ export class Editor implements EditorOperations {
   // notify the editor that the code prefs (accessed via
   // the uiContext) have changed
   public codePrefsChanged() {
-    this.emitEvent(CodePrefsChangedEvent);
+    this.emitEvent(PrefsChangedEvent);
   }
 
   private dispatchTransaction(tr: Transaction) {

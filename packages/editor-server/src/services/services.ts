@@ -49,6 +49,6 @@ export function editorServicesMethods(options: EditorServicesOptions): Record<st
   return {
     ...mathServerMethods(options.documents),
     ...dictionaryServerMethods(options.dictionary),
-    ...prefsServerMethods()
+    ...prefsServerMethods(prefsServer())
   }
 }

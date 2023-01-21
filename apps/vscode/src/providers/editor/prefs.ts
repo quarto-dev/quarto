@@ -25,7 +25,9 @@ const kEditorInsertSpaces = "editor.insertSpaces";
 const kEditorTabSize = "editor.tabSize";
 const kEditorSelectionHighlight = "editor.selectionHighlight";
 const kEditorCursorBlinking = "editor.cursorBlinking";
-const kQuartoVisualLineNumbers = "quarto.visual.lineNumbers";
+const kQuartoVisualEditorLineNumbers = "quarto.visualEditor.lineNumbers";
+const kQuartoVisualEditorSpelling = "quarto.visualEditor.spelling";
+const kQuartoVisualEditorSpellingDictionary = "quarto.visualEditor.spellingDictionary";
 
 const kMonitoredConfigurations = [
   kEditorAutoClosingBrackets,
@@ -34,7 +36,9 @@ const kMonitoredConfigurations = [
   kEditorTabSize,
   kEditorSelectionHighlight,
   kEditorCursorBlinking,
-  kQuartoVisualLineNumbers
+  kQuartoVisualEditorLineNumbers,
+  kQuartoVisualEditorSpelling,
+  kQuartoVisualEditorSpellingDictionary
 ];
 
 export function vscodePrefsServer(
@@ -49,13 +53,21 @@ export function vscodePrefsServer(
     const configuration = workspace.getConfiguration(undefined, uri);
      
     const prefs = { ...(await server.getPrefs()), 
+      
+      // spelling settings
+      realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
+      dictionaryLocale: configuration.get<string>(kQuartoVisualEditorSpellingDictionary, "en_US"),
+
+      // vscode code editor settings
       spacesForTab: configuration.get<boolean>(kEditorInsertSpaces, true),
       tabWidth: configuration.get<number>(kEditorTabSize, 4),
       autoClosingBrackets: configuration.get(kEditorAutoClosingBrackets) !== "never",
       highlightSelectedWord: configuration.get<boolean>(kEditorSelectionHighlight, true),
-      lineNumbers: configuration.get<boolean>(kQuartoVisualLineNumbers, true),
       showWhitespace: configuration.get(kEditorRenderWhitespace) === "all",
       blinkingCursor: configuration.get(kEditorCursorBlinking, "solid") !== "solid",
+
+      // quarto code editor settings
+      lineNumbers: configuration.get<boolean>(kQuartoVisualEditorLineNumbers, true),
     };
     return prefs;
   };

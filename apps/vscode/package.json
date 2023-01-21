@@ -873,11 +873,45 @@
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
         },
-        "quarto.visual.lineNumbers": {
+        "quarto.visualEditor.lineNumbers": {
           "scope": "window",
           "type": "boolean",
           "default": "true",
           "markdownDescription": "Show line numbers in executable code cells"
+        },
+        "quarto.visualEditor.spelling": {
+          "scope": "window",
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "Enable spell checking"
+        },
+        "quarto.visualEditor.spellingDictionary": {
+          "scope": "window",
+          "type": "string",
+          "default": "en_US",
+          "markdownDescription": "Main dictionary language",
+          "enum": [
+            "en_AU",
+            "en_CA",
+            "en_GB",
+            "en_US",
+            "es_ES",
+            "fr_FR",
+            "de_DE",
+            "it_IT",
+            "ru_RU"
+          ],
+          "markdownEnumDescriptions": [
+            "English (Australia)",
+            "English (Canada)",   
+            "English (United Kingdom)",
+            "English (United States)",
+            "Spanish",        
+            "French",
+            "German",
+            "Italian",
+            "Russian"
+          ]
         }
       }
     },

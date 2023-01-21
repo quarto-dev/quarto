@@ -61,9 +61,9 @@ export function useEditorSpelling(
   useEffect(() => {
     if (dictionary) {
       typoRef.current = new Typo(prefs.dictionaryLocale, dictionary.aff, dictionary.words);
-      invalidate.invalidateAllWords();
     }
-  }, [dictionary]);
+    invalidate.invalidateAllWords();
+  }, [dictionary, prefs.realtimeSpelling]);
 
   // update ignored list when user dictionary or ignored words change
   useEffect(() => {
@@ -78,7 +78,9 @@ export function useEditorSpelling(
     return {
       checkWords(words: string[]) : string[] {
         return words.filter(word => {
-          if (ignored.includes(word)) {
+          if (!prefs.realtimeSpelling) {
+            return false;
+          } else if (ignored.includes(word)) {
             return false;
           } else {
             return typoRef.current ? !typoRef.current.check(word) : false
@@ -105,7 +107,7 @@ export function useEditorSpelling(
           .then(() => invalidate.invalidateWord(word));
       }
     }
-  }, [context, dictionary, ignored]);
+  }, [context, dictionary, ignored, prefs.realtimeSpelling]);
 
   return spelling;
 }

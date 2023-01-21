@@ -109,8 +109,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
     prefs(): Prefs {
       return prefsRef.current || defaultPrefs();
     },
-    setPrefs: function (prefs: Record<keyof Prefs,unknown>): void {
-      setPrefs({ ...prefsRef.current!, ...prefs as Prefs});
+    setPrefs: function (prefs: Record<string,unknown>): void {
+      setPrefs({ ...prefsRef.current!, ...prefs });
     }
   };
 

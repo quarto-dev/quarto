@@ -177,9 +177,6 @@ function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
     highlightSelectedWord: () => {
       return provider().prefs().highlightSelectedWord;
     },
-    highlightSelectedLine: () => {
-      return provider().prefs().highlightSelectedLine;
-    },
     lineNumbers: () => {
       return provider().prefs().lineNumbers;
     },

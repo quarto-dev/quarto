@@ -30,6 +30,7 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 
 import { 
   VSC_VE_ApplyExternalEdit, 
+  VSC_VE_PrefsChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_Init, 
   VSC_VE_Focus,
@@ -53,6 +54,7 @@ import {
   EditorServices,
   XRef,
   VSC_VE_IsFocused,
+  Prefs,
 } from "editor-types";
 
 import { 
@@ -65,7 +67,7 @@ import {
   UpdateEvent 
 } from "editor";
 
-import { Command, t } from "editor-ui";
+import { Command, EditorUIStore, t, updatePrefsApi } from "editor-ui";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -99,6 +101,7 @@ export function visualEditorHostClient(
 export async function syncEditorToHost(
   editor: EditorOperations, 
   host: VisualEditorHostClient,
+  store: EditorUIStore,
   focus: boolean
 )  {
 
@@ -117,27 +120,31 @@ export async function syncEditorToHost(
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, {}, false);
-      
+
       if (result) {
-        
-          // focus if requested
-          if (focus) {
-            editor.focus();
-          }
 
-          // visual editor => text editor (just send the state, host will call back for markdown)
-          editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+        // focus if requested
+        if (focus) {
+          editor.focus();
+        }
 
-          // return canonical markdown
-          return result.canonical;     
+        // visual editor => text editor (just send the state, host will call back for markdown)
+        editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+
+        // return canonical markdown
+        return result.canonical;
       } else {
-      
+
         return null;
-      
+
       }
     },
 
-    async focus() {      
+    async prefsChanged(prefs: Prefs): Promise<void> {
+      await updatePrefsApi(store, prefs);
+    },
+
+    async focus() {
       editor.focus();
     },
 
@@ -152,7 +159,7 @@ export async function syncEditorToHost(
       }
     },
 
-    async getMarkdownFromState(state: unknown) : Promise<string> {
+    async getMarkdownFromState(state: unknown): Promise<string> {
       const markdown = await editor.getMarkdownFromStateJson(state, {});
       return markdown;
     },
@@ -221,7 +228,8 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_Focus]: () => editor.focus(),
     [VSC_VE_IsFocused]: () => editor.isFocused(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
-    [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0])
+    [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
+    [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0])
   })
 }
 

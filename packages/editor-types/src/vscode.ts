@@ -15,6 +15,7 @@
 
 import { EditorDisplay } from "./display";
 import { EditorUIImageResolver } from "./image";
+import { Prefs } from "./prefs";
 
 export const VSC_VE_Init = 'vsc_ve_init';
 export const VSC_VE_Focus = 'vsc_ve_focus';
@@ -22,6 +23,7 @@ export const VSC_VE_IsFocused = 'vsc_ve_is_focused';
 export const VSC_VE_GetMarkdown = 'vsc_ve_get_markdown';
 export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
+export const VSC_VE_PrefsChanged = 'vsc_ve_prefs_changed';
 
 export const VSC_VEH_GetHostContext = 'vsc_ve_get_host_context';
 export const VSC_VEH_ReopenSourceMode = 'vsc_ve_reopen_source_mode';
@@ -46,6 +48,7 @@ export interface VSCodeVisualEditor {
   isFocused: () => Promise<boolean>;
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
+  prefsChanged: (prefs: Prefs) => Promise<void>;
 }
 
 export interface HostContext {

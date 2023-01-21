@@ -136,7 +136,6 @@ export interface EditorUIPrefs {
   tabWidth: () => number,
   autoClosingBrackets: () => boolean,
   highlightSelectedWord: () => boolean,
-  highlightSelectedLine: () => boolean,
   lineNumbers: () => boolean,
   showWhitespace: () => boolean,
   blinkingCursor: () => boolean

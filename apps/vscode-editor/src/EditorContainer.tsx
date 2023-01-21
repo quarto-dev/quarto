@@ -24,6 +24,7 @@ import {
   CommandManagerContext, 
   Commands, 
   Editor,  
+  EditorUIStore,  
   keyboardShortcutsCommand, 
   showContextMenu
 } from 'editor-ui';
@@ -40,6 +41,7 @@ export interface EditorContainerProps {
   context: HostContext;
   host: VisualEditorHostClient;
   request: JsonRpcRequestTransport;  
+  store: EditorUIStore;
 }
 
 const EditorContainer: React.FC<EditorContainerProps> = (props) => {
@@ -68,7 +70,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
  
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, props.host, true);
+    syncEditorToHost(editor, props.host, props.store, true);
     return Promise.resolve();
   }, []);
 

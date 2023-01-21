@@ -40,7 +40,10 @@ import {
   VSCodeVisualEditorHost,
   VSC_VE_IsFocused,
   VSC_VEH_SaveDocument,
-  VSC_VEH_RenderDocument
+  VSC_VEH_RenderDocument,
+  VSC_VE_PrefsChanged,
+  Prefs,
+  PrefsServer
 } from "editor-types";
 
 import { 
@@ -70,7 +73,9 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       focus: () => request(VSC_VE_Focus, []),
       isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
-      applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown])
+      applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
+      prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs])
+
     },
     dispose: disconnect
   };
@@ -81,13 +86,14 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 export function visualEditorServer(
   webviewPanel: WebviewPanel,
   lspClient: LanguageClient,
-  host: VSCodeVisualEditorHost
+  host: VSCodeVisualEditorHost,
+  prefsServer: PrefsServer
 ) : Disposable {
   
   
   // table of methods we implement directly
   const extensionMethods = {
-    ...prefsServerMethods(),
+    ...prefsServerMethods(prefsServer),
     ...editorHostMethods(host)
   };
 

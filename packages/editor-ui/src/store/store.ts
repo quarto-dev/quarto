@@ -50,3 +50,4 @@ export async function initializeStore(request: JsonRpcRequestTransport) {
   return store;
 }
 
+export type EditorUIStore = Awaited<ReturnType<typeof initializeStore>>;

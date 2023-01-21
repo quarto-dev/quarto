@@ -39,12 +39,13 @@ import { HostContext, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "e
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, kQuartoLanguageId, preserveEditorFocus, QuartoEditor } from "../../core/doc";
+import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
 import { documentImageResolver } from "./images";
 import { clearInterval } from "timers";
+import { vscodePrefsServer } from "./prefs";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -259,8 +260,20 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       ...documentImageResolver(document, projectDir)
     };
 
+    // create prefs server that also monitors for changes and forwards them to the visual editor
+    const [prefsServer, unsubscribe] = vscodePrefsServer(
+      document.uri,
+      client.editor.prefsChanged.bind(client.editor)
+    );
+    disposables.push(unsubscribe);
+
     // setup server on webview iframe
-    disposables.push(visualEditorServer(webviewPanel, this.lspClient, host));
+    disposables.push(visualEditorServer(
+      webviewPanel, 
+      this.lspClient, 
+      host, 
+      prefsServer
+    ));
 
     // load editor webview (include current doc path in localResourceRoots)
     webviewPanel.webview.options = { 

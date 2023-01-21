@@ -54,8 +54,7 @@ export function prefsServer() : PrefsServer {
   }
 }
 
-export function prefsServerMethods() : Record<string, JsonRpcServerMethod> {
-  const server = prefsServer();
+export function prefsServerMethods(server: PrefsServer) : Record<string, JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
     [kPrefsGetPrefs]: () => server.getPrefs(),
     [kPrefsSetPrefs]: (prefs) => server.setPrefs(prefs[0])

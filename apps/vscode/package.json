@@ -872,6 +872,12 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
+        },
+        "quarto.visual.lineNumbers": {
+          "scope": "window",
+          "type": "boolean",
+          "default": "true",
+          "markdownDescription": "Show line numbers in executable code cells"
         }
       }
     },

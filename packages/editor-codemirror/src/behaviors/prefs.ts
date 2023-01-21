@@ -17,7 +17,7 @@ import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { indentUnit } from "@codemirror/language";
 import { highlightSelectionMatches } from "@codemirror/search";
 import { Compartment, Extension } from "@codemirror/state";
-import { drawSelection, EditorView, highlightActiveLine, highlightTrailingWhitespace, highlightWhitespace, keymap, lineNumbers } from "@codemirror/view";
+import { drawSelection, EditorView, highlightWhitespace, keymap, lineNumbers } from "@codemirror/view";
 import { PrefsChangedEvent } from "editor";
 import { Behavior, BehaviorContext } from ".";
 
@@ -44,17 +44,9 @@ export function prefsBehavior(context: BehaviorContext) : Behavior {
       extensions.push(highlightSelectionMatches());
     }
 
-    // highlight selected line
-    if (prefs.highlightSelectedLine()) {
-      extensions.push(highlightActiveLine());
-    }
-
     // show whitespace
     if (prefs.showWhitespace()) {
-      extensions.push(
-        highlightWhitespace(),
-        highlightTrailingWhitespace()
-      )
+      extensions.push(highlightWhitespace());
     }
 
     // close brackets

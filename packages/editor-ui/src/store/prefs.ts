@@ -17,7 +17,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
 import { Prefs, PrefsServer } from "editor-types";
 
-import { rtkFakeBaseQuery, rtkHandleQuery } from "editor-ui";
+import { EditorUIStore, rtkFakeBaseQuery, rtkHandleQuery } from "editor-ui";
 
 const kPrefsTag = "Prefs";
 
@@ -27,6 +27,9 @@ export function initPrefsApi(server: PrefsServer) {
   prefsServer = server;
 }
 
+export async function updatePrefsApi(store: EditorUIStore, prefs: Prefs) {
+  await store.dispatch(prefsApi.util.upsertQueryData("getPrefs", undefined, prefs))
+}
 
 export const prefsApi = createApi({
   reducerPath: "prefs",

@@ -44,15 +44,16 @@ export interface Prefs {
   readonly citationDefaultInText: boolean;
   readonly packageListingEnabled: boolean;
 
-  // code editing
+  // code editing (vscode settings)
   readonly spacesForTab: boolean;
   readonly tabWidth: number;
-  readonly autoClosingBrackets: boolean;
+  readonly autoClosingBrackets: boolean;   // done
   readonly highlightSelectedWord: boolean;
-  readonly highlightSelectedLine: boolean;
-  readonly lineNumbers: boolean;
   readonly showWhitespace: boolean;
   readonly blinkingCursor: boolean;
+
+  // code editing (native settings)
+  readonly lineNumbers: boolean;
 }
 
 export function defaultPrefs() : Prefs {
@@ -84,7 +85,6 @@ export function defaultPrefs() : Prefs {
     tabWidth: 2,
     autoClosingBrackets: true,
     highlightSelectedWord: true,
-    highlightSelectedLine: false,
     lineNumbers: true,
     showWhitespace: false,
     blinkingCursor: true

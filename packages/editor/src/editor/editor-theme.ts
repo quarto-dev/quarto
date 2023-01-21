@@ -97,7 +97,7 @@ export function defaultTheme(): EditorTheme {
     focusOutlineColor: '#5d84cd',
     paneBorderColor: 'silver',
     fixedWidthFont: 'monospace, monospace',
-    fixedWidthFontSizePt: 9,
+    fixedWidthFontSizePt: 10,
     proportionalFont: '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif',
     proportionalFontSizePt: 10,
     code: {

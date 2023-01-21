@@ -873,6 +873,13 @@
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
         },
+        "quarto.visualEditor.defaultListSpacing": {
+          "scope": "window",
+          "type": "string",
+          "markdownDescription": "Default spacing between list items",
+          "default": "spaced",
+          "enum": ["spaced", "tight"]
+        },
         "quarto.visualEditor.lineNumbers": {
           "scope": "window",
           "type": "boolean",

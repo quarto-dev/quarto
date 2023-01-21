@@ -28,6 +28,7 @@ const kEditorCursorBlinking = "editor.cursorBlinking";
 const kQuartoVisualEditorLineNumbers = "quarto.visualEditor.lineNumbers";
 const kQuartoVisualEditorSpelling = "quarto.visualEditor.spelling";
 const kQuartoVisualEditorSpellingDictionary = "quarto.visualEditor.spellingDictionary";
+const kQuartoVisualEditoDefaultListSpacing = "quarto.visualEditor.defaultListSpacing";
 
 const kMonitoredConfigurations = [
   kEditorAutoClosingBrackets,
@@ -38,7 +39,8 @@ const kMonitoredConfigurations = [
   kEditorCursorBlinking,
   kQuartoVisualEditorLineNumbers,
   kQuartoVisualEditorSpelling,
-  kQuartoVisualEditorSpellingDictionary
+  kQuartoVisualEditorSpellingDictionary,
+  kQuartoVisualEditoDefaultListSpacing
 ];
 
 export function vscodePrefsServer(
@@ -57,6 +59,9 @@ export function vscodePrefsServer(
       // spelling settings
       realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
       dictionaryLocale: configuration.get<string>(kQuartoVisualEditorSpellingDictionary, "en_US"),
+
+      // quarto editor settings
+      listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoVisualEditoDefaultListSpacing, 'spaced'),
 
       // vscode code editor settings
       spacesForTab: configuration.get<boolean>(kEditorInsertSpaces, true),

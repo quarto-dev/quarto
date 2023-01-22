@@ -85,7 +85,7 @@ export function editorSyncManager(
         if (pendingVisualEdit === undefined) {
           pendingVisualEdit = state;
         }
-        const message = error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : JSON.stringify(error);
         console.log("Error getting visual editor markdown: " + message);
         return undefined;
       }

@@ -92,7 +92,7 @@ export function jsonRpcPostMessageRequestTransport(target: JsonRpcPostMessageTar
       return new Promise((resolve, reject) => {
         
         // provision id
-        const requestId = Math.random();
+        const requestId = Math.floor(Math.random() * 1000000);
 
         // track request
         requests.set(requestId, { resolve, reject });

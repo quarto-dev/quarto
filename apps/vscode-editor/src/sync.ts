@@ -64,10 +64,11 @@ import {
 
 import { 
   EditorOperations, 
+  PandocWriterOptions, 
   UpdateEvent 
 } from "editor";
 
-import { Command, EditorUIStore, t, updatePrefsApi } from "editor-ui";
+import { Command, EditorUIStore, readPrefsApi, t, updatePrefsApi } from "editor-ui";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -105,10 +106,24 @@ export async function syncEditorToHost(
   focus: boolean
 )  {
 
+  // determine markdown writer options from current state of the prefs store
+  const writerOptions = () => {
+    const prefs = readPrefsApi(store);
+    const options: PandocWriterOptions = {};
+    options.wrap = prefs.markdownWrap === "column" 
+      ? String(prefs.markdownWrapColumn) 
+      : prefs.markdownWrap;
+    options.references = {
+      location: prefs.markdownReferences,
+      prefix: prefs.markdownReferencesPrefix || undefined
+    }
+    return options;
+  }
+
   // sync from text editor (throttled)
   const kThrottleDelayMs = 1000;
   const receiveEdit = throttle((markdown) => {
-    editor.setMarkdown(markdown, {}, false)
+    editor.setMarkdown(markdown, writerOptions(), false)
       .finally(() => {
         // done
       });
@@ -119,7 +134,7 @@ export async function syncEditorToHost(
     async init(markdown: string) {
 
       // init editor contents and sync cannonical version back to text editor
-      const result = await editor.setMarkdown(markdown, {}, false);
+      const result = await editor.setMarkdown(markdown, writerOptions(), false);
 
       if (result) {
 
@@ -141,7 +156,21 @@ export async function syncEditorToHost(
     },
 
     async prefsChanged(prefs: Prefs): Promise<void> {
+
+      // save existing writer options (for comparison)
+      const prevOptions = writerOptions();
+    
+      // update prevs
       await updatePrefsApi(store, prefs);
+
+      // if markdown writing options changed then force a refresh
+      const options = writerOptions();
+      if (prevOptions.wrap !== options.wrap ||
+          prevOptions.references?.location !== options.references?.location ||
+          prevOptions.references?.prefix !== options.references?.prefix) {
+        await host.onEditorUpdated(editor.getStateJson());
+        await host.flushEditorUpdates();      
+      }
     },
 
     async focus() {
@@ -160,7 +189,7 @@ export async function syncEditorToHost(
     },
 
     async getMarkdownFromState(state: unknown): Promise<string> {
-      const markdown = await editor.getMarkdownFromStateJson(state, {});
+      const markdown = await editor.getMarkdownFromStateJson(state, writerOptions());
       return markdown;
     },
   })

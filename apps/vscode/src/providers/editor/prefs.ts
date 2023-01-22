@@ -29,6 +29,9 @@ const kQuartoVisualEditorLineNumbers = "quarto.visualEditor.lineNumbers";
 const kQuartoVisualEditorSpelling = "quarto.visualEditor.spelling";
 const kQuartoVisualEditorSpellingDictionary = "quarto.visualEditor.spellingDictionary";
 const kQuartoVisualEditoDefaultListSpacing = "quarto.visualEditor.defaultListSpacing";
+const kQuartoEditorMarkdownWrap = "quarto.visualEditor.markdownWrap";
+const kQuartoEditorMarkdownWrapColumn = "quarto.visualEditor.markdownWrapColumn";
+const kQuartoEditorMarkdownReferences = "quarto.visualEditor.markdownReferences";
 
 const kMonitoredConfigurations = [
   kEditorAutoClosingBrackets,
@@ -40,7 +43,10 @@ const kMonitoredConfigurations = [
   kQuartoVisualEditorLineNumbers,
   kQuartoVisualEditorSpelling,
   kQuartoVisualEditorSpellingDictionary,
-  kQuartoVisualEditoDefaultListSpacing
+  kQuartoVisualEditoDefaultListSpacing,
+  kQuartoEditorMarkdownWrap,
+  kQuartoEditorMarkdownWrapColumn,
+  kQuartoEditorMarkdownReferences
 ];
 
 export function vscodePrefsServer(
@@ -54,7 +60,9 @@ export function vscodePrefsServer(
     
     const configuration = workspace.getConfiguration(undefined, uri);
      
-    const prefs = { ...(await server.getPrefs()), 
+    const prefs = { 
+      
+      ...(await server.getPrefs()), 
       
       // spelling settings
       realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
@@ -62,6 +70,11 @@ export function vscodePrefsServer(
 
       // quarto editor settings
       listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoVisualEditoDefaultListSpacing, 'spaced'),
+
+      // markdown writer settings
+      markdownWrap: configuration.get<'none' | 'column' | 'sentence'>(kQuartoEditorMarkdownWrap, 'none'),
+      markdownWrapColumn: configuration.get<number>(kQuartoEditorMarkdownWrapColumn, 72),
+      markdownReferences: configuration.get<'block' | 'section' | 'document'>(kQuartoEditorMarkdownReferences, 'block'),
 
       // vscode code editor settings
       spacesForTab: configuration.get<boolean>(kEditorInsertSpaces, true),

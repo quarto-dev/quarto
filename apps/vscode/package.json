@@ -849,7 +849,7 @@
         "quarto.render.renderOnSave": {
           "scope": "window",
           "type": "boolean",
-          "markdownDescription": "Automatically render documents when they are saved. Note that you can also use the `render-on-save` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\neditor:\n  render-on-save: true\n```\n"
+          "markdownDescription": "Automatically render documents when they are saved. Note that you can also use the `render-on-save` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  render-on-save: true\n---\n```\n"
         },
         "quarto.render.previewType": {
           "scope": "window",
@@ -918,6 +918,36 @@
             "German",
             "Italian",
             "Russian"
+          ]
+        },
+        "quarto.visualEditor.markdownWrap": {
+          "scope": "window",
+          "type": "string",
+          "markdownDescription": "Automatic text wrapping (line breaks). Note that you can also use the `editor: markdown: wrap` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    wrap: column\n---\n```\n",
+          "default": "none",
+          "enum": ["none", "column", "sentence"],
+          "markdownEnumDescriptions": [
+            "Do not perform any text wraping",
+            "Wrap text to occupy a fixed number of columns",
+            "Insert a line break after each sentence"
+          ]
+        },
+        "quarto.visualEditor.markdownWrapColumn": {
+          "scope": "window",
+          "type": "number",
+          "default": 72,
+          "markdownDescription": "Column to wrap at when `markdownWrap` is set to `column`. Note that you can also use the `editor: markdown: wrap` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    wrap: 72\n---\n```\n"
+        },
+        "quarto.visualEditor.markdownReferences": {
+          "scope": "window",
+          "type": "string",
+          "markdownDescription": "Scope to write markdown references (footnotes) at the end of. Note that you can also use the `editor: markdown: references: location` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    references:\n      location: document\n---\n```\n",
+          "default": "block",
+          "enum": ["block", "section", "document"],
+          "markdownEnumDescriptions": [
+            "Write references at the end of the block where they appear.",
+            "Write references at the end of the section where they appear.",
+            "Write references at the end of the document."
           ]
         }
       }

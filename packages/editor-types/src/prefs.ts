@@ -38,6 +38,12 @@ export interface Prefs {
   readonly tabKeyMoveFocus: boolean;
   readonly equationPreview: boolean;
 
+  // markdown
+  readonly markdownWrap: 'none' | 'column' | 'sentence';
+  readonly markdownWrapColumn: number;
+  readonly markdownReferences: 'block' | 'section' | 'document';
+  readonly markdownReferencesPrefix: string;
+
   // citations
   readonly zoteroUseBetterBibtex: boolean;
   readonly bibliographyDefaultType: 'bib' | 'yaml' | 'json';
@@ -73,6 +79,12 @@ export function defaultPrefs() : Prefs {
     listSpacing: 'spaced',
     tabKeyMoveFocus: false,
     equationPreview: true,
+
+    // markdown
+    markdownWrap: 'none',
+    markdownWrapColumn: 72,
+    markdownReferences: 'block',
+    markdownReferencesPrefix: '',
 
     // citations
     zoteroUseBetterBibtex: false,

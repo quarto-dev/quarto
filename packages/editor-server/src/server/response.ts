@@ -48,7 +48,7 @@ export async function handleResponseWithStatus<T>(request: () => Promise<Respons
       }
     }
   } catch(error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? error.message : JSON.stringify(error);
     return {
       status: message.includes("ENOTFOUND") ? kStatusNoHost : kStatusError,
       message: null,

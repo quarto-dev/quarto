@@ -103,7 +103,7 @@ export function mathjaxTypeset(tex: string, options: MathjaxTypesetOptions, docT
       return { error: `Unkown format ${options.format}`};
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? error.message : JSON.stringify(error);
     return { error: message };
   }
 }

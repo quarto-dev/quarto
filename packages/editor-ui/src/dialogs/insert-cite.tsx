@@ -236,7 +236,7 @@ const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
     } catch (err) {
       displayError(
         t('Error Looking up DOI'),
-        err instanceof Error ? err.message : String(err)
+        err instanceof Error ? err.message : JSON.stringify(err)
       )
     }
   }, []);

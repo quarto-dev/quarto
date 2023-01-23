@@ -31,6 +31,7 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 import { 
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_PrefsChanged,
+  VSC_VE_ThemeChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_Init, 
   VSC_VE_Focus,
@@ -69,6 +70,7 @@ import {
 } from "editor";
 
 import { Command, EditorUIStore, readPrefsApi, t, updatePrefsApi } from "editor-ui";
+import { editorThemeFromVSCode } from "./theme";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -133,6 +135,9 @@ export async function syncEditorToHost(
   visualEditorHostServer(host.vscode, {
     async init(markdown: string) {
 
+      // apply initial theme
+      editor.applyTheme(editorThemeFromVSCode());
+
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, writerOptions(), false);
 
@@ -171,6 +176,10 @@ export async function syncEditorToHost(
         await host.onEditorUpdated(editor.getStateJson());
         await host.flushEditorUpdates();      
       }
+    },
+
+    async themeChanged(): Promise<void> {
+      editor.applyTheme(editorThemeFromVSCode());
     },
 
     async focus() {
@@ -258,7 +267,8 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_IsFocused]: () => editor.isFocused(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
-    [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0])
+    [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
+    [VSC_VE_ThemeChanged]: () => editor.themeChanged()
   })
 }
 

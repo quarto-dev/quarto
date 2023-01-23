@@ -272,6 +272,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     );
     disposables.push(unsubscribe);
 
+    // monitor theme changed and forward to visual editor
+    disposables.push(window.onDidChangeActiveColorTheme(() => {
+      client.editor.themeChanged();
+    }));
+    
+
     // setup server on webview iframe
     disposables.push(visualEditorServer(
       webviewPanel, 

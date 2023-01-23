@@ -87,6 +87,7 @@ import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 import { EditorFind } from './EditorFind';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import { EditorLoadFailed } from './EditorLoadFailed';
+import { EditorTheme } from 'editor/src/editor/editor-theme';
 
 
 export interface EditorProps {
@@ -296,6 +297,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
     },
     navigate(type: NavigationType, id: string) {
       editorRef.current?.navigate(type, id);
+    },
+    applyTheme(theme: EditorTheme) {
+      editorRef.current?.applyTheme(theme);
     },
     subscribe<TDetail>(event: string | EventType<TDetail>, handler: EventHandler<TDetail>) {
       return editorRef.current!.subscribe(event, handler);

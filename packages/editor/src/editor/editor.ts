@@ -289,6 +289,9 @@ export interface EditorOperations {
   focus(): void;
   hasFocus(): boolean;
   navigate(type: NavigationType, id: string): void;
+
+  // theme
+  applyTheme(theme: EditorTheme): void;
  
   // events
   subscribe<TDetail>(event: EventType<TDetail> | string, handler: EventHandler<TDetail>): VoidFunction;
@@ -343,7 +346,7 @@ export class Editor implements EditorOperations {
     parent: HTMLElement,
     context: EditorContext,
     format: EditorFormat,
-    options?: EditorOptions,
+    options?: EditorOptions
   ): Promise<Editor> {
     // provide option defaults
     options = {

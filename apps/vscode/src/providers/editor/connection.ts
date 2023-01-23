@@ -42,6 +42,7 @@ import {
   VSC_VEH_SaveDocument,
   VSC_VEH_RenderDocument,
   VSC_VE_PrefsChanged,
+  VSC_VE_ThemeChanged,
   Prefs,
   PrefsServer
 } from "editor-types";
@@ -74,8 +75,8 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
-      prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs])
-
+      prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
+      themeChanged: () =>request(VSC_VE_ThemeChanged, [])
     },
     dispose: disconnect
   };

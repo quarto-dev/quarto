@@ -96,7 +96,7 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
   );
   const padding = 12;
   const width = `calc(${dialogWidgetRef.current.style.width} + ${2 * padding}px`;
-  const height = `calc(${dialogWidgetRef.current.style.height} + ${padding}px`;
+  const height = `calc(${dialogWidgetRef.current.style.height} + ${2.5 * padding}px`;
 
   const dialogBodyRef = (el: HTMLDivElement | null) => {
     if (el) {

@@ -17,15 +17,17 @@ import semver from "semver";
 
 import vscode from "vscode";
 import { TextDocument, Uri, workspace } from "vscode";
-import { parseFrontMatterStr, projectDirForDocument } from "quarto-core";
 
-import { MarkdownEngine } from "../../markdown/engine";
 import {
+  projectDirForDocument,
   metadataFilesForDocument,
   yamlFromMetadataFile,
 } from "quarto-core";
 import { isNotebook, quartoEditor, QuartoEditor } from "../../core/doc";
 import { VisualEditorProvider } from "../editor/editor";
+
+import { MarkdownEngine } from "../../markdown/engine";
+import { documentFrontMatter } from "../../markdown/document";
 
 
 export function findEditor(
@@ -101,23 +103,6 @@ export async function isQuartoShinyDoc(
   }
 }
 
-export async function documentFrontMatter(
-  engine: MarkdownEngine,
-  doc: TextDocument
-): Promise<Record<string, unknown>> {
-  const tokens = await engine.parse(doc);
-  const yaml = tokens.find((token) => token.type === "front_matter");
-  if (yaml) {
-    const frontMatter = parseFrontMatterStr(yaml.markup);
-    if (typeof frontMatter === "object") {
-      return frontMatter as Record<string, unknown>;
-    } else {
-      return {};
-    }
-  } else {
-    return {};
-  }
-}
 
 export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
   // if its a notebook and we don't have a save hook for notebooks then don't

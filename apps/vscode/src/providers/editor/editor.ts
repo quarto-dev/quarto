@@ -46,13 +46,15 @@ import { editorSyncManager } from "./sync";
 import { documentImageResolver } from "./images";
 import { clearInterval } from "timers";
 import { vscodePrefsServer } from "./prefs";
+import { MarkdownEngine } from "../../markdown/engine";
 
 export function activateEditor(
   context: ExtensionContext,
   quartoContext: QuartoContext,
-  lspClient: LanguageClient
+  lspClient: LanguageClient,
+  engine: MarkdownEngine
 ) {
-  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient));
+  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient, engine));
 }
 
 export class VisualEditorProvider implements CustomTextEditorProvider {
@@ -67,7 +69,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   public static register(
     context: ExtensionContext, 
     quartoContext: QuartoContext,
-    lspClient: LanguageClient
+    lspClient: LanguageClient,
+    engine: MarkdownEngine
   ) : Disposable {
 
     // track edits in the active editor if its untitled. this enables us to recover the
@@ -82,7 +85,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
     }));
 
-    const provider = new VisualEditorProvider(context, quartoContext, lspClient);
+    const provider = new VisualEditorProvider(context, quartoContext, lspClient, engine);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -118,7 +121,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   constructor(private readonly context: ExtensionContext,
               private readonly quartoContext: QuartoContext,
-              private readonly lspClient: LanguageClient) {}
+              private readonly lspClient: LanguageClient,
+              private readonly engine: MarkdownEngine) {}
 
  
   public resolveCustomTextEditor(
@@ -262,7 +266,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // create prefs server that also monitors for changes and forwards them to the visual editor
     const [prefsServer, unsubscribe] = vscodePrefsServer(
-      document.uri,
+      this.engine,
+      document,
       client.editor.prefsChanged.bind(client.editor)
     );
     disposables.push(unsubscribe);

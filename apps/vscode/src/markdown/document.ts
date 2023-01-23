@@ -15,6 +15,9 @@
 
 import * as vscode from "vscode";
 
+import { parseFrontMatterStr } from "quarto-core";
+import { MarkdownEngine } from "./engine";
+
 export interface MarkdownTextLine {
   text: string;
 }
@@ -26,4 +29,34 @@ export interface MarkdownTextDocument {
 
   lineAt(line: number): MarkdownTextLine;
   getText(): string;
+}
+
+export async function documentFrontMatterYaml(
+  engine: MarkdownEngine,
+  doc: vscode.TextDocument
+) {
+  const tokens = await engine.parse(doc);
+  const yaml = tokens.find((token) => token.type === "front_matter");
+  if (yaml) {
+    return yaml.markup;
+  } else {
+    return '';
+  }
+}
+
+export async function documentFrontMatter(
+  engine: MarkdownEngine,
+  doc: vscode.TextDocument
+): Promise<Record<string, unknown>> {
+  const yaml = await documentFrontMatterYaml(engine, doc);
+  if (yaml) {
+    const frontMatter = parseFrontMatterStr(yaml);
+    if (typeof frontMatter === "object") {
+      return frontMatter as Record<string, unknown>;
+    } else {
+      return {};
+    }
+  } else {
+    return {};
+  }
 }

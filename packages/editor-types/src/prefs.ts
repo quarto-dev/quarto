@@ -21,7 +21,14 @@ export interface PrefsProvider {
   setPrefs(prefs: Record<string,unknown>) : void;
 }
 
-export interface Prefs {
+export interface MarkdownPrefs {
+  readonly markdownWrap: 'none' | 'column' | 'sentence';
+  readonly markdownWrapColumn: number;
+  readonly markdownReferences: 'block' | 'section' | 'document';
+  readonly markdownReferencesPrefix: string;
+}
+
+export interface Prefs extends MarkdownPrefs {
   // view
   readonly showOutline: boolean;
 
@@ -37,12 +44,6 @@ export interface Prefs {
   readonly listSpacing: 'tight' | 'spaced';
   readonly tabKeyMoveFocus: boolean;
   readonly equationPreview: boolean;
-
-  // markdown
-  readonly markdownWrap: 'none' | 'column' | 'sentence';
-  readonly markdownWrapColumn: number;
-  readonly markdownReferences: 'block' | 'section' | 'document';
-  readonly markdownReferencesPrefix: string;
 
   // citations
   readonly zoteroUseBetterBibtex: boolean;
@@ -60,6 +61,15 @@ export interface Prefs {
 
   // code editing (native settings)
   readonly lineNumbers: boolean;
+}
+
+export function defaultMarkdownPrefs(): MarkdownPrefs {
+  return {
+    markdownWrap: 'none',
+    markdownWrapColumn: 72,
+    markdownReferences: 'block',
+    markdownReferencesPrefix: '',
+  }
 }
 
 export function defaultPrefs() : Prefs {
@@ -81,11 +91,8 @@ export function defaultPrefs() : Prefs {
     equationPreview: true,
 
     // markdown
-    markdownWrap: 'none',
-    markdownWrapColumn: 72,
-    markdownReferences: 'block',
-    markdownReferencesPrefix: '',
-
+    ...defaultMarkdownPrefs(),
+   
     // citations
     zoteroUseBetterBibtex: false,
     bibliographyDefaultType: 'bib',

@@ -13,7 +13,7 @@
  *
  */
 
-import { Disposable, TextDocument, workspace } from "vscode";
+import { Disposable, TextDocument, workspace, window, ColorThemeKind } from "vscode";
 
 import throttle from "lodash.throttle";
 
@@ -70,6 +70,10 @@ export function vscodePrefsServer(
     const prefs = { 
       
       ...(await server.getPrefs()), 
+
+      // dark mode
+      darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
+                window.activeColorTheme.kind === ColorThemeKind.HighContrast,
       
       // spelling settings
       realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
@@ -111,6 +115,11 @@ export function vscodePrefsServer(
     if (kMonitoredConfigurations.some(config => e.affectsConfiguration(config))) {
       firePrefsChanged();
     }
+  }));
+
+  // color theme changes
+  disposables.push(window.onDidChangeActiveColorTheme(e => {
+    firePrefsChanged();
   }));
 
   // front matter changes (only on save)

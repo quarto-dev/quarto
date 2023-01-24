@@ -76,7 +76,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
       prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
-      themeChanged: () =>request(VSC_VE_ThemeChanged, [])
+      themeChanged: (fontSize: number) =>request(VSC_VE_ThemeChanged, [fontSize])
     },
     dispose: disconnect
   };

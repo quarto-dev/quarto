@@ -50,7 +50,7 @@ export interface VSCodeVisualEditor {
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
   prefsChanged: (prefs: Prefs) => Promise<void>;
-  themeChanged: () => Promise<void>;
+  themeChanged: (fontSize: number) => Promise<void>;
 }
 
 export interface HostContext {

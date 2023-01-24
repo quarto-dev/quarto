@@ -178,8 +178,8 @@ export async function syncEditorToHost(
       }
     },
 
-    async themeChanged(): Promise<void> {
-      editor.applyTheme(editorThemeFromVSCode());
+    async themeChanged(fontSize: number): Promise<void> {
+      editor.applyTheme(editorThemeFromVSCode(fontSize));
     },
 
     async focus() {
@@ -268,7 +268,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
-    [VSC_VE_ThemeChanged]: () => editor.themeChanged()
+    [VSC_VE_ThemeChanged]: args => editor.themeChanged(args[0])
   })
 }
 

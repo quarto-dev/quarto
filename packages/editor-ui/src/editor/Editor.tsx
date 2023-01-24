@@ -42,7 +42,9 @@ import {
   EventHandler,
   PandocWriterOptions,
   EditorOptions,
-  EditorContext
+  EditorContext,
+  defaultTheme,
+  EditorTheme
 } from 'editor';
 
 import { 
@@ -87,7 +89,6 @@ import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 import { EditorFind } from './EditorFind';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import { EditorLoadFailed } from './EditorLoadFailed';
-import { EditorTheme } from 'editor/src/editor/editor-theme';
 
 
 export interface EditorProps {
@@ -184,6 +185,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
     editorRef.current = await createEditor(
       parentRef.current!, 
       props.options || {},
+      props.options?.initialTheme || defaultTheme(),
       context
     );
     
@@ -416,6 +418,7 @@ const editorLoadingUI = (uiContext: EditorUIContext, loading: boolean, loadError
 const createEditor = async (
   parent: HTMLElement, 
   options: EditorOptions,
+  theme: EditorTheme,
   context: EditorContext
 ) : Promise<PMEditor> => {
   const format: EditorFormat = {
@@ -431,7 +434,7 @@ const createEditor = async (
     },
     docTypes: [kQuartoDocType]
   }
-  return await PMEditor.create(parent, context, format, options);
+  return await PMEditor.create(parent, context, format, options, theme);
 }
 
 

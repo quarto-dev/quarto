@@ -34,6 +34,8 @@ import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } 
 
 import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
+import { editorThemeFromVSCode } from './theme';
+
 
 import styles from './Editor.module.scss';
 
@@ -98,7 +100,8 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         display={editorDisplay(props.host)}
         onEditorInit={onEditorInit}
         options={{
-          cannotEditUntitled: true 
+          cannotEditUntitled: true,
+          initialTheme: editorThemeFromVSCode() 
         }}
       />
     </div>

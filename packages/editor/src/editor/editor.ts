@@ -139,6 +139,8 @@ import './styles/frame.css';
 import './styles/styles.css';
 import { ExtensionManager, initExtensions } from './editor-extensions';
 import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
+export { defaultTheme };
+export type { EditorTheme };
 
 // re-export editor ui
 export * from '../api/ui-types';
@@ -325,6 +327,10 @@ export class Editor implements EditorOperations {
   private readonly view: EditorView;
   private readonly pandocConverter: PandocConverter;
 
+
+  // track active theme
+  private theme: EditorTheme;
+
   // setting via setKeybindings forces reconfiguration of EditorState
   // with plugins recreated
   private keybindings: EditorKeybindings;
@@ -347,7 +353,8 @@ export class Editor implements EditorOperations {
     parent: HTMLElement,
     context: EditorContext,
     format: EditorFormat,
-    options?: EditorOptions
+    options?: EditorOptions,
+    theme?: EditorTheme
   ): Promise<Editor> {
     // provide option defaults
     options = {
@@ -412,7 +419,7 @@ export class Editor implements EditorOperations {
     const pandocCapabilities = await getPandocCapabilities(context.server.pandoc);
 
     // create editor
-    const editor = new Editor(parent, context, options, format, pandocFmt, pandocCapabilities);
+    const editor = new Editor(parent, context, options, theme || defaultTheme(), format, pandocFmt, pandocCapabilities);
 
     // return editor
     return Promise.resolve(editor);
@@ -422,6 +429,7 @@ export class Editor implements EditorOperations {
     parent: HTMLElement,
     context: EditorContext,
     options: EditorOptions,
+    theme: EditorTheme,
     format: EditorFormat,
     pandocFormat: PandocFormat,
     pandocCapabilities: PandocCapabilities,
@@ -431,10 +439,11 @@ export class Editor implements EditorOperations {
     this.events = new DOMEditorEvents(parent);
     this.context = context;
     this.options = options;
+    this.theme = theme;
     this.format = format;
     this.keybindings = {};
     this.pandocFormat = pandocFormat;
-    this.pandocCapabilities = pandocCapabilities;
+    this.pandocCapabilities = pandocCapabilities;   
 
     // create core extensions
     this.extensions = this.initExtensions();
@@ -491,14 +500,14 @@ export class Editor implements EditorOperations {
       },
     });
 
+    // apply theme
+    this.applyTheme(this.theme);
+
     // Tell extensions about the new view
     this.extensions.view(this.view);
 
     // add proportinal font class to parent
     this.parent.classList.add('pm-proportional-font');
-
-    // apply default theme
-    this.applyTheme(defaultTheme());
 
     // create pandoc translator
     this.pandocConverter = new PandocConverter(
@@ -863,6 +872,9 @@ export class Editor implements EditorOperations {
   }
 
   public applyTheme(theme: EditorTheme) {
+    // save theme (for extensions)
+    this.theme = theme;
+
     // set global mode classes
     this.parent.classList.toggle('pm-dark-mode', !!theme.darkMode);
     this.parent.classList.toggle('pm-solarized-mode', !!theme.solarizedMode);
@@ -983,6 +995,7 @@ export class Editor implements EditorOperations {
         format: this.format,
         options: this.options,
         ui: this.context.ui,
+        theme: () => this.theme,
         math: this.context.ui.math ? editorMath(this.context.ui.math) : undefined,
         events: {
           subscribe: this.subscribe.bind(this),

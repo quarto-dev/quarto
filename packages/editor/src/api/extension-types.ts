@@ -36,6 +36,7 @@ import { EditorNavigation } from './navigation-types';
 import { EditorServer } from 'editor-types';
 import { ContextMenuHandlerFn } from './menu';
 import { EditorFind } from './find-types';
+import { EditorTheme } from '../editor/editor-theme';
 
 export interface Extension {
   view?: (view: EditorView) => void;
@@ -57,6 +58,7 @@ export interface ExtensionContext {
   pandocCapabilities: PandocCapabilities;
   server: EditorServer;
   ui: EditorUI;
+  theme: () => EditorTheme;
   math?: EditorMath;
   format: EditorFormat;
   options: EditorOptions;

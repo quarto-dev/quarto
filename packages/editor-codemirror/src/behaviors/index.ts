@@ -56,7 +56,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     keyboardBehavior(context),
     findBehavior(context),
     indentBehavior(),
-    themeBehavior(),
+    themeBehavior(context),
     prefsBehavior(context),
     trackSelectionBehavior(context)
   ]

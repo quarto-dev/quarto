@@ -13,6 +13,8 @@
  *
  */
 
+import { EditorTheme } from "../editor/editor-theme";
+
 export interface EditorOptions {
   readonly autoFocus?: boolean;
   readonly browserSpellCheck?: boolean;
@@ -24,4 +26,5 @@ export interface EditorOptions {
   readonly className?: string;
   readonly outerScrollContainer?: boolean;
   readonly cannotEditUntitled?: boolean;
+  readonly initialTheme?: EditorTheme;
 }

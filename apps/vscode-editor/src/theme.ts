@@ -63,11 +63,15 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
     : colors["--vscode-editorInfo-foreground"];
   theme.findTextBackgroundColor = colors["--vscode-editor-foldBackground"];
   theme.findTextBorderColor = "transparent";
-  theme.borderBackgroundColor = colors["--vscode-titleBar-inactiveBackground"];
-  theme.blockBorderColor = colors["--vscode-notebook-cellBorderColor"];
+  theme.borderBackgroundColor = theme.darkMode 
+    ? colors["--vscode-titleBar-activeBackground"]
+    : colors["--vscode-titleBar-inactiveBackground"];
+  theme.blockBorderColor = theme.darkMode 
+    ? colors["--vscode-sideBarSectionHeader-border"]
+    : colors["--vscode-notebook-cellBorderColor"];
   theme.focusOutlineColor = colors["--vscode-focusBorder"];
   theme.paneBorderColor = colors["--vscode-sideBarSectionHeader-border"];
-  theme.fixedWidthFont = `"${colors["--vscode-editor-font-family"]}"`;
+  theme.fixedWidthFont = colors["--vscode-editor-font-family"];
   theme.proportionalFont = '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif';
 
   // if not font size is specified then compute it from vscode css
@@ -76,13 +80,9 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
     const match = editorFontSize.match(/(\d+)px/);
     fontSizePx = match ? parseInt(match[1]) : 12;
   }
-  const fontSizePt = Math.round(fontSizePx / 1.333) + 1;
+  const fontSizePt = Math.round(fontSizePx / 1.333) ;
   theme.fixedWidthFontSizePt = fontSizePt;
-  theme.proportionalFontSizePt = fontSizePt;
-  
-
-  // TODO: theme.code
-  // TODO: dialogs/toolbar
+  theme.proportionalFontSizePt = fontSizePt + 1;
 
   return theme;
 

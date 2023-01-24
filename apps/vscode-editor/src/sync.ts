@@ -31,7 +31,6 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 import { 
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_PrefsChanged,
-  VSC_VE_ThemeChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_Init, 
   VSC_VE_Focus,
@@ -174,8 +173,11 @@ export async function syncEditorToHost(
       // save existing writer options (for comparison)
       const prevOptions = writerOptions();
     
-      // update prevs
+      // update prefs
       await updatePrefsApi(store, prefs);
+
+      // apply theme
+      applyTheme(prefs.fontSize);
 
       // if markdown writing options changed then force a refresh
       const options = writerOptions();
@@ -185,10 +187,6 @@ export async function syncEditorToHost(
         await host.onEditorUpdated(editor.getStateJson());
         await host.flushEditorUpdates();      
       }
-    },
-
-    async themeChanged(fontSize: number): Promise<void> {
-      applyTheme(fontSize);
     },
 
     async focus() {
@@ -277,7 +275,6 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
-    [VSC_VE_ThemeChanged]: args => editor.themeChanged(args[0])
   })
 }
 

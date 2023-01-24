@@ -272,17 +272,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     );
     disposables.push(unsubscribe);
 
-    // monitor theme changed and forward to visual editor
-    const fontSize = () => workspace.getConfiguration("editor", document.uri).get<number>("fontSize", 12);
-    disposables.push(window.onDidChangeActiveColorTheme(() => {
-      client.editor.themeChanged(fontSize());
-    }));
-    disposables.push(workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration("editor.fontSize")) {
-        client.editor.themeChanged(fontSize());
-      }
-    }));
-
     // setup server on webview iframe
     disposables.push(visualEditorServer(
       webviewPanel, 

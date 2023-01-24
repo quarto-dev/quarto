@@ -29,6 +29,7 @@ const kEditorAutoClosingBrackets = "editor.autoClosingBrackets";
 const kEditorRenderWhitespace = "editor.renderWhitespace";
 const kEditorInsertSpaces = "editor.insertSpaces";
 const kEditorTabSize = "editor.tabSize";
+const kEditorFontSize = "editor.fontSize";
 const kEditorSelectionHighlight = "editor.selectionHighlight";
 const kEditorCursorBlinking = "editor.cursorBlinking";
 const kQuartoVisualEditorLineNumbers = "quarto.visualEditor.lineNumbers";
@@ -44,6 +45,7 @@ const kMonitoredConfigurations = [
   kEditorRenderWhitespace,
   kEditorInsertSpaces,
   kEditorTabSize,
+  kEditorFontSize,
   kEditorSelectionHighlight,
   kEditorCursorBlinking,
   kQuartoVisualEditorLineNumbers,
@@ -71,9 +73,10 @@ export function vscodePrefsServer(
       
       ...(await server.getPrefs()), 
 
-      // dark mode
+      // theme
       darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
                 window.activeColorTheme.kind === ColorThemeKind.HighContrast,
+      fontSize: configuration.get<number>(kEditorFontSize, 12),
       
       // spelling settings
       realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
@@ -118,7 +121,7 @@ export function vscodePrefsServer(
   }));
 
   // color theme changes
-  disposables.push(window.onDidChangeActiveColorTheme(e => {
+  disposables.push(window.onDidChangeActiveColorTheme(() => {
     firePrefsChanged();
   }));
 

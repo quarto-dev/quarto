@@ -24,7 +24,6 @@ export const VSC_VE_GetMarkdown = 'vsc_ve_get_markdown';
 export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 export const VSC_VE_PrefsChanged = 'vsc_ve_prefs_changed';
-export const VSC_VE_ThemeChanged = 'vsc_ve_theme_changed';
 
 export const VSC_VEH_GetHostContext = 'vsc_ve_get_host_context';
 export const VSC_VEH_ReopenSourceMode = 'vsc_ve_reopen_source_mode';
@@ -50,7 +49,6 @@ export interface VSCodeVisualEditor {
   getMarkdownFromState: (state: unknown) => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
   prefsChanged: (prefs: Prefs) => Promise<void>;
-  themeChanged: (fontSize: number) => Promise<void>;
 }
 
 export interface HostContext {

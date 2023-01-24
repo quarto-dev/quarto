@@ -34,6 +34,7 @@ export interface Prefs extends MarkdownPrefs {
 
   // theme
   readonly darkMode: boolean;
+  readonly fontSize: number;
 
   // spelling
   readonly realtimeSpelling: boolean;
@@ -79,6 +80,7 @@ export function defaultPrefs() : Prefs {
 
     // theme
     darkMode: false,
+    fontSize: 12,
 
     // spelling
     realtimeSpelling: true,

@@ -30,39 +30,44 @@ export function editorThemeFromVSCode() {
         .style.getPropertyValue(rv)
     });
 
-  theme.darkMode = document.body.classList.contains('vscode-dark');
-  theme.solarizedMode = (document.body.getAttribute('data-vscode-theme-name') || '').includes('Solarized Light');
-  theme.cursorColor = colors["--vscode-editorCursor-foreground"];
-  theme.selectionColor = colors["--vscode-editor-selectionBackground"];
-  theme.nodeSelectionColor = colors["--vscode-notebook-focusedCellBorder"];
-  theme.backgroundColor = colors["--vscode-editor-background"];
-  theme.metadataBackgroundColor =  theme.backgroundColor;
-  theme.chunkBackgroundColor = colors["--vscode-notebook-cellEditorBackground"];
-  theme.spanBackgroundColor = theme.chunkBackgroundColor;
-  theme.divBackgroundColor = theme.chunkBackgroundColor;
-  theme.commentColor = '#3c4c72';
-  theme.commentBackgroundColor = '#FFECCB';
-  theme.gutterBackgroundColor = '#f0f0f0';
-  theme.gutterTextColor = '#333';
-  theme.textColor = colors["--vscode-editor-foreground"];
-  theme.surfaceWidgetTextColor = colors["--vscode-editorWidget-foreground"];
-  theme.lightTextColor = colors["--vscode-breadcrumb-foreground"];
-  theme.linkTextColor = colors["--vscode-textLink-foreground"];
-  theme.placeholderTextColor = colors["--vscode-editorGhostText-foreground"];
-  theme.invisibleTextColor = colors["--vscode-editorWhitespace-foreground"];
-  theme.markupTextColor = 'rgb(185, 6, 144)';
-  theme.findTextBackgroundColor = 'rgb(250, 250, 255)';
-  theme.findTextBorderColor = 'rgb(200, 200, 250)';
-  theme.borderBackgroundColor = colors["--vscode-titleBar-inactiveBackground"];
-  theme.blockBorderColor = colors["--vscode-notebook-cellBorderColor"];
-  theme.focusOutlineColor = '#5d84cd';
-  theme.paneBorderColor = colors["--vscode-sideBarSectionHeader-border"];
-  theme.fixedWidthFont = `"${colors["--vscode-editor-font-family"]}"`;
-  theme.fixedWidthFontSizePt = 10;
-  theme.proportionalFont =  '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif';
-  theme.proportionalFontSizePt = 10;
+    theme.darkMode = document.body.classList.contains('vscode-dark');
+    theme.solarizedMode = (document.body.getAttribute('data-vscode-theme-name') || '').includes('Solarized Light');
+    theme.cursorColor = colors["--vscode-editorCursor-foreground"];
+    theme.selectionColor = colors["--vscode-editor-selectionBackground"];
+    theme.nodeSelectionColor = colors["--vscode-notebook-focusedCellBorder"];
+    theme.backgroundColor = colors["--vscode-editor-background"];
+    theme.metadataBackgroundColor =  theme.backgroundColor;
+    theme.chunkBackgroundColor = colors["--vscode-notebook-cellEditorBackground"];
+    theme.spanBackgroundColor = theme.chunkBackgroundColor;
+    theme.divBackgroundColor = theme.chunkBackgroundColor;
+    theme.commentColor = colors["--vscode-editor-foreground"];
+    theme.commentBackgroundColor = colors["--vscode-inputOption-activeBackground"];
+    theme.gutterBackgroundColor = theme.chunkBackgroundColor;
+    theme.gutterTextColor = colors["--vscode-editorWidget-foreground"];
+    theme.textColor = colors["--vscode-editor-foreground"];
+    theme.surfaceWidgetTextColor = theme.gutterTextColor;
+    theme.lightTextColor = colors["--vscode-breadcrumb-foreground"];
+    theme.linkTextColor = colors["--vscode-textLink-foreground"];
+    theme.placeholderTextColor = colors["--vscode-editorGhostText-foreground"];
+    theme.invisibleTextColor = colors["--vscode-editorWhitespace-foreground"];
+    theme.markupTextColor = theme.darkMode 
+      ? colors["--vscode-charts-orange"] 
+      : colors["--vscode-editorInfo-foreground"];
+    theme.findTextBackgroundColor = colors["--vscode-editor-foldBackground"];
+    theme.findTextBorderColor = "transparent";
+    theme.borderBackgroundColor = colors["--vscode-titleBar-inactiveBackground"];
+    theme.blockBorderColor = colors["--vscode-notebook-cellBorderColor"];
+    theme.focusOutlineColor = colors["--vscode-focusBorder"];
+    theme.paneBorderColor = colors["--vscode-sideBarSectionHeader-border"];
+    theme.fixedWidthFont = `"${colors["--vscode-editor-font-family"]}"`;
+    theme.fixedWidthFontSizePt = 10;
+    theme.proportionalFont = '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif';
+    theme.proportionalFontSizePt = 10;
 
+  // TODO: font sizes
   // TODO: theme.code
+  // TODO: widget button
+  // TODO: dialogs/toolbar
 
   return theme;
 

@@ -25,7 +25,7 @@ import { getMarkRange, getMarkAttrs } from '../../api/mark';
 
 import { MathType } from '../../api/math';
 import { EditorMath, EditorUI } from '../../api/ui-types';
-import { kSetMarkdownTransaction } from '../../api/transaction';
+import { kSetMarkdownTransaction, kThemeChangedTransaction } from '../../api/transaction';
 import { attrEditDecorationWidget } from '../../api/attr_edit/attr_edit-decoration';
 import { EditorFormat } from '../../api/format';
 import { editMathAttributes, editMathAttributesEnabled } from './math-commands';
@@ -123,7 +123,7 @@ function mathViewPlugin(schema: Schema, format: EditorFormat, ui: EditorUI, math
 
       apply(tr: Transaction, set: DecorationSet, oldState: EditorState, newState: EditorState) {
         // replacing the entire editor triggers decorations
-        if (tr.getMeta(kSetMarkdownTransaction)) {
+        if (tr.getMeta(kSetMarkdownTransaction) || tr.getMeta(kThemeChangedTransaction)) {
           return decorationsForDoc(newState);
 
           // if one of the steps added or removed a mark of our type then rescan the doc.

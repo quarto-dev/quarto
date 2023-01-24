@@ -20,7 +20,7 @@ import { DecorationSet, Decoration } from 'prosemirror-view';
 
 import { EditorUI } from '../../api/ui-types';
 import { pandocAttrEnabled, pandocAttrAvailable } from '../../api/pandoc_attr';
-import { kSetMarkdownTransaction, transactionsAreTypingChange, forChangedNodes } from '../../api/transaction';
+import { kSetMarkdownTransaction, transactionsAreTypingChange, forChangedNodes, kThemeChangedTransaction } from '../../api/transaction';
 
 import { PandocExtensions } from '../../api/pandoc';
 import { Extension } from '../../api/extension';
@@ -142,7 +142,7 @@ class AttrEditDecorationPlugin extends Plugin<DecorationSet> {
         apply: (tr: Transaction, set: DecorationSet, oldState: EditorState, newState: EditorState) => {
 
           // replacing the entire editor triggers decorations
-          if (tr.getMeta(kSetMarkdownTransaction)) {
+          if (tr.getMeta(kSetMarkdownTransaction) || tr.getMeta(kThemeChangedTransaction)) {
             return decoratorsForDoc(newState);
           }
 

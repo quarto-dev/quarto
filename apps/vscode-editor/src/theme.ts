@@ -75,7 +75,6 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   
 
   // TODO: theme.code
-  // TODO: widget button
   // TODO: dialogs/toolbar
 
   return theme;

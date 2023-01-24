@@ -48,7 +48,7 @@ import { Extension, ExtensionFn } from '../api/extension';
 import { PandocWriterOptions } from '../api/pandoc-types';
 import { PandocCapabilities, getPandocCapabilities } from '../api/pandoc_capabilities';
 import { fragmentToHTML } from '../api/html';
-import { EventType, EventHandler, PrefsChangedEvent } from '../api/event-types';
+import { EventType, EventHandler, PrefsChangedEvent, ThemeChangedEvent } from '../api/event-types';
 import { DOMEditorEvents } from '../api/events';
 
 import {
@@ -80,6 +80,7 @@ import {
   kAddToHistoryTransaction,
   kSetMarkdownTransaction,
   kNoUpdateTransaction,
+  kThemeChangedTransaction,
 } from '../api/transaction';
 import { getOutlineNodes, getEditingOutlineLocation } from '../api/outline';
 import { EditingLocation, getEditingLocation, setEditingLocation } from '../api/location';
@@ -865,8 +866,18 @@ export class Editor implements EditorOperations {
     // set global mode classes
     this.parent.classList.toggle('pm-dark-mode', !!theme.darkMode);
     this.parent.classList.toggle('pm-solarized-mode', !!theme.solarizedMode);
+    
     // apply the rest of the theme
     applyTheme(theme);
+
+    // effect transaction for theme
+    const tr = this.state.tr;
+    tr.setMeta(kThemeChangedTransaction, true);
+    tr.setMeta(kAddToHistoryTransaction, false);
+    this.view.dispatch(tr);
+
+    // fire event
+    this.emitEvent(ThemeChangedEvent);
   }
 
   public setMaxContentWidth(maxWidth: number, minPadding = 10) {

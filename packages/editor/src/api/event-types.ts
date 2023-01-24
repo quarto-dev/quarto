@@ -30,6 +30,7 @@ export const FocusEvent = makeEventType<ProsemirrorNode>('Focus');
 export const DispatchEvent = makeEventType<Transaction>('Dispatch');
 export const NavigateEvent = makeEventType<Navigation>('Navigate');
 export const PrefsChangedEvent =  makeEventType('PrefsChanged');
+export const ThemeChangedEvent = makeEventType('ThemeChanged');
 
 /**
  * Represents an event type; only a single instance of this should exist per

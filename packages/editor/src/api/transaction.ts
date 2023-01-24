@@ -29,6 +29,7 @@ export const kRestoreLocationTransaction = 'restoreLocation';
 export const kNavigationTransaction = 'navigationTransaction';
 export const kInsertSymbolTransaction = 'insertSymbol';
 export const kInsertCompletionTransaction = 'insertCompletion';
+export const kThemeChangedTransaction = 'themeChnaged';
 
 export type TransactionsFilter = (transactions: readonly Transaction[], oldState: EditorState, newState: EditorState) => boolean;
 

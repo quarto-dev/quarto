@@ -403,7 +403,7 @@ const editorLoadingUI = (uiContext: EditorUIContext, loading: boolean, loadError
     return <EditorLoadFailed uiContext={uiContext} error={loadError} />
   } if (loading) {
     return (
-      <div className={['ProseMirror', styles.editorLoading].join(' ')}>
+      <div className={['ProseMirror'].join(' ')}>
         <div className='body pm-editing-root-node pm-text-color pm-background-color'>
           <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
         </div>

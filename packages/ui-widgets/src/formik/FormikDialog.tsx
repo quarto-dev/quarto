@@ -61,8 +61,7 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
           onOpening={props.onOpening}
           onOpened={props.onOpened}
           onClose={() => formikProps.resetForm()}
-          className={[styles.dialog].concat(props.className || []).join(' ')}
-          {...modalDialogProps()}
+          {...modalDialogProps([styles.dialog].concat(props.className || []), {}, true)}
         >
           <Form onSubmit={onSubmit} ref={formRef}>
             <FormikFocusError formRef={formRef}/>

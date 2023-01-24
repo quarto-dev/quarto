@@ -25,6 +25,7 @@ import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './s
 
 import "editor-ui/src/styles";
 import "./styles.scss"
+import { applyDarkMode } from "./theme";
 
 async function runEditor() {
   try {
@@ -44,6 +45,7 @@ async function runEditor() {
 
     // render
     const root = createRoot(document.getElementById('root')!);
+    applyDarkMode(store);
     root.render(<App store={store} host={host} context={context} request={request}/>);
   } catch (error) {
     console.error(error);

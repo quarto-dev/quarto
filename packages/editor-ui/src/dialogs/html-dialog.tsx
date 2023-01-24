@@ -109,7 +109,7 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
       title={props.title}
       isOpen={isOpen}
       onClose={onCancel}
-      {...modalDialogProps({width: 'auto', position: 'relative'})}
+      {...modalDialogProps([], {width: 'auto', position: 'relative'}, false)}
       shouldReturnFocusOnClose={false}
     > 
       <div style={{width, height, padding: padding + 'px'}}>

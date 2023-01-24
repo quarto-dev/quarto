@@ -14,7 +14,14 @@
  */
 
 
+import { EditorUIStore, readPrefsApi } from "editor-ui";
 import { defaultTheme } from "editor/src/editor/editor-theme";
+
+export function applyDarkMode(store: EditorUIStore) {
+  const prefs = readPrefsApi(store);
+  const root = document.getElementById('root');
+  root?.classList.toggle('bp4-dark', prefs.darkMode);  
+}
 
 export function editorThemeFromVSCode(fontSizePx?: number) {
 

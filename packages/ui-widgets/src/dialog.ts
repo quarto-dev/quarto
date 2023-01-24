@@ -35,7 +35,16 @@ export function showValueEditorDialog<T,O = undefined>(
   });
 }
 
-export function modalDialogProps(style?: React.CSSProperties) : Omit<DialogProps, "isOpen"> {
+export function modalDialogProps(classes: string[], style?: React.CSSProperties, themed?: boolean) : Omit<DialogProps, "isOpen"> {
+
+  // if we have a 'root' element in dark mode then propagate to the dialog
+  if (themed) {
+    const rootEl = globalThis.document.getElementById('root');
+    if (rootEl?.classList.contains('bp4-dark')) {
+      classes = [...classes, 'bp4-dark'];
+    }
+  }
+
   return {
     autoFocus: true,
     enforceFocus: true,
@@ -44,6 +53,7 @@ export function modalDialogProps(style?: React.CSSProperties) : Omit<DialogProps
     isCloseButtonShown: true,
     shouldReturnFocusOnClose: true,
     transitionDuration: 150,
-    style: { userSelect: 'none', ...style}
+    style: { userSelect: 'none', ...style},
+    className: classes.join(' ')
   };
 }

@@ -70,7 +70,7 @@ import {
 } from "editor";
 
 import { Command, EditorUIStore, readPrefsApi, t, updatePrefsApi } from "editor-ui";
-import { editorThemeFromVSCode } from "./theme";
+import { applyDarkMode, editorThemeFromVSCode } from "./theme";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -108,9 +108,12 @@ export async function syncEditorToHost(
   focus: boolean
 )  {
 
+  // get the current prefs
+  const readPrefs = () => readPrefsApi(store);
+
   // determine markdown writer options from current state of the prefs store
   const writerOptions = () => {
-    const prefs = readPrefsApi(store);
+    const prefs = readPrefs();
     const options: PandocWriterOptions = {};
     options.wrap = prefs.markdownWrap === "column" 
       ? String(prefs.markdownWrapColumn) 
@@ -120,6 +123,12 @@ export async function syncEditorToHost(
       prefix: prefs.markdownReferencesPrefix || undefined
     }
     return options;
+  }
+
+  // apply the current theme (including bootstrap class on body)
+  const applyTheme = (fontSize?: number) => {
+    applyDarkMode(store);
+    editor.applyTheme(editorThemeFromVSCode(fontSize));
   }
 
   // sync from text editor (throttled)
@@ -136,7 +145,7 @@ export async function syncEditorToHost(
     async init(markdown: string) {
 
       // apply initial theme
-      editor.applyTheme(editorThemeFromVSCode());
+      applyTheme();
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, writerOptions(), false);
@@ -179,7 +188,7 @@ export async function syncEditorToHost(
     },
 
     async themeChanged(fontSize: number): Promise<void> {
-      editor.applyTheme(editorThemeFromVSCode(fontSize));
+      applyTheme(fontSize);
     },
 
     async focus() {

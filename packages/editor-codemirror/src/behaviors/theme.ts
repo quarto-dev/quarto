@@ -69,7 +69,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
       backgroundColor: options.classes?.includes('pm-chunk-background-color')  
         ? editorTheme.chunkBackgroundColor
         : editorTheme.backgroundColor,
-      borderColor: `${editorTheme.blockBorderColor}`,
+      border: "none",
       fontSize: `${editorTheme.fixedWidthFontSizePt}pt`
     },
 
@@ -107,7 +107,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     ".cm-gutters": {
       backgroundColor: editorTheme.gutterBackgroundColor,
       color: editorTheme.gutterTextColor,
-      border: editorTheme.paneBorderColor,
+      border: "none",
       fontFamily: editorTheme.fixedWidthFont,
       fontSize: `${editorTheme.fixedWidthFontSizePt}pt`
     },

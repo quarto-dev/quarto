@@ -42,19 +42,12 @@ $verticalPadding: 1px;
 .outlineHeader {
   display: inline-flex;
   width: 100%;
-  color: $gray1 !important;
   padding: 9px 12px;
   padding-bottom: 5px;
   padding-right: 7px;
   flex: 0 1 auto;
 }
 
-
-.outlineHeader {
-  :global(.bp4-icon) {
-    color: $gray1 !important;
-  }
-}
 
 .outlineHeaderToggle {
   cursor: pointer;
@@ -69,7 +62,6 @@ $verticalPadding: 1px;
   visibility: hidden;
   margin-left: auto;
   cursor: pointer;
-  color: $gray4;
 }
 
 .outlineVisible .outlineHeaderText,
@@ -84,7 +76,6 @@ $verticalPadding: 1px;
 
 .outlineTree {
   padding: 5px 0;
-  color: $dark-gray4;
 }
 
 .outlineTree {
@@ -123,7 +114,6 @@ $verticalPadding: 1px;
   left: 0;
   top: $verticalPadding;
   z-index: $pt-z-index-overlay;
-  color: $gray1 !important;
   background-color: transparent!important;
   padding: 0 !important;
 }
@@ -131,13 +121,9 @@ $verticalPadding: 1px;
 .showOutlineButton {
   min-height: 34px !important;
   max-height: 34px !important;
-  :global(.bp4-icon) {
-    color: $gray1  !important;
-  }
 }
 
 .outlineEmpty {
   padding: 18px 18px;
-  color: $gray1;
 }
 

@@ -67,7 +67,7 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   // render truee
   return (
     <div className={styles.outlineTreeContainer}>
-      <Tree className={styles.outlineTree} contents={contents} onNodeClick={onNodeClick} />
+      <Tree className={[styles.outlineTree, 'pm-light-text-color'].join(' ')} contents={contents} onNodeClick={onNodeClick} />
     </div>
   );
 };

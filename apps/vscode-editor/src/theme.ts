@@ -69,12 +69,15 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
     : colors["--vscode-titleBar-inactiveBackground"];
   theme.gutterBackgroundColor = theme.borderBackgroundColor;
   theme.gutterTextColor = colors["--vscode-editorWidget-foreground"];
+  theme.toolbarBackgroundColor = theme.darkMode 
+     ? colors["--vscode-debugToolBar-background"]
+     : theme.backgroundColor;
+  theme.toolbarTextColor = theme.gutterTextColor;
+  theme.disabledTextColor = colors["--vscode-disabledForeground"];
   theme.surfaceWidgetTextColor = theme.gutterTextColor;
-  theme.blockBorderColor = theme.darkMode 
-    ? colors["--vscode-sideBarSectionHeader-border"]
-    : colors["--vscode-notebook-cellBorderColor"];
+  theme.blockBorderColor = colors["--vscode-notebook-cellBorderColor"];
   theme.focusOutlineColor = colors["--vscode-focusBorder"];
-  theme.paneBorderColor = colors["--vscode-sideBarSectionHeader-border"];
+  theme.paneBorderColor = colors["--vscode-panel-border"];
   theme.fixedWidthFont = colors["--vscode-editor-font-family"];
   theme.proportionalFont = '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif';
 

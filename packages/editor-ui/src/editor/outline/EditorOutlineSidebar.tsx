@@ -65,7 +65,7 @@ const EditorOutlineSidebar: React.FC = () => {
   }, [prefs.showOutline])
 
 
-  const outlineClassName = [styles.outline];
+  const outlineClassName = [styles.outline, 'pm-pane-border-color'];
     if (prefs.showOutline && loaded) {
       outlineClassName.push(styles.outlineVisible);
     }

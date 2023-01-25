@@ -28,8 +28,11 @@ export interface EditorTheme {
   commentBackgroundColor: string;
   gutterBackgroundColor: string;
   gutterTextColor: string;
+  toolbarBackgroundColor: string;
+  toolbarTextColor: string;
   textColor: string;
   lightTextColor: string;
+  disabledTextColor: string;
   placeholderTextColor: string;
   invisibleTextColor: string;
   linkTextColor: string;
@@ -83,9 +86,12 @@ export function defaultTheme(): EditorTheme {
     commentBackgroundColor: '#FFECCB',
     gutterBackgroundColor: '#f0f0f0',
     gutterTextColor: '#333',
+    toolbarBackgroundColor: '#f3f3f3',
+    toolbarTextColor: '#333',
     textColor: 'black',
     surfaceWidgetTextColor: 'rgba(0,0,0,0.5)',
     lightTextColor: 'rgb(60, 76, 114)',
+    disabledTextColor: "rgba(97, 97, 97, 0.5)",
     linkTextColor: '#106ba3',
     placeholderTextColor: 'gray',
     invisibleTextColor: 'rgb(191, 191, 191)',
@@ -235,6 +241,21 @@ export function applyTheme(theme: EditorTheme) {
     }
     .pm-markup-text-color {
       color: ${theme.markupTextColor} !important;
+    }
+    .pm-toolbar-background-color {
+      background-color: ${theme.toolbarBackgroundColor} !important;
+    }
+    .pm-toolbar-text-color, .pm-toolbar-text-color .bp4-button-text {
+      color: ${theme.toolbarTextColor} !important;
+    }
+    .bp4-portal .bp4-menu,
+    .bp4-portal .bp4-menu .bp4-menu-item:not(:hover) * {
+      color: ${theme.toolbarTextColor} !important;
+      background-color: ${theme.toolbarBackgroundColor} !important;
+    }
+    .bp4-portal .bp4-menu a.bp4-menu-item.bp4-disabled,
+    .bp4-portal .bp4-menu a.bp4-menu-item.bp4-disabled * {
+      color: ${theme.disabledTextColor} !important;
     }
     .pm-find-text,
     .pm-list-item-selected,

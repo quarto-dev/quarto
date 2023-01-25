@@ -43,7 +43,7 @@ const EditorToolbar: React.FC = () => {
 
   if (loaded) {
     return (
-      <Toolbar className={styles.editorToolbar}>
+      <Toolbar className={[styles.editorToolbar, 'pm-pane-border-color', 'pm-toolbar-background-color', 'pm-toolbar-text-color'].join(' ')}>
         <CommandToolbarMenu
           className={styles.toolbarBlockFormatMenu}
           commands={[

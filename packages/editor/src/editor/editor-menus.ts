@@ -103,7 +103,6 @@ function insertMenu(ui: EditorUI, commands: EditorCommand[]) {
             subMenu: {
               items: [
                 { command: EditorCommandId.RCodeChunk },
-                { separator: true },
                 { command: EditorCommandId.PythonCodeChunk },
                 { command: EditorCommandId.BashCodeChunk },
                 { command: EditorCommandId.RcppCodeChunk },

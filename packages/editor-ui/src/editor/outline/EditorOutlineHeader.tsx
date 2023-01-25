@@ -30,7 +30,7 @@ export interface EditorOutlineHeaderProps {
 export const EditorOutlineHeader: React.FC<EditorOutlineHeaderProps> = props => {
 
   return (
-    <div className={styles.outlineHeader}>
+    <div className={[styles.outlineHeader, 'pm-surface-widget-text-color'].join(' ')}>
       <Icon icon={IconNames.ALIGN_JUSTIFY} className={styles.outlineHeaderToggle}  onClick={props.onCloseClicked} />
       <div className={styles.outlineHeaderText}>{t('outline_header_text')}</div>
       <Icon

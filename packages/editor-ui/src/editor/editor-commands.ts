@@ -385,7 +385,6 @@ function editorCommandDefs(): CommandDefs {
       },
       // chunk
       [EditorCommandId.RCodeChunk]: {
-        icon: IconNames.CODE_BLOCK,
         menuText: 'R',
       },
       [EditorCommandId.BashCodeChunk]: {

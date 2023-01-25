@@ -56,15 +56,15 @@ const extension: Extension = {
   },
 
   plugins: (schema: Schema) => {
-    let showHint = true;
+    let hints = 2;
     return [emptyNodePlaceholderPlugin(schema.nodes.paragraph, () => " type / to insert a block (code, math, figure, div, etc.)", tr => {
-      if (showHint !== false) {
+      if (hints > 0) {
         if (selectionWithinLastBodyParagraph(tr.selection)) {
           if (tr.docChanged) {
-            showHint = false;
-            return false;
-          } else {
+            hints--;
             return true;
+          } else {
+            return false;
           }
         } else {
           return false;

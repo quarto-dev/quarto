@@ -34,9 +34,14 @@ export function prefsBehavior(context: BehaviorContext) : Behavior {
     const extensions: Extension[] = [EditorView.lineWrapping];
 
     // show line numbers
-    const showLineNumbers = context.options.lineNumbers && prefs.lineNumbers();
+    const options = context.options ;
+    const showLineNumbers = options.lineNumbers && prefs.lineNumbers();
     if (showLineNumbers) {
-      extensions.push(lineNumbers());
+      extensions.push(lineNumbers({
+        formatNumber: options.lineNumberFormatter 
+          ? (lineNo: number) => options.lineNumberFormatter!(lineNo) 
+          : undefined
+      }));
     }
 
     // highlight selected word

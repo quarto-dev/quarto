@@ -105,6 +105,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
       backgroundColor: editorTheme.gutterBackgroundColor,
       color: editorTheme.gutterTextColor,
       border: "none",
+      paddingRight: "6px",
       fontFamily: editorTheme.fixedWidthFont,
       fontSize: `${editorTheme.fixedWidthFontSizePt}pt`
     },

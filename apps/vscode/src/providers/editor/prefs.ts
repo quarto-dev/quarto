@@ -77,7 +77,7 @@ export function vscodePrefsServer(
       darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
                 window.activeColorTheme.kind === ColorThemeKind.HighContrast,
       fontSize: configuration.get<number>(kEditorFontSize, 12),
-      
+
       // spelling settings
       realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
       dictionaryLocale: configuration.get<string>(kQuartoVisualEditorSpellingDictionary, "en_US"),
@@ -104,7 +104,7 @@ export function vscodePrefsServer(
 
 
   // throttled prefs change handler
-  const kThrottleDelayMs = 1250;
+  const kThrottleDelayMs = 100;
   const firePrefsChanged = throttle(() => {
     getPrefs().then(onPrefsChanged);
   }, kThrottleDelayMs, { leading: false, trailing: true});

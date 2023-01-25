@@ -154,24 +154,29 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
 
 
 function codemirrorHighlightStyle(editorTheme: EditorTheme) {
-  const colors = editorTheme.darkMode ? vscodeDarkHighlightColors : vscodeLightHighlightColors;
+
+  if (editorTheme.solarizedMode) {
+    return solarizedLightHighlightStyle();
+  } else {
+    const colors = editorTheme.darkMode ? vscodeDarkHighlightColors : vscodeLightHighlightColors;
+    return  HighlightStyle.define([
+      {tag: [t.operator, t.operatorKeyword, t.brace], color: colors.operator },
+      {tag: [t.heading], color: colors.heading},
+      {tag: [t.meta,t.comment], color: colors.comment},
+      {tag: [t.keyword, t.moduleKeyword], color: colors.keyword},
+      {tag: [t.number], color: colors.number},
+      {tag: [t.regexp], color: colors.regexp},
+      {tag: [t.definition(t.name)], colors: colors.definition},
+      {tag: [t.invalid], color: colors.invalid},
+      {tag: [t.string], color: colors.string},
+      {tag: [t.bracket, t.angleBracket, t.squareBracket], color: colors.bracket},
+      {tag: [t.function(t.variableName)], color: colors.function},
+      {tag: [t.className], color: colors.className},
+      {tag: [t.controlKeyword], color: colors.controlKeyword},
+      {tag: [t.variableName], color: colors.variableName}
+    ]);
+  }
   
-  return  HighlightStyle.define([
-    {tag: [t.operator, t.operatorKeyword, t.brace], color: colors.operator },
-    {tag: [t.heading], color: colors.heading},
-    {tag: [t.meta,t.comment], color: colors.comment},
-    {tag: [t.keyword, t.moduleKeyword], color: colors.keyword},
-    {tag: [t.number], color: colors.number},
-    {tag: [t.regexp], color: colors.regexp},
-    {tag: [t.definition(t.name)], colors: colors.definition},
-    {tag: [t.invalid], color: colors.invalid},
-    {tag: [t.string], color: colors.string},
-    {tag: [t.bracket, t.angleBracket, t.squareBracket], color: colors.bracket},
-    {tag: [t.function(t.variableName)], color: colors.function},
-    {tag: [t.className], color: colors.className},
-    {tag: [t.controlKeyword], color: colors.controlKeyword},
-    {tag: [t.variableName], color: colors.variableName}
-  ]);
 }
 
 
@@ -230,3 +235,57 @@ const vscodeDarkHighlightColors: CodeMirrorHighlightColors = {
   controlKeyword: "#c586c0",
   variableName: "#4fc1ff"
 }
+
+
+// solarized
+function solarizedLightHighlightStyle() {
+  const config = {
+    name: 'solarizedLight',
+    dark: false,
+    background: '#fdf6e3',
+    foreground: '#586e75',
+    selection: '#eee8d5',
+    cursor: '#657b83',
+    dropdownBackground: '#fdf6e3',
+    dropdownBorder: '#d3af86',
+    activeLine: '#eee8d5',
+    matchingBracket: '#eee8d5',
+    keyword: '#859900',
+    storage: '#073642',
+    variable: '#657b83',
+    parameter: '#657b83',
+    function: '#268BD2',
+    string: '#2AA198',
+    constant: '#CB4B16',
+    type: '#b58900',
+    class: '#268BD2',
+    number: '#D33682',
+    comment: '#93A1A1',
+    heading: '#268BD2',
+    invalid: '#586e75',
+    regexp: '#D30102',
+  }
+  return HighlightStyle.define([
+    {tag: t.keyword, color: config.keyword},
+    {tag: [t.name, t.deleted, t.character, t.macroName], color: config.variable},
+    {tag: [t.propertyName], color: config.function},
+    {tag: [t.processingInstruction, t.string, t.inserted, t.special(t.string)], color: config.string},
+    {tag: [t.function(t.variableName), t.labelName], color: config.function},
+    {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: config.constant},
+    {tag: [t.definition(t.name), t.separator], color: config.variable},
+    {tag: [t.className], color: config.class},
+    {tag: [t.number, t.changed, t.annotation, t.modifier, t.self, t.namespace], color: config.number},
+    {tag: [t.typeName], color: config.type, fontStyle: config.type},
+    {tag: [t.operator, t.operatorKeyword], color: config.keyword},
+    {tag: [t.url, t.escape, t.regexp, t.link], color: config.regexp},
+    {tag: [t.meta, t.comment], color: config.comment},
+    {tag: t.strong, fontWeight: 'bold'},
+    {tag: t.emphasis, fontStyle: 'italic'},
+    {tag: t.link, textDecoration: 'underline'},
+    {tag: t.heading, fontWeight: 'bold', color: config.heading},
+    {tag: [t.atom, t.bool, t.special(t.variableName)], color: config.variable},
+    {tag: t.invalid, color: config.invalid},
+    {tag: t.strikethrough, textDecoration: 'line-through'},
+  ]);
+}
+

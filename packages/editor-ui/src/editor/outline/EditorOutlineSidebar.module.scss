@@ -18,6 +18,7 @@
 @import 'editor-ui/src/variables.scss';
 
 $verticalPadding: 1px;
+$buttonOpacity: 0.6;
 
 .outline {
   position: absolute;
@@ -51,6 +52,7 @@ $verticalPadding: 1px;
 
 .outlineHeaderToggle {
   cursor: pointer;
+  opacity: $buttonOpacity;
 }
 
 .outlineHeaderText {
@@ -62,6 +64,7 @@ $verticalPadding: 1px;
   visibility: hidden;
   margin-left: auto;
   cursor: pointer;
+  opacity: $buttonOpacity;
 }
 
 .outlineVisible .outlineHeaderText,
@@ -116,6 +119,7 @@ $verticalPadding: 1px;
   z-index: $pt-z-index-overlay;
   background-color: transparent!important;
   padding: 0 !important;
+  opacity: $buttonOpacity;
 }
 
 .showOutlineButton {

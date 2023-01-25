@@ -15,15 +15,17 @@
 
 
 import { EditorView } from "@codemirror/view";
-import { defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
-import { oneDarkHighlightStyle } from "@codemirror/theme-one-dark";
-
-import { Behavior, BehaviorContext } from ".";
 import { Compartment } from "@codemirror/state";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+
+import {tags as t} from "@lezer/highlight"
+
 import { CodeViewOptions, EditorTheme, ThemeChangedEvent } from "editor";
 
-export function themeBehavior(context: BehaviorContext) : Behavior {
+import { Behavior, BehaviorContext } from ".";
 
+
+export function themeBehavior(context: BehaviorContext) : Behavior {
 
   const themeConf = new Compartment();
 
@@ -32,7 +34,7 @@ export function themeBehavior(context: BehaviorContext) : Behavior {
     const editorTheme = context.pmContext.theme();
     const extensions = [
       codemirrorTheme(editorTheme, context.options), 
-      syntaxHighlighting(editorTheme.darkMode ? oneDarkHighlightStyle : defaultHighlightStyle)
+      syntaxHighlighting(codemirrorHighlightStyle(editorTheme))
     ];
 
     cmView.dispatch({
@@ -53,13 +55,8 @@ export function themeBehavior(context: BehaviorContext) : Behavior {
     },
 
     cleanup: () => unsubscribe?.()
-
-    
   }
 }
-
-
-// https://github.com/codemirror/theme-one-dark/blob/main/src/one-dark.ts
 
 function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
 
@@ -143,4 +140,83 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
   }, {dark: editorTheme.darkMode})
 
 
+}
+
+
+function codemirrorHighlightStyle(editorTheme: EditorTheme) {
+  const colors = editorTheme.darkMode ? vscodeDarkHighlightColors : vscodeLightHighlightColors;
+  
+  return  HighlightStyle.define([
+    {tag: [t.operator, t.operatorKeyword, t.brace], color: colors.operator },
+    {tag: [t.heading], color: colors.heading},
+    {tag: [t.meta,t.comment], color: colors.comment},
+    {tag: [t.keyword, t.moduleKeyword], color: colors.keyword},
+    {tag: [t.number], color: colors.number},
+    {tag: [t.regexp], color: colors.regexp},
+    {tag: [t.definition(t.name)], colors: colors.definition},
+    {tag: [t.invalid], color: colors.invalid},
+    {tag: [t.string], color: colors.string},
+    {tag: [t.bracket, t.angleBracket, t.squareBracket], color: colors.bracket},
+    {tag: [t.function(t.variableName)], color: colors.function},
+    {tag: [t.className], color: colors.className},
+    {tag: [t.controlKeyword], color: colors.controlKeyword},
+    {tag: [t.variableName], color: colors.variableName}
+  ]);
+}
+
+
+interface CodeMirrorHighlightColors {
+  operator: string;
+  heading: string;
+  comment: string;
+  keyword: string;
+  number: string; // also constant
+  regexp: string;
+  definition: string;
+  invalid: string;
+  string: string;
+  bracket: string;
+  function: string;
+  className: string;
+  controlKeyword: string;
+  variableName: string;
+}
+
+
+// vscode light
+const vscodeLightHighlightColors: CodeMirrorHighlightColors = {
+  operator: "#000000",
+  heading: "#000080",
+  comment: "#008000",
+  keyword: "#0000ff",
+  number: "#098658",
+  regexp: "#811f3f",
+  definition: "#001080",
+  invalid: "#cd3131",
+  string: "#a31515",
+  bracket: "#000000",
+  function: "#795e26",
+  className: "#267f99",
+  controlKeyword: "#af00db",
+  variableName: "#0070c1"
+}
+
+
+
+// vscode dark
+const vscodeDarkHighlightColors: CodeMirrorHighlightColors = {
+  operator: "#d4d4d4",
+  heading: "#000080",
+  comment: "#6a9955",
+  keyword: "#569cd6",
+  number: "#b5cea8",
+  regexp: "#646695",
+  definition: "#9cdcfe",
+  invalid: "#f44747",
+  string: "#ce9178",
+  bracket: "#808080",
+  function: "#dcdcaa",
+  className: "#4ec9b0",
+  controlKeyword: "#c586c0",
+  variableName: "#4fc1ff"
 }

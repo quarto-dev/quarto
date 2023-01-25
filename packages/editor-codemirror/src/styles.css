@@ -26,3 +26,7 @@
   position: absolute;
 }
 
+.pm-codemirror-editor.pm-block-border-color:focus-within {
+  border: none;
+}
+

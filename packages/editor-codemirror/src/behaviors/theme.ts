@@ -73,7 +73,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     },
 
     "&.cm-editor.cm-focused": {
-      outline: "none"
+      outline: `1px solid ${editorTheme.focusOutlineColor}`
     },
 
     ".cm-content": {

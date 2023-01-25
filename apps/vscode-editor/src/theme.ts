@@ -69,9 +69,7 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
     : colors["--vscode-titleBar-inactiveBackground"];
   theme.gutterBackgroundColor = theme.borderBackgroundColor;
   theme.gutterTextColor = colors["--vscode-editorWidget-foreground"];
-  theme.toolbarBackgroundColor = theme.darkMode 
-     ? theme.backgroundColor // colors["--vscode-debugToolBar-background"]
-     : theme.backgroundColor;
+  theme.toolbarBackgroundColor = theme.backgroundColor;
   theme.toolbarTextColor = theme.gutterTextColor;
   theme.disabledTextColor = colors["--vscode-disabledForeground"];
   theme.surfaceWidgetTextColor = theme.gutterTextColor;

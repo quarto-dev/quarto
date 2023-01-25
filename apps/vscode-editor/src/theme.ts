@@ -55,7 +55,6 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   theme.commentColor = colors["--vscode-editor-foreground"];
   theme.commentBackgroundColor = colors["--vscode-merge-incomingContentBackground"];
   theme.textColor = colors["--vscode-editor-foreground"];
-  theme.surfaceWidgetTextColor = theme.gutterTextColor;
   theme.lightTextColor = colors["--vscode-breadcrumb-foreground"];
   theme.linkTextColor = colors["--vscode-textLink-foreground"];
   theme.placeholderTextColor = colors["--vscode-editorGhostText-foreground"];
@@ -70,6 +69,7 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
     : colors["--vscode-titleBar-inactiveBackground"];
   theme.gutterBackgroundColor = theme.borderBackgroundColor;
   theme.gutterTextColor = colors["--vscode-editorWidget-foreground"];
+  theme.surfaceWidgetTextColor = theme.gutterTextColor;
   theme.blockBorderColor = theme.darkMode 
     ? colors["--vscode-sideBarSectionHeader-border"]
     : colors["--vscode-notebook-cellBorderColor"];

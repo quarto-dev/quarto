@@ -20,6 +20,8 @@ import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 
 import {tags as t} from "@lezer/highlight"
 
+import { StyleSpec } from 'style-mod';
+
 import { CodeViewOptions, EditorTheme, ThemeChangedEvent } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
@@ -60,7 +62,7 @@ export function themeBehavior(context: BehaviorContext) : Behavior {
 
 function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
 
-  return EditorView.theme({
+  const styleSpec : { [selector: string]: StyleSpec} = {
     "&": {
       color: editorTheme.textColor,
       backgroundColor: options.classes?.includes('pm-chunk-background-color')  
@@ -138,8 +140,15 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
         color: editorTheme.textColor
       }
     }
-  }, {dark: editorTheme.darkMode})
+  };
 
+  if (options.firstLineMeta) {
+    styleSpec[".cm-content .cm-line:first-of-type, .cm-content .cm-line:first-of-type span"] = {
+      color: editorTheme.lightTextColor
+    };
+  }
+  
+  return EditorView.theme(styleSpec, {dark: editorTheme.darkMode});
 
 }
 

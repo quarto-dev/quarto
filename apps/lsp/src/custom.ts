@@ -29,6 +29,7 @@ import { QuartoContext, userDictionaryDir } from "quarto-core";
 import { TextDocuments } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
+import { sourceServerMethods } from "editor-server/src/services/source";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
@@ -65,7 +66,8 @@ export function registerCustomMethods(
   registerLspServerMethods(connection, {
     ...editorServerMethods(options),
     ...dictionaryServerMethods(dictionary),
-    ...mathServerMethods(options.documents)
+    ...mathServerMethods(options.documents),
+    ...sourceServerMethods(options.pandoc)
   });
 
 }

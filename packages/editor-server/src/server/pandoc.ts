@@ -15,10 +15,8 @@
  */
 
 
-import stream from 'stream';
 import path from 'path';
 import * as fs from "fs";
-import * as child_process from "child_process";
 import * as uuid from 'uuid';
 
 import { JsonRpcServerMethod } from 'core';
@@ -50,46 +48,15 @@ import {
   resolveBiblioOptions 
 } from '../biblio';
 
+import { runPandoc as pandoc } from '../pandoc';
+
 import { EditorServerOptions } from './server';
 
-
-
-export interface PandocServerOptions {
-  pandocPath: string;
-  resourcesDir: string;
-  payloadLimitMb: number;
-}
 
 export function pandocServer(options: EditorServerOptions) : PandocServer {
 
   async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
-    return new Promise((resolve, reject) => {
-      const child = child_process.execFile(options.pandoc.pandocPath, args, { 
-        encoding: "utf-8", 
-        maxBuffer: options.pandoc.payloadLimitMb * 1024 * 1024 }, 
-        (error, stdout, stderr) => {
-          if (error) {
-            reject(error);
-          } else if (child.exitCode !== 0) {
-            reject(new Error(`Error status ${child.exitCode}: ${stderr.trim()}`));
-          } else {
-            resolve(stdout.trim());
-          }
-      });  
-      if (stdin) {
-        const stdinStream = new stream.Readable();
-        stdinStream.push(stdin);  
-        stdinStream.push(null);  
-        if (child.stdin) {
-          child.stdin.on('error', () => {
-            // allow errors to be reported by main handler
-          });
-          stdinStream.pipe(child.stdin);
-        } else {
-          reject(new Error("Unable to access Pandoc stdin stream"));
-        }
-      }
-    });
+    return pandoc(options.pandoc, args, stdin);
   }
 
   return {

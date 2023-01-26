@@ -32,6 +32,7 @@ export * from './dialogs'
 export * from './math'
 export * from './dictionary'
 export * from './prefs';
+export * from './source';
 export * from './services'
 export * from './outline'
 export * from './menu'

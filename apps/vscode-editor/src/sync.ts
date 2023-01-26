@@ -55,6 +55,7 @@ import {
   XRef,
   VSC_VE_IsFocused,
   Prefs,
+  SourcePos,
 } from "editor-types";
 
 import { 
@@ -141,7 +142,9 @@ export async function syncEditorToHost(
 
   // setup communication channel for host
   visualEditorHostServer(host.vscode, {
-    async init(markdown: string) {
+    async init(markdown: string, sourcePos?: SourcePos) {
+
+      console.log(sourcePos);
 
       // apply initial theme
       applyTheme();
@@ -269,7 +272,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
 
   // create a server
   return jsonRpcPostMessageServer(target, {
-    [VSC_VE_Init]: args => editor.init(args[0]),
+    [VSC_VE_Init]: args => editor.init(args[0], args[1]),
     [VSC_VE_Focus]: () => editor.focus(),
     [VSC_VE_IsFocused]: () => editor.isFocused(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),

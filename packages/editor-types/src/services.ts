@@ -17,10 +17,12 @@
 import { DictionaryServer } from "./dictionary";
 import { MathServer } from "./math";
 import { PrefsServer } from "./prefs";
+import { SourceServer } from "./source";
 
 
 export interface EditorServices {
   readonly math: MathServer;
   readonly dictionary: DictionaryServer;
   readonly prefs: PrefsServer;
+  readonly source: SourceServer;
 }

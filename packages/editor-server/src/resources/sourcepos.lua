@@ -68,14 +68,18 @@ local function extractPosition(el, type)
   if isSupportedBlock(type) then
     local pos =  el.attr.attributes["data-pos"]
     if pos then
-      local _,_,line,start,finish = string.find(pos, "^.*@(%d+):(%d+)-(%d+).*$")
-      positions:insert({
-        type = type,
-        line = tonumber(line),
-        start = tonumber(start),
-        finish = tonumber(finish),
-        index = #positions
-      })
+      
+      local _,_,beginLine,beginChar,endLine,endChar = string.find(pos, "@?(%d+):(%d+)-(%d+):(%d+)$")
+      if beginLine and beginChar and endLine and endChar then
+        positions:insert({
+          type = type,
+          beginLine = tonumber(beginLine),
+          beginChar = tonumber(beginChar),
+          endLine = tonumber(endLine),
+          endChar = tonumber(endChar)
+        })
+        
+      end
     end
   end
   
@@ -133,21 +137,25 @@ return {
     Pandoc = function(doc)
       -- sort by line
       positions:sort(function (a, b) 
-        if a.line == b.line then
-          if a.finish == b.finish then
-            return a.index < b.index
+        if a.beginLine == b.beginLine then
+          if a.endLine == b.endLine then
+            if a.beginChar == b.beginChar then
+              return a.endChar > b.endChar
+            else
+              return a.beginChar < b.beginChar
+            end
           else
-            return a.finish > b.finish 
+            return a.endLine > b.endLine
           end
         else
-          return a.line < b.line 
+          return a.beginLine < b.beginLine
         end
       end)
     
       -- generate content
       local content = pandoc.LineBlock(positions:map(function(pos) 
         return pandoc.Inlines({
-          pandoc.Str(pos.type .. ":" .. pos.line)
+          pandoc.Str(pos.type .. ":" .. pos.beginLine)
         }) 
       end))
     

@@ -35,11 +35,11 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
-import { HostContext, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
+import { HostContext, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
+import { isMarkdownDoc, isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
@@ -47,6 +47,8 @@ import { documentImageResolver } from "./images";
 import { clearInterval } from "timers";
 import { vscodePrefsServer } from "./prefs";
 import { MarkdownEngine } from "../../markdown/engine";
+import { lspClientTransport } from "core-node";
+import { editorSourceJsonRpcServer } from "editor-core";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -57,11 +59,16 @@ export function activateEditor(
   context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient, engine));
 }
 
+
+
 export class VisualEditorProvider implements CustomTextEditorProvider {
   
   // track the last contents of any active untitled docs (used
   // for recovering from attempt to edit )
   private static activeUntitled?: { uri: Uri, content: string };
+
+  // track the last edited line of code in text editors (used for syncing position)
+  private static editorLastSourcePos = new Map<string,number>();
 
   // track visual editors
   private static visualEditors = visualEditorTracker();
@@ -82,6 +89,14 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         this.activeUntitled = { uri: doc.uri, content: doc.getText() };
       } else {
         this.activeUntitled = undefined;
+      }
+    }));
+
+    // track the last editor line of code in text editors (used for syncing position)
+    context.subscriptions.push(window.onDidChangeTextEditorSelection(e => {
+      const document = e.textEditor.document;
+      if (isQuartoDoc(document)) {
+        this.editorLastSourcePos.set(document.uri.toString(), e.textEditor.selection.start.line + 1);
       }
     }));
 
@@ -149,8 +164,16 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const client = visualEditorClient(webviewPanel);
     disposables.push(client);
 
+    // setup request transport 
+    const lspRequest = lspClientTransport(this.lspClient);
+
     // sync manager
-    const syncManager = editorSyncManager(document, client.editor);
+    const syncManager = editorSyncManager(
+      document, 
+      client.editor, 
+      lspRequest, 
+      VisualEditorProvider.editorLastSourcePos.get(document.uri.toString())
+    );
 
     // editor container implementation   
     const host: VSCodeVisualEditorHost = {
@@ -275,7 +298,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     // setup server on webview iframe
     disposables.push(visualEditorServer(
       webviewPanel, 
-      this.lspClient, 
+      lspRequest, 
       host, 
       prefsServer
     ));

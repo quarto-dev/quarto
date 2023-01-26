@@ -20,12 +20,13 @@ import { EditorServer } from "editor-types";
 import { crossrefServer, crossrefServerMethods, CrossrefServerOptions } from "./crossref";
 import { dataCiteServer, dataCiteServerMethods } from "./datacite";
 import { doiServer, doiServerMethods } from "./doi";
-import { pandocServer, pandocServerMethods, PandocServerOptions } from "./pandoc";
+import { pandocServer, pandocServerMethods } from "./pandoc";
 import { pubMedServer, pubMedServerMethods, PubMedServerOptions } from "./pubmed";
 import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
 import { JsonRpcServerMethod } from 'core';
 import { QuartoContext } from "quarto-core";
+import { PandocServerOptions } from "../pandoc";
 
 export interface EditorServerDocuments {
   getCode(filePath: string) : string;

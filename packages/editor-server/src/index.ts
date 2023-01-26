@@ -30,6 +30,7 @@ export * from './services/services';
 export * from './mathjax';
 export * from './biblio';
 export * from './xref';
+export * from './pandoc';
 
 
 

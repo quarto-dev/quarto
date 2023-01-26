@@ -31,20 +31,33 @@ import {
   kMathMathjaxTypesetSvg,
   kPrefsGetPrefs,
   kPrefsSetPrefs,
+  kSourceGetSourcePosLocations,
   MathjaxTypesetOptions,
   MathServer,
   Prefs,
   PrefsServer,
+  SourcePosLocation,
+  SourceServer,
   
 } from "editor-types";
+
 
 
 export function editorJsonRpcServices(request: JsonRpcRequestTransport) : EditorServices {
   return {
     math: editorMathJsonRpcServer(request),
     dictionary: editorDictionaryJsonRpcServer(request),
-    prefs: editorPrefsJsonRpcServer(request)
+    prefs: editorPrefsJsonRpcServer(request),
+    source: editorSourceJsonRpcServer(request)
   };
+}
+
+export function editorSourceJsonRpcServer(request: JsonRpcRequestTransport) : SourceServer {
+  return {
+    getSourcePosLocations(markdown: string) : Promise<SourcePosLocation[]> {
+        return request(kSourceGetSourcePosLocations, [markdown]);
+    },
+  }
 }
 
 export function editorMathJsonRpcServer(request: JsonRpcRequestTransport) : MathServer {

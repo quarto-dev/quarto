@@ -14,10 +14,12 @@
  */
 
 import { TextDocument, TextEdit, workspace, window, WorkspaceEdit, Range } from "vscode";
-import { VSCodeVisualEditor } from "editor-types";
-import { getWholeRange } from "../../core/doc";
-import { QuartoContext } from "quarto-core";
+import { JsonRpcRequestTransport } from "core";
 
+import { editorSourceJsonRpcServer } from "editor-core";
+import { SourcePos, VSCodeVisualEditor } from "editor-types";
+
+import { getWholeRange } from "../../core/doc";
 
 /* Strategy for managing synchronization of edits between source and visual mode. 
 
@@ -58,7 +60,9 @@ export interface EditorSyncManager {
 // sync the document model w/ the visual editor
 export function editorSyncManager(
   document: TextDocument, 
-  visualEditor: VSCodeVisualEditor
+  visualEditor: VSCodeVisualEditor,
+  request: JsonRpcRequestTransport,
+  initialSourcePos?: number
 ) : EditorSyncManager {
 
   // state: an update from the visual editor that we have yet to apply. we don't 
@@ -112,9 +116,18 @@ export function editorSyncManager(
     // with its initial contents and syncing the canonnical markdown
     // back to the document
     init: async() => {
-      const markdown = await visualEditor.init(document.getText());
-      if (markdown && (markdown !== document.getText())) {
-        await updateWorkspaceDocument(document, markdown);
+      // determine the current sourcePos
+      const markdown = document.getText();
+      let pos: SourcePos | undefined;
+      if (initialSourcePos) {
+        const source = editorSourceJsonRpcServer(request);
+        const locations = await source.getSourcePosLocations(markdown);
+        pos = { locations, pos: initialSourcePos };
+      }
+      
+      const editorMarkdown = await visualEditor.init(markdown, pos);
+      if (editorMarkdown && (editorMarkdown !== document.getText())) {
+        await updateWorkspaceDocument(document, editorMarkdown);
       }
     },
 

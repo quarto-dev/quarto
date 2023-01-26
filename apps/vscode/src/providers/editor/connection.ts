@@ -43,18 +43,18 @@ import {
   VSC_VEH_RenderDocument,
   VSC_VE_PrefsChanged,
   Prefs,
-  PrefsServer
+  PrefsServer,
+  SourcePos
 } from "editor-types";
 
 import { 
   jsonRpcPostMessageServer, 
   JsonRpcPostMessageTarget, 
   JsonRpcServerMethod,
-  jsonRpcPostMessageRequestTransport
+  jsonRpcPostMessageRequestTransport,
+  JsonRpcRequestTransport
 } from "core";
 
-
-import { lspClientTransport } from "core-node";
 
 import { 
   prefsServerMethods 
@@ -69,7 +69,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 
   return {
     editor: {
-      init: (markdown: string) => request(VSC_VE_Init, [markdown]),
+      init: (markdown: string, sourcePos?: SourcePos) => request(VSC_VE_Init, [markdown, sourcePos]),
       focus: () => request(VSC_VE_Focus, []),
       isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
@@ -84,7 +84,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 // host interface provided to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorServer(
   webviewPanel: WebviewPanel,
-  lspClient: LanguageClient,
+  request: JsonRpcRequestTransport,
   host: VSCodeVisualEditorHost,
   prefsServer: PrefsServer
 ) : Disposable {
@@ -97,12 +97,11 @@ export function visualEditorServer(
   };
 
   // proxy unknown methods to the lsp
-  const lspRequest = lspClientTransport(lspClient);
   const methods = (name: string) => {
     if (extensionMethods[name]) {
       return extensionMethods[name];
     } else {
-      return (params: unknown[]) => lspRequest(name, params);
+      return (params: unknown[]) => request(name, params);
     }
   };
 

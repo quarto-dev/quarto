@@ -226,7 +226,11 @@ export const Editor : React.FC<EditorProps> = (props) => {
     setTitle(title: string) {
      editorRef.current!.setTitle(title)
     },
-    async setMarkdown(markdown: string, options: PandocWriterOptions, emitUpdate: boolean) {
+    async setMarkdown(
+      markdown: string, 
+      options: PandocWriterOptions, 
+      emitUpdate: boolean
+    ) {
 
       // if we don't support untitled and this is untitled then show that error
       if (props.uiContext.getDocumentPath() === null && props.options?.cannotEditUntitled) {
@@ -271,7 +275,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
         });
         return null;
       } else {
-        dispatch(setEditorLoading(false));
+        if (loading) {
+          dispatch(setEditorLoading(false));
+        }
         dispatch(setEditorOutline(editor.getOutline()));
         return result;
       }
@@ -284,6 +290,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
     },
     getMarkdown(options: PandocWriterOptions) {
       return editorRef.current!.getMarkdown(options);
+    },
+    getEditorSourcePos() {
+      return editorRef.current!.getEditorSourcePos();
     },
     getFindReplace() {
       return editorRef.current?.getFindReplace();

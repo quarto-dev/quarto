@@ -65,6 +65,7 @@ import {
 
 import { 
   EditorOperations, 
+  NavigationType, 
   PandocWriterOptions, 
   UpdateEvent 
 } from "editor";
@@ -144,19 +145,21 @@ export async function syncEditorToHost(
   visualEditorHostServer(host.vscode, {
     async init(markdown: string, sourcePos?: SourcePos) {
 
-      console.log(sourcePos);
-
       // apply initial theme
       applyTheme();
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, writerOptions(), false);
-
       if (result) {
 
         // focus if requested
         if (focus) {
           editor.focus();
+        }
+
+        // if a source position was passed then navigate to it
+        if (sourcePos) {
+          navigateToSourcePos(sourcePos, editor);
         }
 
         // visual editor => text editor (just send the state, host will call back for markdown)
@@ -301,4 +304,15 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
   };
 }
 
+
+function navigateToSourcePos(sourcePos: SourcePos, editor: EditorOperations) {
+  const cursorLocation = sourcePos.locations.findIndex(loc => loc.pos > sourcePos.pos);
+  if (cursorLocation > 0) {
+    const editorLocations = editor.getEditorSourcePos().locations;
+    if (editorLocations.length >= cursorLocation) {
+      const editorPos = editorLocations[cursorLocation-1];
+      editor.navigate(NavigationType.Pos, editorPos.pos.toString());
+    }
+  }
+}
 

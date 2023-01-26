@@ -36,7 +36,8 @@ import {
   EditorMenus,
   EditorServer, 
   EditingOutlineLocation, 
-  EditorOutline 
+  EditorOutline, 
+  SourcePos
 } from 'editor-types';
 
 import {
@@ -139,6 +140,7 @@ import './styles/frame.css';
 import './styles/styles.css';
 import { ExtensionManager, initExtensions } from './editor-extensions';
 import { defaultTheme, EditorTheme, applyTheme, applyPadding } from './editor-theme';
+import { getEditorSourcePos } from '../api/sourcepos';
 export { defaultTheme };
 export type { EditorTheme };
 
@@ -276,13 +278,14 @@ export interface EditorOperations {
   setMarkdown(
     markdown: string,
     options: PandocWriterOptions,
-    emitUpdate: boolean,
+    emitUpdate: boolean
   ): Promise<EditorSetMarkdownResult | null>;
 
   // get content
   getStateJson() : unknown;
   getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) : Promise<string>;
   getMarkdown(options: PandocWriterOptions) : Promise<EditorCode>;
+  getEditorSourcePos(): SourcePos;
 
   // subsystems
   getFindReplace() : EditorFindReplace | undefined
@@ -303,7 +306,7 @@ export interface EditorOperations {
   onPrefsChanged(): void;
 }
 
-export class Editor implements EditorOperations {
+export class Editor  {
   // core context passed from client
   private readonly parent: HTMLElement;
   private readonly context: EditorContext;
@@ -673,6 +676,10 @@ export class Editor implements EditorOperations {
       selection_only: this.lastTrSelectionOnly,
       location: getEditingOutlineLocation(this.state),
     };
+  }
+
+  public getEditorSourcePos(): SourcePos {
+    return getEditorSourcePos(this.state);
   }
 
   public getEditingOutlineLocation(): EditingOutlineLocation {

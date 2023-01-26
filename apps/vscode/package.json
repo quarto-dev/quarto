@@ -208,7 +208,7 @@
         "displayName": "Quarto Visual Editor",
         "selector": [
           {
-            "filenamePattern": "*.qmd"
+            "filenamePattern": "*.{md,qmd}"
           }
         ],
         "priority": "option"

@@ -12,3 +12,4 @@ public/dist
 .Rproj.user
 .Rhistory
 *.Rproj
+.luarc.json

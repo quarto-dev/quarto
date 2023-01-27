@@ -32,10 +32,12 @@ const kEditorTabSize = "editor.tabSize";
 const kEditorFontSize = "editor.fontSize";
 const kEditorSelectionHighlight = "editor.selectionHighlight";
 const kEditorCursorBlinking = "editor.cursorBlinking";
-const kQuartoVisualEditorLineNumbers = "quarto.visualEditor.lineNumbers";
-const kQuartoVisualEditorSpelling = "quarto.visualEditor.spelling";
-const kQuartoVisualEditorSpellingDictionary = "quarto.visualEditor.spellingDictionary";
-const kQuartoVisualEditoDefaultListSpacing = "quarto.visualEditor.defaultListSpacing";
+
+const kQuartoEditorFontSize = "quarto.visualEditor.fontSize";
+const kQuartoEditorLineNumbers = "quarto.visualEditor.lineNumbers";
+const kQuartoEditorSpelling = "quarto.visualEditor.spelling";
+const kQuartoEditorSpellingDictionary = "quarto.visualEditor.spellingDictionary";
+const kQuartoEditorDefaultListSpacing = "quarto.visualEditor.defaultListSpacing";
 const kQuartoEditorMarkdownWrap = "quarto.visualEditor.markdownWrap";
 const kQuartoEditorMarkdownWrapColumn = "quarto.visualEditor.markdownWrapColumn";
 const kQuartoEditorMarkdownReferences = "quarto.visualEditor.markdownReferences";
@@ -48,10 +50,11 @@ const kMonitoredConfigurations = [
   kEditorFontSize,
   kEditorSelectionHighlight,
   kEditorCursorBlinking,
-  kQuartoVisualEditorLineNumbers,
-  kQuartoVisualEditorSpelling,
-  kQuartoVisualEditorSpellingDictionary,
-  kQuartoVisualEditoDefaultListSpacing,
+  kQuartoEditorFontSize,
+  kQuartoEditorLineNumbers,
+  kQuartoEditorSpelling,
+  kQuartoEditorSpellingDictionary,
+  kQuartoEditorDefaultListSpacing,
   kQuartoEditorMarkdownWrap,
   kQuartoEditorMarkdownWrapColumn,
   kQuartoEditorMarkdownReferences
@@ -76,14 +79,14 @@ export function vscodePrefsServer(
       // theme
       darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
                 window.activeColorTheme.kind === ColorThemeKind.HighContrast,
-      fontSize: configuration.get<number>(kEditorFontSize, 12),
+      fontSize: configuration.get<number>(kQuartoEditorFontSize, 0) || configuration.get<number>(kEditorFontSize, 12),
 
       // spelling settings
-      realtimeSpelling: configuration.get<boolean>(kQuartoVisualEditorSpelling, true),
-      dictionaryLocale: configuration.get<string>(kQuartoVisualEditorSpellingDictionary, "en_US"),
+      realtimeSpelling: configuration.get<boolean>(kQuartoEditorSpelling, true),
+      dictionaryLocale: configuration.get<string>(kQuartoEditorSpellingDictionary, "en_US"),
 
       // quarto editor settings
-      listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoVisualEditoDefaultListSpacing, 'spaced'),
+      listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoEditorDefaultListSpacing, 'spaced'),
 
       // markdown writer settings
       ...(await readMarkdownPrefs(engine, document)),
@@ -97,7 +100,7 @@ export function vscodePrefsServer(
       blinkingCursor: configuration.get(kEditorCursorBlinking, "solid") !== "solid",
 
       // quarto code editor settings
-      lineNumbers: configuration.get<boolean>(kQuartoVisualEditorLineNumbers, true),
+      lineNumbers: configuration.get<boolean>(kQuartoEditorLineNumbers, true),
     };
     return prefs;
   };

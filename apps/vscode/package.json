@@ -873,6 +873,12 @@
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
         },
+        "quarto.visualEditor.fontSize": {
+          "scope": "window",
+          "type": "number",
+          "default": 0,
+          "markdownDescription": "Controls the font size in pixels for the Visual Editor. When set to 0, the `#editor.fontSize#` is used."
+        },
         "quarto.visualEditor.defaultListSpacing": {
           "scope": "window",
           "type": "string",

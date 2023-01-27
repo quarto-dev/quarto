@@ -40,7 +40,7 @@ export function scrollIntoView(
     const parentDiv = schema.nodes.div ? findParentNodeOfTypeClosestToPos($pos, schema.nodes.div) : undefined;
     const resultPos = parentList || parentDiv ? $pos.before(2) : $pos.before();
     const resultNode = view.nodeDOM(resultPos) as HTMLElement;
-    if (container && resultNode) {
+    if (resultNode) {
       const scroller = zenscroll.createScroller(editorScrollContainer(containerEl), duration, offset);
       if (center) {
         scroller.center(resultNode, duration, offset, onDone);

@@ -26,9 +26,12 @@ import {
   CancellationToken, 
   Uri, 
   Webview,
+  Range,
   env,
   commands,
-  ViewColumn
+  ViewColumn,
+  Selection,
+  TextEditorRevealType
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -39,7 +42,7 @@ import { HostContext, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRe
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isMarkdownDoc, isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
+import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
@@ -49,6 +52,7 @@ import { vscodePrefsServer } from "./prefs";
 import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
+import { JsonRpcRequestTransport } from "core";
 
 export function activateEditor(
   context: ExtensionContext,
@@ -70,6 +74,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   // track the last edited line of code in text editors (used for syncing position)
   private static editorLastSourcePos = new Map<string,number>();
 
+  // track the list source location in visual editors (used for syncing position)
+  private static visualEditorLastSourcePos = new Map<string,SourcePos>();
+
   // track visual editors
   private static visualEditors = visualEditorTracker();
 
@@ -79,6 +86,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     lspClient: LanguageClient,
     engine: MarkdownEngine
   ) : Disposable {
+
+    // setup request transport 
+    const lspRequest = lspClientTransport(lspClient);
 
     // track edits in the active editor if its untitled. this enables us to recover the
     // content when we switch to an untitled document, which otherwise are just dropped
@@ -100,7 +110,29 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
     }));
 
-    const provider = new VisualEditorProvider(context, quartoContext, lspClient, engine);
+    // when the active editor changes see if we have a visual editor position for it
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(async (editor) => {
+      const document = editor?.document;
+      if (document && isQuartoDoc(document)) {
+        const pos = this.visualEditorLastSourcePos.get(document.uri.toString());
+        if (pos) {
+          this.visualEditorLastSourcePos.delete(document.uri.toString());
+          const cursorLocation = pos.locations.findIndex(loc => loc.pos > pos.pos);
+          if (cursorLocation > 0) {
+            const source = editorSourceJsonRpcServer(lspRequest);
+            const locations = await source.getSourcePosLocations(document.getText());
+            if (locations.length >= cursorLocation) {
+              const selLine = locations[cursorLocation-1].pos - 1;
+              const selRange = new  Range(selLine, 0, selLine, 0);
+              editor.selection = new Selection(selRange.start, selRange.end);
+              editor.revealRange(selRange, TextEditorRevealType.InCenter);
+            }
+          }
+        }
+      }
+    }));
+
+    const provider = new VisualEditorProvider(context, quartoContext, lspRequest, engine);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -136,7 +168,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   constructor(private readonly context: ExtensionContext,
               private readonly quartoContext: QuartoContext,
-              private readonly lspClient: LanguageClient,
+              private readonly lspRequest: JsonRpcRequestTransport,
               private readonly engine: MarkdownEngine) {}
 
  
@@ -164,15 +196,17 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const client = visualEditorClient(webviewPanel);
     disposables.push(client);
 
-    // setup request transport 
-    const lspRequest = lspClientTransport(this.lspClient);
+    // collect sourcePos if we've been editing this in text mode
+    const sourceUri = document.uri.toString();
+    const sourcePos = VisualEditorProvider.editorLastSourcePos.get(sourceUri);
+    VisualEditorProvider.editorLastSourcePos.delete(sourceUri);
 
-    // sync manager
+     // sync manager
     const syncManager = editorSyncManager(
       document, 
       client.editor, 
-      lspRequest, 
-      VisualEditorProvider.editorLastSourcePos.get(document.uri.toString())
+      this.lspRequest, 
+      sourcePos
     );
 
     // editor container implementation   
@@ -256,6 +290,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       // notify sync manager when visual editor is updated
       onEditorUpdated: syncManager.onVisualEditorChanged,
 
+      onEditorStateChanged: async (sourcePos: SourcePos) => {
+        VisualEditorProvider.visualEditorLastSourcePos.set(document.uri.toString(), sourcePos);
+      },
+
       // flush any pending updates
       flushEditorUpdates: syncManager.flushPendingUpdates,
 
@@ -298,7 +336,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     // setup server on webview iframe
     disposables.push(visualEditorServer(
       webviewPanel, 
-      lspRequest, 
+      this.lspRequest, 
       host, 
       prefsServer
     ));

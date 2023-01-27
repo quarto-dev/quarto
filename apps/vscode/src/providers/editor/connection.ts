@@ -17,8 +17,6 @@
 import { Disposable, WebviewPanel } from "vscode";
 
 
-import { LanguageClient } from "vscode-languageclient/node";
-
 import { 
   VSC_VE_Init,
   VSC_VE_Focus,
@@ -28,6 +26,7 @@ import {
   VSC_VEH_GetHostContext, 
   VSC_VEH_ReopenSourceMode,
   VSC_VEH_OnEditorUpdated,
+  VSC_VEH_OnEditorStateChanged,
   VSC_VEH_FlushEditorUpdates,
   VSC_VEH_OnEditorReady, 
   VSC_VEH_OpenURL,
@@ -121,6 +120,7 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
     [VSC_VEH_ReopenSourceMode]: () => host.reopenSourceMode(),
     [VSC_VEH_OnEditorReady]: () => host.onEditorReady(),
     [VSC_VEH_OnEditorUpdated]: args => host.onEditorUpdated(args[0]),
+    [VSC_VEH_OnEditorStateChanged]: args => host.onEditorStateChanged(args[0]),
     [VSC_VEH_FlushEditorUpdates]: () => host.flushEditorUpdates(),
     [VSC_VEH_SaveDocument]: () => host.saveDocument(),
     [VSC_VEH_RenderDocument]: () => host.renderDocument(),

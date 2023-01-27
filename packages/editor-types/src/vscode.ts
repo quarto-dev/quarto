@@ -30,6 +30,7 @@ export const VSC_VEH_GetHostContext = 'vsc_ve_get_host_context';
 export const VSC_VEH_ReopenSourceMode = 'vsc_ve_reopen_source_mode';
 export const VSC_VEH_OnEditorReady = 'vsc_veh_on_editor_ready';
 export const VSC_VEH_OnEditorUpdated = 'vsc_veh_on_editor_updated';
+export const VSC_VEH_OnEditorStateChanged = 'vsc_veh_on_editor_state_changed';
 export const VSC_VEH_FlushEditorUpdates = 'vsc_veh_flush_editor_updates';
 export const VSC_VEH_SaveDocument = 'vsc_veh_save_document';
 export const VSC_VEH_RenderDocument = 'vsc_veh_render_document';
@@ -64,6 +65,7 @@ export interface VSCodeVisualEditorHost extends EditorDisplay, EditorUIImageReso
   reopenSourceMode: () => Promise<void>;
   onEditorReady: () => Promise<void>; 
   onEditorUpdated: (state: unknown) => Promise<void>;
+  onEditorStateChanged: (sourcePos: SourcePos) => Promise<void>;
   flushEditorUpdates: () => Promise<void>;
   saveDocument: () => Promise<void>;
   renderDocument: () => Promise<void>;

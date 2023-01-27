@@ -42,6 +42,7 @@ import {
   VSC_VEH_GetHostContext,
   VSC_VEH_ReopenSourceMode,
   VSC_VEH_OnEditorUpdated,
+  VSC_VEH_OnEditorStateChanged,
   VSC_VEH_OnEditorReady, 
   VSC_VEH_OpenURL,
   VSC_VEH_NavigateToXRef,
@@ -66,6 +67,7 @@ import {
 import { 
   EditorOperations, 
   PandocWriterOptions, 
+  StateChangeEvent, 
   UpdateEvent 
 } from "editor";
 
@@ -158,8 +160,10 @@ export async function syncEditorToHost(
          editor.navigateToSourcePos(sourcePos);
        }
 
-        // visual editor => text editor (just send the state, host will call back for markdown)
-        editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+       // visual editor => text editor (just send the state, host will call back for markdown)
+       editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+       editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos())); 
+        
 
         // return canonical markdown
         return result.canonical;
@@ -287,6 +291,7 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     reopenSourceMode: () => request(VSC_VEH_ReopenSourceMode, []),
     onEditorReady: () => request(VSC_VEH_OnEditorReady, []),
     onEditorUpdated: (state: unknown) => request(VSC_VEH_OnEditorUpdated, [state]),
+    onEditorStateChanged: (sourcePos: SourcePos) => request(VSC_VEH_OnEditorStateChanged, [sourcePos]),
     flushEditorUpdates: () => request(VSC_VEH_FlushEditorUpdates, []),
     saveDocument: () => request(VSC_VEH_SaveDocument, []),
     renderDocument: () => request(VSC_VEH_RenderDocument, []),

@@ -60,7 +60,7 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   // drive editor selection from outline
   // const dispatch = useDispatch();
   const onNodeClick = (treeNode: TreeNodeInfo<number>) => {
-    editor.navigate(NavigationType.Id, treeNode.id as string);
+    editor.navigate(NavigationType.Id, treeNode.id as string, true);
     editor.focus();
   };
 

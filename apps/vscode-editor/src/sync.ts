@@ -65,7 +65,6 @@ import {
 
 import { 
   EditorOperations, 
-  NavigationType, 
   PandocWriterOptions, 
   UpdateEvent 
 } from "editor";
@@ -105,8 +104,7 @@ export function visualEditorHostClient(
 export async function syncEditorToHost(
   editor: EditorOperations, 
   host: VisualEditorHostClient,
-  store: EditorUIStore,
-  focus: boolean
+  store: EditorUIStore
 )  {
 
   // get the current prefs
@@ -152,15 +150,13 @@ export async function syncEditorToHost(
       const result = await editor.setMarkdown(markdown, writerOptions(), false);
       if (result) {
 
-        // focus if requested
-        if (focus) {
-          editor.focus();
-        }
-
-        // if a source position was passed then navigate to it
-        if (sourcePos) {
-          navigateToSourcePos(sourcePos, editor);
-        }
+       // focus editor
+       editor.focus();
+        
+       // if a source position was passed then navigate to it
+       if (sourcePos) {
+         editor.navigateToSourcePos(sourcePos, false);
+       }
 
         // visual editor => text editor (just send the state, host will call back for markdown)
         editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
@@ -302,17 +298,5 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     resolveBase64Images: (base64Images: string[]) => request(VSC_VEH_ResolveBase64Images, [base64Images]),
     selectImage: () => request(VSC_VEH_SelectImage, [])
   };
-}
-
-
-function navigateToSourcePos(sourcePos: SourcePos, editor: EditorOperations) {
-  const cursorLocation = sourcePos.locations.findIndex(loc => loc.pos > sourcePos.pos);
-  if (cursorLocation > 0) {
-    const editorLocations = editor.getEditorSourcePos().locations;
-    if (editorLocations.length >= cursorLocation) {
-      const editorPos = editorLocations[cursorLocation-1];
-      editor.navigate(NavigationType.Pos, editorPos.pos.toString());
-    }
-  }
 }
 

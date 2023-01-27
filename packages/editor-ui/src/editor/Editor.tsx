@@ -22,7 +22,7 @@ import { Intent, Spinner } from '@blueprintjs/core';
 
 import { JsonRpcRequestTransport } from 'core';
 
-import { defaultPrefs, EditorServer, EditorServices, Prefs, PrefsProvider } from 'editor-types';
+import { defaultPrefs, EditorServer, EditorServices, Prefs, PrefsProvider, SourcePos } from 'editor-types';
 
 import { 
   Editor as PMEditor, 
@@ -275,9 +275,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
         });
         return null;
       } else {
-        if (loading) {
-          dispatch(setEditorLoading(false));
-        }
+        dispatch(setEditorLoading(false));
         dispatch(setEditorOutline(editor.getOutline()));
         return result;
       }
@@ -306,8 +304,11 @@ export const Editor : React.FC<EditorProps> = (props) => {
     hasFocus() {
       return editorRef.current?.hasFocus() || false;
     },
-    navigate(type: NavigationType, id: string) {
-      editorRef.current?.navigate(type, id);
+    navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean) {
+      editorRef.current?.navigate(type, id, recordCurrent, !!animate);
+    },
+    navigateToSourcePos(pos: SourcePos, recordCurrent: boolean, animate?: boolean) {
+      editorRef.current?.navigateToSourcePos(pos, recordCurrent, animate);
     },
     applyTheme(theme: EditorTheme) {
       editorRef.current?.applyTheme(theme);

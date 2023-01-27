@@ -294,7 +294,8 @@ export interface EditorOperations {
   blur(): void;
   focus(): void;
   hasFocus(): boolean;
-  navigate(type: NavigationType, id: string): void;
+  navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean): void;
+  navigateToSourcePos(pos: SourcePos, recordCurrent: boolean, animate?: boolean) : void;
 
   // theme
   applyTheme(theme: EditorTheme): void;
@@ -840,6 +841,17 @@ export class Editor  {
         nav.prevPos = -1;
       }
       this.emitEvent(NavigateEvent, nav);
+    }
+  }
+
+  public navigateToSourcePos(pos: SourcePos, recordCurrent = true, animate = false)  {
+    const cursorLocation = pos.locations.findIndex(loc => loc.pos > pos.pos);
+    if (cursorLocation > 0) {
+      const editorLocations = this.getEditorSourcePos().locations;
+      if (editorLocations.length >= cursorLocation) {
+        const editorPos = editorLocations[cursorLocation-1];
+        this.navigate(NavigationType.Pos, String(editorPos.pos), recordCurrent, animate);
+      }
     }
   }
 

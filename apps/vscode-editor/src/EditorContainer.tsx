@@ -72,7 +72,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
  
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, props.host, props.store, true);
+    syncEditorToHost(editor, props.host, props.store);
     return Promise.resolve();
   }, []);
 

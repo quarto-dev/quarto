@@ -23,7 +23,7 @@ export enum NavigationType {
   Id = 'id',
   Href = 'href',
   Heading = 'heading',
-  XRef = 'xref',
+  XRef = 'xref'
 }
 
 export interface Navigation {

@@ -155,7 +155,7 @@ export async function syncEditorToHost(
         
        // if a source position was passed then navigate to it
        if (sourcePos) {
-         editor.navigateToSourcePos(sourcePos, false);
+         editor.navigateToSourcePos(sourcePos);
        }
 
         // visual editor => text editor (just send the state, host will call back for markdown)

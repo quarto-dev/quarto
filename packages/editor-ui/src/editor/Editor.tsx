@@ -307,8 +307,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
     navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean) {
       editorRef.current?.navigate(type, id, recordCurrent, !!animate);
     },
-    navigateToSourcePos(pos: SourcePos, recordCurrent: boolean, animate?: boolean) {
-      editorRef.current?.navigateToSourcePos(pos, recordCurrent, animate);
+    navigateToSourcePos(pos: SourcePos) {
+      editorRef.current?.navigateToSourcePos(pos);
     },
     applyTheme(theme: EditorTheme) {
       editorRef.current?.applyTheme(theme);

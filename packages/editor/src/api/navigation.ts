@@ -15,11 +15,11 @@
 
 import { EditorView } from 'prosemirror-view';
 
-import { setTextSelection, Predicate, findChildren, findDomRefAtPos } from 'prosemirror-utils';
+import { setTextSelection, Predicate, findChildren, findDomRefAtPos, findParentNodeOfTypeClosestToPos } from 'prosemirror-utils';
 
 import zenscroll from 'zenscroll';
 
-import { editingRootNode } from './node';
+import { editingRootNodeClosestToPos } from './node';
 import { kNavigationTransaction } from './transaction';
 import { xrefPosition } from './xref';
 import { EditorFormat, kQuartoDocType } from './format';
@@ -100,21 +100,26 @@ export function navigateToPos(view: EditorView, pos: number, animate = true): Na
     // doesn't seem to work unless you have the focus)
     setTimeout(() => {
       view.focus();
-      const editingRoot = editingRootNode(view.state.selection)!;
-      const container = view.nodeDOM(editingRoot.pos) as HTMLElement;
-      const scroller = zenscroll.createScroller(editorScrollContainer(container), 700, 20);
-      // some nodes' DOM elements are grandchildren rather than direct children
-      // of the scroll container; move up a level if this is the case
-      let dest = node;
-      if (node.parentElement &&
-        node.parentElement.parentElement &&
-        node.parentElement.parentElement.parentElement === container) {
-        dest = node.parentElement;
-      }
-      if (animate) {
-        scroller.to(dest);
-      } else {
-        scroller.to(dest, 0);
+
+      const $pos = view.state.doc.resolve(pos);
+      const container = editingRootNodeClosestToPos($pos);
+
+      // if we have a container then do the scroll
+      if (container) {
+        const schema = view.state.schema;
+        const containerEl = view.nodeDOM(container.pos) as HTMLElement;
+        const parentList = findParentNodeOfTypeClosestToPos($pos, [schema.nodes.ordered_list, schema.nodes.bullet_list]);
+        const parentDiv = schema.nodes.div ? findParentNodeOfTypeClosestToPos($pos, schema.nodes.div) : undefined;
+        const resultPos = parentList || parentDiv ? $pos.before(2) : $pos.before();
+        const resultNode = view.nodeDOM(resultPos) as HTMLElement;
+        if (resultNode) {
+          const scroller = zenscroll.createScroller(editorScrollContainer(containerEl), 700, 20);
+          if (animate) {
+            scroller.to(resultNode);
+          } else {
+            scroller.to(resultNode, 0);
+          }
+        }
       }
     }, 200);
 

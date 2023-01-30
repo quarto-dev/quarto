@@ -62,8 +62,9 @@ import {
 
 // interface to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorClient(webviewPanel: WebviewPanel) 
-  : { editor: VSCodeVisualEditor, dispose: VoidFunction } {
+  : { editor: VSCodeVisualEditor, connected: () => boolean, dispose: VoidFunction } {
 
+  let isConnected = true;
   const target = webviewPanelPostMessageTarget(webviewPanel);
   const { request, disconnect } = jsonRpcPostMessageRequestTransport(target);
 
@@ -77,7 +78,11 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
       prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
     },
-    dispose: disconnect
+    connected: () => isConnected,
+    dispose: () => {
+      disconnect();
+      isConnected = false;
+    }
   };
 }
 

@@ -66,7 +66,8 @@ export async function activate(context: vscode.ExtensionContext) {
     const lspClient = await activateLsp(context, engine);
 
     // provide visual editor
-    activateEditor(context, quartoContext, lspClient, engine);
+    const editorCommands = activateEditor(context, quartoContext, lspClient, engine);
+    commands.push(...editorCommands);
 
     // assist panel
     const assistCommands = activateQuartoAssistPanel(context, engine);

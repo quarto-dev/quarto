@@ -38,11 +38,12 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
-import { HostContext, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
+import { HostContext, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
 import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
+import { Command } from "../../core/command";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
 import { editorSyncManager } from "./sync";
@@ -53,16 +54,21 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
 import { JsonRpcRequestTransport } from "core";
+import { reopenEditorInSourceMode, toggleVisualModeCommand } from "./toggle";
+
 
 export function activateEditor(
   context: ExtensionContext,
   quartoContext: QuartoContext,
   lspClient: LanguageClient,
   engine: MarkdownEngine
-) {
+) : Command[] {
+  // register the provider
   context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient, engine));
-}
 
+  // return commands
+  return [toggleVisualModeCommand()];
+}
 
 
 export class VisualEditorProvider implements CustomTextEditorProvider {
@@ -189,30 +195,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         ? VisualEditorProvider.activeUntitled.content
         : undefined;
 
-    // function to re-open source mode
+    // function to re-open in source mode
     const reopenSourceMode = async () => {
-
-      // save if required
-      if (!document.isUntitled) {
-        await commands.executeCommand("workbench.action.files.save");
-      }
-
-      // close editor (return immediately as if we don't then this 
-      // rpc method's return will result in an error b/c the webview
-      // has been torn down by the time we return)
-      const viewColumn = webviewPanel.viewColumn;
-      commands.executeCommand('workbench.action.closeActiveEditor').then(async () => {
-        if (document.isUntitled) {
-          const doc = await workspace.openTextDocument({
-            language: kQuartoLanguageId,
-            content: untitledContent || '',
-          });
-          await window.showTextDocument(doc, viewColumn, false);
-        } else {
-          const doc = await workspace.openTextDocument(document.uri);
-          await window.showTextDocument(doc, viewColumn, false);
-        }
-      });
+      await reopenEditorInSourceMode(document, untitledContent, webviewPanel.viewColumn);
     };
 
     // prompt the user
@@ -387,7 +372,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const [prefsServer, unsubscribe] = vscodePrefsServer(
       this.engine,
       document,
-      client.editor.prefsChanged.bind(client.editor)
+      (prefs: Prefs) => {
+        if (client.connected()) {
+          client.editor.prefsChanged(prefs);
+        }
+      }
     );
     disposables.push(unsubscribe);
 

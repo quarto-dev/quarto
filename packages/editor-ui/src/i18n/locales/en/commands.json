@@ -105,6 +105,7 @@
   "enable_dev_tools_menu_text": "ProseMirror Dev Tools",
   "save_menu_text": "Save",
   "render_menu_text": "Render",
+  "edit_source_menu_text": "Edit in Source Mode",
   "group_file": "File",
   "group_text_editing": "Text Editing",
   "group_formatting": "Formatting",

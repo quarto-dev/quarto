@@ -232,7 +232,8 @@ export async function syncEditorToHost(
 
 export enum EditorHostCommands {
   Save = "33AFE7B9-24B0-42B4-8ED0-BE9C0015773D",
-  Render = "297E16BF-B801-4DBB-BC1F-7F9C603B4456"
+  Render = "297E16BF-B801-4DBB-BC1F-7F9C603B4456",
+  EditSource = "E3B3EFC1-0183-4AD1-9E34-B1C11187775D"
 }
 
 export function editorHostCommands(host: VisualEditorHostClient) {
@@ -257,6 +258,17 @@ export function editorHostCommands(host: VisualEditorHostClient) {
       isActive: () => false,
       execute: async () => {
         await host.renderDocument();
+      },
+    },
+    {
+      id: EditorHostCommands.EditSource,
+      menuText: t('commands:edit_source_menu_text'),
+      group: t('commands:group_file'),
+      keymap: ['Mod-Shift-f4'],
+      isEnabled: () => true,
+      isActive: () => false,
+      execute: async () => {
+        await host.reopenSourceMode();
       },
     }
   ];

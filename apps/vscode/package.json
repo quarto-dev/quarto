@@ -879,6 +879,12 @@
           "default": 0,
           "markdownDescription": "Controls the font size in pixels for the Visual Editor. When set to 0, the `#editor.fontSize#` is used."
         },
+        "quarto.visualEditor.maxContentWidth": {
+          "scope": "window",
+          "type": "number",
+          "default": 1000,
+          "markdownDescription": "Controls the maximum width (in pixels) of the editor's content"
+        },
         "quarto.visualEditor.defaultListSpacing": {
           "scope": "window",
           "type": "string",

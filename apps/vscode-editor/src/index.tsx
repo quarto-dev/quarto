@@ -18,7 +18,7 @@ import { createRoot } from 'react-dom/client';
 
 import 'vscode-webview';
 
-import { initEditorTranslations, initializeStore } from 'editor-ui';
+import { initEditorTranslations, initializeStore, readPrefsApi } from 'editor-ui';
 
 import { App } from "./App";
 import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
@@ -37,15 +37,16 @@ async function runEditor() {
     // get host context
     const context = await host.getHostContext();
 
-    // initialize store
+    // initialize store and read initial prefs
     const store = await initializeStore(request);
+    const prefs = readPrefsApi(store)
 
     // init localization
     await initEditorTranslations();
 
     // render
     const root = createRoot(document.getElementById('root')!);
-    applyDarkMode(store);
+    applyDarkMode(prefs);
     root.render(<App store={store} host={host} context={context} request={request}/>);
   } catch (error) {
     console.error(error);

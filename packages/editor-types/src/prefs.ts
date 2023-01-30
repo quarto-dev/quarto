@@ -32,9 +32,10 @@ export interface Prefs extends MarkdownPrefs {
   // view
   readonly showOutline: boolean;
 
-  // theme
+  // display
   readonly darkMode: boolean;
   readonly fontSize: number;
+  readonly maxContentWidth: number;
 
   // spelling
   readonly realtimeSpelling: boolean;
@@ -78,9 +79,11 @@ export function defaultPrefs() : Prefs {
     // view
     showOutline: false,
 
-    // theme
+    // display
     darkMode: false,
     fontSize: 12,
+    // NOTE: sync with default in vscode/package.json
+    maxContentWidth: 1000,
 
     // spelling
     realtimeSpelling: true,

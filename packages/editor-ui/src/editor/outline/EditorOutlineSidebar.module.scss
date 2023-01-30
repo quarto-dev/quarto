@@ -111,6 +111,13 @@ $buttonOpacity: 0.6;
   }
 }
 
+.showOutlineButtonGutter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: $sideGutterWidth;
+}
+
 
 .showOutlineButton {
   position: absolute;

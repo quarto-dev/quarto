@@ -34,14 +34,16 @@ export const EditorOutlineButton: React.FC<EditorOutlineButtonProps> = props => 
 
   if (props.visible) {
     return (
-      <Button
-        icon={IconNames.ALIGN_JUSTIFY}
-        title={title}
-        large={true}
-        minimal={true}
-        className={styles.showOutlineButton}
-        onClick={props.onClick}
-      />
+      <div className={styles.showOutlineButtonGutter}>
+        <Button
+          icon={IconNames.ALIGN_JUSTIFY}
+          title={title}
+          large={true}
+          minimal={true}
+          className={styles.showOutlineButton}
+          onClick={props.onClick}
+        />
+      </div>
     );
   } else {
     return null;

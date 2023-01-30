@@ -14,11 +14,10 @@
  */
 
 
-import { EditorUIStore, readPrefsApi } from "editor-ui";
+import { Prefs } from "editor-types";
 import { defaultTheme } from "editor/src/editor/editor-theme";
 
-export function applyDarkMode(store: EditorUIStore) {
-  const prefs = readPrefsApi(store);
+export function applyDarkMode(prefs: Prefs) {
   const root = document.getElementById('root');
   if (prefs.darkMode) {
     root?.classList.add('bp4-dark');  

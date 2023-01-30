@@ -17,7 +17,7 @@ import { Disposable, TextDocument, workspace, window, ColorThemeKind } from "vsc
 
 import throttle from "lodash.throttle";
 
-import { defaultMarkdownPrefs, MarkdownPrefs, Prefs, PrefsServer } from "editor-types";
+import { defaultMarkdownPrefs, defaultPrefs, MarkdownPrefs, Prefs, PrefsServer } from "editor-types";
 
 import { metadataFilesForDocument, projectDirForDocument, yamlFromMetadataFile } from "quarto-core";
 
@@ -34,6 +34,7 @@ const kEditorSelectionHighlight = "editor.selectionHighlight";
 const kEditorCursorBlinking = "editor.cursorBlinking";
 
 const kQuartoEditorFontSize = "quarto.visualEditor.fontSize";
+const kQuartoEditorMaxContentWidth = "quarto.visualEditor.maxContentWidth";
 const kQuartoEditorLineNumbers = "quarto.visualEditor.lineNumbers";
 const kQuartoEditorSpelling = "quarto.visualEditor.spelling";
 const kQuartoEditorSpellingDictionary = "quarto.visualEditor.spellingDictionary";
@@ -51,6 +52,7 @@ const kMonitoredConfigurations = [
   kEditorSelectionHighlight,
   kEditorCursorBlinking,
   kQuartoEditorFontSize,
+  kQuartoEditorMaxContentWidth,
   kQuartoEditorLineNumbers,
   kQuartoEditorSpelling,
   kQuartoEditorSpellingDictionary,
@@ -67,6 +69,7 @@ export function vscodePrefsServer(
 ) : [PrefsServer, Disposable]  {
 
   const server = prefsServer();
+  const defaults = defaultPrefs();
 
   const getPrefs = async () : Promise<Prefs> => {
     
@@ -79,14 +82,15 @@ export function vscodePrefsServer(
       // theme
       darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
                 window.activeColorTheme.kind === ColorThemeKind.HighContrast,
-      fontSize: configuration.get<number>(kQuartoEditorFontSize, 0) || configuration.get<number>(kEditorFontSize, 12),
+      fontSize: configuration.get<number>(kQuartoEditorFontSize, 0) || configuration.get<number>(kEditorFontSize, defaults.fontSize),
+      maxContentWidth: configuration.get<number>(kQuartoEditorMaxContentWidth, defaults.maxContentWidth),
 
       // spelling settings
-      realtimeSpelling: configuration.get<boolean>(kQuartoEditorSpelling, true),
-      dictionaryLocale: configuration.get<string>(kQuartoEditorSpellingDictionary, "en_US"),
+      realtimeSpelling: configuration.get<boolean>(kQuartoEditorSpelling, defaults.realtimeSpelling),
+      dictionaryLocale: configuration.get<string>(kQuartoEditorSpellingDictionary, defaults.dictionaryLocale),
 
       // quarto editor settings
-      listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoEditorDefaultListSpacing, 'spaced'),
+      listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoEditorDefaultListSpacing, defaults.listSpacing),
 
       // markdown writer settings
       ...(await readMarkdownPrefs(engine, document)),
@@ -100,7 +104,7 @@ export function vscodePrefsServer(
       blinkingCursor: configuration.get(kEditorCursorBlinking, "solid") !== "solid",
 
       // quarto code editor settings
-      lineNumbers: configuration.get<boolean>(kQuartoEditorLineNumbers, true),
+      lineNumbers: configuration.get<boolean>(kQuartoEditorLineNumbers, defaults.lineNumbers),
     };
     return prefs;
   };

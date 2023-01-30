@@ -168,6 +168,11 @@ export const Editor : React.FC<EditorProps> = (props) => {
     invalidateAllWords: () => editorRef.current?.spellingInvalidateAllWords() 
   });
 
+  // propagate resize when showOutline changes
+  useEffect(() => {
+    editorRef.current?.resize();
+  }, [prefs.showOutline]);
+
   // initialize the editor
   const initEditor = useCallback(async () => {
     
@@ -189,8 +194,6 @@ export const Editor : React.FC<EditorProps> = (props) => {
       context
     );
     
-    window.addEventListener("resize", onResize);
-
     showPandocWarnings(editorRef.current?.getPandocFormat());
 
     // subscribe to events
@@ -313,6 +316,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
     applyTheme(theme: EditorTheme) {
       editorRef.current?.applyTheme(theme);
     },
+    setMaxContentWidth(maxWidth: number, minPadding = 10) {
+      editorRef.current?.setMaxContentWidth(maxWidth, minPadding);
+    },
     subscribe<TDetail>(event: string | EventType<TDetail>, handler: EventHandler<TDetail>) {
       return editorRef.current!.subscribe(event, handler);
     },
@@ -341,16 +347,18 @@ export const Editor : React.FC<EditorProps> = (props) => {
     dispatch(setEditorSelection(selection));
   }
 
-  // propagate window resize to editor
-  const onResize = () => {
-    editorRef.current?.resize();
-  }
-
+  
   // editor initialization
   useEffect(() => {
     initEditor().catch(error => {
       editorLoadFailed(error);
     });
+
+    // propagate window resize to editor
+    const onResize = () => {
+      editorRef.current?.resize();
+    }
+    window.addEventListener("resize", onResize);
 
     return () => {
       unregisterEditorEvents();

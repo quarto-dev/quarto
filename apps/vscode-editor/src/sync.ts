@@ -127,9 +127,12 @@ export async function syncEditorToHost(
   }
 
   // apply the current theme (including bootstrap class on body)
-  const applyTheme = (fontSize?: number) => {
-    applyDarkMode(store);
-    editor.applyTheme(editorThemeFromVSCode(fontSize));
+  const applyDisplayPrefs = () => {
+    const prefs = readPrefsApi(store);
+    applyDarkMode(prefs);
+    editor.applyTheme(editorThemeFromVSCode(prefs.fontSize));
+    // NOTE: sync with variables.scss => $sideGutterNarrowWidth
+    editor.setMaxContentWidth(prefs.maxContentWidth, 22);
   }
 
   // sync from text editor (throttled)
@@ -146,7 +149,7 @@ export async function syncEditorToHost(
     async init(markdown: string, sourcePos?: SourcePos) {
 
       // apply initial theme
-      applyTheme();
+      applyDisplayPrefs();
 
       // init editor contents and sync cannonical version back to text editor
       const result = await editor.setMarkdown(markdown, writerOptions(), false);
@@ -185,7 +188,7 @@ export async function syncEditorToHost(
       await updatePrefsApi(store, prefs);
 
       // apply theme
-      applyTheme(prefs.fontSize);
+      applyDisplayPrefs();
 
       // if markdown writing options changed then force a refresh
       const options = writerOptions();

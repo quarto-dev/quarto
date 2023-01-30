@@ -29,11 +29,11 @@
     width: initial;
     height: initial;
     top: 0;
-    left: 0;
+    left: calc(#{$sideGutterWidth} - #{$sideGutterNarrowWidth});
     right: 0;
     bottom: 0;
   }
-  .ProseMirror .body, .ProseMirror .notes {
+  .pm-editing-root-node {
     padding-left: $sideGutterWidth;
     padding-right:  $sideGutterWidth;
   }
@@ -45,7 +45,7 @@
     .ProseMirror {
       left: calc(#{$sidebarWidth});
     }
-    .ProseMirror .body, .ProseMirror .notes {
+    .pm-editing-root-node {
       padding-left: $sideGutterNarrowWidth;
       padding-right: $sideGutterNarrowWidth;;
     }

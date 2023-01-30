@@ -298,8 +298,9 @@ export interface EditorOperations {
   navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean): void;
   navigateToSourcePos(pos: SourcePos) : void;
 
-  // theme
+  // theme/content
   applyTheme(theme: EditorTheme): void;
+  setMaxContentWidth(maxWidth: number, minPadding?: number): void;
  
   // events
   subscribe<TDetail>(event: EventType<TDetail> | string, handler: EventHandler<TDetail>): VoidFunction;
@@ -1302,9 +1303,9 @@ export class Editor  {
 
   // update parent padding based on content width settings (if specified)
   private syncContentWidth() {
-    if (this.maxContentWidth && this.parent.clientWidth) {
+    if (this.maxContentWidth && this.view.dom) {
       const minContentPadding = this.minContentPadding || 10;
-      const parentWidth = this.parent.clientWidth;
+      const parentWidth = this.view.dom.clientWidth;
       if (parentWidth > this.maxContentWidth + 2 * minContentPadding) {
         applyPadding(`calc((100% - ${this.maxContentWidth}px)/2)`);
       } else {

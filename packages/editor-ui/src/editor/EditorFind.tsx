@@ -212,7 +212,10 @@ export const EditorFind: React.FC = () => {
     <CSSTransition nodeRef={nodeRef} in={active} timeout={50} classNames={{ ...styles }}
       onEntered={() =>focusInput(findInputRef.current)}
     >          
-      <div ref={nodeRef} className={styles.findContainer}>
+      <div ref={nodeRef} className={[
+        styles.findContainer, 
+        'pm-popup pm-background-color pm-text-color pm-pane-border-color'].join(' ')}
+      >
         <div className={styles.find}>
           <ControlGroup className={styles.findRow}>
             <InputGroup

@@ -517,19 +517,23 @@
       "editor/title": [
         {
           "command": "quarto.insertCodeCell",
-          "when": "editorLangId == quarto"
+          "when": "editorLangId == quarto",
+          "group": "q_execute"
         },
         {
           "command": "quarto.clearCache",
-          "when": "editorLangId == quarto"
+          "when": "editorLangId == quarto",
+          "group": "q_execute"
         },
         {
           "command": "quarto.editInVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
+          "group": "q_switch"
         },
         {
           "command": "quarto.editInSourceMode",
-          "when": "activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "q_switch"
         }
       ],
       "editor/title/run": [

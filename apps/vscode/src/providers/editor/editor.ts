@@ -175,20 +175,75 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
               private readonly engine: MarkdownEngine) {}
 
  
-  public resolveCustomTextEditor(
+  public async resolveCustomTextEditor(
     document: TextDocument,
     webviewPanel: WebviewPanel,
     _token: CancellationToken
   ) {
 
-    // if the document is untitled then capture its contents (as vscode throws it on the floor
+     // if the document is untitled then capture its contents (as vscode throws it on the floor
     // and we may need it to do a re-open)
     const untitledContent = 
       (document.isUntitled && 
       VisualEditorProvider.activeUntitled?.uri.toString() === document.uri.toString())
         ? VisualEditorProvider.activeUntitled.content
         : undefined;
-    
+
+    // function to re-open source mode
+    const reopenSourceMode = async () => {
+
+      // save if required
+      if (!document.isUntitled) {
+        await commands.executeCommand("workbench.action.files.save");
+      }
+
+      // close editor (return immediately as if we don't then this 
+      // rpc method's return will result in an error b/c the webview
+      // has been torn down by the time we return)
+      const viewColumn = webviewPanel.viewColumn;
+      commands.executeCommand('workbench.action.closeActiveEditor').then(async () => {
+        if (document.isUntitled) {
+          const doc = await workspace.openTextDocument({
+            language: kQuartoLanguageId,
+            content: untitledContent || '',
+          });
+          await window.showTextDocument(doc, viewColumn, false);
+        } else {
+          const doc = await workspace.openTextDocument(document.uri);
+          await window.showTextDocument(doc, viewColumn, false);
+        }
+      });
+    };
+
+    // prompt the user
+    const kVisualModeConfirmed = "visualModeConfirmed";
+    if (this.context.globalState.get(kVisualModeConfirmed) !== true) {
+      const kUseVisualMode = "Use Visual Mode";
+      const kLearnMore = "Learn More...";
+      const result = await window.showInformationMessage<string>(
+        "You are activating Quarto visual markdown editing mode.",
+        { 
+          modal: true, 
+          detail: 
+            "Visual mode enables you to author using a familiar word processor style interface.\n\n" + 
+            "Markdown code will be re-formatted using the Pandoc markdown writer." 
+        },
+        kUseVisualMode,
+        kLearnMore
+      );
+      if (!result) {
+        await reopenSourceMode();
+        return;
+      } else if (result === kLearnMore) {
+        await env.openExternal(Uri.parse("https://quarto.org/docs/visual-editor/markdown.html"));
+        await reopenSourceMode();
+        return;
+      } else {
+        this.context.globalState.update(kVisualModeConfirmed, true);
+      }
+    }
+  
+    // some storage locations
     const projectDir = document.isUntitled ? undefined : projectDirForDocument(document.fileName);
     const workspaceDir = this.quartoContext.workspaceDir;
 

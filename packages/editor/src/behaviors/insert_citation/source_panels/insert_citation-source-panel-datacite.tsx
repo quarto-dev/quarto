@@ -153,7 +153,7 @@ function toCitationListEntry(
     type: record.type || '',
     date: record.publicationYear?.toString() || '',
     journal: record.publisher,
-    image: imageForType(ui.images, record.type || '')[0],
+    image: imageForType(ui.images, record.type || '')[ui.prefs.darkMode() ? 1 : 0],
     doi: record.doi,
     authors: () => {
       return formatAuthors(record.creators || []);

@@ -88,6 +88,7 @@ export async function showInsertCitationDialog(
       cancel: VoidFunction,
       showProgress: (message: string) => void,
       hideProgress: VoidFunction,
+      themed?: boolean
     ) => {
       const kMaxHeight = 650;
       const kMaxWidth = 900;
@@ -104,7 +105,10 @@ export async function showInsertCitationDialog(
       const container = window.document.createElement('div');
       container.style.width = width + 'px';
       container.style.height = height + 'px';
-      container.className = 'pm-default-theme';
+      if (!themed) {
+        container.className = 'pm-default-theme';
+      }
+    
       const root = createRoot(container);
     
       // Provide the providers top the dialog and then refresh the bibliography and reload the items
@@ -212,6 +216,7 @@ export async function showInsertCitationDialog(
         <InsertCitationPanel
           height={height}
           width={width}
+          themed={!!themed}
           configuration={configurationStream}
           initiallySelectedNodeKey={initiallySelectedNodeKey}
           onOk={onOk}
@@ -262,6 +267,7 @@ interface InsertCitationPanelProps extends WidgetProps {
   doc: ProsemirrorNode;
   height: number;
   width: number;
+  themed: boolean;
   configuration: InsertCitationPanelConfigurationStream;
   initiallySelectedNodeKey?: string;
   onOk: (
@@ -654,13 +660,18 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
 
   const totalCitationCount = insertCitationPanelState.citationsToAdd.length + (insertCitationPanelState.selectedIndex > -1 ? 1 : 0);
 
+  // classes
+  const classes = ["pm-cite-panel-container"];
+  if (!props.themed) {
+    classes.push("pm-default-theme");
+  }
 
   // Create the panel that should be displayed for the selected node of the tree
   const panelToDisplay = selectedPanelProvider
     ? React.createElement(selectedPanelProvider.panel, citationProps)
     : undefined;
   return (
-    <div className="pm-cite-panel-container" style={style} onKeyPress={onKeyPress} onKeyDown={onKeyDown}>
+    <div className={classes.join(' ')} style={style} onKeyPress={onKeyPress} onKeyDown={onKeyDown}>
       <div className="pm-cite-panel-cite-selection">
         <div className="pm-cite-panel-cite-selection-sources pm-block-border-color pm-background-color">
           <NavigationTree

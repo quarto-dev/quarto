@@ -23,6 +23,7 @@ import { Dialog, Intent, Position, Spinner, SpinnerSize, Toast, Toaster, Text } 
 import { modalDialogProps } from "ui-widgets";
 
 import { EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn } from "editor-types";
+import { isSolarizedThemeActive } from "../theme";
 
 export async function htmlDialog(
   title: string, 
@@ -92,11 +93,13 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
     onOK, 
     onCancel, 
     setProgress, 
-    () => {setProgress(null)} )
+    () => {setProgress(null)},
+    !isSolarizedThemeActive() )
   );
   const padding = 12;
   const width = `calc(${dialogWidgetRef.current.style.width} + ${2 * padding}px`;
   const height = `calc(${dialogWidgetRef.current.style.height} + ${2.5 * padding}px`;
+  const themed = !isSolarizedThemeActive();
 
   const dialogBodyRef = (el: HTMLDivElement | null) => {
     if (el) {
@@ -109,7 +112,7 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
       title={props.title}
       isOpen={isOpen}
       onClose={onCancel}
-      {...modalDialogProps([], {width: 'auto', position: 'relative'}, false)}
+      {...modalDialogProps([], {width: 'auto', position: 'relative'}, themed)}
       shouldReturnFocusOnClose={false}
     > 
       <div style={{width, height, padding: padding + 'px'}}>

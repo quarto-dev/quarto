@@ -55,6 +55,7 @@ export type EditorHTMLDialogCreateFn = (
   cancel: () => void,
   showProgress: (message: string) => void,
   hideProgress: () => void,
+  themed?: boolean
 ) => HTMLElement;
 
 export type EditorHTMLDialogValidateFn = () => string | null;

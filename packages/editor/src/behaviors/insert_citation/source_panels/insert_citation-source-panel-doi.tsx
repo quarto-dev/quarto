@@ -140,7 +140,7 @@ function toCitationListEntry(
       date: formatIssuedDate(csl.issued),
       journal: csl['container-title'] || csl['short-container-title'] || csl.publisher,
       doi: csl.DOI,
-      image: imageForType(ui.images, csl.type)[0],
+      image: imageForType(ui.images, csl.type)[ui.prefs.darkMode() ? 1 : 0],
       authors: (length: number) => {
         return formatAuthors(csl.author, length);
       },

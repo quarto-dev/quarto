@@ -14,8 +14,9 @@
  */
 
 
+import { defaultTheme } from "editor";
 import { Prefs } from "editor-types";
-import { defaultTheme } from "editor/src/editor/editor-theme";
+import { isSolarizedThemeActive } from "editor-ui";
 
 export function applyDarkMode(prefs: Prefs) {
   const root = document.getElementById('root');
@@ -42,7 +43,7 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   );
 
   theme.darkMode = document.body.classList.contains('vscode-dark');
-  theme.solarizedMode = (document.body.getAttribute('data-vscode-theme-name') || '').includes('Solarized Light');
+  theme.solarizedMode = isSolarizedThemeActive();
   theme.cursorColor = colors["--vscode-editorCursor-foreground"];
   theme.selectionColor = colors["--vscode-editor-selectionBackground"];
   theme.nodeSelectionColor = colors["--vscode-notebook-focusedCellBorder"];

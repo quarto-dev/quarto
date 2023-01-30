@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * solarized.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,13 +13,7 @@
  *
  */
 
-export * from './context';
-export * from './dialogs';
-export * from './commands';
-export * from './widgets';
-export * from './menu';
-export * from './editor';
-export * from './store';
-export * from './i18n';
-export * from './theme';
-
+// detect solarized theme using various hueristics
+export function isSolarizedThemeActive() {
+  return (document.body.getAttribute('data-vscode-theme-name') || '').includes('Solarized Light');
+}

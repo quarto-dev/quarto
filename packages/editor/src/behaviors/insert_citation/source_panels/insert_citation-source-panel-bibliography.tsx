@@ -240,7 +240,7 @@ function toCitationListEntries(
       providerKey: source.providerKey,
       date: formatIssuedDate(source.issued),
       journal: '',
-      image: imageForType(ui.images, source.type)[0],
+      image: imageForType(ui.images, source.type)[ui.prefs.darkMode() ? 1 : 0],
       imageAdornment: source.providerKey === kZoteroProviderKey ? ui.images.citations?.zoteroOverlay : undefined,
       authors: (length: number) => {
         return formatAuthors(source.author, length);

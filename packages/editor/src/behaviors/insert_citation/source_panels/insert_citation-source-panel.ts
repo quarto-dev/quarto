@@ -124,7 +124,7 @@ function existingSourceToCitationListEntry(csl: CSL, existingIds: string[], ui: 
     authors: (length: number) => {
       return formatAuthors(csl.author || [], length);
     },
-    image: imageForType(ui.images, csl.type)[0],
+    image: imageForType(ui.images, csl.type)[ui.prefs.darkMode() ? 1 : 0],
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
       return { ...csl, id: finalId, providerKey };

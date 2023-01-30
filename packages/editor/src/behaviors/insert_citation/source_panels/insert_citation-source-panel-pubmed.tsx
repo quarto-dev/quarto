@@ -160,7 +160,7 @@ function toCitationListEntry(
     authors: () => {
       return formatAuthors(doc.authors || []);
     },
-    image: imageForType(ui, doc.pubTypes)[0],
+    image: imageForType(ui, doc.pubTypes)[ui.prefs.darkMode() ? 1 : 0],
     toBibliographySource: async (finalId: string) => {
       // Generate CSL using the DOI
       const doiResult = await doiServer.fetchCSL(doc.doi);

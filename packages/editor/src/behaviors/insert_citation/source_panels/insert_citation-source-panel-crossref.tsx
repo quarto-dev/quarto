@@ -131,7 +131,7 @@ function toCitationListEntry(
     type: prettyType(ui, crossrefWork.type),
     date: formatIssuedDate(crossrefWork.issued),
     journal: crossrefWork['container-title'] || crossrefWork['short-container-title'] || crossrefWork.publisher,
-    image: imageForCrossrefType(ui, crossrefWork.type)[0],
+    image: imageForCrossrefType(ui, crossrefWork.type)[ui.prefs.darkMode() ? 1 : 0],
     doi: crossrefWork.DOI,
     authors: (length: number) => {
       return formatAuthors(coercedCSL.author, length);

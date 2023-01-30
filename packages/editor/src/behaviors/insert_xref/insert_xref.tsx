@@ -152,7 +152,10 @@ export async function insertXref(
       containerWidth: number,
       containerHeight: number,
       confirm: VoidFunction,
-      cancel: VoidFunction
+      cancel: VoidFunction,
+      _showProgress: (message: string) => void, 
+      _hideProgress: VoidFunction,
+      themed?: boolean
     ) => {
       const kMaxHeight = 400;
       const kMaxWidth = 650;
@@ -166,7 +169,10 @@ export async function insertXref(
       const width = Math.max(Math.min(kMaxWidth, windowWidth * 0.9), 550);
 
       const container = window.document.createElement('div');
-      container.className = 'pm-default-theme';
+      if (!themed) {
+        container.className = 'pm-default-theme';
+      }
+   
       container.style.width = width + 'px';
       container.style.height = height + 75 + 'px';
       const root = createRoot(container);
@@ -196,6 +202,7 @@ export async function insertXref(
         <InsertXrefPanel
           height={height}
           width={width}
+          themed={!!themed}
           styleIndex={lastSelectedStyleIndex}
           onOk={onInsert}
           onCancel={onCancel}
@@ -222,6 +229,7 @@ interface InsertXrefPanelProps extends WidgetProps {
   doc: ProsemirrorNode;
   height: number;
   width: number;
+  themed: boolean;
   styleIndex: number;
   loadXRefs: () => Promise<XRef[]>;
   onOk: (xref: XRef, style: XRefStyle, prefix?: string) => void;
@@ -461,9 +469,14 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
     setSelectedTypeIndex(xRefTypes.findIndex(type => type.type === node.key));
   };
 
+  const classes = ["pm-insert-xref-container"];
+  if (!props.themed) {
+    classes.push("pm-default-theme");
+  }
+
   return (
     <div className="pm-insert-xref">
-      <div className="pm-insert-xref-container">
+      <div className={classes.join(' ')}>
         <div className="pm-insert-xref-type-container pm-block-border-color pm-background-color">
           <NavigationTree
             height={props.height + kXrefSearchBoxHeight}

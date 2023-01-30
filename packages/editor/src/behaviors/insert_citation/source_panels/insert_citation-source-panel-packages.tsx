@@ -137,7 +137,7 @@ function toCitationListEntry(
     date: packageInfo.version || "",
     journal: "",
     doi: "",
-    image: imageForType(ui.images, cslTypes.book)[0],
+    image: imageForType(ui.images, cslTypes.book)[ui.prefs.darkMode() ? 1 : 0],
     authors: () => {
       return packageInfo.name || "";
     },

@@ -1,5 +1,5 @@
 /*
- * preview-reveal.ts
+ * reveal.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -17,8 +17,8 @@ import { Position, TextDocument } from "vscode";
 
 import { parseFrontMatterStr } from "quarto-core";
 
-import { MarkdownEngine } from "../../markdown/engine";
-import { getHeaderLevel } from "../../markdown/toc";
+import { MarkdownEngine } from "./engine";
+import { getHeaderLevel } from "./toc";
 
 export async function revealSlideIndex(
   cursorPos: Position,

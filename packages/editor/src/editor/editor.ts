@@ -287,6 +287,7 @@ export interface EditorOperations {
   getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) : Promise<string>;
   getMarkdown(options: PandocWriterOptions) : Promise<EditorCode>;
   getEditorSourcePos(): SourcePos;
+  getSlideIndex(): number;
 
   // subsystems
   getFindReplace() : EditorFindReplace | undefined

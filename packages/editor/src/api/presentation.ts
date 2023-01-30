@@ -106,6 +106,15 @@ export function getPresentationEditorLocation(state: EditorState) : Presentation
     }
   }
 
+  // if we didn't find the cursor then put it at the end
+  if (!foundCursor && items.length > 0) {
+    items.push({
+      type: kPresentationEditorLocationCursor,
+      level: 0,
+      pos: items[items.length-1].pos
+    });
+  }
+
   // last chance to collect pending auto slide level
   if (pendingAutoSlideLevel > 0){
     autoSlideLevel = pendingAutoSlideLevel;
@@ -141,4 +150,20 @@ export function positionForPresentationEditorLocation(
 
   // default if we can't find a location
   return -1;
+}
+
+export function slideIndexForPresentationEditorLocation(location: PresentationEditorLocation) {
+  let slideIndex = -1;
+  for (const item of location.items) {
+    if (item.type === kPresentationEditorLocationCursor) {
+      return Math.max(slideIndex, 0);
+    } else if (item.type === kPresentationEditorLocationTitle || 
+                item.type === kPresentationEditorLocationHr) {
+      slideIndex++;
+    } else if (item.type === kPresentationEditorLocationHeading && 
+                item.level <= location.auto_slide_level) {
+      slideIndex++;
+    }
+  }
+  return 0;
 }

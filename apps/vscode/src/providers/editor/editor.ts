@@ -159,6 +159,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             editor.editor.focus();
           }, 200);
         },
+        slideIndex: async () => {
+          return await editor.editor.getSlideIndex();
+        },
         viewColumn: editor.webviewPanel.viewColumn 
       };
     } else {

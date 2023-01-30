@@ -29,6 +29,7 @@ export * from './api/event-types';
 export * from './api/extension-types'
 export * from './api/pandoc-types';
 export * from './api/options';
+export * from './api/presentation'
 
 // some api helpers
 export * from './api/cursor';

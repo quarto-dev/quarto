@@ -23,6 +23,7 @@ export const VSC_VE_Focus = 'vsc_ve_focus';
 export const VSC_VE_IsFocused = 'vsc_ve_is_focused';
 export const VSC_VE_GetMarkdown = 'vsc_ve_get_markdown';
 export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
+export const VSC_VE_GetSlideIndex = 'vsc_ve_get_slide_index';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 export const VSC_VE_PrefsChanged = 'vsc_ve_prefs_changed';
 
@@ -49,6 +50,7 @@ export interface VSCodeVisualEditor {
   focus: () => Promise<void>;
   isFocused: () => Promise<boolean>;
   getMarkdownFromState: (state: unknown) => Promise<string>;
+  getSlideIndex: () => Promise<number>;
   applyExternalEdit: (markdown: string) => Promise<void>;
   prefsChanged: (prefs: Prefs) => Promise<void>;
 }

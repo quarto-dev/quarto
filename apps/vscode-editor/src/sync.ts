@@ -32,6 +32,7 @@ import {
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_PrefsChanged,
   VSC_VE_GetMarkdownFromState,
+  VSC_VE_GetSlideIndex,
   VSC_VE_Init, 
   VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
@@ -219,6 +220,10 @@ export async function syncEditorToHost(
       const markdown = await editor.getMarkdownFromStateJson(state, writerOptions());
       return markdown;
     },
+
+    async getSlideIndex(): Promise<number> {
+      return editor.getSlideIndex();
+    }
   })
 
   // let the host know we are ready
@@ -284,6 +289,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_Focus]: () => editor.focus(),
     [VSC_VE_IsFocused]: () => editor.isFocused(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
+    [VSC_VE_GetSlideIndex]: () => editor.getSlideIndex(),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
   })

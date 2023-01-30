@@ -85,7 +85,6 @@ import {
   luaErrorLocation,
   yamlErrorLocation,
 } from "./preview-errors";
-import { revealSlideIndex } from "./preview-reveal";
 
 tmp.setGracefulCleanup();
 
@@ -166,10 +165,8 @@ export async function previewDoc(
   if (engine !== undefined) {
     // set the slide index from the source editor so we can
     // navigate to it in the preview frame
-    if (!isNotebook(editor.document) && editor.textEditor) {
-      previewManager.setSlideIndex(
-        await revealSlideIndex(editor.textEditor.selection.active, editor.document, engine)
-      );
+    if (!isNotebook(editor.document)) {
+      previewManager.setSlideIndex(await editor.slideIndex(engine));
     } else {
       previewManager.setSlideIndex(undefined);
     }

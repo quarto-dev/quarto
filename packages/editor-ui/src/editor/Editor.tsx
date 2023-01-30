@@ -44,7 +44,8 @@ import {
   EditorOptions,
   EditorContext,
   defaultTheme,
-  EditorTheme
+  EditorTheme,
+  slideIndexForPresentationEditorLocation
 } from 'editor';
 
 import { 
@@ -288,6 +289,10 @@ export const Editor : React.FC<EditorProps> = (props) => {
     },
     getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) {
       return editorRef.current!.getMarkdownFromStateJson(stateJson, options);
+    },
+    getSlideIndex() {
+      const location = editorRef.current!.getPresentationEditorLocation();
+      return slideIndexForPresentationEditorLocation(location);
     },
     getMarkdown(options: PandocWriterOptions) {
       return editorRef.current!.getMarkdown(options);

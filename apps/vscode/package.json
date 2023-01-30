@@ -41,7 +41,8 @@
     "onCommand:quarto.renderPDF",
     "onCommand:quarto.renderDOCX",
     "onCommand:quarto.renderShortcut",
-    "onCommand:quarto.toggleVisualMode",
+    "onCommand.quarto.editInSourceMode",
+    "onCommand.quarto.editInVisualMode",
     "onCommand:quarto.newDocument",
     "onCommand:quarto.fileNewDocument",
     "onCommand:quarto.newPresentation",
@@ -287,8 +288,13 @@
         "category": "Quarto"
       },
       {
-        "command": "quarto.toggleVisualMode",
-        "title": "Toggle Visual Mode",
+        "command": "quarto.editInSourceMode",
+        "title": "Edit in Source Mode",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.editInVisualMode",
+        "title": "Edit in Visual Mode",
         "category": "Quarto"
       },
       {
@@ -425,10 +431,16 @@
         "when": "editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
       },
       {
-        "command": "quarto.toggleVisualMode",
+        "command": "quarto.editInSourceMode",
         "key": "ctrl+shift+f4",
         "mac": "cmd+shift+f4",
-        "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+      },
+      {
+        "command": "quarto.editInVisualMode",
+        "key": "ctrl+shift+f4",
+        "mac": "cmd+shift+f4",
+        "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"
       },
       {
         "command": "quarto.insertCodeCell",
@@ -492,13 +504,13 @@
     "menus": {
       "editor/context": [
         {
-          "command": "quarto.toggleVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "command": "quarto.editInVisualMode",
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"
         }
       ],
       "webview/context": [
         {
-          "command": "quarto.toggleVisualMode",
+          "command": "quarto.editInSourceMode",
           "when": "activeCustomEditorId == 'quarto.visualEditor'"
         }
       ],
@@ -512,8 +524,12 @@
           "when": "editorLangId == quarto"
         },
         {
-          "command": "quarto.toggleVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "command": "quarto.editInVisualMode",
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"
+        },
+        {
+          "command": "quarto.editInSourceMode",
+          "when": "activeCustomEditorId == 'quarto.visualEditor'"
         }
       ],
       "editor/title/run": [
@@ -568,8 +584,12 @@
       ],
       "commandPalette": [
         {
-          "command": "quarto.toggleVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "command": "quarto.editInSourceMode",
+          "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        },
+        {
+          "command": "quarto.editInVisualMode",
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"
         },
         {
           "command": "quarto.newDocument"

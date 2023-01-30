@@ -19,19 +19,28 @@ import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 
 
-export function toggleVisualModeCommand() : Command {
+
+
+export function editInVisualModeCommand() : Command {
   return {
-    id: "quarto.toggleVisualMode",
+    id: "quarto.editInVisualMode",
+    execute() {
+      const editor = window.activeTextEditor;
+      if (editor && isQuartoDoc(editor.document)) {
+        reopenEditorInVisualMode(editor.document, editor.viewColumn);
+      }
+    }
+  };
+}
+
+export function editInSourceModeCommand() : Command {
+  return {
+    id: "quarto.editInSourceMode",
     execute() {
       const activeVisual = VisualEditorProvider.activeEditor();
       if (activeVisual) {
         reopenEditorInSourceMode(activeVisual.document, '', activeVisual.viewColumn);
-      } else {
-        const editor = window.activeTextEditor;
-        if (editor && isQuartoDoc(editor.document)) {
-          reopenEditorInVisualMode(editor.document, editor.viewColumn);
-        }
-      }
+      } 
     }
   };
 }

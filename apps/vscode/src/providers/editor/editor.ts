@@ -54,7 +54,11 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
 import { JsonRpcRequestTransport } from "core";
-import { reopenEditorInSourceMode, toggleVisualModeCommand } from "./toggle";
+import { 
+  editInSourceModeCommand, 
+  editInVisualModeCommand, 
+  reopenEditorInSourceMode 
+} from "./toggle";
 
 
 export function activateEditor(
@@ -67,7 +71,7 @@ export function activateEditor(
   context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient, engine));
 
   // return commands
-  return [toggleVisualModeCommand()];
+  return [editInVisualModeCommand(), editInSourceModeCommand()];
 }
 
 

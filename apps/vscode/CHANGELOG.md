@@ -1,8 +1,10 @@
 # Changelog
 
-## 1.60.0 (Unreleased)
+## 1.60.0 (Release on 30 January 2023)
 
-- Prevent render on save from occuring for documents not being actively previewed.
+- Prevent render on save from occurring for documents not being actively previewed.
+- Evaluate tex macros for equation hover/preview.
+- Preview of visual markdown editor (use "Edit in Visual/Source Mode" command or context menu to switch modes).
 
 ## 1.59.0 (Release on 15 December 2022)
 

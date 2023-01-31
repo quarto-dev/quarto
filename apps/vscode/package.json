@@ -1119,7 +1119,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "cd ../.. && turbo run build --filter quarto...",
+    "vscode:prepublish": "cd ../.. && turbo run build --force --filter quarto...",
     "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",

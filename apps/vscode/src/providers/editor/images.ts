@@ -65,18 +65,21 @@ export function documentImageResolver(
 
   const resolveImage = (uri: string) => {
     uri = path.normalize(uri);
+    const relative = (dir: string, file: string) => {
+      return ensureForwardSlashes(path.relative(dir, file));
+    }
     // doc dir relative
     if (uri.startsWith(docDir)) {
-      return path.relative(docDir, uri);
+      return relative(docDir, uri);
     // project dir relative (start w/ slash)
     } else if (projectDir && uri.startsWith(projectDir)) {
-      return `/${path.relative(projectDir, uri)}`;
+      return `/${relative(projectDir, uri)}`;
     // otherwise copy to images dir
     } else {
       const parsedPath = path.parse(uri);
       const imagePath = uniqueImagePath(parsedPath.name, parsedPath.ext, true);
       fs.copyFileSync(uri, imagePath);
-      return path.relative(docDir, imagePath);
+      return relative(docDir, imagePath);
     }
   };
 

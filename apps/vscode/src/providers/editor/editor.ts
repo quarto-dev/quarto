@@ -126,18 +126,30 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       if (document && isQuartoDoc(document)) {
         const pos = this.visualEditorLastSourcePos.get(document.uri.toString());
         if (pos) {
+          // one shot
           this.visualEditorLastSourcePos.delete(document.uri.toString());
-          const cursorLocation = pos.locations.findIndex(loc => loc.pos > pos.pos);
-          if (cursorLocation > 0) {
-            const source = editorSourceJsonRpcServer(lspRequest);
-            const locations = await source.getSourcePosLocations(document.getText());
-            if (locations.length >= cursorLocation) {
-              const selLine = locations[cursorLocation-1].pos - 1;
-              const selRange = new  Range(selLine, 0, selLine, 0);
-              editor.selection = new Selection(selRange.start, selRange.end);
-              editor.revealRange(selRange, TextEditorRevealType.InCenter);
+
+          // find the index
+          let cursorIndex = -1;
+          for (let i=(pos.locations.length-1); i>=0; i--) {
+            if (pos.pos >= pos.locations[i].pos) {
+              cursorIndex = i;
+              break;
             }
           }
+
+          // map to source line
+          let selLine = 0;
+          if (cursorIndex !==-1) {
+            const source = editorSourceJsonRpcServer(lspRequest);
+            const locations = await source.getSourcePosLocations(document.getText());
+            selLine = (locations[cursorIndex] || locations[locations.length-1]).pos - 1;
+          }
+         
+          // navigate
+          const selRange = new  Range(selLine, 0, selLine, 0);
+          editor.selection = new Selection(selRange.start, selRange.end);
+          editor.revealRange(selRange, TextEditorRevealType.InCenter);
         }
       }
     }));

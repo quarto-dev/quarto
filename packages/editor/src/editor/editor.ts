@@ -103,7 +103,7 @@ import { EditorSpellingDoc } from '../api/spelling';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/codeview';
-import { editingRootNodeClosestToPos } from '../api/node';
+import { editingRootNode, editingRootNodeClosestToPos } from '../api/node';
 import { ContextMenuSource } from '../api/menu';
 import { mapSlice } from '../api/slice';
 
@@ -847,14 +847,25 @@ export class Editor  {
   }
 
   public navigateToSourcePos(pos: SourcePos)  {
-    const cursorLocation = pos.locations.findIndex(loc => loc.pos > pos.pos);
-    if (cursorLocation > 0) {
-      const editorLocations = this.getEditorSourcePos().locations;
-      if (editorLocations.length >= cursorLocation) {
-        const targetPos = editorLocations[cursorLocation-1].pos;
-        this.navigate(NavigationType.Pos, String(targetPos), false, false); 
+   
+    // find the index
+    let cursorIndex = -1;
+    for (let i=(pos.locations.length-1); i>=0; i--) {
+      if (pos.pos >= pos.locations[i].pos) {
+        cursorIndex = i;
+        break;
       }
     }
+
+    // map to position
+    let targetPos = editingRootNode(this.view.state.selection)!.pos;
+    if (cursorIndex !== -1) {
+      const locations = this.getEditorSourcePos().locations;
+      targetPos = (locations[cursorIndex] || locations[locations.length-1]).pos;
+    }
+
+    // navigate
+    this.navigate(NavigationType.Pos, String(targetPos), false, false); 
   }
 
   public resize() {

@@ -58,6 +58,7 @@
     "workspaceContains:**/_extension.{yml,yaml}",
     "onWebviewPanel:quarto.previewView",
     "onWebviewPanel:quarto.diagramView",
+    "onCustomEditor:quarto.visualEditor",
     "onView:quarto-assist"
   ],
   "capabilities": {

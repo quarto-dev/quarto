@@ -723,7 +723,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
                   checked={insertCitationPanelState.intextCitationStyle}
                   className='pm-cite-panel-checkbox'
                   onChange={onCitationStyleChanged} />
-                <label htmlFor='intextStyleCheckbox' className='pm-cite-panel-checkbox-label'>{props.ui.context.translateText('Use in-text citation')}</label>
+                <label htmlFor='intextStyleCheckbox' className='pm-cite-panel-checkbox-label'>{props.ui.context.translateText('In-text')}</label>
               </div>
             ) : (
                 <div />

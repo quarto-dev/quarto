@@ -59,8 +59,8 @@ export const CitationBibliographyPicker: React.FC<CitationBiblographyPickerProps
     <div className="pm-citation-bibliography-picker-container" style={props.style}>
       <div className="pm-citation-bibliography-picker-label pm-text-color">
         {props.bibliographyFiles.length > 0
-          ? props.ui.context.translateText('Add to bibliography:')
-          : props.ui.context.translateText('Create bibliography:')}
+          ? props.ui.context.translateText('Add to:')
+          : props.ui.context.translateText('Create:')}
       </div>
       {props.bibliographyFiles.length > 0 ? (
         <SelectInput onChange={onChange}>

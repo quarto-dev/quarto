@@ -188,8 +188,10 @@ export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourc
         return (
           <div className={classes} style={{ height: props.height + 'px' }} ref={ref}>
             <div className="pm-insert-citation-source-panel-list-noresults-text">
-              <img src={props.ui.images.search_progress} className="pm-insert-citation-source-panel-list-progress" 
-                   draggable="false"/>
+              {!props.ui.prefs.darkMode 
+                ? <img src={props.ui.images.search_progress} className="pm-insert-citation-source-panel-list-progress" draggable="false"/>
+                : null
+              }
               {props.statusMessage}
             </div>
           </div>

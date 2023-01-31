@@ -25,6 +25,7 @@ import { xrefPosition } from './xref';
 import { EditorFormat, kQuartoDocType } from './format';
 import { Navigation, NavigationType } from './navigation-types';
 import { editorScrollContainer } from './scroll';
+import { NodeSelection } from 'prosemirror-state';
 
 export function navigateTo(
   view: EditorView,
@@ -87,9 +88,14 @@ export function navigateToPos(view: EditorView, pos: number, animate = true): Na
   // need to target at least the body
   pos = Math.max(pos, 2);
 
-  // set selection
+  // set selection (detect node selection)
   const tr = view.state.tr;
-  setTextSelection(pos)(tr);
+  const pmNode = view.state.doc.nodeAt(pos);
+  if (pmNode?.type.spec.selectable) {
+    tr.setSelection(new NodeSelection(tr.doc.resolve(pos)));
+  } else {
+    setTextSelection(pos)(tr);
+  }
   tr.setMeta(kNavigationTransaction, true);
   view.dispatch(tr);
 

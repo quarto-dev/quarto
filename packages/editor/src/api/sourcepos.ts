@@ -24,6 +24,7 @@ export function getEditorSourcePos(state: EditorState): SourcePos {
   const paraBlockTypes = [
     'paragraph',
     'table_container',
+    'figure',
     'line_block',
     'definition_list',
     'shortcode_block'

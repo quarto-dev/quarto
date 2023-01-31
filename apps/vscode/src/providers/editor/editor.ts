@@ -350,6 +350,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       onEditorUpdated: syncManager.onVisualEditorChanged,
 
       onEditorStateChanged: async (sourcePos: SourcePos) => {
+        console.log(sourcePos);
         VisualEditorProvider.visualEditorLastSourcePos.set(document.uri.toString(), sourcePos);
       },
 

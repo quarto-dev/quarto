@@ -82,7 +82,6 @@ import {
   kSetMarkdownTransaction,
   kNoUpdateTransaction,
   kThemeChangedTransaction,
-  kNavigationTransaction,
 } from '../api/transaction';
 import { getOutlineNodes, getEditingOutlineLocation } from '../api/outline';
 import { EditingLocation, getEditingLocation, setEditingLocation } from '../api/location';
@@ -102,7 +101,7 @@ import { wrapSentences } from '../api/wrap';
 import { yamlFrontMatter, applyYamlFrontMatter } from '../api/yaml';
 import { EditorSpellingDoc } from '../api/spelling';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
-import { kPmScrollContainer, scrollIntoView } from '../api/scroll';
+import { kPmScrollContainer } from '../api/scroll';
 import { CodeViewExtensionFn } from '../api/codeview';
 import { editingRootNodeClosestToPos } from '../api/node';
 import { ContextMenuSource } from '../api/menu';
@@ -853,18 +852,7 @@ export class Editor  {
       const editorLocations = this.getEditorSourcePos().locations;
       if (editorLocations.length >= cursorLocation) {
         const targetPos = editorLocations[cursorLocation-1].pos;
-
-        // set selection
-        const tr = this.view.state.tr;
-        setTextSelection(targetPos)(tr);
-        tr.setMeta(kNavigationTransaction, true);
-        this.view.dispatch(tr);
-
-        // set focus
-        this.view.focus();
-
-        // navigate
-        scrollIntoView(this.view, targetPos, true, 0, 100);
+        this.navigate(NavigationType.Pos, String(targetPos), false, false); 
       }
     }
   }

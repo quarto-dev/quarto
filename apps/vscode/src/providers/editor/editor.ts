@@ -121,8 +121,13 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     }));
 
     // when the active editor changes see if we have a visual editor position for it
-    context.subscriptions.push(window.onDidChangeActiveTextEditor(async (editor) => {
-      const document = editor?.document;
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(async () => {
+      // resolve active editor
+      const editor = window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      const document = editor.document;
       if (document && isQuartoDoc(document)) {
         const pos = this.visualEditorLastSourcePos.get(document.uri.toString());
         if (pos) {

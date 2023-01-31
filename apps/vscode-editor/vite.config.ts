@@ -1,5 +1,5 @@
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, normalizePath } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 
@@ -18,8 +18,8 @@ export default defineConfig(env => {
       viteStaticCopy({
         targets: [
           {
-            src: path.resolve(__dirname, './dist/*'),
-            dest: path.resolve(__dirname, '../vscode/assets/www/editor')
+            src: normalizePath(path.resolve(__dirname, './dist/*')),
+            dest: normalizePath(path.resolve(__dirname, '../vscode/assets/www/editor'))
           }
         ]
       })

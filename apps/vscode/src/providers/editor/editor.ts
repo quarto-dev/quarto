@@ -355,7 +355,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
       // map resources to uris valid in the editor
       editorResourceUri: async (path: string) => {
-        const uri = webviewPanel.webview.asWebviewUri(Uri.parse(path)).toString();
+        const uri = webviewPanel.webview.asWebviewUri(Uri.file(path)).toString();
         return uri;
       },
 
@@ -397,7 +397,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       localResourceRoots: [
         this.context.extensionUri,
         ...(workspace.workspaceFolders ? workspace.workspaceFolders.map(folder => folder.uri) : []),
-        ...(!document.isUntitled ? [Uri.parse(path.dirname(document.fileName))] : [])
+        ...(!document.isUntitled ? [Uri.file(path.dirname(document.fileName))] : [])
       ],
       enableScripts: true 
     };
@@ -456,7 +456,7 @@ async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) 
   
   const docDir = path.dirname(baseDoc.uri.fsPath);
   const filePath = path.normalize(path.isAbsolute(file) ? file : path.join(docDir, file));
-  const uri = Uri.parse(filePath);
+  const uri = Uri.file(filePath);
   const ext = extname(filePath).toLowerCase();
 
   const openWith = async (viewType: string) => {

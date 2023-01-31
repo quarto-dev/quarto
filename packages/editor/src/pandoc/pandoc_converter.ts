@@ -40,6 +40,7 @@ import { pandocToProsemirror } from './pandoc_to_prosemirror';
 import { pandocFromProsemirror } from './pandoc_from_prosemirror';
 import { isParagraphNode } from '../api/paragraph';
 import { PandocFormat, PandocWriterOptions } from '../api/pandoc-types';
+import { normalizeNewlines } from 'core';
 
 export type PandocLineWrapping = 'none' | 'column' | 'sentence';
 
@@ -88,6 +89,9 @@ export class PandocConverter {
   }
 
   public async toProsemirror(markdown: string, format: PandocFormat): Promise<PandocToProsemirrorResult> {
+    // normalize newlines (for regex)
+    markdown = normalizeNewlines(markdown);
+
     // save original markdown (for aligning capsule positions)
     const original = markdown;
 

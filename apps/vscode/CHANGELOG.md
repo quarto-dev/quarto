@@ -3,6 +3,7 @@
 ## 1.61.0 (Unreleased)
 
 - Spell checking: ignore words with uppercase letters.
+- Activate extension when visual editor loads.
 
 ## 1.60.0 (Release on 31 January 2023)
 

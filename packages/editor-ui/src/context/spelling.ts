@@ -82,6 +82,13 @@ export function useEditorSpelling(
             return false;
           } else if (ignored.includes(word)) {
             return false;
+          // ignore pathalogically long words
+          } else if (word.length > 250) {
+            return false;
+          // ignore words with number or capital letters
+          // NOTE: may want to make this a preference
+          } else if (ignoreWordWithUppercaseOrNumber(word)) {
+            return false;
           } else {
             return typoRef.current ? !typoRef.current.check(word) : false
           }
@@ -110,4 +117,17 @@ export function useEditorSpelling(
   }, [context, dictionary, ignored, prefs.realtimeSpelling]);
 
   return spelling;
+}
+
+function ignoreWordWithUppercaseOrNumber(word: string) {
+  for (const ch of word) {
+    if (ch === ch.toLocaleUpperCase()) {
+      return true;
+    }
+    const code = ch.charCodeAt(0);
+    if (code >= 48 && code <= 57) {
+      return true;
+    }    
+  }
+  return false;
 }

@@ -244,7 +244,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         await reopenSourceMode();
         return;
       } else if (result === kLearnMore) {
-        await env.openExternal(Uri.parse("https://quarto.org/docs/visual-editor/markdown.html"));
+        await env.openExternal(Uri.parse("https://quarto.org/docs/visual-editor/vscode/#markdown-output"));
         await reopenSourceMode();
         return;
       } else {

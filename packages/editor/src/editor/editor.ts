@@ -24,6 +24,8 @@ import applyDevTools from "prosemirror-dev-tools";
 
 import { setTextSelection } from 'prosemirror-utils';
 
+import { qtWebEngineVersion } from 'core-browser';
+
 import { citeUI } from '../api/cite';
 import { EditorOptions } from '../api/options';
 import { ProsemirrorCommand, CommandFn, EditorCommand } from '../api/command';
@@ -1270,7 +1272,8 @@ export class Editor  {
       props: {
         handleKeyDown: (view: EditorView, event: KeyboardEvent) => {
           // workaround for Ctrl+ keys on windows desktop
-          if (this.context.ui.context.isWindowsDesktop()) {
+          if (this.context.ui.context.isWindowsDesktop() &&
+              qtWebEngineVersion() !== undefined) {
             const keyEvent = event as KeyboardEvent;
             if (keyEvent.ctrlKey) {
               const keyCommand = ctrlKeyCodes[keyEvent.code];

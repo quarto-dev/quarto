@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * browser.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,13 @@
  *
  */
 
-export * from './jsonrpc/browser';
-export * from './jsonrpc/postmessage';
-export * from './input';
-export * from './browser';
 
-
+export function qtWebEngineVersion() {
+  const pattern = new RegExp("QtWebEngine/([^\\s]+)", "i");
+  const match = navigator.userAgent.match(pattern);
+  if (match) {
+    return match[1];
+  } else {
+    return undefined;
+  }
+}

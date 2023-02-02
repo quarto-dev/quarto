@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.61.0 (Unreleased)
+## 1.61.0 (Release on 2 February 2023)
 
 - Spell checking: ignore words with uppercase letters.
+- Fix issue with render keybinding on Windows.
 - Activate extension when visual editor loads.
 
 ## 1.60.0 (Release on 31 January 2023)

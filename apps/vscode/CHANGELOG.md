@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.61.0 (Unreleased)
+
+- Spell checking: ignore words with uppercase letters.
+
 ## 1.60.0 (Release on 31 January 2023)
 
 - Prevent render on save from occurring for documents not being actively previewed.

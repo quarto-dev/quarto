@@ -15,6 +15,8 @@
 
 import path, { extname } from "path";
 
+import debounce from "lodash.debounce";
+
 import { 
   window,
   workspace, 
@@ -121,7 +123,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     }));
 
     // when the active editor changes see if we have a visual editor position for it
-    context.subscriptions.push(window.onDidChangeActiveTextEditor(async () => {
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(() => {
       // resolve active editor
       const editor = window.activeTextEditor;
       if (!editor) {
@@ -143,21 +145,22 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             }
           }
 
-          // map to source line
-          let selLine = 0;
-          if (cursorIndex !==-1) {
-            const source = editorSourceJsonRpcServer(lspRequest);
-            const locations = await source.getSourcePosLocations(document.getText());
-            selLine = (locations[cursorIndex] || locations[locations.length-1]).pos - 1;
-          }
-         
-          // navigate
-          const selRange = new  Range(selLine, 0, selLine, 0);
-          editor.selection = new Selection(selRange.start, selRange.end);
-          editor.revealRange(selRange, TextEditorRevealType.InCenter);
+          // get source locations
+          const source = editorSourceJsonRpcServer(lspRequest);
+          source.getSourcePosLocations(document.getText()).then(locations => {
+            // map to source line
+            const selLine = cursorIndex !== -1 
+              ? (locations[cursorIndex] || locations[locations.length-1]).pos - 1
+              : 0;
+
+            // navigate
+            const selRange = new  Range(selLine, 0, selLine, 0);
+            editor.selection = new Selection(selRange.start, selRange.end);
+            editor.revealRange(selRange, TextEditorRevealType.InCenter);
+          });
         }
       }
-    }));
+    }, 100)));
 
     const provider = new VisualEditorProvider(context, quartoContext, lspRequest, engine);
     const providerRegistration = window.registerCustomEditorProvider(

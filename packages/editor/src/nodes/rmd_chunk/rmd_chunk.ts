@@ -31,6 +31,7 @@ import { rmdChunkBlockCapsuleFilter } from './rmd_chunk-capsule';
 
 import './rmd_chunk-styles.css';
 import { EditorState, Transaction } from 'prosemirror-state';
+import { EditorOptions } from '../../api/options';
 
 const extension = (context: ExtensionContext): Extension | null => {
   const { ui, options, format } = context;
@@ -100,8 +101,8 @@ const extension = (context: ExtensionContext): Extension | null => {
 
     commands: () => {
       const commands = [
-        new RChunkCommand(ui),
-        new PythonChunkCommand(ui),
+        new RChunkCommand(options, ui),
+        new PythonChunkCommand(options, ui),
         new BashChunkCommand(ui),
         new RcppChunkCommand(ui),
         new SQLChunkCommand(ui),
@@ -139,8 +140,8 @@ class RmdChunkCommand extends ProsemirrorCommand {
     group = OmniInsertGroup.Chunks
   ) {
     super(id, keymap, insertRmdChunk(placeholder), {
-      name: `${lang} ${ui.context.translateText('Code Chunk')}`,
-      description: `${ui.context.translateText('Executable')} ${lang} ${ui.context.translateText('chunk')}`,
+      name: `${lang} ${ui.context.translateText('Code Cell')}`,
+      description: `${ui.context.translateText('Executable')} ${lang} ${ui.context.translateText('cell')}`,
       group,
       priority,
       image
@@ -148,22 +149,30 @@ class RmdChunkCommand extends ProsemirrorCommand {
   }
 }
 
+const kInsertCodeChunkShortcut = ['Mod-Alt-i'];
+
 class RChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
-    super(ui, EditorCommandId.RCodeChunk, ['Mod-Alt-i'], 10, 'R', '{r}\n', () =>
-      ui.prefs.darkMode() ? ui.images.omni_insert!.r_chunk_dark! : ui.images.omni_insert!.r_chunk!,
+  constructor(options: EditorOptions, ui: EditorUI) {
+    super(
+      ui, 
+      EditorCommandId.RCodeChunk, 
+      !options.defaultCellTypePython ? kInsertCodeChunkShortcut : [], 
+      !options.defaultCellTypePython ? 10 : 8, 
+      'R', 
+      '{r}\n', 
+      () => ui.prefs.darkMode() ? ui.images.omni_insert!.r_chunk_dark! : ui.images.omni_insert!.r_chunk!,
       OmniInsertGroup.Common
     );
   }
 }
 
 class PythonChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
+  constructor(options: EditorOptions, ui: EditorUI) {
     super(
       ui,
       EditorCommandId.PythonCodeChunk,
-      [],
-      8,
+      options.defaultCellTypePython ? kInsertCodeChunkShortcut : [],
+      options.defaultCellTypePython ? 10 : 8,
       'Python',
       '{python}\n',
       () => ui.images.omni_insert!.python_chunk!,

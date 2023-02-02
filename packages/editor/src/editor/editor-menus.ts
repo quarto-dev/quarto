@@ -16,11 +16,12 @@
 import { EditorUI } from '../api/ui-types';
 import { tableMenu } from '../api/table';
 import { EditorCommandId, EditorCommand } from '../api/command';
+import { EditorOptions } from '../api/options';
 
-export function editorMenus(ui: EditorUI, commands: EditorCommand[]) {
+export function editorMenus(options: EditorOptions, ui: EditorUI, commands: EditorCommand[]) {
   return {
     format: formatMenu(ui, commands),
-    insert: insertMenu(ui, commands),
+    insert: insertMenu(options, ui, commands),
     table: tableMenu(true, ui),
   };
 }
@@ -92,18 +93,21 @@ function formatMenu(ui: EditorUI, commands: EditorCommand[]) {
   ];
 }
 
-function insertMenu(ui: EditorUI, commands: EditorCommand[]) {
+function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorCommand[]) {
+  const pyDefault = !!options.defaultCellTypePython;
   return [
     { command: EditorCommandId.OmniInsert },
     ...(haveAnyOf(commands, EditorCommandId.RCodeChunk, EditorCommandId.PythonCodeChunk)
       ? [
           { separator: true },
           {
-            text: ui.context.translateText('Code Chunk'),
+            text: ui.context.translateText('Code Cell'),
             subMenu: {
               items: [
-                { command: EditorCommandId.RCodeChunk },
-                { command: EditorCommandId.PythonCodeChunk },
+                ...(pyDefault
+                  ? [ { command: EditorCommandId.PythonCodeChunk }, { command: EditorCommandId.RCodeChunk } ]  
+                  : [ { command: EditorCommandId.RCodeChunk }, { command: EditorCommandId.PythonCodeChunk } ] 
+                ),
                 { command: EditorCommandId.BashCodeChunk },
                 { command: EditorCommandId.RcppCodeChunk },
                 { command: EditorCommandId.SQLCodeChunk },

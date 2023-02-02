@@ -73,7 +73,7 @@
   "close_button_title": "Close",
   "outline_header_text": "Outline",
   "outline_metadata_text": "Metadata",
-  "outline_code_chunk_text": "Code Chunk",
+  "outline_code_chunk_text": "Code Cell",
   "outline_empty": "Headings you add to the document will appear here.",
   "find_placeholder": "Find",
   "replace_placeholder": "Replace",

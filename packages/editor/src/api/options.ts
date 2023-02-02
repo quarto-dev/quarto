@@ -27,4 +27,5 @@ export interface EditorOptions {
   readonly outerScrollContainer?: boolean;
   readonly cannotEditUntitled?: boolean;
   readonly initialTheme?: EditorTheme;
+  readonly defaultCellTypePython?: boolean;
 }

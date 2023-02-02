@@ -372,6 +372,7 @@ export class Editor  {
       codeEditor: '',
       rmdImagePreview: false,
       hideFormatComment: false,
+      defaultCellTypePython: false,
       className: '',
       ...options,
     };
@@ -879,7 +880,7 @@ export class Editor  {
   }
 
   public getMenus(): EditorMenus {
-    return editorMenus(this.context.ui, this.commands());
+    return editorMenus(this.options, this.context.ui, this.commands());
   }
 
   public commands(): EditorCommand[] {

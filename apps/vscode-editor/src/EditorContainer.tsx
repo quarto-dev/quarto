@@ -101,6 +101,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         onEditorInit={onEditorInit}
         options={{
           cannotEditUntitled: true,
+          defaultCellTypePython: true,
           initialTheme: editorThemeFromVSCode() 
         }}
       />

@@ -293,7 +293,7 @@ class ImageNodeView implements NodeView {
       // (and watch for future changes)
       this.img.src = await mapResourceToURL(this.editorUI.context, src);
       this.unregisterWatchImg = this.editorUI.context.watchResource(src, async () => {
-        this.img.src = await mapResourceToURL(this.editorUI.context, src);
+        this.img.src = await mapResourceToURL(this.editorUI.context, src) + "?" + new Date().getTime();
       });
     }
 

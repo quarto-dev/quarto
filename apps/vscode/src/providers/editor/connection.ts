@@ -42,6 +42,7 @@ import {
   VSC_VEH_SaveDocument,
   VSC_VEH_RenderDocument,
   VSC_VE_PrefsChanged,
+  VSC_VE_ImageChanged,
   Prefs,
   PrefsServer,
   SourcePos
@@ -77,6 +78,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       getSlideIndex: () => request(VSC_VE_GetSlideIndex, []),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
       prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
+      imageChanged: (file: string) => request(VSC_VE_ImageChanged, [file])
     },
     connected: () => isConnected,
     dispose: () => {

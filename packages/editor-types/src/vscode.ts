@@ -26,6 +26,7 @@ export const VSC_VE_GetMarkdownFromState = 'vsc_ve_get_markdown_from_state';
 export const VSC_VE_GetSlideIndex = 'vsc_ve_get_slide_index';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 export const VSC_VE_PrefsChanged = 'vsc_ve_prefs_changed';
+export const VSC_VE_ImageChanged = 'vsc_ve_image_changed';
 
 export const VSC_VEH_GetHostContext = 'vsc_ve_get_host_context';
 export const VSC_VEH_ReopenSourceMode = 'vsc_ve_reopen_source_mode';
@@ -53,6 +54,7 @@ export interface VSCodeVisualEditor {
   getSlideIndex: () => Promise<number>;
   applyExternalEdit: (markdown: string) => Promise<void>;
   prefsChanged: (prefs: Prefs) => Promise<void>;
+  imageChanged: (file: string) => Promise<void>;
 }
 
 export interface HostContext {

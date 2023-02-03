@@ -31,6 +31,7 @@ import { windowJsonRpcPostMessageTarget } from "core-browser";
 import { 
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_PrefsChanged,
+  VSC_VE_ImageChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_GetSlideIndex,
   VSC_VE_Init, 
@@ -57,7 +58,7 @@ import {
   XRef,
   VSC_VE_IsFocused,
   Prefs,
-  SourcePos,
+  SourcePos
 } from "editor-types";
 
 import { 
@@ -102,10 +103,13 @@ export function visualEditorHostClient(
   }
 }
 
-
+export interface ImageChangeSink {
+  notifyImageChanged(file: string): void;
+}
 
 export async function syncEditorToHost(
   editor: EditorOperations, 
+  imageChange: ImageChangeSink,
   host: VisualEditorHostClient,
   store: EditorUIStore
 )  {
@@ -197,6 +201,10 @@ export async function syncEditorToHost(
         await host.onEditorUpdated(editor.getStateJson());
         await host.flushEditorUpdates();      
       }
+    },
+
+    async imageChanged(file: string) {
+      imageChange.notifyImageChanged(file);
     },
 
     async focus() {
@@ -302,6 +310,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_GetSlideIndex]: () => editor.getSlideIndex(),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
+    [VSC_VE_ImageChanged]: args => editor.imageChanged(args[0])
   })
 }
 

@@ -15,9 +15,11 @@
 
 import React, { useMemo, useEffect, useContext, useCallback, useState } from 'react';
 
+import * as uuid from 'uuid';
+
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
-import { JsonRpcRequestTransport } from 'core';
+import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
 
 import { 
   commandHotkeys, 
@@ -32,7 +34,7 @@ import {
 import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
 
 
-import { editorHostCommands, syncEditorToHost, VisualEditorHostClient } from './sync';
+import { editorHostCommands, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
 import { editorThemeFromVSCode } from './theme';
 
@@ -72,7 +74,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
  
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, props.host, props.store);
+    syncEditorToHost(editor, uiContext, props.host, props.store);
     return Promise.resolve();
   }, []);
 
@@ -133,7 +135,7 @@ function editorDisplay(host: VisualEditorHostClient)  {
 }
 
 
-class HostEditorUIContext implements EditorUIContext {
+class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
   
   constructor(
     private readonly context: HostContext, 
@@ -198,8 +200,8 @@ class HostEditorUIContext implements EditorUIContext {
 
   // watch a resource for changes (returns an unsubscribe function)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public watchResource(_path: string, _notify: VoidFunction): VoidFunction {
-    return () => { /* */ };
+  public watchResource(path: string, notify: VoidFunction): VoidFunction {
+    return this.subscribe(path, notify);
   }
 
   // are there dropped uris available?
@@ -222,6 +224,24 @@ class HostEditorUIContext implements EditorUIContext {
       return `${this.context.projectDir}/${path.slice(1)}`;
     } else {
       return `${this.context.resourceDir}/${path}`;
+    }
+  }
+
+  // manage image changed subscriptions
+  public notifyImageChanged(file: string) {
+    file = pathWithForwardSlashes(file);
+    Object.values(this.subscriptions).forEach(sub => {
+       if (sub.file === file) {
+        sub.handler();
+       }
+    });
+  }
+  private subscriptions: Record<string, { file: string, handler: VoidFunction }> = {};
+  private subscribe(file: string, handler: VoidFunction) : VoidFunction {
+    const id = uuid.v4();
+    this.subscriptions[id] = { file: pathWithForwardSlashes(this.resolvePath(file)), handler };
+    return () => {
+      delete this.subscriptions[id];
     }
   }
 }

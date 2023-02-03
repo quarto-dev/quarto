@@ -33,7 +33,8 @@ import {
   commands,
   ViewColumn,
   Selection,
-  TextEditorRevealType
+  TextEditorRevealType,
+  GlobPattern
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -412,12 +413,29 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       prefsServer
     ));
 
+    // doc dir
+    const docDir = !document.isUntitled ? path.dirname(document.fileName) : undefined;
+
+    // monitor image file changes
+    const kImagePattern = '**/*.{png,svg,jpg,jpeg}';
+    const globPattern : GlobPattern = docDir  
+      ? { baseUri: Uri.file(docDir), base: docDir, pattern: kImagePattern }
+      : kImagePattern;
+    const watcher = workspace.createFileSystemWatcher(globPattern);
+    disposables.push(watcher);
+    const onChange = (e: Uri) => {
+      client.editor.imageChanged(e.fsPath);
+    };
+    watcher.onDidChange(onChange);
+    watcher.onDidCreate(onChange);
+    watcher.onDidDelete(onChange);
+
     // load editor webview (include current doc path in localResourceRoots)
     webviewPanel.webview.options = { 
       localResourceRoots: [
-        this.context.extensionUri,
+        this.context.extensionUri, 
         ...(workspace.workspaceFolders ? workspace.workspaceFolders.map(folder => folder.uri) : []),
-        ...(!document.isUntitled ? [Uri.file(path.dirname(document.fileName))] : [])
+        ...(docDir ? [Uri.file(docDir)] : [])
       ],
       enableScripts: true 
     };

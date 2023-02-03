@@ -86,7 +86,7 @@ export function tablePaste() {
 
               // convert to a table header w/ default class
               const headerPos = pos + 1 + childPos;
-              tr.setNodeMarkup(headerPos, schema.nodes.table_header, {
+              tr.setNodeMarkup(headerPos, undefined, {
                 ...childNode.attrs,
                 className: kDefaultCellClasses,
               });

@@ -40,9 +40,14 @@ export function createServer(quartoContext: QuartoContext, editorResourcesDir: s
     userDictionaryDir: userDictionaryDir()
   };
 
+  const serverOptions = defaultEditorServerOptions(quartoContext, editorResourcesDir, "pandoc", kPayloadLimitMb);
   const writerRpcServer = jayson.Server(jaysonServerMethods({
-    ...editorServerMethods(defaultEditorServerOptions(quartoContext, editorResourcesDir, "pandoc", kPayloadLimitMb)),
-    ...editorServicesMethods({ dictionary: dictionaryOptions, documents: fsEditorServerDocuments() })
+    ...editorServerMethods(serverOptions),
+    ...editorServicesMethods({ 
+      dictionary: dictionaryOptions, 
+      documents: fsEditorServerDocuments(),
+      pandoc: serverOptions.pandoc 
+    })
   }));
 
   const server = express()

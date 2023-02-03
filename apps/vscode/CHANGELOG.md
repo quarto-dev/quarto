@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.62.0 (Unreleased)
+
+- Automatically update images in visual editor when they change on disk.
+
 ## 1.61.0 (Release on 2 February 2023)
 
 - Spell checking: ignore words with uppercase letters.

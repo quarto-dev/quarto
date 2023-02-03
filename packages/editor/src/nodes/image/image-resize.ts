@@ -269,7 +269,7 @@ function resizeShelf(
   const inputClasses = ['pm-text-color', 'pm-background-color'];
   const wLabel = createInputLabel('w:');
   addToPanel(wLabel, 4);
-  const wInput = createTextInput(4, inputClasses);
+  const wInput = createTextInput(5, inputClasses);
   wInput.onchange = onWidthChanged;
   addToPanel(wInput, 8);
 
@@ -277,7 +277,7 @@ function resizeShelf(
   const kHeightWidth = '38px';
   const hLabel = createInputLabel('h:');
   addToPanel(hLabel, 4);
-  const hInput = createTextInput(4, inputClasses, { width: kHeightWidth });
+  const hInput = createTextInput(5, inputClasses, { width: kHeightWidth });
   hInput.onchange = onHeightChanged;
   addToPanel(hInput, 0);
   const hAutoLabel = createInputLabel('(auto)', ['pm-light-text-color'], { width: kHeightWidth });

@@ -90,6 +90,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   // track the list source location in visual editors (used for syncing position)
   private static visualEditorLastSourcePos = new Map<string,SourcePos>();
 
+  // track pending xref navigations
+  private static visualEditorPendingXRefNavigations = new Map<string,XRef>();
+
   // track visual editors
   private static visualEditors = visualEditorTracker();
 
@@ -200,6 +203,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     }
   }
 
+  public static visualEditorPendingXRefNavigation(uri: string, xref: XRef) {
+    this.visualEditorPendingXRefNavigations.set(uri, xref);
+  }
+
   constructor(private readonly context: ExtensionContext,
               private readonly quartoContext: QuartoContext,
               private readonly lspRequest: JsonRpcRequestTransport,
@@ -269,12 +276,16 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const sourcePos = VisualEditorProvider.editorLastSourcePos.get(sourceUri);
     VisualEditorProvider.editorLastSourcePos.delete(sourceUri);
 
+    // collection pending navigation
+    const xref = VisualEditorProvider.visualEditorPendingXRefNavigations.get(sourceUri);
+    VisualEditorProvider.visualEditorPendingXRefNavigations.delete(sourceUri);
+
      // sync manager
     const syncManager = editorSyncManager(
       document, 
       client.editor, 
       this.lspRequest, 
-      sourcePos
+      xref || sourcePos
     );
 
     // editor container implementation   
@@ -502,7 +513,9 @@ async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) 
   };
 
   if (ext === ".qmd") {
-
+    if (xref) {
+       VisualEditorProvider.visualEditorPendingXRefNavigation(uri.toString(), xref);
+    }
     await openWith(VisualEditorProvider.viewType);
   
   } else if (ext === ".ipynb") {

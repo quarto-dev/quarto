@@ -17,7 +17,7 @@ import { TextDocument, TextEdit, workspace, window, WorkspaceEdit, Range } from 
 import { JsonRpcRequestTransport } from "core";
 
 import { editorSourceJsonRpcServer } from "editor-core";
-import { SourcePos, VSCodeVisualEditor } from "editor-types";
+import { isXRef, SourcePos, VSCodeVisualEditor, XRef } from "editor-types";
 
 import { getWholeRange } from "../../core/doc";
 
@@ -62,7 +62,7 @@ export function editorSyncManager(
   document: TextDocument, 
   visualEditor: VSCodeVisualEditor,
   request: JsonRpcRequestTransport,
-  initialSourcePos?: number
+  navigation?: XRef | number
 ) : EditorSyncManager {
 
   // state: an update from the visual editor that we have yet to apply. we don't 
@@ -118,14 +118,16 @@ export function editorSyncManager(
     init: async() => {
       // determine the current sourcePos
       const markdown = document.getText();
-      let pos: SourcePos | undefined;
-      if (initialSourcePos) {
+      let initialNav: XRef | SourcePos | undefined;
+      if (typeof(navigation) === "number") {
         const source = editorSourceJsonRpcServer(request);
         const locations = await source.getSourcePosLocations(markdown);
-        pos = { locations, pos: initialSourcePos };
+        initialNav = { locations, pos: navigation };
+      } else if (isXRef(navigation)) {
+        initialNav = navigation;
       }
       
-      const editorMarkdown = await visualEditor.init(markdown, pos);
+      const editorMarkdown = await visualEditor.init(markdown, initialNav);
       if (editorMarkdown && (editorMarkdown !== document.getText())) {
         await updateWorkspaceDocument(document, editorMarkdown);
       }

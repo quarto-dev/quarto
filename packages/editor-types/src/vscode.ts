@@ -17,6 +17,7 @@ import { EditorDisplay } from "./display";
 import { EditorUIImageResolver } from "./image";
 import { Prefs } from "./prefs";
 import { SourcePos } from "./source";
+import { XRef } from "./xref";
 
 export const VSC_VE_Init = 'vsc_ve_init';
 export const VSC_VE_Focus = 'vsc_ve_focus';
@@ -47,7 +48,7 @@ export const VSC_VEH_ResolveBase64Images = 'vsc_veh_resolve_base64_images';
 export const VSC_VEH_SelectImage = 'vsc_veh_select_image';
 
 export interface VSCodeVisualEditor {
-  init: (markdown: string, sourcePos?: SourcePos) => Promise<string | null>; 
+  init: (markdown: string, navigation?: XRef | SourcePos) => Promise<string | null>; 
   focus: () => Promise<void>;
   isFocused: () => Promise<boolean>;
   getMarkdownFromState: (state: unknown) => Promise<string>;

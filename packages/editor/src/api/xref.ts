@@ -105,7 +105,7 @@ function xrefPositionLocate(doc: ProsemirrorNode, xref: string, locators: Record
             xrefPos = pos;
             return false;
           }
-          return false;
+          return true;
         });
       }
     }

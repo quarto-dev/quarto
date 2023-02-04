@@ -38,5 +38,9 @@ export interface XRef {
   title?: string;
 }
 
+export function isXRef(x: unknown): x is XRef {
+  return typeof x === "object" && !!(x as XRef).type;
+}
+
 export type XRefType = "quarto" | "bookdown";
 

@@ -45,7 +45,8 @@ import {
   VSC_VE_ImageChanged,
   Prefs,
   PrefsServer,
-  SourcePos
+  SourcePos,
+  XRef
 } from "editor-types";
 
 import { 
@@ -71,7 +72,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 
   return {
     editor: {
-      init: (markdown: string, sourcePos?: SourcePos) => request(VSC_VE_Init, [markdown, sourcePos]),
+      init: (markdown: string, navigation?: XRef | SourcePos) => request(VSC_VE_Init, [markdown, navigation]),
       focus: () => request(VSC_VE_Focus, []),
       isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),

@@ -58,7 +58,8 @@ import {
   XRef,
   VSC_VE_IsFocused,
   Prefs,
-  SourcePos
+  SourcePos,
+  isSourcePos
 } from "editor-types";
 
 import { 
@@ -68,6 +69,7 @@ import {
 
 import { 
   EditorOperations, 
+  NavigationType, 
   PandocWriterOptions, 
   StateChangeEvent, 
   UpdateEvent 
@@ -151,7 +153,7 @@ export async function syncEditorToHost(
 
   // setup communication channel for host
   visualEditorHostServer(host.vscode, {
-    async init(markdown: string, sourcePos?: SourcePos) {
+    async init(markdown: string, navigation?: XRef | SourcePos) {
 
       // apply initial theme
       applyDisplayPrefs();
@@ -164,8 +166,16 @@ export async function syncEditorToHost(
        editor.focus();
         
        // if a source position was passed then navigate to it
-       if (sourcePos) {
-          editor.navigateToSourcePos(sourcePos);
+       if (navigation) {
+          if (isSourcePos(navigation)) {
+            editor.navigateToSourcePos(navigation);
+          } else {
+            editor.navigate(
+              NavigationType.XRef, 
+              `${navigation.type}:${navigation.id}`,
+              false, false
+            );
+          } 
        }
        
        // visual editor => text editor (just send the state, host will call back for markdown)

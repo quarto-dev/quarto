@@ -29,6 +29,10 @@ export interface SourcePos {
   pos: number;  // could be a line number or a prosemirror pos
 }
 
+export function isSourcePos(x: unknown): x is SourcePos {
+  return typeof x === "object" && !!(x as SourcePos).locations;
+}
+
 
 export interface SourceServer {
   getSourcePosLocations: (markdown: string) => Promise<SourcePosLocation[]>;

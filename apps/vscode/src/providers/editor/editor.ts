@@ -579,7 +579,7 @@ function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : 
   let cancelled = false;
 
   const timer = setInterval(async () => {
-    if (!webviewPanel.active && !cancelled) {
+    if (webviewPanel.visible && !webviewPanel.active && !cancelled) {
       const hasFocus = await editor.isFocused();
       if (hasFocus) {
         await commands.executeCommand('workbench.action.focusNextGroup');

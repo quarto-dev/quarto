@@ -47,9 +47,11 @@ export const VSC_VEH_ResolveImageUris = 'vsc_veh_resolve_image_uris';
 export const VSC_VEH_ResolveBase64Images = 'vsc_veh_resolve_base64_images';
 export const VSC_VEH_SelectImage = 'vsc_veh_select_image';
 
+export type Navigation = XRef | SourcePos;
+
 export interface VSCodeVisualEditor {
-  init: (markdown: string, navigation?: XRef | SourcePos) => Promise<string | null>; 
-  focus: () => Promise<void>;
+  init: (markdown: string, navigation?: Navigation) => Promise<string | null>; 
+  focus: (navigation?: Navigation) => Promise<void>;
   isFocused: () => Promise<boolean>;
   getMarkdownFromState: (state: unknown) => Promise<string>;
   getSlideIndex: () => Promise<number>;

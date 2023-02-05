@@ -41,7 +41,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
-import { HostContext, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
+import { HostContext, Navigation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
@@ -187,11 +187,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       return { 
         document: editor.document, 
         activate: async () => {
-          editor.webviewPanel.reveal(editor.webviewPanel.viewColumn, false);
-          // delay required to circumvent other focus activity
-          setTimeout(() => {
-            editor.editor.focus();
-          }, 200);
+          activateVisualEditor(editor);
         },
         slideIndex: async () => {
           return await editor.editor.getSlideIndex();
@@ -201,6 +197,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     } else {
       return undefined;
     }
+  }
+
+  public static editorForUri(uri: Uri) : TrackedEditor | undefined {
+    return this.visualEditors.editorForUri(uri);
   }
 
   public static visualEditorPendingXRefNavigation(uri: string, xref: XRef) {
@@ -509,14 +509,21 @@ async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) 
   const ext = extname(filePath).toLowerCase();
 
   const openWith = async (viewType: string) => {
-    await commands.executeCommand("vscode.openWith", uri, viewType);
+    await commands.executeCommand("vscode.openWith", uri, viewType, { preserveFocus: false });
   };
 
   if (ext === ".qmd") {
     if (xref) {
-       VisualEditorProvider.visualEditorPendingXRefNavigation(uri.toString(), xref);
+      const visualEditor = VisualEditorProvider.editorForUri(uri);
+      if (visualEditor) {
+        activateVisualEditor(visualEditor, xref);
+      } else {
+        VisualEditorProvider.visualEditorPendingXRefNavigation(uri.toString(), xref);
+        await openWith(VisualEditorProvider.viewType);
+      }
+    } else {
+      await openWith(VisualEditorProvider.viewType);
     }
-    await openWith(VisualEditorProvider.viewType);
   
   } else if (ext === ".ipynb") {
     
@@ -536,8 +543,17 @@ interface TrackedEditor {
   editor: VSCodeVisualEditor;
 }
 
+function activateVisualEditor(editor: TrackedEditor, navigation?: Navigation) {
+  editor.webviewPanel.reveal(editor.webviewPanel.viewColumn, false);
+  // delay required to circumvent other focus activity
+  setTimeout(() => {
+    editor.editor.focus(navigation);
+  }, 200);
+}
+
 interface VisualEditorTracker {
   track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) => Disposable;
+  editorForUri: (uri: Uri) => TrackedEditor | undefined;
   activeEditor: (includeVisible?: boolean) => TrackedEditor | undefined;
 }
 
@@ -556,6 +572,9 @@ function visualEditorTracker() : VisualEditorTracker {
           }
         }
       };
+    },
+    editorForUri: (uri: Uri) => {
+      return activeEditors.find(editor => editor.document.uri.toString() === uri.toString());
     },
     activeEditor: (includeVisible?: boolean) => {
       return activeEditors.find(editor => {

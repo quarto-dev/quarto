@@ -59,7 +59,7 @@ import {
   VSC_VE_IsFocused,
   Prefs,
   SourcePos,
-  isSourcePos
+  Navigation
 } from "editor-types";
 
 import { 
@@ -69,7 +69,6 @@ import {
 
 import { 
   EditorOperations, 
-  NavigationType, 
   PandocWriterOptions, 
   StateChangeEvent, 
   UpdateEvent 
@@ -153,7 +152,7 @@ export async function syncEditorToHost(
 
   // setup communication channel for host
   visualEditorHostServer(host.vscode, {
-    async init(markdown: string, navigation?: XRef | SourcePos) {
+    async init(markdown: string, navigation?: Navigation) {
 
       // apply initial theme
       applyDisplayPrefs();
@@ -163,21 +162,8 @@ export async function syncEditorToHost(
       if (result) {
 
        // focus editor
-       editor.focus();
-        
-       // if a source position was passed then navigate to it
-       if (navigation) {
-          if (isSourcePos(navigation)) {
-            editor.navigateToSourcePos(navigation);
-          } else {
-            editor.navigate(
-              NavigationType.XRef, 
-              `${navigation.type}:${navigation.id}`,
-              false, false
-            );
-          } 
-       }
-       
+       editor.focus(navigation);
+         
        // visual editor => text editor (just send the state, host will call back for markdown)
        editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
        editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos())); 
@@ -217,8 +203,8 @@ export async function syncEditorToHost(
       imageChange.notifyImageChanged(file);
     },
 
-    async focus() {
-      editor.focus();
+    async focus(navigation?: Navigation) {
+      editor.focus(navigation);
     },
 
     async isFocused() {
@@ -314,7 +300,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
   // create a server
   return jsonRpcPostMessageServer(target, {
     [VSC_VE_Init]: args => editor.init(args[0], args[1]),
-    [VSC_VE_Focus]: () => editor.focus(),
+    [VSC_VE_Focus]: args => editor.focus(args[0]),
     [VSC_VE_IsFocused]: () => editor.isFocused(),
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_GetSlideIndex]: () => editor.getSlideIndex(),

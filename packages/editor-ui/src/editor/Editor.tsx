@@ -22,7 +22,16 @@ import { Intent, Spinner } from '@blueprintjs/core';
 
 import { JsonRpcRequestTransport } from 'core';
 
-import { defaultPrefs, EditorServer, EditorServices, Prefs, PrefsProvider, SourcePos } from 'editor-types';
+import { 
+  defaultPrefs, 
+  EditorServer, 
+  EditorServices, 
+  isSourcePos, 
+  Navigation, 
+  Prefs, 
+  PrefsProvider, 
+  SourcePos 
+} from 'editor-types';
 
 import { 
   Editor as PMEditor, 
@@ -306,8 +315,19 @@ export const Editor : React.FC<EditorProps> = (props) => {
     blur() {
       editorRef.current?.blur();
     },
-    focus() {
+    focus(navigation?: Navigation) {
       editorRef.current?.focus();
+      if (navigation) {
+        if (isSourcePos(navigation)) {
+          editorRef.current?.navigateToSourcePos(navigation);
+        } else {
+          editorRef.current?.navigate(
+            NavigationType.XRef, 
+            `${navigation.type}:${navigation.id}`,
+            false, false
+          );
+        } 
+      }
     },
     hasFocus() {
       return editorRef.current?.hasFocus() || false;

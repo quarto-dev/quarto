@@ -39,7 +39,8 @@ import {
   EditorServer, 
   EditingOutlineLocation, 
   EditorOutline, 
-  SourcePos
+  SourcePos,
+  Navigation
 } from 'editor-types';
 
 import {
@@ -295,7 +296,7 @@ export interface EditorOperations {
 
   // activation/navigation
   blur(): void;
-  focus(): void;
+  focus(navigation?: Navigation): void;
   hasFocus(): boolean;
   navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean): void;
   navigateToSourcePos(pos: SourcePos) : void;

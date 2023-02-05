@@ -17,7 +17,7 @@ import { TextDocument, TextEdit, workspace, window, WorkspaceEdit, Range } from 
 import { JsonRpcRequestTransport } from "core";
 
 import { editorSourceJsonRpcServer } from "editor-core";
-import { isXRef, SourcePos, VSCodeVisualEditor, XRef } from "editor-types";
+import { isXRef, Navigation, VSCodeVisualEditor, XRef } from "editor-types";
 
 import { getWholeRange } from "../../core/doc";
 
@@ -118,7 +118,7 @@ export function editorSyncManager(
     init: async() => {
       // determine the current sourcePos
       const markdown = document.getText();
-      let initialNav: XRef | SourcePos | undefined;
+      let initialNav: Navigation | undefined;
       if (typeof(navigation) === "number") {
         const source = editorSourceJsonRpcServer(request);
         const locations = await source.getSourcePosLocations(markdown);

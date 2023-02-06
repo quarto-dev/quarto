@@ -92,25 +92,3 @@ export async function reopenEditorInSourceMode(
   });
   
 }
-
-/*
-const openWith = async (viewType: string) => {
-    await commands.executeCommand("vscode.openWith", uri, viewType);
-  };
-
-  if (ext === ".qmd") {
-
-    await openWith(VisualEditorProvider.viewType);
-  
-  } else if (ext === ".ipynb") {
-    
-    await openWith("jupyter-notebook");
-  
-  } else {
-
-    const doc = await workspace.openTextDocument(uri);
-    await window.showTextDocument(doc, ViewColumn.Active, false);
-
-  }
-
-*/

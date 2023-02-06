@@ -45,7 +45,7 @@ import {
   VSC_VE_ImageChanged,
   Prefs,
   PrefsServer,
-  Navigation
+  NavLocation
 } from "editor-types";
 
 import { 
@@ -71,8 +71,8 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 
   return {
     editor: {
-      init: (markdown: string, navigation?: Navigation) => request(VSC_VE_Init, [markdown, navigation]),
-      focus: (navigation?: Navigation) => request(VSC_VE_Focus, [navigation]),
+      init: (markdown: string, navigation?: NavLocation) => request(VSC_VE_Init, [markdown, navigation]),
+      focus: (navigation?: NavLocation) => request(VSC_VE_Focus, [navigation]),
       isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       getSlideIndex: () => request(VSC_VE_GetSlideIndex, []),

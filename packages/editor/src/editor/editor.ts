@@ -40,7 +40,7 @@ import {
   EditingOutlineLocation, 
   EditorOutline, 
   SourcePos,
-  Navigation
+  NavLocation
 } from 'editor-types';
 
 import {
@@ -296,7 +296,7 @@ export interface EditorOperations {
 
   // activation/navigation
   blur(): void;
-  focus(navigation?: Navigation): void;
+  focus(navigation?: NavLocation): void;
   hasFocus(): boolean;
   navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean): void;
   navigateToSourcePos(pos: SourcePos) : void;

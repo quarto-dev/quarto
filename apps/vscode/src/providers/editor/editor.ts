@@ -41,7 +41,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
-import { HostContext, Navigation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
+import { HostContext, NavLocation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
@@ -543,7 +543,7 @@ interface TrackedEditor {
   editor: VSCodeVisualEditor;
 }
 
-function activateVisualEditor(editor: TrackedEditor, navigation?: Navigation) {
+function activateVisualEditor(editor: TrackedEditor, navigation?: NavLocation) {
   editor.webviewPanel.reveal(editor.webviewPanel.viewColumn, false);
   // delay required to circumvent other focus activity
   setTimeout(() => {

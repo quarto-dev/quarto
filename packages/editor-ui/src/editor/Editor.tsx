@@ -27,7 +27,7 @@ import {
   EditorServer, 
   EditorServices, 
   isSourcePos, 
-  Navigation, 
+  NavLocation, 
   Prefs, 
   PrefsProvider, 
   SourcePos 
@@ -315,7 +315,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
     blur() {
       editorRef.current?.blur();
     },
-    focus(navigation?: Navigation) {
+    focus(navigation?: NavLocation) {
       editorRef.current?.focus();
       if (navigation) {
         if (isSourcePos(navigation)) {

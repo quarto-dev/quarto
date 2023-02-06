@@ -59,7 +59,7 @@ import {
   VSC_VE_IsFocused,
   Prefs,
   SourcePos,
-  Navigation
+  NavLocation
 } from "editor-types";
 
 import { 
@@ -152,7 +152,7 @@ export async function syncEditorToHost(
 
   // setup communication channel for host
   visualEditorHostServer(host.vscode, {
-    async init(markdown: string, navigation?: Navigation) {
+    async init(markdown: string, navigation?: NavLocation) {
 
       // apply initial theme
       applyDisplayPrefs();
@@ -203,7 +203,7 @@ export async function syncEditorToHost(
       imageChange.notifyImageChanged(file);
     },
 
-    async focus(navigation?: Navigation) {
+    async focus(navigation?: NavLocation) {
       editor.focus(navigation);
     },
 

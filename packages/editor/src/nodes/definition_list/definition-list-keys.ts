@@ -243,6 +243,7 @@ function emptyDescriptionBackspace(
 ) {
   const tr = state.tr;
   tr.deleteRange(description.pos, description.pos + description.node.nodeSize);
+  setTextSelection(description.pos,-1)(tr).scrollIntoView();
   dispatch(tr);
 }
 

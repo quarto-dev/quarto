@@ -19,7 +19,7 @@ import React from "react";
 import { v4 as uuidv4 } from 'uuid';
 
 import { EditorMenuItem } from "editor-types";
-import { CommandMenuItem } from "./CommandMenuItem";
+import { CommandMenuItem, CommandMenuItemActive } from "./CommandMenuItem";
 import { MenuDivider } from "@blueprintjs/core";
 import { CommandSubMenu } from "./CommandSubMenu";
 import { Commands } from "./CommandManager";
@@ -42,7 +42,7 @@ function editorCommandMenuItem(mi: EditorMenuItem, commands?: Commands) {
   if (mi.separator) {
     return <MenuDivider key={uuidv4()}/>
   } else if (mi.command) {
-    return <CommandMenuItem id={mi.command} key={mi.command} text={mi.text} commands={commands}/> 
+    return <CommandMenuItem id={mi.command} key={mi.command} text={mi.text} active={CommandMenuItemActive.Check} commands={commands}/> 
   } else if (mi.subMenu && mi.text) {
     return <CommandSubMenu text={mi.text} key={uuidv4()}>{mi.subMenu.items.map(mi => editorCommandMenuItem(mi, commands))}</CommandSubMenu>
   } else {

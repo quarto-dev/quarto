@@ -25,6 +25,11 @@ export function fileCrossrefIndexStorage(file: string) {
   return fileScratchStorage(file, "xref.json");
 }
 
+export function filePrefsStorage(file: string) {
+  return fileScratchStorage(file, "prefs.json");
+}
+
+
 export function fileScratchStorage(file: string, scope: string, dir?: boolean) {
   // determine uuid for file scratch storage
   file = path.normalize(file);

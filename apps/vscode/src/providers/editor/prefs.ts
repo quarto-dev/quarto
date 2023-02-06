@@ -19,11 +19,12 @@ import throttle from "lodash.throttle";
 
 import { defaultMarkdownPrefs, defaultPrefs, MarkdownPrefs, Prefs, PrefsServer } from "editor-types";
 
-import { metadataFilesForDocument, projectDirForDocument, yamlFromMetadataFile } from "quarto-core";
+import { filePrefsStorage, metadataFilesForDocument, projectDirForDocument, yamlFromMetadataFile } from "quarto-core";
 
 import { prefsServer } from "editor-server";
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter, documentFrontMatterYaml } from "../../markdown/document";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 
 const kEditorAutoClosingBrackets = "editor.autoClosingBrackets";
 const kEditorRenderWhitespace = "editor.renderWhitespace";
@@ -75,9 +76,12 @@ export function vscodePrefsServer(
     
     const configuration = workspace.getConfiguration(undefined, document.uri);
      
+    const globalPrefs = await server.getPrefs();
     const prefs = { 
       
-      ...(await server.getPrefs()), 
+      ...(globalPrefs),
+
+      ...readPerDocumentPrefs(document, globalPrefs), 
 
       // theme
       darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
@@ -156,6 +160,7 @@ export function vscodePrefsServer(
       getPrefs,
       setPrefs: async (prefs: Prefs) : Promise<void> => {
         server.setPrefs(prefs);
+        writePerDocumentPrefs(document, prefs);
       }
     }, 
     {
@@ -251,5 +256,29 @@ function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: Markdo
   }
 
   return resolved;
+}
+
+
+interface PerDocumentPrefs {
+  showOutline: boolean;
+}
+
+function readPerDocumentPrefs(document: TextDocument, defaultPrefs: Prefs) : PerDocumentPrefs {
+  const storage = filePrefsStorage(document.uri.fsPath);
+  if (existsSync(storage)) {
+    const prefs = JSON.parse(readFileSync(storage, { encoding: "utf8" }));
+    return {
+      showOutline: prefs.showOutline !== undefined ? prefs.showOutline : defaultPrefs.showOutline
+    };
+  } else {
+    return {
+      showOutline: defaultPrefs.showOutline
+    };
+  }
+}
+
+function writePerDocumentPrefs(document: TextDocument, prefs: PerDocumentPrefs) {
+  const storage = filePrefsStorage(document.uri.fsPath);
+  writeFileSync(storage, JSON.stringify(prefs), { encoding: "utf8" });
 }
 

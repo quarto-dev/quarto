@@ -6,6 +6,10 @@
 - Navigation to cross references located in other project files.
 - Fix issue w/ spurious editor opens after switching modes.
 - Preserve header bit when copying and pasting tables in visual mode.
+- Improved paste handling from MS Word
+- Scroll content in full page code blocks into view during fine
+- Per-document state for show/hide of outline
+- Improved editing (backspace key handling) for definition lists
 
 ## 1.61.0 (Release on 2 February 2023)
 

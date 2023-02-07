@@ -268,6 +268,7 @@ const vscodeDarkHighlightColors: CodeMirrorHighlightColors = {
 }
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function abyssHighlightStyle() {
   const config = {
     name: 'abyss',
@@ -577,6 +578,7 @@ function highContrastLightHighlightStyle() {
   ]);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function kimbieDarkHighlightStyle() {
   const config = {
     name: 'kimbieDark',

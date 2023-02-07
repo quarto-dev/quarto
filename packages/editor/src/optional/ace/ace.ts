@@ -42,11 +42,8 @@ import { selectAll } from '../../behaviors/select_all';
 import { AceRenderQueue } from './ace-render-queue';
 import { AcePlaceholder } from './ace-placeholder';
 
-import zenscroll from 'zenscroll';
-
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { editorScrollContainer } from '../../api/scroll';
-import { CodeEditorNodeViews, CodeViewOptions } from '../../api/codeview';
+import { CodeEditorNodeViews, CodeViewOptions, scrollCodeViewElementIntoView } from '../../api/codeview';
 import { EditorFind } from '../../api/find-types';
 
 import './ace.css';
@@ -470,49 +467,7 @@ export class AceNodeView implements NodeView {
    * @param ele The child to scroll.
    */
   private scrollIntoView(ele: HTMLElement) {
-    const editingRoot = editingRootNode(this.view.state.selection);
-    if (editingRoot) {
-      const container = this.view.nodeDOM(editingRoot.pos) as HTMLElement;
-      const scroller = zenscroll.createScroller(editorScrollContainer(container));
-
-      let top = 0;
-
-      // The DOM node representing this editor chunk (this.dom) may not be a
-      // direct child of the scrollable container. If it isn't, walk up the DOM
-      // tree until we find the main content node (pm-content), which is the
-      // offset parent against which we need to compute scroll position.
-      let scrollParent = this.dom;
-      while (scrollParent.offsetParent != null &&
-             !scrollParent.offsetParent.classList.contains("pm-content"))
-      {
-        top += scrollParent.offsetTop;
-        scrollParent = scrollParent.offsetParent as HTMLElement;
-      }
-
-      // Since the element we want to scroll into view is not a direct child of
-      // the scrollable container, do a little math to figure out the
-      // destination scroll position.
-      top += ele.offsetTop + scrollParent.offsetTop;
-      const bottom = top + ele.offsetHeight;
-      const viewTop = container.scrollTop;
-      const viewBottom = container.scrollTop + container.offsetHeight;
-
-      // Scroll based on element's current position and size
-      if (top > viewTop && bottom < viewBottom) {
-        // Element is already fully contained in the viewport
-        return;
-      } else if (ele.offsetHeight > container.offsetHeight) {
-        // Element is taller than the viewport, so show the first part of it
-        scroller.toY(top);
-      } else if (top < viewTop) {
-        // Element is above viewport, so scroll it into view
-        scroller.toY(top);
-      } else if (bottom > viewBottom) {
-        // Part of the element is beneath the viewport, so scroll just enough to
-        // bring it into view
-        scroller.toY(container.scrollTop - (viewBottom - bottom));
-      }
-    }
+    scrollCodeViewElementIntoView(ele, this.dom, this.view);
   }
 
   /**

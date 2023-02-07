@@ -15,6 +15,7 @@
 
 import { Compartment, Range, RangeSet } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
+import { scrollCodeViewElementIntoView } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
 
@@ -30,6 +31,7 @@ export function findBehavior(context: BehaviorContext) : Behavior {
 
       pmUpdate(_prevNode, updateNode, cmView) {
       
+        // get the find decorations
         const findMarkers: Range<Decoration>[] = [];
         const decorations = context.pmContext.find.decorations();      
         if (decorations && typeof getPos === "function") {
@@ -38,6 +40,13 @@ export function findBehavior(context: BehaviorContext) : Behavior {
             decos.forEach((deco) => {
               if (deco.from !== view.state.selection.from && deco.to !== view.state.selection.to) {
                 findMarkers.push(findDecoratorMark.range(deco.from - getPos() - 1, deco.to - getPos() -1));
+              } else {
+                // ensure that the selection is visible
+                const domElement = cmView.domAtPos(deco.from);
+                const el = domElement.node instanceof HTMLElement ? domElement.node : domElement.node.parentElement;
+                if (el) {
+                  scrollCodeViewElementIntoView(el, context.dom, context.view);
+                }
               }
             })
           }

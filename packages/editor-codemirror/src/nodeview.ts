@@ -89,6 +89,7 @@ export const codeMirrorNodeView: (
 
   // create behaviors
   const behaviors = createBehaviors({
+    dom,
     view,
     getPos,
     options: codeViewOptions,

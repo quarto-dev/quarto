@@ -70,7 +70,7 @@ import behaviorEmptyMark from '../behaviors/empty_mark';
 import behaviorEscapeMark from '../behaviors/escape_mark';
 import behaviorOutline from '../behaviors/outline';
 import beahviorCodeBlockInput from '../behaviors/code_block_input';
-import behaviorPasteText from '../behaviors/paste_text';
+import behaviorPasteText from '../behaviors/paste';
 import behaviorBottomPadding from '../behaviors/bottom_padding';
 import behaviorInsertSymbol from '../behaviors/insert_symbol/insert_symbol-plugin-symbol';
 import behaviorInsertSymbolEmoji from '../behaviors/insert_symbol/insert_symbol-plugin-emoji';

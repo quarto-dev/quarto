@@ -37,6 +37,8 @@ const kEmbededLanguages = [
   defineLanguage("julia", { ext: "jl", trigger: ["."] }),
   defineLanguage("sql", { trigger: ["."] }),
   defineLanguage("bash", { ext: "sh" }),
+  defineLanguage("sh", { ext: "sh" }),
+  defineLanguage("shell", { ext: "sh" }),   
   defineLanguage("ruby", { ext: "rb", trigger: ["."] }),
   defineLanguage("rust", { ext: "rs", trigger: ["."] }),
   defineLanguage("java", { trigger: ["."] }),

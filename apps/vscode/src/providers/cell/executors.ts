@@ -199,7 +199,7 @@ function validateRequiredExtension(executor: CellExecutor, silent = false) {
 
 interface CellExecutor {
   language: string;
-  requiredExtensionName: string;
+  requiredExtensionName?: string;
   requiredExtension?: string[];
   requiredVersion?: string;
   isYamlOption: (line: string) => boolean;
@@ -251,8 +251,23 @@ const juliaCellExecutor: CellExecutor = {
   },
 };
 
+
+const bashCellExecutor: CellExecutor = {
+  language: "bash",
+  isYamlOption: isYamlHashOption,
+  execute: async (blocks: string[]) => {
+    const terminal = window.activeTerminal || window.createTerminal();
+    terminal.show();
+    terminal.sendText(blocks.join("\n"));
+  }
+};
+
+const shCellExecutor = { ...bashCellExecutor, language: "sh" };
+
+const shellCellExecutor = { ...bashCellExecutor, language: "shell" };
+
 function isYamlHashOption(line: string) {
   return !!line.match(/^#\s*\| ?/);
 }
 
-const kCellExecutors = [pythonCellExecutor, rCellExecutor, juliaCellExecutor];
+const kCellExecutors = [pythonCellExecutor, rCellExecutor, juliaCellExecutor, bashCellExecutor, shCellExecutor, shellCellExecutor];

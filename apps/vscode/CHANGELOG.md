@@ -6,6 +6,7 @@
 - Update to Mermaid JS v9.3.0 (prevent preview errors for YAML front matter)
 - Only show Quarto Assist panel when the extension is activated
 - Disable Copilot by default for Quarto documents 
+- Prevent preview from hanging when terminals run in an editor tab 
 
 ## 1.62.0 (Release on 8 February 2023)
 

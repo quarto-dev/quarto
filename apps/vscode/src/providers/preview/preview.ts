@@ -456,7 +456,7 @@ class PreviewManager {
 
     const cmdText = this.quartoContext_.useCmd
       ? `cmd /C"${cmd.join(" ")}"`
-      : cmd.join(" ");
+      : cmd.join(" "); 
     this.terminal_.show(true);
     // delay if required (e.g. to allow conda to initialized)
     // wait for up to 5 seconds (note that we can do this without
@@ -472,7 +472,9 @@ class PreviewManager {
       }
     }
 
-    this.terminal_.sendText(cmdText, true);
+    // send the command
+    console.info("[quarto]: " + cmdText + "\n");
+    this.terminal_!.sendText(cmdText, true);
 
     // show progress
     this.progressShow(target);

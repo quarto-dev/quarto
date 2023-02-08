@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.62.0 (Unreleased)
+## 1.62.0 (Release on 8 February 2023)
 
 - Automatically update images in visual editor when they change on disk.
 - Navigation to cross references located in other project files.

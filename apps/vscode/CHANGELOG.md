@@ -2,6 +2,7 @@
 
 ## 1.63.0 (Unreleased)
 
+- Support for executing `bash` and `sh` code cells
 - Run Jupyter cells in one shot (otherwise they can run out of order)
 - Implement support for Go to Definition within code cells
 - Update to Mermaid JS v9.3.0 (prevent preview errors for YAML front matter)

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.63.0 (Unreleased)
+## 1.63.0 (Release on 8 February 2023)
 
 - Support for executing `bash` and `sh` code cells
 - Run Jupyter cells in one shot (otherwise they can run out of order)

@@ -785,6 +785,9 @@
         "editor.suggestOnTriggerCharacters": true,
         "editor.unicodeHighlight.ambiguousCharacters": false,
         "editor.unicodeHighlight.invisibleCharacters": false
+      },
+      "github.copilot.enable": {
+        "quarto": false
       }
     },
     "configuration": {

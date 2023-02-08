@@ -25,6 +25,10 @@ import {
   ColorThemeKind,
   ConfigurationTarget,
   MarkdownString,
+  ProviderResult,
+  Location,
+  LocationLink,
+  Definition
 } from "vscode";
 import {
   LanguageClient,
@@ -45,9 +49,9 @@ import {
   MarkedString,
   Middleware,
   ProvideCompletionItemsSignature,
+  ProvideDefinitionSignature,
   ProvideHoverSignature,
   ProvideSignatureHelpSignature,
-  State,
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import { virtualDoc, virtualDocUri } from "../vdoc/vdoc";
@@ -86,8 +90,10 @@ export async function activateLsp(
 
   // create middleware (respect disabling of selected features in config)
   const config = workspace.getConfiguration("quarto");
+  activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
+    provideDefinition: embeddedGoToDefinitionProvider(engine),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);
@@ -133,10 +139,10 @@ export function deactivate(): Thenable<void> | undefined {
   return client.stop();
 }
 
-function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
-  // initialize embedded conent
-  activateVirtualDocEmbeddedContent();
 
+
+function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
+ 
   return async (
     document: TextDocument,
     position: Position,
@@ -267,6 +273,65 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
       }
     } else {
       return await next(document, position, context, token);
+    }
+  };
+}
+
+
+function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
+  return async (
+    document: TextDocument, 
+    position: Position, 
+    token: CancellationToken, 
+    next: ProvideDefinitionSignature
+  ) : Promise<Definition | LocationLink[] | null | undefined> => {
+    const vdoc = await virtualDoc(document, position, engine);
+    if (vdoc) {
+      const vdocUri = await virtualDocUri(vdoc, document.uri);
+      try {
+        const definitions = await commands.executeCommand<ProviderResult<Definition | LocationLink[]>>(
+          "vscode.executeDefinitionProvider",
+          vdocUri,
+          adjustedPosition(vdoc.language, position)
+        );
+        const resolveLocation = (location: Location) => {
+          if (location.uri.toString() === vdocUri.toString()) {
+            return new Location(document.uri, unadjustedRange(vdoc.language, location.range));
+          } else {
+            return location;
+          }
+        };
+        const resolveLocationLink = (location: LocationLink) => {
+          if (location.targetUri.toString() === vdocUri.toString()) {
+            const locationLink: LocationLink = {
+              targetRange: unadjustedRange(vdoc.language, location.targetRange),
+              originSelectionRange: location.originSelectionRange 
+                ? unadjustedRange(vdoc.language, location.originSelectionRange) : undefined,
+              targetSelectionRange: location.targetSelectionRange 
+                ? unadjustedRange(vdoc.language, location.targetSelectionRange) : undefined,
+              targetUri: document.uri
+            };
+            return locationLink;
+          } else {
+            return location;
+          }
+        };
+        if (definitions instanceof Location) {
+          return resolveLocation(definitions);
+        } else if (Array.isArray(definitions) && definitions.length > 0) {
+          if (definitions[0] instanceof Location) {
+            return definitions.map((definition) => resolveLocation(definition as Location));
+          } else {
+            return definitions.map((definition) => resolveLocationLink(definition as LocationLink));
+          }
+        } else {
+          return definitions;
+        }
+      } catch (error) {
+        return undefined;
+      }
+    } else {
+      return await next(document, position, token);
     }
   };
 }

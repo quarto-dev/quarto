@@ -2,6 +2,7 @@
 
 ## 1.63.0 (Unreleased)
 
+- Implement support for Go to Definition within code cells
 - Update to Mermaid JS v9.3.0 (prevent preview errors for YAML front matter)
 
 ## 1.62.0 (Release on 8 February 2023)

@@ -39,6 +39,7 @@ import { initializeQuarto } from "./quarto/quarto";
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
+import { kDefinitionCapabilities, onDefinition } from "./providers/definition";
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
@@ -74,6 +75,7 @@ connection.onInitialize((params: InitializeParams) => {
       ...kCompletionCapabilities,
       ...kHoverCapabilities,
       ...kSignatureCapabilities,
+      ...kDefinitionCapabilities
     },
   };
 });
@@ -142,6 +144,15 @@ connection.onHover(async (textDocumentPosition) => {
     } else {
       return null;
     }
+  } else {
+    return null;
+  }
+});
+
+connection.onDefinition(async (textDocumentPosition) => {
+  const doc = resolveDoc(textDocumentPosition.textDocument);
+  if (doc) {
+    return await onDefinition();
   } else {
     return null;
   }

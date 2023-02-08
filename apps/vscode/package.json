@@ -201,7 +201,8 @@
           "id": "quarto-assist",
           "name": "Quarto",
           "icon": "assets/logo/quarto.svg",
-          "visibility": "hidden"
+          "visibility": "hidden",
+          "when": "quarto.assistView.isEnabled"
         }
       ]
     },

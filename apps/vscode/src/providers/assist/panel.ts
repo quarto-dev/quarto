@@ -25,6 +25,14 @@ export function activateQuartoAssistPanel(
   context: ExtensionContext,
   engine: MarkdownEngine
 ): Command[] {
+
+  // indicate that its okay to show
+  commands.executeCommand(
+    "setContext",
+    QuartoAssistViewProvider.enabledContext,
+    true
+  );
+
   const provider = new QuartoAssistViewProvider(context, engine);
   context.subscriptions.push(provider);
 

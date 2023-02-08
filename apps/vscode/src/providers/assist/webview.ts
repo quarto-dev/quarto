@@ -265,4 +265,5 @@ export class QuartoAssistViewProvider
   private updateMode_ = UpdateMode.Sticky;
   private pinned_ = false;
   private static readonly pinnedContext = "quarto.assistView.isPinned";
+  public static readonly enabledContext = "quarto.assistView.isEnabled";
 }

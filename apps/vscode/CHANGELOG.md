@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.63.0 (Unreleased)
+
+- Update to Mermaid JS v9.3.0 (prevent preview errors for YAML front matter)
+
 ## 1.62.0 (Release on 8 February 2023)
 
 - Automatically update images in visual editor when they change on disk.

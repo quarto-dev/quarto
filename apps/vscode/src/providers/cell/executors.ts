@@ -214,9 +214,7 @@ const pythonCellExecutor: CellExecutor = {
   requiredVersion: "2021.8.0",
   isYamlOption: isYamlHashOption,
   execute: async (blocks: string[]) => {
-    for (const block of blocks) {
-      await commands.executeCommand("jupyter.execSelectionInteractive", block);
-    }
+    await commands.executeCommand("jupyter.execSelectionInteractive", blocks.join("\n"));
   },
 };
 

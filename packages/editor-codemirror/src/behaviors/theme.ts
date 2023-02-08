@@ -268,58 +268,6 @@ const vscodeDarkHighlightColors: CodeMirrorHighlightColors = {
 }
 
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function abyssHighlightStyle() {
-  const config = {
-    name: 'abyss',
-    dark: true,
-    background: '#000c18',
-    foreground: '#6688cc',
-    selection: '#770811',
-    cursor: '#ddbb88',
-    dropdownBackground: '#000c18',
-    dropdownBorder: '#454545',
-    activeLine: '#082050',
-    matchingBracket: '#082050',
-    keyword: '#225588',
-    storage: '#225588',
-    variable: '#2277ff',
-    parameter: '#2277ff',
-    function: '#ddbb88',
-    string: '#22aa44',
-    constant: '#f280d0',
-    type: '#ffeebb',
-    class: '#ffeebb',
-    number: '#f280d0',
-    comment: '#384887',
-    heading: '#6688cc',
-    invalid: '#A22D44',
-    regexp: '#22aa44',
-  };
-  return HighlightStyle.define([ 
-    {tag: t.keyword, color: config.keyword},
-    {tag: [t.name, t.deleted, t.character, t.macroName], color: config.variable},
-    {tag: [t.propertyName], color: config.function},
-    {tag: [t.processingInstruction, t.string, t.inserted, t.special(t.string)], color: config.string},
-    {tag: [t.function(t.variableName), t.labelName], color: config.function},
-    {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: config.constant},
-    {tag: [t.definition(t.name), t.separator], color: config.variable},
-    {tag: [t.className], color: config.class},
-    {tag: [t.number, t.changed, t.annotation, t.modifier, t.self, t.namespace], color: config.number},
-    {tag: [t.typeName], color: config.type, fontStyle: config.type},
-    {tag: [t.operator, t.operatorKeyword], color: config.keyword},
-    {tag: [t.url, t.escape, t.regexp, t.link], color: config.regexp},
-    {tag: [t.meta, t.comment], color: config.comment},
-    {tag: t.strong, fontWeight: 'bold'},
-    {tag: t.emphasis, fontStyle: 'italic'},
-    {tag: t.link, textDecoration: 'underline'},
-    {tag: t.heading, fontWeight: 'bold', color: config.heading},
-    {tag: [t.atom, t.bool, t.special(t.variableName)], color: config.variable},
-    {tag: t.invalid, color: config.invalid},
-    {tag: t.strikethrough, textDecoration: 'line-through'},
-  ]);
-}
-
 
 function darkHighlightStyle() {
   const config = {
@@ -578,57 +526,6 @@ function highContrastLightHighlightStyle() {
   ]);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function kimbieDarkHighlightStyle() {
-  const config = {
-    name: 'kimbieDark',
-    dark: true,
-    background: '#221a0f',
-    foreground: '#d3af86',
-    selection: '#84613daa',
-    cursor: '#d3af86',
-    dropdownBackground: '#221a0f',
-    dropdownBorder: '#454545',
-    activeLine: '#5e452b',
-    matchingBracket: '#5e452b',
-    keyword: '#98676a',
-    storage: '#98676a',
-    variable: '#dc3958',
-    parameter: '#dc3958',
-    function: '#8ab1b0',
-    string: '#889b4a',
-    constant: '#f79a32',
-    type: '#f06431',
-    class: '#f06431',
-    number: '#f79a32',
-    comment: '#a57a4c',
-    heading: '#8ab1b0',
-    invalid: '#dc3958',
-    regexp: '#7e602c',
-  };
-  return HighlightStyle.define([ 
-    {tag: t.keyword, color: config.keyword},
-    {tag: [t.name, t.deleted, t.character, t.macroName], color: config.variable},
-    {tag: [t.propertyName], color: config.function},
-    {tag: [t.processingInstruction, t.string, t.inserted, t.special(t.string)], color: config.string},
-    {tag: [t.function(t.variableName), t.labelName], color: config.function},
-    {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: config.constant},
-    {tag: [t.definition(t.name), t.separator], color: config.variable},
-    {tag: [t.className], color: config.class},
-    {tag: [t.number, t.changed, t.annotation, t.modifier, t.self, t.namespace], color: config.number},
-    {tag: [t.typeName], color: config.type, fontStyle: config.type},
-    {tag: [t.operator, t.operatorKeyword], color: config.keyword},
-    {tag: [t.url, t.escape, t.regexp, t.link], color: config.regexp},
-    {tag: [t.meta, t.comment], color: config.comment},
-    {tag: t.strong, fontWeight: 'bold'},
-    {tag: t.emphasis, fontStyle: 'italic'},
-    {tag: t.link, textDecoration: 'underline'},
-    {tag: t.heading, fontWeight: 'bold', color: config.heading},
-    {tag: [t.atom, t.bool, t.special(t.variableName)], color: config.variable},
-    {tag: t.invalid, color: config.invalid},
-    {tag: t.strikethrough, textDecoration: 'line-through'},
-  ]);
-}
 
 function lightHighlightStyle() {
   const config = {

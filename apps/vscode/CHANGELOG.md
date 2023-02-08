@@ -11,6 +11,7 @@
 - Per-document state for show/hide of outline
 - Improved editing (backspace key handling) for definition lists
 - Sync visual editor syntax highlighting to current VS Code theme
+- Completion: Respect absolute paths for bibliography and csl 
 
 ## 1.61.0 (Release on 2 February 2023)
 

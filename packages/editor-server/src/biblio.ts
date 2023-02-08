@@ -13,7 +13,7 @@
  *
  */
 
-import path from "path";
+import path, { isAbsolute } from "path";
 import fs from "fs";
 import * as tmp from "tmp";
 tmp.setGracefulCleanup();
@@ -396,7 +396,7 @@ function normalizeOptions(dir: string, files?: string | string[]) {
   if (files) {
     files = typeof files === "string" ? [files] : files;
     return files
-      .map((file) => path.normalize(path.join(dir, file)))
+      .map((file) => path.normalize(isAbsolute(file) ? file : path.join(dir, file)))
       .filter(fs.existsSync);
   } else {
     return undefined;

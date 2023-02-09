@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.64.0 (Unreleased)
+
+- Improve backspace handling for empty blocks that follow code blocks
+- Fix issue with recognizing consecutive inline math expressions.
+- Fix issue with shortcodes that start a line when going source to visual.
+- Ignore leading and trailing whitespace when evaluating DOI search terms.
+- Improved detection of inline math input (require leading space for disambiguation)
+- Don't wrap sentences that are already followed by a line break
+- Preserve list tight attribute when editing sublists
+
 ## 1.63.0 (Release on 8 February 2023)
 
 - Support for executing `bash` and `sh` code cells

@@ -269,7 +269,8 @@ const extension = (context: ExtensionContext): Extension | null => {
         new InputRule(
           new RegExp('(^|[^`])' + kInlineMathInputRulePattern + '$'),
           (state: EditorState, match: RegExpMatchArray, start: number, end: number) => {
-            if (!markIsActive(state, schema.marks.math) && filter(state)) {
+            if (!markIsActive(state, schema.marks.math) && filter(state) &&
+                !state.doc.rangeHasMark(start, start+1, schema.marks.math)) {
               const tr = state.tr;
               tr.insertText('$');
               const mark = schema.marks.math.create({ type: MathType.Inline });

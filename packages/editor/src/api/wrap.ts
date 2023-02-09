@@ -70,11 +70,24 @@ function wrapSentencesTransform(tr: Transform) {
       return;
     }
 
-    // break sentences in text
+    // split into parts
     const parts = split(textContent);
-    parts
+
+    // only consider sentences that aren't already followed by a hard break
+    const sentences: typeof parts = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i].type === 'Sentence') {
+        if (i === parts.length - 1 || 
+            parts[i + 1].type !== 'WhiteSpace' || 
+            parts[i + 1].value !== '\n') {
+          sentences.push(parts[i]);
+        }
+      }
+    }
+
+    // reverse so we can insert line breaks without messing up positions
+    sentences
       .reverse()
-      .filter(part => part.type === 'Sentence')
       .forEach(sentence => {
         // don't break sentence if at least one mark is active
         if (tr.doc.resolve(paragraph.pos + sentence.range[1] + 1).marks().length === 0) {

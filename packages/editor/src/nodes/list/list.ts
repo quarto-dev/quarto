@@ -14,7 +14,7 @@
  */
 
 import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
-import { liftListItem, sinkListItem, splitListItem } from 'prosemirror-schema-list';
+import { splitListItem } from 'prosemirror-schema-list';
 import { Plugin, PluginKey, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
@@ -39,6 +39,8 @@ import {
   CheckedListItemCommand,
   CheckedListItemToggleCommand,
 } from './list-checked';
+
+import { liftListItem, sinkListItem } from './list-indent';
 
 import { writePandocBulletList, writePandocOrderedList, readPandocList } from './list-pandoc';
 
@@ -367,6 +369,9 @@ function typeToNumberStyle(type: string | null): ListNumberStyle {
       return ListNumberStyle.Decimal;
   }
 }
+
+
+
 
 function bulletListOmniInsert(ui: EditorUI) {
   return {

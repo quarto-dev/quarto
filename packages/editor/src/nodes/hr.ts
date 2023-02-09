@@ -84,8 +84,8 @@ const extension = (context: ExtensionContext) => {
 
 function hrOmniInsert(ui: EditorUI) {
   return {
-    name: ui.context.translateText('Horizontal Rule'),
-    keywords: ["hr"],
+    name: ui.context.translateText('Horizontal Line'),
+    keywords: ["hr", "rule"],
     description: ui.context.translateText('Line that spans across the page'),
     group: OmniInsertGroup.Content,
     priority: 1,

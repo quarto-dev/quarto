@@ -139,8 +139,13 @@ function isParaWrappingShortcode(tok: PandocToken) {
       const [first, second] = tok.c;
       const firstText = first.t === PandocTokenType.Str ? first.c : second.c;
       if (typeof firstText === 'string' && firstText.startsWith('{{<')) {
-        const text = stringifyTokens(children);
-        return !!text.match(kShortcodeRegEx);
+        const text = stringifyTokens(children).trim();
+        const match = text.match(kShortcodeRegEx);
+        if (match && match[0] === text) {
+          return true;
+        } else {
+          return false;
+        }
       }
     }
   }

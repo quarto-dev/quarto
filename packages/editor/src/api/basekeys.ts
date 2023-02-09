@@ -28,8 +28,7 @@ import { undoInputRule } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction, Plugin, Selection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-
-import { setTextSelection } from 'prosemirror-utils';
+import { findParentNodeOfType, setTextSelection } from 'prosemirror-utils';
 
 import { CommandFn } from './command';
 import { editingRootNodeClosestToPos, editingRootNode } from './node';
@@ -54,6 +53,7 @@ export function baseKeysPlugin(keys: readonly BaseKeyBinding[]): Plugin {
     { key: BaseKey.Backspace, command: selectNodeBackward },
     { key: BaseKey.Backspace, command: joinBackward },
     { key: BaseKey.Backspace, command: deleteSelection },
+    { key: BaseKey.Backspace, command: clearBlockFormatting() },
 
     // base tab key behavior (ignore)
     { key: BaseKey.Tab, command: ignoreKey },
@@ -203,5 +203,35 @@ function endTopLevelBodyNodeBoundary() {
     } else {
       return false;
     }
+  };
+}
+
+// backspace in an empty block should reset to a paragraph
+function clearBlockFormatting() {
+  return (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+    if (state.selection.empty) {
+      const nodeTypes = [
+        state.schema.nodes.blockquote,
+        state.schema.nodes.ordered_list,
+        state.schema.nodes.bullet_list,
+        state.schema.nodes.div,
+        state.schema.nodes.line_block
+      ].filter(x => !!x);
+      const parentNode = findParentNodeOfType(nodeTypes)(state.selection);
+      if (parentNode && parentNode.node.textContent.length === 0) {
+        if (dispatch) {
+          const tr = state.tr;
+          tr.replaceRangeWith(
+            parentNode.pos, 
+            parentNode.pos + parentNode.node.nodeSize, 
+            state.schema.nodes.paragraph.create()
+          );
+          setTextSelection(parentNode.pos)(tr);
+          dispatch(tr);
+        }
+        return true;
+      }
+    }
+    return false;    
   };
 }

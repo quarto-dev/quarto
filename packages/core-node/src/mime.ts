@@ -70,6 +70,10 @@ export function isTextContent(path?: string) {
   );
 }
 
+export function isIpynbContent(path?: string) {
+  return !!path && path.endsWith(".ipynb");
+}
+
 const MEDIA_TYPES: Record<string, string> = {
   ".md": kTextMarkdown,
   ".markdown": kTextMarkdown,

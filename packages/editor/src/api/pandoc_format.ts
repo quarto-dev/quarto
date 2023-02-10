@@ -202,6 +202,7 @@ function readPandocFormatConfig(source: Record<string,any>) {
     } else {
       formatConfig.references_location = source.references.location;
       formatConfig.references_prefix = source.references.prefix;
+      formatConfig.references_links = asBoolean(source.references.links);
     }
   }
   if (source.canonical) {

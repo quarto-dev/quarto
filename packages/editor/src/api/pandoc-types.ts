@@ -34,6 +34,7 @@ export interface PandocFormatConfig {
   doctypes?: string[];
   references_location?: string;
   references_prefix?: string;
+  references_links?: boolean;
   canonical?: boolean;
 }
 

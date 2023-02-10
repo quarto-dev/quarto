@@ -119,6 +119,7 @@ export interface PandocExtensions {
 export interface PandocWriterReferencesOptions {
   location?: string; // block | section | document
   prefix?: string;
+  links?: boolean;
 }
 
 export interface PandocWriterOptions {

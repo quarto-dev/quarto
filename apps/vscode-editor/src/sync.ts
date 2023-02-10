@@ -127,7 +127,8 @@ export async function syncEditorToHost(
       : prefs.markdownWrap;
     options.references = {
       location: prefs.markdownReferences,
-      prefix: prefs.markdownReferencesPrefix || undefined
+      prefix: prefs.markdownReferencesPrefix || undefined,
+      links: prefs.markdownReferenceLinks
     }
     return options;
   }

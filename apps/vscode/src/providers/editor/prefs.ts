@@ -43,6 +43,7 @@ const kQuartoEditorDefaultListSpacing = "quarto.visualEditor.defaultListSpacing"
 const kQuartoEditorMarkdownWrap = "quarto.visualEditor.markdownWrap";
 const kQuartoEditorMarkdownWrapColumn = "quarto.visualEditor.markdownWrapColumn";
 const kQuartoEditorMarkdownReferences = "quarto.visualEditor.markdownReferences";
+const kQuartoEditorMarkdownReferenceLinks = "quarto.visualEditor.markdownReferenceLinks";
 
 const kMonitoredConfigurations = [
   kEditorAutoClosingBrackets,
@@ -60,7 +61,8 @@ const kMonitoredConfigurations = [
   kQuartoEditorDefaultListSpacing,
   kQuartoEditorMarkdownWrap,
   kQuartoEditorMarkdownWrapColumn,
-  kQuartoEditorMarkdownReferences
+  kQuartoEditorMarkdownReferences,
+  kQuartoEditorMarkdownReferenceLinks
 ];
 
 export function vscodePrefsServer(
@@ -185,7 +187,8 @@ async function readMarkdownPrefs(engine: MarkdownEngine, document: TextDocument)
     markdownWrap: config.get<'none' | 'column' | 'sentence'>(kQuartoEditorMarkdownWrap, defaultPrefs.markdownWrap),
     markdownWrapColumn: config.get<number>(kQuartoEditorMarkdownWrapColumn, defaultPrefs.markdownWrapColumn),
     markdownReferences: config.get<'block' | 'section' | 'document'>(kQuartoEditorMarkdownReferences, defaultPrefs.markdownReferences),
-    markdownReferencesPrefix: defaultPrefs.markdownReferencesPrefix
+    markdownReferencesPrefix: defaultPrefs.markdownReferencesPrefix,
+    markdownReferenceLinks: config.get<boolean>(kQuartoEditorMarkdownReferenceLinks, defaultPrefs.markdownReferenceLinks),
   };
 
   // layer in project level settings if specified
@@ -253,6 +256,9 @@ function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: Markdo
     resolved.markdownReferencesPrefix = prefix && typeof(prefix) === "string"
       ? prefix
       : resolved.markdownReferencesPrefix;
+
+    const links = referencesKey["links"];
+    resolved.markdownReferenceLinks = links === true;
   }
 
   return resolved;

@@ -26,6 +26,7 @@ export interface MarkdownPrefs {
   readonly markdownWrapColumn: number;
   readonly markdownReferences: 'block' | 'section' | 'document';
   readonly markdownReferencesPrefix: string;
+  readonly markdownReferenceLinks: boolean;
 }
 
 export interface Prefs extends MarkdownPrefs {
@@ -71,6 +72,7 @@ export function defaultMarkdownPrefs(): MarkdownPrefs {
     markdownWrapColumn: 72,
     markdownReferences: 'block',
     markdownReferencesPrefix: '',
+    markdownReferenceLinks: false
   }
 }
 

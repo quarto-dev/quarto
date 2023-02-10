@@ -203,6 +203,11 @@ export class PandocConverter {
       pandocOptions.push('--id-prefix', options.references.prefix);
     }
 
+    // reference links
+    if (options.references?.links) {
+      pandocOptions.push('--reference-links');
+    }
+
     // provide wrap options
     pandocOptions = pandocOptions.concat(wrapOptions(options));
 

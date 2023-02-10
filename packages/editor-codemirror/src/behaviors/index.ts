@@ -31,6 +31,7 @@ import { indentBehavior } from './indent';
 import { trackSelectionBehavior } from './trackselection';
 import { themeBehavior } from './theme';
 import { prefsBehavior } from './prefs';
+import { completionBehavior } from './completion';
 
 export interface Behavior {
   extensions: Extension[];
@@ -55,6 +56,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
   return [
     langModeBehavior(context),
     keyboardBehavior(context),
+    completionBehavior(),
     findBehavior(context),
     indentBehavior(),
     themeBehavior(context),

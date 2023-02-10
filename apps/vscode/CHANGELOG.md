@@ -1,7 +1,8 @@
 # Changelog
 
-## 1.64.0 (Unreleased)
+## 1.64.0 (Release on 9 February 2023)
 
+- Support for writing markdown reference links 
 - Improve backspace handling for empty blocks that follow code blocks
 - Fix issue with recognizing consecutive inline math expressions.
 - Fix issue with shortcodes that start a line when going source to visual.

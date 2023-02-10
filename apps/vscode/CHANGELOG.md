@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.65.0 (Unreleased)
+
+- Revert change to run Python blocks as one piece of code (breaks magics)
+
 ## 1.64.0 (Release on 9 February 2023)
 
 - Support for writing markdown reference links 
@@ -416,4 +420,3 @@
 
 - Syntax highlighting for `.qmd` files
 - Snippets for `.qmd` files
-

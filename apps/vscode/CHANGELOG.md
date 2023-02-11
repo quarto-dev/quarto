@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.66.0 (Unreleased)
+
+- Write code blocks without attributes using back ticks rather than indented 4 spaces
+
 ## 1.65.0 (Release on 10 February 2023)
 
 - Revert change to run Python blocks as one piece of code (breaks magics)

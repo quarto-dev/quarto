@@ -13,13 +13,17 @@
  *
  */
 
+import path from "path";
+
 import { Disposable, TextDocument, workspace, window, ColorThemeKind } from "vscode";
 
 import throttle from "lodash.throttle";
 
+import { pandocAutoIdentifier } from "core";
+
 import { defaultMarkdownPrefs, defaultPrefs, MarkdownPrefs, Prefs, PrefsServer } from "editor-types";
 
-import { filePrefsStorage, metadataFilesForDocument, projectDirForDocument, yamlFromMetadataFile } from "quarto-core";
+import { filePrefsStorage, metadataFilesForDocument, projectDirForDocument, QuartoContext, quartoProjectConfig, yamlFromMetadataFile } from "quarto-core";
 
 import { prefsServer } from "editor-server";
 import { MarkdownEngine } from "../../markdown/engine";
@@ -66,6 +70,7 @@ const kMonitoredConfigurations = [
 ];
 
 export function vscodePrefsServer(
+  context: QuartoContext,
   engine: MarkdownEngine,
   document: TextDocument,
   onPrefsChanged: (prefs: Prefs) => void
@@ -99,7 +104,7 @@ export function vscodePrefsServer(
       listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoEditorDefaultListSpacing, defaults.listSpacing),
 
       // markdown writer settings
-      ...(await readMarkdownPrefs(engine, document)),
+      ...(await readMarkdownPrefs(context, engine, document)),
      
       // vscode code editor settings
       spacesForTab: configuration.get<boolean>(kEditorInsertSpaces, true),
@@ -176,7 +181,11 @@ export function vscodePrefsServer(
 }
 
 
-async function readMarkdownPrefs(engine: MarkdownEngine, document: TextDocument) {
+async function readMarkdownPrefs(
+  context: QuartoContext, 
+  engine: MarkdownEngine, 
+  document: TextDocument
+) {
 
   // start with defaults
   const defaultPrefs = defaultMarkdownPrefs();
@@ -206,7 +215,22 @@ async function readMarkdownPrefs(engine: MarkdownEngine, document: TextDocument)
 
   // finally, layer in document level options (highest priority)
   const docYaml = await documentFrontMatter(engine, document);
-  return resolveMarkdownPrefs(docYaml, prefs);
+  prefs = resolveMarkdownPrefs(docYaml, prefs);
+
+
+  // if this is a book and no explicit prefix is specified, then auto-generate a prefix
+  if (!prefs.markdownReferencesPrefix && projectDir) {
+    const config = await quartoProjectConfig(context.runQuarto, projectDir);
+    const book = config?.config.project.type === "book";
+    if (book) {
+      const stem = path.basename(document.uri.fsPath, path.extname(document.uri.fsPath));
+      const prefix = pandocAutoIdentifier('a' + stem).substring(1) + "-";
+      prefs = { ...prefs, markdownReferencesPrefix: prefix };
+    }
+  }
+
+  // return prefs
+  return prefs;
 }
 
 function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: MarkdownPrefs) {

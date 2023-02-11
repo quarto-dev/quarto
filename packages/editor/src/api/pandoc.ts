@@ -171,6 +171,8 @@ export type PandocPreprocessorFn = (markdown: string) => string;
 
 export type PandocPostprocessorFn = (doc: ProsemirrorNode) => ProsemirrorNode;
 
+export type PandocMarkdownPostProcessorFn = (markdown: string) => string;
+
 export interface PandocMarkWriter {
   // pandoc mark name
   readonly name: string;

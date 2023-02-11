@@ -26,6 +26,7 @@ import {
   PandocPostprocessorFn,
   PandocInlineHTMLReaderFn,
   PandocTokensFilterFn,
+  PandocMarkdownPostProcessorFn,
 } from '../api/pandoc';
 
 import { haveTableCellsWithInlineRcode } from '../api/rmd';
@@ -63,6 +64,7 @@ export class PandocConverter {
   private readonly blockCapsuleFilters: readonly PandocBlockCapsuleFilter[];
   private readonly nodeWriters: readonly PandocNodeWriter[];
   private readonly markWriters: readonly PandocMarkWriter[];
+  private readonly markdownPostProcessors: readonly PandocMarkdownPostProcessorFn[];
   private readonly pandoc: PandocServer;
   private readonly pandocCapabilities: PandocCapabilities;
 
@@ -83,6 +85,7 @@ export class PandocConverter {
     this.blockCapsuleFilters = extensions.pandocBlockCapsuleFilters();
     this.nodeWriters = extensions.pandocNodeWriters();
     this.markWriters = extensions.pandocMarkWriters();
+    this.markdownPostProcessors = extensions.pandocMarkdownPostProcessors();
 
     this.pandoc = pandoc;
     this.pandocCapabilities = pandocCapabilities;
@@ -212,10 +215,18 @@ export class PandocConverter {
     pandocOptions = pandocOptions.concat(wrapOptions(options));
 
     // render to markdown
-    const markdown = await this.pandoc.astToMarkdown(output.ast, format, pandocOptions);
+    let markdown = await this.pandoc.astToMarkdown(output.ast, format, pandocOptions);
 
     // normalize newlines (don't know if pandoc uses \r\n on windows)
-    return markdown.replace(/\r\n|\n\r|\r/g, '\n');
+    markdown = markdown.replace(/\r\n|\n\r|\r/g, '\n');
+
+    // run post-processors
+    this.markdownPostProcessors.forEach(postprocessor => {
+      markdown = postprocessor(markdown);
+    });
+
+    // return
+    return markdown;
   }
 }
 

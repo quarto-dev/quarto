@@ -34,6 +34,7 @@ import {
   PandocBlockReaderFn,
   PandocInlineHTMLReaderFn,
   PandocTokensFilterFn,
+  PandocMarkdownPostProcessorFn,
 } from '../api/pandoc';
 import { PandocBlockCapsuleFilter } from '../api/pandoc_capsule';
 import { markInputRuleFilter } from '../api/input_rule';
@@ -293,6 +294,12 @@ export class ExtensionManager {
 
   public pandocPostprocessors(): readonly PandocPostprocessorFn[] {
     return this.pandocReaders().flatMap(reader => (reader.postprocessor ? [reader.postprocessor] : []));
+  }
+
+  public pandocMarkdownPostProcessors(): readonly PandocMarkdownPostProcessorFn[] {
+    return this.collectFrom({
+      node: node => [node.pandoc.markdownPostProcessor],
+    });
   }
 
   public pandocTokensFilters(): readonly PandocTokensFilterFn[] {

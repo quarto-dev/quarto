@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.65.0 (Unreleased)
+## 1.65.0 (Release on 10 February 2023)
 
 - Revert change to run Python blocks as one piece of code (breaks magics)
 

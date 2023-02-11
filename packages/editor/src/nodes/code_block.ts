@@ -25,7 +25,7 @@ import { Extension, ExtensionContext } from '../api/extension';
 import { BaseKey } from '../api/basekeys';
 import { codeNodeSpec } from '../api/code';
 import { PandocOutput, PandocTokenType, PandocExtensions } from '../api/pandoc';
-import { pandocAttrSpec, pandocAttrParseDom, pandocAttrToDomAttr } from '../api/pandoc_attr';
+import { pandocAttrSpec, pandocAttrParseDom, pandocAttrToDomAttr, pandocAttrAvailable } from '../api/pandoc_attr';
 import { PandocCapabilities } from '../api/pandoc_capabilities';
 import { EditorUI } from '../api/ui-types';
 import { CodeBlockProps } from 'editor-types';
@@ -33,6 +33,8 @@ import { hasFencedCodeBlocks } from '../api/pandoc_format';
 import { precedingListItemInsertPos, precedingListItemInsert } from '../api/list';
 import { EditorOptions } from '../api/options';
 import { OmniInsertGroup } from '../api/omni_insert';
+
+const kNoAttributesSentinel = 'CEF7FA4615C140E18D13A77AF6DFC586';
 
 const extension = (context: ExtensionContext): Extension => {
   const { pandocExtensions, pandocCapabilities, ui, options } = context;
@@ -96,13 +98,30 @@ const extension = (context: ExtensionContext): Extension => {
               if (hasAttr) {
                 const id = pandocExtensions.fenced_code_attributes ? node.attrs.id : '';
                 const keyvalue = pandocExtensions.fenced_code_attributes ? node.attrs.keyvalue : [];
-                output.writeAttr(id, node.attrs.classes, keyvalue);
+                
+                // if there are no attributes this will end up outputting a code block
+                // without the fence markers (rather indenting the code block 4 spaces).
+                // we don't want this so we add a sentinel class to the attributes to
+                // force the fence markers (which we then cleanup below in the postprocessor)
+                const classes = node.attrs.classes;
+                if (!pandocAttrAvailable(node.attrs) && pandocExtensions.backtick_code_blocks) {
+                  classes.push(kNoAttributesSentinel)
+                }
+
+                output.writeAttr(id, classes, keyvalue);
               } else {
                 output.writeAttr();
               }
               output.write(node.textContent);
             });
           },
+          markdownPostProcessor: (markdown: string) => {
+             // cleanup the sentinel classes we may have added above
+            if (pandocExtensions.backtick_code_blocks) {
+              markdown = markdown.replace(new RegExp("``` " + kNoAttributesSentinel, 'g'),  "```");
+            }
+            return markdown;
+          }
         },
       },
     ],

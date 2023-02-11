@@ -34,6 +34,7 @@ import {
   PandocBlockReaderFn,
   PandocInlineHTMLReaderFn,
   PandocTokensFilterFn,
+  PandocMarkdownPostProcessorFn,
 } from './pandoc';
 import { PandocBlockCapsuleFilter } from './pandoc_capsule';
 
@@ -54,6 +55,7 @@ export interface PandocNode {
     readonly blockReader?: PandocBlockReaderFn;
     readonly inlineHTMLReader?: PandocInlineHTMLReaderFn;
     readonly blockCapsuleFilter?: PandocBlockCapsuleFilter;
+    readonly markdownPostProcessor?: PandocMarkdownPostProcessorFn;
   };
 }
 

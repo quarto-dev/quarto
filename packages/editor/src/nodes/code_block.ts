@@ -34,7 +34,7 @@ import { precedingListItemInsertPos, precedingListItemInsert } from '../api/list
 import { EditorOptions } from '../api/options';
 import { OmniInsertGroup } from '../api/omni_insert';
 
-const kNoAttributesSentinel = 'CEF7FA4615C140E18D13A77AF6DFC586';
+const kNoAttributesSentinel = 'CEF7FA46';
 
 const extension = (context: ExtensionContext): Extension => {
   const { pandocExtensions, pandocCapabilities, ui, options } = context;
@@ -118,7 +118,10 @@ const extension = (context: ExtensionContext): Extension => {
           markdownPostProcessor: (markdown: string) => {
              // cleanup the sentinel classes we may have added above
             if (pandocExtensions.backtick_code_blocks) {
-              markdown = markdown.replace(new RegExp("``` " + kNoAttributesSentinel, 'g'),  "```");
+              markdown = markdown.replace(
+                new RegExp("``` " + kNoAttributesSentinel, 'g'), 
+                 "``` " + " ".repeat(kNoAttributesSentinel.length)
+              );
             }
             return markdown;
           }

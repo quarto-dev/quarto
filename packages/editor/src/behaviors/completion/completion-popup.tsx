@@ -305,7 +305,7 @@ function completionPopupPositionStyles(view: EditorView, pos: number, width: num
 
   // see if we need to be above
   if (top + height + kMinimumPaddingToEdge >= window.innerHeight) {
-    top = selectionCoords.top - height - kCompletionsVerticalPadding;
+    top = Math.max(selectionCoords.top - height - kCompletionsVerticalPadding, kCompletionsVerticalPadding);
   }
 
   // see if we need to be to the left (use cursor as pos in this case)

@@ -57,6 +57,7 @@ h4.pm-heading {
 }
 
 .pm-blockquote {
+  background-color: transparent;
   padding-left: 0.75em;
   border-left: 0.25em solid;
   margin-left: 0; 

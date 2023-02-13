@@ -54,11 +54,10 @@ import {
   ProvideSignatureHelpSignature,
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
-import { virtualDoc, virtualDocUri } from "../vdoc/vdoc";
+import { adjustedPosition, unadjustedRange, virtualDoc, virtualDocUri } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { deactivateVirtualDocTempFiles } from "../vdoc/vdoc-tempfile";
 import { imageHover } from "../providers/hover-image";
-import { EmbeddedLanguage } from "../vdoc/languages";
 
 let client: LanguageClient;
 
@@ -336,19 +335,6 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   };
 }
 
-// adjust position for inject
-const adjustedPosition = (language: EmbeddedLanguage, pos: Position) => {
-  return new Position(pos.line + (language.inject?.length || 0), pos.character);
-};
-const unadjustedPosition = (language: EmbeddedLanguage, pos: Position) => {
-  return new Position(pos.line - (language.inject?.length || 0), pos.character);
-};
-const unadjustedRange = (language: EmbeddedLanguage, range: Range) => {
-  return new Range(
-    unadjustedPosition(language, range.start),
-    unadjustedPosition(language, range.end)
-  );
-};
 
 function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;

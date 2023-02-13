@@ -355,6 +355,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.formatCell",
+        "title": "Format Cell",
+        "category": "Quarto"
+      },
+      {
         "command": "quarto.previewMath",
         "category": "Quarto",
         "title": "Preview Math"
@@ -497,6 +502,12 @@
         "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
       },
       {
+        "command": "quarto.formatCell",
+        "key": "ctrl+k ctrl+f",
+        "mac": "cmd+k cmd+f",
+        "when": "editorTextFocus && editorLangId == quarto && !editorHasSelection"
+      },
+      {
         "command": "quarto.paste",
         "key": "ctrl+v",
         "mac": "cmd+v",
@@ -505,6 +516,11 @@
     ],
     "menus": {
       "editor/context": [
+        {
+          "command": "quarto.formatCell",
+          "when": "editorLangId == quarto && !editorHasSelection",
+          "group": "q_format"
+        },
         {
           "command": "quarto.editInVisualMode",
           "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"

@@ -14,7 +14,7 @@
  */
 
 import Token from "markdown-it/lib/token";
-import { Position, TextDocument, Uri } from "vscode";
+import { Position, TextDocument, Uri, Range } from "vscode";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import {
@@ -49,7 +49,7 @@ export async function virtualDoc(
     // filter out lines that aren't of this language
     const lines: string[] = [];
     for (let i = 0; i < document.lineCount; i++) {
-      lines.push("");
+      lines.push(language.emptyLine || "");
     }
     for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
       if (languageBlock.map) {
@@ -106,3 +106,19 @@ export function isBlockOfLanguage(language: EmbeddedLanguage) {
     );
   };
 }
+
+// adjust position for inject
+export function adjustedPosition(language: EmbeddedLanguage, pos: Position) {
+  return new Position(pos.line + (language.inject?.length || 0), pos.character);
+};
+
+export function unadjustedPosition(language: EmbeddedLanguage, pos: Position) {
+  return new Position(pos.line - (language.inject?.length || 0), pos.character);
+};
+
+export function unadjustedRange(language: EmbeddedLanguage, range: Range) {
+  return new Range(
+    unadjustedPosition(language, range.start),
+    unadjustedPosition(language, range.end)
+  );
+};

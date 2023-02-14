@@ -13,7 +13,7 @@
  *
  */
 
-import { ServerCapabilities, SignatureHelp } from "vscode-languageserver/node";
+import { ServerCapabilities } from "vscode-languageserver/node";
 
 export const kSignatureCapabilities: ServerCapabilities = {
   signatureHelpProvider: {
@@ -23,7 +23,3 @@ export const kSignatureCapabilities: ServerCapabilities = {
     retriggerCharacters: [")"],
   },
 };
-
-export async function onSignatureHelp(): Promise<SignatureHelp | null> {
-  return null;
-}

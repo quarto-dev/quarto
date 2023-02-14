@@ -17,10 +17,11 @@ export interface EmbeddedLanguage {
   ids: string[];
   extension: string;
   type: "content" | "tempfile";
-  emptyLine?: string
+  emptyLine?: string;
   trigger?: string[];
   inject?: string[];
   reuseVdoc?: boolean;
+  canFormat?: boolean;
 }
 
 export function embeddedLanguage(langauge: string) {
@@ -34,13 +35,24 @@ const kEmbededLanguages = [
     inject: ["# type: ignore", "# flake8: noqa"],
     trigger: ["."],
     emptyLine: "#",
+    canFormat: true,
   }),
-  defineLanguage("r", { trigger: ["$", "@", ":", "."], reuseVdoc: true }),
-  defineLanguage("julia", { ext: "jl", trigger: ["."] }),
+  defineLanguage("r", {
+    trigger: ["$", "@", ":", "."],
+    emptyLine: "#",
+    reuseVdoc: true,
+    canFormat: true,
+  }),
+  defineLanguage("julia", {
+    ext: "jl",
+    emptyLine: "#",
+    trigger: ["."],
+    canFormat: true,
+  }),
   defineLanguage("sql", { trigger: ["."] }),
   defineLanguage("bash", { ext: "sh" }),
   defineLanguage("sh", { ext: "sh" }),
-  defineLanguage("shell", { ext: "sh" }),   
+  defineLanguage("shell", { ext: "sh" }),
   defineLanguage("ruby", { ext: "rb", trigger: ["."] }),
   defineLanguage("rust", { ext: "rs", trigger: ["."] }),
   defineLanguage("java", { trigger: ["."] }),
@@ -69,6 +81,7 @@ interface LanguageOptions {
   trigger?: string[];
   inject?: string[];
   reuseVdoc?: boolean;
+  canFormat?: boolean;
 }
 
 function defineLanguage(
@@ -76,6 +89,11 @@ function defineLanguage(
   options?: LanguageOptions
 ): EmbeddedLanguage {
   language = Array.isArray(language) ? language : [language];
+  if (options?.canFormat && !options?.emptyLine) {
+    throw new Error(
+      "emptyLine must be specified for languages with canFormat === true"
+    );
+  }
   return {
     ids: language,
     extension: options?.ext || language[0],
@@ -84,5 +102,6 @@ function defineLanguage(
     trigger: options?.trigger,
     inject: options?.inject,
     reuseVdoc: options?.reuseVdoc,
+    canFormat: options?.canFormat,
   };
 }

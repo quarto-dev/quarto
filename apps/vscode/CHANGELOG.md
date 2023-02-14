@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.66.0 (Unreleased)
+## 1.66.0 (Release on 14 February 2023)
 
 - Document, range, and cell formatting for Python and Julia code
 - Write code blocks without attributes using back ticks rather than indented 4 spaces

@@ -62,6 +62,8 @@ export function themeBehavior(context: BehaviorContext) : Behavior {
 
 function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
 
+  const completion = { Margin: 30, Width: 400 };
+
   const styleSpec : { [selector: string]: StyleSpec} = {
     "&": {
       color: editorTheme.textColor,
@@ -139,6 +141,123 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
         backgroundColor: editorTheme.spanBackgroundColor,
         color: editorTheme.textColor
       }
+    },
+    // autocomplete (https://github.com/codemirror/autocomplete/blob/main/src/theme.ts)
+    ".cm-tooltip.cm-tooltip-autocomplete": {
+      "& > ul": {
+        fontFamily: editorTheme.fixedWidthFont,
+        whiteSpace: "nowrap",
+        overflow: "hidden auto",
+        maxWidth_fallback: "700px",
+        maxWidth: "min(700px, 95vw)",
+        minWidth: "250px",
+        maxHeight: "10em",
+        height: "100%",
+        listStyle: "none",
+        margin: 0,
+        padding: 3,
+        border: `1px solid ${editorTheme.paneBorderColor}`,
+  
+        "& > li": {
+          overflowX: "hidden",
+          textOverflow: "ellipsis",
+          cursor: "pointer",
+          padding: "3px 3px",
+          lineHeight: 1.3
+        },
+      }
+    },
+  
+    "& .cm-tooltip-autocomplete ul li[aria-selected]": {
+      background: editorTheme.findTextBackgroundColor,
+      color: editorTheme.textColor,
+    },
+  
+    "& .cm-tooltip-autocomplete-disabled ul li[aria-selected]": {
+      background: editorTheme.gutterBackgroundColor,
+    },
+  
+    ".cm-completionListIncompleteTop:before, .cm-completionListIncompleteBottom:after": {
+      content: '"···"',
+      opacity: 0.5,
+      display: "block",
+      textAlign: "center"
+    },
+  
+    ".cm-tooltip.cm-completionInfo": {
+      position: "absolute",
+      padding: "3px 9px",
+      width: "max-content",
+      maxWidth: `${completion.Width}px`,
+      boxSizing: "border-box"
+    },
+  
+    ".cm-completionInfo.cm-completionInfo-left": { right: "100%" },
+    ".cm-completionInfo.cm-completionInfo-right": { left: "100%" },
+    ".cm-completionInfo.cm-completionInfo-left-narrow": { right: `${completion.Margin}px` },
+    ".cm-completionInfo.cm-completionInfo-right-narrow": { left: `${completion.Margin}px` },
+  
+    "& .cm-snippetField": {backgroundColor: editorTheme.invisibleTextColor},
+    ".cm-snippetFieldPosition": {
+      verticalAlign: "text-top",
+      width: 0,
+      height: "1.15em",
+      display: "inline-block",
+      margin: "0 -0.7px -.7em",
+      borderLeft: `1.4px dotted ${editorTheme.gutterBackgroundColor}`
+    },
+  
+    ".cm-completionMatchedText": {
+      textDecoration: "underline"
+    },
+  
+    ".cm-completionDetail": {
+      marginLeft: "0.5em",
+      fontStyle: "italic"
+    },
+  
+    ".cm-completionIcon": {
+      fontSize: "90%",
+      width: ".8em",
+      display: "inline-block",
+      textAlign: "center",
+      paddingRight: ".6em",
+      opacity: "0.6",
+      boxSizing: "content-box"
+    },
+  
+    ".cm-completionIcon-function, .cm-completionIcon-method": {
+      "&:after": { content: "'ƒ'" }
+    },
+    ".cm-completionIcon-class": {
+      "&:after": { content: "'○'" }
+    },
+    ".cm-completionIcon-interface": {
+      "&:after": { content: "'◌'" }
+    },
+    ".cm-completionIcon-variable": {
+      "&:after": { content: "'𝑥'" }
+    },
+    ".cm-completionIcon-constant": {
+      "&:after": { content: "'𝐶'" }
+    },
+    ".cm-completionIcon-type": {
+      "&:after": { content: "'𝑡'" }
+    },
+    ".cm-completionIcon-enum": {
+      "&:after": { content: "'∪'" }
+    },
+    ".cm-completionIcon-property": {
+      "&:after": { content: "'□'" }
+    },
+    ".cm-completionIcon-keyword": {
+      "&:after": { content: "'🔑\uFE0E'" } // Disable emoji rendering
+    },
+    ".cm-completionIcon-namespace": {
+      "&:after": { content: "'▢'" }
+    },
+    ".cm-completionIcon-text": {
+      "&:after": { content: "'abc'", fontSize: "50%", verticalAlign: "middle" }
     }
   };
 

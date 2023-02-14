@@ -519,8 +519,8 @@
         {
           "command": "quarto.formatCell",
           "when": "editorLangId == quarto && !editorHasSelection",
-          "group": "q_format"
-        },
+          "group": "1_modification"
+        }, 
         {
           "command": "quarto.editInVisualMode",
           "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"

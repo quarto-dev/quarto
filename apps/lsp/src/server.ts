@@ -32,14 +32,15 @@ import {
   onCompletion,
 } from "./providers/completion/completion";
 import { kHoverCapabilities, onHover } from "./providers/hover/hover";
-import { kSignatureCapabilities, onSignatureHelp } from "./providers/signature";
+import { kSignatureCapabilities } from "./providers/signature";
 import { provideDiagnostics } from "./providers/diagnostics";
 
 import { initializeQuarto } from "./quarto/quarto";
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
-import { kDefinitionCapabilities, onDefinition } from "./providers/definition";
+import { kDefinitionCapabilities } from "./providers/definition";
+import { kFormattingCapabilities } from "./providers/format";
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
@@ -75,7 +76,8 @@ connection.onInitialize((params: InitializeParams) => {
       ...kCompletionCapabilities,
       ...kHoverCapabilities,
       ...kSignatureCapabilities,
-      ...kDefinitionCapabilities
+      ...kDefinitionCapabilities,
+      ...kFormattingCapabilities,
     },
   };
 });
@@ -149,23 +151,23 @@ connection.onHover(async (textDocumentPosition) => {
   }
 });
 
-connection.onDefinition(async (textDocumentPosition) => {
-  const doc = resolveDoc(textDocumentPosition.textDocument);
-  if (doc) {
-    return await onDefinition();
-  } else {
-    return null;
-  }
+// methods provided just so we can intercept them w/ middleware on the client
+connection.onSignatureHelp(async () => {
+  return null;
 });
 
-connection.onSignatureHelp(async (textDocumentPosition) => {
-  const doc = resolveDoc(textDocumentPosition.textDocument);
-  if (doc) {
-    return await onSignatureHelp();
-  } else {
-    return null;
-  }
+connection.onDefinition(async () => {
+  return null;
 });
+
+connection.onDocumentFormatting(async () => {
+  return null;
+});
+
+connection.onDocumentRangeFormatting(async () => {
+  return null;
+});
+
 
 // diagnostics on open and save (clear on doc modified)
 documents.onDidOpen(async (e) => {

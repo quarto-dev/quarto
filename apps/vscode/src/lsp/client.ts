@@ -28,7 +28,7 @@ import {
   ProviderResult,
   Location,
   LocationLink,
-  Definition
+  Definition,
 } from "vscode";
 import {
   LanguageClient,
@@ -54,10 +54,19 @@ import {
   ProvideSignatureHelpSignature,
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
-import { adjustedPosition, unadjustedRange, virtualDoc, virtualDocUri } from "../vdoc/vdoc";
+import {
+  adjustedPosition,
+  unadjustedRange,
+  virtualDoc,
+  virtualDocUri,
+} from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { deactivateVirtualDocTempFiles } from "../vdoc/vdoc-tempfile";
 import { imageHover } from "../providers/hover-image";
+import {
+  embeddedDocumentFormattingProvider,
+  embeddedDocumentRangeFormattingProvider,
+} from "../providers/format";
 
 let client: LanguageClient;
 
@@ -93,6 +102,10 @@ export async function activateLsp(
   const middleware: Middleware = {
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
+    provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
+    provideDocumentRangeFormattingEdits: embeddedDocumentRangeFormattingProvider(
+      engine
+    ),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);
@@ -138,10 +151,7 @@ export function deactivate(): Thenable<void> | undefined {
   return client.stop();
 }
 
-
-
 function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
- 
   return async (
     document: TextDocument,
     position: Position,
@@ -276,26 +286,30 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   };
 }
 
-
 function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   return async (
-    document: TextDocument, 
-    position: Position, 
-    token: CancellationToken, 
+    document: TextDocument,
+    position: Position,
+    token: CancellationToken,
     next: ProvideDefinitionSignature
-  ) : Promise<Definition | LocationLink[] | null | undefined> => {
+  ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
       const vdocUri = await virtualDocUri(vdoc, document.uri);
       try {
-        const definitions = await commands.executeCommand<ProviderResult<Definition | LocationLink[]>>(
+        const definitions = await commands.executeCommand<
+          ProviderResult<Definition | LocationLink[]>
+        >(
           "vscode.executeDefinitionProvider",
           vdocUri,
           adjustedPosition(vdoc.language, position)
         );
         const resolveLocation = (location: Location) => {
           if (location.uri.toString() === vdocUri.toString()) {
-            return new Location(document.uri, unadjustedRange(vdoc.language, location.range));
+            return new Location(
+              document.uri,
+              unadjustedRange(vdoc.language, location.range)
+            );
           } else {
             return location;
           }
@@ -304,11 +318,13 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           if (location.targetUri.toString() === vdocUri.toString()) {
             const locationLink: LocationLink = {
               targetRange: unadjustedRange(vdoc.language, location.targetRange),
-              originSelectionRange: location.originSelectionRange 
-                ? unadjustedRange(vdoc.language, location.originSelectionRange) : undefined,
-              targetSelectionRange: location.targetSelectionRange 
-                ? unadjustedRange(vdoc.language, location.targetSelectionRange) : undefined,
-              targetUri: document.uri
+              originSelectionRange: location.originSelectionRange
+                ? unadjustedRange(vdoc.language, location.originSelectionRange)
+                : undefined,
+              targetSelectionRange: location.targetSelectionRange
+                ? unadjustedRange(vdoc.language, location.targetSelectionRange)
+                : undefined,
+              targetUri: document.uri,
             };
             return locationLink;
           } else {
@@ -319,9 +335,13 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           return resolveLocation(definitions);
         } else if (Array.isArray(definitions) && definitions.length > 0) {
           if (definitions[0] instanceof Location) {
-            return definitions.map((definition) => resolveLocation(definition as Location));
+            return definitions.map((definition) =>
+              resolveLocation(definition as Location)
+            );
           } else {
-            return definitions.map((definition) => resolveLocationLink(definition as LocationLink));
+            return definitions.map((definition) =>
+              resolveLocationLink(definition as LocationLink)
+            );
           }
         } else {
           return definitions;
@@ -334,7 +354,6 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
     }
   };
 }
-
 
 function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;

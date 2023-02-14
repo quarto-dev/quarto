@@ -1,5 +1,5 @@
 /*
- * definition.ts
+ * format.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,7 +15,9 @@
 
 import { ServerCapabilities } from "vscode-languageserver/node";
 
-export const kDefinitionCapabilities: ServerCapabilities = {
-  definitionProvider: true
+export const kFormattingCapabilities: ServerCapabilities = {
+  documentFormattingProvider: true,
+  documentRangeFormattingProvider: true,
 };
+
 

@@ -2,6 +2,7 @@
 
 ## 1.66.0 (Unreleased)
 
+- Document, range, and cell formatting for Python and Julia code
 - Write code blocks without attributes using back ticks rather than indented 4 spaces
 - Automatically generate references prefix for book projects
 
@@ -11,7 +12,7 @@
 
 ## 1.64.0 (Release on 9 February 2023)
 
-- Support for writing markdown reference links 
+- Support for writing markdown reference links
 - Improve backspace handling for empty blocks that follow code blocks
 - Fix issue with recognizing consecutive inline math expressions.
 - Fix issue with shortcodes that start a line when going source to visual.
@@ -27,8 +28,8 @@
 - Implement support for Go to Definition within code cells
 - Update to Mermaid JS v9.3.0 (prevent preview errors for YAML front matter)
 - Only show Quarto Assist panel when the extension is activated
-- Disable Copilot by default for Quarto documents 
-- Prevent preview from hanging when terminals run in an editor tab 
+- Disable Copilot by default for Quarto documents
+- Prevent preview from hanging when terminals run in an editor tab
 
 ## 1.62.0 (Release on 8 February 2023)
 
@@ -41,7 +42,7 @@
 - Per-document state for show/hide of outline
 - Improved editing (backspace key handling) for definition lists
 - Sync visual editor syntax highlighting to current VS Code theme
-- Completion: Respect absolute paths for bibliography and csl 
+- Completion: Respect absolute paths for bibliography and csl
 
 ## 1.61.0 (Release on 2 February 2023)
 

@@ -523,13 +523,16 @@
         }, 
         {
           "command": "quarto.editInVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown"
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
+          "group": "0_editorMode",
+          "order": 1  
         }
       ],
       "webview/context": [
         {
           "command": "quarto.editInSourceMode",
-          "when": "activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "navigation"
         }
       ],
       "editor/title": [

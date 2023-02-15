@@ -56,7 +56,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
   return [
     langModeBehavior(context),
     keyboardBehavior(context),
-    completionBehavior(),
+    completionBehavior(context),
     findBehavior(context),
     indentBehavior(),
     themeBehavior(context),

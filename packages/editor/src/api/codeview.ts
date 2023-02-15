@@ -253,6 +253,7 @@ export function executableCodeForActiveLanguage(state: EditorState) {
       }
       code.push(...blockLines);
     });
+    // TODO: use parent offset to generate cursor position?
     return {
       code,
       activeCellBegin,

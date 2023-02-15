@@ -15,15 +15,20 @@
 
 
 import { autocompletion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
+import { executableCodeForActiveLanguage } from "editor";
 
-import { Behavior } from ".";
+import { Behavior, BehaviorContext } from ".";
 
-export function completionBehavior() : Behavior {
+export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
+
+  
+
   return {
     extensions: [
       autocompletion({
         override: [
           async (context: CompletionContext) : Promise<CompletionResult | null> => {
+            console.log(executableCodeForActiveLanguage(behaviorContext.view.state));
             const word = context.matchBefore(/\w*/)!;
             if (word.from == word.to && !context.explicit)
               return null

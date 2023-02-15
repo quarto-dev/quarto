@@ -74,12 +74,19 @@ export function virtualDocForLanguage(
     }
   }
 
-  // perform inject if necessary
+  // return virtual doc
+  return virtualDocForCode(lines, language);
+  
+}
+
+export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
+  
+  const lines = [...code];
+
   if (language.inject) {
     lines.unshift(...language.inject);
   }
 
-  // return the language and the content
   return {
     language,
     content: lines.join("\n"),

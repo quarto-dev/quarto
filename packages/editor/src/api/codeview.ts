@@ -195,7 +195,6 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
-
 export function codeViewCompletionContext(state: EditorState) : CodeViewCompletionContext | undefined {
 
   // function to examine a node and see if has executable code
@@ -215,6 +214,8 @@ export function codeViewCompletionContext(state: EditorState) : CodeViewCompleti
       const parts = rmdChunk(node.textContent);
       if (parts) {
         return languageCodeBlock(parts.lang, parts.code, true);
+      } else {
+        return undefined;
       }
     } else if (node.type === schema.nodes.raw_block) {
       return languageCodeBlock(node.attrs.format);

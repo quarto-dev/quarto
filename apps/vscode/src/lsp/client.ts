@@ -21,7 +21,6 @@ import {
   SignatureHelpContext,
   workspace,
   window,
-  Range,
   ColorThemeKind,
   ConfigurationTarget,
   MarkdownString,
@@ -41,7 +40,6 @@ import {
   CancellationToken,
   commands,
   CompletionContext,
-  CompletionList,
   Position,
   TextDocument,
 } from "vscode";
@@ -62,6 +60,8 @@ import {
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { deactivateVirtualDocTempFiles } from "../vdoc/vdoc-tempfile";
+import { vdocCompletions } from "../vdoc/vdoc-completion";
+
 import { imageHover } from "../providers/hover-image";
 import {
   embeddedDocumentFormattingProvider,
@@ -174,33 +174,14 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
         }
       }
 
-      // get uri for completions
-      const vdocUri = await virtualDocUri(vdoc, document.uri);
-
       try {
-        const completions = await commands.executeCommand<CompletionList>(
-          "vscode.executeCompletionItemProvider",
-          vdocUri,
-          adjustedPosition(language, position),
-          context.triggerCharacter
+        return vdocCompletions(
+          vdoc,
+          position,
+          context.triggerCharacter,
+          language,
+          document.uri
         );
-        return completions.items.map((completion) => {
-          if (language.inject && completion.range) {
-            if (completion.range instanceof Range) {
-              completion.range = unadjustedRange(language, completion.range);
-            } else {
-              completion.range.inserting = unadjustedRange(
-                language,
-                completion.range.inserting
-              );
-              completion.range.replacing = unadjustedRange(
-                language,
-                completion.range.replacing
-              );
-            }
-          }
-          return completion;
-        });
       } catch (error) {
         return undefined;
       }

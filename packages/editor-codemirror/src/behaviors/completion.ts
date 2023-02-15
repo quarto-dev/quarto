@@ -15,6 +15,9 @@
 
 
 import { autocompletion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
+
+import { InsertReplaceEdit, TextEdit } from "vscode-languageserver-types";
+
 import { codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
@@ -42,14 +45,32 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
 
             // get completions
             const completions = await behaviorContext.pmContext.ui.completion?.codeViewCompletions(cvContext);
-            if (!completions) {
+            if (!completions || completions.items.length == 0) {
               return null;
             }
 
-            // map completions to codemirror api
+            // determine range from first completion
+            // TODO: per-completion insert?
+            const range = { from: context.pos, to: undefined as unknown as number };
+            const first = completions.items[0];
+            if (first.textEdit) {
+              if (InsertReplaceEdit.is(first.textEdit)) {
+                range.from = context.pos - (first.textEdit.insert.end.character - first.textEdit.insert.start.character);
+                range.to = context.pos;
+              } else if (TextEdit.is(first.textEdit)) {
+                range.from = context.pos - (first.textEdit.range.end.character - first.textEdit.range.start.character);
+                range.to = context.pos;
+              }
+            }
             
-            // TODO
-            return null;
+            return {
+              ...range,
+              options: completions.items.map(item => ({
+                label: item.label,
+                detail: item.detail,
+                apply: item.insertText
+              }))
+            };
           }
         ]
       })

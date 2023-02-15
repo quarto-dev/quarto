@@ -951,19 +951,19 @@
           "markdownDescription": "Reveal the preview panel after document render."
         },
         "quarto.visualEditor.fontSize": {
-          "scope": "window",
+          "scope": "resource",
           "type": "number",
           "default": 0,
           "markdownDescription": "Controls the font size in pixels for the Visual Editor. When set to 0, the `#editor.fontSize#` is used."
         },
         "quarto.visualEditor.maxContentWidth": {
-          "scope": "window",
+          "scope": "resource",
           "type": "number",
           "default": 1000,
           "markdownDescription": "Controls the maximum width (in pixels) of the editor's content"
         },
         "quarto.visualEditor.defaultListSpacing": {
-          "scope": "window",
+          "scope": "resource",
           "type": "string",
           "markdownDescription": "Default spacing between list items",
           "default": "spaced",
@@ -973,19 +973,19 @@
           ]
         },
         "quarto.visualEditor.lineNumbers": {
-          "scope": "window",
+          "scope": "resource",
           "type": "boolean",
           "default": "true",
           "markdownDescription": "Show line numbers in executable code cells"
         },
         "quarto.visualEditor.spelling": {
-          "scope": "window",
+          "scope": "resource",
           "type": "boolean",
           "default": "true",
           "markdownDescription": "Enable spell checking"
         },
         "quarto.visualEditor.spellingDictionary": {
-          "scope": "window",
+          "scope": "resource",
           "type": "string",
           "default": "en_US",
           "markdownDescription": "Main dictionary language",
@@ -1013,7 +1013,7 @@
           ]
         },
         "quarto.visualEditor.markdownWrap": {
-          "scope": "window",
+          "scope": "resource",
           "type": "string",
           "markdownDescription": "Automatic text wrapping (line breaks). Note that you can also use the `editor: markdown: wrap` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    wrap: column\n---\n```\n",
           "default": "none",
@@ -1029,13 +1029,13 @@
           ]
         },
         "quarto.visualEditor.markdownWrapColumn": {
-          "scope": "window",
+          "scope": "resource",
           "type": "number",
           "default": 72,
           "markdownDescription": "Column to wrap at when `markdownWrap` is set to `column`. Note that you can also use the `editor: markdown: wrap` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    wrap: 72\n---\n```\n"
         },
         "quarto.visualEditor.markdownReferences": {
-          "scope": "window",
+          "scope": "resource",
           "type": "string",
           "markdownDescription": "Scope to write markdown references (footnotes and reference links) at the end of. Note that you can also use the `editor: markdown: references: location` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    references:\n      location: document\n---\n```\n",
           "default": "block",
@@ -1051,7 +1051,7 @@
           ]
         },
         "quarto.visualEditor.markdownReferenceLinks": {
-          "scope": "window",
+          "scope": "resource",
           "type": "boolean",
           "default": false,
           "markdownDescription": "Write markdown links as references rather than inline. Reference links are written to the location specified in `#quarto.visualEditor.markdownReferences#`."

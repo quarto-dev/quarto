@@ -28,6 +28,7 @@ import { editorScrollContainer } from './scroll';
 import { EditorState } from 'prosemirror-state';
 import { rmdChunk } from './rmd';
 import { lines } from 'core';
+import { CodeViewCompletionContext } from 'editor-types';
 
 export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
 
@@ -194,16 +195,18 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
-export function executableCodeForActiveLanguage(state: EditorState) {
+
+export function codeViewCompletionContext(state: EditorState) : CodeViewCompletionContext | undefined {
 
   // function to examine a node and see if has executable code
   const schema = state.schema;
   const nodeAsLanguageCodeBlock = (node: ProsemirrorNode, pos: number) => {
-    const languageCodeBlock = (language: string, code?: string) => {
+    const languageCodeBlock = (language: string, code?: string, metaLine?: boolean) => {
       return {
         language,
         pos,
-        code: code || node.textContent
+        code: code || node.textContent,
+        metaLine
       };
     }
     if (node.type === schema.nodes.yaml_metadata) {
@@ -211,7 +214,7 @@ export function executableCodeForActiveLanguage(state: EditorState) {
     } else if (node.type === schema.nodes.rmd_chunk) {
       const parts = rmdChunk(node.textContent);
       if (parts) {
-        return languageCodeBlock(parts.lang, parts.code);
+        return languageCodeBlock(parts.lang, parts.code, true);
       }
     } else if (node.type === schema.nodes.raw_block) {
       return languageCodeBlock(node.attrs.format);
@@ -225,6 +228,27 @@ export function executableCodeForActiveLanguage(state: EditorState) {
 
   const activeBlock = nodeAsLanguageCodeBlock(parent, pos - parentOffset);
   if (activeBlock) {
+
+    // compute start index (skip over meta line if there is one)
+    const startIndex = activeBlock.metaLine
+      ? lines(parent.textContent)[0].length + 1 
+      : 0;
+
+    // compute the position within the block
+    let row = 0, col = 0;
+    for (let i=startIndex; i<parentOffset; i++) {
+      const ch = parent.textContent.at(i);
+      if (!ch) {
+        break;
+      }
+      if (ch === "\n") {
+        row++;
+        col = 0;
+      } else {
+        col++;
+      }
+    }
+
     // collect all the blocks with this language
     const blocks: Array<{ language: string, code: string; active: boolean }> = [];
     state.doc.descendants((node, pos) => {
@@ -240,25 +264,25 @@ export function executableCodeForActiveLanguage(state: EditorState) {
     // concatenate together all of the code, and indicate the start and end lines 
     // of the active block
     const code: string[] = [];
-    let activeCellBegin = -1, activeCellEnd = -1;
+    let cellBegin = -1, cellEnd = -1;
     blocks.forEach(block => {
       const blockLines = lines(block.code);
       if (block.active) {
-        activeCellBegin = code.length;
-        activeCellEnd = code.length + blockLines.length - 1;
+        cellBegin = code.length;
+        cellEnd = code.length + blockLines.length - 1;
       }
       if (blockLines[blockLines.length-1].trim().length !== 0) {
         blockLines.push("");
       }
       code.push(...blockLines);
     });
-    // TODO: use parent offset to generate cursor position?
     return {
+      language: activeBlock.language,
       code,
-      activeCellBegin,
-      activeCellEnd
+      cellBegin,
+      cellEnd,
+      cursorPos: { row: cellBegin + row, col }
     }
-
   } else {
     return undefined;
   }

@@ -23,6 +23,7 @@ import { prefsServer, prefsServerMethods } from "./prefs";
 import { EditorServerDocuments } from "../server/server";
 import { sourceServer, sourceServerMethods } from "./source";
 import { PandocServerOptions } from "../pandoc";
+import { completionServerMethods, completionServer } from "./completion";
 
 export {
   mathServer, 
@@ -30,7 +31,9 @@ export {
   dictionaryServer, 
   dictionaryServerMethods,
   prefsServer,
-  prefsServerMethods
+  prefsServerMethods,
+  completionServer,
+  completionServerMethods
 };
 export type { DictionaryServerOptions };
 
@@ -45,7 +48,8 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
     math: mathServer(options.documents),
     dictionary: dictionaryServer(options.dictionary),
     prefs: prefsServer(),
-    source: sourceServer(options.pandoc)
+    source: sourceServer(options.pandoc),
+    completion: completionServer()
   };
 } 
 
@@ -54,6 +58,7 @@ export function editorServicesMethods(options: EditorServicesOptions): Record<st
     ...mathServerMethods(options.documents),
     ...dictionaryServerMethods(options.dictionary),
     ...prefsServerMethods(prefsServer()),
-    ...sourceServerMethods(options.pandoc)
+    ...sourceServerMethods(options.pandoc),
+    ...completionServerMethods(completionServer())
   };
 }

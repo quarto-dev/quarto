@@ -16,11 +16,14 @@
 import { JsonRpcRequestTransport } from "core";
 
 import {
+  CodeViewCompletionContext,
+  CompletionServer,
   Dictionary,
   DictionaryInfo,
   DictionaryServer,
   EditorServices,
   IgnoredWord,
+  kCompletionGetCodeViewCompletions,
   kDictionaryAddToUserDictionary,
   kDictionaryAvailableDictionaries,
   kDictionaryGetDictionary,
@@ -48,7 +51,8 @@ export function editorJsonRpcServices(request: JsonRpcRequestTransport) : Editor
     math: editorMathJsonRpcServer(request),
     dictionary: editorDictionaryJsonRpcServer(request),
     prefs: editorPrefsJsonRpcServer(request),
-    source: editorSourceJsonRpcServer(request)
+    source: editorSourceJsonRpcServer(request),
+    completion: editorCompletionJsonRpcServer(request)
   };
 }
 
@@ -65,6 +69,14 @@ export function editorMathJsonRpcServer(request: JsonRpcRequestTransport) : Math
     mathjaxTypeset(math: string, options: MathjaxTypesetOptions) {
       return request(kMathMathjaxTypesetSvg, [math, options]);
     }
+  }
+}
+
+export function editorCompletionJsonRpcServer(request: JsonRpcRequestTransport) : CompletionServer {
+  return {
+    codeViewCompletions(context: CodeViewCompletionContext) {
+      return request(kCompletionGetCodeViewCompletions, [context]);
+    },
   }
 }
 

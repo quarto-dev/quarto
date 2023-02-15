@@ -15,7 +15,8 @@
     "mathjax-full": "^3.2.2",
     "tsconfig": "*",
     "typescript": "^4.5.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "vscode-languageserver-types": "^3.17.3"
   },
   "devDependencies": {
     "@types/node": "^18.11.17"

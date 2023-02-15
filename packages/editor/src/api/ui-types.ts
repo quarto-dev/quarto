@@ -13,9 +13,11 @@
  *
  */
 
+import { CompletionList } from 'vscode-languageserver-types';
+
 import { SkinTone } from './emoji';
 
-import { EditorUISpelling, EditorDialogs, EditorDisplay, EditorUIImageResolver } from 'editor-types';
+import { EditorUISpelling, EditorDialogs, EditorDisplay, EditorUIImageResolver, CodeViewCompletionContext } from 'editor-types';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
@@ -29,6 +31,7 @@ export interface EditorUI {
   images: EditorUIImages;
   math?: EditorUIMath;
   spelling?: EditorUISpelling;
+  completion?: EditorUICompletion;
   chunks?: EditorUIChunks;
 }
 
@@ -111,6 +114,10 @@ export interface EditorUIContext extends EditorUIImageResolver {
 
 export interface EditorUIMath {
   typeset: (el: HTMLElement, text: string, priority: boolean) => Promise<boolean>;
+}
+
+export interface EditorUICompletion {
+  codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
 }
 
 export const kListSpacingTight = 'tight';

@@ -46,6 +46,7 @@
     "transliteration": "^2.2.0",
     "typescript": "^4.5.2",
     "use-debounce": "^9.0.2",
+    "vscode-languageserver-types": "^3.17.3",
     "zenscroll": "^4.0.2"
   },
   "devDependencies": {

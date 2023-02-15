@@ -15,13 +15,18 @@
 
 
 import { autocompletion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
-import { executableCodeForActiveLanguage } from "editor";
+import { codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
-  
+  // don't provide behavior if we don't have completions
+  if (!behaviorContext.pmContext.ui.completion) {
+    return {
+      extensions: []
+    }
+  }
 
   return {
     extensions: [
@@ -29,21 +34,22 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
         override: [
           async (context: CompletionContext) : Promise<CompletionResult | null> => {
             
-            return null;
-            
-            // console.log(executableCodeForActiveLanguage(behaviorContext.view.state));
-            
-            const word = context.matchBefore(/\w*/)!;
-            if (word.from == word.to && !context.explicit)
-              return null
-            return {
-              from: word.from,
-              options: [
-                {label: "match", type: "keyword"},
-                {label: "hello", type: "variable", info: "(World)"},
-                {label: "magic", type: "text", apply: "⠁⭒*.✩.*⭒⠁", detail: "macro"}
-              ]
+            // see if there is a completion context
+            const cvContext = codeViewCompletionContext(behaviorContext.view.state);
+            if (!cvContext) {
+              return null;
             }
+
+            // get completions
+            const completions = await behaviorContext.pmContext.ui.completion?.codeViewCompletions(cvContext);
+            if (!completions) {
+              return null;
+            }
+
+            // map completions to codemirror api
+            
+            // TODO
+            return null;
           }
         ]
       })

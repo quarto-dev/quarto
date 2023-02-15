@@ -45,7 +45,8 @@ import {
   VSC_VE_ImageChanged,
   Prefs,
   PrefsServer,
-  NavLocation
+  NavLocation,
+  CompletionServer
 } from "editor-types";
 
 import { 
@@ -58,7 +59,8 @@ import {
 
 
 import { 
-  prefsServerMethods 
+  prefsServerMethods,
+  completionServerMethods
 } from "editor-server";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
@@ -94,14 +96,16 @@ export function visualEditorServer(
   webviewPanel: WebviewPanel,
   request: JsonRpcRequestTransport,
   host: VSCodeVisualEditorHost,
-  prefsServer: PrefsServer
+  prefsServer: PrefsServer,
+  completionServer: CompletionServer
 ) : Disposable {
   
   
   // table of methods we implement directly
   const extensionMethods = {
     ...prefsServerMethods(prefsServer),
-    ...editorHostMethods(host)
+    ...completionServerMethods(completionServer),
+    ...editorHostMethods(host),
   };
 
   // proxy unknown methods to the lsp

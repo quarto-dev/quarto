@@ -1,5 +1,5 @@
 /*
- * services.ts
+ * completion.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,18 +13,20 @@
  *
  */
 
+import { CompletionList } from "vscode-languageserver-types";
 
-import { CompletionServer } from "./completion";
-import { DictionaryServer } from "./dictionary";
-import { MathServer } from "./math";
-import { PrefsServer } from "./prefs";
-import { SourceServer } from "./source";
+export const kCompletionGetCodeViewCompletions = 'completion_code_view_completions';
 
-
-export interface EditorServices {
-  readonly math: MathServer;
-  readonly dictionary: DictionaryServer;
-  readonly prefs: PrefsServer;
-  readonly source: SourceServer;
-  readonly completion: CompletionServer;
+export interface CodeViewCompletionContext {
+  language: string;
+  code: string[];
+  cellBegin: number;
+  cellEnd: number;
+  cursorPos: { row: number; col: number }
 }
+
+export interface CompletionServer {
+  codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
+}
+
+

@@ -1,5 +1,5 @@
 /*
- * services.ts
+ * completion.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,18 +13,18 @@
  *
  */
 
+import { CompletionList } from "vscode-languageserver-types";
 
-import { CompletionServer } from "./completion";
-import { DictionaryServer } from "./dictionary";
-import { MathServer } from "./math";
-import { PrefsServer } from "./prefs";
-import { SourceServer } from "./source";
+import { CodeViewCompletionContext, CompletionServer } from "editor-types";
 
-
-export interface EditorServices {
-  readonly math: MathServer;
-  readonly dictionary: DictionaryServer;
-  readonly prefs: PrefsServer;
-  readonly source: SourceServer;
-  readonly completion: CompletionServer;
+export function vscodeCompletionServer() : CompletionServer {
+  return {
+    async codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
+      //console.log("called vscode completion handler!!!1");
+      return {
+        items: [],
+        isIncomplete: false
+      };
+    },
+  };
 }

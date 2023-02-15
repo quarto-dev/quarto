@@ -520,12 +520,11 @@
           "command": "quarto.formatCell",
           "when": "editorLangId == quarto && !editorHasSelection",
           "group": "1_modification"
-        }, 
+        },
         {
           "command": "quarto.editInVisualMode",
           "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
-          "group": "0_editorMode",
-          "order": 1  
+          "group": "0_editorMode"
         }
       ],
       "webview/context": [
@@ -1177,6 +1176,7 @@
     "tmp": "^0.2.1",
     "uuid": "^9.0.0",
     "vscode-languageclient": "^8.0.2",
+    "vscode-languageserver-types": "^3.17.3",
     "vscode-nls": "^5.2.0"
   },
   "devDependencies": {

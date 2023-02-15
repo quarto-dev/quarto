@@ -25,6 +25,10 @@ import { ExtensionFn } from "./extension-types";
 import { editingRootNode } from './node';
 import { editorScrollContainer } from './scroll';
 
+import { EditorState } from 'prosemirror-state';
+import { rmdChunk } from './rmd';
+import { lines } from 'core';
+
 export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
 
 export interface CodeViewOptions {
@@ -187,6 +191,76 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
       // bring it into view
       scroller.toY(container.scrollTop - (viewBottom - bottom));
     }
+  }
+}
+
+export function executableCodeForActiveLanguage(state: EditorState) {
+
+  // function to examine a node and see if has executable code
+  const schema = state.schema;
+  const nodeAsLanguageCodeBlock = (node: ProsemirrorNode, pos: number) => {
+    const languageCodeBlock = (language: string, code?: string) => {
+      return {
+        language,
+        pos,
+        code: code || node.textContent
+      };
+    }
+    if (node.type === schema.nodes.yaml_metadata) {
+      return languageCodeBlock('yaml');
+    } else if (node.type === schema.nodes.rmd_chunk) {
+      const parts = rmdChunk(node.textContent);
+      if (parts) {
+        return languageCodeBlock(parts.lang, parts.code);
+      }
+    } else if (node.type === schema.nodes.raw_block) {
+      return languageCodeBlock(node.attrs.format);
+    } else {
+      return undefined;
+    }
+  };
+
+  // check the currently active node to see if it has a langauge
+  const { parent, parentOffset, pos }= state.selection.$head;
+
+  const activeBlock = nodeAsLanguageCodeBlock(parent, pos - parentOffset);
+  if (activeBlock) {
+    // collect all the blocks with this language
+    const blocks: Array<{ language: string, code: string; active: boolean }> = [];
+    state.doc.descendants((node, pos) => {
+      const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
+      if (languageBlock?.language === activeBlock.language) {
+        blocks.push({
+          ...languageBlock,
+          active: languageBlock.pos === activeBlock.pos
+        });
+      }
+    });
+
+    // concatenate together all of the code, and indicate the start and end lines 
+    // of the active block
+    const code: string[] = [];
+    let activeCellBegin = -1, activeCellEnd = -1;
+    blocks.forEach(block => {
+      const blockLines = lines(block.code);
+      if (block.active) {
+        activeCellBegin = code.length;
+        activeCellEnd = code.length + blockLines.length - 1;
+      }
+      if (blockLines[blockLines.length-1].trim().length !== 0) {
+        blockLines.push("");
+      }
+      code.push(...blockLines);
+    });
+    // TODO: use parent offset to generate cursor position?
+    return {
+      code,
+      activeCellBegin,
+      activeCellEnd
+    }
+
+  } else {
+    return undefined;
   }
 }
 

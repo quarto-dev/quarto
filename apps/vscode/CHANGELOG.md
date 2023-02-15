@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.67.0 (Unreleased)
+
+- Change location of edit in visual/source context menu item
+- Use resource scoping for visual editor preferences
+
 ## 1.66.0 (Release on 14 February 2023)
 
 - Document, range, and cell formatting for Python and Julia code

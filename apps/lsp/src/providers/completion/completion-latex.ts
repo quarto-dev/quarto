@@ -77,7 +77,7 @@ export async function latexCompletions(
   const text = line.slice(0, pos.character);
   const backslashPos = text.lastIndexOf("\\");
   const spacePos = text.lastIndexOf(" ");
-  if (backslashPos !== -1 && backslashPos > spacePos) {
+  if (backslashPos !== -1 && backslashPos > spacePos && text[backslashPos-1] !== "\\") {
     const loadedExtensions = mathjaxLoadedExtensions(config.mathJaxExtensions());
     const token = text.slice(backslashPos + 1);
     const completions: CompletionItem[] = Object.keys(kMathjaxCommands)

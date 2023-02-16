@@ -17,6 +17,7 @@ import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
 import * as child_process from "child_process";
+import which from "which";
 
 import { extensions, Uri, workspace } from "vscode";
 
@@ -106,7 +107,14 @@ export class PreviewEnvManager {
         workspaceFolder?.uri
       );
       if (Array.isArray(execDetails?.execCommand)) {
-        env.QUARTO_PYTHON = execDetails.execCommand[0];
+        let quartoPython = execDetails.execCommand[0] as string;
+        if (!path.isAbsolute(quartoPython)) {
+          const path = which.sync(quartoPython, { nothrow: true });
+          if (path) {
+            quartoPython = path;
+          }
+        }
+        env.QUARTO_PYTHON = quartoPython;
       }
     }
 

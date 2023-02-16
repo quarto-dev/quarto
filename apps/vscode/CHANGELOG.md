@@ -6,6 +6,7 @@
 - Use resource scoping for visual editor preferences
 - Resolve full path when setting QUARTO_PYTHON from Python extension config
 - Don't offer LaTeX completions for `\\` 
+- Ensure that empty code block class doesn't show up in the visual editor
 
 ## 1.66.0 (Release on 14 February 2023)
 

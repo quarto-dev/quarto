@@ -103,7 +103,7 @@ const extension = (context: ExtensionContext): Extension => {
                 // without the fence markers (rather indenting the code block 4 spaces).
                 // we don't want this so we add a sentinel class to the attributes to
                 // force the fence markers (which we then cleanup below in the postprocessor)
-                const classes = node.attrs.classes;
+                const classes = [...node.attrs.classes];
                 if (!pandocAttrAvailable(node.attrs) && pandocExtensions.backtick_code_blocks) {
                   classes.push(kNoAttributesSentinel)
                 }

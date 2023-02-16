@@ -101,13 +101,13 @@ const extension = (context: ExtensionContext): Extension | null => {
 
     commands: () => {
       const commands = [
-        new RChunkCommand(options, ui),
-        new PythonChunkCommand(options, ui),
-        new BashChunkCommand(ui),
-        new RcppChunkCommand(ui),
-        new SQLChunkCommand(ui),
-        new D3ChunkCommand(ui),
-        new StanChunkCommand(ui),
+        new RChunkCommand(ui, options),
+        new PythonChunkCommand(ui, options),
+        new BashChunkCommand(ui, options),
+        new RcppChunkCommand(ui, options),
+        new SQLChunkCommand(ui, options),
+        new D3ChunkCommand(ui, options),
+        new StanChunkCommand(ui, options),
       ];
       if (ui.chunks) {
         commands.push(
@@ -131,6 +131,7 @@ const extension = (context: ExtensionContext): Extension | null => {
 class RmdChunkCommand extends ProsemirrorCommand {
   constructor(
     ui: EditorUI,
+    options: EditorOptions,
     id: EditorCommandId,
     keymap: string[],
     priority: number,
@@ -140,8 +141,8 @@ class RmdChunkCommand extends ProsemirrorCommand {
     group = OmniInsertGroup.Chunks
   ) {
     super(id, keymap, insertRmdChunk(placeholder), {
-      name: `${lang} ${ui.context.translateText('Code Cell')}`,
-      description: `${ui.context.translateText('Executable')} ${lang} ${ui.context.translateText('cell')}`,
+      name: `${lang} ${ui.context.translateText('Code ')} ${cellName(ui, options)}`,
+      description: `${ui.context.translateText('Executable')} ${lang} ${cellName(ui, options).toLowerCase()}`,
       group,
       priority,
       image
@@ -149,12 +150,21 @@ class RmdChunkCommand extends ProsemirrorCommand {
   }
 }
 
+function cellName(ui: EditorUI, options: EditorOptions) {
+  if (options.defaultCellTypePython) {
+    return ui.context.translateText('Cell');
+  } else {
+    return ui.context.translateText('Chunk');
+  }
+}
+
 const kInsertCodeChunkShortcut = ['Mod-Alt-i'];
 
 class RChunkCommand extends RmdChunkCommand {
-  constructor(options: EditorOptions, ui: EditorUI) {
+  constructor(ui: EditorUI, options: EditorOptions) {
     super(
       ui, 
+      options,
       EditorCommandId.RCodeChunk, 
       !options.defaultCellTypePython ? kInsertCodeChunkShortcut : [], 
       !options.defaultCellTypePython ? 10 : 8, 
@@ -167,9 +177,10 @@ class RChunkCommand extends RmdChunkCommand {
 }
 
 class PythonChunkCommand extends RmdChunkCommand {
-  constructor(options: EditorOptions, ui: EditorUI) {
+  constructor(ui: EditorUI, options: EditorOptions) {
     super(
       ui,
+      options,
       EditorCommandId.PythonCodeChunk,
       options.defaultCellTypePython ? kInsertCodeChunkShortcut : [],
       options.defaultCellTypePython ? 10 : 8,
@@ -182,25 +193,26 @@ class PythonChunkCommand extends RmdChunkCommand {
 }
 
 class BashChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
-    super(ui, EditorCommandId.BashCodeChunk, [], 7, 'Bash', '{bash}\n', () =>
+  constructor(ui: EditorUI, options: EditorOptions) {
+    super(ui, options, EditorCommandId.BashCodeChunk, [], 7, 'Bash', '{bash}\n', () =>
       ui.prefs.darkMode() ? ui.images.omni_insert!.bash_chunk_dark! : ui.images.omni_insert!.bash_chunk!,
     );
   }
 }
 
 class RcppChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
-    super(ui, EditorCommandId.RcppCodeChunk, [], 6, 'Rcpp', '{Rcpp}\n', () =>
+  constructor(ui: EditorUI, options: EditorOptions) {
+    super(ui, options, EditorCommandId.RcppCodeChunk, [], 6, 'Rcpp', '{Rcpp}\n', () =>
       ui.prefs.darkMode() ? ui.images.omni_insert!.rcpp_chunk_dark! : ui.images.omni_insert!.rcpp_chunk!,
     );
   }
 }
 
 class SQLChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
+  constructor(ui: EditorUI, options: EditorOptions) {
     super(
       ui,
+      options,
       EditorCommandId.SQLCodeChunk,
       [],
       5,
@@ -213,15 +225,16 @@ class SQLChunkCommand extends RmdChunkCommand {
 }
 
 class D3ChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
-    super(ui, EditorCommandId.D3CodeChunk, [], 4, 'D3', '{d3 data=}\n', () => ui.images.omni_insert!.d3_chunk!, OmniInsertGroup.Chunks);
+  constructor(ui: EditorUI, options: EditorOptions) {
+    super(ui, options, EditorCommandId.D3CodeChunk, [], 4, 'D3', '{d3 data=}\n', () => ui.images.omni_insert!.d3_chunk!, OmniInsertGroup.Chunks);
   }
 }
 
 class StanChunkCommand extends RmdChunkCommand {
-  constructor(ui: EditorUI) {
+  constructor(ui: EditorUI, options: EditorOptions) {
     super(
       ui,
+      options,
       EditorCommandId.StanCodeChunk,
       [],
       7,

@@ -145,7 +145,8 @@ class RmdChunkCommand extends ProsemirrorCommand {
       description: `${ui.context.translateText('Executable')} ${lang} ${cellName(ui, options).toLowerCase()}`,
       group,
       priority,
-      image
+      image,
+      keywords: ["cell", "chunk"]
     });
   }
 }

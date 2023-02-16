@@ -14,7 +14,7 @@
  */
 
 import { CompletionItem as VCompletionItem, CompletionItemKind as VCompletionItemKind, MarkdownString, SnippetString, Range } from "vscode";
-import { CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionList, MarkupContent, MarkupKind } from "vscode-languageserver-types";
+import { CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionList, InsertTextFormat, MarkupContent, MarkupKind } from "vscode-languageserver-types";
 
 import { CodeViewCompletionContext, CompletionServer } from "editor-types";
 import { Position, TextDocument } from "vscode";
@@ -65,7 +65,10 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : Comp
       : item.documentation,
     sortText: item.sortText,
     filterText: item.filterText,
-    insertText
+    insertText,
+    insertTextFormat: item.insertText instanceof SnippetString 
+      ? InsertTextFormat.Snippet 
+      : InsertTextFormat.PlainText
   };
   if (item.range) {
     const isRange = (x?: unknown) : x is Range => { return !!x && !!(x as Record<string,unknown>).start; };

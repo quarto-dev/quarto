@@ -13,6 +13,8 @@
  *
  */
 
+import { editorLanguage } from "editor-core";
+
 export interface EmbeddedLanguage {
   ids: string[];
   extension: string;
@@ -31,75 +33,67 @@ export function embeddedLanguage(langauge: string) {
 const kEmbededLanguages = [
   // these langauges required creating a temp file
   defineLanguage("python", {
-    ext: "py",
     inject: ["# type: ignore", "# flake8: noqa"],
-    trigger: ["."],
     emptyLine: "#",
     canFormat: true,
   }),
   defineLanguage("r", {
-    trigger: ["$", "@", ":", "."],
     emptyLine: "#",
     reuseVdoc: true,
     canFormat: true,
   }),
   defineLanguage("julia", {
-    ext: "jl",
     emptyLine: "#",
-    trigger: ["."],
     canFormat: true,
   }),
-  defineLanguage("sql", { trigger: ["."] }),
-  defineLanguage("bash", { ext: "sh" }),
-  defineLanguage("sh", { ext: "sh" }),
-  defineLanguage("shell", { ext: "sh" }),
-  defineLanguage("ruby", { ext: "rb", trigger: ["."] }),
-  defineLanguage("rust", { ext: "rs", trigger: ["."] }),
-  defineLanguage("java", { trigger: ["."] }),
-  defineLanguage(["cpp"], { trigger: [".", ">", ":"] }),
-  defineLanguage("go", { trigger: ["."] }),
+  defineLanguage("sql"),
+  defineLanguage("bash"),
+  defineLanguage("sh"),
+  defineLanguage("shell"),
+  defineLanguage("ruby"),
+  defineLanguage("rust"),
+  defineLanguage("java"),
+  defineLanguage("cpp"),
+  defineLanguage("go"),
   // these langauges work w/ text document content provider
   defineLanguage("html", { type: "content" }),
   defineLanguage("css", { type: "content" }),
-  defineLanguage(["ts", "typescript"], {
-    ext: "ts",
-    type: "content",
-    trigger: ["."],
-  }),
-  defineLanguage(["js", "javascript", "d3", "ojs"], {
-    ext: "js",
-    type: "content",
-    trigger: ["."],
-  }),
-  defineLanguage("jsx", { trigger: ["."], type: "content" }),
+  defineLanguage("typescript", { type: "content"}),
+  defineLanguage("javascript", { type: "content" }),
+  defineLanguage("jsx", { type: "content" }),
 ];
 
 interface LanguageOptions {
-  ext?: string;
   type?: "content" | "tempfile";
   emptyLine?: string;
-  trigger?: string[];
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
 }
 
 function defineLanguage(
-  language: string | string[],
+  id: string,
   options?: LanguageOptions
 ): EmbeddedLanguage {
-  language = Array.isArray(language) ? language : [language];
+ 
+  // lookup langauge
+  const language = editorLanguage(id);
+  if (!language) {
+    throw new Error(`Unknown language ${id}`);
+  }
+
+  // validate consistency of options
   if (options?.canFormat && !options?.emptyLine) {
     throw new Error(
       "emptyLine must be specified for languages with canFormat === true"
     );
   }
   return {
-    ids: language,
-    extension: options?.ext || language[0],
+    ids: language.ids,
+    extension: language.ext || language.ids[0],
     type: options?.type || "tempfile",
     emptyLine: options?.emptyLine,
-    trigger: options?.trigger,
+    trigger: language.trigger,
     inject: options?.inject,
     reuseVdoc: options?.reuseVdoc,
     canFormat: options?.canFormat,

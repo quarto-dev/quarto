@@ -14,17 +14,31 @@
  */
 
 
-import { autocompletion, Completion, CompletionContext, CompletionResult, insertCompletionText, pickedCompletion, snippet } from "@codemirror/autocomplete"
+import { EditorView } from "@codemirror/view";
+
+
+import { 
+  autocompletion, 
+  Completion, 
+  CompletionContext, 
+  CompletionResult, 
+  insertCompletionText, 
+  pickedCompletion, 
+  snippet 
+} from "@codemirror/autocomplete"
 
 import { InsertReplaceEdit, InsertTextFormat, TextEdit } from "vscode-languageserver-types";
+
+import { editorLanguage } from "editor-core";
 
 import { codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
-import { editorLanguage } from "editor-core";
-import { escapeRegExpCharacters } from "core";
-import { EditorState } from "@codemirror/state";
-import { EditorView } from "codemirror";
+
+// TODO: types/icons
+// TODO: documentation
+// TODO: YAML and TeX completions
+// TODO: html with < is messed up
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
@@ -53,16 +67,15 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
               return null;
             }
 
-            // check for completeable content
-            const triggerRegex = language.trigger ? escapeRegExpCharacters(language.trigger.join("")) : "";
-            const word = context.matchBefore(new RegExp(`[\\w${triggerRegex}]*`));
-            if (!word || (word.from == word.to && !context.explicit)) {
-              return null
+            // we need to be preceded by a non space character or be explicit
+            const match = context.matchBefore(/\S/);
+            if (!match && !context.explicit) {
+              return null;
             }
 
             // get completions
             const completions = await behaviorContext.pmContext.ui.completion?.codeViewCompletions(cvContext);
-            if (!completions || completions.items.length == 0) {
+            if (context.aborted || !completions || completions.items.length == 0) {
               return null;
             }
 
@@ -80,13 +93,13 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
             const boostScore = (index: number) => {
               return -99 + Math.round(((total-index)/total) * 198);
             }
-            
             // return completions
             return {
               from: context.pos,
               options: completions.items.map((item,index) : Completion => ({
                 label: item.label,
                 detail: item.detail,
+                info: "foobar",
                 apply: (view: EditorView, completion: Completion, from: number) => {
                   // compute from
                   from = item.textEdit 
@@ -102,6 +115,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
                   if (item.insertTextFormat === InsertTextFormat.Snippet) {
                     const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
                     insertSnippet(view, completion, from, context.pos);
+                  // normal completions
                   } else {
                     view.dispatch({
                       ...insertCompletionText(view.state, insertText, from, context.pos),

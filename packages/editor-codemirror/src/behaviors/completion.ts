@@ -27,7 +27,16 @@ import {
   snippet 
 } from "@codemirror/autocomplete"
 
-import { InsertReplaceEdit, InsertTextFormat, TextEdit } from "vscode-languageserver-types";
+import { 
+  CompletionItem,
+  InsertReplaceEdit, 
+  InsertTextFormat, 
+  MarkupContent, 
+  MarkupKind, 
+  TextEdit 
+} from "vscode-languageserver-types";
+
+import md from "markdown-it";
 
 import { editorLanguage } from "editor-core";
 
@@ -39,6 +48,7 @@ import { Behavior, BehaviorContext } from ".";
 // TODO: documentation
 // TODO: YAML and TeX completions
 // TODO: html with < is messed up
+// TODO: why doesn't R trigger on ::?
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
@@ -96,39 +106,82 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
             // return completions
             return {
               from: context.pos,
-              options: completions.items.map((item,index) : Completion => ({
-                label: item.label,
-                detail: item.detail,
-                info: "foobar",
-                apply: (view: EditorView, completion: Completion, from: number) => {
-                  // compute from
-                  from = item.textEdit 
-                    ? InsertReplaceEdit.is(item.textEdit) 
-                        ? context.pos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
-                        : TextEdit.is(item.textEdit)
-                            ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
-                            : context.pos
-                    : context.pos;
-
-                  // handle snippets
-                  const insertText = item.insertText || item.label;
-                  if (item.insertTextFormat === InsertTextFormat.Snippet) {
-                    const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
-                    insertSnippet(view, completion, from, context.pos);
-                  // normal completions
-                  } else {
-                    view.dispatch({
-                      ...insertCompletionText(view.state, insertText, from, context.pos),
-                      annotations: pickedCompletion.of(completion)
-                    })
-                  }
-                },
-                boost: boostScore(index)
-              }))
+              options: completions.items.map((item,index) : Completion => {
+                return {
+                  label: item.label,
+                  info: () : Node | null => {
+                    return infoNodeForItem(item);     
+                  },
+                  apply: (view: EditorView, completion: Completion, from: number) => {
+                    // compute from
+                    from = item.textEdit 
+                      ? InsertReplaceEdit.is(item.textEdit) 
+                          ? context.pos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
+                          : TextEdit.is(item.textEdit)
+                              ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
+                              : context.pos
+                      : context.pos;
+  
+                    // handle snippets
+                    const insertText = item.insertText || item.label;
+                    if (item.insertTextFormat === InsertTextFormat.Snippet) {
+                      const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
+                      insertSnippet(view, completion, from, context.pos);
+                    // normal completions
+                    } else {
+                      view.dispatch({
+                        ...insertCompletionText(view.state, insertText, from, context.pos),
+                        annotations: pickedCompletion.of(completion)
+                      })
+                    }
+                  },
+                  boost: boostScore(index)
+                }
+              })
             };
           }
         ]
       })
     ]
   }
+}
+
+function infoNodeForItem(item: CompletionItem) {
+
+  const headerEl = (text: string, tag: string) => {
+    const header = document.createElement(tag);
+    header.classList.add("cm-completionInfoHeader");
+    header.innerText = text;
+    return header;
+  }
+  const textDiv = (text: string) => {
+    const span = document.createElement("div");
+    span.innerText = text;
+    return span;
+  }
+  
+  if (item.detail && !item.documentation) {
+    return headerEl(item.detail, "span");
+  } else if (item.documentation) {
+    const infoDiv = document.createElement("div");
+    if (item.detail) {
+      infoDiv.appendChild(headerEl(item.detail, "p"));
+    }
+    if (MarkupContent.is(item.documentation)) {
+      if (item.documentation.kind === MarkupKind.Markdown) {
+        const commonmark = md('commonmark');
+        const html = commonmark.render(item.documentation.value);
+        const mdDiv = document.createElement("div");
+        mdDiv.innerHTML = html;
+        infoDiv.appendChild(mdDiv);
+      } else {
+        infoDiv.appendChild(textDiv(item.documentation.value));
+      }
+    } else {
+      infoDiv.appendChild(textDiv(item.documentation));
+    }
+    return infoDiv;
+  } else {
+    return null;
+  }                    
 }

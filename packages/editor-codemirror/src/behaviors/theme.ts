@@ -62,7 +62,7 @@ export function themeBehavior(context: BehaviorContext) : Behavior {
 
 function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
 
-  const completion = { Margin: 30, Width: 400 };
+  const completion = { Margin: 30, Width: 250 };
 
   const styleSpec : { [selector: string]: StyleSpec} = {
     "&": {
@@ -145,7 +145,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
         overflow: "hidden auto",
         maxWidth_fallback: "700px",
         maxWidth: "min(700px, 95vw)",
-        minWidth: "350px",
+        minWidth: "250px",
         maxHeight: "10em",
         height: "100%",
         listStyle: "none",
@@ -186,8 +186,17 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
       padding: "3px 9px",
       width: "max-content",
       maxWidth: `${completion.Width}px`,
-      boxSizing: "border-box"
+      boxSizing: "border-box",
+      color: editorTheme.suggestWidgetForegroundColor,
+      backgroundColor: editorTheme.suggestWidgetBackgroundColor,
+      border: `1px solid ${editorTheme.suggestWidgetBorderColor}`
     },
+    ".cm-tooltip.cm-completionInfo .cm-completionInfoHeader": {
+      fontFamily: editorTheme.fixedWidthFont
+    },
+    ".cm-tooltip.cm-completionInfo a": {
+      display: "none"
+   },
   
     ".cm-completionInfo.cm-completionInfo-left": { right: "100%" },
     ".cm-completionInfo.cm-completionInfo-right": { left: "100%" },

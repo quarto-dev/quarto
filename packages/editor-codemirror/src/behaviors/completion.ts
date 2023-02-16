@@ -45,7 +45,6 @@ import { codeViewCompletionContext } from "editor";
 import { Behavior, BehaviorContext } from ".";
 
 // TODO: types/icons
-// TODO: documentation
 // TODO: YAML and TeX completions
 // TODO: html with < is messed up
 // TODO: why doesn't R trigger on ::?

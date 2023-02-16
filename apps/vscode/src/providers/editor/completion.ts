@@ -63,7 +63,7 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : Comp
     documentation: item.documentation instanceof MarkdownString 
       ? mdStringToMdContent(item.documentation) 
       : item.documentation,
-    sortText: item.sortText,
+    sortText: item.sortText && /^\d/.test(item.sortText) ? item.sortText : undefined,
     filterText: item.filterText,
     insertText,
     insertTextFormat: item.insertText instanceof SnippetString 

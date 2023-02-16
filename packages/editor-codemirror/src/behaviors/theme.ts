@@ -137,6 +137,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
       borderBottomColor: editorTheme.paneBorderColor
     },
     // autocomplete (https://github.com/codemirror/autocomplete/blob/main/src/theme.ts)
+    
     ".cm-tooltip.cm-tooltip-autocomplete": {
       "& > ul": {
         fontFamily: editorTheme.fixedWidthFont,
@@ -144,13 +145,15 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
         overflow: "hidden auto",
         maxWidth_fallback: "700px",
         maxWidth: "min(700px, 95vw)",
-        minWidth: "250px",
+        minWidth: "350px",
         maxHeight: "10em",
         height: "100%",
         listStyle: "none",
         margin: 0,
         padding: 3,
-        border: `1px solid ${editorTheme.paneBorderColor}`,
+        color: editorTheme.suggestWidgetForegroundColor,
+        backgroundColor: editorTheme.suggestWidgetBackgroundColor,
+        border: `1px solid ${editorTheme.suggestWidgetBorderColor}`,
   
         "& > li": {
           overflowX: "hidden",
@@ -163,12 +166,12 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     },
   
     "& .cm-tooltip-autocomplete ul li[aria-selected]": {
-      background: editorTheme.findTextBackgroundColor,
-      color: editorTheme.textColor,
+      background: editorTheme.suggestWidgetSelectedBackgroundColor,
+      color: editorTheme.suggestWidgetSelectedForegroundColor,
     },
   
     "& .cm-tooltip-autocomplete-disabled ul li[aria-selected]": {
-      background: editorTheme.gutterBackgroundColor,
+      background: editorTheme.suggestWidgetSelectedBackgroundColor,
     },
   
     ".cm-completionListIncompleteTop:before, .cm-completionListIncompleteBottom:after": {
@@ -202,12 +205,19 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     },
   
     ".cm-completionMatchedText": {
-      textDecoration: "underline"
+      textDecoration: "none",
+      color: editorTheme.suggestWidgetFocusHighlightForegroundColor
     },
   
     ".cm-completionDetail": {
       marginLeft: "0.5em",
-      fontStyle: "italic"
+      color: editorTheme.lightTextColor,
+      float: "right",
+      fontStyle: "normal"
+    },
+
+    "& .cm-tooltip-autocomplete ul li[aria-selected] .cm-completionDetail": {
+      color: editorTheme.suggestWidgetSelectedForegroundColor,
     },
   
     ".cm-completionIcon": {
@@ -218,6 +228,10 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
       paddingRight: ".6em",
       opacity: "0.6",
       boxSizing: "content-box"
+    },
+
+    "& .cm-tooltip-autocomplete ul li[aria-selected] .cm-completionIcon": {
+      color: editorTheme.suggestWidgetSelectedIconForegroundColor,
     },
   
     ".cm-completionIcon-function, .cm-completionIcon-method": {

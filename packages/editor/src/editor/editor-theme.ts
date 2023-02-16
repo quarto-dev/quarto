@@ -48,6 +48,14 @@ export interface EditorTheme {
   fixedWidthFontSizePt: number;
   proportionalFont: string;
   proportionalFontSizePt: number;
+  suggestWidgetBackgroundColor: string;
+  suggestWidgetBorderColor: string;
+  suggestWidgetForegroundColor: string;
+  suggestWidgetFocusHighlightForegroundColor: string;
+  suggestWidgetHighlightForegroundColor: string;
+  suggestWidgetSelectedBackgroundColor: string;
+  suggestWidgetSelectedForegroundColor: string;
+  suggestWidgetSelectedIconForegroundColor: string; 
   code: CodeTheme;
 }
 
@@ -106,6 +114,14 @@ export function defaultTheme(): EditorTheme {
     fixedWidthFontSizePt: 10,
     proportionalFont: '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif',
     proportionalFontSizePt: 10,
+    suggestWidgetBackgroundColor: "#f3f3f3",
+    suggestWidgetBorderColor: "#c8c8c8",
+    suggestWidgetForegroundColor: "#000000",
+    suggestWidgetFocusHighlightForegroundColor: "#bbe7ff",
+    suggestWidgetHighlightForegroundColor: "#0066bf",
+    suggestWidgetSelectedBackgroundColor: "#0060c0",
+    suggestWidgetSelectedForegroundColor: "#ffffff",
+    suggestWidgetSelectedIconForegroundColor: "#ffffff", 
     code: {
       keywordColor: 'rgb(0, 0, 255)',
       atomColor: 'rgb(88, 92, 246)',

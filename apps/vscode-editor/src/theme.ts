@@ -90,7 +90,14 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   const fontSizePt = Math.round(fontSizePx / 1.333) ;
   theme.fixedWidthFontSizePt = fontSizePt;
   theme.proportionalFontSizePt = fontSizePt + 1;
-
+  theme.suggestWidgetBackgroundColor = colors["--vscode-editorSuggestWidget-background"];
+  theme.suggestWidgetBorderColor = colors["--vscode-editorSuggestWidget-border"];
+  theme.suggestWidgetForegroundColor = colors["--vscode-editorSuggestWidget-foreground"];
+  theme.suggestWidgetSelectedForegroundColor = colors["--vscode-editorSuggestWidget-selectedForeground"];
+  theme.suggestWidgetSelectedIconForegroundColor = colors["--vscode-editorSuggestWidget-selectedIconForeground"];
+  theme.suggestWidgetSelectedBackgroundColor = colors["--vscode-editorSuggestWidget-selectedBackground"];
+  theme.suggestWidgetHighlightForegroundColor = colors["--vscode-editorSuggestWidget-highlightForeground"];
+  theme.suggestWidgetFocusHighlightForegroundColor = colors["--vscode-editorSuggestWidget-focusHighlightForeground"];
   return theme;
 
 

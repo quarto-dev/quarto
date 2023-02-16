@@ -48,6 +48,7 @@ import { Behavior, BehaviorContext } from ".";
 // TODO: YAML and TeX completions
 // TODO: html with < is messed up
 // TODO: why doesn't R trigger on ::?
+// TODO: whitelist completions?
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
@@ -108,8 +109,13 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
               options: completions.items.map((item,index) : Completion => {
                 return {
                   label: item.label,
+                  detail: item.detail && !item.documentation ? item.detail : undefined,
                   info: () : Node | null => {
-                    return infoNodeForItem(item);     
+                    if (item.documentation) {
+                      return infoNodeForItem(item);   
+                    } else {
+                      return null;
+                    }
                   },
                   apply: (view: EditorView, completion: Completion, from: number) => {
                     // compute from

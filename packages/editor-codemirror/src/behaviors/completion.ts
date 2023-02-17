@@ -86,9 +86,9 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
             }
 
             // we need to be preceded by a non space character or be explicit
-            // (also don't show matches if query < 3 chracters)
+            // (also don't show matches if query is empty)
             const match = context.matchBefore(/\S+/);
-            if ((!match && !context.explicit) || (match && match.text.length < 3)) {
+            if ((!match && !context.explicit) || (match && match.text.length < 1)) {
               return null;
             }
 

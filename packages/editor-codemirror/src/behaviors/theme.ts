@@ -205,6 +205,9 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
       margin: 0,
       padding: 0
     },
+    ".cm-tooltip.cm-completionInfo p.cm-completionInfoHeader": {
+      marginBottom: "1em"
+    },
   
     ".cm-completionInfo.cm-completionInfo-left": { right: "100%" },
     ".cm-completionInfo.cm-completionInfo-right": { left: "100%" },

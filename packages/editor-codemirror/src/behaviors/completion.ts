@@ -29,6 +29,7 @@ import {
 
 import { 
   CompletionItem,
+  CompletionItemKind,
   InsertReplaceEdit, 
   InsertTextFormat, 
   MarkupContent, 
@@ -44,10 +45,10 @@ import { codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
 
+// <strong class=""> produces text completions
 // TODO: types/icons
 // TODO: YAML and TeX completions
 // TODO: explore throttling
-// TODO: links
 // TODO: respect prefs / num chars
 // TODO: html with < is messed up
 // TODO: whitelist completions?
@@ -132,9 +133,16 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
               
               options: completions.items
                 .filter(item => {
+                  
+                  // no text completions that aren't snippets
+                  if (item.kind === CompletionItemKind.Text &&
+                      item.insertTextFormat !== InsertTextFormat.Snippet) {
+                    return false;
+                  }
+                   
+                  // only return label prefix matches
                   const replaceText = context.state.sliceDoc(itemFrom(item), context.pos);
-                  const insertText = item.insertText || item.label;
-                  return insertText.toLowerCase().startsWith(replaceText.toLowerCase());
+                  return item.label.toLowerCase().startsWith(replaceText.toLowerCase());
                 })
                 .map((item,index) : Completion => {
                   return {

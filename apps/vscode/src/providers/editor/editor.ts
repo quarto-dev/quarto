@@ -468,7 +468,13 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   }
 
   private editorAssetUri(webview: Webview, file: string) {
-    return webview.asWebviewUri(Uri.joinPath(this.context.extensionUri, "assets", "www", "editor", file));
+    return this.extensionResourceUrl(webview, ["assets", "www", "editor", file]);
+  }
+
+  protected extensionResourceUrl(webview: Webview, parts: string[]): Uri {
+    return webview.asWebviewUri(
+      Uri.joinPath(this.context.extensionUri, ...parts)
+    );
   }
 
   /**
@@ -478,6 +484,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
    
     const scriptUri = this.editorAssetUri(webview, "index.js");
     const stylesUri = this.editorAssetUri(webview, "style.css");
+    const codiconsUri = this.extensionResourceUrl(webview, [
+      "assets",
+      "www",
+      "codicon",
+      "codicon.css",
+    ]);
 
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
@@ -489,11 +501,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             <meta charset="UTF-8">
 
             <!-- Use a content security policy to only allow scripts that have a specific nonce. -->
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src https: data: ${webview.cspSource}; font-src data:;">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src https: data: ${webview.cspSource}; font-src data: ${webview.cspSource};">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
             <link href="${stylesUri}" rel="stylesheet" />
-            
+            <link rel="stylesheet" type="text/css" href="${codiconsUri}">
+
             <title>Visual Editor</title>
         </head>
         <body>

@@ -46,8 +46,6 @@ import { CodeViewCompletionContext, codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
 
-// TODO: types/icons
-
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
   // don't provide behavior if we don't have completions
@@ -60,6 +58,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
   return {
     extensions: [
       autocompletion({
+        closeOnBlur: false,
         override: [
           async (context: CompletionContext) : Promise<CompletionResult | null> => {
 
@@ -199,6 +198,7 @@ async function getCompletions(
         return {
           label: item.label,
           detail: item.detail && !item.documentation ? item.detail : undefined,
+          type: vsKindToType(item.kind),
           info: () : Node | null => {
             if (item.documentation) {
               return infoNodeForItem(item);   
@@ -231,6 +231,53 @@ async function getCompletions(
       })
   };
 }
+
+
+function vsKindToType(kind?: CompletionItemKind) {
+  kind = kind || CompletionItemKind.Text;
+  switch(kind) {
+    case CompletionItemKind.Method:
+    case CompletionItemKind.Constructor: 
+      return "method";
+    case CompletionItemKind.Function:
+      return "function";
+    case CompletionItemKind.Field: 
+    case CompletionItemKind.Property:
+    case CompletionItemKind.Event:
+      return "property";
+    case CompletionItemKind.Variable:
+    case CompletionItemKind.Reference:
+      return "variable";
+    case CompletionItemKind.Class:
+    case CompletionItemKind.Struct:
+      return "class";
+    case CompletionItemKind.Interface:
+      return "interface";
+    case CompletionItemKind.Module:
+    case CompletionItemKind.Unit:
+    case CompletionItemKind.File:
+    case CompletionItemKind.Folder:
+      return "namespace";
+    case CompletionItemKind.Value: 
+    case CompletionItemKind.Constant:
+      return "constant";
+    case CompletionItemKind.Enum: 
+    case CompletionItemKind.EnumMember:
+      return "enum";
+    case CompletionItemKind.Keyword: 
+      return "keyword";
+    case CompletionItemKind.TypeParameter:
+      return "type";
+
+    case CompletionItemKind.Text:
+    case CompletionItemKind.Snippet: 
+    case CompletionItemKind.Color:
+    case CompletionItemKind.Operator:
+    default:
+      return "text"; 
+  }
+}
+
 
 function infoNodeForItem(item: CompletionItem) {
 

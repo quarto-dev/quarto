@@ -141,12 +141,13 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     ".cm-tooltip.cm-tooltip-autocomplete": {
       "& > ul": {
         fontFamily: editorTheme.fixedWidthFont,
+        fontSize: `${editorTheme.fixedWidthFontSizePt}pt`,
         whiteSpace: "nowrap",
         overflow: "hidden auto",
         maxWidth_fallback: "700px",
         maxWidth: "min(700px, 95vw)",
         minWidth: "250px",
-        maxHeight: "220px",
+        maxHeight: "215px",
         height: "100%",
         listStyle: "none",
         margin: 0,
@@ -159,8 +160,10 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
           overflowX: "hidden",
           textOverflow: "ellipsis",
           cursor: "pointer",
-          padding: "3px 3px",
-          lineHeight: 1.3
+          padding: "2px 2px",
+          lineHeight: 1.15,
+          display: "flex",
+          alignItems: "center"
         },
       }
     },
@@ -241,52 +244,67 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     },
   
     ".cm-completionIcon": {
-      fontSize: "90%",
-      width: ".8em",
+      fontFamily: "codicon",
+      fontSize: `${editorTheme.fixedWidthFontSizePt+2}pt`,
       display: "inline-block",
+      width: "1em",
       textAlign: "center",
-      paddingRight: ".6em",
-      opacity: "0.6",
+      paddingLeft: ".1em",
+      paddingRight: ".3em",
+      opacity: "0.8",
       boxSizing: "content-box"
     },
+
+    ".cm-completionIcon-function, .cm-completionIcon-method": {
+      "&:after": { content: "'\\eb5f'" },
+      color: editorTheme.symbolIconFunctionForegroundColor
+    },
+    ".cm-completionIcon-class": {
+      "&:after": { content: "'\\eb5b'" },
+      "color": editorTheme.symbolIconClassForegroundColor,
+    },
+    ".cm-completionIcon-interface": {
+      "&:after": { content: "'\\eb61'" },
+      color: editorTheme.symbolIconInterfaceForegroundColor 
+    },
+    ".cm-completionIcon-variable": {
+      "&:after": { content: "'\\ea88'" },
+      color: editorTheme.symbolIconVariableForegroundColor
+    },
+    ".cm-completionIcon-constant": {
+      "&:after": { content: "'\\eb5d'" },
+      color: editorTheme.symbolIconConstantForegroundColor
+    },
+    ".cm-completionIcon-type": {
+      "&:after": { content: "'\\ea92'" },
+      color: editorTheme.symbolIconTypeParameterForegroundColor
+    },
+    ".cm-completionIcon-enum": {
+      "&:after": { content: "'\\ea95'" },
+      color: editorTheme.symbolIconEnumForegroundColor
+    },
+    ".cm-completionIcon-property": {
+      "&:after": { content: "'\\eb65'" },
+      color: editorTheme.symbolIconPropertyForegroundColor
+    },
+    ".cm-completionIcon-keyword": {
+      "&:after": { content: "'\\eb62'" },
+      color: editorTheme.symbolIconKeywordForegroundColor
+    },
+    ".cm-completionIcon-namespace": {
+      "&:after": { content: "'\\ea8b'" },
+      color: editorTheme.symbolIconNamespaceForegroundColor
+    },
+    ".cm-completionIcon-text": {
+      "&:after": { content: "'\\ea93'" },
+      color: editorTheme.symbolIconTextForegroundColor
+    },
+
 
     "& .cm-tooltip-autocomplete ul li[aria-selected] .cm-completionIcon": {
       color: editorTheme.suggestWidgetSelectedIconForegroundColor,
     },
   
-    ".cm-completionIcon-function, .cm-completionIcon-method": {
-      "&:after": { content: "'ƒ'" }
-    },
-    ".cm-completionIcon-class": {
-      "&:after": { content: "'○'" }
-    },
-    ".cm-completionIcon-interface": {
-      "&:after": { content: "'◌'" }
-    },
-    ".cm-completionIcon-variable": {
-      "&:after": { content: "'𝑥'" }
-    },
-    ".cm-completionIcon-constant": {
-      "&:after": { content: "'𝐶'" }
-    },
-    ".cm-completionIcon-type": {
-      "&:after": { content: "'𝑡'" }
-    },
-    ".cm-completionIcon-enum": {
-      "&:after": { content: "'∪'" }
-    },
-    ".cm-completionIcon-property": {
-      "&:after": { content: "'□'" }
-    },
-    ".cm-completionIcon-keyword": {
-      "&:after": { content: "'🔑\uFE0E'" } // Disable emoji rendering
-    },
-    ".cm-completionIcon-namespace": {
-      "&:after": { content: "'▢'" }
-    },
-    ".cm-completionIcon-text": {
-      "&:after": { content: "'abc'", fontSize: "50%", verticalAlign: "middle" }
-    }
   };
 
   if (options.firstLineMeta) {
@@ -413,6 +431,7 @@ const vscodeDarkHighlightColors: CodeMirrorHighlightColors = {
   controlKeyword: "#c586c0",
   variableName: "#4fc1ff"
 }
+
 
 
 

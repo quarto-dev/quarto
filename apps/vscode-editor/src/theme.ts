@@ -98,7 +98,17 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   theme.suggestWidgetSelectedBackgroundColor = colors["--vscode-editorSuggestWidget-selectedBackground"];
   theme.suggestWidgetHighlightForegroundColor = colors["--vscode-editorSuggestWidget-highlightForeground"];
   theme.suggestWidgetFocusHighlightForegroundColor = colors["--vscode-editorSuggestWidget-focusHighlightForeground"];
+  theme.symbolIconClassForegroundColor = colors["--vscode-symbolIcon-classForeground"];
+  theme.symbolIconConstantForegroundColor = colors["--vscode-symbolIcon-constantForeground)"];
+  theme.symbolIconEnumForegroundColor = colors["--vscode-symbolIcon-enumeratorForeground"];
+  theme.symbolIconFunctionForegroundColor = colors["--vscode-symbolIcon-functionForeground"];
+  theme.symbolIconInterfaceForegroundColor = colors["--vscode-symbolIcon-interfaceForeground"];
+  theme.symbolIconKeywordForegroundColor = colors["--vscode-symbolIcon-keywordForeground"];
+  theme.symbolIconMethodForegroundColor = colors["--vscode-symbolIcon-methodForeground"];
+  theme.symbolIconNamespaceForegroundColor = colors["--vscode-symbolIcon-namespaceForeground"];
+  theme.symbolIconPropertyForegroundColor = colors["--vscode-symbolIcon-propertyForeground"];
+  theme.symbolIconTextForegroundColor = colors["--vscode-symbolIcon-textForeground"];
+  theme.symbolIconTypeParameterForegroundColor = colors["--vscode-typeParameterForeground"];
+  theme.symbolIconVariableForegroundColor = colors["--vscode-symbolIcon-variableForeground"];
   return theme;
-
-
 }

@@ -79,7 +79,6 @@ export function registerCustomMethods(
 
 function lspCompletionServer() : CompletionServer {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     codeViewCompletions: async (context: CodeViewCompletionContext) : Promise<CompletionList> => {
       
       if (context.language == "yaml") {

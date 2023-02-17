@@ -56,6 +56,18 @@ export interface EditorTheme {
   suggestWidgetSelectedBackgroundColor: string;
   suggestWidgetSelectedForegroundColor: string;
   suggestWidgetSelectedIconForegroundColor: string; 
+  symbolIconClassForegroundColor: string;
+  symbolIconConstantForegroundColor: string;
+  symbolIconEnumForegroundColor: string;
+  symbolIconFunctionForegroundColor: string;
+  symbolIconInterfaceForegroundColor: string;
+  symbolIconKeywordForegroundColor: string;
+  symbolIconMethodForegroundColor: string;
+  symbolIconNamespaceForegroundColor: string;
+  symbolIconPropertyForegroundColor: string;
+  symbolIconTextForegroundColor: string;
+  symbolIconTypeParameterForegroundColor: string;
+  symbolIconVariableForegroundColor: string;
   code: CodeTheme;
 }
 
@@ -122,6 +134,18 @@ export function defaultTheme(): EditorTheme {
     suggestWidgetSelectedBackgroundColor: "#0060c0",
     suggestWidgetSelectedForegroundColor: "#ffffff",
     suggestWidgetSelectedIconForegroundColor: "#ffffff", 
+    symbolIconClassForegroundColor: '#D67E00',
+    symbolIconConstantForegroundColor: "#616161",
+    symbolIconEnumForegroundColor: '#D67E00',
+    symbolIconFunctionForegroundColor: "#652D90",
+    symbolIconInterfaceForegroundColor: "#007ACC",
+    symbolIconKeywordForegroundColor: "#616161",
+    symbolIconMethodForegroundColor: '#652D90',
+    symbolIconNamespaceForegroundColor: "#616161",
+    symbolIconPropertyForegroundColor: "#616161",
+    symbolIconTextForegroundColor: "#616161",
+    symbolIconTypeParameterForegroundColor: "#616161",
+    symbolIconVariableForegroundColor: "#007ACC",
     code: {
       keywordColor: 'rgb(0, 0, 255)',
       atomColor: 'rgb(88, 92, 246)',

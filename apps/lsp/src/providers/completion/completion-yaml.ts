@@ -14,13 +14,15 @@
  *
  */
 
-import { Range, TextEdit } from "vscode-languageserver-types";
+import { 
+  Range, 
+  TextEdit, 
+  Command, 
+  CompletionItem, 
+  CompletionItemKind, 
+  MarkupKind 
+} from "vscode-languageserver-types";
 
-import {
-  Command,
-  CompletionItem,
-  CompletionItemKind,
-} from "vscode-languageserver/node";
 
 import { EditorContext, quarto } from "../../quarto/quarto";
 
@@ -51,11 +53,14 @@ export async function yamlCompletions(context: EditorContext) {
       };
       // strip tags from description
       if (completion.description) {
-        item.documentation = decodeEntities(
-          completion.description
-            .replace(/(<([^>]+)>)/gi, "")
-            .replace(/\n/g, " ")
-        );
+        item.documentation = {
+          kind: MarkupKind.Markdown,
+          value: decodeEntities(
+            completion.description
+              .replace(/(<([^>]+)>)/gi, "")
+              .replace(/\n/g, " ")
+          )
+        }
       }
       if (result.token.length > 0 && completionWord.startsWith(result.token)) {
         const edit = TextEdit.replace(

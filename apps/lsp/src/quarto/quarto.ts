@@ -14,7 +14,9 @@
  */
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { Position, Range, CompletionItem } from "vscode-languageserver-types";
+import { Position, CompletionItem } from "vscode-languageserver-types";
+
+import { lines } from "core";
 
 import { QuartoContext } from "quarto-core";
 
@@ -46,28 +48,21 @@ export interface EditorContext {
   client: string;
 }
 
-export function editorContext(
-  doc: TextDocument,
+export function codeEditorContext(
+  path: string,
+  filetype: string,
+  code: string,
   pos: Position,
+  embedded: boolean,
   explicit: boolean,
   trigger?: string
 ) {
-  const path = filePathForDoc(doc);
-  const filetype = isQuartoDoc(doc)
-    ? "markdown"
-    : isQuartoYaml(doc)
-    ? "yaml"
-    : "markdown"; // should never get here
-  const embedded = false;
-  const code = doc.getText();
-  const line = doc
-    .getText(Range.create(pos.line, 0, pos.line, code.length))
-    .replace(/[\r\n]+$/, "");
+  const line = lines(code)[pos.line];
   const position = { row: pos.line, column: pos.character };
 
   // detect reveal document
   const formats: string[] = [];
-  if (isQuartoRevealDoc(doc)) {
+  if (isQuartoRevealDoc(code)) {
     formats.push("revealjs");
   }
 
@@ -85,6 +80,32 @@ export function editorContext(
     engine: "jupyter",
     client: "lsp",
   };
+}
+
+export function docEditorContext(
+  doc: TextDocument,
+  pos: Position,
+  explicit: boolean,
+  trigger?: string
+) {
+  const path = filePathForDoc(doc);
+  const filetype = isQuartoDoc(doc)
+    ? "markdown"
+    : isQuartoYaml(doc)
+    ? "yaml"
+    : "markdown"; // should never get here
+ 
+  const code = doc.getText();
+
+  return codeEditorContext(
+    path,
+    filetype,
+    code,
+    pos,
+    false,
+    explicit,
+    trigger
+  )
 }
 
 export const kStartRow = "start.row";

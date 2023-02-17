@@ -196,7 +196,7 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
-export function codeViewCompletionContext(state: EditorState) : CodeViewCompletionContext | undefined {
+export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean) : CodeViewCompletionContext | undefined {
 
   // function to examine a node and see if has executable code
   const schema = state.schema;
@@ -255,11 +255,13 @@ export function codeViewCompletionContext(state: EditorState) : CodeViewCompleti
     if (activeBlock.language === "yaml") {
       const codeLines = lines(activeBlock.code).map(line => !/^(---|...)\s*$/.test(line) ? line : "");
       return {
+        filepath,
         language: activeBlock.language,
         code: codeLines,
         cellBegin: 0,
         cellEnd: codeLines.length - 1,
-        cursorPos: { row, col }
+        cursorPos: { row, col },
+        explicit
       }
     } else {
       // collect all the blocks with this language
@@ -290,11 +292,13 @@ export function codeViewCompletionContext(state: EditorState) : CodeViewCompleti
         code.push(...blockLines);
       });
       return {
+        filepath,
         language: activeBlock.language,
         code,
         cellBegin,
         cellEnd,
-        cursorPos: { row: cellBegin + row, col }
+        cursorPos: { row: cellBegin + row, col },
+        explicit
       }
     }
 

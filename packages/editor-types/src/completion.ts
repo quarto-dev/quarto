@@ -18,11 +18,13 @@ import { CompletionList } from "vscode-languageserver-types";
 export const kCompletionGetCodeViewCompletions = 'completion_code_view_completions';
 
 export interface CodeViewCompletionContext {
+  filepath: string;
   language: string;
   code: string[];
   cellBegin: number;
   cellEnd: number;
-  cursorPos: { row: number; col: number }
+  cursorPos: { row: number; col: number };
+  explicit: boolean;
 }
 
 export interface CompletionServer {

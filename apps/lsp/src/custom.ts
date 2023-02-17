@@ -21,15 +21,20 @@ import {
   dictionaryServerMethods, 
   editorServerMethods, 
   mathServerMethods,
-  EditorServerOptions
+  EditorServerOptions,
+  sourceServerMethods,
+  completionServerMethods,
 } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
 import { QuartoContext, userDictionaryDir } from "quarto-core";
-import { TextDocuments } from "vscode-languageserver/node";
+import { CompletionList } from "vscode-languageserver-types";
+import { Position, TextDocuments } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { sourceServerMethods } from "editor-server/src/services/source";
+import { CodeViewCompletionContext, CompletionServer } from "editor-types";
+import { codeEditorContext } from "./quarto/quarto";
+import { yamlCompletions } from "./providers/completion/completion-yaml";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
@@ -67,7 +72,41 @@ export function registerCustomMethods(
     ...editorServerMethods(options),
     ...dictionaryServerMethods(dictionary),
     ...mathServerMethods(options.documents),
-    ...sourceServerMethods(options.pandoc)
+    ...sourceServerMethods(options.pandoc),
+    ...completionServerMethods(lspCompletionServer())
   });
+}
 
+function lspCompletionServer() : CompletionServer {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    codeViewCompletions: async (context: CodeViewCompletionContext) : Promise<CompletionList> => {
+      
+      if (context.language == "yaml") {
+        const edContext = codeEditorContext(
+          context.filepath,
+          "yaml",
+          context.code.join("\n"),
+          Position.create(context.cursorPos.row, context.cursorPos.col),
+          true,
+          context.explicit
+        );
+        const completions = await yamlCompletions(edContext);
+        if (completions) {
+          return {
+            isIncomplete: false,
+            items: completions
+          }
+        }
+      } 
+
+
+      // no completions for this language
+      return {
+        isIncomplete: false,
+        items: []
+      };
+    }
+   
+  };
 }

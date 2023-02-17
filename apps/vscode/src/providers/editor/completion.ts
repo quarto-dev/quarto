@@ -16,38 +16,44 @@
 import { CompletionItem as VCompletionItem, CompletionItemKind as VCompletionItemKind, MarkdownString, SnippetString, Range } from "vscode";
 import { CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionList, InsertTextFormat, MarkupContent, MarkupKind } from "vscode-languageserver-types";
 
-import { CodeViewCompletionContext, CompletionServer } from "editor-types";
+import { CodeViewCompletionContext, CompletionServer, kCompletionGetCodeViewCompletions } from "editor-types";
 import { Position, TextDocument } from "vscode";
 import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode } from "../../vdoc/vdoc";
 import { vdocCompletions } from "../../vdoc/vdoc-completion";
+import { JsonRpcRequestTransport } from "core";
 
 
-export function vscodeCompletionServer(document: TextDocument) : CompletionServer {
+export function vscodeCompletionServer(document: TextDocument, lspRequest: JsonRpcRequestTransport) : CompletionServer {
   return {
     async codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
 
-      // see if we have an embedded langaage
-      const language = embeddedLanguage(context.language);
-      if (language) {
-        const vdoc = virtualDocForCode(context.code, language);
-        const completions = await vdocCompletions(
-          vdoc,
-          new Position(context.cursorPos.row, context.cursorPos.col),
-          undefined,
-          language,
-          document.uri
-        );
-        return {
-          items: completions.map(vsCompletionItemToLsCompletionItem),
-          isIncomplete: false
-        };
+      // if this is yaml then call the lsp directly
+      if (context.language === "yaml") {
+        return lspRequest(kCompletionGetCodeViewCompletions, [context]);
       } else {
-        return {
-          items: [],
-          isIncomplete: false
-        };
-      }      
+        // see if we have an embedded langaage
+        const language = embeddedLanguage(context.language);
+        if (language) {
+          const vdoc = virtualDocForCode(context.code, language);
+          const completions = await vdocCompletions(
+            vdoc,
+            new Position(context.cursorPos.row, context.cursorPos.col),
+            undefined,
+            language,
+            document.uri
+          );
+          return {
+            items: completions.map(vsCompletionItemToLsCompletionItem),
+            isIncomplete: false
+          };
+        } else {
+          return {
+            items: [],
+            isIncomplete: false
+          };
+        }      
+      }
     },
   };
 }
@@ -68,7 +74,8 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : Comp
     insertText,
     insertTextFormat: item.insertText instanceof SnippetString 
       ? InsertTextFormat.Snippet 
-      : InsertTextFormat.PlainText
+      : InsertTextFormat.PlainText,
+    command: item.command
   };
   if (item.range) {
     const isRange = (x?: unknown) : x is Range => { return !!x && !!(x as Record<string,unknown>).start; };

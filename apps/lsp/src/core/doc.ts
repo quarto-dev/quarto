@@ -60,20 +60,23 @@ export function filePathForDoc(doc: TextDocument) {
 const kRegExYAML =
   /(^)(---[ \t]*[\r\n]+(?![ \t]*[\r\n]+)[\W\w]*?[\r\n]+(?:---|\.\.\.))([ \t]*)$/gm;
 
-export function isQuartoRevealDoc(doc: TextDocument) {
-  if (isQuartoDoc(doc)) {
-    const text = doc.getText();
-    if (text) {
-      const match = doc.getText().match(kRegExYAML);
-      if (match) {
-        const yaml = match[0];
-        return (
-          !!yaml.match(/^format:\s+revealjs\s*$/gm) ||
-          !!yaml.match(/^[ \t]*revealjs:\s*(default)?\s*$/gm)
-        );
-      }
+export function isQuartoRevealDoc(doc: TextDocument | string) {
+  if (typeof(doc) !== "string") {
+    if (isQuartoDoc(doc)) {
+      doc = doc.getText();
+    } else {
+      return false;
     }
-  } else {
-    return false;
+  }
+  if (doc) {
+    const match = doc.match(kRegExYAML);
+    if (match) {
+      const yaml = match[0];
+      return (
+        !!yaml.match(/^format:\s+revealjs\s*$/gm) ||
+        !!yaml.match(/^[ \t]*revealjs:\s*(default)?\s*$/gm)
+      );
+    }
   }
 }
+

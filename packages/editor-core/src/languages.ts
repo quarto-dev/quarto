@@ -92,6 +92,10 @@ const kEditorLanguages = [
   {
     ids: ["jsx"],
     trigger: ["."]
+  },
+  {
+    ids: ["yaml"],
+    ext: "yml"
   }
 ];
 

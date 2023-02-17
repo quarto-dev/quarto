@@ -33,7 +33,9 @@ export {
   prefsServer,
   prefsServerMethods,
   completionServer,
-  completionServerMethods
+  completionServerMethods,
+  sourceServer,
+  sourceServerMethods
 };
 export type { DictionaryServerOptions };
 

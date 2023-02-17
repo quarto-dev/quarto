@@ -22,7 +22,7 @@ import {
   CompletionTriggerKind,
   ServerCapabilities,
 } from "vscode-languageserver/node";
-import { editorContext } from "../../quarto/quarto";
+import { docEditorContext } from "../../quarto/quarto";
 import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";
@@ -45,7 +45,7 @@ export async function onCompletion(
   const explicit =
     completionContext?.triggerKind === CompletionTriggerKind.TriggerCharacter;
   const trigger = completionContext?.triggerCharacter;
-  const context = editorContext(doc, pos, explicit, trigger);
+  const context = docEditorContext(doc, pos, explicit, trigger);
   return (
     (await refsCompletions(doc, pos, context)) ||
     (await attrCompletions(context)) ||

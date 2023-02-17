@@ -22,7 +22,7 @@ import {
   Range,
 } from "vscode-languageserver/node";
 import {
-  editorContext,
+  docEditorContext,
   kEndColumn,
   kEndRow,
   kStartColumn,
@@ -40,7 +40,7 @@ export async function provideDiagnostics(
   }
 
   if (quarto) {
-    const context = editorContext(doc, Position.create(0, 0), true);
+    const context = docEditorContext(doc, Position.create(0, 0), true);
     const diagnostics = await quarto.getYamlDiagnostics(context);
     return diagnostics.map((item) => {
       return {

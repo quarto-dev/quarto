@@ -24,7 +24,8 @@ import {
   CompletionResult, 
   insertCompletionText, 
   pickedCompletion, 
-  snippet 
+  snippet, 
+  startCompletion
 } from "@codemirror/autocomplete"
 
 import { 
@@ -46,7 +47,6 @@ import { CodeViewCompletionContext, codeViewCompletionContext } from "editor";
 import { Behavior, BehaviorContext } from ".";
 
 // TODO: types/icons
-// TODO: YAML and TeX completions
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
@@ -63,8 +63,14 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
         override: [
           async (context: CompletionContext) : Promise<CompletionResult | null> => {
 
+            // no completions if there is no path
+            const filepath = behaviorContext.pmContext.ui.context.getDocumentPath();
+            if (!filepath) {
+              return null;
+            }
+
             // see if there is a completion context
-            const cvContext = codeViewCompletionContext(behaviorContext.view.state);
+            const cvContext = codeViewCompletionContext(filepath, behaviorContext.view.state, context.explicit);
             if (!cvContext) {
               return null;
             }
@@ -102,6 +108,7 @@ async function getCompletions(
   behaviorContext: BehaviorContext
 ) : Promise<CompletionResult | null> {
 
+  // get completions
   const completions = await behaviorContext.pmContext.ui.completion?.codeViewCompletions(cvContext);
   if (context.aborted || !completions || completions.items.length == 0) {
     return null;
@@ -118,8 +125,9 @@ async function getCompletions(
       }
     });  
   }
-    
 
+  // compute token
+  const token = context.matchBefore(/\S+/)?.text;
 
   // compute from
   const itemFrom = (item: CompletionItem) => {
@@ -136,20 +144,22 @@ async function getCompletions(
   // use order to create boost
   const total = completions.items.length;
   const boostScore = (index: number) => {
-    
-    if (haveOrder) {
-       // compute replaceText
-      const item = completions.items[index];
-      const replaceText = context.state.sliceDoc(itemFrom(item), context.pos).toLowerCase();
 
-      // if the replaceText doesn't start with "." then bury items thatdo
+    // compute replaceText
+    const item = completions.items[index];
+    const replaceText = context.state.sliceDoc(itemFrom(item), context.pos).toLowerCase();
+
+    if (haveOrder) {
+      
+      // if the replaceText doesn't start with "." then bury items that do
       if (!replaceText.startsWith(".") && item.label.startsWith(".")) {
         return -99;
       }
 
       // only boost things that have a prefix match
       if (item.label.toLowerCase().startsWith(replaceText) ||
-          (item.insertText && item.insertText.toLowerCase().startsWith(replaceText))) {
+         (item.textEdit && item.textEdit.newText.toLowerCase().startsWith(replaceText)) ||
+         (item.insertText && item.insertText.toLowerCase().startsWith(replaceText))) {
         return -99 + Math.round(((total-index)/total) * 198);;
       } else {
         return -99;
@@ -173,8 +183,15 @@ async function getCompletions(
           return false;
         }
           
-        // only return label prefix matches
+        // compute text to replace
         const replaceText = context.state.sliceDoc(itemFrom(item), context.pos).toLowerCase();
+
+        // only allow non-text edits if we have no token
+        if (!item.textEdit && token) {
+          return false;
+        }
+       
+        // require at least inclusion
         return item.label.toLowerCase().includes(replaceText) ||
                 (item.insertText && item.insertText.toLowerCase().includes(replaceText));
       })
@@ -194,7 +211,7 @@ async function getCompletions(
             from = itemFrom(item);
 
             // handle snippets
-            const insertText = item.insertText || item.label;
+            const insertText = item.textEdit?.newText ?? (item.insertText || item.label);
             if (item.insertTextFormat === InsertTextFormat.Snippet) {
               const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
               insertSnippet(view, completion, from, context.pos);
@@ -204,6 +221,9 @@ async function getCompletions(
                 ...insertCompletionText(view.state, insertText, from, context.pos),
                 annotations: pickedCompletion.of(completion)
               })
+              if (item.command?.command === "editor.action.triggerSuggest") {
+                startCompletion(view);
+              }
             }
           },
           boost: boostScore(index)

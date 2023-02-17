@@ -424,7 +424,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       this.lspRequest, 
       host, 
       prefsServer,
-      vscodeCompletionServer(document)
+      vscodeCompletionServer(document, this.lspRequest)
     ));
 
     // doc dir

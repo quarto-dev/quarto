@@ -46,8 +46,10 @@ import { Behavior, BehaviorContext } from ".";
 
 // TODO: types/icons
 // TODO: YAML and TeX completions
+// TODO: explore throttling
+// TODO: links
+// TODO: respect prefs / num chars
 // TODO: html with < is messed up
-// TODO: why doesn't R trigger on ::?
 // TODO: whitelist completions?
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
@@ -64,7 +66,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
       autocompletion({
         override: [
           async (context: CompletionContext) : Promise<CompletionResult | null> => {
-            
+
             // see if there is a completion context
             const cvContext = codeViewCompletionContext(behaviorContext.view.state);
             if (!cvContext) {
@@ -90,60 +92,82 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
             }
 
             // order completions
-            completions.items = completions.items.sort((a, b) => {
-              if (a.sortText && b.sortText) {
-                return a.sortText.localeCompare(b.sortText);
-              } else {
-                return a.label.localeCompare(b.label);
-              }
-            });    
+            const haveOrder = !!completions.items?.[0].sortText;
+            if (haveOrder) {
+              completions.items = completions.items.sort((a, b) => {
+                if (a.sortText && b.sortText) {
+                  return a.sortText.localeCompare(b.sortText);
+                } else {
+                  return 0;
+                }
+              });  
+            }
+              
           
             // use order to create boost
             const total = completions.items.length;
             const boostScore = (index: number) => {
-              return -99 + Math.round(((total-index)/total) * 198);
+              if (haveOrder) {
+                return -99 + Math.round(((total-index)/total) * 198);
+              } else {
+                return undefined;
+              }
             }
+
+            // compute from
+            const itemFrom = (item: CompletionItem) => {
+               // compute from
+               return item.textEdit 
+                ? InsertReplaceEdit.is(item.textEdit) 
+                    ? context.pos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
+                    : TextEdit.is(item.textEdit)
+                        ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
+                        : context.pos
+                : context.pos;
+            }
+
             // return completions
             return {
               from: context.pos,
-              options: completions.items.map((item,index) : Completion => {
-                return {
-                  label: item.label,
-                  detail: item.detail && !item.documentation ? item.detail : undefined,
-                  info: () : Node | null => {
-                    if (item.documentation) {
-                      return infoNodeForItem(item);   
-                    } else {
-                      return null;
-                    }
-                  },
-                  apply: (view: EditorView, completion: Completion, from: number) => {
-                    // compute from
-                    from = item.textEdit 
-                      ? InsertReplaceEdit.is(item.textEdit) 
-                          ? context.pos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
-                          : TextEdit.is(item.textEdit)
-                              ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
-                              : context.pos
-                      : context.pos;
-  
-                    // handle snippets
-                    const insertText = item.insertText || item.label;
-                    if (item.insertTextFormat === InsertTextFormat.Snippet) {
-                      const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
-                      insertSnippet(view, completion, from, context.pos);
-                    // normal completions
-                    } else {
-                      view.dispatch({
-                        ...insertCompletionText(view.state, insertText, from, context.pos),
-                        annotations: pickedCompletion.of(completion)
-                      })
-                    }
-                  },
-                  boost: boostScore(index)
-                }
-              })
-            };
+              
+              options: completions.items
+                .filter(item => {
+                  const replaceText = context.state.sliceDoc(itemFrom(item), context.pos);
+                  const insertText = item.insertText || item.label;
+                  return insertText.toLowerCase().startsWith(replaceText.toLowerCase());
+                })
+                .map((item,index) : Completion => {
+                  return {
+                    label: item.label,
+                    detail: item.detail && !item.documentation ? item.detail : undefined,
+                    info: () : Node | null => {
+                      if (item.documentation) {
+                        return infoNodeForItem(item);   
+                      } else {
+                        return null;
+                      }
+                    },
+                    apply: (view: EditorView, completion: Completion, from: number) => {
+                      // compute from
+                      from = itemFrom(item);
+    
+                      // handle snippets
+                      const insertText = item.insertText || item.label;
+                      if (item.insertTextFormat === InsertTextFormat.Snippet) {
+                        const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
+                        insertSnippet(view, completion, from, context.pos);
+                      // normal completions
+                      } else {
+                        view.dispatch({
+                          ...insertCompletionText(view.state, insertText, from, context.pos),
+                          annotations: pickedCompletion.of(completion)
+                        })
+                      }
+                    },
+                    boost: boostScore(index)
+                  }
+                })
+              };
           }
         ]
       })

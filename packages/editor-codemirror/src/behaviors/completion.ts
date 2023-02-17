@@ -202,6 +202,13 @@ function infoNodeForItem(item: CompletionItem) {
         const html = commonmark.render(item.documentation.value);
         const mdDiv = document.createElement("div");
         mdDiv.innerHTML = html;
+        // remove mdn links
+        for (const paraEl of mdDiv.querySelectorAll("p")) {
+          if (paraEl.childElementCount === 1 && 
+              paraEl.firstElementChild?.tagName === "A") {
+            paraEl.parentElement?.removeChild(paraEl);
+          }
+        }
         infoDiv.appendChild(mdDiv);
       } else {
         infoDiv.appendChild(textDiv(item.documentation.value));

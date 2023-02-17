@@ -194,9 +194,17 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
     ".cm-tooltip.cm-completionInfo .cm-completionInfoHeader": {
       fontFamily: editorTheme.fixedWidthFont
     },
+    // links don't work so change hteir appearance
     ".cm-tooltip.cm-completionInfo a": {
-      display: "none"
-   },
+      color: editorTheme.suggestWidgetForegroundColor,
+    },
+    ".cm-tooltip.cm-completionInfo a:hover": {
+      textDecoration: "none",
+    },
+    ".cm-tooltip.cm-completionInfo p": {
+      margin: 0,
+      padding: 0
+    },
   
     ".cm-completionInfo.cm-completionInfo-left": { right: "100%" },
     ".cm-completionInfo.cm-completionInfo-right": { left: "100%" },

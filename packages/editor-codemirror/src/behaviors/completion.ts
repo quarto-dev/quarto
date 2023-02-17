@@ -45,13 +45,12 @@ import { codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
 
-// <strong class=""> produces text completions
 // TODO: types/icons
 // TODO: YAML and TeX completions
 // TODO: explore throttling
+// TODO: play w/ fuzzy matching
 // TODO: respect prefs / num chars
-// TODO: html with < is messed up
-// TODO: whitelist completions?
+
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
@@ -80,9 +79,15 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
               return null;
             }
 
+            // if we don't have quick suggestions enabled and this isn't explicit then bail
+            if (!behaviorContext.pmContext.ui.prefs.quickSuggestions() && !context.explicit) {
+              return null;
+            }
+
             // we need to be preceded by a non space character or be explicit
-            const match = context.matchBefore(/\S/);
-            if (!match && !context.explicit) {
+            // (also don't show matches if query < 3 chracters)
+            const match = context.matchBefore(/\S+/);
+            if ((!match && !context.explicit) || (match && match.text.length < 3)) {
               return null;
             }
 
@@ -141,8 +146,9 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
                   }
                    
                   // only return label prefix matches
-                  const replaceText = context.state.sliceDoc(itemFrom(item), context.pos);
-                  return item.label.toLowerCase().startsWith(replaceText.toLowerCase());
+                  const replaceText = context.state.sliceDoc(itemFrom(item), context.pos).toLowerCase();
+                  return item.label.toLowerCase().includes(replaceText) ||
+                         (item.insertText && item.insertText.toLowerCase().includes(replaceText));
                 })
                 .map((item,index) : Completion => {
                   return {

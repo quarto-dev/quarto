@@ -61,6 +61,7 @@ export interface Prefs extends MarkdownPrefs {
   readonly highlightSelectedWord: boolean;
   readonly showWhitespace: boolean;
   readonly blinkingCursor: boolean;
+  readonly quickSuggestions: boolean;
 
   // code editing (native settings)
   readonly lineNumbers: boolean;
@@ -113,7 +114,8 @@ export function defaultPrefs() : Prefs {
     highlightSelectedWord: true,
     lineNumbers: true,
     showWhitespace: false,
-    blinkingCursor: true
+    blinkingCursor: true,
+    quickSuggestions: true
   }
 }
 

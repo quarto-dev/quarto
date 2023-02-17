@@ -145,7 +145,8 @@ export interface EditorUIPrefs {
   highlightSelectedWord: () => boolean,
   lineNumbers: () => boolean,
   showWhitespace: () => boolean,
-  blinkingCursor: () => boolean
+  blinkingCursor: () => boolean,
+  quickSuggestions: () => boolean
 }
 
 

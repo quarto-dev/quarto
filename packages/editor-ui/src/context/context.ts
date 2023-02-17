@@ -186,6 +186,9 @@ function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
     },
     blinkingCursor: () => {
       return provider().prefs().blinkingCursor;
+    },
+    quickSuggestions: () => {
+      return provider().prefs().quickSuggestions;
     }
   };
 }

@@ -146,7 +146,7 @@ function codemirrorTheme(editorTheme: EditorTheme, options: CodeViewOptions) {
         maxWidth_fallback: "700px",
         maxWidth: "min(700px, 95vw)",
         minWidth: "250px",
-        maxHeight: "10em",
+        maxHeight: "220px",
         height: "100%",
         listStyle: "none",
         margin: 0,

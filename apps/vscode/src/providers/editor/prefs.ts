@@ -37,6 +37,7 @@ const kEditorTabSize = "editor.tabSize";
 const kEditorFontSize = "editor.fontSize";
 const kEditorSelectionHighlight = "editor.selectionHighlight";
 const kEditorCursorBlinking = "editor.cursorBlinking";
+const kEditorQuickSuggestions = "editor.quickSuggestions";
 
 const kQuartoEditorFontSize = "quarto.visualEditor.fontSize";
 const kQuartoEditorMaxContentWidth = "quarto.visualEditor.maxContentWidth";
@@ -66,7 +67,8 @@ const kMonitoredConfigurations = [
   kQuartoEditorMarkdownWrap,
   kQuartoEditorMarkdownWrapColumn,
   kQuartoEditorMarkdownReferences,
-  kQuartoEditorMarkdownReferenceLinks
+  kQuartoEditorMarkdownReferenceLinks,
+  kEditorQuickSuggestions
 ];
 
 export function vscodePrefsServer(
@@ -79,10 +81,10 @@ export function vscodePrefsServer(
   const server = prefsServer();
   const defaults = defaultPrefs();
 
-  const getPrefs = async () : Promise<Prefs> => {
+  const getPrefs = async () : Promise<Prefs> => {  
     
     const configuration = workspace.getConfiguration(undefined, document.uri);
-     
+    
     const globalPrefs = await server.getPrefs();
     const prefs = { 
       
@@ -113,6 +115,7 @@ export function vscodePrefsServer(
       highlightSelectedWord: configuration.get<boolean>(kEditorSelectionHighlight, true),
       showWhitespace: configuration.get(kEditorRenderWhitespace) === "all",
       blinkingCursor: configuration.get(kEditorCursorBlinking, "solid") !== "solid",
+      quickSuggestions: configuration.get(kEditorQuickSuggestions + ".other", "on") === "on",
 
       // quarto code editor settings
       lineNumbers: configuration.get<boolean>(kQuartoEditorLineNumbers, defaults.lineNumbers),

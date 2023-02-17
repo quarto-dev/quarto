@@ -3,6 +3,7 @@
 ## 1.67.0 (Unreleased)
 
 - Code completion for cells and YAML metadata within visual editor
+- Support for editing Pandoc v3.0 Figure AST nodes.
 - Change location of edit in visual/source context menu item
 - Use resource scoping for visual editor preferences
 - Resolve full path when setting QUARTO_PYTHON from Python extension config

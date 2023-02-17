@@ -18,6 +18,8 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
 
+import { lines } from 'core';
+
 import zenscroll from 'zenscroll';
 
 import { CommandFn } from "./command";
@@ -27,7 +29,6 @@ import { editorScrollContainer } from './scroll';
 
 import { EditorState } from 'prosemirror-state';
 import { rmdChunk } from './rmd';
-import { lines } from 'core';
 import { CodeViewCompletionContext } from 'editor-types';
 
 export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
@@ -250,40 +251,54 @@ export function codeViewCompletionContext(state: EditorState) : CodeViewCompleti
       }
     }
 
-    // collect all the blocks with this language
-    const blocks: Array<{ language: string, code: string; active: boolean }> = [];
-    state.doc.descendants((node, pos) => {
-      const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
-      if (languageBlock?.language === activeBlock.language) {
-        blocks.push({
-          ...languageBlock,
-          active: languageBlock.pos === activeBlock.pos
-        });
+    // if this is yaml we strip the delimiters and use only the active block
+    if (activeBlock.language === "yaml") {
+      const codeLines = lines(activeBlock.code).map(line => !/^(---|...)\s*$/.test(line) ? line : "");
+      return {
+        language: activeBlock.language,
+        code: codeLines,
+        cellBegin: 0,
+        cellEnd: codeLines.length - 1,
+        cursorPos: { row, col }
       }
-    });
+    } else {
+      // collect all the blocks with this language
+      const blocks: Array<{ language: string, code: string; active: boolean }> = [];
+      state.doc.descendants((node, pos) => {
+        const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
+        if (languageBlock?.language === activeBlock.language) {
+          blocks.push({
+            ...languageBlock,
+            active: languageBlock.pos === activeBlock.pos
+          });
+        }
+      });
 
-    // concatenate together all of the code, and indicate the start and end lines 
-    // of the active block
-    const code: string[] = [];
-    let cellBegin = -1, cellEnd = -1;
-    blocks.forEach(block => {
-      const blockLines = lines(block.code);
-      if (block.active) {
-        cellBegin = code.length;
-        cellEnd = code.length + blockLines.length - 1;
+      // concatenate together all of the code, and indicate the start and end lines 
+      // of the active block
+      const code: string[] = [];
+      let cellBegin = -1, cellEnd = -1;
+      blocks.forEach(block => {
+        const blockLines = lines(block.code);
+        if (block.active) {
+          cellBegin = code.length;
+          cellEnd = code.length + blockLines.length - 1;
+        }
+        if (blockLines[blockLines.length-1].trim().length !== 0) {
+          blockLines.push("");
+        }
+        code.push(...blockLines);
+      });
+      return {
+        language: activeBlock.language,
+        code,
+        cellBegin,
+        cellEnd,
+        cursorPos: { row: cellBegin + row, col }
       }
-      if (blockLines[blockLines.length-1].trim().length !== 0) {
-        blockLines.push("");
-      }
-      code.push(...blockLines);
-    });
-    return {
-      language: activeBlock.language,
-      code,
-      cellBegin,
-      cellEnd,
-      cursorPos: { row: cellBegin + row, col }
     }
+
+ 
   } else {
     return undefined;
   }

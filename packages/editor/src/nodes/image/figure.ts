@@ -87,6 +87,24 @@ const extension = (context: ExtensionContext): Extension => {
         pandoc: {
           writer: imagePandocOutputWriter(true),
 
+          readers: [
+            {
+              token: PandocTokenType.Figure,
+              handler: (schema: Schema) => {
+                const imageHandler = pandocImageHandler(true, true)(schema);
+                return (writer: ProsemirrorWriter, tok: PandocToken) => {
+                  const kFigureAttributes = 0;
+                  const kFigureContents = 2;
+                  const tokImage: PandocToken | undefined = tok.c[kFigureContents]?.[0]?.c[0];
+                  if (tokImage?.t === PandocTokenType.Image) {
+                    tokImage.c[0][0] = tok.c[kFigureAttributes][0];
+                    imageHandler(writer, tokImage);
+                  }
+                }
+              },
+            },
+          ],
+
           // intercept  paragraphs with a single image and process them as figures
           blockReader: (schema: Schema, tok: PandocToken, writer: ProsemirrorWriter) => {
             // helper to process html image
@@ -99,7 +117,7 @@ const extension = (context: ExtensionContext): Extension => {
                 return false;
               }
             };
-
+           
             // unroll figure from paragraph with single image
             if (isParaWrappingFigure(tok) && !writerHasProhibitedFigureParent(schema, writer)) {
               const handler = pandocImageHandler(true, imageAttr)(schema);

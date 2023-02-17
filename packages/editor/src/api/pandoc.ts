@@ -61,6 +61,7 @@ export enum PandocTokenType {
   OrderedList = 'OrderedList',
   DefinitionList = 'DefinitionList',
   Image = 'Image',
+  Figure = 'Figure',
   Link = 'Link',
   Note = 'Note',
   Cite = 'Cite',

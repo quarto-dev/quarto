@@ -112,7 +112,7 @@ class ImageNodeView implements NodeView {
     // set node selection on click
     const selectOnClick = () => {
       const tr = view.state.tr;
-      tr.setSelection(NodeSelection.create(view.state.doc, getPos()));
+      tr.setSelection(NodeSelection.create(tr.doc, getPos()));
       view.dispatch(tr);
     };
 

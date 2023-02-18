@@ -172,7 +172,12 @@ function gapClickHandler(view: EditorView, event: Event): boolean {
                node.type === schema.nodes.figure ||
                node.type === schema.nodes.table ||
                node.type === schema.nodes.horizontal_rule ||
-               node.type === schema.nodes.code_block;
+               node.type === schema.nodes.code_block ||
+               node.type === schema.nodes.raw_block ||
+               node.type === schema.nodes.rmd_chunk ||
+               node.type === schema.nodes.html_preserve ||
+               node.type === schema.nodes.shortcode_block ||
+               node.type === schema.nodes.yaml_metadata;
       } else {
         return false;
       }

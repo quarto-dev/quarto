@@ -35,7 +35,7 @@ import { ChunkEditor, EditorUIChunks } from '../../api/ui-types';
 import { EditorEvents } from '../../api/event-types';
 import { ExtensionContext, ExtensionFn } from '../../api/extension';
 import { DispatchEvent, ResizeEvent, ScrollEvent } from '../../api/event-types';
-import { arrowHandler, handleArrowToAdjacentNode } from '../../api/cursor';
+import { codeViewArrowHandler, handleArrowToAdjacentNode } from '../../api/cursor';
 
 import { selectAll } from '../../behaviors/select_all';
 
@@ -109,10 +109,10 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
         }),
         // arrow in and out of editor
         keymap({
-          ArrowLeft: arrowHandler('left', nodeTypes),
-          ArrowRight: arrowHandler('right', nodeTypes),
-          ArrowUp: arrowHandler('up', nodeTypes),
-          ArrowDown: arrowHandler('down', nodeTypes),
+          ArrowLeft: codeViewArrowHandler('left', nodeTypes),
+          ArrowRight: codeViewArrowHandler('right', nodeTypes),
+          ArrowUp: codeViewArrowHandler('up', nodeTypes),
+          ArrowDown: codeViewArrowHandler('down', nodeTypes),
         }),
       ],
       commands: () => [

@@ -20,7 +20,7 @@ import { Plugin, PluginKey } from "prosemirror-state";
 import { Node as ProsemirrorNode } from "prosemirror-model";
 import { EditorView, NodeView } from "prosemirror-view";
 
-import { ExtensionFn, CodeViewOptions, BaseKey, arrowHandler, CodeEditorNodeViews } from "editor";
+import { ExtensionFn, CodeViewOptions, BaseKey, codeViewArrowHandler, CodeEditorNodeViews } from "editor";
 
 import { codeMirrorNodeView } from "./nodeview";
 
@@ -62,10 +62,10 @@ export function codeMirrorExtension(
       ],
       baseKeys: () => {
         return [
-          { key: BaseKey.ArrowLeft, command: arrowHandler('left', nodeTypes) },
-          { key: BaseKey.ArrowRight, command: arrowHandler('right', nodeTypes) },
-          { key: BaseKey.ArrowUp, command: arrowHandler('up', nodeTypes) },
-          { key: BaseKey.ArrowDown, command: arrowHandler('down', nodeTypes) }
+          { key: BaseKey.ArrowLeft, command: codeViewArrowHandler('left', nodeTypes) },
+          { key: BaseKey.ArrowRight, command: codeViewArrowHandler('right', nodeTypes) },
+          { key: BaseKey.ArrowUp, command: codeViewArrowHandler('up', nodeTypes) },
+          { key: BaseKey.ArrowDown, command: codeViewArrowHandler('down', nodeTypes) }
         
         ];
       },

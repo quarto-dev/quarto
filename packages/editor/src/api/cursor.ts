@@ -17,13 +17,13 @@ import { EditorState, Transaction, NodeSelection, Selection } from 'prosemirror-
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
 
-export function arrowHandler(dir: 'up' | 'down' | 'left' | 'right', nodeTypes: string[]) {
+export function codeViewArrowHandler(dir: 'up' | 'down' | 'left' | 'right', codeViewNodeTypes: string[]) {
   return (state: EditorState, dispatch?: (tr: Transaction) => void, view?: EditorView) => {
     if (state.selection.empty && !(state.selection instanceof GapCursor) && view && view.endOfTextblock(dir)) {
       const side = dir === 'left' || dir === 'up' ? -1 : 1;
       const $head = state.selection.$head;
       const nextPos = Selection.near(state.doc.resolve(side > 0 ? $head.after() : $head.before()), side);
-      if (nextPos.$head && nodeTypes.includes(nextPos.$head.parent.type.name)) {
+      if (nextPos.$head && codeViewNodeTypes.includes(nextPos.$head.parent.type.name)) {
         // check for e.g. math where you can advance across embedded newlines
         if ((dir === 'up' || dir === 'down') && verticalArrowCanAdvanceWithinTextBlock(state.selection, dir)) {
           return false;

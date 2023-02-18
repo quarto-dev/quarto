@@ -113,6 +113,9 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
                 { command: EditorCommandId.SQLCodeChunk },
                 { command: EditorCommandId.D3CodeChunk },
                 { command: EditorCommandId.StanCodeChunk },
+                { separator: true },
+                { command: EditorCommandId.MermaidCodeChunk },
+                { command: EditorCommandId.GraphVizCodeChunk }
               ],
             },
           },

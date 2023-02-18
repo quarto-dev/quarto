@@ -22,7 +22,7 @@ import { codeNodeSpec } from '../../api/code';
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 
 import { EditorUI, EditorUIChunks } from '../../api/ui-types';
-import { kBookdownDocType } from '../../api/format';
+import { kBookdownDocType, kQuartoDocType } from '../../api/format';
 import { rmdChunk, insertRmdChunk } from '../../api/rmd';
 import { OmniInsertGroup } from '../../api/omni_insert';
 
@@ -102,13 +102,23 @@ const extension = (context: ExtensionContext): Extension | null => {
     commands: () => {
       const commands = [
         new RChunkCommand(ui, options),
-        new PythonChunkCommand(ui, options),
-        new BashChunkCommand(ui, options),
-        new RcppChunkCommand(ui, options),
-        new SQLChunkCommand(ui, options),
-        new D3ChunkCommand(ui, options),
-        new StanChunkCommand(ui, options),
+        new PythonChunkCommand(ui, options)
       ];
+      if (!options.defaultCellTypePython) {
+        commands.push(
+          new BashChunkCommand(ui, options),
+          new RcppChunkCommand(ui, options),
+          new SQLChunkCommand(ui, options),
+          new D3ChunkCommand(ui, options),
+          new StanChunkCommand(ui, options),
+        )
+      }
+      if (format.docTypes.includes(kQuartoDocType)) {
+        commands.push(
+          new MermaidChunkCommand(ui, options),
+          new GraphVizChunkCommand(ui, options)
+        )
+      }
       if (ui.chunks) {
         commands.push(
           new ExpandAllChunksCommand(ui.chunks),
@@ -138,7 +148,8 @@ class RmdChunkCommand extends ProsemirrorCommand {
     lang: string,
     placeholder: string,
     image: () => string,
-    group = OmniInsertGroup.Chunks
+    group = OmniInsertGroup.Chunks,
+    keywords?: string[]
   ) {
     super(id, keymap, insertRmdChunk(placeholder), {
       name: `${lang} ${ui.context.translateText('Code ')} ${cellName(ui, options)}`,
@@ -146,7 +157,7 @@ class RmdChunkCommand extends ProsemirrorCommand {
       group,
       priority,
       image,
-      keywords: ["cell", "chunk"]
+      keywords: ["cell", "chunk", ...(keywords ? keywords : [])]
     });
   }
 }
@@ -228,6 +239,40 @@ class SQLChunkCommand extends RmdChunkCommand {
 class D3ChunkCommand extends RmdChunkCommand {
   constructor(ui: EditorUI, options: EditorOptions) {
     super(ui, options, EditorCommandId.D3CodeChunk, [], 4, 'D3', '{d3 data=}\n', () => ui.images.omni_insert!.d3_chunk!, OmniInsertGroup.Chunks);
+  }
+}
+
+class MermaidChunkCommand extends RmdChunkCommand {
+  constructor(ui: EditorUI, options: EditorOptions) {
+    super(
+      ui,
+      options,
+      EditorCommandId.MermaidCodeChunk,
+      [],
+      7,
+      'Mermaid',
+      '{mermaid}\n',
+      () => ui.prefs.darkMode() ? ui.images.omni_insert!.code_block_dark : ui.images.omni_insert!.code_block!,
+      OmniInsertGroup.Chunks,
+      ["diagram"]
+    );
+  }
+}
+
+class GraphVizChunkCommand extends RmdChunkCommand {
+  constructor(ui: EditorUI, options: EditorOptions) {
+    super(
+      ui,
+      options,
+      EditorCommandId.GraphVizCodeChunk,
+      [],
+      7,
+      'GraphViz',
+      '{dot}\n',
+      () => ui.prefs.darkMode() ? ui.images.omni_insert!.code_block_dark : ui.images.omni_insert!.code_block!,
+      OmniInsertGroup.Chunks,
+      ["diagram", "dot"]
+    );
   }
 }
 

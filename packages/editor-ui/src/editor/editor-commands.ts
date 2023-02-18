@@ -404,6 +404,12 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.StanCodeChunk]: {
         menuText: 'Stan',
+      },
+      [EditorCommandId.MermaidCodeChunk]: {
+        menuText: 'Mermaid',
+      },
+      [EditorCommandId.GraphVizCodeChunk]: {
+        menuText: "GraphViz"
       }
     },
     [t('commands:group_slides')]: {

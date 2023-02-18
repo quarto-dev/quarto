@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.67.0 (Unreleased)
+## 1.67.0 (Release on 18 February 2023)
 
 - Code completion for cells and YAML metadata within visual editor
 - Support for editing Pandoc v3.0 Figure AST nodes.

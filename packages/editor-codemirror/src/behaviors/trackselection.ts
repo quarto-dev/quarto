@@ -14,8 +14,7 @@
  */
 
 import { EditorView as PMEditorView } from "prosemirror-view";
-import { GapCursor } from "prosemirror-gapcursor";
-import { Transaction } from "prosemirror-state";
+import { TextSelection, Transaction } from "prosemirror-state";
 
 import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
@@ -37,7 +36,7 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
       unsubscibe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
         if (tr) {
           // track selection changes that occur when we don't have focus
-          if (!cmView.hasFocus && tr.selectionSet && !tr.docChanged && !(tr.selection instanceof GapCursor)) {
+          if (!cmView.hasFocus && tr.selectionSet && !tr.docChanged && (tr.selection instanceof TextSelection)) {
             const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
             context.withState(State.Updating, () => {
               if (cmSelection) {

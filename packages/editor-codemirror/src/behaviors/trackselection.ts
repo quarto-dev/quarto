@@ -15,7 +15,7 @@
 
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { GapCursor } from "prosemirror-gapcursor";
-import { NodeSelection, Transaction } from "prosemirror-state";
+import { Transaction } from "prosemirror-state";
 
 import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
@@ -69,15 +69,14 @@ const asCodeMirrorSelection = (
     if (node) {
       const nodeSize = node.nodeSize;
       const selection = pmView.state.selection;
-      if (!(selection instanceof NodeSelection)) {
-        const cmRange = { from: offset, to: offset + nodeSize };
-        const isWithinCm = (pos: number) => pos >= cmRange.from && pos < cmRange.to;
-        if (isWithinCm(selection.from) || isWithinCm(selection.to)) {
-          return EditorSelection.single(selection.from - offset, selection.to - offset);
-        } else if (selection.from <= cmRange.from && selection.to >= cmRange.to) {
-          return EditorSelection.single(0, cmView.state.doc.length);
-        }
+      const cmRange = { from: offset, to: offset + nodeSize - 1 };
+      const isWithinCm = (pos: number) => pos >= cmRange.from && pos < cmRange.to;
+      if (isWithinCm(selection.from) || isWithinCm(selection.to)) {
+        return EditorSelection.single(selection.from - offset, selection.to - offset);
+      } else if (selection.from <= cmRange.from && selection.to >= cmRange.to) {
+        return EditorSelection.single(0, cmView.state.doc.length);
       }
+      
     }
   }
   return undefined;

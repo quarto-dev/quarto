@@ -253,7 +253,7 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
 
     // if this is yaml we strip the delimiters and use only the active block
     if (activeBlock.language === "yaml") {
-      const codeLines = lines(activeBlock.code).map(line => !/^(---|...)\s*$/.test(line) ? line : "");
+      const codeLines = lines(activeBlock.code).map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
       return {
         filepath,
         language: activeBlock.language,

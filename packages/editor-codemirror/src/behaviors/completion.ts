@@ -58,7 +58,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
   return {
     extensions: [
       autocompletion({
-        closeOnBlur: false,
+        closeOnBlur: true,
         override: [
           async (context: CompletionContext) : Promise<CompletionResult | null> => {
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.68.0 (Unreleased)
+
+- Fix YAML completions for 3-character prefix
+- Improved gap cursor click handler (handle all code view types)
+
 ## 1.67.0 (Release on 18 February 2023)
 
 - Code completion for cells and YAML metadata within visual editor

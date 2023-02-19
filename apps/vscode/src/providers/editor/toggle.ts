@@ -69,8 +69,6 @@ export async function reopenEditorInSourceMode(
   untitledContent?: string, 
   viewColumn?: ViewColumn
 ) {
-
-  // save if required (there are scenarios )
   if (!document.isUntitled) {
     await commands.executeCommand("workbench.action.files.save");
   }

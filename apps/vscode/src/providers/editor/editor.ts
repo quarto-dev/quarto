@@ -45,7 +45,7 @@ import { HostContext, NavLocation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeV
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, kQuartoLanguageId, QuartoEditor } from "../../core/doc";
+import { isQuartoDoc, QuartoEditor } from "../../core/doc";
 import { Command } from "../../core/command";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
@@ -306,27 +306,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
       reopenSourceMode: async () => {
 
-        // save if required
-        if (!document.isUntitled) {
-          await commands.executeCommand("workbench.action.files.save");
-        }
-
-        // close editor (return immediately as if we don't then this 
-        // rpc method's return will result in an error b/c the webview
-        // has been torn down by the time we return)
-        const viewColumn = webviewPanel.viewColumn;
-        commands.executeCommand('workbench.action.closeActiveEditor').then(async () => {
-          if (document.isUntitled) {
-            const doc = await workspace.openTextDocument({
-              language: kQuartoLanguageId,
-              content: untitledContent || '',
-            });
-            await window.showTextDocument(doc, viewColumn, false);
-          } else {
-            const doc = await workspace.openTextDocument(document.uri);
-            await window.showTextDocument(doc, viewColumn, false);
-          }
-        });
+        reopenEditorInSourceMode(
+          document,
+          untitledContent || '',
+          webviewPanel.viewColumn,
+        );
       },
 
       // editor is fully loaded and ready for communication

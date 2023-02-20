@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.68.0 (Unreleased)
+## 1.68.0 (Release on 20 February 2023)
 
 - Provide choice of language for insert cell command
 - Fix YAML completions for 3-character prefix

@@ -7,6 +7,7 @@
 - Handle exceptions that occur when writing settings at startup
 - Correct indentation for multi-line YAML completions
 - Fix issue w/ handling visual mode untitled document warning
+- Resolve issue w/ reading large bibliographies 
 
 ## 1.67.0 (Release on 18 February 2023)
 

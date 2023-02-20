@@ -38,7 +38,10 @@ export function vscodeCompletionServer(document: TextDocument, lspRequest: JsonR
           const vdoc = virtualDocForCode(context.code, language);
           const completions = await vdocCompletions(
             vdoc,
-            new Position(context.cursorPos.row, context.cursorPos.col),
+            new Position(
+              context.selection.start.line, 
+              context.selection.start.character
+            ),
             undefined,
             language,
             document.uri

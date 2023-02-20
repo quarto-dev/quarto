@@ -18,9 +18,11 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
 
-import { lines } from 'core';
+import { Position, Range } from "vscode-languageserver-types"
 
 import zenscroll from 'zenscroll';
+
+import { lines } from 'core';
 
 import { CommandFn } from "./command";
 import { ExtensionFn } from "./extension-types";
@@ -196,7 +198,14 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
-export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean) : CodeViewCompletionContext | undefined {
+export interface CodeViewActiveBlockContext {
+  language: string;
+  blocks: Array<{ code: string; active: boolean }>;
+  selection: Range;
+  selectedText: string;
+}
+
+export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveBlockContext | undefined {
 
   // function to examine a node and see if has executable code
   const schema = state.schema;
@@ -226,7 +235,8 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
   };
 
   // check the currently active node to see if it has a langauge
-  const { parent, parentOffset, pos }= state.selection.$head;
+  const { parent, parentOffset, pos } = state.selection.$from;
+  const { parentOffset: toParentOffset } = state.selection.$to;
 
   const activeBlock = nodeAsLanguageCodeBlock(parent, pos - parentOffset);
   if (activeBlock) {
@@ -236,51 +246,79 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
       ? lines(parent.textContent)[0].length + 1 
       : 0;
 
-    // compute the position within the block
-    let row = 0, col = 0;
-    for (let i=startIndex; i<parentOffset; i++) {
-      const ch = parent.textContent.at(i);
-      if (!ch) {
-        break;
+    // compute position within the active block
+    const positionForOffset = (offset: number) => {
+      let line = 0, character = 0;
+      for (let i=startIndex; i<offset; i++) {
+        const ch = parent.textContent.at(i);
+        if (!ch) {
+          break;
+        }
+        if (ch === "\n") {
+          line++;
+          character = 0;
+        } else {
+          character++;
+        }
       }
-      if (ch === "\n") {
-        row++;
-        col = 0;
-      } else {
-        col++;
-      }
+      return Position.create(line, character);
     }
 
-    // if this is yaml we strip the delimiters and use only the active block
-    if (activeBlock.language === "yaml") {
+
+    // collect all the blocks with this language
+    const blocks: Array<{ code: string; active: boolean }> = [];
+    state.doc.descendants((node, pos) => {
+      const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
+      if (languageBlock?.language === activeBlock.language) {
+        blocks.push({
+          ...languageBlock,
+          active: languageBlock.pos === activeBlock.pos
+        });
+      }
+    });
+
+    return {
+      language: activeBlock.language,
+      blocks,
+      selection: {
+        start: positionForOffset(parentOffset),
+        end: positionForOffset(toParentOffset)
+      },
+      selectedText: state.doc.textBetween(
+        activeBlock.pos + Math.max(parentOffset, startIndex), 
+        activeBlock.pos + toParentOffset
+      )
+    }
+  } else {
+    return undefined;
+  }
+}
+
+
+
+export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean) : CodeViewCompletionContext | undefined {
+
+  const activeBlockContext = codeViewActiveBlockContext(state);
+
+  if (activeBlockContext) {
+     // if this is yaml we strip the delimiters and use only the active block
+     if (activeBlockContext.language === "yaml") {
+      const activeBlock = activeBlockContext.blocks.find(block => block.active) || activeBlockContext.blocks[0];
       const codeLines = lines(activeBlock.code).map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
       return {
         filepath,
-        language: activeBlock.language,
+        language: activeBlockContext.language,
         code: codeLines,
         cellBegin: 0,
         cellEnd: codeLines.length - 1,
-        cursorPos: { row, col },
+        selection: activeBlockContext.selection,
         explicit
       }
+    // concatenate together all of the code, and indicate start/end lines of active block
     } else {
-      // collect all the blocks with this language
-      const blocks: Array<{ language: string, code: string; active: boolean }> = [];
-      state.doc.descendants((node, pos) => {
-        const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
-        if (languageBlock?.language === activeBlock.language) {
-          blocks.push({
-            ...languageBlock,
-            active: languageBlock.pos === activeBlock.pos
-          });
-        }
-      });
-
-      // concatenate together all of the code, and indicate the start and end lines 
-      // of the active block
       const code: string[] = [];
       let cellBegin = -1, cellEnd = -1;
-      blocks.forEach(block => {
+      activeBlockContext.blocks.forEach(block => {
         const blockLines = lines(block.code);
         if (block.active) {
           cellBegin = code.length;
@@ -293,16 +331,23 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
       });
       return {
         filepath,
-        language: activeBlock.language,
+        language: activeBlockContext.language,
         code,
         cellBegin,
         cellEnd,
-        cursorPos: { row: cellBegin + row, col },
+        selection: { 
+          start: {
+            line: cellBegin + activeBlockContext.selection.start.line, 
+            character: activeBlockContext.selection.start.character 
+          },
+          end: {
+            line: cellBegin + activeBlockContext?.selection.end.line,
+            character: activeBlockContext?.selection.end.character
+          }
+        },
         explicit
       }
     }
-
- 
   } else {
     return undefined;
   }

@@ -13,7 +13,7 @@
  *
  */
 
-import { CompletionList } from "vscode-languageserver-types";
+import { CompletionList, Range} from "vscode-languageserver-types";
 
 export const kCompletionGetCodeViewCompletions = 'completion_code_view_completions';
 
@@ -23,7 +23,7 @@ export interface CodeViewCompletionContext {
   code: string[];
   cellBegin: number;
   cellEnd: number;
-  cursorPos: { row: number; col: number };
+  selection: Range;
   explicit: boolean;
 }
 

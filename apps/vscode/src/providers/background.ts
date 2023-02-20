@@ -65,12 +65,15 @@ export function activateBackgroundHighlighter(
     context.subscriptions
   );
 
-  // update highlighting on changes to the document
+  // update highlighting on changes to the document (if its visible)
   vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      if (event.document === vscode.window.activeTextEditor?.document) {
+      const visibleEditor = vscode.window.visibleTextEditors.find(editor => { 
+        return editor.document.uri.toString() === event.document.uri.toString();
+      });
+      if (visibleEditor) {
         triggerUpdateActiveEditorDecorations(
-          vscode.window.activeTextEditor,
+          visibleEditor,
           engine,
           highlightingConfig.delayMs(),
           true,

@@ -4,6 +4,7 @@
 
 - Fix YAML completions for 3-character prefix
 - Improved gap cursor click handler (handle all code view types)
+- Handle exceptions that occur when writing settings at startup
 
 ## 1.67.0 (Release on 18 February 2023)
 

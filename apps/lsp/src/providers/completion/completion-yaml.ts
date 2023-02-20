@@ -14,6 +14,7 @@
  *
  */
 
+import { lines } from "core";
 import { 
   Range, 
   TextEdit, 
@@ -26,7 +27,7 @@ import {
 
 import { EditorContext, quarto } from "../../quarto/quarto";
 
-export async function yamlCompletions(context: EditorContext) {
+export async function yamlCompletions(context: EditorContext, stripPadding: boolean) {
   // bail if no quarto connection
   if (!quarto) {
     return null;
@@ -62,6 +63,16 @@ export async function yamlCompletions(context: EditorContext) {
           )
         }
       }
+
+      // strip padding if requested (vscode doesn't seem to need indentation padding)
+      let value = completion.value;
+      if (stripPadding) {
+        const padding = context.line.match(/^\s+/)?.[0];
+        if (padding) {
+          value = lines(value).map(line => line.replace(padding, "")).join("\n");
+        }
+      }
+
       if (result.token.length > 0 && completionWord.startsWith(result.token)) {
         const edit = TextEdit.replace(
           Range.create(
@@ -70,11 +81,11 @@ export async function yamlCompletions(context: EditorContext) {
             context.position.row,
             context.position.column
           ),
-          completion.value
+          value
         );
         item.textEdit = edit;
       } else {
-        item.insertText = completion.value;
+        item.insertText = value;
       }
 
       if (completion.suggest_on_accept) {

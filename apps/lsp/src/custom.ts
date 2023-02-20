@@ -90,7 +90,7 @@ function lspCompletionServer() : CompletionServer {
           true,
           context.explicit
         );
-        const completions = await yamlCompletions(edContext);
+        const completions = await yamlCompletions(edContext, false);
         if (completions) {
           return {
             isIncomplete: false,

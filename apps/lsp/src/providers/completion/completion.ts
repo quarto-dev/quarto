@@ -50,7 +50,7 @@ export async function onCompletion(
     (await refsCompletions(doc, pos, context)) ||
     (await attrCompletions(context)) ||
     (await latexCompletions(doc, pos, completionContext)) ||
-    (await yamlCompletions(context)) ||
+    (await yamlCompletions(context, true)) ||
     null
   );
 }

@@ -119,14 +119,16 @@ export function editorSyncManager(
       // determine the current sourcePos
       const markdown = document.getText();
       let initialNav: NavLocation | undefined;
-      if (typeof(navigation) === "number") {
-        const source = editorSourceJsonRpcServer(request);
-        const locations = await source.getSourcePosLocations(markdown);
-        initialNav = { locations, pos: navigation };
-      } else if (isXRef(navigation)) {
-        initialNav = navigation;
+      if (markdown) {
+        if (typeof(navigation) === "number") {
+          const source = editorSourceJsonRpcServer(request);
+          const locations = await source.getSourcePosLocations(markdown);
+          initialNav = { locations, pos: navigation };
+        } else if (isXRef(navigation)) {
+          initialNav = navigation;
+        }
       }
-      
+     
       const editorMarkdown = await visualEditor.init(markdown, initialNav);
       if (editorMarkdown && (editorMarkdown !== document.getText())) {
         await updateWorkspaceDocument(document, editorMarkdown);

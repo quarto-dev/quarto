@@ -46,7 +46,7 @@ import {
   Prefs,
   PrefsServer,
   NavLocation,
-  CompletionServer
+  CodeViewServer
 } from "editor-types";
 
 import { 
@@ -60,7 +60,7 @@ import {
 
 import { 
   prefsServerMethods,
-  completionServerMethods
+  codeViewServerMethods
 } from "editor-server";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
@@ -97,14 +97,14 @@ export function visualEditorServer(
   request: JsonRpcRequestTransport,
   host: VSCodeVisualEditorHost,
   prefsServer: PrefsServer,
-  completionServer: CompletionServer
+  codeViewServer: CodeViewServer
 ) : Disposable {
   
   
   // table of methods we implement directly
   const extensionMethods = {
     ...prefsServerMethods(prefsServer),
-    ...completionServerMethods(completionServer),
+    ...codeViewServerMethods(codeViewServer),
     ...editorHostMethods(host),
   };
 

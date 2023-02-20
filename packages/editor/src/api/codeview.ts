@@ -18,7 +18,7 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
 
-import { Position, Range } from "vscode-languageserver-types"
+import { Position } from "vscode-languageserver-types"
 
 import zenscroll from 'zenscroll';
 
@@ -31,7 +31,7 @@ import { editorScrollContainer } from './scroll';
 
 import { EditorState } from 'prosemirror-state';
 import { rmdChunk } from './rmd';
-import { CodeViewCompletionContext } from 'editor-types';
+import { CodeViewActiveBlockContext, CodeViewCompletionContext } from 'editor-types';
 
 export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
 
@@ -198,12 +198,6 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
-export interface CodeViewActiveBlockContext {
-  language: string;
-  blocks: Array<{ code: string; active: boolean }>;
-  selection: Range;
-  selectedText: string;
-}
 
 export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveBlockContext | undefined {
 

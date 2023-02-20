@@ -14,7 +14,7 @@
  */
 
 
-import { CompletionServer } from "./completion";
+import { CodeViewServer } from "./codeview";
 import { DictionaryServer } from "./dictionary";
 import { MathServer } from "./math";
 import { PrefsServer } from "./prefs";
@@ -26,5 +26,5 @@ export interface EditorServices {
   readonly dictionary: DictionaryServer;
   readonly prefs: PrefsServer;
   readonly source: SourceServer;
-  readonly completion: CompletionServer;
+  readonly codeview: CodeViewServer;
 }

@@ -1,5 +1,5 @@
 /*
- * completion.ts
+ * codeviews.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,7 +15,17 @@
 
 import { CompletionList, Range} from "vscode-languageserver-types";
 
-export const kCompletionGetCodeViewCompletions = 'completion_code_view_completions';
+export const kCodeViewGetCompletions = 'code_view_get_completions';
+export const kCodeViewExecute = 'code_view_execute';
+
+export type CodeViewExecute = "selection" | "cell" | "above" | "below";
+
+export interface CodeViewActiveBlockContext {
+  language: string;
+  blocks: Array<{ code: string; active: boolean }>;
+  selection: Range;
+  selectedText: string;
+}
 
 export interface CodeViewCompletionContext {
   filepath: string;
@@ -27,7 +37,8 @@ export interface CodeViewCompletionContext {
   explicit: boolean;
 }
 
-export interface CompletionServer {
+export interface CodeViewServer {
+  codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
 }
 

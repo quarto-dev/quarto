@@ -23,7 +23,7 @@ import {
   mathServerMethods,
   EditorServerOptions,
   sourceServerMethods,
-  completionServerMethods,
+  codeViewServerMethods,
 } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
@@ -32,9 +32,10 @@ import { CompletionList } from "vscode-languageserver-types";
 import { Position, TextDocuments } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { CodeViewCompletionContext, CompletionServer } from "editor-types";
+import { CodeViewCompletionContext, CodeViewServer } from "editor-types";
 import { codeEditorContext } from "./quarto/quarto";
 import { yamlCompletions } from "./providers/completion/completion-yaml";
+import { jsonRpcError, kJsonRpcInvalidParams, kJsonRpcMethodNotFound } from "core";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
@@ -73,38 +74,42 @@ export function registerCustomMethods(
     ...dictionaryServerMethods(dictionary),
     ...mathServerMethods(options.documents),
     ...sourceServerMethods(options.pandoc),
-    ...completionServerMethods(lspCompletionServer())
+    ...codeViewServerMethods(codeViewServer())
   });
 }
 
-function lspCompletionServer() : CompletionServer {
+function codeViewServer() : CodeViewServer {
   return {
+    codeViewExecute: async () => {
+      // we don't handle execution within the lsp (currently handled in the vscode extension)
+      throw jsonRpcError('codeViewExecute not found', undefined, kJsonRpcMethodNotFound);
+    }
+    ,
     codeViewCompletions: async (context: CodeViewCompletionContext) : Promise<CompletionList> => {
-      
+      // handle yaml completions within the lsp (the rest are currently handled in the vscode extension)
       if (context.language == "yaml") {
         const edContext = codeEditorContext(
           context.filepath,
           "yaml",
           context.code.join("\n"),
-          Position.create(context.cursorPos.row, context.cursorPos.col),
+          Position.create(context.selection.start.line, context.selection.start.character),
           true,
           context.explicit
         );
         const completions = await yamlCompletions(edContext, false);
-        if (completions) {
-          return {
-            isIncomplete: false,
-            items: completions
-          }
+        return {
+          isIncomplete: false,
+          items: completions || []
         }
-      } 
 
-
-      // no completions for this language
-      return {
-        isIncomplete: false,
-        items: []
-      };
+      } else {
+        // should only be called for yaml
+        throw jsonRpcError(
+          "Completions not available for " + context.language,
+          undefined,
+          kJsonRpcInvalidParams
+        );
+      }
     }
    
   };

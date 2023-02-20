@@ -49,7 +49,7 @@ import { Behavior, BehaviorContext } from ".";
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
   // don't provide behavior if we don't have completions
-  if (!behaviorContext.pmContext.ui.completion) {
+  if (!behaviorContext.pmContext.ui.codeview) {
     return {
       extensions: []
     }
@@ -108,7 +108,7 @@ async function getCompletions(
 ) : Promise<CompletionResult | null> {
 
   // get completions
-  const completions = await behaviorContext.pmContext.ui.completion?.codeViewCompletions(cvContext);
+  const completions = await behaviorContext.pmContext.ui.codeview?.codeViewCompletions(cvContext);
   if (context.aborted || !completions || completions.items.length == 0) {
     return null;
   }

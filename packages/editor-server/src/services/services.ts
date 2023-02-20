@@ -23,7 +23,7 @@ import { prefsServer, prefsServerMethods } from "./prefs";
 import { EditorServerDocuments } from "../server/server";
 import { sourceServer, sourceServerMethods } from "./source";
 import { PandocServerOptions } from "../pandoc";
-import { completionServerMethods, completionServer } from "./completion";
+import { codeViewServerMethods, codeViewServer } from "./codeview";
 
 export {
   mathServer, 
@@ -32,8 +32,8 @@ export {
   dictionaryServerMethods,
   prefsServer,
   prefsServerMethods,
-  completionServer,
-  completionServerMethods,
+  codeViewServer,
+  codeViewServerMethods,
   sourceServer,
   sourceServerMethods
 };
@@ -51,7 +51,7 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
     dictionary: dictionaryServer(options.dictionary),
     prefs: prefsServer(),
     source: sourceServer(options.pandoc),
-    completion: completionServer()
+    codeview: codeViewServer()
   };
 } 
 
@@ -61,6 +61,6 @@ export function editorServicesMethods(options: EditorServicesOptions): Record<st
     ...dictionaryServerMethods(options.dictionary),
     ...prefsServerMethods(prefsServer()),
     ...sourceServerMethods(options.pandoc),
-    ...completionServerMethods(completionServer())
+    ...codeViewServerMethods(codeViewServer())
   };
 }

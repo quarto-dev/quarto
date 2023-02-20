@@ -37,7 +37,7 @@ export * from './services'
 export * from './outline'
 export * from './menu'
 export * from './display'
-export * from './completion'
+export * from './codeview'
 export * from './vscode'
 
 

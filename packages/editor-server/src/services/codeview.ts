@@ -1,5 +1,5 @@
 /*
- * completion.ts
+ * codeview.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -14,27 +14,39 @@
  */
 
 import { JsonRpcServerMethod } from "core";
-import { CodeViewCompletionContext, CompletionServer, kCompletionGetCodeViewCompletions } from "editor-types";
+
+import { 
+  CodeViewCompletionContext, 
+  CodeViewServer, 
+  kCodeViewGetCompletions, 
+  kCodeViewExecute, 
+  CodeViewExecute, 
+  CodeViewActiveBlockContext 
+} from "editor-types";
+
 import { CompletionList } from "vscode-languageserver-types";
 
 
-export function completionServer() : CompletionServer {
+export function codeViewServer() : CodeViewServer {
   return {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    codeViewExecute: async (_execute: CodeViewExecute, _context: CodeViewActiveBlockContext) => {
+      // no-op
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     codeViewCompletions: async (_context: CodeViewCompletionContext) : Promise<CompletionList> => {
-      // by default we don't currently do any completions on the server (all done via vdoc in extension host)
       return {
         isIncomplete: false,
         items: []
       };
     }
-   
   };
 }
 
-export function completionServerMethods(server: CompletionServer) : Record<string, JsonRpcServerMethod> {
+export function codeViewServerMethods(server: CodeViewServer) : Record<string, JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kCompletionGetCodeViewCompletions]: args => server.codeViewCompletions(args[0]),
+    [kCodeViewExecute]: args => server.codeViewExecute(args[0], args[1]),
+    [kCodeViewGetCompletions]: args => server.codeViewCompletions(args[0]),
   }
   return methods;
 }

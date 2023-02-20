@@ -13,24 +13,52 @@
  *
  */
 
-import { CompletionItem as VCompletionItem, CompletionItemKind as VCompletionItemKind, MarkdownString, SnippetString, Range } from "vscode";
-import { CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionList, InsertTextFormat, MarkupContent, MarkupKind } from "vscode-languageserver-types";
+import { 
+  CompletionItem as VCompletionItem, 
+  CompletionItemKind as VCompletionItemKind, 
+  MarkdownString, 
+  SnippetString, 
+  Range,
+  Position,
+  TextDocument 
+} from "vscode";
 
-import { CodeViewCompletionContext, CompletionServer, kCompletionGetCodeViewCompletions } from "editor-types";
-import { Position, TextDocument } from "vscode";
+import { 
+  CompletionItem, 
+  CompletionItemKind, 
+  CompletionItemLabelDetails, 
+  CompletionList, 
+  InsertTextFormat, 
+  MarkupContent, 
+  MarkupKind 
+} from "vscode-languageserver-types";
+
+import { JsonRpcRequestTransport } from "core";
+
+import { 
+  CodeViewActiveBlockContext, 
+  CodeViewCompletionContext, 
+  CodeViewExecute, 
+  CodeViewServer, 
+  kCodeViewGetCompletions 
+} from "editor-types";
+
 import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode } from "../../vdoc/vdoc";
 import { vdocCompletions } from "../../vdoc/vdoc-completion";
-import { JsonRpcRequestTransport } from "core";
+import { MarkdownEngine } from "../../markdown/engine";
 
 
-export function vscodeCompletionServer(document: TextDocument, lspRequest: JsonRpcRequestTransport) : CompletionServer {
+export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport) : CodeViewServer {
   return {
+    async codeViewExecute(execute: CodeViewExecute, context: CodeViewActiveBlockContext) {
+      // TODO: perform execute request
+    },
     async codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
 
       // if this is yaml then call the lsp directly
       if (context.language === "yaml") {
-        return lspRequest(kCompletionGetCodeViewCompletions, [context]);
+        return lspRequest(kCodeViewGetCompletions, [context]);
       } else {
         // see if we have an embedded langaage
         const language = embeddedLanguage(context.language);

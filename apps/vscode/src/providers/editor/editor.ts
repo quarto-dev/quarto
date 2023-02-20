@@ -53,7 +53,7 @@ import { editorSyncManager } from "./sync";
 import { documentImageResolver } from "./images";
 import { clearInterval } from "timers";
 import { vscodePrefsServer } from "./prefs";
-import { vscodeCompletionServer } from "./completion";
+import { vscodeCodeViewServer } from "./completion";
 import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
@@ -408,7 +408,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       this.lspRequest, 
       host, 
       prefsServer,
-      vscodeCompletionServer(document, this.lspRequest)
+      vscodeCodeViewServer(this.engine, document, this.lspRequest)
     ));
 
     // doc dir

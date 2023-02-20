@@ -66,7 +66,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
     math: editorMath(providers.services.math, providers.uiContext),
     context: providers.uiContext,
     prefs: editorPrefs(providers.prefs),
-    completion: providers.services.completion,
+    codeview: providers.services.codeview,
     spelling: editorSpelling(providers.spelling),
     images: uiTools.context.defaultUIImages()
   };

@@ -10,6 +10,7 @@
 - Fix issue w/ handling visual mode untitled document warning
 - Resolve issue w/ reading large bibliographies 
 - Allow dot ('.') in citation highlighting regex 
+- Derive `mathjax.theme` from name of `workbench.colorTheme`
 
 ## 1.67.0 (Release on 18 February 2023)
 

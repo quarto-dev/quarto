@@ -16,10 +16,8 @@
 import {
   commands,
   window,
-  workspace,
   Range,
   Position,
-  WorkspaceEdit,
 } from "vscode";
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
@@ -43,17 +41,18 @@ class InsertCodeCellCommand implements Command {
     if (window.activeTextEditor) {
       const doc = window.activeTextEditor?.document;
       if (doc && isQuartoDoc(doc)) {
+
         // determine most recently used language engien above the cursor
         const tokens = await this.engine_.parse(doc);
         const cursorLine = window.activeTextEditor?.selection.active.line;
-        let langauge = "";
+        let language = "";
         let insertTopPaddingLine = false;
 
         const pos = new Position(cursorLine, 0);
         const block = languageBlockAtPosition(tokens, pos, true);
         if (block?.map) {
           // cursor is in an executable block
-          langauge = languageNameFromBlock(block);
+          language = languageNameFromBlock(block);
           insertTopPaddingLine = true;
           const moveDown = block.map[1] - cursorLine;
           await commands.executeCommand("cursorMove", {
@@ -67,12 +66,12 @@ class InsertCodeCellCommand implements Command {
           )) {
             // if this is past the cursor then terminate
             if (executableBlock.map && executableBlock.map[0] > cursorLine) {
-              if (!langauge) {
-                langauge = languageNameFromBlock(executableBlock);
+              if (!language) {
+                language = languageNameFromBlock(executableBlock);
               }
               break;
             } else {
-              langauge = languageNameFromBlock(executableBlock);
+              language = languageNameFromBlock(executableBlock);
             }
           }
 
@@ -102,25 +101,21 @@ class InsertCodeCellCommand implements Command {
           }
         }
 
-        // insert the code cell
-        const edit = new WorkspaceEdit();
-        const kPrefix = "```{";
-        edit.insert(
-          doc.uri,
-          window.activeTextEditor.selection.active,
-          (insertTopPaddingLine ? "\n" : "") + kPrefix + langauge + "}\n\n```\n"
-        );
-        await workspace.applyEdit(edit);
-        await commands.executeCommand("cursorMove", {
-          to: "up",
-          value: langauge ? 2 : 3,
+        // order by language
+        const allLangs = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
+        const languages = language 
+          ? [language, allLangs.filter(lang => lang !== language)]
+          : allLangs;
+        
+        // insert snippet
+        await commands.executeCommand("editor.action.insertSnippet", {
+          snippet: [
+            ...(insertTopPaddingLine ? [""] : []),
+            "```{${1|" + languages.join(",") + "|}}",
+            "${TM_SELECTED_TEXT}$0",
+            "```"
+          ].join("\n"),
         });
-        if (!langauge) {
-          await commands.executeCommand("cursorMove", {
-            to: "right",
-            value: kPrefix.length,
-          });
-        }
       }
     }
   }

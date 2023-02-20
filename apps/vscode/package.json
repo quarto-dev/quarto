@@ -903,16 +903,6 @@
           },
           "uniqueItems": true
         },
-        "quarto.mathjax.theme": {
-          "scope": "window",
-          "type": "string",
-          "enum": [
-            "light",
-            "dark"
-          ],
-          "default": "dark",
-          "markdownDescription": "Theme for MathJax preview (`light` or `dark`)."
-        },
         "quarto.lua.provideTypes": {
           "scope": "window",
           "type": "boolean",

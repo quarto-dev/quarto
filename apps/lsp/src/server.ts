@@ -89,9 +89,18 @@ connection.onInitialized(async () => {
   if (hasConfigurationCapability) {
     // sync configuration
     const syncConfiguration = async () => {
+      // get quarto config
       const configuration = await connection.workspace.getConfiguration({
         section: "quarto",
       });
+      // add mathjax theme
+      const wbConfig = await connection.workspace.getConfiguration("workbench");
+      const mathJaxTheme =  wbConfig?.colorTheme?.includes("Light")
+        ? "light"
+        : "dark";
+      configuration.mathjax = configuration.mathjax || {};
+      configuration.mathjax.theme = mathJaxTheme;
+      // update config
       config.update(configuration);
     };
     await syncConfiguration();

@@ -32,6 +32,7 @@ import { ensureGitignore } from "core-node";
 import { QuartoContext } from "quarto-core";
 
 import { join } from "path";
+import { safeUpdateConfig } from "../core/config";
 
 export async function activateLuaTypes(
   context: ExtensionContext,
@@ -222,11 +223,13 @@ async function ensureNoGitScheme() {
       !inspectSupportScheme?.workspaceValue &&
       !inspectSupportScheme?.workspaceFolderValue
     ) {
-      await luaConfig.update(
-        "workspace.supportScheme",
-        ["file", "default"],
-        ConfigurationTarget.Global
-      );
+      await safeUpdateConfig(async () => {
+        await luaConfig.update(
+          "workspace.supportScheme",
+          ["file", "default"],
+          ConfigurationTarget.Global
+        );
+      });
     }
   }
 }

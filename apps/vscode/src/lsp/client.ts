@@ -67,6 +67,7 @@ import {
   embeddedDocumentFormattingProvider,
   embeddedDocumentRangeFormattingProvider,
 } from "../providers/format";
+import { safeUpdateConfig } from "../core/config";
 
 let client: LanguageClient;
 
@@ -344,14 +345,16 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
 async function syncColorThemeConfig() {
   // update the config
   const updateColorThemeConfig = async () => {
-    const theme =
-      window.activeColorTheme.kind === ColorThemeKind.Light ? "light" : "dark";
-    const quartoConfig = workspace.getConfiguration("quarto");
-    await quartoConfig.update(
-      "mathjax.theme",
-      theme,
-      ConfigurationTarget.Global
-    );
+    await safeUpdateConfig(async () => {
+      const theme = 
+        window.activeColorTheme.kind === ColorThemeKind.Light ? "light" : "dark";
+      const quartoConfig = workspace.getConfiguration("quarto");
+      await quartoConfig.update(
+        "mathjax.theme",
+        theme,
+        ConfigurationTarget.Global
+      );
+    });
   };
   await updateColorThemeConfig();
 

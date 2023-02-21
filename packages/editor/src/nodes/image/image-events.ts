@@ -161,11 +161,13 @@ function handleImageDataTransfer(event: Event, dataTransfer: DataTransfer, view:
   }
 
   // if we have at least one then handle
-  if (files.length && ui.context.resolveBase64Images) {
-    Promise.all(files.map(blobToBase64)).then(async (base64Files) => {
-      const images = await ui.context.resolveBase64Images!(base64Files);
-      insertImageFiles(view, pos, images);
-    });
+  if (files.length) {
+    if (ui.context.resolveBase64Images) {
+      Promise.all(files.map(blobToBase64)).then(async (base64Files) => {
+        const images = await ui.context.resolveBase64Images!(base64Files);
+        insertImageFiles(view, pos, images);
+      });
+    }
     event.preventDefault();
     return true;
   } else {

@@ -211,7 +211,9 @@ async function readMarkdownPrefs(
       // scan from root _project.yml down so settings closer to us win
       for (const metadataFile of metadataFiles.reverse()) {
         const yaml = yamlFromMetadataFile(metadataFile);
-        prefs = resolveMarkdownPrefs(yaml, prefs);
+        if (yaml) {
+          prefs = resolveMarkdownPrefs(yaml, prefs);
+        }
       }
     }
   }

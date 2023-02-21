@@ -130,9 +130,11 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
     if (metadataFiles) {
       for (const metadataFile of metadataFiles) {
         const yaml = yamlFromMetadataFile(metadataFile);
-        const projSetting = readRenderOnSave(yaml);
-        if (projSetting !== undefined) {
-          return projSetting;
+        if (yaml) {
+          const projSetting = readRenderOnSave(yaml);
+          if (projSetting !== undefined) {
+            return projSetting;
+          }
         }
       }
     }

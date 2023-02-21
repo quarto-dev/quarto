@@ -90,7 +90,7 @@ export function hasQuartoProject(dir?: string) {
 // cli
 // quarto-core
 
-export function yamlFromMetadataFile(file: string): Record<string, unknown> {
+export function yamlFromMetadataFile(file: string): Record<string, unknown> | null {
   const yamlSrc = fs.readFileSync(file, "utf-8");
   try {
     if (yamlSrc.trim().length > 0) {

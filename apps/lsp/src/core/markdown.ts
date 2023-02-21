@@ -60,7 +60,7 @@ export function documentFrontMatter(
   const yaml = tokens.find((token) => token.type === "front_matter");
   if (yaml) {
     const frontMatter = parseFrontMatterStr(yaml.markup);
-    if (typeof frontMatter === "object") {
+    if (frontMatter && typeof frontMatter === "object") {
       return frontMatter as Record<string, unknown>;
     } else {
       return {};

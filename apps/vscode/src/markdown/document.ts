@@ -51,7 +51,7 @@ export async function documentFrontMatter(
   const yaml = await documentFrontMatterYaml(engine, doc);
   if (yaml) {
     const frontMatter = parseFrontMatterStr(yaml);
-    if (typeof frontMatter === "object") {
+    if (frontMatter && typeof frontMatter === "object") {
       return frontMatter as Record<string, unknown>;
     } else {
       return {};

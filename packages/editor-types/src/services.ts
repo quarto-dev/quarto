@@ -24,7 +24,7 @@ import { SourceServer } from "./source";
 export interface EditorServices {
   readonly math: MathServer;
   readonly dictionary: DictionaryServer;
-  readonly prefs: PrefsServer;
   readonly source: SourceServer;
-  readonly codeview: CodeViewServer;
+  readonly prefs: PrefsServer;
+  readonly codeview?: CodeViewServer;
 }

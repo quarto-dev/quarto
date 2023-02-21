@@ -16,32 +16,12 @@
 import { JsonRpcServerMethod } from "core";
 
 import { 
-  CodeViewCompletionContext, 
   CodeViewServer, 
   kCodeViewGetCompletions, 
   kCodeViewExecute, 
-  CodeViewExecute, 
-  CodeViewActiveBlockContext 
 } from "editor-types";
 
-import { CompletionList } from "vscode-languageserver-types";
 
-
-export function codeViewServer() : CodeViewServer {
-  return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    codeViewExecute: async (_execute: CodeViewExecute, _context: CodeViewActiveBlockContext) => {
-      // no-op
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    codeViewCompletions: async (_context: CodeViewCompletionContext) : Promise<CompletionList> => {
-      return {
-        isIncomplete: false,
-        items: []
-      };
-    }
-  };
-}
 
 export function codeViewServerMethods(server: CodeViewServer) : Record<string, JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {

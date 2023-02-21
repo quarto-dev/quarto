@@ -14,7 +14,7 @@
  */
 
 
-import { EditorServices } from "editor-types";
+import { CodeViewServer, EditorServices } from "editor-types";
 
 import { mathServer, mathServerMethods } from "./math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
@@ -23,7 +23,7 @@ import { prefsServer, prefsServerMethods } from "./prefs";
 import { EditorServerDocuments } from "../server/server";
 import { sourceServer, sourceServerMethods } from "./source";
 import { PandocServerOptions } from "../pandoc";
-import { codeViewServerMethods, codeViewServer } from "./codeview";
+import { codeViewServerMethods } from "./codeview";
 
 export {
   mathServer, 
@@ -32,7 +32,6 @@ export {
   dictionaryServerMethods,
   prefsServer,
   prefsServerMethods,
-  codeViewServer,
   codeViewServerMethods,
   sourceServer,
   sourceServerMethods
@@ -42,7 +41,8 @@ export type { DictionaryServerOptions };
 export interface EditorServicesOptions {
   documents: EditorServerDocuments;
   dictionary: DictionaryServerOptions;
-  pandoc: PandocServerOptions
+  pandoc: PandocServerOptions,
+  codeview?: CodeViewServer;
 }
 
 export function editorServices(options: EditorServicesOptions) : EditorServices {
@@ -51,7 +51,7 @@ export function editorServices(options: EditorServicesOptions) : EditorServices 
     dictionary: dictionaryServer(options.dictionary),
     prefs: prefsServer(),
     source: sourceServer(options.pandoc),
-    codeview: codeViewServer()
+    codeview: options.codeview
   };
 } 
 
@@ -61,6 +61,6 @@ export function editorServicesMethods(options: EditorServicesOptions): Record<st
     ...dictionaryServerMethods(options.dictionary),
     ...prefsServerMethods(prefsServer()),
     ...sourceServerMethods(options.pandoc),
-    ...codeViewServerMethods(codeViewServer())
+    ...(options.codeview ? codeViewServerMethods(options.codeview) : {})
   };
 }

@@ -3,6 +3,8 @@
 ## 1.69.0 (Unreleased)
 
 - Update background highlight for all visible editors (not just active)
+- Improve cursor placement for YAML block insertion
+- More robust handling when parsing empty yaml metadata blocks
 
 ## 1.68.0 (Release on 20 February 2023)
 

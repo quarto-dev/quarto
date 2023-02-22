@@ -20,6 +20,7 @@ export interface EmbeddedLanguage {
   extension: string;
   type: "content" | "tempfile";
   emptyLine?: string;
+  comment?: string;
   trigger?: string[];
   inject?: string[];
   reuseVdoc?: boolean;
@@ -92,6 +93,7 @@ function defineLanguage(
     ids: language.ids,
     extension: language.ext || language.ids[0],
     type: options?.type || "tempfile",
+    comment: language.comment,
     emptyLine: options?.emptyLine,
     trigger: language.trigger,
     inject: options?.inject,

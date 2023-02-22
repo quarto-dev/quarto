@@ -34,7 +34,6 @@ import { URI } from "vscode-uri";
 import { CodeViewCompletionContext, kCodeViewGetCompletions } from "editor-types";
 import { codeEditorContext } from "./quarto/quarto";
 import { yamlCompletions } from "./providers/completion/completion-yaml";
-import { jsonRpcError, kJsonRpcInvalidParams } from "core";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
@@ -80,27 +79,17 @@ export function registerCustomMethods(
 
 async function codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
   // handle yaml completions within the lsp (the rest are currently handled in the vscode extension)
-  if (context.language == "yaml") {
-    const edContext = codeEditorContext(
-      context.filepath,
-      "yaml",
-      context.code.join("\n"),
-      Position.create(context.selection.start.line, context.selection.start.character),
-      true,
-      context.explicit
-    );
-    const completions = await yamlCompletions(edContext, false);
-    return {
-      isIncomplete: false,
-      items: completions || []
-    }
-
-  } else {
-    // should only be called for yaml
-    throw jsonRpcError(
-      "Completions not available for " + context.language,
-      undefined,
-      kJsonRpcInvalidParams
-    );
+  const edContext = codeEditorContext(
+    context.filepath,
+    context.language == "yaml" ? "yaml" : "script",
+    context.code.join("\n"),
+    Position.create(context.selection.start.line, context.selection.start.character),
+    true,
+    context.explicit
+  );
+  const completions = await yamlCompletions(edContext, false);
+  return {
+    isIncomplete: false,
+    items: completions || []
   }
 }

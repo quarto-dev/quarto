@@ -63,21 +63,53 @@ export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocum
         // see if we have an embedded langaage
         const language = embeddedLanguage(context.language);
         if (language) {
-          const vdoc = virtualDocForCode(context.code, language);
-          const completions = await vdocCompletions(
-            vdoc,
-            new Position(
-              context.selection.start.line, 
-              context.selection.start.character
-            ),
-            undefined,
-            language,
-            document.uri
-          );
-          return {
-            items: completions.map(vsCompletionItemToLsCompletionItem),
-            isIncomplete: false
-          };
+          // if this is a yaml comment line then call the lsp
+          const line = context.code[context.selection.start.line];
+          if (language.comment && line.startsWith(`${language.comment}| `)) {
+            // strip out lines that aren't in the code block
+            const code = context.code.map((codeLine, index) => {
+              if (index < context.cellBegin || index > context.cellEnd) {
+                return "";
+              } else {
+                return codeLine;
+              }
+            });
+            // include language header (we offset cellEnd below accordingly)
+            code.splice(context.cellBegin, 0, `{${context.language}}`);
+            // make request 
+            return lspRequest(kCodeViewGetCompletions, [{
+              ...context,
+              code,
+              cellEnd: context.cellEnd + 1,
+              selection: {
+                start: {
+                  ...context.selection.start,
+                  line: context.selection.start.line + 1
+                },
+                end: {
+                  ...context.selection.end,
+                  line: context.selection.end.line + 1
+                }
+              }
+            }]);
+          // otherwise delegate to vscode completion system
+          } else {
+            const vdoc = virtualDocForCode(context.code, language);
+            const completions = await vdocCompletions(
+              vdoc,
+              new Position(
+                context.selection.start.line, 
+                context.selection.start.character
+              ),
+              undefined,
+              language,
+              document.uri
+            );
+            return {
+              items: completions.map(vsCompletionItemToLsCompletionItem),
+              isIncomplete: false
+            };
+          }
         } else {
           return {
             items: [],

@@ -2,6 +2,7 @@
 
 ## 1.69.0 (Unreleased)
 
+- Automatically insert option comments (e.g. `#| `) on enter
 - Update background highlight for all visible editors (not just active)
 - Improve cursor placement for YAML block insertion
 - More robust handling when parsing empty yaml metadata blocks

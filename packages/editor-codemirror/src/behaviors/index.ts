@@ -20,7 +20,7 @@ import { Node as ProsemirrorNode } from 'prosemirror-model'
 import { EditorView as PMEditorView} from "prosemirror-view";
 
 import { Extension } from "@codemirror/state";
-import { EditorView } from '@codemirror/view';
+import { EditorView, KeyBinding } from '@codemirror/view';
 
 import { CodeViewOptions, ExtensionContext } from "editor";
 
@@ -32,9 +32,11 @@ import { trackSelectionBehavior } from './trackselection';
 import { themeBehavior } from './theme';
 import { prefsBehavior } from './prefs';
 import { completionBehavior } from './completion';
+import { yamlOptionBehavior } from './yamloption';
 
 export interface Behavior {
   extensions: Extension[];
+  keys?: KeyBinding[];
   init?: (pmNode: ProsemirrorNode, cmView: EditorView) => void;
   pmUpdate?: (prevNode: ProsemirrorNode, updateNode: ProsemirrorNode, cmView: EditorView) => void;
   cleanup?: VoidFunction;
@@ -53,16 +55,18 @@ export enum State { Updating, Escaping };
 export type WithState = (state: State, fn: () => void) => void; 
 
 export function createBehaviors(context: BehaviorContext) : Behavior[] {
-  return [
+  const behaviors = [
     langModeBehavior(context),
     completionBehavior(context),
-    keyboardBehavior(context),
     findBehavior(context),
     indentBehavior(),
     themeBehavior(context),
     prefsBehavior(context),
-    trackSelectionBehavior(context)
-  ]
+    trackSelectionBehavior(context),
+    yamlOptionBehavior(context),
+  ];
+  behaviors.push(keyboardBehavior(context, behaviors.flatMap(behavior => behavior.keys || [])));
+  return behaviors;
 }
 
 export function behaviorExtensions(

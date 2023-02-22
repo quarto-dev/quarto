@@ -38,14 +38,17 @@ export function scrollIntoView(
     const containerEl = view.nodeDOM(container.pos) as HTMLElement;
     const parentList = findParentNodeOfTypeClosestToPos($pos, [schema.nodes.ordered_list, schema.nodes.bullet_list]);
     const parentDiv = schema.nodes.div ? findParentNodeOfTypeClosestToPos($pos, schema.nodes.div) : undefined;
-    const resultPos =  parentList || parentDiv ? $pos.before(2) : pos;
-    const resultNode = view.nodeDOM(resultPos) as HTMLElement;
+    const resultPos =  (parentList || parentDiv) ? $pos.before(2) : pos;
+    const resultNode = view.nodeDOM(resultPos);
     if (resultNode) {
-      const scroller = zenscroll.createScroller(editorScrollContainer(containerEl), duration, offset);
+      const scrollNode = resultNode instanceof HTMLElement ? resultNode : resultNode.parentElement;
+      if (scrollNode) {
+        const scroller = zenscroll.createScroller(editorScrollContainer(containerEl), duration, offset);
       if (center) {
-        scroller.center(resultNode, duration, offset, onDone);
+        scroller.center(scrollNode, duration, offset, onDone);
       } else {
-        scroller.intoView(resultNode, duration, onDone);
+        scroller.intoView(scrollNode, duration, onDone);
+      }
       }
     }
   }
@@ -53,14 +56,15 @@ export function scrollIntoView(
 
 export function scrollToPos(view: EditorView, pos: number, duration?: number, offset?: number, onDone?: VoidFunction) {
   const node = view.nodeDOM(pos);
-  if (node instanceof HTMLElement) {
+  const scrollNode = node instanceof HTMLElement ? node : node?.parentElement;
+  if (scrollNode) {
     const editingRoot = editingRootNode(view.state.selection)!;
     const container = view.nodeDOM(editingRoot.pos) as HTMLElement;
     const scroller = zenscroll.createScroller(editorScrollContainer(container), duration, offset);
     if (duration) {
-      scroller.to(node, duration, onDone);
+      scroller.to(scrollNode, duration, onDone);
     } else {
-      scroller.to(node, 0, onDone);
+      scroller.to(scrollNode, 0, onDone);
     }
   }
 }

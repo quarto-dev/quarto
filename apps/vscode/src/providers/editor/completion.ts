@@ -58,40 +58,20 @@ export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocum
 
       // if this is yaml then call the lsp directly
       if (context.language === "yaml") {
+
         return lspRequest(kCodeViewGetCompletions, [context]);
+      
       } else {
+        
         // see if we have an embedded langaage
         const language = embeddedLanguage(context.language);
         if (language) {
+          
           // if this is a yaml comment line then call the lsp
           const line = context.code[context.selection.start.line];
           if (language.comment && line.startsWith(`${language.comment}| `)) {
-            // strip out lines that aren't in the code block
-            const code = context.code.map((codeLine, index) => {
-              if (index < context.cellBegin || index > context.cellEnd) {
-                return "";
-              } else {
-                return codeLine;
-              }
-            });
-            // include language header (we offset cellEnd below accordingly)
-            code.splice(context.cellBegin, 0, `{${context.language}}`);
-            // make request 
-            return lspRequest(kCodeViewGetCompletions, [{
-              ...context,
-              code,
-              cellEnd: context.cellEnd + 1,
-              selection: {
-                start: {
-                  ...context.selection.start,
-                  line: context.selection.start.line + 1
-                },
-                end: {
-                  ...context.selection.end,
-                  line: context.selection.end.line + 1
-                }
-              }
-            }]);
+            return lspCellYamlOptionsCompletions(context, lspRequest);
+
           // otherwise delegate to vscode completion system
           } else {
             const vdoc = virtualDocForCode(context.code, language);
@@ -119,6 +99,35 @@ export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocum
       }
     },
   };
+}
+
+function lspCellYamlOptionsCompletions(context: CodeViewCompletionContext, lspRequest: JsonRpcRequestTransport) {
+   // strip out lines that aren't in the code block
+   const code = context.code.map((codeLine, index) => {
+    if (index < context.cellBegin || index > context.cellEnd) {
+      return "";
+    } else {
+      return codeLine;
+    }
+  });
+  // include language header (we offset cellEnd below accordingly)
+  code.splice(context.cellBegin, 0, `{${context.language}}`);
+  // make request 
+  return lspRequest(kCodeViewGetCompletions, [{
+    ...context,
+    code,
+    cellEnd: context.cellEnd + 1,
+    selection: {
+      start: {
+        ...context.selection.start,
+        line: context.selection.start.line + 1
+      },
+      end: {
+        ...context.selection.end,
+        line: context.selection.end.line + 1
+      }
+    }
+  }]);
 }
 
 export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : CompletionItem {

@@ -15,6 +15,7 @@
 
 export interface EditorLanguage {
   ids: string[];
+  comment?: string;
   ext?: string;
   trigger?: string[];
 }
@@ -23,54 +24,66 @@ const kEditorLanguages = [
   {
     ids: ["python"],
     ext: "py",
+    comment: "#",
     trigger: ["."]
   },
   {
     ids: ["r"],
     ext: "r",
+    comment: "#",
     trigger: ["$", "@", ":", "."],
   },
   {
     ids: ["julia"],
     ext: "jl",
+    comment: "#",
     trigger: ["."]
   },
   {
     ids: ["sql"],
+    comment: "--",
     trigger: ["."]
   },
   {
     ids: ["bash"],
+    comment: "#",
     ext: "sh"
   },
   {
     ids: ["sh"],
+    comment: "#",
     ext: "sh"
   },
   {
     ids: ["shell"],
+    comment: "#",
     ext: "sh"
   },
   {
     ids: ["ruby"],
     ext: "rb",
+    comment: "#",
     trigger: ["."]
   },
   {
     ids: ["rust"],
     ext: "rs",
+    comment: "//",
     trigger: ["."]
   },
   {
     ids: ["java"],
+    comment: "//",
     trigger: ["."]
   },
   {
     ids: ["cpp"],
+    comment: "//",
     trigger: [".", ">", ":"]
   },
   {
     ids: ["go"],
+    comment: "//",
     trigger: ["."]
   },
   {
@@ -81,16 +94,19 @@ const kEditorLanguages = [
   },
   {
     ids: ["ts", "typescript"],
+    comment: "//",
     ext: "ts",
     trigger: ["."],
   },
   {
     ids: ["js", "javascript", "d3", "ojs"],
+    comment: "//",
     ext: "js",
     trigger: ["."],
   },
   {
     ids: ["jsx"],
+    comment: "//",
     trigger: ["."]
   },
   {

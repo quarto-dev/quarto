@@ -13,19 +13,29 @@
  *
  */
 
+import { Node as ProsemirrorNode } from 'prosemirror-model'
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { undo, redo } from "prosemirror-history";
 import { exitCode, selectAll, setBlockType } from "prosemirror-commands";
 
 import { EditorView, KeyBinding, keymap } from "@codemirror/view";
+import { insertNewlineAndIndent } from "@codemirror/commands";
 
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
 import { handleArrowToAdjacentNode } from "editor";
 
 import { Behavior, BehaviorContext, State } from ".";
+import { editorLanguage } from 'editor-core';
 
 export function keyboardBehavior(context: BehaviorContext) : Behavior {
+
+  // track current language
+  let language  = '';
+  const updateLanguage = (nd: ProsemirrorNode) => {
+    language = context.options.lang(nd, nd.textContent) || '';
+  }
+
 
   // alias context
   const { view, getPos } = context;
@@ -82,6 +92,13 @@ export function keyboardBehavior(context: BehaviorContext) : Behavior {
       },
     },
     {
+      key: "Enter",
+      run: (cmView: EditorView) => {
+        return handlerEnterKey(cmView, language);
+      },
+      shift: insertNewlineAndIndent
+    },
+    {
       key: "Shift-Enter",
       run: (cmView: EditorView) => {
         const sel = cmView.state.selection.main;
@@ -107,6 +124,53 @@ export function keyboardBehavior(context: BehaviorContext) : Behavior {
 
   return {
     extensions: [keymap.of([...keys, ...vscodeKeys] as KeyBinding[])],
+
+    init(pmNode) {
+      updateLanguage(pmNode);
+    },
+
+    pmUpdate: (_prevNode, updateNode) => {
+      updateLanguage(updateNode);
+    }
+  }
+}
+
+
+const handlerEnterKey = (cmView: EditorView, language: string) => {
+ 
+  // capture current line
+  const line = cmView.state.doc.lineAt(cmView.state.selection.main.from);
+  
+  // perform the default action
+  if (insertNewlineAndIndent(cmView)) {
+    // if the current block has a language with a commnt char defined then check
+    // for a continuation of an option comment line
+    const langComment = editorLanguage(language)?.comment;
+    if (langComment) {
+      const newlineSel = cmView.state.selection.main;
+      const optionComment = `${langComment}| `;
+      if (line.text.trim() === optionComment.trim()) {
+        cmView.dispatch({
+          changes: {
+            from: newlineSel.from - line.text.length - 1,
+            to: newlineSel.from,
+            insert: "\n"
+          }
+        })
+      } else if (line.text.startsWith(optionComment)) {
+        cmView.dispatch({
+          changes: {
+            from: newlineSel.from,
+            to: newlineSel.to,
+            insert: optionComment,
+          },
+          selection: {anchor: newlineSel.from + optionComment.length}
+        })
+      }
+    }
+    return true;
+  } else {
+    return false;
   }
 }
 

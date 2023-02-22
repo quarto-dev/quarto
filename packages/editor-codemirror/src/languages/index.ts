@@ -88,6 +88,10 @@ export function createLanguageMode(lang: string) : Language  | null {
     case 'sh':
       lang = 'shell';
       break;
+    case 'js':
+    case 'ojs':
+      lang = 'javascript';
+      break;
   }
 
   switch(lang) {

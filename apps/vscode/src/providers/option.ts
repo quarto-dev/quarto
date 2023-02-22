@@ -20,6 +20,7 @@ import {
   Position,
   TextEditor,
   Range,
+  TextDocumentContentChangeEvent,
 } from "vscode";
 import { isQuartoDoc } from "../core/doc";
 
@@ -71,42 +72,32 @@ export function activateOptionEnterProvider(
 }
 
 function handleOptionEnter(editor: TextEditor, comment: string) {
+
   // option comment for this language
   const optionComment = comment + "| ";
 
-  // get current line
+  // current line info
   const currentLineNumber = editor.selection.active.line;
-  const currentLine = editor.document
-    .getText(new Range(currentLineNumber, 0, currentLineNumber + 1, 0))
-    .trim();
-
-  // if the current line is empty then we might qualify for some auto insert/delete
-  if (currentLine.length === 0) {
-    // get the previous line
-    const previousLine = editor.document
-      .getText(new Range(currentLineNumber - 1, 0, currentLineNumber, 0))
-      .trim();
-    if (previousLine.trim() === optionComment.trim()) {
-      // previous line is an empty option comment -- remove the comment
-      editor.edit((builder) => {
-        builder.replace(
-          new Range(
-            new Position(editor.selection.active.line - 1, 0),
-            new Position(editor.selection.active.line, 0)
-          ),
-          "\n"
-        );
-      });
-    } else if (previousLine.startsWith(optionComment)) {
-      // previous line starts with option comment -- start this line with a comment
-      editor.edit((builder) => {
-        builder.insert(editor.selection.end!, optionComment);
-      });
-    }
+  const currentLine = editor.document.lineAt(editor.selection.start).text;
+ 
+  // apply edits
+  if (currentLine.trim() === optionComment.trim()) {
+    editor.edit((builder) => {
+      builder.delete(new Range(new Position(currentLineNumber, 0), new Position(currentLineNumber, currentLine.length)));
+    });
+  } else if (currentLine.startsWith(optionComment)) {
+    editor.edit((builder) => {
+      builder.insert(editor.selection.start.translate(1, 0), optionComment);
+    });
   }
 }
 
 function languageOptionComment(langauge: string) {
+  // some mappings
+  if (langauge === "ojs") {
+    langauge = "js";
+  }
+
   if (Object.keys(kLangCommentChars).includes(langauge)) {
     return kLangCommentChars[langauge];
   } else {

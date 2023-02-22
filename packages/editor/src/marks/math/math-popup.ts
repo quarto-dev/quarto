@@ -162,11 +162,13 @@ export class MathPopupPlugin extends Plugin {
     if (inlineMath !== this.lastRenderedMath && this.popup) {
       this.math.typeset!(this.popup, inlineMath, true).then(error => {
         if (!error) {
-          this.popup!.style.visibility = 'visible';
-          this.lastRenderedMath = inlineMath;
-          // autoscroll for non-mouse triggers
-          if (!$mousePos && range) {
-            this.autoscollPopup(range);
+          if (this.popup) {
+            this.popup.style.visibility = 'visible';
+            this.lastRenderedMath = inlineMath;
+            // autoscroll for non-mouse triggers
+            if (!$mousePos && range) {
+              this.autoscollPopup(range);
+            }
           }
         }
       });

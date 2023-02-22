@@ -5,6 +5,7 @@
 - Update background highlight for all visible editors (not just active)
 - Improve cursor placement for YAML block insertion
 - More robust handling when parsing empty yaml metadata blocks
+- Fix for editor scrollIntoView that targets text nodes (as opposed to blocks)
 
 ## 1.68.0 (Release on 20 February 2023)
 

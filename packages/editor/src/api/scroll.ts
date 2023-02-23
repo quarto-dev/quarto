@@ -14,7 +14,7 @@
  */
 
 import { EditorView } from 'prosemirror-view';
-import { findParentNodeOfTypeClosestToPos } from 'prosemirror-utils';
+import { findDomRefAtPos, findParentNodeOfTypeClosestToPos } from 'prosemirror-utils';
 
 import zenscroll from 'zenscroll';
 
@@ -39,7 +39,7 @@ export function scrollIntoView(
     const parentList = findParentNodeOfTypeClosestToPos($pos, [schema.nodes.ordered_list, schema.nodes.bullet_list]);
     const parentDiv = schema.nodes.div ? findParentNodeOfTypeClosestToPos($pos, schema.nodes.div) : undefined;
     const resultPos =  (parentList || parentDiv) ? $pos.before(2) : pos;
-    const resultNode = view.nodeDOM(resultPos);
+    const resultNode = findDomRefAtPos(resultPos, view.domAtPos.bind(view))
     if (resultNode) {
       const scrollNode = resultNode instanceof HTMLElement ? resultNode : resultNode.parentElement;
       if (scrollNode) {

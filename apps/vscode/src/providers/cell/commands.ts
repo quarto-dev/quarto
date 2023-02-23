@@ -13,6 +13,8 @@
  *
  */
 
+import { lines } from "core";
+import { CodeViewActiveBlockContext, CodeViewSelectionAction } from "editor-types";
 import Token from "markdown-it/lib/token";
 import {
   Position,
@@ -30,6 +32,7 @@ import {
   languageNameFromBlock,
   languageBlockAtPosition,
 } from "../../markdown/language";
+import { QuartoVisualEditor, VisualEditorProvider } from "../editor/editor";
 import {
   blockHasExecutor,
   blockIsExecutable,
@@ -37,6 +40,7 @@ import {
   ensureRequiredExtension,
   executeInteractive,
   executeSelectionInteractive,
+  hasExecutor,
 } from "./executors";
 
 export function cellCommands(engine: MarkdownEngine): Command[] {
@@ -59,33 +63,51 @@ abstract class RunCommand {
   }
 
   public async execute(line?: number): Promise<void> {
-    const editor = window.activeTextEditor;
-    const doc = editor?.document;
-    if (doc && isQuartoDoc(doc)) {
-      const tokens = await this.engine_.parse(doc);
-      line = line || editor.selection.start.line;
-      if (this.blockRequired()) {
-        const block = languageBlockAtPosition(
-          tokens,
-          new Position(line, 0),
-          this.includeFence()
-        );
-        if (block) {
-          const language = languageNameFromBlock(block);
-          if (await ensureRequiredExtension(language, doc, this.engine_)) {
-            await this.doExecute(editor, tokens, line, block);
-          }
+
+    // see if this is for the visual or the source editor
+    const visualEditor = VisualEditorProvider.activeEditor();
+    if (visualEditor) {
+      const blockContext = await visualEditor.getActiveBlockContext();
+      if (blockContext) {
+        if (hasExecutor(blockContext.language)) {
+          await this.doExecuteVisualMode(visualEditor, blockContext);
         } else {
-          window.showInformationMessage(
-            "Editor selection is not within an executable cell"
-          );
+          window.showWarningMessage(`Execution of ${blockContext.language} cells is not supported`);
         }
       } else {
-        await this.doExecute(editor, tokens, line);
+        window.showWarningMessage("Editor selection is not within an executable cell");
       }
     } else {
-      window.showInformationMessage("Active editor is not a Quarto document");
+      const editor = window.activeTextEditor;
+      const doc = editor?.document;
+      if (doc && isQuartoDoc(doc)) {
+        const tokens = await this.engine_.parse(doc);
+        line = line || editor.selection.start.line;
+        if (this.blockRequired()) {
+          const block = languageBlockAtPosition(
+            tokens,
+            new Position(line, 0),
+            this.includeFence()
+          );
+          if (block) {
+            const language = languageNameFromBlock(block);
+            if (await ensureRequiredExtension(language, doc, this.engine_)) {
+              await this.doExecute(editor, tokens, line, block);
+            }
+          } else {
+            window.showWarningMessage(
+              "Editor selection is not within an executable cell"
+            );
+          }
+        } else {
+          await this.doExecute(editor, tokens, line);
+        }
+      } else {
+        window.showWarningMessage("Active editor is not a Quarto document");
+      }
     }
+
+   
   }
 
   protected includeFence() {
@@ -95,6 +117,11 @@ abstract class RunCommand {
   protected blockRequired() {
     return true;
   }
+
+  protected abstract doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void>;
 
   protected abstract doExecute(
     editor: TextEditor,
@@ -125,6 +152,17 @@ class RunCurrentCellCommand extends RunCommand implements Command {
       await executeInteractive(language, [code]);
     }
   }
+
+  override async doExecuteVisualMode(
+    _editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    const activeBlock = context.blocks.find(block => block.active);
+    if (activeBlock) {
+      await executeInteractive(context.language, [activeBlock.code]);
+    }
+  }
+
 }
 
 class RunNextCellCommand extends RunCommand implements Command {
@@ -138,6 +176,20 @@ class RunNextCellCommand extends RunCommand implements Command {
     const block = nextBlock(line, tokens, true);
     if (block) {
       await runAdjacentBlock(editor, block);
+    }
+  }
+
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    const activeBlockIndex = context.blocks.findIndex(block => block.active);
+    const nextBlock = context.blocks[activeBlockIndex + 1];
+    if (nextBlock) {
+      await editor.setBlockSelection(context, "nextblock");
+      await executeInteractive(context.language, [nextBlock.code]);
+    } else {
+      window.showInformationMessage("No more cells available to execute");
     }
   }
 }
@@ -155,6 +207,20 @@ class RunPreviousCellCommand extends RunCommand implements Command {
       if (block) {
         await runAdjacentBlock(editor, block);
       }
+    }
+  }
+
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    const activeBlockIndex = context.blocks.findIndex(block => block.active);
+    const prevBlock = context.blocks[activeBlockIndex - 1];
+    if (prevBlock) {
+      await editor.setBlockSelection(context, "prevblock");
+      await executeInteractive(context.language, [prevBlock.code]);
+    } else {
+      window.showInformationMessage("No more cells available to execute");
     }
   }
 }
@@ -207,6 +273,30 @@ class RunSelectionCommand extends RunCommand implements Command {
       await executeInteractive(language, [selection]);
     }
   }
+
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    // if the selection is empty take the whole line, otherwise take the selected text exactly
+    let selection = context.selectedText;
+    let action: CodeViewSelectionAction | undefined;
+    if (selection.length <= 0) {
+      const activeBlock = context.blocks.find(block => block.active);
+      if (activeBlock) {
+        selection = lines(activeBlock.code)[context.selection.start.line];
+        action = "nextline";
+      }
+    }
+
+    // run code
+    await executeInteractive(context.language, [selection]);
+    
+    // advance cursor if necessary
+    if (action) {
+      editor.setBlockSelection(context, "nextline");
+    }
+  }
 }
 
 class RunCellsAboveCommand extends RunCommand implements Command {
@@ -256,6 +346,23 @@ class RunCellsAboveCommand extends RunCommand implements Command {
       await executeInteractive(language, code);
     }
   }
+  
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    const code: string[] = [];
+    for (const block of context.blocks) {
+      if (block.active) {
+        break;
+      }
+      code.push(block.code);
+    }
+    if (code.length > 0) {
+      await executeInteractive(context.language, code);
+      await editor.activate();
+    }
+  }
 }
 
 class RunCellsBelowCommand extends RunCommand implements Command {
@@ -300,6 +407,25 @@ class RunCellsBelowCommand extends RunCommand implements Command {
       await executeInteractive(language, blocks);
     }
   }
+
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+
+    let code: string[] | undefined;
+    for (const block of context.blocks) {
+      if (block.active) {
+        code = [];
+      } else if (code) {
+        code.push(block.code);
+      }
+    }
+    if (code && code.length > 0) {
+      await executeInteractive(context.language, code);
+      await editor.activate();
+    }
+  }
 }
 
 class RunAllCellsCommand extends RunCommand implements Command {
@@ -334,37 +460,67 @@ class RunAllCellsCommand extends RunCommand implements Command {
       await executeInteractive(language, blocks);
     }
   }
+
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    const code : string[] = [];
+    for (const block of context.blocks) {
+      code.push(block.code);
+    }
+    if (code.length > 0) {
+      await executeInteractive(context.language, code);
+      await editor.activate();
+    }
+  }
 }
 
 class GoToCellCommand {
   constructor(
     engine: MarkdownEngine,
-    selector: (line: number, tokens: Token[]) => Token | undefined
+    dir: "next" | "previous"
   ) {
     this.engine_ = engine;
-    this.selector_ = selector;
+    this.dir_ = dir;
   }
 
   async execute(): Promise<void> {
-    const editor = window.activeTextEditor;
-    const doc = editor?.document;
-    if (doc && isQuartoDoc(doc)) {
-      const tokens = await this.engine_.parse(doc);
-      const line = editor.selection.start.line;
-      const cell = this.selector_(line, tokens);
-      if (cell) {
-        navigateToBlock(editor, cell);
+    const visualEditor = VisualEditorProvider.activeEditor();
+    if (visualEditor) {
+      const blockContext = await visualEditor.getActiveBlockContext();
+      if (blockContext) {
+        if (this.dir_ === "next") {
+          visualEditor.setBlockSelection(blockContext, "nextblock");
+        } else {
+          visualEditor.setBlockSelection(blockContext, "prevblock");
+        }
+      } else {
+        window.showWarningMessage("Editor selection is not within an executable cell");
+      }
+    } else {
+      const editor = window.activeTextEditor;
+      const doc = editor?.document;
+      if (doc && isQuartoDoc(doc)) {
+        const tokens = await this.engine_.parse(doc);
+        const line = editor.selection.start.line;
+        const selector = this.dir_ === "next" ? nextBlock : previousBlock;
+        const cell = selector(line, tokens);
+        if (cell) {
+          navigateToBlock(editor, cell);
+        }
       }
     }
+    
   }
 
   private engine_: MarkdownEngine;
-  private selector_: (line: number, tokens: Token[]) => Token | undefined;
+  private dir_: "next" | "previous";
 }
 
 class GoToNextCellCommand extends GoToCellCommand implements Command {
   constructor(engine: MarkdownEngine) {
-    super(engine, nextBlock);
+    super(engine, "next");
   }
   private static readonly id = "quarto.goToNextCell";
   public readonly id = GoToNextCellCommand.id;
@@ -372,7 +528,7 @@ class GoToNextCellCommand extends GoToCellCommand implements Command {
 
 class GoToPreviousCellCommand extends GoToCellCommand implements Command {
   constructor(engine: MarkdownEngine) {
-    super(engine, previousBlock);
+    super(engine, "previous");
   }
   private static readonly id = "quarto.goToPreviousCell";
   public readonly id = GoToPreviousCellCommand.id;

@@ -22,10 +22,12 @@ export type CodeViewExecute = "selection" | "cell" | "above" | "below";
 
 export interface CodeViewActiveBlockContext {
   language: string;
-  blocks: Array<{ code: string; active: boolean }>;
+  blocks: Array<{ pos: number, code: string; active: boolean }>;
   selection: Range;
   selectedText: string;
 }
+
+export type CodeViewSelectionAction = "nextline" | "nextblock" | "prevblock";
 
 export interface CodeViewCompletionContext {
   filepath: string;

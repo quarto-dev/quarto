@@ -40,7 +40,9 @@ import {
   EditingOutlineLocation, 
   EditorOutline, 
   SourcePos,
-  NavLocation
+  NavLocation,
+  CodeViewActiveBlockContext,
+  CodeViewSelectionAction
 } from 'editor-types';
 
 import {
@@ -105,7 +107,7 @@ import { yamlFrontMatter, applyYamlFrontMatter } from '../api/yaml';
 import { EditorSpellingDoc } from '../api/spelling';
 import { getPresentationEditorLocation, PresentationEditorLocation, positionForPresentationEditorLocation } from '../api/presentation';
 import { kPmScrollContainer } from '../api/scroll';
-import { CodeViewExtensionFn } from '../api/codeview';
+import { codeViewActiveBlockContext, CodeViewExtensionFn, codeViewSetBlockSelection } from '../api/codeview';
 import { editingRootNode, editingRootNodeClosestToPos } from '../api/node';
 import { ContextMenuSource } from '../api/menu';
 import { mapSlice } from '../api/slice';
@@ -290,6 +292,10 @@ export interface EditorOperations {
   getMarkdown(options: PandocWriterOptions) : Promise<EditorCode>;
   getEditorSourcePos(): SourcePos;
   getSlideIndex(): number;
+
+  // codeviews
+  getCodeViewActiveBlockContext() : CodeViewActiveBlockContext | undefined;
+  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : void;
 
   // subsystems
   getFindReplace() : EditorFindReplace | undefined
@@ -829,6 +835,16 @@ export class Editor  {
 
   public blur() {
     (this.view.dom as HTMLElement).blur();
+  }
+
+  public getCodeViewActiveBlockContext() : CodeViewActiveBlockContext | undefined {
+    return codeViewActiveBlockContext(this.state);
+  }
+
+  public setBlockSelection(
+    context: CodeViewActiveBlockContext, 
+    action: CodeViewSelectionAction) {
+    codeViewSetBlockSelection(this.view, context, action);
   }
 
   public insertChunk(chunkPlaceholder: string) {

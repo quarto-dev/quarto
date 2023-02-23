@@ -31,7 +31,7 @@ import {
 } from "../../markdown/language";
 import { virtualDoc, virtualDocUri } from "../../vdoc/vdoc";
 
-import { cellOptions, kExecuteEval } from "./options";
+import { cellOptionsForToken, kExecuteEval } from "./options";
 
 export function hasExecutor(language: string) {
   return !!kCellExecutors.find((x) => x.language === language);
@@ -49,7 +49,7 @@ export function blockHasExecutor(token?: Token) {
 export function blockIsExecutable(token?: Token) {
   if (token) {
     return (
-      blockHasExecutor(token) && cellOptions(token)[kExecuteEval] !== false
+      blockHasExecutor(token) && cellOptionsForToken(token)[kExecuteEval] !== false
     );
   } else {
     return false;

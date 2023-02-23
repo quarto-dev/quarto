@@ -41,7 +41,7 @@ import { LanguageClient } from "vscode-languageclient/node";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
-import { HostContext, NavLocation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
+import { CodeViewActiveBlockContext, CodeViewSelectionAction, HostContext, NavLocation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
@@ -64,6 +64,11 @@ import {
   reopenEditorInSourceMode 
 } from "./toggle";
 
+
+export interface QuartoVisualEditor extends QuartoEditor {
+  getActiveBlockContext() : Promise<CodeViewActiveBlockContext | null>;
+  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : Promise<void>;
+}
 
 export function activateEditor(
   context: ExtensionContext,
@@ -182,7 +187,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static readonly viewType = "quarto.visualEditor";
 
-  public static activeEditor(includeVisible?: boolean) : QuartoEditor | undefined {
+  public static activeEditor(includeVisible?: boolean) : QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
       return { 
@@ -192,6 +197,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         },
         slideIndex: async () => {
           return await editor.editor.getSlideIndex();
+        },
+        getActiveBlockContext: async () => {
+          return await editor.editor.getActiveBlockContext();
+        },
+        setBlockSelection: async (context, action) => {
+          await editor.editor.setBlockSelection(context, action);
         },
         viewColumn: editor.webviewPanel.viewColumn 
       };

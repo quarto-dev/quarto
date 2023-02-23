@@ -116,9 +116,9 @@ export function navigateToPos(view: EditorView, pos: number, animate = true): Na
         const containerEl = view.nodeDOM(container.pos) as HTMLElement;
         const parentList = findParentNodeOfTypeClosestToPos($pos, [schema.nodes.ordered_list, schema.nodes.bullet_list]);
         const parentDiv = schema.nodes.div ? findParentNodeOfTypeClosestToPos($pos, schema.nodes.div) : undefined;
-        const resultPos = parentList || parentDiv ? $pos.before(2) : pos;
-        const resultNode = view.nodeDOM(resultPos) as HTMLElement;
-        if (resultNode) {
+        const resultPos = (parentList || parentDiv) ? $pos.before(2) : pos;
+        const resultNode = findDomRefAtPos(resultPos, view.domAtPos.bind(view))
+        if (resultNode instanceof HTMLElement) {
           const scroller = zenscroll.createScroller(editorScrollContainer(containerEl), 700, 20);
           if (animate) {
             scroller.to(resultNode);

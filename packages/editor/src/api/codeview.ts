@@ -27,11 +27,13 @@ import { lines } from 'core';
 import { CommandFn } from "./command";
 import { ExtensionFn } from "./extension-types";
 import { editingRootNode } from './node';
-import { editorScrollContainer } from './scroll';
+import { editorScrollContainer, scrollIntoView } from './scroll';
 
-import { EditorState } from 'prosemirror-state';
+import { EditorState, TextSelection } from 'prosemirror-state';
 import { rmdChunk } from './rmd';
-import { CodeViewActiveBlockContext, CodeViewCompletionContext } from 'editor-types';
+import { CodeViewActiveBlockContext, CodeViewCompletionContext, CodeViewSelectionAction } from 'editor-types';
+import { navigateToPos } from './navigation';
+import { setTextSelection } from 'prosemirror-utils';
 
 export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
 
@@ -198,6 +200,35 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
+export function codeViewSetBlockSelection(
+  view: EditorView, 
+  context: CodeViewActiveBlockContext, 
+  action: CodeViewSelectionAction 
+) {
+  
+
+  const activeIndex = context.blocks.findIndex(block => block.active);
+
+  if (activeIndex !== -1) {
+
+    if (action === "nextline") {
+     // TODO -- may need to communicate directly w/ the codeview
+    } else {
+      let navigatePos : number | undefined;
+      if (action === "nextblock") {
+        navigatePos = context.blocks[activeIndex + 1]?.pos;
+      } else if (action === "prevblock") {
+        navigatePos = context.blocks[activeIndex - 1]?.pos;
+      } 
+      if (navigatePos) { 
+        navigateToPos(view, navigatePos!, false);
+      }
+    }
+  }
+
+
+  
+}
 
 export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveBlockContext | undefined {
 
@@ -260,7 +291,7 @@ export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveB
 
 
     // collect all the blocks with this language
-    const blocks: Array<{ code: string; active: boolean }> = [];
+    const blocks: Array<{ pos: number, code: string; active: boolean }> = [];
     state.doc.descendants((node, pos) => {
       const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
       if (languageBlock?.language === activeBlock.language) {

@@ -23,6 +23,8 @@ import {
   VSC_VE_GetMarkdownFromState,
   VSC_VE_GetSlideIndex,
   VSC_VE_ApplyExternalEdit, 
+  VSC_VE_GetActiveBlockContext,
+  VSC_VE_SetBlockSelection,
   VSC_VEH_EditorResourceUri,
   VSC_VEH_GetHostContext, 
   VSC_VEH_ReopenSourceMode,
@@ -46,7 +48,9 @@ import {
   Prefs,
   PrefsServer,
   NavLocation,
-  CodeViewServer
+  CodeViewServer,
+  CodeViewActiveBlockContext,
+  CodeViewSelectionAction
 } from "editor-types";
 
 import { 
@@ -78,6 +82,11 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       isFocused: () => request(VSC_VE_IsFocused, []),
       getMarkdownFromState: (state: unknown) => request(VSC_VE_GetMarkdownFromState, [state]),
       getSlideIndex: () => request(VSC_VE_GetSlideIndex, []),
+      getActiveBlockContext: () => request(VSC_VE_GetActiveBlockContext, []),
+      setBlockSelection: (
+        context: CodeViewActiveBlockContext, 
+        action: CodeViewSelectionAction
+      ) => request(VSC_VE_SetBlockSelection, [context, action]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
       prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
       imageChanged: (file: string) => request(VSC_VE_ImageChanged, [file])

@@ -81,8 +81,16 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   // ensure that keys we handle aren't propagated to vscode
   const keyboardEventHandler = (handler: React.KeyboardEventHandler) => {
     return (event: React.KeyboardEvent<HTMLElement>) => {
+      
+      // call handler
       handler(event);
-      if (event.isDefaultPrevented()) {
+
+      // for some reason Cmd+Shift+Enter is marked as default prevented, but
+      // we want it to propagate!
+      const cmdShiftEnter = (event.ctrlKey || event.metaKey) &&  event.shiftKey && event.key === "Enter";
+
+      // propagage
+      if (!cmdShiftEnter && event.isDefaultPrevented()) {
         event.stopPropagation();
       }
     };

@@ -34,6 +34,8 @@ import {
   VSC_VE_ImageChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_GetSlideIndex,
+  VSC_VE_GetActiveBlockContext,
+  VSC_VE_SetBlockSelection,
   VSC_VE_Init, 
   VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
@@ -59,7 +61,9 @@ import {
   VSC_VE_IsFocused,
   Prefs,
   SourcePos,
-  NavLocation
+  NavLocation,
+  CodeViewActiveBlockContext,
+  CodeViewSelectionAction
 } from "editor-types";
 
 import { 
@@ -226,6 +230,13 @@ export async function syncEditorToHost(
 
     async getSlideIndex(): Promise<number> {
       return editor.getSlideIndex();
+    },
+
+    async getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null> {
+      return editor.getCodeViewActiveBlockContext() || null;
+    },
+    async setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) {
+      editor.setBlockSelection(context, action);
     }
   })
 
@@ -306,6 +317,8 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_GetMarkdownFromState]: args => editor.getMarkdownFromState(args[0]),
     [VSC_VE_GetSlideIndex]: () => editor.getSlideIndex(),
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
+    [VSC_VE_GetActiveBlockContext]: () => editor.getActiveBlockContext(),
+    [VSC_VE_SetBlockSelection]: args => editor.setBlockSelection(args[0], args[1]),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
     [VSC_VE_ImageChanged]: args => editor.imageChanged(args[0])
   })

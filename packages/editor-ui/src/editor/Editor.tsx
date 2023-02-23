@@ -309,6 +309,12 @@ export const Editor : React.FC<EditorProps> = (props) => {
     getEditorSourcePos() {
       return editorRef.current!.getEditorSourcePos();
     },
+    getCodeViewActiveBlockContext() {
+      return editorRef.current!.getCodeViewActiveBlockContext();
+    },
+    setBlockSelection(context, action) {
+      editorRef.current!.setBlockSelection(context, action);
+    },
     getFindReplace() {
       return editorRef.current?.getFindReplace();
     },

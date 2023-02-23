@@ -1,9 +1,10 @@
 # Changelog
 
-## 1.69.0 (Unreleased)
+## 1.69.0 (Release on 23 February 2023)
 
 - Automatically insert option comments (e.g. `#| `) on enter
 - Completion for YAML options within cell comments
+- Improved handling of escaped executable code blocks (required for Pandoc v3)
 - Update background highlight for all visible editors (not just active)
 - Improve cursor placement for YAML block insertion
 - More robust handling when parsing empty yaml metadata blocks

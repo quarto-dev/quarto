@@ -20,11 +20,13 @@ import { EditorView } from 'prosemirror-view';
 
 import { findParentNodeOfType } from 'prosemirror-utils';
 
+import { lines } from 'core';
+
 import { BlockCommand, EditorCommandId, ProsemirrorCommand, toggleBlockType } from '../api/command';
 import { Extension, ExtensionContext } from '../api/extension';
 import { BaseKey } from '../api/basekeys';
 import { codeNodeSpec } from '../api/code';
-import { PandocOutput, PandocTokenType, PandocExtensions } from '../api/pandoc';
+import { PandocOutput, PandocTokenType, PandocExtensions, ProsemirrorWriter } from '../api/pandoc';
 import { pandocAttrSpec, pandocAttrParseDom, pandocAttrToDomAttr, pandocAttrAvailable } from '../api/pandoc_attr';
 import { PandocCapabilities } from '../api/pandoc_capabilities';
 import { EditorUI } from '../api/ui-types';
@@ -33,6 +35,7 @@ import { hasFencedCodeBlocks } from '../api/pandoc_format';
 import { precedingListItemInsertPos, precedingListItemInsert } from '../api/list';
 import { EditorOptions } from '../api/options';
 import { OmniInsertGroup } from '../api/omni_insert';
+import { blockCapsuleParagraphTokenHandler, blockCapsuleSourceWithoutPrefix, blockCapsuleTextHandler, encodedBlockCapsuleRegex, PandocBlockCapsule, PandocBlockCapsuleFilter } from '../api/pandoc_capsule';
 
 const kNoAttributesSentinel = 'CEF7FA46';
 
@@ -94,6 +97,24 @@ const extension = (context: ExtensionContext): Extension => {
             },
           ],
           writer: (output: PandocOutput, node: ProsemirrorNode) => {
+
+            // see if we need to escape executable code block syntax
+            if (!pandocAttrAvailable(node.attrs) && pandocExtensions.backtick_code_blocks) {
+              let text = node.textContent;
+              const textLines = lines(text);
+              if (textLines.length > 0) {
+                const match = textLines[0].match(/^(```+)(\{+[^}]+\}+)([ \t]*)$/);
+                if (match) {
+                  textLines[0] = `${match[1]}{${match[2]}}${match[3]}`;
+                  text = textLines.join("\n");
+                  output.writeToken(PandocTokenType.Para, () => {
+                    output.writeRawMarkdown(text);
+                  });
+                  return;
+                }
+              }
+            }
+            
             output.writeToken(PandocTokenType.CodeBlock, () => {
               if (hasAttr) {
                 const id = pandocExtensions.fenced_code_attributes ? node.attrs.id : '';
@@ -115,6 +136,7 @@ const extension = (context: ExtensionContext): Extension => {
               output.write(node.textContent);
             });
           },
+          blockCapsuleFilter: escapedRmdChunkBlockCapsuleFilter(),
           markdownPostProcessor: (markdown: string) => {
              // cleanup the sentinel classes we may have added above
             if (pandocExtensions.backtick_code_blocks) {
@@ -308,5 +330,57 @@ function codeBlockAttrEdit(pandocExtensions: PandocExtensions, pandocCapabilitie
     }
   };
 }
+
+// NOTE: we also reverse this when writing code blocks: for the first line ```{python} becomes ```{{python}}
+export function escapedRmdChunkBlockCapsuleFilter(): PandocBlockCapsuleFilter {
+  const kEscapedRmdChunkBlockCapsuleType = '9CB79E6C-888D-4A0E-9C9B-FF67CD404E60'.toLowerCase();
+
+  return {
+    type: kEscapedRmdChunkBlockCapsuleType,
+
+    // eslint-disable-next-line no-useless-escape
+    match: /^([\t >]*)((```+)\s*\{{2,}[a-zA-Z0-9_]+(?: *[ ,].*?)?\}{2,}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
+
+    extract: (_match: string, p1: string, p2: string, _p3: string, p4: string) => {
+      return {
+        prefix: p1,
+        source: p2,
+        suffix: p4,
+      };
+    },
+
+    // textually enclose the capsule so that pandoc parses it as the type of block we want it to
+    // (in this case we don't do anything because pandoc would have written this table as a
+    // semantically standalone block)
+    enclose: (capsuleText: string) => {
+      return capsuleText;
+    },
+
+    // look for one of our block capsules within pandoc ast text (e.g. a code or raw block)
+    // and if we find it, parse and return the original source code
+    handleText: blockCapsuleTextHandler(
+      kEscapedRmdChunkBlockCapsuleType,
+      encodedBlockCapsuleRegex(undefined, undefined, 'gm'),
+    ),
+
+    // we are looking for a paragraph token consisting entirely of a block capsule of our type.
+    // if find that then return the block capsule text
+    handleToken: blockCapsuleParagraphTokenHandler(kEscapedRmdChunkBlockCapsuleType),
+
+    // write the node
+    writeNode: (schema: Schema, writer: ProsemirrorWriter, capsule: PandocBlockCapsule) => {
+      // remove the source prefix
+      const source = blockCapsuleSourceWithoutPrefix(capsule.source, capsule.prefix);
+
+      // remove escaping
+      const sourceLines = lines(source);
+      sourceLines[0] = sourceLines[0].replace(/^(```+)\{(\{+[^}]+\}+)\}([ \t]*)$/, "$1$2$3");
+
+      // write the node
+      writer.addNode(schema.nodes.code_block, {}, [schema.text(sourceLines.join("\n"))]);
+    },
+  };
+}
+
 
 export default extension;

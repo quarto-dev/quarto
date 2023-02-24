@@ -317,7 +317,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             ? (workspaceDir || process.cwd()) 
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows(),
-          executableLanguages: executableLanguages()
+          // python doesn't work b/c jupyter.execSelectionInteractive wants a text editor to be active
+          executableLanguages: executableLanguages().filter(language => language !== "python")
         };
       },
 

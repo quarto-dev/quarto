@@ -45,6 +45,7 @@ import { editorLanguage } from "editor-core";
 import { CodeViewCompletionContext, codeViewCompletionContext } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
+import { escapeRegExpCharacters } from "core";
 
 export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
 
@@ -85,11 +86,13 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
               return null;
             }
 
-            // we need to be preceded by a non space character or be explicit
-            // (also don't show matches if query is empty)
-            const match = context.matchBefore(/\S+/);
-            if ((!match && !context.explicit) || (match && match.text.length < 1)) {
-              return null;
+            // if we aren't explcit then filter based on match (letter + wordchar + optional trigger chars)
+            if (!context.explicit) {
+              const trigger = (language.trigger || ["."]);
+              const match = context.matchBefore(new RegExp('(^|[ \t])[A-Za-z_\\.][\\w_\\(\\)\\[\\]' +  escapeRegExpCharacters(trigger.join('')) + ']*'));
+              if (!match) {
+                return null;
+              }
             }
 
             // get completions

@@ -18,8 +18,9 @@ import { TextSelection, Transaction } from "prosemirror-state";
 
 import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { cursorLineDown, cursorLineStart } from "@codemirror/commands";
 
-import { DispatchEvent } from "editor";
+import { DispatchEvent, kCodeViewNextLineTransaction } from "editor";
 
 import { Behavior, BehaviorContext, State } from ".";
 
@@ -45,8 +46,17 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
                 cmView.dispatch({ selection: EditorSelection.single(0)})
               } 
             })
+          } else if (tr.getMeta(kCodeViewNextLineTransaction) === true) {
+            const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
+            if (cmSelection) {
+              context.withState(State.Updating, () => {
+                if (cursorLineDown(cmView)) {
+                  cursorLineStart(cmView);
+                }
+              })
+            }
           }
-        }
+        } 
       });
     },
 

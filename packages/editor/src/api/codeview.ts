@@ -17,6 +17,7 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
+import { EditorState } from 'prosemirror-state';
 
 import { Position } from "vscode-languageserver-types"
 
@@ -27,13 +28,13 @@ import { lines } from 'core';
 import { CommandFn } from "./command";
 import { ExtensionFn } from "./extension-types";
 import { editingRootNode } from './node';
-import { editorScrollContainer, scrollIntoView } from './scroll';
+import { editorScrollContainer } from './scroll';
 
-import { EditorState, TextSelection } from 'prosemirror-state';
 import { rmdChunk } from './rmd';
 import { CodeViewActiveBlockContext, CodeViewCompletionContext, CodeViewSelectionAction } from 'editor-types';
 import { navigateToPos } from './navigation';
-import { setTextSelection } from 'prosemirror-utils';
+
+export const kCodeViewNextLineTransaction = "codeViewNextLine";
 
 export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
 
@@ -210,9 +211,10 @@ export function codeViewSetBlockSelection(
   const activeIndex = context.blocks.findIndex(block => block.active);
 
   if (activeIndex !== -1) {
-
     if (action === "nextline") {
-     // TODO -- may need to communicate directly w/ the codeview
+      const tr = view.state.tr;
+      tr.setMeta(kCodeViewNextLineTransaction, true);
+      view.dispatch(tr);
     } else {
       let navigatePos : number | undefined;
       if (action === "nextblock") {

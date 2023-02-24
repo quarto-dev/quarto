@@ -66,7 +66,6 @@ export function codeMirrorExtension(
           { key: BaseKey.ArrowRight, command: codeViewArrowHandler('right', nodeTypes) },
           { key: BaseKey.ArrowUp, command: codeViewArrowHandler('up', nodeTypes) },
           { key: BaseKey.ArrowDown, command: codeViewArrowHandler('down', nodeTypes) }
-        
         ];
       },
     };

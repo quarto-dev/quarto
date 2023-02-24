@@ -5,7 +5,8 @@
 
 @font-face {
 	font-family: "codicon";
-	src: url("./codicon.ttf?756fa482df4f1610f1e0548d031e8c29") format("truetype");
+	font-display: block;
+	src: url("./codicon.ttf?939d3cf562f2f1379a18b5c3113b59cd") format("truetype");
 }
 
 .codicon[class*='codicon-'] {
@@ -21,6 +22,40 @@
 	-ms-user-select: none;
 }
 
+/*---------------------
+ *  Modifiers
+ *-------------------*/
+
+@keyframes codicon-spin {
+	100% {
+		transform:rotate(360deg);
+	}
+}
+
+.codicon-sync.codicon-modifier-spin,
+.codicon-loading.codicon-modifier-spin,
+.codicon-gear.codicon-modifier-spin {
+	/* Use steps to throttle FPS to reduce CPU usage */
+	animation: codicon-spin 1.5s steps(30) infinite;
+}
+
+.codicon-modifier-disabled {
+	opacity: 0.5;
+}
+
+.codicon-modifier-hidden {
+	opacity: 0;
+}
+
+/* custom speed & easing for loading icon */
+.codicon-loading {
+	animation-duration: 1s !important;
+	animation-timing-function: cubic-bezier(0.53, 0.21, 0.29, 0.67) !important;
+}
+
+/*---------------------
+ *  Icons
+ *-------------------*/
 
 .codicon-add:before { content: "\ea60" }
 .codicon-plus:before { content: "\ea60" }
@@ -40,7 +75,6 @@
 .codicon-tag-add:before { content: "\ea66" }
 .codicon-tag-remove:before { content: "\ea66" }
 .codicon-person:before { content: "\ea67" }
-.codicon-person-add:before { content: "\ea67" }
 .codicon-person-follow:before { content: "\ea67" }
 .codicon-person-outline:before { content: "\ea67" }
 .codicon-person-filled:before { content: "\ea67" }
@@ -73,6 +107,7 @@
 .codicon-debug-breakpoint:before { content: "\ea71" }
 .codicon-debug-breakpoint-disabled:before { content: "\ea71" }
 .codicon-debug-hint:before { content: "\ea71" }
+.codicon-terminal-decoration-success:before { content: "\ea71" }
 .codicon-primitive-square:before { content: "\ea72" }
 .codicon-edit:before { content: "\ea73" }
 .codicon-pencil:before { content: "\ea73" }
@@ -192,7 +227,9 @@
 .codicon-chrome-minimize:before { content: "\eaba" }
 .codicon-chrome-restore:before { content: "\eabb" }
 .codicon-circle-outline:before { content: "\eabc" }
+.codicon-circle:before { content: "\eabc" }
 .codicon-debug-breakpoint-unverified:before { content: "\eabc" }
+.codicon-terminal-decoration-incomplete:before { content: "\eabc" }
 .codicon-circle-slash:before { content: "\eabd" }
 .codicon-circuit-board:before { content: "\eabe" }
 .codicon-clear-all:before { content: "\eabf" }
@@ -268,7 +305,6 @@
 .codicon-horizontal-rule:before { content: "\eb07" }
 .codicon-hubot:before { content: "\eb08" }
 .codicon-inbox:before { content: "\eb09" }
-.codicon-issue-closed:before { content: "\eb0a" }
 .codicon-issue-reopened:before { content: "\eb0b" }
 .codicon-issues:before { content: "\eb0c" }
 .codicon-italic:before { content: "\eb0d" }
@@ -400,7 +436,9 @@
 .codicon-debug-breakpoint-function:before { content: "\eb88" }
 .codicon-debug-breakpoint-function-disabled:before { content: "\eb88" }
 .codicon-debug-stackframe-active:before { content: "\eb89" }
+.codicon-circle-small-filled:before { content: "\eb8a" }
 .codicon-debug-stackframe-dot:before { content: "\eb8a" }
+.codicon-terminal-decoration-mark:before { content: "\eb8a" }
 .codicon-debug-stackframe:before { content: "\eb8b" }
 .codicon-debug-stackframe-focused:before { content: "\eb8b" }
 .codicon-debug-breakpoint-unsupported:before { content: "\eb8c" }
@@ -428,6 +466,7 @@
 .codicon-server-process:before { content: "\eba2" }
 .codicon-server-environment:before { content: "\eba3" }
 .codicon-pass:before { content: "\eba4" }
+.codicon-issue-closed:before { content: "\eba4" }
 .codicon-stop-circle:before { content: "\eba5" }
 .codicon-play-circle:before { content: "\eba6" }
 .codicon-record:before { content: "\eba7" }
@@ -444,6 +483,97 @@
 .codicon-pinned-dirty:before { content: "\ebb2" }
 .codicon-pass-filled:before { content: "\ebb3" }
 .codicon-circle-large-filled:before { content: "\ebb4" }
+.codicon-circle-large:before { content: "\ebb5" }
 .codicon-circle-large-outline:before { content: "\ebb5" }
 .codicon-combine:before { content: "\ebb6" }
 .codicon-gather:before { content: "\ebb6" }
+.codicon-table:before { content: "\ebb7" }
+.codicon-variable-group:before { content: "\ebb8" }
+.codicon-type-hierarchy:before { content: "\ebb9" }
+.codicon-type-hierarchy-sub:before { content: "\ebba" }
+.codicon-type-hierarchy-super:before { content: "\ebbb" }
+.codicon-git-pull-request-create:before { content: "\ebbc" }
+.codicon-run-above:before { content: "\ebbd" }
+.codicon-run-below:before { content: "\ebbe" }
+.codicon-notebook-template:before { content: "\ebbf" }
+.codicon-debug-rerun:before { content: "\ebc0" }
+.codicon-workspace-trusted:before { content: "\ebc1" }
+.codicon-workspace-untrusted:before { content: "\ebc2" }
+.codicon-workspace-unknown:before { content: "\ebc3" }
+.codicon-terminal-cmd:before { content: "\ebc4" }
+.codicon-terminal-debian:before { content: "\ebc5" }
+.codicon-terminal-linux:before { content: "\ebc6" }
+.codicon-terminal-powershell:before { content: "\ebc7" }
+.codicon-terminal-tmux:before { content: "\ebc8" }
+.codicon-terminal-ubuntu:before { content: "\ebc9" }
+.codicon-terminal-bash:before { content: "\ebca" }
+.codicon-arrow-swap:before { content: "\ebcb" }
+.codicon-copy:before { content: "\ebcc" }
+.codicon-person-add:before { content: "\ebcd" }
+.codicon-filter-filled:before { content: "\ebce" }
+.codicon-wand:before { content: "\ebcf" }
+.codicon-debug-line-by-line:before { content: "\ebd0" }
+.codicon-inspect:before { content: "\ebd1" }
+.codicon-layers:before { content: "\ebd2" }
+.codicon-layers-dot:before { content: "\ebd3" }
+.codicon-layers-active:before { content: "\ebd4" }
+.codicon-compass:before { content: "\ebd5" }
+.codicon-compass-dot:before { content: "\ebd6" }
+.codicon-compass-active:before { content: "\ebd7" }
+.codicon-azure:before { content: "\ebd8" }
+.codicon-issue-draft:before { content: "\ebd9" }
+.codicon-git-pull-request-closed:before { content: "\ebda" }
+.codicon-git-pull-request-draft:before { content: "\ebdb" }
+.codicon-debug-all:before { content: "\ebdc" }
+.codicon-debug-coverage:before { content: "\ebdd" }
+.codicon-run-errors:before { content: "\ebde" }
+.codicon-folder-library:before { content: "\ebdf" }
+.codicon-debug-continue-small:before { content: "\ebe0" }
+.codicon-beaker-stop:before { content: "\ebe1" }
+.codicon-graph-line:before { content: "\ebe2" }
+.codicon-graph-scatter:before { content: "\ebe3" }
+.codicon-pie-chart:before { content: "\ebe4" }
+.codicon-bracket:before { content: "\eb0f" }
+.codicon-bracket-dot:before { content: "\ebe5" }
+.codicon-bracket-error:before { content: "\ebe6" }
+.codicon-lock-small:before { content: "\ebe7" }
+.codicon-azure-devops:before { content: "\ebe8" }
+.codicon-verified-filled:before { content: "\ebe9" }
+.codicon-newline:before { content: "\ebea" }
+.codicon-layout:before { content: "\ebeb" }
+.codicon-layout-activitybar-left:before { content: "\ebec" }
+.codicon-layout-activitybar-right:before { content: "\ebed" }
+.codicon-layout-panel-left:before { content: "\ebee" }
+.codicon-layout-panel-center:before { content: "\ebef" }
+.codicon-layout-panel-justify:before { content: "\ebf0" }
+.codicon-layout-panel-right:before { content: "\ebf1" }
+.codicon-layout-panel:before { content: "\ebf2" }
+.codicon-layout-sidebar-left:before { content: "\ebf3" }
+.codicon-layout-sidebar-right:before { content: "\ebf4" }
+.codicon-layout-statusbar:before { content: "\ebf5" }
+.codicon-layout-menubar:before { content: "\ebf6" }
+.codicon-layout-centered:before { content: "\ebf7" }
+.codicon-target:before { content: "\ebf8" }
+.codicon-indent:before { content: "\ebf9" }
+.codicon-record-small:before { content: "\ebfa" }
+.codicon-error-small:before { content: "\ebfb" }
+.codicon-terminal-decoration-error:before { content: "\ebfb" }
+.codicon-arrow-circle-down:before { content: "\ebfc" }
+.codicon-arrow-circle-left:before { content: "\ebfd" }
+.codicon-arrow-circle-right:before { content: "\ebfe" }
+.codicon-arrow-circle-up:before { content: "\ebff" }
+.codicon-layout-sidebar-right-off:before { content: "\ec00" }
+.codicon-layout-panel-off:before { content: "\ec01" }
+.codicon-layout-sidebar-left-off:before { content: "\ec02" }
+.codicon-blank:before { content: "\ec03" }
+.codicon-heart-filled:before { content: "\ec04" }
+.codicon-map:before { content: "\ec05" }
+.codicon-map-filled:before { content: "\ec06" }
+.codicon-circle-small:before { content: "\ec07" }
+.codicon-bell-slash:before { content: "\ec08" }
+.codicon-bell-slash-dot:before { content: "\ec09" }
+.codicon-comment-unresolved:before { content: "\ec0a" }
+.codicon-git-pull-request-go-to-changes:before { content: "\ec0b" }
+.codicon-git-pull-request-new-changes:before { content: "\ec0c" }
+.codicon-search-fuzzy:before { content: "\ec0d" }
+.codicon-comment-draft:before { content: "\ec0e" }

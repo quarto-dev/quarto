@@ -53,7 +53,7 @@ import { editorSyncManager } from "./sync";
 import { documentImageResolver } from "./images";
 import { clearInterval } from "timers";
 import { vscodePrefsServer } from "./prefs";
-import { vscodeCodeViewServer } from "./completion";
+import { vscodeCodeViewServer } from "./codeview";
 import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";

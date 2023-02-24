@@ -1,5 +1,5 @@
 /*
- * completion.ts
+ * codeview.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -20,7 +20,8 @@ import {
   SnippetString, 
   Range,
   Position,
-  TextDocument 
+  TextDocument, 
+  commands
 } from "vscode";
 
 import { 
@@ -36,7 +37,9 @@ import {
 import { JsonRpcRequestTransport } from "core";
 
 import { 
+  CodeViewActiveBlockContext, 
   CodeViewCompletionContext, 
+  CodeViewExecute, 
   CodeViewServer, 
   kCodeViewGetCompletions 
 } from "editor-types";
@@ -49,6 +52,19 @@ import { MarkdownEngine } from "../../markdown/engine";
 
 export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport) : CodeViewServer {
   return {
+    async codeViewExecute(execute: CodeViewExecute) {
+      switch(execute) {
+        case "cell":
+          await commands.executeCommand("quarto.runCurrentCell");
+          break;
+        case "above":
+          await commands.executeCommand("quarto.runCellsAbove");
+          break;
+        case "below":
+          await commands.executeCommand("quarto.runCellsBelow");
+          break;
+      }
+    },
     async codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
 
       // if this is yaml then call the lsp directly

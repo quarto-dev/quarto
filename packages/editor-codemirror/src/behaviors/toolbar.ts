@@ -14,50 +14,68 @@
  */
 
 
-import { DispatchEvent } from "editor";
+import { CodeViewActiveBlockContext, codeViewActiveBlockContext, CodeViewExecute, DispatchEvent } from "editor";
 import { Transaction } from "prosemirror-state";
 import { Behavior, BehaviorContext } from ".";
 import { asCodeMirrorSelection } from "./trackselection";
 
 export function toolbarBehavior(context: BehaviorContext) : Behavior {
   
-  let unsubscibe: VoidFunction;
+  let unsubscribe: VoidFunction;
 
   let activeToolbar: HTMLElement | undefined;
-  
   
   return {
     init(pmView, cmView) {
 
-      unsubscibe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
+      unsubscribe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
         // track selection-only changes
         if (tr && tr.selectionSet && !tr.docChanged) {
           const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
           if (cmSelection) {
             if (!activeToolbar) {
+              // verify this is an executable language
               const nodeLang = context.options.lang(pmView, pmView.textContent);
               if (nodeLang) {
                 if (!context.pmContext.ui.context.executableLanguges?.().includes(nodeLang)) {
                   return;
                 }
               }
+
+              // get context
+              const cvContext = codeViewActiveBlockContext(context.view.state);
+              if (!cvContext) {
+                return;
+              }
                   
-              // add widgets
-              // https://microsoft.github.io/vscode-codicons/dist/codicon.html
+              // create toolbar
               activeToolbar = document.createElement("div");
               activeToolbar.classList.add("pm-codemirror-toolbar");
 
-              const addButton = (...classes: string[]) => {
+              // add an execute button
+              const addButton = (execute: CodeViewExecute, ...classes: string[]) => {
                 const button = document.createElement("i");
                 button.classList.add("codicon", ...classes);
+                button.addEventListener('click', (ev) => {
+                  context.pmContext.ui.codeview?.codeViewExecute(execute, cvContext);
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  return false;
+                });
                 activeToolbar!.appendChild(button);
+                return button;
               }
-
               
-              addButton("codicon-run-above", "pm-codeview-run-other-button");
-              addButton("codicon-run-below", "pm-codeview-run-other-button");
-              addButton("codicon-play", "pm-codeview-run-button");
-
+              // buttons (conditional on context)
+              if (runnableCellsAbove(cvContext)) {
+                addButton("above", "codicon-run-above", "pm-codeview-run-other-button");
+              }
+              if (runnableCellsBelow(cvContext)) {
+                addButton("below", "codicon-run-below", "pm-codeview-run-other-button");
+              }
+              addButton("cell", "codicon-play", "pm-codeview-run-button");
+               
+              // append toolbar
               context.dom.appendChild(activeToolbar);
             }
           } else {
@@ -68,13 +86,34 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
           }
         }
       });
-
-      
-
     },
     cleanup: () => {
-      unsubscibe?.();
+      unsubscribe?.();
     },
     extensions: []
   }
+}
+
+function runnableCellsAbove(context: CodeViewActiveBlockContext) {
+  const activeIndex = context.blocks.findIndex(block => block.active);
+  if (activeIndex !== -1) {
+    for (let i=0; i<activeIndex; i++) {
+      if (context.blocks[i].language === context.activeLanguage) {
+        return true;
+      }
+    }
+  } 
+  return false;
+}
+
+function runnableCellsBelow(context: CodeViewActiveBlockContext) {
+  const activeIndex = context.blocks.findIndex(block => block.active);
+  if (activeIndex !== -1) {
+    for (let i=(activeIndex+1); i<context.blocks.length; i++) {
+      if (context.blocks[i]?.language === context.activeLanguage) {
+        return true;
+      }
+    }
+  } 
+  return false;
 }

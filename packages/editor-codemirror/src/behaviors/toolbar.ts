@@ -15,7 +15,7 @@
 
 
 import { StateEffect, StateField } from "@codemirror/state";
-import { Decoration, DecorationSet, EditorView, showPanel } from "@codemirror/view";
+import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 import { CodeViewActiveBlockContext, codeViewActiveBlockContext, CodeViewExecute, DispatchEvent } from "editor";
 import { Transaction } from "prosemirror-state";
 import { Behavior, BehaviorContext } from ".";
@@ -66,8 +66,9 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
     toolbar.classList.add("pm-codemirror-toolbar");
 
     // add an execute button
-    const addButton = (execute: CodeViewExecute, ...classes: string[]) => {
+    const addButton = (execute: CodeViewExecute, title: string, ...classes: string[]) => {
       const button = document.createElement("i");
+      button.title = title;
       button.classList.add("codicon", ...classes);
       button.addEventListener('click', (ev) => {
         context.pmContext.ui.codeview?.codeViewExecute(execute, cvContext);
@@ -80,13 +81,14 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
     }
     
     // buttons (conditional on context)
+    const t = context.pmContext.ui.context.translateText;
     if (runnableCellsAbove(cvContext)) {
-      addButton("above", "codicon-run-above", "pm-codeview-run-other-button");
+      addButton("above", t("Run Cells Above"), "codicon-run-above", "pm-codeview-run-other-button");
     }
     if (runnableCellsBelow(cvContext)) {
-      addButton("below", "codicon-run-below", "pm-codeview-run-other-button");
+      addButton("below", t("Run Cells Below"), "codicon-run-below", "pm-codeview-run-other-button");
     }
-    addButton("cell", "codicon-play", "pm-codeview-run-button");
+    addButton("cell", t("Run Cell"), "codicon-play", "pm-codeview-run-button");
 
     return toolbar;
   }

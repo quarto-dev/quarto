@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.70.0 (Unreleased)
+
+- Cell execution and navigation for visual mode
+- Improved filtering of completion states based on spaces, trigger chars, etc.
+
 ## 1.69.0 (Release on 23 February 2023)
 
 - Automatically insert option comments (e.g. `#| `) on enter

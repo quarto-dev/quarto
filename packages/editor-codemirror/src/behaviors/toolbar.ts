@@ -14,6 +14,8 @@
  */
 
 
+import { StateEffect, StateField } from "@codemirror/state";
+import { Decoration, DecorationSet, EditorView, showPanel } from "@codemirror/view";
 import { CodeViewActiveBlockContext, codeViewActiveBlockContext, CodeViewExecute, DispatchEvent } from "editor";
 import { Transaction } from "prosemirror-state";
 import { Behavior, BehaviorContext } from ".";
@@ -23,9 +25,74 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
   
   let unsubscribe: VoidFunction;
 
-  let activeToolbar: HTMLElement | undefined;
+  const toggleToolbar = StateEffect.define<boolean>();
+
+  const toolbarDecoration = Decoration.widget({
+    widget: {
+      toDOM() {
+        return createToolbarPanel();
+      },
+      eq: () => false,
+      updateDOM: () => false,
+      estimatedHeight: -1,
+      ignoreEvent: () => true,
+      destroy: () => { /* */ }
+    },
+    side: 0
+  });
+  
+  const toolbarState = StateField.define<DecorationSet>({
+    create: () => Decoration.none,
+    update(value, tr) {
+      for (const e of tr.effects) if (e.is(toggleToolbar)) {
+        if (e.value) {
+          return Decoration.set([toolbarDecoration.range(0,0)]);
+        } else {
+          return Decoration.none;
+        }
+      }
+      return value;
+    },
+    provide: f => EditorView.decorations.from(f)
+  });
+
+  function createToolbarPanel() {
+      
+    // get context
+    const cvContext = codeViewActiveBlockContext(context.view.state)!;
+        
+    // create toolbar
+    const toolbar = document.createElement("div");
+    toolbar.classList.add("pm-codemirror-toolbar");
+
+    // add an execute button
+    const addButton = (execute: CodeViewExecute, ...classes: string[]) => {
+      const button = document.createElement("i");
+      button.classList.add("codicon", ...classes);
+      button.addEventListener('click', (ev) => {
+        context.pmContext.ui.codeview?.codeViewExecute(execute, cvContext);
+        ev.preventDefault();
+        ev.stopPropagation();
+        return false;
+      });
+      toolbar.appendChild(button);
+      return button;
+    }
+    
+    // buttons (conditional on context)
+    if (runnableCellsAbove(cvContext)) {
+      addButton("above", "codicon-run-above", "pm-codeview-run-other-button");
+    }
+    if (runnableCellsBelow(cvContext)) {
+      addButton("below", "codicon-run-below", "pm-codeview-run-other-button");
+    }
+    addButton("cell", "codicon-play", "pm-codeview-run-button");
+
+    return toolbar;
+  }
   
   return {
+    extensions: [toolbarState],
     init(pmView, cmView) {
 
       unsubscribe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
@@ -33,56 +100,15 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
         if (tr && tr.selectionSet && !tr.docChanged) {
           const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
           if (cmSelection) {
-            if (!activeToolbar) {
-              // verify this is an executable language
-              const nodeLang = context.options.lang(pmView, pmView.textContent);
-              if (nodeLang) {
-                if (!context.pmContext.ui.context.executableLanguges?.().includes(nodeLang)) {
-                  return;
-                }
-              }
-
-              // get context
-              const cvContext = codeViewActiveBlockContext(context.view.state);
-              if (!cvContext) {
-                return;
-              }
-                  
-              // create toolbar
-              activeToolbar = document.createElement("div");
-              activeToolbar.classList.add("pm-codemirror-toolbar");
-
-              // add an execute button
-              const addButton = (execute: CodeViewExecute, ...classes: string[]) => {
-                const button = document.createElement("i");
-                button.classList.add("codicon", ...classes);
-                button.addEventListener('click', (ev) => {
-                  context.pmContext.ui.codeview?.codeViewExecute(execute, cvContext);
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                  return false;
-                });
-                activeToolbar!.appendChild(button);
-                return button;
-              }
-              
-              // buttons (conditional on context)
-              if (runnableCellsAbove(cvContext)) {
-                addButton("above", "codicon-run-above", "pm-codeview-run-other-button");
-              }
-              if (runnableCellsBelow(cvContext)) {
-                addButton("below", "codicon-run-below", "pm-codeview-run-other-button");
-              }
-              addButton("cell", "codicon-play", "pm-codeview-run-button");
-               
-              // append toolbar
-              context.dom.appendChild(activeToolbar);
+            const nodeLang = context.options.lang(pmView, pmView.textContent);
+            const cvContext = codeViewActiveBlockContext(context.view.state);
+            if (cvContext && nodeLang && context.pmContext.ui.context.executableLanguges?.().includes(nodeLang)) {
+              cmView.dispatch({effects: toggleToolbar.of(true)});
+            } else {
+              cmView.dispatch({effects: toggleToolbar.of(false)});
             }
           } else {
-            if (activeToolbar) {
-              activeToolbar.parentElement?.removeChild(activeToolbar);
-              activeToolbar = undefined;
-            }
+            cmView.dispatch({effects: toggleToolbar.of(false)});
           }
         }
       });
@@ -90,7 +116,6 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
     cleanup: () => {
       unsubscribe?.();
     },
-    extensions: []
   }
 }
 

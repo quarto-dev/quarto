@@ -154,12 +154,13 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   }
 
   override async doExecuteVisualMode(
-    _editor: QuartoVisualEditor,
+    editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ) : Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
       await executeInteractive(context.activeLanguage, [activeBlock.code]);
+      await activateIfRequired(editor);
     }
   }
 
@@ -189,6 +190,7 @@ class RunNextCellCommand extends RunCommand implements Command {
       await editor.setBlockSelection(context, "nextblock");
       if (hasExecutor(nextBlock.language)) {
         await executeInteractive(nextBlock.language, [nextBlock.code]);
+        await activateIfRequired(editor);
       }
     } else {
       window.showInformationMessage("No more cells available to execute");
@@ -222,6 +224,7 @@ class RunPreviousCellCommand extends RunCommand implements Command {
       await editor.setBlockSelection(context, "prevblock");
       if (hasExecutor(prevBlock.language)) {
         await executeInteractive(prevBlock.language, [prevBlock.code]);
+        await activateIfRequired(editor);
       }
     } else {
       window.showInformationMessage("No more cells available to execute");
@@ -365,7 +368,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     }
     if (code.length > 0) {
       await executeInteractive(context.activeLanguage, code);
-      await editor.activate();
+      await activateIfRequired(editor);
     }
   }
 }
@@ -428,7 +431,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     }
     if (code && code.length > 0) {
       await executeInteractive(context.activeLanguage, code);
-      await editor.activate();
+      await activateIfRequired(editor);
     }
   }
 }
@@ -478,7 +481,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
     }
     if (code.length > 0) {
       await executeInteractive(context.activeLanguage, code);
-      await editor.activate();
+      await activateIfRequired(editor);
     }
   }
 }
@@ -498,10 +501,11 @@ class GoToCellCommand {
       const blockContext = await visualEditor.getActiveBlockContext();
       if (blockContext) {
         if (this.dir_ === "next") {
-          visualEditor.setBlockSelection(blockContext, "nextblock");
+          await visualEditor.setBlockSelection(blockContext, "nextblock");
         } else {
-          visualEditor.setBlockSelection(blockContext, "prevblock");
+          await visualEditor.setBlockSelection(blockContext, "prevblock");
         }
+        await activateIfRequired(visualEditor);
       } else {
         window.showWarningMessage("Editor selection is not within an executable cell");
       }
@@ -584,4 +588,10 @@ function previousBlock(
     }
   }
   return undefined;
+}
+
+async function activateIfRequired(editor: QuartoVisualEditor) {
+  if (!(await editor.hasFocus())) {
+    await editor.activate();
+  }
 }

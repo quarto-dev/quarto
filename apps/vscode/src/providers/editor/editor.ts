@@ -67,6 +67,7 @@ import { executableLanguages } from "../cell/executors";
 
 
 export interface QuartoVisualEditor extends QuartoEditor {
+  hasFocus() : Promise<boolean>;
   getActiveBlockContext() : Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : Promise<void>;
 }
@@ -193,6 +194,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     if (editor) {
       return { 
         document: editor.document, 
+        hasFocus: async () => {
+          return await editor.editor.isFocused();
+        },
         activate: async () => {
           activateVisualEditor(editor);
         },

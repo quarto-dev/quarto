@@ -18,14 +18,12 @@ import { JsonRpcServerMethod } from "core";
 import { 
   CodeViewServer, 
   kCodeViewGetCompletions, 
-  kCodeViewExecute, 
 } from "editor-types";
 
 
 
 export function codeViewServerMethods(server: CodeViewServer) : Record<string, JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kCodeViewExecute]: args => server.codeViewExecute(args[0], args[1]),
     [kCodeViewGetCompletions]: args => server.codeViewCompletions(args[0]),
   }
   return methods;

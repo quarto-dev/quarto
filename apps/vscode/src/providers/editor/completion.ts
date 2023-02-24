@@ -36,9 +36,7 @@ import {
 import { JsonRpcRequestTransport } from "core";
 
 import { 
-  CodeViewActiveBlockContext, 
   CodeViewCompletionContext, 
-  CodeViewExecute, 
   CodeViewServer, 
   kCodeViewGetCompletions 
 } from "editor-types";
@@ -51,9 +49,6 @@ import { MarkdownEngine } from "../../markdown/engine";
 
 export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport) : CodeViewServer {
   return {
-    async codeViewExecute(execute: CodeViewExecute, context: CodeViewActiveBlockContext) {
-      // TODO: perform execute request
-    },
     async codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
 
       // if this is yaml then call the lsp directly

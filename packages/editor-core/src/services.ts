@@ -24,7 +24,6 @@ import {
   EditorServices,
   IgnoredWord,
   kCodeViewGetCompletions,
-  kCodeViewExecute,
   kDictionaryAddToUserDictionary,
   kDictionaryAvailableDictionaries,
   kDictionaryGetDictionary,
@@ -42,8 +41,6 @@ import {
   PrefsServer,
   SourcePosLocation,
   SourceServer,
-  CodeViewExecute,
-  CodeViewActiveBlockContext,
   
 } from "editor-types";
 
@@ -77,9 +74,6 @@ export function editorMathJsonRpcServer(request: JsonRpcRequestTransport) : Math
 
 export function editorCompletionJsonRpcServer(request: JsonRpcRequestTransport) : CodeViewServer {
   return {
-    codeViewExecute(execute: CodeViewExecute, context: CodeViewActiveBlockContext) {
-      return request(kCodeViewExecute, [execute, context]);
-    },
     codeViewCompletions(context: CodeViewCompletionContext) {
       return request(kCodeViewGetCompletions, [context]);
     },

@@ -33,6 +33,7 @@ import { themeBehavior } from './theme';
 import { prefsBehavior } from './prefs';
 import { completionBehavior } from './completion';
 import { yamlOptionBehavior } from './yamloption';
+import { toolbarBehavior } from './toolbar';
 
 export interface Behavior {
   extensions: Extension[];
@@ -64,6 +65,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     prefsBehavior(context),
     trackSelectionBehavior(context),
     yamlOptionBehavior(context),
+    toolbarBehavior(context)
   ];
   behaviors.push(keyboardBehavior(context, behaviors.flatMap(behavior => behavior.keys || [])));
   return behaviors;

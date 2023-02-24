@@ -63,6 +63,7 @@ import {
   editInVisualModeCommand, 
   reopenEditorInSourceMode 
 } from "./toggle";
+import { executableLanguages } from "../cell/executors";
 
 
 export interface QuartoVisualEditor extends QuartoEditor {
@@ -311,7 +312,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
           resourceDir: document.isUntitled 
             ? (workspaceDir || process.cwd()) 
             : path.dirname(document.fileName),
-          isWindowsDesktop: isWindows()
+          isWindowsDesktop: isWindows(),
+          executableLanguages: executableLanguages()
         };
       },
 

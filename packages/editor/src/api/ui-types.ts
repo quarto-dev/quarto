@@ -70,9 +70,6 @@ export interface EditorMath {
 
 export interface EditorUIContext extends EditorUIImageResolver {
 
-  // get the current username
-  getUsername?: () => string;
-
   // are we running in windows desktop mode?
   isWindowsDesktop: () => boolean;
 
@@ -86,9 +83,6 @@ export interface EditorUIContext extends EditorUIImageResolver {
   // (note this just means that the server has a copy of it for e.g.
   // indexing xrefs, from the user's standpoint the doc is still dirty)
   withSavedDocument: () => Promise<boolean>;
-
-  // reopen the file in source mode
-  reopenInSourceMode?: () => void,
 
   // get the default directory for resources (e.g. where relative links point to)
   getDefaultResourceDir: () => string;
@@ -110,6 +104,15 @@ export interface EditorUIContext extends EditorUIImageResolver {
 
   // image from the clipboard (returned as file path)
   clipboardImage: () => Promise<string | null>;
+
+  // get the current username
+  getUsername?: () => string;
+
+  // reopen the file in source mode
+  reopenInSourceMode?: () => void,
+
+  // executable languages
+  executableLanguges?: () => string[]
 }
 
 export interface EditorUIMath {

@@ -110,5 +110,7 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   theme.symbolIconTextForegroundColor = colors["--vscode-symbolIcon-textForeground"];
   theme.symbolIconTypeParameterForegroundColor = colors["--vscode-typeParameterForeground"];
   theme.symbolIconVariableForegroundColor = colors["--vscode-symbolIcon-variableForeground"];
+  theme.debugStartForegroundColor = colors["--vscode-debugIcon-startForeground"];
+  theme.debugStepForgroundColor = colors["--vscode-debugIcon-stepOverForeground"];
   return theme;
 }

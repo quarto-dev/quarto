@@ -68,6 +68,8 @@ export interface EditorTheme {
   symbolIconTextForegroundColor: string;
   symbolIconTypeParameterForegroundColor: string;
   symbolIconVariableForegroundColor: string;
+  debugStartForegroundColor: string;
+  debugStepForgroundColor: string;
   code: CodeTheme;
 }
 
@@ -146,6 +148,8 @@ export function defaultTheme(): EditorTheme {
     symbolIconTextForegroundColor: "#616161",
     symbolIconTypeParameterForegroundColor: "#616161",
     symbolIconVariableForegroundColor: "#007ACC",
+    debugStartForegroundColor: "#388a34",
+    debugStepForgroundColor: "#007acc",
     code: {
       keywordColor: 'rgb(0, 0, 255)',
       atomColor: 'rgb(88, 92, 246)',
@@ -392,6 +396,12 @@ export function applyTheme(theme: EditorTheme) {
       color: ${theme.textColor};
       border-color: ${theme.textColor};
       background-color: ${theme.backgroundColor};
+    }
+    .pm-codeview-run-button {
+      color: ${theme.debugStartForegroundColor};
+    }
+    .pm-codeview-run-other-button {
+      color: ${theme.debugStepForgroundColor}
     }
     .pm-ace-first-line-meta .ace_text-layer .ace_line_group:first-child,
     .pm-ace-first-line-meta .ace_text-layer .ace_line_group:first-child span {

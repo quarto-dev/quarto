@@ -20,8 +20,8 @@ export const kCodeViewGetCompletions = 'code_view_get_completions';
 export type CodeViewExecute = "selection" | "cell" | "above" | "below";
 
 export interface CodeViewActiveBlockContext {
-  language: string;
-  blocks: Array<{ pos: number, code: string; active: boolean }>;
+  activeLanguage: string;
+  blocks: Array<{ pos: number, language: string, code: string; active: boolean }>;
   selection: Range;
   selectedText: string;
 }

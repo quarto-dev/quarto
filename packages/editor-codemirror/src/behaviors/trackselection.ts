@@ -67,7 +67,7 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
 
 }
 
-const asCodeMirrorSelection = (
+export const asCodeMirrorSelection = (
   pmView: PMEditorView,
   cmView: EditorView,
   getPos: (() => number) | boolean

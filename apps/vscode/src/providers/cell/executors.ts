@@ -33,6 +33,10 @@ import { virtualDoc, virtualDocUri } from "../../vdoc/vdoc";
 
 import { cellOptionsForToken, kExecuteEval } from "./options";
 
+export function executableLanguages() {
+  return kCellExecutors.map(x => x.language);
+}
+
 export function hasExecutor(language: string) {
   return !!kCellExecutors.find((x) => x.language === language);
 }

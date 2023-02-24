@@ -173,6 +173,10 @@ class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
     this.host.reopenSourceMode();
   }
 
+  public executableLanguges(): string[] {
+    return this.context.executableLanguages;
+  }
+
   // get the default directory for resources (e.g. where relative links point to)
   public getDefaultResourceDir(): string {
     return this.context.resourceDir;

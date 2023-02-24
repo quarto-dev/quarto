@@ -70,6 +70,7 @@ export interface HostContext {
   projectDir?: string;
   resourceDir: string;
   isWindowsDesktop: boolean;
+  executableLanguages: string[];
 }
 
 export interface VSCodeVisualEditorHost extends EditorDisplay, EditorUIImageResolver {

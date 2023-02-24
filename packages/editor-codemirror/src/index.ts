@@ -26,6 +26,8 @@ import { codeMirrorNodeView } from "./nodeview";
 
 export const codeMirrorPluginKey = new PluginKey("codemirror");
 
+import "./styles.css"
+
 export function codeMirrorExtension(
   codeViews: { [key: string]: CodeViewOptions })
 : ExtensionFn {

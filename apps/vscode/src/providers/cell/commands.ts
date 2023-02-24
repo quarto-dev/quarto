@@ -69,10 +69,10 @@ abstract class RunCommand {
     if (visualEditor) {
       const blockContext = await visualEditor.getActiveBlockContext();
       if (blockContext) {
-        if (hasExecutor(blockContext.language)) {
+        if (hasExecutor(blockContext.activeLanguage)) {
           await this.doExecuteVisualMode(visualEditor, blockContext);
         } else {
-          window.showWarningMessage(`Execution of ${blockContext.language} cells is not supported`);
+          window.showWarningMessage(`Execution of ${blockContext.activeLanguage} cells is not supported`);
         }
       } else {
         window.showWarningMessage("Editor selection is not within an executable cell");
@@ -159,7 +159,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ) : Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
-      await executeInteractive(context.language, [activeBlock.code]);
+      await executeInteractive(context.activeLanguage, [activeBlock.code]);
     }
   }
 
@@ -187,7 +187,9 @@ class RunNextCellCommand extends RunCommand implements Command {
     const nextBlock = context.blocks[activeBlockIndex + 1];
     if (nextBlock) {
       await editor.setBlockSelection(context, "nextblock");
-      await executeInteractive(context.language, [nextBlock.code]);
+      if (hasExecutor(nextBlock.language)) {
+        await executeInteractive(nextBlock.language, [nextBlock.code]);
+      }
     } else {
       window.showInformationMessage("No more cells available to execute");
     }
@@ -218,7 +220,9 @@ class RunPreviousCellCommand extends RunCommand implements Command {
     const prevBlock = context.blocks[activeBlockIndex - 1];
     if (prevBlock) {
       await editor.setBlockSelection(context, "prevblock");
-      await executeInteractive(context.language, [prevBlock.code]);
+      if (hasExecutor(prevBlock.language)) {
+        await executeInteractive(prevBlock.language, [prevBlock.code]);
+      }
     } else {
       window.showInformationMessage("No more cells available to execute");
     }
@@ -290,7 +294,7 @@ class RunSelectionCommand extends RunCommand implements Command {
     }
 
     // run code
-    await executeInteractive(context.language, [selection]);
+    await executeInteractive(context.activeLanguage, [selection]);
     
     // advance cursor if necessary
     if (action) {
@@ -355,11 +359,12 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     for (const block of context.blocks) {
       if (block.active) {
         break;
+      } else if (block.language === context.activeLanguage) {
+        code.push(block.code);
       }
-      code.push(block.code);
     }
     if (code.length > 0) {
-      await executeInteractive(context.language, code);
+      await executeInteractive(context.activeLanguage, code);
       await editor.activate();
     }
   }
@@ -417,12 +422,12 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     for (const block of context.blocks) {
       if (block.active) {
         code = [];
-      } else if (code) {
+      } else if (code && (block.language === context.activeLanguage)) {
         code.push(block.code);
       }
     }
     if (code && code.length > 0) {
-      await executeInteractive(context.language, code);
+      await executeInteractive(context.activeLanguage, code);
       await editor.activate();
     }
   }
@@ -467,10 +472,12 @@ class RunAllCellsCommand extends RunCommand implements Command {
   ) : Promise<void> {
     const code : string[] = [];
     for (const block of context.blocks) {
-      code.push(block.code);
+      if (block.language === context.activeLanguage) {
+        code.push(block.code);
+      }
     }
     if (code.length > 0) {
-      await executeInteractive(context.language, code);
+      await executeInteractive(context.activeLanguage, code);
       await editor.activate();
     }
   }

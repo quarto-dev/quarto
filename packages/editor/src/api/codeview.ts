@@ -13,7 +13,7 @@
  *
  */
 
-import { Node as ProsemirrorNode } from 'prosemirror-model';
+import { Node as ProsemirrorNode, NodeType } from 'prosemirror-model';
 
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
@@ -232,10 +232,21 @@ export function codeViewSetBlockSelection(
   
 }
 
-export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveBlockContext | undefined {
 
-  // function to examine a node and see if has executable code
+export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveBlockContext | undefined {
+  return codeViewBlockContext(state, false, [state.schema.nodes.rmd_chunk]);
+}
+
+
+function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, nodeTypes?: NodeType[]) : CodeViewActiveBlockContext | undefined {
+
+  // alias schema
   const schema = state.schema;
+
+  // default to all types
+  nodeTypes = nodeTypes || [schema.nodes.yaml_metadata, schema.nodes.rmd_chunk, schema.nodes.raw_block];
+
+  // function to examine a node and see if has executable codes
   const nodeAsLanguageCodeBlock = (node: ProsemirrorNode, pos: number) => {
     const languageCodeBlock = (language: string, code?: string, metaLine?: boolean) => {
       return {
@@ -245,17 +256,21 @@ export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveB
         metaLine
       };
     }
-    if (node.type === schema.nodes.yaml_metadata) {
-      return languageCodeBlock('yaml');
-    } else if (node.type === schema.nodes.rmd_chunk) {
-      const parts = rmdChunk(node.textContent);
-      if (parts) {
-        return languageCodeBlock(parts.lang, parts.code, true);
+    if (nodeTypes?.includes(node.type)) {
+      if (node.type === schema.nodes.yaml_metadata) {
+        return languageCodeBlock('yaml');
+      } else if (node.type === schema.nodes.rmd_chunk) {
+        const parts = rmdChunk(node.textContent);
+        if (parts) {
+          return languageCodeBlock(parts.lang, parts.code, true);
+        } else {
+          return undefined;
+        }
+      } else if (node.type === schema.nodes.raw_block) {
+        return languageCodeBlock(node.attrs.format);
       } else {
         return undefined;
       }
-    } else if (node.type === schema.nodes.raw_block) {
-      return languageCodeBlock(node.attrs.format);
     } else {
       return undefined;
     }
@@ -293,19 +308,21 @@ export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveB
 
 
     // collect all the blocks with this language
-    const blocks: Array<{ pos: number, code: string; active: boolean }> = [];
+    const blocks: Array<{ pos: number, language: string, code: string; active: boolean }> = [];
     state.doc.descendants((node, pos) => {
       const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
-      if (languageBlock?.language === activeBlock.language) {
-        blocks.push({
-          ...languageBlock,
-          active: languageBlock.pos === activeBlock.pos
-        });
+      if (languageBlock) {
+        if (!activeLanguageOnly || (languageBlock.language === activeBlock.language)) {
+          blocks.push({
+            ...languageBlock,
+            active: languageBlock.pos === activeBlock.pos
+          });
+        }
       }
     });
 
     return {
-      language: activeBlock.language,
+      activeLanguage: activeBlock.language,
       blocks,
       selection: {
         start: positionForOffset(parentOffset),
@@ -325,16 +342,17 @@ export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveB
 
 export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean) : CodeViewCompletionContext | undefined {
 
-  const activeBlockContext = codeViewActiveBlockContext(state);
+  // get blocks (for active language only)
+  const activeBlockContext = codeViewBlockContext(state, true);
 
   if (activeBlockContext) {
      // if this is yaml we strip the delimiters and use only the active block
-     if (activeBlockContext.language === "yaml") {
+     if (activeBlockContext.activeLanguage === "yaml") {
       const activeBlock = activeBlockContext.blocks.find(block => block.active) || activeBlockContext.blocks[0];
       const codeLines = lines(activeBlock.code).map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
       return {
         filepath,
-        language: activeBlockContext.language,
+        language: activeBlockContext.activeLanguage,
         code: codeLines,
         cellBegin: 0,
         cellEnd: codeLines.length - 1,
@@ -358,7 +376,7 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
       });
       return {
         filepath,
-        language: activeBlockContext.language,
+        language: activeBlockContext.activeLanguage,
         code,
         cellBegin,
         cellEnd,

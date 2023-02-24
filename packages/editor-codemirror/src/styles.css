@@ -1,5 +1,5 @@
 /*
- * ace.css
+ * styles.css
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -18,15 +18,33 @@
   position: relative;
 }
 
-.ProseMirror .pm-image-button {
-  margin-left: 5px;
-}
 
-.pm-codemirror-editor .pm-find-text {
+.pm-codemirror-editor .pm-codemirror-toolbar {
   position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9;
 }
 
-.pm-codemirror-editor.pm-block-border-color:focus-within {
-  border: none;
+.pm-codemirror-editor .pm-codemirror-toolbar {
+  margin-top: 3px;
+  margin-right: 3px;
 }
+
+.pm-codemirror-editor .pm-codemirror-toolbar .codicon {
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pm-codeview-run-button {
+  margin-left: 9px;
+  font-weight: 500 !important;
+}
+
+.pm-codeview-run-other-button {
+  margin-left: 6px;
+  opacity: 0.7;
+}
+
 

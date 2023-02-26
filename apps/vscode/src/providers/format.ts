@@ -57,7 +57,7 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
     token: CancellationToken,
     next: ProvideDocumentFormattingEditsSignature
   ): Promise<TextEdit[] | null | undefined> => {
-    if (isQuartoDoc(document)) {
+    if (isQuartoDoc(document, true)) {
       // ensure we are dealing w/ the active document
       const editor = window.activeTextEditor;
       const activeDocument = editor?.document;
@@ -83,10 +83,13 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
           }
         }
       }
+      // ensure that other formatters don't ever run over qmd files
+      return [];
+    } else {
+      // delegate if we didn't handle it
+      return next(document, options, token);
     }
 
-    // delegate if we didn't handle it
-    return next(document, options, token);
   };
 }
 
@@ -100,7 +103,7 @@ export function embeddedDocumentRangeFormattingProvider(
     token: CancellationToken,
     next: ProvideDocumentRangeFormattingEditsSignature
   ): Promise<TextEdit[] | null | undefined> => {
-    if (isQuartoDoc(document)) {
+    if (isQuartoDoc(document, true)) {
       const tokens = await engine.parse(document);
       const beginBlock = languageBlockAtPosition(tokens, range.start, false);
       const endBlock = languageBlockAtPosition(tokens, range.end, false);
@@ -121,10 +124,12 @@ export function embeddedDocumentRangeFormattingProvider(
           }
         }
       }
+      // ensure that other formatters don't ever run over qmd files
+      return [];
+    } else {
+      // if we don't perform any formatting, then call the next handler
+      return next(document, range, options, token);
     }
-
-    // if we don't perform any formatting, then call the next handler
-    return next(document, range, options, token);
   };
 }
 

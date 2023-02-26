@@ -30,10 +30,11 @@ export const kQuartoDocSelector: vscode.DocumentSelector = {
   scheme: "*",
 };
 
-export function isQuartoDoc(doc?: vscode.TextDocument) {
+
+export function isQuartoDoc(doc?: vscode.TextDocument, strict = false) {
   return (
     isLanguageDoc(kQuartoLanguageId, doc) ||
-    isLanguageDoc(kMarkdownLanguageId, doc)
+    (!strict && isLanguageDoc(kMarkdownLanguageId, doc))
   );
 }
 

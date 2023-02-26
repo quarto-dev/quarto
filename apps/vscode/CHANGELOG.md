@@ -5,6 +5,7 @@
 - Cell execution and navigation for visual mode
 - Mermaid and GraphViz diagram preview for visual mode
 - Improved filtering of completion states based on spaces, trigger chars, etc.
+- Formatting: only run for `qmd` (not `md`) and never delegate to other handlers
 
 ## 1.69.0 (Release on 23 February 2023)
 

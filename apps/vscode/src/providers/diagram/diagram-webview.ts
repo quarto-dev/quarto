@@ -22,6 +22,10 @@ import {
   Position,
   ViewColumn,
 } from "vscode";
+
+import { DiagramState } from "editor-types";
+import { languageDiagramEngine } from "editor-core";
+
 import { isGraphvizDoc, isMermaidDoc, isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import {
@@ -30,13 +34,9 @@ import {
   languageNameFromBlock,
 } from "../../markdown/language";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
+import { visualEditorDiagramState } from "./diagram";
 
 const kDiagramViewId = "quarto.diagramView";
-
-export interface DiagramState {
-  engine: "mermaid" | "graphviz";
-  src: string;
-}
 
 export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
   QuartoDiagramWebview,
@@ -65,11 +65,19 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
     );
   }
 
-  public showDiagram() {
-    this.setOnShow(this.updatePreview.bind(this));
+  public showDiagram(state?: DiagramState, activate = true) {
+    
+    if (!this.activeView_ && !activate) {
+      return;
+    }
+
+    this.setOnShow(() => {
+      this.updatePreview(state);
+    });
     if (this.activeView_) {
       this.revealWebview();
     } else {
+      this.lastState_ = undefined;
       this.showWebview(null, {
         preserveFocus: true,
         viewColumn: ViewColumn.Beside,
@@ -78,13 +86,20 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
   }
 
   protected override onViewStateChanged(): void {
-    this.updatePreview();
+    this.updatePreview(this.lastState_);
   }
 
-  private async updatePreview() {
+
+  private async updatePreview(state?: DiagramState) {
+    
     if (this.isVisible()) {
-      // get the active editor
-      if (window.activeTextEditor) {
+      // see if there is an explcit state update (otherwise inspect hte active editor)
+      if (state) {
+        
+        this.updateViewState(state);
+      
+      // inspect the active editor for a diagram
+      } else if (window.activeTextEditor) {
         const doc = window.activeTextEditor.document;
         if (isQuartoDoc(doc) && window.activeTextEditor.selection) {
           // if we are in a diagram block then send its contents
@@ -93,25 +108,37 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
           const block = languageBlockAtPosition(tokens, new Position(line, 0));
           if (block && isDiagram(block)) {
             const language = languageNameFromBlock(block);
-            this.activeView_?.update({
-              engine: language === "dot" ? "graphviz" : "mermaid",
-              src: block.content,
-            });
+            const engine = languageDiagramEngine(language);
+            if (engine) {
+              this.updateViewState({ engine, src: block.content });
+            }
           }
         } else if (isMermaidDoc(doc)) {
-          this.activeView_?.update({
+          this.updateViewState({
             engine: "mermaid",
             src: doc.getText(),
           });
         } else if (isGraphvizDoc(doc)) {
-          this.activeView_?.update({
+          this.updateViewState({
             engine: "graphviz",
             src: doc.getText(),
           });
         }
-      }
+      } else {
+        const veDiagram = await visualEditorDiagramState();
+        if (veDiagram) {
+          this.updateViewState(veDiagram);
+        }
+      } 
     }
   }
+
+  private updateViewState(state: DiagramState) {
+    this.lastState_ = state;
+    this.activeView_?.update(state);
+  }
+
+  private lastState_: DiagramState | undefined;
 }
 
 class QuartoDiagramWebview extends QuartoWebview<null> {

@@ -51,9 +51,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
 
   // don't provide behavior if we don't have completions
   if (!behaviorContext.pmContext.ui.codeview) {
-    return {
-      extensions: []
-    }
+    return {}
   }
 
   return {

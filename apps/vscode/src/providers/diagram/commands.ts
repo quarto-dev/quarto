@@ -14,6 +14,8 @@
  */
 
 import { commands, Position, window, Selection } from "vscode";
+import { DiagramState } from "editor-types";
+
 import { Command } from "../../core/command";
 import { isGraphvizDoc, isMermaidDoc, isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
@@ -23,6 +25,13 @@ import {
   languageBlockAtPosition,
 } from "../../markdown/language";
 import { QuartoDiagramWebviewManager } from "./diagram-webview";
+import { visualEditorDiagramState } from "./diagram";
+
+export interface PreviewDiagramOptions {
+  textEditorLine?: number;
+  state?: DiagramState;
+  activate?: boolean;
+}
 
 export function diagramCommands(
   manager: QuartoDiagramWebviewManager,
@@ -34,17 +43,18 @@ export function diagramCommands(
   ];
 }
 
+
 class PreviewDiagramCommand implements Command {
   constructor(private readonly manager_: QuartoDiagramWebviewManager) {}
-  execute(line?: number): void {
-    // set selection to line
-    if (line && window.activeTextEditor) {
-      const selPos = new Position(line, 0);
+  execute(options?: PreviewDiagramOptions): void {
+    // set selection to line if requested
+    if (options?.textEditorLine !== undefined && window.activeTextEditor) {
+      const selPos = new Position(options?.textEditorLine, 0);
       window.activeTextEditor.selection = new Selection(selPos, selPos);
     }
 
     // ensure diagram view is visible
-    this.manager_.showDiagram();
+    this.manager_.showDiagram(options?.state, options?.activate);
   }
 
   private static readonly id = "quarto.previewDiagram";
@@ -67,7 +77,7 @@ class PreviewShortcutCommand implements Command {
             commands.executeCommand("quarto.previewMath", line);
             return;
           } else if (isDiagram(block)) {
-            commands.executeCommand("quarto.previewDiagram", line);
+            commands.executeCommand("quarto.previewDiagram", { textEditorLine: line });
             return;
           }
         }
@@ -75,11 +85,22 @@ class PreviewShortcutCommand implements Command {
         commands.executeCommand("quarto.previewDiagram");
         return;
       }
+    } else {
+
+      // check for a diagram in the visual editor
+      const veDiagram = await visualEditorDiagramState();
+      if (veDiagram) {
+        await commands.executeCommand("quarto.previewDiagram", {
+          state: veDiagram,
+          activate: true
+        });
+      } else {
+         // info message
+        window.showInformationMessage(
+          "No preview available (selection not within an equation or diagram)"
+        );
+      }     
     }
-    // info message
-    window.showInformationMessage(
-      "No preview available (selection not within an equation or diagram)"
-    );
   }
 
   private static readonly id = "quarto.previewShortcut";

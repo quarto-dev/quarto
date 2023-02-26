@@ -435,7 +435,7 @@
         "command": "quarto.previewShortcut",
         "key": "ctrl+shift+l",
         "mac": "cmd+shift+l",
-        "when": "editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
+        "when": "activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
       },
       {
         "command": "quarto.editInSourceMode",
@@ -689,7 +689,7 @@
         },
         {
           "command": "quarto.previewDiagram",
-          "when": "editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
+          "when": "activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
         },
         {
           "command": "quarto.showAssist"

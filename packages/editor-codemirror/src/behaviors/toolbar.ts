@@ -16,9 +16,13 @@
 
 import { StateEffect, StateField } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
-import { CodeViewActiveBlockContext, codeViewActiveBlockContext, CodeViewExecute, DispatchEvent } from "editor";
 import { Transaction } from "prosemirror-state";
+
+import { languageDiagramEngine } from "editor-core";
+
+import { CodeViewActiveBlockContext, codeViewActiveBlockContext, CodeViewExecute, DispatchEvent } from "editor";
 import { Behavior, BehaviorContext } from ".";
+import { previewDiagram } from "./diagram";
 import { asCodeMirrorSelection } from "./trackselection";
 
 export function toolbarBehavior(context: BehaviorContext) : Behavior {
@@ -66,12 +70,12 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
     toolbar.classList.add("pm-codemirror-toolbar");
 
     // add an execute button
-    const addButton = (execute: CodeViewExecute, title: string, ...classes: string[]) => {
+    const addButton = (title: string, onClick: VoidFunction, ...classes: string[]) => {
       const button = document.createElement("i");
       button.title = title;
       button.classList.add("codicon", ...classes);
       button.addEventListener('click', (ev) => {
-        context.pmContext.ui.codeview?.codeViewExecute(execute, cvContext);
+        onClick();
         ev.preventDefault();
         ev.stopPropagation();
         return false;
@@ -79,17 +83,31 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
       toolbar.appendChild(button);
       return button;
     }
+
+    const addExecuteButton = (execute: CodeViewExecute, title: string, ...classes: string[]) => {
+      addButton(title, () => {
+        context.pmContext.ui.codeview?.codeViewExecute(execute, cvContext);
+      }, ...classes)
+    };
     
     // buttons (conditional on context)
     const t = context.pmContext.ui.context.translateText;
-    if (runnableCellsAbove(cvContext)) {
-      addButton("above", t("Run Cells Above"), "codicon-run-above", "pm-codeview-run-other-button");
+    const diagramEngine = languageDiagramEngine(cvContext.activeLanguage);
+    if (diagramEngine) {
+      addButton(t("Preview Diagram"), () => {
+        previewDiagram(context, true);
+      }, "codicon-zoom-in", "pm-codeview-run-button");
+    } else {
+      if (runnableCellsAbove(cvContext)) {
+        addExecuteButton("above", t("Run Cells Above"), "codicon-run-above", "pm-codeview-run-other-button");
+      }
+      if (runnableCellsBelow(cvContext)) {
+        addExecuteButton("below", t("Run Cells Below"), "codicon-run-below", "pm-codeview-run-other-button");
+      }
+      addExecuteButton("cell", t("Run Cell"), "codicon-play", "pm-codeview-run-button");  
     }
-    if (runnableCellsBelow(cvContext)) {
-      addButton("below", t("Run Cells Below"), "codicon-run-below", "pm-codeview-run-other-button");
-    }
-    addButton("cell", t("Run Cell"), "codicon-play", "pm-codeview-run-button");
 
+   
     return toolbar;
   }
   
@@ -104,7 +122,11 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
           if (cmSelection) {
             const nodeLang = context.options.lang(pmView, pmView.textContent);
             const cvContext = codeViewActiveBlockContext(context.view.state);
-            if (cvContext && nodeLang && context.pmContext.ui.context.executableLanguges?.().includes(nodeLang)) {
+            if (cvContext && nodeLang && 
+                // is an executable language
+                (context.pmContext.ui.context.executableLanguges?.().includes(nodeLang) ||
+                // or is a diagram language
+                languageDiagramEngine(nodeLang))) {
               cmView.dispatch({effects: toggleToolbar.of(true)});
             } else {
               cmView.dispatch({effects: toggleToolbar.of(false)});

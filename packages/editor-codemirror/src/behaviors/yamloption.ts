@@ -29,7 +29,6 @@ export function yamlOptionBehavior(context: BehaviorContext) : Behavior {
   }
   
   return {
-    extensions: [],
 
     keys: [
       {

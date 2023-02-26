@@ -25,6 +25,7 @@ import {
   IgnoredWord,
   kCodeViewGetCompletions,
   kCodeViewExecute,
+  kCodeViewPreviewDiagram,
   kDictionaryAddToUserDictionary,
   kDictionaryAvailableDictionaries,
   kDictionaryGetDictionary,
@@ -44,6 +45,7 @@ import {
   SourceServer,
   CodeViewExecute,
   CodeViewActiveBlockContext,
+  DiagramState,
   
 } from "editor-types";
 
@@ -55,7 +57,7 @@ export function editorJsonRpcServices(request: JsonRpcRequestTransport) : Editor
     dictionary: editorDictionaryJsonRpcServer(request),
     prefs: editorPrefsJsonRpcServer(request),
     source: editorSourceJsonRpcServer(request),
-    codeview: editorCompletionJsonRpcServer(request)
+    codeview: editorCodeViewJsonRpcServer(request)
   };
 }
 
@@ -75,13 +77,16 @@ export function editorMathJsonRpcServer(request: JsonRpcRequestTransport) : Math
   }
 }
 
-export function editorCompletionJsonRpcServer(request: JsonRpcRequestTransport) : CodeViewServer {
+export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport) : CodeViewServer {
   return {
     codeViewExecute(execute: CodeViewExecute, context: CodeViewActiveBlockContext) {
       return request(kCodeViewExecute, [execute, context]);
     },
     codeViewCompletions(context: CodeViewCompletionContext) {
       return request(kCodeViewGetCompletions, [context]);
+    },
+    codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
+      return request(kCodeViewPreviewDiagram, [state, activate]);
     },
   }
 }

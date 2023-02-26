@@ -31,8 +31,6 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
 
   return {
 
-    extensions: [],
-
     init(_pmNode, cmView) {
       unsubscibe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
         if (tr) {

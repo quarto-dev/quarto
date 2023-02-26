@@ -51,7 +51,7 @@ export function diagramCodeLensProvider(
                 title: "$(zoom-in) Preview",
                 tooltip: "Preview the diagram",
                 command: "quarto.previewDiagram",
-                arguments: [block.map[0] + 1],
+                arguments: [{ textEditorLine: block.map[0] + 1 }],
               }),
             ]
           );

@@ -17,7 +17,16 @@ import { CompletionList } from 'vscode-languageserver-types';
 
 import { SkinTone } from './emoji';
 
-import { EditorUISpelling, EditorDialogs, EditorDisplay, EditorUIImageResolver, CodeViewCompletionContext, CodeViewExecute, CodeViewActiveBlockContext } from 'editor-types';
+import { 
+  EditorUISpelling, 
+  EditorDialogs, 
+  EditorDisplay, 
+  EditorUIImageResolver, 
+  CodeViewCompletionContext, 
+  CodeViewExecute, 
+  CodeViewActiveBlockContext, 
+  DiagramState 
+} from 'editor-types';
 
 export * from './spelling';
 export { SkinTone } from './emoji';
@@ -122,6 +131,7 @@ export interface EditorUIMath {
 export interface EditorUICodeView {
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
+  codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
 
 export const kListSpacingTight = 'tight';

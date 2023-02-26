@@ -118,3 +118,13 @@ const kEditorLanguages = [
 export function editorLanguage(id: string) {
   return kEditorLanguages.find((lang) => lang.ids.includes(id));
 }
+
+export function languageDiagramEngine(id: string) {
+  if (id === "dot") {
+    return "graphviz";
+  } else if (id === "mermaid") {
+    return "mermaid";
+  } else {
+    return undefined;
+  }
+}

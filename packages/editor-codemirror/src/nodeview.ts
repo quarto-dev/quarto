@@ -37,7 +37,8 @@ import {
   behaviorInit, 
   behaviorPmUpdate, 
   State,
-  behaviorCleanup, 
+  behaviorCleanup,
+  behaviorCmUpdate, 
 } from "./behaviors";
 
 export const codeMirrorNodeView: (
@@ -125,6 +126,8 @@ export const codeMirrorNodeView: (
         }
 
       }
+
+      behaviorCmUpdate(behaviors, tr, codeMirrorView, node);
     },
   });
   dom.append(codeMirrorView.dom);

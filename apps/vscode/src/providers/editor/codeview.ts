@@ -37,11 +37,11 @@ import {
 import { JsonRpcRequestTransport } from "core";
 
 import { 
-  CodeViewActiveBlockContext, 
   CodeViewCompletionContext, 
   CodeViewExecute, 
   CodeViewServer, 
-  kCodeViewGetCompletions 
+  DiagramState, 
+  kCodeViewGetCompletions,
 } from "editor-types";
 
 import { embeddedLanguage } from "../../vdoc/languages";
@@ -109,6 +109,9 @@ export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocum
         }      
       }
     },
+    async codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
+      commands.executeCommand("quarto.previewDiagram", { state, activate });
+    }
   };
 }
 

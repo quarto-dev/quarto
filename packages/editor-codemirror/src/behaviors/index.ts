@@ -19,7 +19,7 @@
 import { Node as ProsemirrorNode } from 'prosemirror-model'
 import { EditorView as PMEditorView} from "prosemirror-view";
 
-import { Extension } from "@codemirror/state";
+import { Extension, Transaction } from "@codemirror/state";
 import { EditorView, KeyBinding } from '@codemirror/view';
 
 import { CodeViewOptions, ExtensionContext } from "editor";
@@ -34,11 +34,13 @@ import { prefsBehavior } from './prefs';
 import { completionBehavior } from './completion';
 import { yamlOptionBehavior } from './yamloption';
 import { toolbarBehavior } from './toolbar';
+import { diagramBehavior } from './diagram';
 
 export interface Behavior {
-  extensions: Extension[];
+  extensions?: Extension[];
   keys?: KeyBinding[];
   init?: (pmNode: ProsemirrorNode, cmView: EditorView) => void;
+  cmUpdate?: (tr: Transaction, cmView: EditorView, pmNode: ProsemirrorNode) => void;
   pmUpdate?: (prevNode: ProsemirrorNode, updateNode: ProsemirrorNode, cmView: EditorView) => void;
   cleanup?: VoidFunction;
 }
@@ -65,7 +67,8 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     prefsBehavior(context),
     trackSelectionBehavior(context),
     yamlOptionBehavior(context),
-    toolbarBehavior(context)
+    toolbarBehavior(context),
+    diagramBehavior(context),
   ];
   behaviors.push(keyboardBehavior(context, behaviors.flatMap(behavior => behavior.keys || [])));
   return behaviors;
@@ -74,7 +77,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
 export function behaviorExtensions(
   behaviors: Behavior[]
 ) : Extension[] {
-  return behaviors.flatMap(behavior => behavior.extensions);
+  return behaviors.flatMap(behavior => (behavior.extensions || []));
 }
 
 export function behaviorInit(
@@ -82,6 +85,13 @@ export function behaviorInit(
   pmNode: ProsemirrorNode, cmView: EditorView
 ) {
   behaviors.forEach(behavior =>  behavior.init?.(pmNode, cmView));
+}
+
+export function behaviorCmUpdate(
+  behaviors: Behavior[],
+  tr: Transaction, cmView: EditorView, pmNode: ProsemirrorNode
+) {
+  behaviors.forEach(behavior => behavior.cmUpdate?.(tr, cmView, pmNode));
 }
 
 export function behaviorPmUpdate(

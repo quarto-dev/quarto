@@ -17,6 +17,7 @@ import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { MarkdownEngine } from "../markdown/engine";
 import { revealSlideIndex } from "../markdown/reveal";
+import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
@@ -111,6 +112,16 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
       setTimeout(() => {
         if (editor) {
           editor.activate();
+        }
+      }, 200);
+    }
+  } else {
+    // see if there is a visual editor we should be preserving focus for
+    const visualEditor = VisualEditorProvider.activeEditor();
+    if (visualEditor) {
+      setTimeout(async () => {
+        if (!(await visualEditor.hasFocus())) {
+          await visualEditor.activate();
         }
       }, 200);
     }

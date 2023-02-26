@@ -14,9 +14,11 @@
  */
 
 import { CompletionList, Range} from "vscode-languageserver-types";
+import { DiagramState } from "./diagram";
 
 export const kCodeViewGetCompletions = 'code_view_get_completions';
 export const kCodeViewExecute = 'code_view_execute';
+export const kCodeViewPreviewDiagram = 'code_view_preview_diagram';
 
 export type CodeViewExecute = "selection" | "cell" | "above" | "below";
 
@@ -42,6 +44,7 @@ export interface CodeViewCompletionContext {
 export interface CodeViewServer {
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
+  codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
 
 

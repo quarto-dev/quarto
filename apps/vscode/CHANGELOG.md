@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.70.1 (Release on 26 February 2023)
+
+- Correct theme for math preview in visual editor
+
 ## 1.70.0 (Release on 26 February 2023)
 
 - Cell execution and navigation for visual mode

@@ -63,7 +63,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
   const ui = {
     dialogs: providers.dialogs(),
     display: providers.display(),
-    math: editorMath(providers.services.math, providers.uiContext),
+    math: editorMath(providers.services.math, providers.uiContext, providers.prefs),
     context: providers.uiContext,
     prefs: editorPrefs(providers.prefs),
     codeview: providers.services.codeview,
@@ -82,7 +82,11 @@ export function editorContext(providers: EditorProviders) : EditorContext {
 }
 
 
-export function editorMath(server: MathServer, uiContext: EditorUIContext): EditorMath {
+export function editorMath(
+  server: MathServer,
+  uiContext: EditorUIContext,
+  prefs: () => EditorPrefs
+): EditorMath {
 
   const mathQueue = new PromiseQueue<MathjaxTypesetResult>();
 
@@ -100,7 +104,7 @@ export function editorMath(server: MathServer, uiContext: EditorUIContext): Edit
           text, 
           { 
             format: "data-uri",
-            theme: "light",
+            theme: prefs().prefs().darkMode ? "dark" : "light",
             scale: 1,
             extensions: []
           },

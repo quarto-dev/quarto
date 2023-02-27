@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.70.0 (Unreleased)
+## 1.70.0 (Release on 26 February 2023)
 
 - Cell execution and navigation for visual mode
 - Mermaid and GraphViz diagram preview for visual mode

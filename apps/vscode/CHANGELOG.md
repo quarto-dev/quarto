@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.70.2 (Release on 27 February 2023)
+
+- Fix issue w/ visual editor generating heading ids for Quarto v1.3 (Pandoc 3)
+
 ## 1.70.1 (Release on 26 February 2023)
 
 - Correct theme for math preview in visual editor

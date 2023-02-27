@@ -83,6 +83,7 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
 
       // heading-ids
       // disable auto identifiers so we can discover *only* explicit ids
+      format = format.replace(/\+(auto_identifiers|gfm_auto_identifiers)/, "");
       format += "-auto_identifiers-gfm_auto_identifiers";
       const headingIds = await runPandoc(
         ["--from", format,

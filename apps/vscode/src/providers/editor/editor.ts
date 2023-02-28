@@ -161,7 +161,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
           const source = editorSourceJsonRpcServer(lspRequest);
           source.getSourcePosLocations(document.getText()).then(locations => {
             // map to source line
-            const selLine = cursorIndex !== -1 
+            const selLine = (cursorIndex !== -1 && (locations.length > cursorIndex))
               ? (locations[cursorIndex] || locations[locations.length-1]).pos - 1
               : 0;
 

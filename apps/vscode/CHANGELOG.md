@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.71.0 (Release on 28 February 2023)
+
+- Format Document/Range now supports workspace formatting config
+- Go to Definition now works with local file references
+- Ensure that empty links survive visual editor round trip
+- Protect against null ref when syncing source position
+
 ## 1.70.2 (Release on 27 February 2023)
 
 - Fix issue w/ visual editor generating heading ids for Quarto v1.3 (Pandoc 3)

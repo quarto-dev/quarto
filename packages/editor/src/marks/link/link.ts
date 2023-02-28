@@ -119,7 +119,16 @@ const extension = (context: ExtensionContext): Extension => {
                   ...(linkAttr ? pandocAttrReadAST(tok, kLinkAttr) : {}),
                 };
               },
-              getChildren: (tok: PandocToken) => tok.c[kLinkChildren],
+              getChildren: (tok: PandocToken) => {
+                const children = tok.c[kLinkChildren];
+                if (children.length > 0) {
+                  return children;
+                } else {
+                  return [{
+                    t: PandocTokenType.Space,
+                  }]
+                }
+              },
 
               postprocessor: hasShortcutHeadingLinks(pandocExtensions) ? linkHeadingsPostprocessor : undefined,
             },

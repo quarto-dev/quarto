@@ -27,12 +27,31 @@ import {
   WorkspaceEdit,
 } from "vscode";
 import { getWholeRange } from "../core/doc";
-import { VirtualDoc } from "./vdoc";
+import { VirtualDoc, VirtualDocUri } from "./vdoc";
 
 // one virtual doc per language file extension
 const languageVirtualDocs = new Map<String, TextDocument>();
 
-export async function virtualDocUriFromTempFile(virtualDoc: VirtualDoc) {
+export async function virtualDocUriFromTempFile(
+  virtualDoc: VirtualDoc, 
+  docPath: string, 
+  local: boolean
+) : Promise<VirtualDocUri> {
+
+  // if this is local then create it alongside the docPath and return a cleanup 
+  // function to remove it when the action is completed. 
+  if (local) {
+    const ext = virtualDoc.language.extension;
+    const vdocPath = path.join(path.dirname(docPath), `.vdoc.${ext}`);
+    fs.writeFileSync(vdocPath, virtualDoc.content);
+    const vdocUri = Uri.file(vdocPath);
+    const doc = await workspace.openTextDocument(vdocUri);
+    return {
+      uri: doc.uri,
+      cleanup: async () => await deleteDocument(doc)
+    };
+  }
+
   // do we have an existing document?
   const langVdoc = languageVirtualDocs.get(virtualDoc.language.extension);
   if (langVdoc && !langVdoc.isClosed) {
@@ -45,10 +64,10 @@ export async function virtualDocUriFromTempFile(virtualDoc: VirtualDoc) {
         await workspace.applyEdit(edit);
         await langVdoc.save();
       }
-      return langVdoc.uri;
+      return { uri: langVdoc.uri };
     } else if (langVdoc.getText() === virtualDoc.content) {
       // if its content is identical to what's passed in then just return it
-      return langVdoc.uri;
+      return { uri: langVdoc.uri };
     } else {
       // otherwise remove it (it will get recreated below)
       await deleteDocument(langVdoc);
@@ -75,7 +94,7 @@ export async function virtualDocUriFromTempFile(virtualDoc: VirtualDoc) {
   }
 
   // return the uri
-  return doc.uri;
+  return { uri: doc.uri };
 }
 
 // delete any vdocs left open
@@ -103,8 +122,7 @@ function createVirtualDocTempFile(virtualDoc: VirtualDoc) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
-  const tmpPath = path.join(vdocTempDir, ext, "intellisense." + ext);
-
+  const tmpPath = path.join(vdocTempDir, ext, ".intellisense." + ext);
   fs.writeFileSync(tmpPath, virtualDoc.content);
 
   return tmpPath;

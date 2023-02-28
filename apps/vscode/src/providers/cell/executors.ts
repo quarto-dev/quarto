@@ -147,7 +147,7 @@ export async function ensureRequiredExtension(
       );
       if (vdoc) {
         // get the virtual doc
-        await virtualDocUri(vdoc, document.uri);
+        await virtualDocUri(vdoc, document.uri, "hover");
 
         // mark language as being loaded
         kLoadedLanguageExtensions.push(executor.language);

@@ -44,6 +44,7 @@ import {
   virtualDoc,
   virtualDocForLanguage,
   virtualDocUri,
+  withVirtualDocUri,
 } from "../vdoc/vdoc";
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
@@ -110,15 +111,17 @@ export function embeddedDocumentRangeFormattingProvider(
       if (beginBlock && beginBlock?.map?.[0] === endBlock?.map?.[0]) {
         const vdoc = await virtualDoc(document, range.start, engine);
         if (vdoc) {
-          const vdocUri = await virtualDocUri(vdoc, document.uri);
-          const edits = await executeFormatRangeProvider(
-            vdocUri,
-            new Range(
-              adjustedPosition(vdoc.language, range.start),
-              adjustedPosition(vdoc.language, range.end)
-            ),
-            formattingOptions(document.uri, vdoc.language, options)
-          );
+          const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
+          const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+            return await executeFormatRangeProvider(
+              uri,
+              new Range(
+                adjustedPosition(vdoc.language, range.start),
+                adjustedPosition(vdoc.language, range.end)
+              ),
+              formattingOptions(document.uri, vdoc.language, options)
+            );
+          });
           if (edits) {
             return unadjustedEdits(edits, vdoc.language);
           }
@@ -144,12 +147,14 @@ class FormatCellCommand implements Command {
       const result = await virtualDocAtEditorSelection(editor, this.engine_);
       if (result) {
         const { vdoc, startLine, endLine } = result;
-        const vdocUri = await virtualDocUri(vdoc, doc.uri);
-        const edits = await executeFormatRangeProvider(
-          vdocUri,
-          adjustedCellRange(vdoc.language, doc, startLine, endLine),
-          formattingOptions(doc.uri, vdoc.language)
-        );
+        const vdocUri = await virtualDocUri(vdoc, doc.uri, "format");
+        const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+          return await executeFormatRangeProvider(
+            uri,
+            adjustedCellRange(vdoc.language, doc, startLine, endLine),
+            formattingOptions(doc.uri, vdoc.language)
+          );
+        });
         if (edits) {
           editor.edit((editBuilder) => {
             unadjustedEdits(edits, vdoc.language).forEach((edit) => {
@@ -222,12 +227,14 @@ async function executeFormatDocumentProvider(
   document: TextDocument,
   options: FormattingOptions
 ): Promise<TextEdit[] | undefined> {
-  const vdocUri = await virtualDocUri(vdoc, document.uri);
-  const edits = await commands.executeCommand<TextEdit[]>(
-    "vscode.executeFormatDocumentProvider",
-    vdocUri,
-    options
-  );
+  const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
+  const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+    return await commands.executeCommand<TextEdit[]>(
+      "vscode.executeFormatDocumentProvider",
+      uri,
+      options
+    );
+  });
   if (edits) {
     return unadjustedEdits(edits, vdoc.language);
   } else {

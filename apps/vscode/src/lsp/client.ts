@@ -202,13 +202,13 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
       // get uri for hover
-      const vdocUri = await virtualDocUri(vdoc, document.uri);
+      const vdocUri = await virtualDocUri(vdoc, document.uri, "hover");
 
       // execute hover
       try {
         const hovers = await commands.executeCommand<Hover[]>(
           "vscode.executeHoverProvider",
-          vdocUri,
+          vdocUri.uri,
           adjustedPosition(vdoc.language, position)
         );
         if (hovers && hovers.length > 0) {
@@ -227,6 +227,10 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        if (vdocUri.cleanup) {
+          await vdocUri.cleanup();
+        }
       }
     }
 
@@ -245,16 +249,20 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri);
+      const vdocUri = await virtualDocUri(vdoc, document.uri, "signature");
       try {
         return await commands.executeCommand<SignatureHelp>(
           "vscode.executeSignatureHelpProvider",
-          vdocUri,
+          vdocUri.uri,
           adjustedPosition(vdoc.language, position),
           context.triggerCharacter
         );
       } catch (error) {
         return undefined;
+      } finally {
+        if (vdocUri.cleanup) {
+          await vdocUri.cleanup();
+        }
       }
     } else {
       return await next(document, position, context, token);
@@ -271,17 +279,17 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri);
+      const vdocUri = await virtualDocUri(vdoc, document.uri, "definition");
       try {
         const definitions = await commands.executeCommand<
           ProviderResult<Definition | LocationLink[]>
         >(
           "vscode.executeDefinitionProvider",
-          vdocUri,
+          vdocUri.uri,
           adjustedPosition(vdoc.language, position)
         );
         const resolveLocation = (location: Location) => {
-          if (location.uri.toString() === vdocUri.toString()) {
+          if (location.uri.toString() === vdocUri.uri.toString()) {
             return new Location(
               document.uri,
               unadjustedRange(vdoc.language, location.range)
@@ -291,7 +299,7 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           }
         };
         const resolveLocationLink = (location: LocationLink) => {
-          if (location.targetUri.toString() === vdocUri.toString()) {
+          if (location.targetUri.toString() === vdocUri.uri.toString()) {
             const locationLink: LocationLink = {
               targetRange: unadjustedRange(vdoc.language, location.targetRange),
               originSelectionRange: location.originSelectionRange
@@ -324,6 +332,10 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
         }
       } catch (error) {
         return undefined;
+      } finally {
+        if (vdocUri.cleanup) {
+          await vdocUri.cleanup();
+        }
       }
     } else {
       return await next(document, position, token);

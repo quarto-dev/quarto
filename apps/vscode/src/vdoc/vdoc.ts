@@ -73,6 +73,11 @@ export function virtualDocForLanguage(
       }
     }
   }
+  
+  // add a couple of blank lines at the bottom for padding
+  for (let i=0; i<2; i++) {
+    lines.push(language.emptyLine || ""); 
+  }
 
   // return virtual doc
   return virtualDocForCode(lines, language);
@@ -89,14 +94,45 @@ export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
 
   return {
     language,
-    content: lines.join("\n"),
+    content: lines.join("\n") + "\n",
   };
 }
 
-export async function virtualDocUri(virtualDoc: VirtualDoc, parentUri: Uri) {
+export type VirtualDocAction = 
+  "completion" | 
+  "hover"      | 
+  "signature"  | 
+  "definition" | 
+  "format";
+
+export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
+
+export async function withVirtualDocUri<T>(virtualDocUri: VirtualDocUri, f: (uri: Uri) => Promise<T>) {
+  try {
+    return await f(virtualDocUri.uri);
+  } finally {
+    if (virtualDocUri.cleanup) {
+      virtualDocUri.cleanup();
+    }
+  }
+}
+
+export async function virtualDocUri(
+  virtualDoc: VirtualDoc, 
+  parentUri: Uri, 
+  action: VirtualDocAction
+) : Promise<VirtualDocUri> {
+
+  // format and definition actions use a transient local vdoc
+  // (so they can get project-specific paths and formatting config)
+  // note that we don't do this if the language requires vdoc re-use
+  // (as the closing of the document will cause the extension to exit)
+  const local = ["format", "definition"].includes(action) &&
+                !virtualDoc.language.reuseVdoc;
+
   return virtualDoc.language.type === "content"
-    ? virtualDocUriFromEmbeddedContent(virtualDoc, parentUri)
-    : await virtualDocUriFromTempFile(virtualDoc);
+    ? { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) }
+    : await virtualDocUriFromTempFile(virtualDoc, parentUri.fsPath, local);
 }
 
 export function languageAtPosition(tokens: Token[], position: Position) {

@@ -161,7 +161,7 @@ export function slideIndexForPresentationEditorLocation(location: PresentationEd
                 item.type === kPresentationEditorLocationHr) {
       slideIndex++;
     } else if (item.type === kPresentationEditorLocationHeading && 
-                item.level <= location.auto_slide_level) {
+                item.level <= location.auto_slide_level + 1) {
       slideIndex++;
     }
   }

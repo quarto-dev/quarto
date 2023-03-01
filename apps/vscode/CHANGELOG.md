@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.72.0 (Unreleased)
+
+- Correct scrolling behavior for visual editor outline
+
 ## 1.71.0 (Release on 28 February 2023)
 
 - Format Document/Range now supports workspace formatting config

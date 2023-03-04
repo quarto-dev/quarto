@@ -245,6 +245,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
       emitUpdate: boolean
     ) {
 
+      // ensure that there is some content
+      markdown = markdown || " ";
+
       // if we don't support untitled and this is untitled then show that error
       if (props.uiContext.getDocumentPath() === null && props.options?.cannotEditUntitled) {
         editorLoadFailed({

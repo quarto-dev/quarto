@@ -97,11 +97,13 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
   const pyDefault = !!options.defaultCellTypePython;
   return [
     { command: EditorCommandId.OmniInsert },
+    { separator: true },
+    { command: EditorCommandId.YamlMetadata },
     ...(haveAnyOf(commands, EditorCommandId.RCodeChunk, EditorCommandId.PythonCodeChunk)
       ? [
           { separator: true },
           {
-            text: ui.context.translateText('Code Cell'),
+            text: ui.context.translateText('Executable Code Cell'),
             subMenu: {
               items: [
                 ...(pyDefault
@@ -126,6 +128,8 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
     { command: EditorCommandId.Image },
     { command: EditorCommandId.Link },
     { command: EditorCommandId.Shortcode },
+    { separator: true },
+    { command: EditorCommandId.CodeBlockFormat },
     ...(haveAnyOf(commands, EditorCommandId.Citation, EditorCommandId.CrossReference, EditorCommandId.Footnote)
     ? [
       { separator: true },
@@ -195,9 +199,6 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
       { command: EditorCommandId.Tabset },
       { command: EditorCommandId.Callout },
      ] : []),
-    { separator: true },
-    { command: EditorCommandId.CodeBlockFormat },
-    { command: EditorCommandId.YamlMetadata },
     { separator: true },
     { command: haveAnyOf(commands, EditorCommandId.UserComment) 
         ? EditorCommandId.UserComment 

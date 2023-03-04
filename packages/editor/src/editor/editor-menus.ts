@@ -103,11 +103,13 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
       ? [
           { separator: true },
           {
-            text: ui.context.translateText('Executable Code Cell'),
+            text: ui.context.translateText('Executable Cell'),
             subMenu: {
               items: [
                 ...(pyDefault
-                  ? [ { command: EditorCommandId.PythonCodeChunk }, { command: EditorCommandId.RCodeChunk } ]  
+                  ? [ { command: EditorCommandId.PythonCodeChunk }, 
+                      { command: EditorCommandId.RCodeChunk }, 
+                      { command: EditorCommandId.JuliaCodeChunk } ]  
                   : [ { command: EditorCommandId.RCodeChunk }, { command: EditorCommandId.PythonCodeChunk } ] 
                 ),
                 { command: EditorCommandId.BashCodeChunk },

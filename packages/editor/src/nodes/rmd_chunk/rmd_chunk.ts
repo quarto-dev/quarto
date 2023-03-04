@@ -102,7 +102,8 @@ const extension = (context: ExtensionContext): Extension | null => {
     commands: () => {
       const commands = [
         new RChunkCommand(ui, options),
-        new PythonChunkCommand(ui, options)
+        new PythonChunkCommand(ui, options),
+        new JuliaChunkCommand(ui, options)
       ];
       if (!options.defaultCellTypePython) {
         commands.push(
@@ -199,6 +200,23 @@ class PythonChunkCommand extends RmdChunkCommand {
       'Python',
       '{python}\n',
       () => ui.images.omni_insert!.python_chunk!,
+      OmniInsertGroup.Common
+    );
+  }
+}
+
+
+class JuliaChunkCommand extends RmdChunkCommand {
+  constructor(ui: EditorUI, options: EditorOptions) {
+    super(
+      ui,
+      options,
+      EditorCommandId.JuliaCodeChunk,
+      [],
+      9,
+      'Julia',
+      '{julia}\n',
+      () => ui.prefs.darkMode() ? ui.images.omni_insert!.code_block_dark : ui.images.omni_insert!.code_block!,
       OmniInsertGroup.Common
     );
   }

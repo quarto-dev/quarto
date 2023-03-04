@@ -396,6 +396,9 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.PythonCodeChunk]: {
         menuText: 'Python',
       },
+      [EditorCommandId.JuliaCodeChunk]: {
+        menuText: 'Julia',
+      },
       [EditorCommandId.RcppCodeChunk]: {
         menuText: 'Rcpp',
       },

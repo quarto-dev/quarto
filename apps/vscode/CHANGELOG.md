@@ -6,6 +6,7 @@
 - Fix preview syncing for presentations with level 1 headings
 - Improve visual editor insert menu (YAML, Code Cell vs. Block)
 - Add Julia code cell command to visual editor
+- Handle entirely empty documents in the visual editor
 
 ## 1.71.0 (Release on 28 February 2023)
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.72.0 (Unreleased)
+## 1.72.0 (Release on 7 March 2023)
 
 - Correct scrolling behavior for visual editor outline
 - Fix preview syncing for presentations with level 1 headings

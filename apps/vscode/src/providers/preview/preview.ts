@@ -529,7 +529,7 @@ class PreviewManager {
         }
 
         if (this.previewType_ === "internal") {
-          this.showPreview();
+          await this.showPreview();
         } else if (this.previewType_ === "external") {
           try {
             const url = Uri.parse(this.previewUrl_);
@@ -625,12 +625,14 @@ class PreviewManager {
     }
   }
 
-  private showPreview() {
+  private async showPreview() {
     if (
       !this.previewOutputFile_ || // no output file means project render/preview
       this.isBrowserPreviewable(this.previewOutputFile_)
     ) {
-      this.webviewManager_.showWebview(this.previewUrl_!, {
+      // https://code.visualstudio.com/api/advanced-topics/remote-extensions
+      const previewUrl = (await vscode.env.asExternalUri(Uri.parse(this.previewUrl_!))).toString();
+      this.webviewManager_.showWebview(previewUrl, {
         preserveFocus: true,
         viewColumn: ViewColumn.Beside,
       });

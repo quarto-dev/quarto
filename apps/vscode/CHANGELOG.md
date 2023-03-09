@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.73.0 (Unreleased)
+
+- Support for Preview in GitHub Codespaces
+- Support for codicons (editor, preview) in GitHub Codespaces
+
 ## 1.72.0 (Release on 7 March 2023)
 
 - Correct scrolling behavior for visual editor outline

@@ -492,6 +492,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       "codicon",
       "codicon.css",
     ]);
+    const codiconsFontUri = this.extensionResourceUrl(webview, [
+      "assets",
+      "www",
+      "codicon",
+      "codicon.ttf",
+    ]);
 
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
@@ -507,6 +513,13 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
             <link href="${stylesUri}" rel="stylesheet" />
+            <style type="text/css">
+            @font-face {
+              font-family: "codicon";
+              font-display: block;
+              src: url("${codiconsFontUri}?939d3cf562f2f1379a18b5c3113b59cd") format("truetype");
+            }
+            </style>
             <link rel="stylesheet" type="text/css" href="${codiconsUri}">
 
             <title>Visual Editor</title>

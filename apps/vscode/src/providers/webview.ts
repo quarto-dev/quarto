@@ -233,7 +233,13 @@ export abstract class QuartoWebview<T> extends Disposable {
       "codicon",
       "codicon.css",
     ]);
-
+    const codiconsFontUri = this.extensionResourceUrl([
+      "assets",
+      "www",
+      "codicon",
+      "codicon.ttf",
+    ]);
+    
     return /* html */ `<!DOCTYPE html>
 			<html>
 			<head>
@@ -253,6 +259,13 @@ export abstract class QuartoWebview<T> extends Disposable {
 				${headerHtml}
 
 				<link rel="stylesheet" type="text/css" href="${mainCss}">
+        <style type="text/css">
+        @font-face {
+          font-family: "codicon";
+          font-display: block;
+          src: url("${codiconsFontUri}?939d3cf562f2f1379a18b5c3113b59cd") format("truetype");
+        }
+        </style>
 				<link rel="stylesheet" type="text/css" href="${codiconsUri}">
 			</head>
 			<body>

@@ -25,6 +25,30 @@ export function isRStudioWorkbench() {
   return process.env.RS_SERVER_URL && process.env.RS_SESSION_URL;
 }
 
+
+export function gitHubCodespaceName() {
+  return process.env.CODESPACE_NAME;
+}
+
+export function gitHubCodespacePortForwardingDomain() {
+  return process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN;
+}
+
+export function isGitHubCodespaces() {
+  return !!gitHubCodespacePortForwardingDomain() && !!gitHubCodespaceName();
+}
+
+export function gitHubCodeSpacesProxyUri() {
+  const CODESPACE_NAME = gitHubCodespaceName();
+  const GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN =
+    gitHubCodespacePortForwardingDomain();
+  if (CODESPACE_NAME && GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN) {
+    return `https://${CODESPACE_NAME}-{{port}}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`;
+  } else {
+    return undefined;
+  }
+}
+
 export function isVSCodeServer() {
   return !!vsCodeServerProxyUri();
 }

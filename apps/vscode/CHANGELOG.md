@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.73.0 (Unreleased)
+## 1.73.0 (Release on 9 March 2023)
 
 - Support for Preview in GitHub Codespaces
 - Support for codicons (editor, preview) in GitHub Codespaces

@@ -106,9 +106,14 @@ export async function deactivateVirtualDocTempFiles() {
 
 // delete a document
 async function deleteDocument(doc: TextDocument) {
-  const edit = new WorkspaceEdit();
-  edit.deleteFile(doc.uri);
-  await workspace.applyEdit(edit);
+  try {
+    const edit = new WorkspaceEdit();
+    edit.deleteFile(doc.uri);
+    await workspace.applyEdit(edit);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.log(`Error removing vdoc at ${doc.fileName}: ${msg}`);
+  }
 }
 
 // create temp files for vdocs. use a base directory that has a subdirectory

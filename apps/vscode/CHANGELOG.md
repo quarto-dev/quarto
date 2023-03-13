@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.74.0 (Unreleased)
+
+- Handle errors cleaning up vdocs more gracefully.
+
 ## 1.73.0 (Release on 9 March 2023)
 
 - Support for Preview in GitHub Codespaces

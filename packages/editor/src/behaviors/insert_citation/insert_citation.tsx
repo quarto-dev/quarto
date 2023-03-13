@@ -233,10 +233,6 @@ export async function showInsertCitationDialog(
     },
     () => {
       // Validation
-      // User has to select a citation, everything else we can use defaults
-      if (!result || result.bibliographySources.length === 0) {
-        return ui.context.translateText('Please select at least one citation to insert.');
-      }
       return null;
     },
   );

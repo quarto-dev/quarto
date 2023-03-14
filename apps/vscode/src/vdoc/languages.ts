@@ -14,6 +14,7 @@
  */
 
 import { editorLanguage } from "editor-core";
+import { Uri, workspace } from "vscode";
 
 export interface EmbeddedLanguage {
   ids: string[];
@@ -25,10 +26,15 @@ export interface EmbeddedLanguage {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
+  canFormatSelection?: (uri: Uri) => boolean;
 }
 
 export function embeddedLanguage(langauge: string) {
   return kEmbededLanguages.find((lang) => lang.ids.includes(langauge));
+}
+
+export function langaugeCanFormatSelection(language: EmbeddedLanguage, uri: Uri) {
+  return !language.canFormatSelection || language.canFormatSelection(uri);
 }
 
 const kEmbededLanguages = [
@@ -37,6 +43,10 @@ const kEmbededLanguages = [
     inject: ["# type: ignore", "# flake8: noqa"],
     emptyLine: "#",
     canFormat: true,
+    canFormatSelection: (uri: Uri) => {
+      const settings = workspace.getConfiguration("python", uri);
+      return settings.get<string>("formatting.provider") !== "black";
+    }
   }),
   defineLanguage("r", {
     emptyLine: "#",
@@ -70,6 +80,7 @@ interface LanguageOptions {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
+  canFormatSelection?: (uri: Uri) => boolean;
 }
 
 function defineLanguage(
@@ -99,5 +110,6 @@ function defineLanguage(
     inject: options?.inject,
     reuseVdoc: options?.reuseVdoc,
     canFormat: options?.canFormat,
+    canFormatSelection: options?.canFormatSelection
   };
 }

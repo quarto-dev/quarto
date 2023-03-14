@@ -34,7 +34,7 @@ import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { languageBlockAtPosition } from "../markdown/language";
-import { EmbeddedLanguage } from "../vdoc/languages";
+import { EmbeddedLanguage, langaugeCanFormatSelection } from "../vdoc/languages";
 import {
   adjustedPosition,
   languageAtPosition,
@@ -146,18 +146,37 @@ class FormatCellCommand implements Command {
     if (doc && isQuartoDoc(doc)) {
       const result = await virtualDocForActiveCell(editor, this.engine_);
       if (result) {
-        const { vdoc } = result;
-        const edits = await executeFormatDocumentProvider(
-          vdoc,
-          doc,
-          formattingOptions(doc.uri, vdoc.language)
-        );
-        if (edits) {
-          editor.edit((editBuilder) => {
-            edits.forEach((edit) => {
-              editBuilder.replace(edit.range, edit.newText);
-            });
+        const { vdoc, startLine, endLine } = result;
+        if (langaugeCanFormatSelection(vdoc.language, doc.uri)) {
+          const vdocUri = await virtualDocUri(vdoc, doc.uri, "format");
+          const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+            return await executeFormatRangeProvider(
+              uri,
+              adjustedCellRange(vdoc.language, doc, startLine, endLine),
+              formattingOptions(doc.uri, vdoc.language)
+            );
           });
+          if (edits) {
+            editor.edit((editBuilder) => {
+              unadjustedEdits(edits, vdoc.language).forEach((edit) => {
+                editBuilder.replace(edit.range, edit.newText);
+              });
+            });
+          }
+        } else {
+          const edits = await executeFormatDocumentProvider(
+            vdoc,
+            doc,
+            formattingOptions(doc.uri, vdoc.language)
+          );
+          if (edits) {
+            editor.edit((editBuilder) => {
+              edits.forEach((edit) => {
+                editBuilder.replace(edit.range, edit.newText);
+              });
+            });
+          }
+       
         }
       } else {
         window.showInformationMessage(

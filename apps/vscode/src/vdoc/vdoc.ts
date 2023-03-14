@@ -34,7 +34,8 @@ export interface VirtualDoc {
 export async function virtualDoc(
   document: TextDocument,
   position: Position,
-  engine: MarkdownEngine
+  engine: MarkdownEngine,
+  block?: Token
 ): Promise<VirtualDoc | undefined> {
   // make sure this is a quarto doc
   if (!isQuartoDoc(document)) {
@@ -46,10 +47,21 @@ export async function virtualDoc(
   const language = languageAtPosition(tokens, position);
 
   if (language) {
-    return virtualDocForLanguage(document, tokens, language);
+    if (block) {
+      return virtualDocForBlock(document, block, language);
+    } else {
+      return virtualDocForLanguage(document, tokens, language);
+    }
   } else {
     return undefined;
   }
+}
+
+export function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {
+  const lines = linesForLanguage(document, language);
+  fillLinesFromBlock(lines, document, block);
+  padLinesForLanguage(lines, language);
+  return virtualDocForCode(lines, language);
 }
 
 export function virtualDocForLanguage(
@@ -57,31 +69,38 @@ export function virtualDocForLanguage(
   tokens: Token[],
   language: EmbeddedLanguage
 ): VirtualDoc {
-  // filter out lines that aren't of this language
-  const lines: string[] = [];
-  for (let i = 0; i < document.lineCount; i++) {
-    lines.push(language.emptyLine || "");
-  }
+  const lines = linesForLanguage(document, language);
   for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
-    if (languageBlock.map) {
-      for (
-        let line = languageBlock.map[0] + 1;
-        line < languageBlock.map[1] - 1 && line < document.lineCount;
-        line++
-      ) {
-        lines[line] = document.lineAt(line).text;
-      }
+    fillLinesFromBlock(lines, document, languageBlock);
+  }
+  padLinesForLanguage(lines, language);
+  return virtualDocForCode(lines, language);
+}
+
+function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
+  const lines: string[] = [];
+   for (let i = 0; i < document.lineCount; i++) {
+     lines.push(language.emptyLine || "");
+   }
+   return lines;
+}
+
+function fillLinesFromBlock(lines: string[], document: TextDocument, block: Token) {
+  if (block.map) {
+    for (
+      let line = block.map[0] + 1;
+      line < block.map[1] - 1 && line < document.lineCount;
+      line++
+    ) {
+      lines[line] = document.lineAt(line).text;
     }
   }
-  
-  // add a couple of blank lines at the bottom for padding
+}
+
+function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
   for (let i=0; i<2; i++) {
     lines.push(language.emptyLine || ""); 
   }
-
-  // return virtual doc
-  return virtualDocForCode(lines, language);
-  
 }
 
 export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {

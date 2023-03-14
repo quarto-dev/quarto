@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.75.0 (Release on 14 March 2023)
+
+- Scope Format Cell change to Python 'black' formatter only.
+
 ## 1.74.0 (Release on 13 March 2023)
 
 - Format Cell for language formatters that don't support selection formatting

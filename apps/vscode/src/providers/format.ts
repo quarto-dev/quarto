@@ -136,18 +136,17 @@ class FormatCellCommand implements Command {
     const editor = window.activeTextEditor;
     const doc = editor?.document;
     if (doc && isQuartoDoc(doc)) {
-      const result = await virtualDocAtEditorSelection(editor, this.engine_);
+      const result = await virtualDocForActiveCell(editor, this.engine_);
       if (result) {
-        const { vdoc, startLine, endLine } = result;
-        const vdocUri = await virtualDocUri(vdoc, doc.uri);
-        const edits = await executeFormatRangeProvider(
-          vdocUri,
-          adjustedCellRange(vdoc.language, doc, startLine, endLine),
+        const { vdoc } = result;
+        const edits = await executeFormatDocumentProvider(
+          vdoc,
+          doc,
           formattingOptions(doc.uri, vdoc.language)
         );
         if (edits) {
           editor.edit((editBuilder) => {
-            unadjustedEdits(edits, vdoc.language).forEach((edit) => {
+            edits.forEach((edit) => {
               editBuilder.replace(edit.range, edit.newText);
             });
           });
@@ -181,7 +180,7 @@ function formattingOptions(
   };
 }
 
-async function virtualDocAtEditorSelection(
+async function virtualDocForActiveCell(
   editor: TextEditor,
   engine: MarkdownEngine
 ) {
@@ -190,7 +189,7 @@ async function virtualDocAtEditorSelection(
   const position = new Position(line, 0);
   const block = languageBlockAtPosition(tokens, position, false);
   if (block?.map) {
-    const vdoc = await virtualDoc(editor.document, position, engine);
+    const vdoc = await virtualDoc(editor.document, position, engine, block);
     if (vdoc) {
       return { vdoc, startLine: block.map[0], endLine: block.map[1] };
     }

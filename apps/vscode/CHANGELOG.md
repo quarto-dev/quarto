@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.74.0 (Unreleased)
+## 1.74.0 (Release on 13 March 2023)
 
-- Handle errors cleaning up vdocs more gracefully.
+- Format Cell for language formatters that don't support selection formatting
+- Handle errors cleaning up virtual docs more gracefully.
 
 ## 1.73.0 (Release on 9 March 2023)
 

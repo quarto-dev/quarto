@@ -736,15 +736,15 @@
         },
         {
           "command": "quarto.runNextCell",
-          "when":"editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.runCellsBelow",
-          "when":"editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.runCellsAbove",
-          "when":"editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.runAllCells",
@@ -1202,6 +1202,7 @@
     "markdown-it-container": "^3.0.0",
     "markdown-it-highlightjs": "^4.0.1",
     "nanoid": "^4.0.0",
+    "picomatch": "^2.3.1",
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-vscode-editor": "*",
@@ -1222,6 +1223,7 @@
     "@types/markdown-it-container": "^2.0.5",
     "@types/markdown-it-highlightjs": "^3.3.1",
     "@types/node": "16.x",
+    "@types/picomatch": "^2.3.0",
     "@types/semver": "^7.3.13",
     "@types/tmp": "^0.2.3",
     "@types/uuid": "^9.0.0",

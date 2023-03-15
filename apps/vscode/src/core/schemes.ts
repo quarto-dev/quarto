@@ -16,7 +16,7 @@
 
 import { Uri } from "vscode";
 
-export const Schemes = {
+export const Schemes = Object.freeze({
   http: "http:",
   https: "https:",
   file: "file:",
@@ -25,8 +25,13 @@ export const Schemes = {
   data: "data:",
   vscode: "vscode:",
   "vscode-insiders": "vscode-insiders:",
-};
+  notebookCell: 'vscode-notebook-cell',
+});
 
 export function hasFileScheme(uri: Uri) {
   return uri.scheme === Schemes.file.slice(0, Schemes.file.length - 1);
+}
+
+export function isOfScheme(scheme: string, link: string): boolean {
+	return link.toLowerCase().startsWith(scheme + ':');
 }

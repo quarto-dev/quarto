@@ -30,6 +30,7 @@ import { activateLuaTypes } from "./providers/lua-types";
 import { activateCreate } from "./providers/create/create";
 import { activatePaste } from "./providers/paste";
 import { activateEditor } from "./providers/editor/editor";
+import { activateCopyFiles } from "./providers/copyfiles";
 
 export async function activate(context: vscode.ExtensionContext) {
   // create markdown engine
@@ -94,6 +95,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // provide paste handling
   const pasteCommands = activatePaste();
   commands.push(...pasteCommands);
+
+  // provide file copy/drop handling
+  activateCopyFiles(context);
 
   // activate providers common to browser/node
   activateCommon(context, engine, commands);

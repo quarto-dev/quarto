@@ -2,6 +2,7 @@
 
 ## 1.76.0 (Unreleased)
 
+- Support for Shift-Drag/Drop of images in markdown source editor
 - Provide option for visual editor font (defaults to Markdown Preview font)
 
 ## 1.75.0 (Release on 14 March 2023)

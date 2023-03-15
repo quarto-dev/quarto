@@ -108,15 +108,16 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
               items: [
                 ...(pyDefault
                   ? [ { command: EditorCommandId.PythonCodeChunk }, 
-                      { command: EditorCommandId.RCodeChunk }, 
-                      { command: EditorCommandId.JuliaCodeChunk } ]  
-                  : [ { command: EditorCommandId.RCodeChunk }, { command: EditorCommandId.PythonCodeChunk } ] 
+                      { command: EditorCommandId.RCodeChunk } ]  
+                  : [ { command: EditorCommandId.RCodeChunk }, 
+                      { command: EditorCommandId.PythonCodeChunk } ] 
                 ),
                 { command: EditorCommandId.BashCodeChunk },
                 { command: EditorCommandId.RcppCodeChunk },
                 { command: EditorCommandId.SQLCodeChunk },
                 { command: EditorCommandId.D3CodeChunk },
                 { command: EditorCommandId.StanCodeChunk },
+                { command: EditorCommandId.JuliaCodeChunk },
                 { separator: true },
                 { command: EditorCommandId.MermaidCodeChunk },
                 { command: EditorCommandId.GraphVizCodeChunk }

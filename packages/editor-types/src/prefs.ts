@@ -36,6 +36,7 @@ export interface Prefs extends MarkdownPrefs {
   // display
   readonly darkMode: boolean;
   readonly fontSize: number;
+  readonly fontFamily: string;
   readonly maxContentWidth: number;
 
   // spelling
@@ -85,6 +86,8 @@ export function defaultPrefs() : Prefs {
     // display
     darkMode: false,
     fontSize: 12,
+    // by default, same as vscode markdown preview
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif",
     // NOTE: sync with default in vscode/package.json
     maxContentWidth: 1000,
 

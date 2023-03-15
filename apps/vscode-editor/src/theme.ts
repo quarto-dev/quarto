@@ -15,7 +15,7 @@
 
 
 import { defaultTheme } from "editor";
-import { Prefs } from "editor-types";
+import { Prefs, defaultPrefs } from "editor-types";
 import { isSolarizedThemeActive } from "editor-ui";
 
 export function applyDarkMode(prefs: Prefs) {
@@ -27,7 +27,7 @@ export function applyDarkMode(prefs: Prefs) {
   }
 }
 
-export function editorThemeFromVSCode(fontSizePx?: number) {
+export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) {
 
   // start with default
   const theme = defaultTheme();
@@ -79,7 +79,7 @@ export function editorThemeFromVSCode(fontSizePx?: number) {
   ? theme.paneBorderColor
   : colors["--vscode-notebook-cellBorderColor"];
   theme.fixedWidthFont = colors["--vscode-editor-font-family"];
-  theme.proportionalFont = '"Lucida Sans", "DejaVu Sans", "Lucida Grande", "Segoe UI", Verdana, Helvetica, sans-serif';
+  theme.proportionalFont = fontFamily || defaultPrefs().fontFamily;
 
   // if not font size is specified then compute it from vscode css
   if (!fontSizePx) {

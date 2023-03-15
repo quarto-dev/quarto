@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.76.0 (Unreleased)
+
+- Provide option for visual editor font (defaults to Markdown Preview font)
+
 ## 1.75.0 (Release on 14 March 2023)
 
 - Scope Format Cell change to Python 'black' formatter only.

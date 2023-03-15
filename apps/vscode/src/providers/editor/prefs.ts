@@ -38,8 +38,9 @@ const kEditorFontSize = "editor.fontSize";
 const kEditorSelectionHighlight = "editor.selectionHighlight";
 const kEditorCursorBlinking = "editor.cursorBlinking";
 const kEditorQuickSuggestions = "editor.quickSuggestions";
-
+const kMarkdownPreviewFontFamily = "markdown.preview.fontFamily";
 const kQuartoEditorFontSize = "quarto.visualEditor.fontSize";
+const kQuartoEditorFontFamily = "quarto.visualEditor.fontFamily";
 const kQuartoEditorMaxContentWidth = "quarto.visualEditor.maxContentWidth";
 const kQuartoEditorLineNumbers = "quarto.visualEditor.lineNumbers";
 const kQuartoEditorSpelling = "quarto.visualEditor.spelling";
@@ -58,7 +59,9 @@ const kMonitoredConfigurations = [
   kEditorFontSize,
   kEditorSelectionHighlight,
   kEditorCursorBlinking,
+  kMarkdownPreviewFontFamily,
   kQuartoEditorFontSize,
+  kQuartoEditorFontFamily,
   kQuartoEditorMaxContentWidth,
   kQuartoEditorLineNumbers,
   kQuartoEditorSpelling,
@@ -96,6 +99,7 @@ export function vscodePrefsServer(
       darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
                 window.activeColorTheme.kind === ColorThemeKind.HighContrast,
       fontSize: configuration.get<number>(kQuartoEditorFontSize, 0) || configuration.get<number>(kEditorFontSize, defaults.fontSize),
+      fontFamily: configuration.get<string>(kQuartoEditorFontFamily) || configuration.get<string>(kMarkdownPreviewFontFamily, defaults.fontFamily),
       maxContentWidth: configuration.get<number>(kQuartoEditorMaxContentWidth, defaults.maxContentWidth),
 
       // spelling settings

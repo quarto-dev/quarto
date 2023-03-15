@@ -141,7 +141,7 @@ export async function syncEditorToHost(
   const applyDisplayPrefs = () => {
     const prefs = readPrefsApi(store);
     applyDarkMode(prefs);
-    editor.applyTheme(editorThemeFromVSCode(prefs.fontSize));
+    editor.applyTheme(editorThemeFromVSCode(prefs.fontFamily, prefs.fontSize));
     // NOTE: sync with variables.scss => $sideGutterNarrowWidth
     editor.setMaxContentWidth(prefs.maxContentWidth, 22);
   }

@@ -985,6 +985,12 @@
           "default": 0,
           "markdownDescription": "Controls the font size in pixels for the Visual Editor. When set to 0, the `#editor.fontSize#` is used."
         },
+        "quarto.visualEditor.fontFamily": {
+          "scope": "resource",
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Controls the font family for the visual editor. When unspecified, the Markdown Preview font family is used."
+        },
         "quarto.visualEditor.maxContentWidth": {
           "scope": "resource",
           "type": "number",

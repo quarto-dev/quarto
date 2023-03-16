@@ -61,6 +61,8 @@
     "markdown-it-deflist": "^2.0.3",
     "markdown-it-implicit-figures": "^0.11.0",
     "markdown-it-gridtables": "^v0.4.0",
+    "markdown-it-sub": "^v1.0.0",
+    "markdown-it-sup": "^v1.0.0",
     "@agoose77/markdown-it-mermaid": "0.1.0a0",
     "@jupyterlab/application": "^3.0.0",
     "@jupyterlab/apputils": "^3.0.0",

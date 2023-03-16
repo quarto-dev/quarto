@@ -39,20 +39,25 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
 
 // Markdown It Extensions which provide base Pandoc behavior
 const kPandocExtensions = [
-  footnotes,
+  footnotes, // footnote seriously render in the cell in which they appear in :(
   deflist,
   figures,
   gridtables,
   sub,
   sup,
   tasklists
+  // TODO: markdown-it-texmath
+  // TODO: markdown-it-mathjax3
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior
 const kQuartoExtensions = [
-  callouts
+  callouts,
+  mermaid // TODO mermaid needs to support {} syntax
+  // TODO: tabsets
+  // TODO: give cites and crossrefs a special treatment
 ];
 
 
 // The extensions that should be enabled for Jupyter
-export default [plugin, ...kPandocExtensions, ...kQuartoExtensions, mermaid];
+export default [plugin, ...kPandocExtensions, ...kQuartoExtensions ];

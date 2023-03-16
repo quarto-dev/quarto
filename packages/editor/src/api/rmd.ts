@@ -150,7 +150,7 @@ export function rmdChunk(code: string): EditorRmdChunk | null {
   let lines = code.trimLeft().split('\n');
   if (lines.length > 0) {
     const meta = lines[0].replace(/^[\s`{]*(.*?)\}?\s*$/, '$1');
-    const matchLang = meta.match(/\w+/);
+    const matchLang = meta.match(/[\w_-]+/);
     const lang = matchLang ? matchLang[0] : '';
 
     const isContainerChunk = ["verbatim", "asis", "comment"].includes(lang);
@@ -221,7 +221,7 @@ export function mergeRmdChunks(chunks: EditorRmdChunk[]) {
 export function rmdChunkEngineAndLabel(text: string) {
 
   // Match the engine and (maybe the) label with a regex
-  const match = text.match(/^\{([a-zA-Z0-9_]+)[\s,]*([a-zA-Z0-9/._='"-]*)/);
+  const match = text.match(/^\{([a-zA-Z0-9_-]+)[\s,]*([a-zA-Z0-9/._='"-]*)/);
   
   if (match) {
     // The first capturing group is the engine

@@ -304,7 +304,7 @@ function thereomLocator(engine: string) {
         return true;
       } else {
         // look for explicit label= syntax
-        const match = node.textContent.match(/^\{([a-zA-Z0-9_]+)[\s,]+label\s*=\s*['"]([^"']+)['"].*\}/);
+        const match = node.textContent.match(/^\{([a-zA-Z0-9_-]+)[\s,]+label\s*=\s*['"]([^"']+)['"].*\}/);
         return !!match && match[1].localeCompare(engine, undefined, { sensitivity: 'accent' }) === 0 && match[2] === id;
       }
     },

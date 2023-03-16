@@ -28,7 +28,7 @@ export function rmdChunkBlockCapsuleFilter() {
   return {
     type: kBlockCapsuleType,
 
-    match: /^([\t >]*)((```+)\s*\{[a-zA-Z0-9_]+(?: *[ ,].*?)?\}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
+    match: /^([\t >]*)((```+)\s*\{[a-zA-Z0-9_-]+(?: *[ ,].*?)?\}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
 
     extract: (_match: string, p1: string, p2: string, _p3: string, p4: string) => {
       return {

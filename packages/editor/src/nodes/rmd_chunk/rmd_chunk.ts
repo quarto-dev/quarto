@@ -74,14 +74,14 @@ const extension = (context: ExtensionContext): Extension | null => {
           bookdownTheorems: format.docTypes.includes(kBookdownDocType),
           classes: ['pm-chunk-background-color'],
           lang: (_node: ProsemirrorNode, content: string) => {
-            const match = content.match(/^\{([a-zA-Z0-9_]+)/);
+            const match = content.match(/^\{([a-zA-Z0-9_-]+)/);
             if (match) {
-              return match[1];
+              return match[1].split("-").pop() || "";
             } else {
               return null;
             }
           },
-          createFromPastePattern: /^\{([a-zA-Z0-9_]+).*}.*?\n/m,
+          createFromPastePattern: /^\{([a-zA-Z0-9_-]+).*}.*?\n/m,
         },
 
         pandoc: {

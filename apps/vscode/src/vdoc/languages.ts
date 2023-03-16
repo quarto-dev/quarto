@@ -30,6 +30,7 @@ export interface EmbeddedLanguage {
 }
 
 export function embeddedLanguage(langauge: string) {
+  langauge = langauge.split("-").pop() || "";
   return kEmbededLanguages.find((lang) => lang.ids.includes(langauge));
 }
 

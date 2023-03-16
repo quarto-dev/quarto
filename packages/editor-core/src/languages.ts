@@ -116,6 +116,7 @@ const kEditorLanguages = [
 ];
 
 export function editorLanguage(id: string) {
+  id = id.split("-").pop() || "";
   return kEditorLanguages.find((lang) => lang.ids.includes(id));
 }
 

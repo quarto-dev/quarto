@@ -278,9 +278,9 @@ function codeBlockLang(node: ProsemirrorNode, options: EditorOptions) {
   if (node.attrs.classes && node.attrs.classes.length) {
     const lang = node.attrs.classes[0];
     if (options.rmdExampleHighlight && lang === 'md') {
-      const match = node.textContent.match(/^```+\s*\{([a-zA-Z0-9_]+)( *[ ,].*)?\}`r ''`/);
+      const match = node.textContent.match(/^```+\s*\{([a-zA-Z0-9_-]+)( *[ ,].*)?\}`r ''`/);
       if (match) {
-        return match[1];
+        return match[1].split("-").pop() || "";
       }
     }
     return lang;
@@ -339,7 +339,7 @@ export function escapedRmdChunkBlockCapsuleFilter(): PandocBlockCapsuleFilter {
     type: kEscapedRmdChunkBlockCapsuleType,
 
     // eslint-disable-next-line no-useless-escape
-    match: /^([\t >]*)((```+)\s*\{{2,}[a-zA-Z0-9_]+(?: *[ ,].*?)?\}{2,}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
+    match: /^([\t >]*)((```+)\s*\{{2,}[a-zA-Z0-9_-]+(?: *[ ,].*?)?\}{2,}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
 
     extract: (_match: string, p1: string, p2: string, _p3: string, p4: string) => {
       return {

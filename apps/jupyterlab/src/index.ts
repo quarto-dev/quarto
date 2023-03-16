@@ -19,6 +19,7 @@ import { markdownItManager } from './manager';
 import { callouts } from './providers/callouts';
 import { deflist } from './providers/deflist';
 import { figures } from './providers/figures';
+import { gridtables } from './providers/gridtables';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -37,7 +38,8 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
 const kPandocExtensions = [
   footnotes,
   deflist,
-  figures
+  figures,
+  gridtables
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior

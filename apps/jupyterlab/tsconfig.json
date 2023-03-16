@@ -1,0 +1,19 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
+    "incremental": true,
+    "jsx": "react",
+    "module": "esnext",
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "strictNullChecks": true,
+    "target": "ES2018",
+    "types": []
+  },
+  "include": ["src/**/*"]
+}

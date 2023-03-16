@@ -1,0 +1,39 @@
+/*
+    See the JupyterLab Developer Guide for useful CSS Patterns:
+
+    https://jupyterlab.readthedocs.io/en/stable/developer/css.html
+*/
+
+.callout-note h2,
+.callout-warning h2,
+.callout-tip h2,
+.callout-important h2,
+.callout-caution h2 {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.callout-note {
+    padding: 1em;
+    border: solid blue 1px;
+}
+
+.callout-warning {
+    padding: 1em;
+    border: solid orange 1px;
+}
+
+.callout-tip {
+    padding: 1em;
+    border: solid green 1px;
+}
+
+.callout-important {
+    padding: 1em;
+    border: solid red 1px;
+}
+
+.callout-caution {
+    padding: 1em;
+    border: solid yellow 1px;
+}

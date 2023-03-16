@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "jupyter_quarto",
+  "description": "jupyter_quarto settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

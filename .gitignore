@@ -13,3 +13,4 @@ public/dist
 .Rhistory
 *.Rproj
 .luarc.json
+.ipynb_checkpoints

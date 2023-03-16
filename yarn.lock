@@ -6787,6 +6787,11 @@ markdown-it-sup@^v1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-it-sup/-/markdown-it-sup-1.0.0.tgz#cb9c9ff91a5255ac08f3fd3d63286e15df0a1fc3"
   integrity sha512-E32m0nV9iyhRR7CrhnzL5msqic7rL1juWre6TQNxsnApg7Uf+F97JOKxUijg5YwXz86lZ0mqfOnutoryyNdntQ==
 
+markdown-it-task-lists@^v1.3.0:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/markdown-it-task-lists/-/markdown-it-task-lists-1.4.1.tgz#ca7babc76a678e10837d75a90183f45112b87b05"
+  integrity sha512-UEVfu9VCX7bvsDqhf2V5HNZNQUNwvpHwu7E9NDWTPSYFZ807kx6iAZ2L/jrZAAt6HmmfiHf4yIRmRYg6RmdzTA==
+
 markdown-it@^12.2.3, markdown-it@^12.3.2:
   version "12.3.2"
   resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-12.3.2.tgz#bf92ac92283fe983fe4de8ff8abfb5ad72cd0c90"

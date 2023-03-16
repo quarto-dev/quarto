@@ -22,6 +22,7 @@ import { figures } from './providers/figures';
 import { gridtables } from './providers/gridtables';
 import { sub } from './providers/sub';
 import { sup } from './providers/sup';
+import { tasklists } from './providers/tasklists';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -43,7 +44,8 @@ const kPandocExtensions = [
   figures,
   gridtables,
   sub,
-  sup
+  sup,
+  tasklists
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior

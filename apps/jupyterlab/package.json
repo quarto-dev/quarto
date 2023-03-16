@@ -63,6 +63,7 @@
     "markdown-it-gridtables": "^v0.4.0",
     "markdown-it-sub": "^v1.0.0",
     "markdown-it-sup": "^v1.0.0",
+    "markdown-it-task-lists": "^v1.3.0",
     "@agoose77/markdown-it-mermaid": "0.1.0a0",
     "@jupyterlab/application": "^3.0.0",
     "@jupyterlab/apputils": "^3.0.0",

@@ -6751,6 +6751,11 @@ markdown-it-highlightjs@^4.0.1:
   dependencies:
     highlight.js "^11.5.1"
 
+markdown-it-implicit-figures@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/markdown-it-implicit-figures/-/markdown-it-implicit-figures-0.11.0.tgz#cb16879a2c7a9f5c160aafec39faf9e627a8a81c"
+  integrity sha512-ed32u3O8pTEM3TKgeBTMKw8ce86L8u5L41CuLvGee3yevYOq+1BoxjI84m/f7RcUaATcKgXTgZwieadvOH4afg==
+
 markdown-it@^12.2.3, markdown-it@^12.3.2:
   version "12.3.2"
   resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-12.3.2.tgz#bf92ac92283fe983fe4de8ff8abfb5ad72cd0c90"

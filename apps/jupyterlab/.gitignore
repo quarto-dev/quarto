@@ -1,0 +1,6 @@
+/lib
+/jupyter_quarto/labextension
+/node_modules
+/jupyter_quarto/_version.py
+/jupyter_quarto/__pycache__
+/tsconfig.tsbuildinfo

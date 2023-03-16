@@ -96,7 +96,7 @@ export function wordBreaker() : WordBreaker {
 
     breakWords(text: string) : Array<{ start: number, end: number }> {
       
-      const words = new Array<{ start: number, end: number }>;
+      const words = new Array<{ start: number, end: number }>();
          
       let pos = 0;
       while (pos < text.length) 

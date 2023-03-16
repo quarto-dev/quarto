@@ -4,6 +4,7 @@
 
 - Support for Shift-Drag/Drop of images in markdown source editor
 - Provide option for visual editor font (defaults to Markdown Preview font)
+- Support languages with prefix (e.g. shinylive-python) in visual editor
 
 ## 1.75.0 (Release on 14 March 2023)
 

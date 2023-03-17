@@ -24,6 +24,7 @@ import { sub } from './providers/sub';
 import { sup } from './providers/sup';
 import { tasklists } from './providers/tasklists';
 import { citations } from './providers/citations';
+import { attrs } from './providers/attrs';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -46,7 +47,8 @@ const kPandocExtensions = [
   gridtables,
   sub,
   sup,
-  tasklists
+  tasklists,
+  attrs
   // TODO: markdown-it-texmath
   // TODO: markdown-it-mathjax3
 ];

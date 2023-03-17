@@ -4,6 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
+import gridTableRulePlugin from '../plugins/gridtables';
 import { markdownItExtension } from './provider';
 
 export const gridtables = markdownItExtension({
@@ -28,10 +29,7 @@ export const gridtables = markdownItExtension({
 `
   },
   plugin: async () => {
-    const plugin = await import(
-      'markdown-it-gridtables'
-    );
-    return [plugin.default];
+    return [gridTableRulePlugin];
   }
 });
 

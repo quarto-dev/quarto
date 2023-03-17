@@ -23,6 +23,7 @@ import { gridtables } from './providers/gridtables';
 import { sub } from './providers/sub';
 import { sup } from './providers/sup';
 import { tasklists } from './providers/tasklists';
+import { citations } from './providers/citations';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -53,6 +54,7 @@ const kPandocExtensions = [
 // Markdown It Extensions which provide Quarto specific behavior
 const kQuartoExtensions = [
   callouts,
+  citations,
   mermaid // TODO mermaid needs to support {} syntax
   // TODO: tabsets
   // TODO: give cites and crossrefs a special treatment

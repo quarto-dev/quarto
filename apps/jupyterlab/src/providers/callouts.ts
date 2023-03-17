@@ -4,7 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import { pandocDivs } from "../plugins/callout";
+import { calloutPlugin } from "../plugins/callout";
 import { markdownItExtension } from "./provider";
 
 export const callouts = markdownItExtension({
@@ -26,6 +26,6 @@ export const callouts = markdownItExtension({
   `
   },
   plugin: async () => {
-    return [pandocDivs];
+    return [calloutPlugin];
   }
 });

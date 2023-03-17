@@ -15,7 +15,7 @@ interface PandocDiv {
   // keywords: string[];
 }
 
-export const pandocDivs = (md: MarkdownIt) => {
+export const calloutPlugin = (md: MarkdownIt) => {
   // Parse pandoc-style div attributes
   function parseAttrs(attrs: string): PandocDiv {
     const idMatch = attrs.match(/#([\w-]+)/)

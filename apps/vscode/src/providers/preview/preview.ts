@@ -126,7 +126,7 @@ export function activatePreview(
       await onSave(doc.uri);
     })
   );
-  // we use 1.60 as our minimum version (and type import) but
+  // we use 1.66 as our minimum version (and type import) but
   // onDidSaveNotebookDocument was introduced in 1.67
   if (haveNotebookSaveEvents()) {
     context.subscriptions.push(

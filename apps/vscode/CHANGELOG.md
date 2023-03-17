@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.76.0 (Unreleased)
+## 1.77.0 (Release as 17 March 2023)
+
+- Make Shift-Drag/Drop of images conditional on VS Code >= 1.74
+
+## 1.76.0 (Release on 16 March 2023)
 
 - Support for Shift-Drag/Drop of images in markdown source editor
 - Provide option for visual editor font (defaults to Markdown Preview font)

@@ -2,3 +2,4 @@
 /jupyter_quarto
 /node_modules
 /tsconfig.tsbuildinfo
+.python-version

@@ -1,0 +1,3 @@
+- markdown-it-citations
+- front-matter!
+- fix mermaid to support proper syntax

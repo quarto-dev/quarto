@@ -16,7 +16,7 @@ import { footnotes } from './providers/footnotes';
 
 import '../style/index.css';
 import { markdownItManager } from './manager';
-import { callouts } from './providers/callouts';
+import { divs } from './providers/divs';
 import { deflist } from './providers/deflist';
 import { figures } from './providers/figures';
 import { gridtables } from './providers/gridtables';
@@ -48,14 +48,14 @@ const kPandocExtensions = [
   sub,
   sup,
   tasklists,
-  attrs
+  attrs,
+  divs
   // TODO: markdown-it-texmath
   // TODO: markdown-it-mathjax3
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior
 const kQuartoExtensions = [
-  callouts,
   citations,
   mermaid // TODO mermaid needs to support {} syntax
   // TODO: tabsets

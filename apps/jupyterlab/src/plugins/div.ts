@@ -8,6 +8,9 @@ import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
 import Renderer from "markdown-it/lib/renderer";
 
+export const kTokDivOpen = 'pandoc_div_open';
+export const kTokDivClose = 'pandoc_div_close';
+
 const parseAttr = (attr?: string) => {
   // starts with #    id
   // starts with .    class
@@ -48,7 +51,7 @@ const parseAttr = (attr?: string) => {
   return attributes;
 }
 
-export const calloutPlugin = (md: MarkdownIt) => {
+export const divPlugin = (md: MarkdownIt) => {
   
   // Render pandoc-style divs
   function renderStartDiv(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
@@ -134,7 +137,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
           incrementDivCount(divFence);
 
           // Make an open token
-          const token = state.push("pandoc_div_open", "div", 1)
+          const token = state.push(kTokDivOpen, "div", 1)
           token.markup = line;
 
           // Parse attributes and push onto token
@@ -148,7 +151,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
           decrementDivCount(divFence);
 
           // Make a close token
-          const token = state.push("pandoc_div_close", "div", -1)
+          const token = state.push(kTokDivClose, "div", -1)
           token.markup = line; 
         }
       }
@@ -159,6 +162,6 @@ export const calloutPlugin = (md: MarkdownIt) => {
     { alt: [] }
   )
 
-  md.renderer.rules.pandoc_div_open = renderStartDiv
-  md.renderer.rules.pandoc_div_close = renderEndDiv
+  md.renderer.rules[kTokDivOpen] = renderStartDiv
+  md.renderer.rules[kTokDivClose] = renderEndDiv
 }

@@ -4,28 +4,26 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import { calloutPlugin } from "../plugins/callout";
+import { divPlugin } from "../plugins/div";
 import { markdownItExtension } from "./provider";
 
-export const callouts = markdownItExtension({
+export const divs = markdownItExtension({
   id: '@dragonstyle/markdown-it-quarto-callout',
-  title: 'Quarto callout',
-  description: 'Create callouts using Quarto syntax.',
+  title: 'Pandoc style divs',
+  description: 'Create divs using Pandoc syntax.',
   documentationUrls: {
     Plugin: 'https://github.com/dragonstyle/mdit-quarto-callout',
   },
   examples: {
     'Note': `
-  :::{.callout-note}
+  :::{#div-id .div-class div-attr=bar}
   
-  ## The Title of the Callout
-
-  This is a callout which notes something for the reader.
+  This is the body content of the div.
 
   :::
   `
   },
   plugin: async () => {
-    return [calloutPlugin];
+    return [divPlugin];
   }
 });

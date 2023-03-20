@@ -37,3 +37,9 @@
     padding: 1em;
     border: solid yellow 1px;
 }
+
+.jp-RenderedHTMLCommon :not(pre) > code.cite { 
+  color: purple;
+  padding-left: 1px;
+  padding-right: 1px;
+}

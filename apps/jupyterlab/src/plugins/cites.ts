@@ -35,12 +35,18 @@ export const citationPlugin = (md: MarkdownIt) => {
           if (child.type === 'text') {
             let content = child.content;
 
+
+            const textToken = (text: string[]) => {
+              const newToken = new state.Token('text', '', 0);
+              newToken.content = text.join("");
+              
+              return newToken;
+            }
+
             let text: string[] = [];
             const flushText = () => {
               if (text.length) {
-                const newToken = new state.Token('text', '', 0);
-                newToken.content = text.join("");
-                children.push(newToken);
+                children.push(textToken(text));
                 text = [];                  
               }
             }
@@ -57,13 +63,24 @@ export const citationPlugin = (md: MarkdownIt) => {
                 // The classes
                 const clz = ["cite", style];
 
+                // If the cite ends in punctuation, trim that off and make that text
+                let puncText: string[] = [];
+                if ([".", "!", "?"].includes(cite[cite.length - 1])) {
+                  puncText.push(cite[cite.length - 1]);
+                  cite = cite.slice(0, -1);
+                }
+
                 // Make a cite token
                 const newToken = new state.Token(kTokCite, '', 0);
                 newToken.content = cite.join("");
                 newToken.attrs = newToken.attrs || [];
                 newToken.attrs?.push(["class", clz.join(" ")]);
                 children.push(newToken);
-                cite = [];  
+                cite = []; 
+                
+                if (puncText.length > 0) {
+                  children.push(textToken(puncText));
+                }
               }
             }
 

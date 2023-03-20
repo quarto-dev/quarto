@@ -4,10 +4,10 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import { citationPlugin } from "../plugins/citation";
+import { citationPlugin } from "../plugins/cites";
 import { markdownItExtension } from "./provider";
 
-export const citations = markdownItExtension({
+export const cites = markdownItExtension({
   id: '@dragonstyle/markdown-it-quarto-citation',
   title: 'Quarto citations',
   description: 'Create citations using Quarto syntax.',

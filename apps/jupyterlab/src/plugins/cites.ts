@@ -7,7 +7,17 @@
 
 
 import type MarkdownIt from "markdown-it/lib"
+import Renderer from "markdown-it/lib/renderer";
 import Token from "markdown-it/lib/token";
+
+const kTokCite = "quarto_cite";
+
+// Render pandoc-style divs
+function renderCite(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  const token = tokens[idx]; 
+  const citeContent =  `<code ${self.renderAttrs(token)}>${token.content}</code>`;
+  return citeContent;
+}
 
 export const citationPlugin = (md: MarkdownIt) => {
 
@@ -38,17 +48,27 @@ export const citationPlugin = (md: MarkdownIt) => {
             let cite: string[] = [];
             const flushCite = () => {
               if (cite.length) {
-                // TODO: replace with a custom token and custom renderer (consider)
-                // including cite id and style as attributes to enable
-                // previewing in the future.
-                const newToken = new state.Token('code_inline', '', 0);
+                // Determine the cite style
+                let style = cite[0] === "-" ? "suppress-author" : "in-text";
+                if (bracketCount > 0) {
+                  style = "normal";
+                }
+
+                // The classes
+                const clz = ["cite", style];
+
+                // Make a cite token
+                const newToken = new state.Token(kTokCite, '', 0);
                 newToken.content = cite.join("");
+                newToken.attrs = newToken.attrs || [];
+                newToken.attrs?.push(["class", clz.join(" ")]);
                 children.push(newToken);
                 cite = [];  
               }
             }
 
             let capture: "text" | "cite" = "text";
+            let bracketCount = 0;
             for (let j = 0; j < content.length; j++) {
 
               const char = content.charAt(j);
@@ -83,7 +103,11 @@ export const citationPlugin = (md: MarkdownIt) => {
                 capture = 'text';
                 flushCite();
                 text.push(char);
+              } else if (char === "[") {
+                bracketCount++;
+                text.push(char);
               } else if (char === "]") {
+                bracketCount--;
                 capture = 'text';
                 flushCite();
                 text.push(char);
@@ -107,4 +131,5 @@ export const citationPlugin = (md: MarkdownIt) => {
     }
   });
 
+  md.renderer.rules[kTokCite] = renderCite
 }

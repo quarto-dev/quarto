@@ -4,6 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
+import mermaidPlugin from '../plugins/mermaid';
 import { markdownItExtension } from './provider';
 
 export const mermaid = markdownItExtension(
@@ -11,24 +12,20 @@ export const mermaid = markdownItExtension(
   title: 'Mermaid',
   description: 'Create diagrams and visualizations using text and code.',
   documentationUrls: {
-    Plugin: 'https://github.com/agoose77/markdown-it-mermaid',
     MermaidJS: 'https://mermaid-js.github.io/mermaid'
   },
   examples: {
     'Mermaid Flowchart': `
-  \`\`\`mermaid
-  graph TD;
-      A-->B;
-      A-->C;
-      B-->D;
-      C-->D;
-  \`\`\``
+\`\`\`{mermaid}
+flowchart LR
+  A[Hard edge] --> B(Round edge)
+  B --> C{Decision}
+  C --> D[Result one]
+  C --> E[Result two]
+\`\`\``
   },
   plugin: async () => {
-    const mermaidPlugin = await import(
-      '@agoose77/markdown-it-mermaid'
-    );
-    return [mermaidPlugin.default];
+    return [mermaidPlugin];
   }}
 );
 

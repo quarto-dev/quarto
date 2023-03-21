@@ -4,10 +4,10 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import { Title } from "@lumino/widgets";
 import type MarkdownIt from "markdown-it/lib"
 import Renderer from "markdown-it/lib/renderer";
 import Token from "markdown-it/lib/token";
+import { readAttrValue } from "../utils/markdownit";
 import { kDivRuleName, kTokDivClose, kTokDivOpen } from "./divs";
 
 
@@ -26,15 +26,6 @@ interface Callout {
   appearance?: "default" | "minimal" | "simple";
   collapse?: boolean;
 } 
-
-const readAttrValue = (name: string, attrs: null | [string, string][]) => {
-  if (attrs === null) {
-    return undefined;
-  }
-
-  const attr = attrs.find((attr) => { return attr[0] === name; });
-  return attr ? attr[1] : undefined;
-}
 
 const calloutAppearance = (val: string | undefined) => {
   if (val) {

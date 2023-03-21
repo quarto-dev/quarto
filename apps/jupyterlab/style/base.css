@@ -4,38 +4,72 @@
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
 
+/* Decorated Divs */
+
+.quarto-div {
+  border: solid 1px silver;
+  border-radius: 3px;
+  background-color: #EEEEEE33;
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+.quarto-div-decorator {
+  position: absolute;
+  right: 2em;
+  background-color: transparent;
+  font-size: 0.7em;
+  transform: translateY(-1em);
+}
+
+.quarto-div-decorator .quarto-div-decorator-content {
+  border: solid 1px silver;
+  background-color: whitesmoke;
+  border-radius: 20px;
+  margin-right: 6px;
+  padding-bottom: 2px;
+  padding-left: 7px;
+  padding-right: 7px;
+  white-space: nowrap;
+}
+
 .callout-note h2,
 .callout-warning h2,
 .callout-tip h2,
 .callout-important h2,
 .callout-caution h2 {
-    font-size: 1.1em;
-    font-weight: 700;
+  font-size: 1.1em;
+  font-weight: 700;
 }
 
 .callout-note {
     padding: 1em;
     border: solid blue 1px;
+    margin-bottom: 1.5em;
 }
 
 .callout-warning {
     padding: 1em;
     border: solid orange 1px;
+    margin-bottom: 1.5em;
 }
 
 .callout-tip {
     padding: 1em;
     border: solid green 1px;
+    margin-bottom: 1.5em;
 }
 
 .callout-important {
     padding: 1em;
     border: solid red 1px;
+    margin-bottom: 1.5em;
 }
 
 .callout-caution {
     padding: 1em;
     border: solid yellow 1px;
+    margin-bottom: 1.5em;
 }
 
 .jp-RenderedHTMLCommon :not(pre) > code.cite { 

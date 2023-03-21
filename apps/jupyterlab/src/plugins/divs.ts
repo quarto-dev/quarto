@@ -7,6 +7,7 @@
 import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
 import Renderer from "markdown-it/lib/renderer";
+import { addClass, readAttrValue } from "../utils/markdownit";
 
 export const kDivRuleName = "pandocDiv";
 
@@ -16,7 +17,7 @@ export const kTokDivClose = 'pandoc_div_close';
 const parseAttr = (attr?: string) => {
   // starts with #    id
   // starts with .    class
-  // all else are attr
+  // all else are     attr
   const attributes: Record<string, string> = {};
   if (attr) {
     const parts = attr.split(' ');
@@ -24,10 +25,10 @@ const parseAttr = (attr?: string) => {
       const clz: string[] = [];
       if (part.startsWith('#')) {
         // id attribute 
-        if (!!attributes['id']) {
+        if (attributes['id'] === undefined) {
           attributes['id'] = part.substring(1);
         } else {
-          throw new Error(`Duplicate id for attribute ${attr}`);
+          console.warn(`Duplicate id ${part} for attribute ${attr}. Duplicate will be ignored.`);
         }
       } else if (part.startsWith('.')) {
         // classes
@@ -53,12 +54,47 @@ const parseAttr = (attr?: string) => {
   return attributes;
 }
 
+export const decoratorSpan = (contents: string) => {
+  return `<span class="quarto-div-decorator-content">${contents}</span>`
+}
+
 export const divPlugin = (md: MarkdownIt) => {
   
   // Render pandoc-style divs
   function renderStartDiv(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
     const token = tokens[idx];
-    return `<div ${self.renderAttrs(token)}>`;
+
+    // id
+    const id = readAttrValue("id", token.attrs);
+      
+    // classes
+    const clz = readAttrValue("class", token.attrs);
+
+    // other attributes
+    const otherAttrs = token.attrs?.filter((attr) => { return attr[0] !== "id" && attr[0] !== "class"});
+
+    // Create a decorator for the div
+    const contents: string[] = [];
+    if (id) {
+      contents.push(decoratorSpan(`#${id}`));
+    } 
+    if (clz) {
+      const clzStr = clz.split(" ").map((cls) => `.${cls}`).join(" ");
+      contents.push(decoratorSpan(clzStr));
+    }
+    if (otherAttrs && otherAttrs.length > 0) {
+      const otherAttrStr = otherAttrs?.map((attr) => {
+        return `${attr[0]}="${attr[1]}"`
+      }).join(" ");
+      contents.push(decoratorSpan(otherAttrStr));
+    }
+    const divDecorator = `<div class="quarto-div-decorator">${contents.join("")}</div>`
+
+    // Add a class to designate that this is a quarto dev
+    token.attrs = addClass("quarto-div", token.attrs)
+
+    const divRendered = `${divDecorator}\n<div ${self.renderAttrs(token)}>`;
+    return divRendered;
   }
 
   // Render pandoc-style divs

@@ -14,46 +14,6 @@ export const kDivRuleName = "pandocDiv";
 export const kTokDivOpen = 'pandoc_div_open';
 export const kTokDivClose = 'pandoc_div_close';
 
-const parseAttr = (attr?: string) => {
-  // starts with #    id
-  // starts with .    class
-  // all else are     attr
-  const attributes: Record<string, string> = {};
-  if (attr) {
-    const parts = attr.split(' ');
-    for (const part of parts) {
-      const clz: string[] = [];
-      if (part.startsWith('#')) {
-        // id attribute 
-        if (attributes['id'] === undefined) {
-          attributes['id'] = part.substring(1);
-        } else {
-          console.warn(`Duplicate id ${part} for attribute ${attr}. Duplicate will be ignored.`);
-        }
-      } else if (part.startsWith('.')) {
-        // classes
-        clz.push(part.substring(1))
-      } else {
-        // other attributes
-        if (part.includes('=')) {
-          const partSplit = part.split('=');
-          const name = partSplit[0];
-          const value = partSplit.slice(1).join("");
-          attributes[name] = value;
-        } else {
-          attributes[part] = "";
-        }
-      }
-
-      // classes
-      if (clz.length > 0) {
-        attributes['class'] = clz.join(" ");
-      }
-    }  
-  }
-  return attributes;
-}
-
 export const decoratorSpan = (contents: string) => {
   return `<span class="quarto-div-decorator-content">${contents}</span>`
 }
@@ -132,6 +92,7 @@ export const divPlugin = (md: MarkdownIt) => {
 
       // Get the line for parsing
       const line = state.src.slice(pos, max)
+      console.log(state.tokens);
 
       // Three or more colons followed by a an option brace with attributes
       const divRegex = /^(:::+)(?:\{([\s\S]+?)\})?$/;
@@ -177,13 +138,9 @@ export const divPlugin = (md: MarkdownIt) => {
           // Make an open token
           const token = state.push(kTokDivOpen, "div", 1)
           token.markup = line;
-
-          // Parse attributes and push onto token
-          const attributes = parseAttr(attr);
-          const attrArray: [string, string][] = Object.keys(attributes).map((key) => { return [key, attributes[key]]});
-          token.attrs = token.attrs || [];
-          token.attrs.push(...attrArray);
-
+          // Allow this to be parsed for attributes by markdown-it-attr
+          token.info = `{${attr}}`;
+          token.block = true;
         } else {
           // Subtract from the open count (min zero)
           decrementDivCount(divFence);

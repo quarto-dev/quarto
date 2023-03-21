@@ -7,7 +7,7 @@
 import type MarkdownIt from "markdown-it/lib"
 import Renderer from "markdown-it/lib/renderer";
 import Token from "markdown-it/lib/token";
-import { readAttrValue } from "../utils/markdownit";
+import { addClass, readAttrValue } from "../utils/markdownit";
 import { kDivRuleName, kTokDivClose, kTokDivOpen } from "./divs";
 
 
@@ -80,6 +80,8 @@ const parseCallout = (attrs: null | [string, string][]) : Callout | undefined =>
 // Render pandoc-style divs
 function renderStartCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
   const token = tokens[idx];
+
+  token.attrs = addClass("callout", token.attrs);
   return `<div ${self.renderAttrs(token)}>`;
 }
 

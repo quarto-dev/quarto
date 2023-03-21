@@ -33,6 +33,20 @@
   white-space: nowrap;
 }
 
+/* Cites and Xrefs */
+.jp-RenderedHTMLCommon :not(pre) > code.cite { 
+    color: purple;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+/* Callouts */
+
+.callout {
+  padding: 1em;
+  margin-bottom: 1.5em;
+}
+
 .callout-note h2,
 .callout-warning h2,
 .callout-tip h2,
@@ -43,37 +57,22 @@
 }
 
 .callout-note {
-    padding: 1em;
-    border: solid blue 1px;
-    margin-bottom: 1.5em;
+  border: solid blue 1px;
 }
 
 .callout-warning {
-    padding: 1em;
-    border: solid orange 1px;
-    margin-bottom: 1.5em;
+  border: solid orange 1px;
 }
 
 .callout-tip {
-    padding: 1em;
-    border: solid green 1px;
-    margin-bottom: 1.5em;
+  border: solid green 1px;
 }
 
 .callout-important {
-    padding: 1em;
-    border: solid red 1px;
-    margin-bottom: 1.5em;
+  border: solid red 1px;
 }
 
 .callout-caution {
-    padding: 1em;
-    border: solid yellow 1px;
-    margin-bottom: 1.5em;
+  border: solid yellow 1px;
 }
 
-.jp-RenderedHTMLCommon :not(pre) > code.cite { 
-  color: purple;
-  padding-left: 1px;
-  padding-right: 1px;
-}

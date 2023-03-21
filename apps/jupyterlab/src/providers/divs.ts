@@ -15,7 +15,7 @@ export const divs = markdownItExtension({
     Plugin: 'https://github.com/dragonstyle/mdit-quarto-callout',
   },
   examples: {
-    'Note': `
+    'Fenced Div': `
   :::{#div-id .div-class div-attr=bar}
   
   This is the body content of the div.

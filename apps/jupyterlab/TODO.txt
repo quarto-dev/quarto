@@ -1,3 +1,8 @@
 - markdown-it-citations
+  (consider showing rendered form)
 - front-matter!
-- fix mermaid to support proper syntax
+
+- how to apply styles
+- tabset
+- real callout rendering
+- footnotes render in cell, not at bottom of document

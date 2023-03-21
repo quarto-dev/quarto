@@ -25,6 +25,7 @@ import { sup } from './providers/sup';
 import { tasklists } from './providers/tasklists';
 import { cites } from './providers/cites';
 import { attrs } from './providers/attrs';
+import { callouts } from './providers/callouts';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -57,9 +58,9 @@ const kPandocExtensions = [
 // Markdown It Extensions which provide Quarto specific behavior
 const kQuartoExtensions = [
   cites,
-  mermaid // TODO mermaid needs to support {} syntax
+  mermaid,
+  callouts
   // TODO: tabsets
-  // TODO: give cites and crossrefs a special treatment
 ];
 
 

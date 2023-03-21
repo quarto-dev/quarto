@@ -8,6 +8,8 @@ import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
 import Renderer from "markdown-it/lib/renderer";
 
+export const kDivRuleName = "pandocDiv";
+
 export const kTokDivOpen = 'pandoc_div_open';
 export const kTokDivClose = 'pandoc_div_close';
 
@@ -67,7 +69,7 @@ export const divPlugin = (md: MarkdownIt) => {
   // Handle pandoc-style divs
   md.block.ruler.before(
     "fence",
-    "pandocDiv",
+    kDivRuleName,
     (state, start, end, silent) => {
 
       // This is a validation run, can ignore

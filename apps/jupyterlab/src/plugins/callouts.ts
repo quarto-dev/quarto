@@ -7,7 +7,6 @@
 import type MarkdownIt from "markdown-it/lib"
 import Renderer from "markdown-it/lib/renderer";
 import Token from "markdown-it/lib/token";
-import { callouts } from "../providers/callouts";
 import { addClass, readAttrValue } from "../utils/markdownit";
 import { kDivRuleName, kTokDivClose, kTokDivOpen } from "./divs";
 

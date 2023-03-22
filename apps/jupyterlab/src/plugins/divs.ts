@@ -92,8 +92,7 @@ export const divPlugin = (md: MarkdownIt) => {
 
       // Get the line for parsing
       const line = state.src.slice(pos, max)
-      console.log(state.tokens);
-
+      
       // Three or more colons followed by a an option brace with attributes
       const divRegex = /^(:::+)(?:\{([\s\S]+?)\})?$/;
 

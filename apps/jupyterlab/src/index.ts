@@ -26,6 +26,7 @@ import { tasklists } from './providers/tasklists';
 import { cites } from './providers/cites';
 import { attrs } from './providers/attrs';
 import { callouts } from './providers/callouts';
+import { mathjax } from './providers/math';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -50,7 +51,8 @@ const kPandocExtensions = [
   sup,
   tasklists,
   attrs,
-  divs
+  divs,
+  mathjax
   // TODO: markdown-it-texmath
   // TODO: markdown-it-mathjax3
 ];

@@ -26,7 +26,6 @@ import { tasklists } from './providers/tasklists';
 import { cites } from './providers/cites';
 import { attrs } from './providers/attrs';
 import { callouts } from './providers/callouts';
-import { mathjax } from './providers/math';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -52,9 +51,6 @@ const kPandocExtensions = [
   tasklists,
   attrs,
   divs,
-  mathjax
-  // TODO: markdown-it-texmath
-  // TODO: markdown-it-mathjax3
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior
@@ -62,7 +58,6 @@ const kQuartoExtensions = [
   cites,
   mermaid,
   callouts
-  // TODO: tabsets
 ];
 
 

@@ -4621,7 +4621,7 @@
       <key>reference</key>
       <dict>
         <key>match</key>
-        <string>-?\@[\w\d\.-]+</string>
+        <string>-?\@[^@;\[\]\s\!\,]*[\w\}]</string>
         <key>name</key>
         <string>keyword.control.import.reference</string>
       </dict>

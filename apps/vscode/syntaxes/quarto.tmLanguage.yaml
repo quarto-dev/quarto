@@ -432,7 +432,7 @@ repository:
     - {include: '#image-ref'}
     - {include: '#strikethrough'}
   reference:
-    match: "-?\\@[\\w\\d\\.-]+"
+    match: "-?\\@[^@;\\[\\]\\s\\!\\,]*[\\w\\}]"
     name: keyword.control.import.reference
   shortcode:
     match: "{{< .*? >}}"

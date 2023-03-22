@@ -10,7 +10,7 @@
     "jayson": "^4.0.0",
     "tsconfig": "*",
     "typescript": "^4.5.2",
-    "vscode-languageclient": "^8.0.2",
-    "vscode-languageserver": "^8.0.2"
+    "vscode-languageclient": "^7.0.0",
+    "vscode-languageserver": "^7.0.0"
   }
 }

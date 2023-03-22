@@ -40,7 +40,19 @@
   padding-right: 1px;
 }
 
+/* Code Blocks */
+.jp-RenderedHTMLCommon pre,
+.jp-RenderedHTMLCommon > pre {
+  margin-left: .1em;
+  margin-right: 0;
+  padding: 0.5em;
+  border: solid 1px silver;
+  border-radius: 3px;
+}
+
+
 /* Callouts */
+/* TODO: Need to automate ingesting this */
 
 .callout {
   padding: 1em;

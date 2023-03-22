@@ -7,20 +7,8 @@
 import { markdownItExtension } from './provider';
 
 export const footnotes = markdownItExtension({
-  id: '@dragonstyle/footnote',
+  id: '@quarto/footnotes',
   title: 'Footnotes',
-  description: 'Use footnotes in markdown cells.',
-  documentationUrls: {
-    Plugin: 'https://github.com/markdown-it/markdown-it-footnote',
-    MarkdownIt: 'https://markdown-it.github.io'
-  },
-  examples: {
-    'Footnote': `
-    Here is a footnote reference,[^1]
-
-    [^1]: Here is the footnote.
-    `
-  },
   plugin: async () => {
     const footnotePlugin = await import(
       'markdown-it-footnote'

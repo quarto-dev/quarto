@@ -38,9 +38,6 @@ export interface MarkdownItPluginProvider extends Ranked {
   // A unique identifier for the plugin
   id: string;
   title: string;
-  description: string;
-  documentationUrls: Record<string, string>;
-  examples?: Record<string, string>;
 
   // A lazy provider of the plugin function and plugin options
   plugin(): Promise<[MarkdownItPlugin, ...any]>;

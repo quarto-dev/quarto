@@ -7,18 +7,8 @@
 import { markdownItExtension } from './provider';
 
 export const figures = markdownItExtension({
-  id: '@dragonstyle/implicit-figures',
-  title: 'Implicit Figures',
-  description: 'Use implicit figures in markdown cells.',
-  documentationUrls: {
-    Plugin: 'https://github.com/arve0/markdown-it-implicit-figures',
-    MarkdownIt: 'https://markdown-it.github.io'
-  },
-  examples: {
-    'Implicit Figure': `
-    ![](fig.png)
-`
-  },
+  id: '@quarto/figures',
+  title: 'Figures',
   plugin: async () => {
     const options = {
       figcaption: true,

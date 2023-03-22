@@ -3,6 +3,7 @@
 ## 1.78.0 (Unreleased)
 
 - Fix crossref indexing when running with Quarto v1.3
+- Improve highligthing regex for citation / reference ids
 
 ## 1.77.0 (Release as 17 March 2023)
 

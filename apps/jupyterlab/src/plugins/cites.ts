@@ -65,7 +65,9 @@ export const citationPlugin = (md: MarkdownIt) => {
 
                 // If the cite ends in punctuation, trim that off and make that text
                 let puncText: string[] = [];
-                if ([".", "!", "?"].includes(cite[cite.length - 1])) {
+
+                // Trim off ending punctuation
+                if ([":",".","#","$","%","&","-","+","?","<",">","~","/","!"].includes(cite[cite.length - 1])) {
                   puncText.push(cite[cite.length - 1]);
                   cite = cite.slice(0, -1);
                 }

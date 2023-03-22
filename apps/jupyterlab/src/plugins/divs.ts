@@ -73,28 +73,25 @@ export const divPlugin = (md: MarkdownIt) => {
         return true;
       }
 
+      // Calculate the line position
       const pos = state.bMarks[start] + state.tShift[start];
       const max = state.eMarks[start];
-      
-      // Has to be at least 3 characters
-      if (pos + 3 > max) {
-        return false;
-      }
 
-      // Starts with 3 or more colons
-      if (
-        state.src[pos] !== ":" ||
-        state.src[pos + 1] !== ":" ||
-        state.src[pos + 2] !== ":"
-      ) {
-        return false
+      // Has to be at least 3 characters
+      // otherwise skip it
+      if (pos + 3 > max) {
+        state.line = start + 1;
+        return true;
       }
 
       // Get the line for parsing
       const line = state.src.slice(pos, max)
-      
-      // Three or more colons followed by a an option brace with attributes
+
+      // Three or more colons followed by a an optional brace with attributes
       const divRegex = /^(:::+)(?:\{([\s\S]+?)\})?$/;
+
+      // A line ending with a new line then three or more colons
+      const paraEndRegex = /.*\n(:::+)$/;
 
       // The current state of the divs (e.g. is there an open)
       // div. Data structure holds key that is the number of colons
@@ -112,7 +109,13 @@ export const divPlugin = (md: MarkdownIt) => {
         state.env.quartoOpenDivs[fence] = Math.max(0, current - 1);
       }
 
-      const match = divRegex.exec(line);
+      let match = divRegex.exec(line);
+      console.log(match);
+      if (!match) {
+        match = paraEndRegex.exec(line);
+      }
+      
+
       if (match) {
         // There is a div here, is one already open?
         const divFence = match[1];
@@ -149,6 +152,7 @@ export const divPlugin = (md: MarkdownIt) => {
           token.markup = line; 
         }
       }
+
 
       state.line = start + 1
       return true

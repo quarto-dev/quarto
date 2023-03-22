@@ -72,30 +72,12 @@ export const divPlugin = (md: MarkdownIt) => {
       if (silent) {
         return true;
       }
-
-      const pos = state.bMarks[start] + state.tShift[start];
-      const max = state.eMarks[start];
       
-      // Has to be at least 3 characters
-      if (pos + 3 > max) {
-        return false;
-      }
-
-      // Starts with 3 or more colons
-      if (
-        state.src[pos] !== ":" ||
-        state.src[pos + 1] !== ":" ||
-        state.src[pos + 2] !== ":"
-      ) {
-        return false
-      }
-
       // Get the line for parsing
-      const line = state.src.slice(pos, max)
+      const lineStart = state.bMarks[start] + state.tShift[start];
+      const lineEnd = state.eMarks[start];
+      const line = state.src.slice(lineStart, lineEnd)
       
-      // Three or more colons followed by a an option brace with attributes
-      const divRegex = /^(:::+)(?:\{([\s\S]+?)\})?$/;
-
       // The current state of the divs (e.g. is there an open)
       // div. Data structure holds key that is the number of colons
       const divState = state.env.quartoOpenDivs || {};
@@ -112,7 +94,22 @@ export const divPlugin = (md: MarkdownIt) => {
         state.env.quartoOpenDivs[fence] = Math.max(0, current - 1);
       }
 
-      const match = divRegex.exec(line);
+      // Three or more colons followed by a an optional brace with attributes
+      const divBraceRegex = /^(:::+)\s*(?:(\{[\s\S]+?\}))?$/;
+
+      // Three or more colons followed by a string with no braces
+      const divNoBraceRegex = /^(:::+)\s*(?:([^\{\}\s]+?))?$/;
+
+      const matchers = [divBraceRegex, divNoBraceRegex];
+
+      let match;
+      for (const matcher of matchers) {
+        match = matcher.exec(line);
+        if (match) {
+          break;
+        }
+      }
+
       if (match) {
         // There is a div here, is one already open?
         const divFence = match[1];
@@ -138,7 +135,11 @@ export const divPlugin = (md: MarkdownIt) => {
           const token = state.push(kTokDivOpen, "div", 1)
           token.markup = line;
           // Allow this to be parsed for attributes by markdown-it-attr
-          token.info = `{${attr}}`;
+          if (attr && attr.startsWith("{")) {
+            token.info = attr;
+          } else if (attr) {
+            token.info = `{.${attr}}`;
+          }
           token.block = true;
         } else {
           // Subtract from the open count (min zero)
@@ -148,10 +149,12 @@ export const divPlugin = (md: MarkdownIt) => {
           const token = state.push(kTokDivClose, "div", -1)
           token.markup = line; 
         }
-      }
 
-      state.line = start + 1
-      return true
+        state.line = start + 1
+        return true  
+      } else {
+        return false;
+      }
     },
     { alt: [] }
   )

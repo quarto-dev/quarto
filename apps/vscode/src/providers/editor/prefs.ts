@@ -74,12 +74,12 @@ const kMonitoredConfigurations = [
   kEditorQuickSuggestions
 ];
 
-export function vscodePrefsServer(
+export async function vscodePrefsServer(
   context: QuartoContext,
   engine: MarkdownEngine,
   document: TextDocument,
   onPrefsChanged: (prefs: Prefs) => void
-) : [PrefsServer, Disposable]  {
+) : Promise<[PrefsServer, Disposable]>  {
 
   const server = prefsServer();
   const defaults = defaultPrefs();
@@ -151,10 +151,10 @@ export function vscodePrefsServer(
   }));
 
   // front matter changes (only on save)
-  let lastDocYamlFrontMatter = documentFrontMatterYaml(engine, document);
+  let lastDocYamlFrontMatter = await documentFrontMatterYaml(engine, document);
   disposables.push(workspace.onDidSaveTextDocument(async (savedDoc) => {
     if (savedDoc.uri.toString() === document.uri.toString()) {
-      const yamlFrontMatter = documentFrontMatterYaml(engine, document);
+      const yamlFrontMatter = await documentFrontMatterYaml(engine, document);
       if (yamlFrontMatter !== lastDocYamlFrontMatter) {
         lastDocYamlFrontMatter = yamlFrontMatter;
         firePrefsChanged();

@@ -408,7 +408,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     };
 
     // create prefs server that also monitors for changes and forwards them to the visual editor
-    const [prefsServer, unsubscribe] = vscodePrefsServer(
+    const [prefsServer, unsubscribe] = await vscodePrefsServer(
       this.quartoContext,
       this.engine,
       document,

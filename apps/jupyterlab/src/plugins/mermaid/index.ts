@@ -23,7 +23,6 @@ export default function mermaidPlugin(md: MarkdownIt, options: any) {
     slf: any
   ) {
     let token = tokens[idx];
-    console.log(token);
     if (token.info === kLang || (token.attrs !== null && token.attrs.length === 1 && token.attrs[0][0] === kLang))  {
       let imageHTML: string = "";
       let imageAttrs: string[][] = [];

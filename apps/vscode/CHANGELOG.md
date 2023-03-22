@@ -4,6 +4,7 @@
 
 - Fix crossref indexing when running with Quarto v1.3
 - Improve highligthing regex for citation / reference ids
+- Prevent redraw of visual editor decorators on save
 
 ## 1.77.0 (Release as 17 March 2023)
 

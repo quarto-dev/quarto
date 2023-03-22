@@ -176,8 +176,13 @@ function indexSourceFile(quartoContext: QuartoContext, code: string, filename: s
     // write defaults file
     const defaultsFile = path.join(xrefIndexingDir, "defaults.yml");
     const filtersPath = path.join(quartoContext.resourcePath, "filters");
+
+    // use qmd reader if it exists
+    const qmdReaderPath = path.join(filtersPath, "qmd-reader.lua");
+    const from = fs.existsSync(qmdReaderPath) ? qmdReaderPath : 'markdown';
+
     const defaults = `
-from: markdown
+from: ${from}
 to: native
 data-dir: "${pathWithForwardSlashes(
       path.join(quartoContext.resourcePath, "pandoc", "datadir")

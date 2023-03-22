@@ -7,16 +7,13 @@
 import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
 import Renderer from "markdown-it/lib/renderer";
-import { addClass, readAttrValue } from "../utils/markdownit";
+import { addClass } from "../utils/markdownit";
+import { attributeDecorator } from "../utils/html";
 
 export const kDivRuleName = "pandocDiv";
 
 export const kTokDivOpen = 'pandoc_div_open';
 export const kTokDivClose = 'pandoc_div_close';
-
-export const decoratorSpan = (contents: string) => {
-  return `<span class="quarto-div-decorator-content">${contents}</span>`
-}
 
 export const divPlugin = (md: MarkdownIt) => {
   
@@ -24,36 +21,13 @@ export const divPlugin = (md: MarkdownIt) => {
   function renderStartDiv(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
     const token = tokens[idx];
 
-    // id
-    const id = readAttrValue("id", token.attrs);
-      
-    // classes
-    const clz = readAttrValue("class", token.attrs);
-
-    // other attributes
-    const otherAttrs = token.attrs?.filter((attr) => { return attr[0] !== "id" && attr[0] !== "class"});
-
-    // Create a decorator for the div
-    const contents: string[] = [];
-    if (id) {
-      contents.push(decoratorSpan(`#${id}`));
-    } 
-    if (clz) {
-      const clzStr = clz.split(" ").map((cls) => `.${cls}`).join(" ");
-      contents.push(decoratorSpan(clzStr));
-    }
-    if (otherAttrs && otherAttrs.length > 0) {
-      const otherAttrStr = otherAttrs?.map((attr) => {
-        return `${attr[0]}="${attr[1]}"`
-      }).join(" ");
-      contents.push(decoratorSpan(otherAttrStr));
-    }
-    const divDecorator = `<div class="quarto-div-decorator">${contents.join("")}</div>`
+    // Compute a decorator
+    const attrDecorator = attributeDecorator(token);
 
     // Add a class to designate that this is a quarto dev
     token.attrs = addClass("quarto-div", token.attrs)
 
-    const divRendered = `${divDecorator}\n<div ${self.renderAttrs(token)}>`;
+    const divRendered = `${attrDecorator}\n<div ${self.renderAttrs(token)}>`;
     return divRendered;
   }
 

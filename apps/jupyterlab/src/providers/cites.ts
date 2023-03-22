@@ -1,5 +1,5 @@
 /*
-* citations.ts
+* cites.ts
 *
 * Copyright (C) 2020-2023 Posit Software, PBC
 *

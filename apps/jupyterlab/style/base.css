@@ -14,15 +14,23 @@
   margin-bottom: 1em;
 }
 
-.quarto-div-decorator {
-  position: absolute;
-  right: 2em;
-  background-color: transparent;
-  font-size: 0.7em;
-  transform: translateY(-1em);
+.quarto-heading-decorated {
+  margin-top: 0px !important;
 }
 
-.quarto-div-decorator .quarto-div-decorator-content {
+.quarto-heading-attribute-decorator {
+  margin-top: var(--jp-content-heading-margin-top);
+}
+
+.quarto-attribute-decorator {
+  display: flex;
+  justify-content: right;
+  background-color: transparent;
+  font-size: 0.7em;
+  transform: translateY(1em);
+}
+
+.quarto-attribute-decorator .quarto-attribute-decorator-content {
   border: solid 1px silver;
   background-color: whitesmoke;
   border-radius: 20px;

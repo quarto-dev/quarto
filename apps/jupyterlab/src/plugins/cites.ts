@@ -85,10 +85,12 @@ export const citationPlugin = (md: MarkdownIt) => {
 
               const char = content.charAt(j);
               if (char === "@") {
-                if (text.length === 1 && text[0] === '-') {
+                if ((text.length === 1 && text[0] === '-') || 
+                    text.length > 1 && text[text.length - 1] === "-" && text[text.length - 2] === "[") {
                   cite.push('-');
                   cite.push(char);
-                  text = [];
+                  text.pop();
+                  flushText();
                   capture = 'cite';
                 } else if (text[text.length - 1] === ' ') {
                   flushText();   
@@ -104,7 +106,11 @@ export const citationPlugin = (md: MarkdownIt) => {
                   flushText();
                   cite.push(char);
                   capture = 'cite';
-                } else {
+                } else if (text.length === 0) {
+                  cite.push(char);
+                  capture = 'cite';
+                }
+                else {
                   if (capture === 'cite') {
                     cite.push(char);
                   } else {

@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * fs.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -14,11 +14,16 @@
  */
 
 
-export * from './jsonrpc';
-export * from './jsonrpc-lsp'
-export * from './appdirs';
-export * from './exec';
-export * from './mime';
-export * from './path';
+import { Uri, workspace } from "vscode";
 
-
+export async function fsExists(uri: Uri) {
+  try {
+    console.log(uri);
+    await workspace.fs.stat(uri);
+    console.log("file does exist");
+    return true;
+  } catch {
+    console.log("file does not exist");
+    return false;
+  } 
+}

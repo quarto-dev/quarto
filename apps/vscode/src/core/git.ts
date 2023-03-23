@@ -13,24 +13,23 @@
  *
  */
 
-import * as fs from "fs";
-import * as path from "path";
 import * as os from "os";
 
 import { lines } from "core";
 import { execProgram } from "core-node";
+import { URI, Utils } from "vscode-uri";
+import { fsExists } from "./fs";
+import { workspace } from "vscode";
 
-export function ensureGitignore(
-  dir: string,
+export async function ensureGitignore(
+  dir: URI,
   entries: string[]
-): boolean {
+): Promise<boolean> {
   // if .gitignore exists, then ensure it has the requisite entries
-  const gitignorePath = path.join(dir, ".gitignore");
-  if (fs.existsSync(gitignorePath)) {
+  const gitignorePath = Utils.joinPath(dir, ".gitignore");
+  if (await fsExists(gitignorePath)) {
     const gitignore = lines(
-      fs.readFileSync(gitignorePath, {
-        encoding: "utf-8",
-      })
+      (await workspace.fs.readFile(gitignorePath)).toString()
     ).map((line) => line.trim());
     const requiredEntries: string[] = [];
     for (const requiredEntry of entries) {
@@ -47,10 +46,10 @@ export function ensureGitignore(
   } else {
     // if it doesn't exist then auto-create if we are in a git project or we had the force flag
     try {
-      const result = execProgram("git", ["rev-parse"], {
-        cwd: dir,
-      });
-      if (result !== undefined) {
+      const create = 
+        dir.authority === "github" || 
+        dir.scheme === "file" && !!execProgram("git", ["rev-parse"], { cwd: dir.fsPath });
+      if (create) {
         createGitignore(dir, entries);
         return true;
       } else {
@@ -62,15 +61,14 @@ export function ensureGitignore(
   }
 }
 
-export function createGitignore(dir: string, entries: string[]) {
+export function createGitignore(dir: URI, entries: string[]) {
   writeGitignore(dir, entries);
 }
 
-function writeGitignore(dir: string, lines: string[]) {
+function writeGitignore(dir: URI, lines: string[]) {
   const lineEnding = os.platform() === "win32" ? "\r\n" : "\n";
-  fs.writeFileSync(
-    path.join(dir, ".gitignore"),
-    lines.join(lineEnding) + lineEnding,
-    { encoding: "utf-8" }
+  workspace.fs.writeFile(
+    Utils.joinPath(dir, ".gitignore"),
+    Buffer.from(lines.join(lineEnding) + lineEnding, "utf-8"),
   );
 }

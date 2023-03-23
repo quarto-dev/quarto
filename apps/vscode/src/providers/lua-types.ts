@@ -25,14 +25,17 @@ import {
   window,
   MessageItem,
   ConfigurationTarget,
+  Uri,
 } from "vscode";
 
-import { ensureGitignore } from "core-node";
+import { Utils } from 'vscode-uri';
 
 import { QuartoContext } from "quarto-core";
 
 import { join } from "path";
 import { safeUpdateConfig } from "../core/config";
+import { fsExists } from "../core/fs";
+import { ensureGitignore } from "../core/git";
 
 export async function activateLuaTypes(
   context: ExtensionContext,
@@ -47,7 +50,7 @@ export async function activateLuaTypes(
   // compute path to .luarc.json (make sure we have at least one worksapce folder)
   const luarc =
     workspace.workspaceFolders && workspace.workspaceFolders.length > 0
-      ? path.join(workspace.workspaceFolders[0].uri.fsPath, ".luarc.json")
+      ? Utils.joinPath(workspace.workspaceFolders[0].uri, ".luarc.json")
       : undefined;
   if (!luarc) {
     return;
@@ -93,7 +96,7 @@ export async function activateLuaTypes(
 async function syncLuaTypes(
   context: ExtensionContext,
   quartoContext: QuartoContext,
-  luarc: string
+  luarc: Uri
 ) {
   // if we don't have the extension that see if we should prompt to install it
   if (!isLuaLspInstalled() && canPromptForLuaLspInstall(context)) {
@@ -158,8 +161,8 @@ async function syncLuaTypes(
     "Lua.diagnostics.disable": ["lowercase-global", "trailing-space"],
   };
   const luarcJson = (
-    fs.existsSync(luarc)
-      ? JSON.parse(fs.readFileSync(luarc, { encoding: "utf-8" }))
+     await fsExists(luarc)
+      ? JSON.parse((await workspace.fs.readFile(luarc)).toString())
       : kDefaultLuaRc
   ) as Record<string, unknown>;
 
@@ -197,7 +200,10 @@ async function syncLuaTypes(
 
   // rewrite if we need to
   if (rewriteLuarc) {
-    fs.writeFileSync(luarc, JSON.stringify(luarcJson, undefined, 2));
+    await workspace.fs.writeFile(
+      luarc, 
+      Buffer.from(JSON.stringify(luarcJson, undefined, 2), "utf-8")
+    );
   }
 
   // fix issue w/ git protocol (but not if we just installed the LSP as the config
@@ -205,7 +211,8 @@ async function syncLuaTypes(
   await ensureNoGitScheme();
 
   // ensure gitignore
-  ensureGitignore(path.dirname(luarc), ["/" + path.basename(luarc)]);
+
+  ensureGitignore(Utils.dirname(luarc), ["/" + Utils.basename(luarc)]);
 }
 
 // git scheme doesn't have our folder level settings so all of the

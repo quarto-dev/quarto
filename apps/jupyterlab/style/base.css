@@ -18,11 +18,14 @@
   margin-top: 0px !important;
 }
 
-.quarto-heading-attribute-decorator {
+.quarto-attribute-decorator.quarto-heading-attribute-decorator {
   margin-top: var(--jp-content-heading-margin-top);
+  transform: translateY(2em);
 }
 
+
 .quarto-attribute-decorator {
+  padding-right: 1em;
   display: flex;
   justify-content: right;
   background-color: transparent;

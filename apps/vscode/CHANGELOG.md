@@ -6,9 +6,10 @@
 - Improve highligthing regex for citation / reference ids
 - Prevent redraw of visual editor decorators on save
 - Preserve visual editor focus on render errors
-- Improve syncing to current slide for reveal preview
+- Navigation to slide at cursor for reveal preview initial load
+- Improve fidelity of syncing to current slide for reveal preview
 
-## 1.77.0 (Release as 17 March 2023)
+## 1.77.0 (Release on 17 March 2023)
 
 - Make Shift-Drag/Drop of images conditional on VS Code >= 1.74
 

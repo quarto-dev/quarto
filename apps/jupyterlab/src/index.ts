@@ -27,6 +27,7 @@ import { cites } from './providers/cites';
 import { attrs } from './providers/attrs';
 import { callouts } from './providers/callouts';
 import { decorator } from './providers/decorator';
+import { yaml } from './providers/yaml';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -59,7 +60,8 @@ const kQuartoExtensions = [
   cites,
   mermaid,
   callouts,
-  decorator
+  decorator,
+  yaml
 ];
 
 

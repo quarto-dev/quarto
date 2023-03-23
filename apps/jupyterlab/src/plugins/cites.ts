@@ -12,13 +12,6 @@ import Token from "markdown-it/lib/token";
 
 const kTokCite = "quarto_cite";
 
-// Render pandoc-style divs
-function renderCite(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-  const token = tokens[idx]; 
-  const citeContent =  `<code ${self.renderAttrs(token)}>${token.content}</code>`;
-  return citeContent;
-}
-
 export const citationPlugin = (md: MarkdownIt) => {
 
   // Very simple plugin example that surrounds @text with `code`
@@ -151,4 +144,12 @@ export const citationPlugin = (md: MarkdownIt) => {
   });
 
   md.renderer.rules[kTokCite] = renderCite
+}
+
+
+// Render pandoc-style divs
+function renderCite(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  const token = tokens[idx]; 
+  const citeContent =  `<code ${self.renderAttrs(token)}>${token.content}</code>`;
+  return citeContent;
 }

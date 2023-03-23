@@ -8,7 +8,6 @@ import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
 import Renderer from "markdown-it/lib/renderer";
 import { attributeDecorator, decorator } from "../utils/html";
-import { addClass } from "../utils/markdownit";
 import { kTokDivOpen } from "./divs";
 
 
@@ -17,7 +16,6 @@ const kTokDecorator = "quarto_decorator";
 export const decoratorPlugin = (md: MarkdownIt) => {
 
   md.core.ruler.push('quarto-decorator', function replaceAtSymbol(state) {
-    console.log(state.tokens);
     const outTokens: Token[] = [];
     for (const token of state.tokens) {
       if (token.type === "fence" && !token.attrs && token.info) {
@@ -32,16 +30,6 @@ export const decoratorPlugin = (md: MarkdownIt) => {
     state.tokens = outTokens;
   });
   
-  // Render pandoc-style divs
-  function renderDecorator(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-    const token = tokens[idx];
-    if (token.info) {
-      return decorator([token.info]) ;
-    } else {
-      return attributeDecorator(token);
-    }
-  }
-
   md.renderer.rules[kTokDecorator] = renderDecorator
 }
 
@@ -51,3 +39,14 @@ function decoratorTokForToken(token: Token) {
   decoratorTok.info = token.info;
   return decoratorTok;
 }
+
+// Render pandoc-style divs
+function renderDecorator(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  const token = tokens[idx];
+  if (token.info) {
+    return decorator([token.info]) ;
+  } else {
+    return attributeDecorator(token);
+  }
+}
+

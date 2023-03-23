@@ -20,8 +20,6 @@ const kTokCalloutTitleClose = "quarto_callout_title_close";
 const kTokCalloutContentOpen = "quarto_callout_content_open";
 const kTokCalloutContentClose = "quarto_callout_content_close";
 
-const kCalloutRuleName = "quartoCallout";
-
 const kCalloutPrefix = "callout-";
 
 interface Callout {
@@ -32,99 +30,6 @@ interface Callout {
   appearance?: "default" | "minimal" | "simple";
   collapse?: boolean;
 } 
-
-const calloutAppearance = (val: string | undefined) => {
-  if (val) {
-    switch(val) {
-      case "minimal":
-        return "minimal";
-      case "simple":
-        return "simple"
-      case "default":
-      default:
-        return "default";
-    }
-  } else {
-    return "default";
-  }
-}
-
-const parseCallout = (attrs: null | [string, string][]) : Callout | undefined => {
-  if (attrs === null) { 
-    return undefined;
-  }
-
-  const classAttr = attrs.find((attr) => { return attr[0] === "class"});
-  if (!classAttr) {
-    return undefined;
-  }
-
-  const classes = classAttr[1].split(" ");
-  const calloutClass = classes.find((clz) => {
-    return clz.startsWith('callout-');
-  })
-
-  if (calloutClass) { 
-    const type = calloutClass.replace(kCalloutPrefix, "")
-    
-    // TODO: capitalizeTitle
-    const title = readAttrValue("title", attrs) || type;
-    const appearance = calloutAppearance(readAttrValue("appearance", attrs));
-
-    return {
-      type: type || "note",
-      clz: calloutClass,
-      title,
-      appearance
-    }
-
-  } else {
-    return undefined;
-  }
-
-}
-
-const appearanceClass = (appearance?:  "default" | "minimal" | "simple") => {
-  let style = appearance || "default";
-  return `callout-style-${style}`;
-}
-
-
-// Render pandoc-style divs
-function renderStartCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-  const token = tokens[idx];
-  const callout = token.meta as Callout;
-
-  // Add classes decorating as callout
-  token.attrs = addClass(`callout ${callout.clz}`, token.attrs);
-
-  // Add class that reflects the style
-  token.attrs = addClass(appearanceClass(callout.appearance), token.attrs);
-
-  return `<div ${self.renderAttrs(token)}>`;
-}
-
-// Render pandoc-style divs
-function renderEndCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-  return `</div>`;
-}
-
-function renderStartCalloutTitle(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-  const token = tokens[idx];
-  const title = readAttrValue("title", token.attrs) || "";
-  const startContent = `
-<div class="callout-header">
-<div class="callout-icon-container">
-  <i class="callout-icon"></i>
-</div>
-<div class="callout-title-container">${title}
-`;
-  return startContent;
-}
-
-function renderEndCalloutTitle(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-  return `</div>\n</div>`;
-}
 
 export const calloutPlugin = (md: MarkdownIt) => {
   
@@ -257,4 +162,97 @@ export const calloutPlugin = (md: MarkdownIt) => {
   md.renderer.rules[kTokCalloutTitleClose] = renderEndCalloutTitle
 }
 
+
+// Render pandoc-style divs
+function renderStartCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  const token = tokens[idx];
+  const callout = token.meta as Callout;
+
+  // Add classes decorating as callout
+  token.attrs = addClass(`callout ${callout.clz}`, token.attrs);
+
+  // Add class that reflects the style
+  token.attrs = addClass(appearanceClass(callout.appearance), token.attrs);
+
+  return `<div ${self.renderAttrs(token)}>`;
+}
+
+// Render pandoc-style divs
+function renderEndCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  return `</div>`;
+}
+
+function renderStartCalloutTitle(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  const token = tokens[idx];
+  const title = readAttrValue("title", token.attrs) || "";
+  const startContent = `
+<div class="callout-header">
+<div class="callout-icon-container">
+  <i class="callout-icon"></i>
+</div>
+<div class="callout-title-container">${title}
+`;
+  return startContent;
+}
+
+function renderEndCalloutTitle(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  return `</div>\n</div>`;
+}
+
+
+const calloutAppearance = (val: string | undefined) => {
+  if (val) {
+    switch(val) {
+      case "minimal":
+        return "minimal";
+      case "simple":
+        return "simple"
+      case "default":
+      default:
+        return "default";
+    }
+  } else {
+    return "default";
+  }
+}
+
+const parseCallout = (attrs: null | [string, string][]) : Callout | undefined => {
+  if (attrs === null) { 
+    return undefined;
+  }
+
+  const classAttr = attrs.find((attr) => { return attr[0] === "class"});
+  if (!classAttr) {
+    return undefined;
+  }
+
+  const classes = classAttr[1].split(" ");
+  const calloutClass = classes.find((clz) => {
+    return clz.startsWith('callout-');
+  })
+
+  if (calloutClass) { 
+    const type = calloutClass.replace(kCalloutPrefix, "")
+    
+    // TODO: capitalizeTitle
+    const title = readAttrValue("title", attrs) || type;
+    const appearance = calloutAppearance(readAttrValue("appearance", attrs));
+
+    return {
+      type: type || "note",
+      clz: calloutClass,
+      title,
+      appearance
+    }
+
+  } else {
+    return undefined;
+  }
+
+}
+
+const appearanceClass = (appearance?:  "default" | "minimal" | "simple") => {
+  let style = appearance || "default";
+  return `callout-style-${style}`;
+}
 

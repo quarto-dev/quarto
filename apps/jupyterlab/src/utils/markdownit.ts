@@ -5,6 +5,20 @@
 *
 */
 
+export const hasClass = (clz: string, attrs: null | [string, string][]) => {
+  if (attrs === null) {
+    return false
+  }
+
+  const classes = readAttrValue("class", attrs);
+  if (classes === null) {
+    return false;
+  } else {
+    return classes?.split(" ").includes(clz);
+  }
+
+
+}
 
 export const readAttrValue = (name: string, attrs: null | [string, string][]) => {
   if (attrs === null) {

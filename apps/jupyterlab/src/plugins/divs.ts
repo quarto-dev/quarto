@@ -8,7 +8,6 @@ import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
 import Renderer from "markdown-it/lib/renderer";
 import { addClass } from "../utils/markdownit";
-import { attributeDecorator } from "../utils/html";
 
 export const kDivRuleName = "pandocDiv";
 
@@ -19,16 +18,12 @@ export const divPlugin = (md: MarkdownIt) => {
   
   // Render pandoc-style divs
   function renderStartDiv(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
-    const token = tokens[idx];
-
-    // Compute a decorator
-    const attrDecorator = attributeDecorator(token);
 
     // Add a class to designate that this is a quarto dev
+    const token = tokens[idx];
     token.attrs = addClass("quarto-div", token.attrs)
 
-    const divRendered = `${attrDecorator}\n<div ${self.renderAttrs(token)}>`;
-    return divRendered;
+    return `<div ${self.renderAttrs(token)}>`;
   }
 
   // Render pandoc-style divs

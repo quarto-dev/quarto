@@ -26,7 +26,7 @@ import { tasklists } from './providers/tasklists';
 import { cites } from './providers/cites';
 import { attrs } from './providers/attrs';
 import { callouts } from './providers/callouts';
-import { headings } from './providers/headings';
+import { decorator } from './providers/decorator';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -52,14 +52,14 @@ const kPandocExtensions = [
   tasklists,
   attrs,
   divs,
-  headings
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior
 const kQuartoExtensions = [
   cites,
   mermaid,
-  callouts
+  callouts,
+  decorator
 ];
 
 

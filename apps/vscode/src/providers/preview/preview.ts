@@ -604,21 +604,23 @@ class PreviewManager {
       // find existing visible instance
       const fileUri = Uri.file(errorLoc.file);
       const editor = findEditor((doc) => doc.uri.fsPath === fileUri.fsPath);
-      if (editor && editor.textEditor) {
-        // if the current selection is outside of the error region then
-        // navigate to the top of the error region
-        const errPos = new Position(errorLoc.lineBegin - 1, 0);
-        const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
-        const textEditor = editor.textEditor;
-        if (
-          textEditor.selection.active.isBefore(errPos) ||
-          textEditor.selection.active.isAfter(errEndPos)
-        ) {
-          textEditor.selection = new Selection(errPos, errPos);
-          textEditor.revealRange(
-            new Range(errPos, errPos),
-            TextEditorRevealType.InCenterIfOutsideViewport
-          );
+      if (editor) {
+        if (editor.textEditor) {
+          // if the current selection is outside of the error region then
+          // navigate to the top of the error region
+          const errPos = new Position(errorLoc.lineBegin - 1, 0);
+          const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
+          const textEditor = editor.textEditor;
+          if (
+            textEditor.selection.active.isBefore(errPos) ||
+            textEditor.selection.active.isAfter(errEndPos)
+          ) {
+            textEditor.selection = new Selection(errPos, errPos);
+            textEditor.revealRange(
+              new Range(errPos, errPos),
+              TextEditorRevealType.InCenterIfOutsideViewport
+            );
+          }
         }
         preserveEditorFocus(editor);
       }

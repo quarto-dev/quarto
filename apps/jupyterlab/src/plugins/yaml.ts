@@ -245,7 +245,13 @@ function renderTitle(titleBlock: TitleBlock) {
     const names: string[] = [];
     const affils: string[] = [];
     for (const author of titleBlock.authors) {
-      names.push(author.name);
+      
+      
+      if (author.orcid) {
+        names.push(`${author.name}<a href="https://orcid.org/${author.orcid}" class="quarto-orcid"><i></i></a>`);
+      } else {
+        names.push(author.name)
+      }
       
       // Place empty rows to allow affiliations to line up
       const emptyCount = author.affil ? Math.max(author.affil.length - 1, 0) : 0;

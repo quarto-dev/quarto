@@ -235,7 +235,7 @@ const parseCallout = (attrs: null | [string, string][]) : Callout | undefined =>
     const type = calloutClass.replace(kCalloutPrefix, "")
     
     // TODO: capitalizeTitle
-    const title = readAttrValue("title", attrs) || type;
+    const title = readAttrValue("title", attrs) || type.slice(0, 1).toUpperCase() + type.slice(1);;
     const appearance = calloutAppearance(readAttrValue("appearance", attrs));
 
     return {

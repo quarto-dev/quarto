@@ -147,6 +147,11 @@
   border-radius: .25rem;
 }
 
+.callout-title-container {
+  font-weight: 600;
+  opacity: 80%;
+}
+
 .callout.callout-style-simple { 
   padding: 0em 0.5em;
   border-left: solid #acacac .3rem;

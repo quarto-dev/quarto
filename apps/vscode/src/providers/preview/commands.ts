@@ -85,7 +85,7 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
         !(await renderOnSave(this.engine_, targetEditor.document)) ||
         !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
-        await previewDoc(targetEditor, format, false, this.engine_, onShow);
+        await previewDoc(targetEditor, format, false, onShow);
       } else {
         // show the editor
         if (!isNotebook(targetEditor.document)) {

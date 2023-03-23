@@ -15,7 +15,6 @@
 
 import * as vscode from "vscode";
 import { Uri } from "vscode";
-import { MarkdownEngine } from "../markdown/engine";
 import { revealSlideIndex } from "../markdown/reveal";
 import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
@@ -132,7 +131,7 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
 export interface QuartoEditor {
   document: vscode.TextDocument;
   activate: () => Promise<void>;
-  slideIndex: (engine: MarkdownEngine) => Promise<number>;
+  slideIndex: () => Promise<number>;
   viewColumn?: vscode.ViewColumn;
   textEditor?: vscode.TextEditor;
 }
@@ -143,11 +142,10 @@ export function quartoEditor(editor: vscode.TextEditor) {
     activate: async () => {
       await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
     },
-    slideIndex: async (engine: MarkdownEngine) => {
+    slideIndex: async () => {
       return await revealSlideIndex(
         editor.selection.active, 
-        editor.document, 
-        engine)
+        editor.document)
       ;
     },
     viewColumn: editor.viewColumn, 

@@ -15,17 +15,17 @@
 
 import { Position, TextDocument } from "vscode";
 
-import { parseFrontMatterStr } from "quarto-core";
+import { markdownitFrontMatterPlugin, parseFrontMatterStr } from "quarto-core";
 
-import { MarkdownEngine } from "./engine";
+import { tokenizeMarkdownString } from "./engine";
 import { getHeaderLevel } from "./toc";
+import MarkdownIt from "markdown-it";
 
 export async function revealSlideIndex(
   cursorPos: Position,
-  doc: TextDocument,
-  engine: MarkdownEngine
+  doc: TextDocument
 ) {
-  const location = await revealEditorLocation(cursorPos, doc, engine);
+  const location = await revealEditorLocation(cursorPos, doc);
   let slideIndex = -1;
   for (const item of location.items) {
     if (item.type === kCursor) {
@@ -63,13 +63,12 @@ interface RevealEditorLocationItem {
 
 async function revealEditorLocation(
   cursorPos: Position,
-  doc: TextDocument,
-  engine: MarkdownEngine
+  doc: TextDocument
 ): Promise<RevealEditorLocation> {
   const items: RevealEditorLocationItem[] = [];
   let explicitSlideLevel: number | null = null;
   let foundCursor = false;
-  const tokens = await engine.parse(doc);
+  const tokens = tokenizeMarkdownString(doc.getText(), revealSlidesMarkdownEngine());
   for (const token of tokens) {
     if (token.map) {
       // if the cursor is before this token then add the cursor item
@@ -96,6 +95,21 @@ async function revealEditorLocation(
   }
 
   return { items, slideLevel: explicitSlideLevel || 2 };
+}
+
+function revealSlidesMarkdownEngine() {
+  const engine =  MarkdownIt("zero");
+  engine.enable([
+    "heading",
+    "lheading",
+    "hr",
+    // needs code block tokens so it can ignore headings, etc. inside code
+    "code", 
+    "fence",
+    "html_block"
+  ]);
+  engine.use(markdownitFrontMatterPlugin);
+  return engine;
 }
 
 function slideLevelFromYaml(str: string) {

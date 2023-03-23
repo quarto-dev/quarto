@@ -22,6 +22,10 @@ import { markdownitMathPlugin, markdownitFrontMatterPlugin } from "quarto-core";
 
 const UNICODE_NEWLINE_REGEX = /\u2028|\u2029/g;
 
+export function tokenizeMarkdownString(text: string, engine: MarkdownIt) {
+  return engine.parse(text.replace(UNICODE_NEWLINE_REGEX, ""), {});
+}
+
 export class MarkdownEngine {
   private md?: MarkdownIt;
 
@@ -89,13 +93,9 @@ export class MarkdownEngine {
       return cached;
     }
 
-    const tokens = this.tokenizeString(document.getText(), engine);
+    const tokens = tokenizeMarkdownString(document.getText(), engine);
     this._tokenCache.update(document, tokens);
     return tokens;
-  }
-
-  private tokenizeString(text: string, engine: MarkdownIt) {
-    return engine.parse(text.replace(UNICODE_NEWLINE_REGEX, ""), {});
   }
 }
 

@@ -117,7 +117,7 @@ export function activatePreview(
         (await renderOnSave(engine, editor.document)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
-        await previewDoc(editor, undefined, true, engine);
+        await previewDoc(editor, undefined, true);
       }
     }
   };
@@ -158,19 +158,16 @@ export async function previewDoc(
   editor: QuartoEditor,
   format: string | null | undefined,
   renderOnSave: boolean,
-  engine?: MarkdownEngine,
   onShow?: () => void
-) {
-  // get the slide index if we can
-  if (engine !== undefined) {
-    // set the slide index from the source editor so we can
-    // navigate to it in the preview frame
-    if (!isNotebook(editor.document)) {
-      previewManager.setSlideIndex(await editor.slideIndex(engine));
-    } else {
-      previewManager.setSlideIndex(undefined);
-    }
+) { 
+  // set the slide index from the source editor so we can
+  // navigate to it in the preview frame
+  if (!isNotebook(editor.document)) {
+    previewManager.setSlideIndex(await editor.slideIndex());
+  } else {
+    previewManager.setSlideIndex(undefined);
   }
+  
   //  set onShow if provided
   if (onShow !== undefined) {
     previewManager.setOnShow(onShow);

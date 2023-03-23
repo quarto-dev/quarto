@@ -184,24 +184,18 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
       }
     }
     
+    // Read simple values
     titleBlock.title = readStr("title");
     titleBlock.subtitle = readStr("subtitle");
     titleBlock.abstract = readStr("abstract");
     titleBlock.date = readStr("date");
     titleBlock.modified = readStr("date-modified");
     titleBlock.doi = readStr("doi");
-
-    /*
-    titleBlock['date'] = frontMatter.date;
-    delete frontMatter.date;
-
-    titleBlock['abstract'] = frontMatter.abstract;
-    delete frontMatter.abstract;
-
-    titleBlock['author'] = frontMatter.author || frontMatter.authors;
+    
+    // Read Authors
+    titleBlock.authors = parseAuthor(frontMatter.author || frontMatter.authors);
     delete frontMatter.author;
     delete frontMatter.authors;
-    */
 
     return `${renderTitle(titleBlock)}\n<pre>\n${yaml.dump(frontMatter)}\n</pre>`;
   } else {
@@ -247,6 +241,34 @@ function renderTitle(titleBlock: TitleBlock) {
 
   const metadataBlocks: string[] = [];
 
+  if (titleBlock.authors && titleBlock.authors?.length > 0) {
+    const names: string[] = [];
+    const affils: string[] = [];
+    for (const author of titleBlock.authors) {
+      names.push(author.name);
+      
+      // Place empty rows to allow affiliations to line up
+      const emptyCount = author.affil ? Math.max(author.affil.length - 1, 0) : 0;
+      for (let i = 0; i < emptyCount; i++) {
+        names.push("&nbsp;");
+      }
+
+      // Collect affilations
+      author.affil?.forEach((affil) => {
+        affils.push(affil);
+      });
+    }
+
+    const authLabel = names.length === 1 ? "Author" : "Authors";
+    metadataBlocks.push(renderDocMeta(authLabel, names));
+
+    if (affils.length > 0) {
+      const affilLabel = affils.length === 1 ? "Affiliation" : "Affiliations";
+      metadataBlocks.push(renderDocMeta(affilLabel, affils));
+    }
+
+  }
+  
   if (titleBlock.date) {
     metadataBlocks.push(renderDocMeta("Date", [titleBlock.date]));
   }
@@ -293,35 +315,49 @@ function renderDocMeta(label: string, vals: string[]) {
   return rendered.join("\n");
 }
 
-// Maybe put in a div
-/*
-<h1>TITLE</h1>
-<p class="quarto-subtitle">SUBTITLE<p>
-<div class="quarto-meta">
-  <div class="quarto-author">
-    <p class="quarto-meta-title">Authors</p>
-    <p>auth1</p>
-    <p></p>
-    <p>auth 2</p>
-  </div>
-  <div class="quarto-affil">
-    <p class="quarto-meta-title">Affils</p>
-    <p>auth1-affil</p>
-    <p>auth1-affil</p>
-    <p>auth2-afill</p>
-  </div>
-  <div class="quarto-date">
-    <p class="quarto-meta-title">date</p>
-    <p>Date</p>
-  </div>
-  <div class="quarto-modified">
-    <p class="quarto-meta-title">modified</p>
-    <p>Date</p>
-  </div>
-</div>
-<p class="quarto-abstract">ABSTRACT<p>
-<div class="quarto-frontmatter">
-FRONT MATTER STR
-<div>
-*/
+function parseAuthor(author: unknown) : Author[] {
+  const authorsRaw = Array.isArray(author) ? author : [author];
+  const authors: Author[] = [];
+  for (const authorRaw of authorsRaw) {
+    if (typeof(authorRaw) === "string") {
+      authors.push({
+        name: authorRaw
+      });
+    } else if (typeof(authorRaw) === "object") {
 
+      const str = (key: string, defaultValue?: string) => {
+        if (typeof(authorRaw[key]) === "string") {
+          return authorRaw[key] as string;
+        } else {
+          return defaultValue;
+        }
+      }
+
+      const affiliations: string[] = [];
+      const affiliationSimple = str("affiliation");
+      if (affiliationSimple) {
+        affiliations.push(affiliationSimple);
+      } else if (authorRaw.affiliations) {
+        const affils = Array.isArray(authorRaw.affiliations) ? authorRaw.affiliations as unknown[] : [authorRaw.affiliations];
+        affils.forEach((affilRaw) => {
+          if (typeof(affilRaw) === "string") {
+            affiliations.push(affilRaw);
+          } else if (typeof(affilRaw === "object")) {
+            const affilRecord = affilRaw as Record<string, unknown>;
+            const name = affilRecord.name;
+            if (typeof(name) === "string") {
+              affiliations.push(name);
+            }
+          }
+        });
+      }
+
+      authors.push({
+        name: str("name", "")!,
+        orcid: str("orcid"),
+        affil: affiliations
+      })
+    }
+  }
+  return authors;
+}

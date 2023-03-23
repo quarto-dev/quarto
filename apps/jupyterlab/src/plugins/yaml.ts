@@ -19,6 +19,7 @@ import Renderer from "markdown-it/lib/renderer";
 import StateBlock from "markdown-it/lib/rules_block/state_block";
 import Token from "markdown-it/lib/token";
 import * as yaml from "js-yaml";
+import { decorator } from "../utils/html";
 
 // Typescript version of https://github.com/parksb/markdown-it-front-matter
 // TODO: Rationalize this with quarto-core/src/markdownit-yaml.ts
@@ -175,7 +176,9 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
     const frontMatter = frontUnknown as Record<string, unknown>;
 
     const readStr = (key: string) => {
-      if (typeof(frontMatter[key]) === "string") {
+      if (frontMatter[key] === undefined) {
+        return undefined;
+      } else if (typeof(frontMatter[key]) === "string") {
         const val = frontMatter[key] as string;
         delete frontMatter[key];
         return val;
@@ -197,12 +200,27 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
     delete frontMatter.author;
     delete frontMatter.authors;
 
+
+    // The final rendered HTML output
+    const titleLines: string[] = [];
+
     // Render the title block and other yaml options
     const titleRendered = renderTitle(titleBlock);
-    const yamlDump = yaml.dump(frontMatter);
-    const otherYamlRendered = `<pre><code class="cm-s-jupyter language-yaml">${yamlDump}</code></pre>`;
+    titleLines.push(titleRendered);
 
-    return `${titleRendered}\n${otherYamlRendered}`;
+    if (Object.keys(frontMatter).length > 0) {
+
+      // decorator
+      const decor = decorator(["Other Options"]);
+      titleLines.push(decor);
+
+      // yaml
+      const yamlDump = yaml.dump(frontMatter);
+      const otherYamlRendered = `<pre><code class="cm-s-jupyter language-yaml quarto-frontmatter">${yamlDump}</code></pre>`;
+
+      titleLines.push(otherYamlRendered);
+    }
+    return titleLines.join("\n");
   } else {
     return "";
   }
@@ -224,11 +242,16 @@ interface TitleBlock {
   authors?: Author[]; 
 }
 
+type DocMetaValue = {
+  value: string;
+  padded?: boolean
+};
+
 // TODO: Use core function instead
 function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
-    return yaml.load(str);
+    return yaml.load(str, { schema: yaml.FAILSAFE_SCHEMA});
   } catch (error) {
     return undefined;
   }
@@ -247,27 +270,39 @@ function renderTitle(titleBlock: TitleBlock) {
   const metadataBlocks: string[] = [];
 
   if (titleBlock.authors && titleBlock.authors?.length > 0) {
-    const names: string[] = [];
-    const affils: string[] = [];
-    for (const author of titleBlock.authors) {
-      
-      
+    const names: DocMetaValue[] = [];
+    const affils: DocMetaValue[] = [];
+    
+
+    for (let i = 0; i < titleBlock.authors.length; i++) {
+      const author = titleBlock.authors[i];      
       if (author.orcid) {
-        names.push(`${author.name}<a href="https://orcid.org/${author.orcid}" class="quarto-orcid"><i></i></a>`);
+        names.push(
+          { 
+            value: `${author.name}<a href="https://orcid.org/${author.orcid}" class="quarto-orcid"><i></i></a>`,
+            padded: i > 0
+          });
       } else {
-        names.push(author.name)
+        names.push({ value: author.name, padded: i > 0 })
       }
       
       // Place empty rows to allow affiliations to line up
       const emptyCount = author.affil ? Math.max(author.affil.length - 1, 0) : 0;
-      for (let i = 0; i < emptyCount; i++) {
-        names.push("&nbsp;");
+      for (let j = 0; j < emptyCount; j++) {
+        names.push({ value: "&nbsp;"});
       }
 
       // Collect affilations
-      author.affil?.forEach((affil) => {
-        affils.push(affil);
-      });
+      if (author.affil) {
+        for (let k = 0; k < author.affil.length; k++) {
+          const affil = author.affil[k];
+          affils.push({
+            value: affil,
+            padded: i > 0 && k == 0
+          });
+        }
+  
+      }
     }
 
     const authLabel = names.length === 1 ? "Author" : "Authors";
@@ -281,15 +316,15 @@ function renderTitle(titleBlock: TitleBlock) {
   }
   
   if (titleBlock.date) {
-    metadataBlocks.push(renderDocMeta("Date", [titleBlock.date]));
+    metadataBlocks.push(renderDocMeta("Date", [{value: titleBlock.date}]));
   }
   
   if (titleBlock.modified) {
-    metadataBlocks.push(renderDocMeta("Date", [titleBlock.modified]));
+    metadataBlocks.push(renderDocMeta("Modified", [{value: titleBlock.modified}]));
   }
 
   if (titleBlock.doi) {
-    metadataBlocks.push(renderDocMeta("DOI", [`<a href="https://doi.org/${titleBlock.doi}">${titleBlock.doi}</a>`]));
+    metadataBlocks.push(renderDocMeta("DOI", [{value: `<a href="https://doi.org/${titleBlock.doi}">${titleBlock.doi}</a>`}]));
   }
 
   if (metadataBlocks.length > 0) {
@@ -313,13 +348,14 @@ function renderDocMetas(docMetas: string[]) {
   return rendered.join("\n");
 }
 
-function renderDocMeta(label: string, vals: string[]) {
+function renderDocMeta(label: string, vals: DocMetaValue[]) {
   const rendered: string[] = [];
 
   rendered.push(`<div class="quarto-meta">`);
   rendered.push(`<p class="quarto-meta-title">${label}</p>`);
   vals.forEach((val) => {
-    rendered.push(`<p>${val}</p>`);
+    const clz = val.padded ? ` class="quarto-meta-padded"` : "";
+    rendered.push(`<p${clz}>${val.value}</p>`);
   });
   rendered.push(`</div>`);
 

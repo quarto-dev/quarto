@@ -12,7 +12,11 @@
 }
 
 .quarto-meta {
-  margin-bottom: 1em;
+  margin-bottom: 1.4em;
+}
+
+.quarto-meta-padded {
+  padding-top: .4em;
 }
 
 .quarto-meta p.quarto-meta-title {
@@ -38,6 +42,15 @@
   background-repeat: no-repeat;
   background-size: 1rem 1rem;
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAALVBMVEUAAACmzjmmzjmmzjmmzjmmzjn////0+ebj8MHe7bXT55y82mus0UWmzjmSwCmNJ4LqAAAABnRSTlMAIGC/z+8mlFLTAAAAaElEQVR42k2OsQmAMBRET3CAFG5gbWMv6CBpRT44knM4hU3ESl6bLs5gEUW7x3GPO0k1tJJUAQxS4S3B4VRiCejVcCU2gjosjtO2CyymdSHDOT/A/Eu63NnVZCuoBIBehQc43Df63rgBoFJNFnlCBV4AAAAASUVORK5CYII=");
+}
+
+.quarto-frontmatter {
+  font-size: 0.9em !important;
+  line-height: 0.9em !important;
+}
+
+.quarto-abstract {
+  padding-top: 0.5em;
 }
 
 /* Decorated Divs */

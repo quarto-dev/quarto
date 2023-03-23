@@ -28,6 +28,7 @@ import { attrs } from './providers/attrs';
 import { callouts } from './providers/callouts';
 import { decorator } from './providers/decorator';
 import { yaml } from './providers/yaml';
+import { math } from './providers/math';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -53,6 +54,7 @@ const kPandocExtensions = [
   tasklists,
   attrs,
   divs,
+  math
 ];
 
 // Markdown It Extensions which provide Quarto specific behavior

@@ -16,7 +16,8 @@
 }
 
 .quarto-meta p.quarto-meta-title {
-  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8em;
 }
 
 .quarto-meta p {

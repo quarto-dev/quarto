@@ -197,7 +197,12 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
     delete frontMatter.author;
     delete frontMatter.authors;
 
-    return `${renderTitle(titleBlock)}\n<pre>\n${yaml.dump(frontMatter)}\n</pre>`;
+    // Render the title block and other yaml options
+    const titleRendered = renderTitle(titleBlock);
+    const yamlDump = yaml.dump(frontMatter);
+    const otherYamlRendered = `<pre><code class="cm-s-jupyter language-yaml">${yamlDump}</code></pre>`;
+
+    return `${titleRendered}\n${otherYamlRendered}`;
   } else {
     return "";
   }

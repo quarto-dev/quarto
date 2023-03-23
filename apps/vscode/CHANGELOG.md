@@ -6,6 +6,7 @@
 - Improve highligthing regex for citation / reference ids
 - Prevent redraw of visual editor decorators on save
 - Preserve visual editor focus on render errors
+- Improve syncing to current slide for reveal preview
 
 ## 1.77.0 (Release as 17 March 2023)
 

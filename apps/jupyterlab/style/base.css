@@ -7,7 +7,7 @@
 /* Decorated Divs */
 
 .quarto-div {
-  border: solid 1px silver;
+  border: solid 1px var(--jp-border-color0);
   border-radius: 3px;
   background-color: #EEEEEE33;
   padding: 1em;
@@ -39,8 +39,9 @@
 }
 
 .quarto-attribute-decorator .quarto-attribute-decorator-content {
-  border: solid 1px silver;
-  background-color: whitesmoke;
+  color: var(--jp-content-font-color1);
+  border: solid 1px var(--jp-border-color1);
+  background-color: var(--jp-input-background);
   border-radius: 20px;
   margin-right: 6px;
   padding-bottom: 2px;
@@ -51,7 +52,7 @@
 
 /* Cites and Xrefs */
 .jp-RenderedHTMLCommon :not(pre) > code.cite { 
-  color: purple;
+  color: var(--jp-content-link-color);
   padding-left: 1px;
   padding-right: 1px;
 }
@@ -62,7 +63,7 @@
   margin-left: .1em;
   margin-right: 0;
   padding: 0.5em;
-  border: solid 1px silver;
+  border: solid 1px var(--jp-border-color0);
   border-radius: 3px;
 }
 

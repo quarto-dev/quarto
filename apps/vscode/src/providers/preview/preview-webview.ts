@@ -23,9 +23,14 @@ import {
 } from "vscode";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
 
+export interface QuartoPreviewState {
+  url: string;
+  slideIndex?: number;
+}
+
 export class QuartoPreviewWebviewManager extends QuartoWebviewManager<
   QuartoPreviewWebview,
-  string
+  QuartoPreviewState
 > {
   public clear() {
     if (this.activeView_) {
@@ -44,10 +49,10 @@ export class QuartoPreviewWebviewManager extends QuartoWebviewManager<
   }
 }
 
-export class QuartoPreviewWebview extends QuartoWebview<string> {
+export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
   public constructor(
     extensionUri: Uri,
-    state: string,
+    state: QuartoPreviewState,
     webviewPanel: WebviewPanel
   ) {
     super(extensionUri, state, webviewPanel);
@@ -119,13 +124,14 @@ export class QuartoPreviewWebview extends QuartoWebview<string> {
     });
   }
 
-  protected getHtml(state: string): string {
+  protected getHtml(state: QuartoPreviewState): string {
     const configuration = workspace.getConfiguration("simpleBrowser");
 
     const headerHtml = `
     <meta id="simple-browser-settings" data-settings="${this.escapeAttribute(
       JSON.stringify({
-        url: state,
+        url: state.url,
+        slideIndex: state.slideIndex,
         focusLockEnabled: configuration.get<boolean>(
           "focusLockIndicator.enabled",
           true

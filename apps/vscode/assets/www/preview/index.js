@@ -82,8 +82,9 @@ window.addEventListener("message", (e) => {
     case "reveal-init": {
       // set the slide index
       const slides = e.data.data.slides;
-      if (slideIndex !== undefined) {
-        const slide = slides[slideIndex];
+      const index = slideIndex || settings.slideIndex;
+      if (index !== undefined) {
+        const slide = slides[index];
         if (slide) {
           e.source.postMessage(
             { message: "reveal-slide", data: slide },

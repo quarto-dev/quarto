@@ -162,11 +162,10 @@ export async function previewDoc(
 ) { 
   // set the slide index from the source editor so we can
   // navigate to it in the preview frame
-  if (!isNotebook(editor.document)) {
-    previewManager.setSlideIndex(await editor.slideIndex());
-  } else {
-    previewManager.setSlideIndex(undefined);
-  }
+  const slideIndex = !isNotebook(editor.document)
+    ? await editor.slideIndex()
+    : undefined;
+  previewManager.setSlideIndex(slideIndex);
   
   //  set onShow if provided
   if (onShow !== undefined) {
@@ -203,7 +202,7 @@ export async function previewDoc(
     }
 
     // run the preview
-    await previewManager.preview(previewEditor.document.uri, previewEditor.document, format);
+    await previewManager.preview(previewEditor.document.uri, previewEditor.document, format, slideIndex);
 
     // focus the editor (sometimes the terminal steals focus)
     if (!isNotebook(previewEditor.document)) {
@@ -247,7 +246,8 @@ class PreviewManager {
   public async preview(
     uri: Uri,
     doc: TextDocument | undefined,
-    format: string | null | undefined
+    format: string | null | undefined,
+    slideIndex?: number
   ) {
     // resolve format if we need to
     if (format === undefined) {
@@ -267,17 +267,18 @@ class PreviewManager {
         if (response.status === 200) {
           this.progressShow(uri);
         } else {
-          await this.startPreview(previewEnv, uri, format, doc);
+          await this.startPreview(previewEnv, uri, format, doc, slideIndex);
         }
       } catch (e) {
-        await this.startPreview(previewEnv, uri, format, doc);
+        await this.startPreview(previewEnv, uri, format, doc, slideIndex);
       }
     } else {
-      await this.startPreview(previewEnv, uri, format, doc);
+      await this.startPreview(previewEnv, uri, format, doc, slideIndex);
     }
   }
 
   public setSlideIndex(slideIndex?: number) {
+    this.previewSlideIndex_ = slideIndex;
     this.webviewManager_.setSlideIndex(slideIndex);
   }
 
@@ -377,7 +378,8 @@ class PreviewManager {
     previewEnv: PreviewEnv,
     target: Uri,
     format: string | null,
-    doc?: TextDocument
+    doc?: TextDocument,
+    slideIndex?: number
   ) {
     // dispose any existing preview terminals
     await this.killPreview();
@@ -390,6 +392,7 @@ class PreviewManager {
     this.previewTarget_ = target;
     this.previewType_ = this.previewTypeConfig();
     this.previewUrl_ = undefined;
+    this.previewSlideIndex_ = slideIndex;
     this.previewDir_ = undefined;
     this.previewCommandUrl_ = undefined;
     this.previewOutputFile_ = undefined;
@@ -631,7 +634,7 @@ class PreviewManager {
     ) {
       // https://code.visualstudio.com/api/advanced-topics/remote-extensions
       const previewUrl = (await vscode.env.asExternalUri(Uri.parse(this.previewUrl_!))).toString();
-      this.webviewManager_.showWebview(previewUrl, {
+      this.webviewManager_.showWebview( { url: previewUrl, slideIndex: this.previewSlideIndex_ }, {
         preserveFocus: true,
         viewColumn: ViewColumn.Beside,
       });
@@ -717,6 +720,7 @@ class PreviewManager {
   private previewEnv_: PreviewEnv | undefined;
   private previewTarget_: Uri | undefined;
   private previewUrl_: string | undefined;
+  private previewSlideIndex_: number | undefined;
   private previewDir_: string | undefined;
   private previewCommandUrl_: string | undefined;
   private previewOutputFile_: Uri | undefined;

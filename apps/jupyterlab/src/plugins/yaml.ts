@@ -21,7 +21,8 @@ import Token from "markdown-it/lib/token";
 import * as yaml from "js-yaml";
 
 // Typescript version of https://github.com/parksb/markdown-it-front-matter
-
+// TODO: Rationalize this with quarto-core/src/markdownit-yaml.ts
+//       This is a copy with rendering added - the core tokenizing function is identical (or should be)
 const kTokFrontMatter = 'front_matter';
 
 export function markdownitFrontMatterPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
@@ -170,12 +171,27 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
   // Extract important content
   
   if (typeof(frontUnknown) === "object") {
-    const titleBlock: Record<string, unknown> = {};
+    const titleBlock: TitleBlock = {};
     const frontMatter = frontUnknown as Record<string, unknown>;
-    /*
-    titleBlock['title'] = frontMatter.title;
-    delete frontMatter.title;
 
+    const readStr = (key: string) => {
+      if (typeof(frontMatter[key]) === "string") {
+        const val = frontMatter[key] as string;
+        delete frontMatter[key];
+        return val;
+      } else {
+        return undefined;
+      }
+    }
+    
+    titleBlock.title = readStr("title");
+    titleBlock.subtitle = readStr("subtitle");
+    titleBlock.abstract = readStr("abstract");
+    titleBlock.date = readStr("date");
+    titleBlock.modified = readStr("date-modified");
+    titleBlock.doi = readStr("doi");
+
+    /*
     titleBlock['date'] = frontMatter.date;
     delete frontMatter.date;
 
@@ -187,13 +203,30 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
     delete frontMatter.authors;
     */
 
-    return `<pre>\n${yaml.dump(frontMatter)}\n</pre>`;
+    return `${renderTitle(titleBlock)}\n<pre>\n${yaml.dump(frontMatter)}\n</pre>`;
   } else {
     return "";
   }
 }
 
-export function parseFrontMatterStr(str: string) {
+interface Author {
+  name: string;
+  affil?: string[];
+  orcid?: string;
+}
+
+interface TitleBlock {
+  title?: string;
+  subtitle?: string;
+  abstract?: string;
+  date?: string;
+  modified?: string;
+  doi?: string;
+  authors?: Author[]; 
+}
+
+// TODO: Use core function instead
+function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
     return yaml.load(str);
@@ -201,3 +234,94 @@ export function parseFrontMatterStr(str: string) {
     return undefined;
   }
 }
+
+function renderTitle(titleBlock: TitleBlock) {
+  const rendered: string[] = [];
+  if (titleBlock.title) {
+    rendered.push(`<h1>${titleBlock.title}</h1>`);
+  }
+
+  if (titleBlock.subtitle) {
+    rendered.push(`<p class="quarto-subtitle">${titleBlock.subtitle}</p>`);
+  }
+
+  const metadataBlocks: string[] = [];
+
+  if (titleBlock.date) {
+    metadataBlocks.push(renderDocMeta("Date", [titleBlock.date]));
+  }
+  
+  if (titleBlock.modified) {
+    metadataBlocks.push(renderDocMeta("Date", [titleBlock.modified]));
+  }
+
+  if (titleBlock.doi) {
+    metadataBlocks.push(renderDocMeta("DOI", [`<a href="https://doi.org/${titleBlock.doi}">${titleBlock.doi}</a>`]));
+  }
+
+  if (metadataBlocks.length > 0) {
+    rendered.push(renderDocMetas(metadataBlocks));
+  }
+
+  if (titleBlock.abstract) {
+    rendered.push(`<p class="quarto-abstract">${titleBlock.abstract}</p>`);
+  }
+
+  return rendered.join("\n");
+}
+
+function renderDocMetas(docMetas: string[]) {
+  const rendered: string[] = [];
+
+  rendered.push(`<div class="quarto-meta-block">`);
+  docMetas.forEach((docMeta) => { rendered.push(docMeta)});
+  rendered.push(`</div>`);
+
+  return rendered.join("\n");
+}
+
+function renderDocMeta(label: string, vals: string[]) {
+  const rendered: string[] = [];
+
+  rendered.push(`<div class="quarto-meta">`);
+  rendered.push(`<p class="quarto-meta-title">${label}</p>`);
+  vals.forEach((val) => {
+    rendered.push(`<p>${val}</p>`);
+  });
+  rendered.push(`</div>`);
+
+  return rendered.join("\n");
+}
+
+// Maybe put in a div
+/*
+<h1>TITLE</h1>
+<p class="quarto-subtitle">SUBTITLE<p>
+<div class="quarto-meta">
+  <div class="quarto-author">
+    <p class="quarto-meta-title">Authors</p>
+    <p>auth1</p>
+    <p></p>
+    <p>auth 2</p>
+  </div>
+  <div class="quarto-affil">
+    <p class="quarto-meta-title">Affils</p>
+    <p>auth1-affil</p>
+    <p>auth1-affil</p>
+    <p>auth2-afill</p>
+  </div>
+  <div class="quarto-date">
+    <p class="quarto-meta-title">date</p>
+    <p>Date</p>
+  </div>
+  <div class="quarto-modified">
+    <p class="quarto-meta-title">modified</p>
+    <p>Date</p>
+  </div>
+</div>
+<p class="quarto-abstract">ABSTRACT<p>
+<div class="quarto-frontmatter">
+FRONT MATTER STR
+<div>
+*/
+

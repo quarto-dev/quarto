@@ -4,6 +4,26 @@
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
 
+/* Title Block */
+
+.quarto-meta-block {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+.quarto-meta {
+  margin-bottom: 1em;
+}
+
+.quarto-meta p.quarto-meta-title {
+  font-weight: 700;
+}
+
+.quarto-meta p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 /* Decorated Divs */
 
 .quarto-div {

@@ -31,6 +31,7 @@ export const divPlugin = (md: MarkdownIt) => {
     return `</div>`;
   }
 
+  // TODO Implement a better test during validation run
   // Handle pandoc-style divs
   md.block.ruler.before(
     "fence",

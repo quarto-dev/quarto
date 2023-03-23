@@ -4,7 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import { markdownitFrontMatterPlugin } from "../plugins/markdownit-yaml";
+import { markdownitFrontMatterPlugin } from "../plugins/yaml";
 import { markdownItExtension } from "./provider";
 
 export const yaml = markdownItExtension({

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.79.0 (Unreleased)
+
+- Improved handling/display of errors during visual editor initialization
+
 ## 1.78.0 (Release on 23 March 2023)
 
 - Fix crossref indexing when running with Quarto v1.3

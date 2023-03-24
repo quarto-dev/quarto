@@ -186,49 +186,54 @@ export const Editor : React.FC<EditorProps> = (props) => {
   // initialize the editor
   const initEditor = useCallback(async () => {
     
-    const context = editorContext({
-      prefs: () => editorPrefs,
-      server: server.current,
-      services: services.current,
-      request: props.request,
-      uiContext: props.uiContext,
-      display: () => props.display(() => commandsRef.current!), 
-      dialogs: () => dialogs.current,
-      spelling: () => spellingRef.current!
-    })
-
-    editorRef.current = await createEditor(
-      parentRef.current!, 
-      props.options || {},
-      props.options?.initialTheme || defaultTheme(),
-      context
-    );
+    try {
+      const context = editorContext({
+        prefs: () => editorPrefs,
+        server: server.current,
+        services: services.current,
+        request: props.request,
+        uiContext: props.uiContext,
+        display: () => props.display(() => commandsRef.current!), 
+        dialogs: () => dialogs.current,
+        spelling: () => spellingRef.current!
+      })
+  
+      editorRef.current = await createEditor(
+        parentRef.current!, 
+        props.options || {},
+        props.options?.initialTheme || defaultTheme(),
+        context
+      );
+      
+      showPandocWarnings(editorRef.current?.getPandocFormat());
+  
+      // subscribe to events
+      onEditorEvent(UpdateEvent, onEditorDocChanged);
+      onEditorEvent(OutlineChangeEvent, onEditorOutlineChanged);
+      onEditorEvent(StateChangeEvent, onEditorStateChanged);
+  
+      // add commands
+      cmDispatch({ type: "ADD_COMMANDS", payload: [
+        ...editorProsemirrorCommands(editorRef.current!.commands()),
+        ...editorExternalCommands(editorRef.current!),
+        ...editorDebugCommands(editorRef.current!),
+      ]});
+  
+      // set menus
+      cmDispatch({ type: "SET_MENUS", payload: editorRef.current!.getMenus()});
+  
+      // load editor
+      if (props.onEditorInit) {
+        await props.onEditorInit(editor);
+      } 
+  
+      // set title and outline
+      dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
+      onEditorOutlineChanged();
+    } catch (error) {
+      editorLoadFailed(error);
+    }
     
-    showPandocWarnings(editorRef.current?.getPandocFormat());
-
-    // subscribe to events
-    onEditorEvent(UpdateEvent, onEditorDocChanged);
-    onEditorEvent(OutlineChangeEvent, onEditorOutlineChanged);
-    onEditorEvent(StateChangeEvent, onEditorStateChanged);
-
-    // add commands
-    cmDispatch({ type: "ADD_COMMANDS", payload: [
-      ...editorProsemirrorCommands(editorRef.current!.commands()),
-      ...editorExternalCommands(editorRef.current!),
-      ...editorDebugCommands(editorRef.current!),
-    ]});
-
-    // set menus
-    cmDispatch({ type: "SET_MENUS", payload: editorRef.current!.getMenus()});
-
-    // load editor
-    if (props.onEditorInit) {
-      await props.onEditorInit(editor);
-    } 
-
-    // set title and outline
-    dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
-    onEditorOutlineChanged();
   }, []);
 
   // provide EditorOperations -- we need to provide a fully bound instance
@@ -359,6 +364,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
     onPrefsChanged() {
       editorRef.current?.onPrefsChanged();
     },
+    onLoadFailed(error: unknown) {
+      editorLoadFailed(error);
+    }
   }
 
   // when doc changes propagate title
@@ -384,9 +392,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
   
   // editor initialization
   useEffect(() => {
-    initEditor().catch(error => {
-      editorLoadFailed(error);
-    });
+    // initialize editor
+    initEditor();
 
     // propagate window resize to editor
     const onResize = () => {

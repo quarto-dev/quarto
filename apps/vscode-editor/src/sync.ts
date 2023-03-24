@@ -159,28 +159,34 @@ export async function syncEditorToHost(
   visualEditorHostServer(host.vscode, {
     async init(markdown: string, navigation?: NavLocation) {
 
-      // apply initial theme
-      applyDisplayPrefs();
+      try {
+        // apply initial theme
+        applyDisplayPrefs();
 
-      // init editor contents and sync cannonical version back to text editor
-      const result = await editor.setMarkdown(markdown, writerOptions(), false);
-      if (result) {
+        // init editor contents and sync cannonical version back to text editor
+        const result = await editor.setMarkdown(markdown, writerOptions(), false);
+        if (result) {
 
-       // focus editor
-       editor.focus(navigation);
-         
-       // visual editor => text editor (just send the state, host will call back for markdown)
-       editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
-       editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos())); 
-        
+          // focus editor
+          editor.focus(navigation);
+            
+          // visual editor => text editor (just send the state, host will call back for markdown)
+          editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+          editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos())); 
+            
 
-        // return canonical markdown
-        return result.canonical;
-      } else {
+          // return canonical markdown
+          return result.canonical;
+        } else {
 
+          return null;
+
+        }
+      } catch(error) {
+        editor.onLoadFailed(error);
         return null;
-
       }
+     
     },
 
     async prefsChanged(prefs: Prefs): Promise<void> {

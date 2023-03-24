@@ -316,6 +316,9 @@ export interface EditorOperations {
 
   // notify the editor that prefs have changed
   onPrefsChanged(): void;
+
+  // notify the editor that loading failed
+  onLoadFailed(error: unknown): void;
 }
 
 export class Editor  {

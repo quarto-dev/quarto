@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "core": "*",
-    "core-node": "*"
+    "core-node": "*",
+    "cross-fetch": "^3.1.5"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",

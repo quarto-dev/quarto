@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "lib": ["ES2019"],
+    "lib": ["ES2015"],
     "module": "CommonJS",
     "outDir": "./dist",
-    "rootDir": "./src",
-    "sourceMap": true,
-    "resolveJsonModule": true,
+    "rootDir": "./src"
   },
   "exclude": ["node_modules"],
   "extends": "tsconfig/base.json",

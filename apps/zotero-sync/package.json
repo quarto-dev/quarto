@@ -4,25 +4,24 @@
   "private": true,
   "license": "agpl-3.0",
   "scripts": {
-    "build": "tsx build.ts",
-    "dev": "yarn run build dev",
+    "build": "tsup src/index.ts --format cjs",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "dev": "npx nodemon --watch src --watch ../../packages/core --watch ../../packages/core-node src/index.ts",
     "lint": "tsc --noEmit && TIMING=1 eslint \"src/**/*.ts*\"",
-    "start": "node dist/server.js"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "core": "*",
-    "core-node": "*",
-    "quarto-core": "*"
+    "core-node": "*"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",
-    "build": "*",
-    "esbuild": "^0.16.7",
     "eslint": "^7.32.0",
     "eslint-config-custom-server": "*",
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1",
     "tsconfig": "*",
-    "tsx": "^3.12.1",
+    "tsup": "^6.2.3",
     "typescript": "^4.5.2"
   }
 }

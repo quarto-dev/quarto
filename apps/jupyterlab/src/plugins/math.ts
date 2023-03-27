@@ -174,7 +174,8 @@ function math_block(
       break;
     }
 
-    if (state.src.slice(pos, max).trim().slice(-2) === "$$") {
+    const line = state.src.slice(pos, max).trim();
+    if (line.match(/^\$\$\s*(?:\{.*\})\s*$/)) {
       lastPos = state.src.slice(0, max).lastIndexOf("$$");
       lastLine = state.src.slice(pos, lastPos);
       found = true;

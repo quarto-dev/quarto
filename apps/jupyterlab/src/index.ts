@@ -18,7 +18,6 @@ import '../style/index.css';
 import { markdownItManager } from './manager';
 import { divs } from './providers/divs';
 import { deflist } from './providers/deflist';
-import { figures } from './providers/figures';
 import { gridtables } from './providers/gridtables';
 import { sub } from './providers/sub';
 import { sup } from './providers/sup';
@@ -29,6 +28,7 @@ import { callouts } from './providers/callouts';
 import { decorator } from './providers/decorator';
 import { yaml } from './providers/yaml';
 import { math } from './providers/math';
+import { figures } from './providers/figures';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -46,13 +46,13 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
 // Markdown It Extensions which provide base Pandoc behavior
 const kPandocExtensions = [
   footnotes, // footnote seriously render in the cell in which they appear in :(
+  attrs,
   deflist,
   figures,
   gridtables,
   sub,
   sup,
   tasklists,
-  attrs,
   divs,
   math
 ];

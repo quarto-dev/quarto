@@ -32,6 +32,7 @@ import { figures } from './providers/figures';
 import { figureDivs } from './providers/figure-divs';
 import { tableCaptions } from './providers/table-captions';
 import { spans } from './providers/spans';
+import { shortcodes } from './providers/shortcodes';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -69,7 +70,8 @@ const kQuartoExtensions = [
   mermaid,
   callouts,
   decorator,
-  yaml
+  yaml,
+  shortcodes
 ];
 
 

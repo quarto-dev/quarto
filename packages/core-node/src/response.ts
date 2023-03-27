@@ -18,6 +18,7 @@
 
 export interface ResponseWithStatus<T> {
   status: number;
+  headers: Headers | null;
   message: T | null;
   error: string;
 }
@@ -28,12 +29,14 @@ export async function handleResponseWithStatus<T>(request: () => Promise<Respons
     if (response.ok) {
       return {
         status: 200,
+        headers: response.headers,
         message: await response.json() as T,
         error: ''
       }
     } else {
       return {
         status: response.status,
+        headers: response.headers,
         message: null,
         error: `${response.status} Error: ${response.statusText}`
       }
@@ -42,6 +45,7 @@ export async function handleResponseWithStatus<T>(request: () => Promise<Respons
     const message = error instanceof Error ? error.message : JSON.stringify(error);
     return {
       status: message.includes("ENOTFOUND") ? 503 : 500,
+      headers: null,
       message: null,
       error: message
     }

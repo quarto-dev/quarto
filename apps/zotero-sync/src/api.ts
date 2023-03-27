@@ -72,6 +72,13 @@ export interface Item {
   data: Record<string,unknown>;
 }
 
+export interface Deleted {
+  collections: string[];
+  searches: string[];
+  items: string[];
+  tags: string[];
+}
+
 export type ObjectVersions = { [objectId: string]: number };
 
 export type VersionedResponse<T> = { data: T, version: number | null } | null;
@@ -87,6 +94,8 @@ export interface ZoteroApi {
  
   itemVersions(library: Library, since: number) : Promise<VersionedResponse<ObjectVersions>>;
   items(library: Library, keys: string[], since: number) : Promise<VersionedResponse<Item[]>>;
+
+  deleted(library: Library, since: number) : Promise<Deleted>;
 }
 
 export function zoteroApi(key: string) : ZoteroApi {
@@ -137,6 +146,12 @@ export function zoteroApi(key: string) : ZoteroApi {
       const prefix = objectPrefix(library);
       const query = `/items?itemKey=${keys.join(',')}&format=json&include=csljson,data&includeTrashed=1`;
       return zoteroVersionedRequest<Item[]>(key, `${prefix}${query}`, since);
+    },
+
+    deleted: (library: Library, since: number) => {
+      const prefix = objectPrefix(library);
+      const query = `/deleted?since=${since}`;
+      return zoteroRequest<Deleted>(key, `${prefix}${query}`);
     }
   }
 }

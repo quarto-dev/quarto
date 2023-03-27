@@ -187,11 +187,28 @@ const zoteroFetch = async <T>(
         ...headers
       }
     });
-    return {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-      message: response.ok ? await response.json() as T  : null,
+
+    // handle backoff requests
+    // https://www.zotero.org/support/dev/web_api/v3/basics#rate_limiting
+    const retryAfter = response.status === 429 ? Number(response.headers.get("Retry-After") || 0) : 0;
+    const backoff = Number(response.headers.get("Backoff") || 0) || retryAfter;
+    if (backoff) {
+      return new Promise<ZoteroResponse<T>>((resolve, reject) => {
+        setTimeout(() => {
+          zoteroFetch<T>(key, path, headers)
+            .then(resolve)
+            .catch(reject);
+        }, backoff * 1000)
+      });
+
+    // otherwise handle normally
+    } else {
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        message: response.ok ? await response.json() as T  : null,
+      }
     }
   } catch(error) {
     const message = error instanceof Error ? error.message : JSON.stringify(error);

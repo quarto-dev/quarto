@@ -77,6 +77,14 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
         continue;
       }
 
+      // The image
+      var image = token.children.length === 1 ? token.children[0] : token.children[1];
+      
+      // The image must have a caption to count as a figure
+      if (!image.children || image.children.length === 0) {
+        continue;
+      }
+    
       // We have inline token containing an image only.
       // Previous token is paragraph open.
       // Next token is paragraph close.
@@ -88,10 +96,8 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       if (options.dataType == true) {
         state.tokens[i - 1].attrPush(["data-type", "image"]);
       }
-      var image;
 
       if (options.link == true && token.children.length === 1) {
-        image = token.children[0];
         token.children.unshift(new state.Token("link_open", "a", 1));
         const src = image.attrGet("src");
         if (src !== null) {
@@ -100,9 +106,7 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
         token.children.push(new state.Token("link_close", "a", -1));
       }
 
-      // for linked images, image is one off
-      image =
-        token.children.length === 1 ? token.children[0] : token.children[1];
+
 
       if (options.figcaption == true) {
         if (image.children && image.children.length) {

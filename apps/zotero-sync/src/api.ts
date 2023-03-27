@@ -13,6 +13,7 @@
  *
  */
 
+import { sleep } from "core";
 import fetch from "cross-fetch";
 
 import { CSL } from "editor-types";
@@ -194,37 +195,36 @@ const zoteroFetch = async <T>(
   headers = {} as Record<string,string>
 ) : Promise<ZoteroResponse<T>> => {
   try {
-    const url = `https://api.zotero.org${path}`;
-    const response = await fetch(url, {
-      headers: {
-        "Zotero-API-Version": "3",
-        "Zotero-API-Key": key,
-        ...headers
-      }
-    });
-
-    // handle backoff requests
-    // https://www.zotero.org/support/dev/web_api/v3/basics#rate_limiting
-    const retryAfter = response.status === 429 ? Number(response.headers.get("Retry-After") || 0) : 0;
-    const backoff = Number(response.headers.get("Backoff") || 0) || retryAfter;
-    if (backoff) {
-      return new Promise<ZoteroResponse<T>>((resolve, reject) => {
-        setTimeout(() => {
-          zoteroFetch<T>(key, path, headers)
-            .then(resolve)
-            .catch(reject);
-        }, backoff * 1000)
+    let backoff = 0;
+    let response: Response;
+    do {
+      // make request
+      const url = `https://api.zotero.org${path}`;
+      response = await fetch(url, {
+        headers: {
+          "Zotero-API-Version": "3",
+          "Zotero-API-Key": key,
+          ...headers
+        }
       });
 
-    // otherwise handle normally
-    } else {
-      return {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-        message: response.ok ? await response.json() as T  : null,
-      }
+      // handle backoff headers
+      // https://www.zotero.org/support/dev/web_api/v3/basics#rate_limiting
+      const retryAfter = response.status === 429 ? Number(response.headers.get("Retry-After") || 0) : 0;
+      backoff = Number(response.headers.get("Backoff") || 0) || retryAfter;
+      if (backoff) {
+        await sleep(backoff * 1000);
+      }  
+    } while(backoff);
+
+    // return response
+    return {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      message: response.ok ? await response.json() as T  : null,
     }
+
   } catch(error) {
     const message = error instanceof Error ? error.message : JSON.stringify(error);
     return {

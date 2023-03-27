@@ -8,6 +8,15 @@
 import Token from "markdown-it/lib/token";
 import { readAttrValue } from "./markdownit";
 
+export interface DecoratorOptions {
+  customClass?: string;
+  hide: {
+    id?: boolean;
+    classes?: boolean;
+    attributes?: boolean;
+  }
+}
+
 export const decorator = (contents: string[], customClass?: string) => {
   if (contents.length > 0) {
     // Provide a decorator with the attributes
@@ -18,7 +27,7 @@ export const decorator = (contents: string[], customClass?: string) => {
   }
 }
 
-export const attributeDecorator = (token: Token, customClass?: string) => {
+export const attributeDecorator = (token: Token, options?: DecoratorOptions) => {
   // id
   const id = readAttrValue("id", token.attrs);
   
@@ -30,20 +39,20 @@ export const attributeDecorator = (token: Token, customClass?: string) => {
 
   // Create a decorator for the div
   const contents: string[] = [];
-  if (id) {
+  if (id && !options?.hide.id) {
     contents.push(`#${id}`);
   } 
-  if (clz) {
+  if (clz && !options?.hide.classes) {
     const clzStr = clz.split(" ").map((cls) => `.${cls}`).join(" ");
     contents.push(clzStr);
   }
-  if (otherAttrs && otherAttrs.length > 0) {
+  if (otherAttrs && otherAttrs.length > 0 && !options?.hide.attributes) {
     const otherAttrStr = otherAttrs?.map((attr) => {
       return `${attr[0]}="${attr[1]}"`
     }).join(" ");
     contents.push(otherAttrStr);
   }
-  return decorator(contents, customClass);
+  return decorator(contents, options?.customClass);
 }
 
 const decoratorSpan = (contents: string) => {

@@ -16,45 +16,39 @@ export interface FigureOptions {
   lazyLoading?: boolean;
 }
 
+export const kTokFigureOpen = "figure_open";
+export const kTokFigureClose = "figure_open";
+
+export const kTokFigCaptionOpen = "figcaption_open";
+export const kTokFigCaptionClose = "figcaption_close";
+
 export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
   options = options || {};
 
   md.core.ruler.before("linkify", "implicit_figures", (state) => {
-    console.log(state);
     // reset tabIndex on md.render()
     var tabIndex = 1;
 
     // do not process first and last token
     for (var i = 1, l = state.tokens.length; i < l - 1; ++i) {
-      console.log(i);
       var token = state.tokens[i];
 
       if (token.type !== "inline") {
         continue;
       }
-      console.log("> inline");
 
       // children: image alone, or link_open -> image -> link_close
-      console.log(`children: ${token.children}`);
-      if (token.children !== null) {
-        for (const child of token.children) {
-          console.log(child);
-        }
-      }
       if (
         !token.children ||
         (token.children.length !== 1 && token.children.length !== 3)
       ) {
         continue;
       }
-      console.log("> correct children");
-
+      
       // one child, should be img
       if (token.children.length === 1 && token.children[0].type !== "image") {
-        console.log(`type: ${token.children[0].type}`);
         continue;
       }
-      console.log("> one child, is image");
 
       // three children, should be image enclosed in link
       if (
@@ -65,7 +59,6 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       ) {
         continue;
       }
-      console.log("> three child, is link");
 
 
       // prev token is paragraph open
@@ -76,16 +69,15 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       if (i !== l - 1 && state.tokens[i + 1].type !== "paragraph_close") {
         continue;
       }
-      console.log("GOT A FIG BRO!");
 
       // We have inline token containing an image only.
       // Previous token is paragraph open.
       // Next token is paragraph close.
       // Lets replace the paragraph tokens with figure tokens.
       var figure = state.tokens[i - 1];
-      figure.type = "figure_open";
+      figure.type = kTokFigureOpen;
       figure.tag = "figure";
-      state.tokens[i + 1].type = "figure_close";
+      state.tokens[i + 1].type = kTokFigureClose;
       state.tokens[i + 1].tag = "figure";
 
       if (options.dataType == true) {
@@ -110,11 +102,11 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       if (options.figcaption == true) {
         if (image.children && image.children.length) {
           token.children.push(
-            new state.Token("figcaption_open", "figcaption", 1)
+            new state.Token(kTokFigCaptionOpen, "figcaption", 1)
           );
           token.children.splice(token.children.length, 0, ...image.children);
           token.children.push(
-            new state.Token("figcaption_close", "figcaption", -1)
+            new state.Token(kTokFigCaptionClose, "figcaption", -1)
           );
           image.children.length = 0;
         }

@@ -11,6 +11,6 @@ export const figures = markdownItExtension({
   id: '@quarto/figures',
   title: 'Quarto figures',
   plugin: async () => {
-    return [figuresPlugin, { figcaption: true }];
+    return [figuresPlugin, { figcaption: true, copyAttrs: true }];
   }
 });

@@ -30,6 +30,7 @@ import { yaml } from './providers/yaml';
 import { math } from './providers/math';
 import { figures } from './providers/figures';
 import { figureDivs } from './providers/figure-divs';
+import { tableCaptions } from './providers/table-captions';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -61,6 +62,7 @@ const kPandocExtensions = [
 // Markdown It Extensions which provide Quarto specific behavior
 const kQuartoExtensions = [
   figureDivs,
+  tableCaptions,
   cites,
   mermaid,
   callouts,

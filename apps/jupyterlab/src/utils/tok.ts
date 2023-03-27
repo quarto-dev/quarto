@@ -10,3 +10,8 @@ export const kTokParaOpen = "paragraph_open";
 export const kTokParaClose = "paragraph_close";
 
 export const kTokInline = "inline";
+
+export const kTokTableOpen = "table_open";
+export const kTokTableClose = "table_close";
+
+export const kTokText = "text";

@@ -10,6 +10,7 @@ import Renderer from "markdown-it/lib/renderer";
 import { attributeDecorator, decorator, DecoratorOptions } from "../utils/html";
 import { kTokDivOpen } from "./divs";
 import { kTokFigureOpen } from "./figures";
+import { kTokTableOpen } from "../utils/tok";
 
 
 const kTokDecorator = "quarto_decorator";
@@ -29,6 +30,8 @@ export const decoratorPlugin = (md: MarkdownIt) => {
         outTokens.push(decoratorTokForToken(token));
       } else if (token.type === kTokFigureOpen && token.attrs) {
         outTokens.push(decoratorTokForToken(token, { hide: { attributes: true }}));
+      } else if (token.type === kTokTableOpen && token.attrs) {
+        outTokens.push(decoratorTokForToken(token));
       }
       outTokens.push(token);
     } 

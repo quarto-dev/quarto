@@ -6,6 +6,8 @@
  */
 
 import MarkdownIt from "markdown-it";
+import Token from "markdown-it/lib/token";
+import { kTokParaClose, kTokParaOpen } from "../utils/tok";
 
 export interface FigureOptions {
   dataType?: boolean;
@@ -17,10 +19,15 @@ export interface FigureOptions {
 }
 
 export const kTokFigureOpen = "figure_open";
-export const kTokFigureClose = "figure_open";
+export const kTokFigureClose = "figure_close";
 
 export const kTokFigCaptionOpen = "figcaption_open";
 export const kTokFigCaptionClose = "figcaption_close";
+
+export const mutateToFigureTok = (token: Token, type: "open" | "close") => {
+  token.type = type === "open" ? kTokFigureOpen : kTokFigureClose;
+  token.tag = "figure";
+}
 
 export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
   options = options || {};
@@ -62,11 +69,11 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
 
 
       // prev token is paragraph open
-      if (i !== 0 && state.tokens[i - 1].type !== "paragraph_open") {
+      if (i !== 0 && state.tokens[i - 1].type !== kTokParaOpen) {
         continue;
       }
       // next token is paragraph close
-      if (i !== l - 1 && state.tokens[i + 1].type !== "paragraph_close") {
+      if (i !== l - 1 && state.tokens[i + 1].type !== kTokParaClose) {
         continue;
       }
 
@@ -75,10 +82,8 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       // Next token is paragraph close.
       // Lets replace the paragraph tokens with figure tokens.
       var figure = state.tokens[i - 1];
-      figure.type = kTokFigureOpen;
-      figure.tag = "figure";
-      state.tokens[i + 1].type = kTokFigureClose;
-      state.tokens[i + 1].tag = "figure";
+      mutateToFigureTok(figure, "open");
+      mutateToFigureTok(state.tokens[i + 1], "close");
 
       if (options.dataType == true) {
         state.tokens[i - 1].attrPush(["data-type", "image"]);

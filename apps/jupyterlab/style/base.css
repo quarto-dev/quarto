@@ -254,3 +254,13 @@ div.callout-caution .callout-icon::before {
 div.callout-caution .callout-header {
   background-color: #ffe5d0
 }
+
+/* Shortcodes */
+
+span.shortcode {
+  font-family: var(--jp-code-font-family);
+  /* ???? */
+  color: var(--jp-content-font-color1);
+  border: solid 1px var(--jp-border-color1);
+  background-color: var(--jp-input-background);
+}

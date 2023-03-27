@@ -17,7 +17,7 @@
     "editor-types": "*"
   },
   "devDependencies": {
-    "@types/node": "^15.12.2",
+    "@types/node": "^18.11.18",
     "eslint": "^7.32.0",
     "eslint-config-custom-server": "*",
     "nodemon": "^2.0.20",

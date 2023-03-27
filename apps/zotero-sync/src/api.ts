@@ -91,19 +91,15 @@ export interface ZoteroApi {
   group(groupID: number) : Promise<VersionedResponse<Group>>;
 
   collectionVersions(library: Library, since: number) : Promise<VersionedResponse<ObjectVersions>>;
-  collections(library: Library, keys: string[], since: number) : Promise<VersionedResponse<Collection[]>>;
+  collections(library: Library, keys: string[]) : Promise<Collection[]>;
  
   itemVersions(library: Library, since: number) : Promise<VersionedResponse<ObjectVersions>>;
-  items(library: Library, keys: string[], since: number) : Promise<VersionedResponse<Item[]>>;
+  items(library: Library, keys: string[]) : Promise<Item[]>;
 
   deleted(library: Library, since: number) : Promise<Deleted>;
 }
 
 export function zoteroApi(key: string) : ZoteroApi {
-
-  const objectPrefix = (library: Library) => {
-    return `/${library.type}s/${library.id}`;
-  };
 
   return {
     user: () => {
@@ -123,18 +119,10 @@ export function zoteroApi(key: string) : ZoteroApi {
       return zoteroVersionedRequest<ObjectVersions>(key, `${prefix}/collections?since=${since}&format=versions`, since);
     },
 
-    collections: async (library: Library, keys: string[], since: number) => {
-      const prefix = objectPrefix(library);
-      const query = `/collections?collectionKey=${keys.join(',')}`;
-      const response = await zoteroVersionedRequest<Array<{ data: Collection }>>(key, `${prefix}${query}`, since);
-      if (response) {
-        return {
-          data: response.data.map(x => x.data),
-          version: response.version
-        }
-      } else {
-        return null;
-      }
+    collections: async (library: Library, keys: string[]) => {
+      return zoteroKeyedItems<Collection>(key, library, keys, pageKeys => {
+        return `/collections?collectionKey=${pageKeys.join(',')}`;
+      })
     },
 
     itemVersions: (library: Library, since: number) => {
@@ -143,10 +131,10 @@ export function zoteroApi(key: string) : ZoteroApi {
       return zoteroVersionedRequest<ObjectVersions>(key, `${prefix}${query}`, since);
     },
 
-    items: (library: Library, keys: string[], since: number) => {
-      const prefix = objectPrefix(library);
-      const query = `/items?itemKey=${keys.join(',')}&format=json&include=csljson,data&includeTrashed=1`;
-      return zoteroVersionedRequest<Item[]>(key, `${prefix}${query}`, since);
+    items: async (library: Library, keys: string[]) => {
+      return zoteroKeyedItems<Item>(key, library, keys, (pageKeys => {
+        return  `/items?itemKey=${pageKeys.join(',')}&format=json&include=csljson,data&includeTrashed=1`
+      }));
     },
 
     deleted: (library: Library, since: number) => {
@@ -156,6 +144,24 @@ export function zoteroApi(key: string) : ZoteroApi {
     }
   }
 }
+
+const objectPrefix = (library: Library) => {
+  return `/${library.type}s/${library.id}`;
+};
+
+const zoteroKeyedItems = async<T>(key: string, library: Library, keys: string[], query: (pageKeys: string[]) => string ) => {
+  const kPageSize = 50;
+  let retreived = 0;
+  const results: T[] = [];
+  const prefix = objectPrefix(library);
+  while (retreived < keys.length) {
+    const pageKeys = keys.slice(retreived, retreived + kPageSize);
+    results.push(...(await zoteroRequest<T[]>(key, `${prefix}${query(pageKeys)}`)));
+    retreived += pageKeys.length;
+  }
+  return results;
+};
+
 
 interface ZoteroResponse<T> {
   status: number;

@@ -26,11 +26,12 @@ const dump = (obj: unknown) => {
 // see rate limiting and caching: https://www.zotero.org/support/dev/web_api/v3/basics
 
 
-const zotero = zoteroApi("ZL68OPrdYJdKknDdlytHMcQc");
+const zotero = zoteroApi("");
 
 
 zotero.user().then(async (user) => {
-  //dump(user);
+  dump(user);
+  const userLibrary: Library = { type: "user", id: user.userID };
 
   /*
   dump(await zotero.groupVersions(user.userID));
@@ -42,19 +43,21 @@ zotero.user().then(async (user) => {
   const userLibrary: Library = { type: "user", id: user.userID };
   */
  
+  
   /*
-  const collections = await zotero.collectionVersions(groupLibrary, 3);
+  const collections = await zotero.collectionVersions(userLibrary, 3);
   dump(collections);
-  dump(await zotero.collections(groupLibrary, ["57YSFW7C"], 3));
+  if (collections) {
+    dump(await zotero.collections(userLibrary, Object.keys(collections.data).slice(0,1)));
+  }
   */
+ 
 
-  /*
   const items = await zotero.itemVersions(userLibrary, 0);
   dump(items);
   if (items) {
-    dump(await zotero.items(userLibrary, Object.keys(items.data).slice(0, 1), 154));
+    dump((await zotero.items(userLibrary, Object.keys(items.data))).map(item => item.key));
   }
-  */
 });
 
 

@@ -20,7 +20,7 @@ import gridtables from '../plugins/gridtables';
 import { citationPlugin as cites } from '../plugins/cites';
 import { calloutPlugin as callouts } from '../plugins/callouts';
 import { divPlugin as divs } from '../plugins/divs';
-import { headingsPlugin as headings } from '../plugins/headings';
+import { shortcodePlugin as shortcodes } from '../plugins/shortcodes';
 
 // Provides resolved MarkdownIt options using the passed in options, the plugin
 // options, and default options.
@@ -37,36 +37,32 @@ const resolveOptions = (options: Options) => {
   };
 }
 
-describe('sum module', () => {
-  test('adds 1 + 2 to equal 3', () => {
-    const str = '# Hi there\n\nThis is a test.';
+const makeMd = () => {
+  // no current plugin uses this parameter
+  const options = resolveOptions({});
 
-    // no current plugin uses this parameter
-    const options = resolveOptions({});
+  let md = new MarkdownIt('default', options)
+    .use(sub)
+    .use(sup)
+    .use(deflist)
+    .use(figures, { figcaption: true })
+    .use(footnotes)
+    .use(tasklists)
+    .use(cites)
+    .use(mermaid)
+    .use(callouts)
+    .use(attrs)
+    .use(divs)
+    .use(gridtables)
+    .use(shortcodes);
+  return md;
+}
 
-    let md = new MarkdownIt('default', options)
-      .use(sub)
-      .use(sup)
-      .use(deflist)
-      .use(figures, { figcaption: true })
-      .use(footnotes)
-      .use(tasklists)
-      .use(cites)
-      .use(mermaid)
-      .use(callouts)
-      .use(attrs)
-      .use(divs)
-      .use(headings)
-      .use(gridtables);
-    
-    console.log(toAst(md.parse(str, {})));
-    expect(true).toBe(true);
-  });
-});
-
-
-describe('nothing', () => {
-  test('nothing', () => {
-    expect(true).toBe(true);
+describe('basic parse', () => {
+  test('simple shortcode parser', () => {
+    const str = '{{< shortcode >}}';
+    const result = '<p><span class="shortcode">{{&lt; shortcode &gt;}}</span></p>\n'
+    const md = makeMd();
+    expect(md.render(str)).toBe(result);
   });
 });

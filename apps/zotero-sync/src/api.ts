@@ -195,6 +195,8 @@ const zoteroFetch = async <T>(
   headers = {} as Record<string,string>
 ) : Promise<ZoteroResponse<T>> => {
   try {
+    const kMaxWait = 5 * 60;
+    let totalWait = 0;
     let backoff = 0;
     let response: Response;
     do {
@@ -214,8 +216,19 @@ const zoteroFetch = async <T>(
       backoff = Number(response.headers.get("Backoff") || 0) || retryAfter;
       if (backoff) {
         await sleep(backoff * 1000);
+        totalWait += backoff;
       }  
-    } while(backoff);
+    } while(backoff && (totalWait <= kMaxWait));
+
+    // timed out
+    if (totalWait > kMaxWait) {
+      return {
+        status: 503,
+        statusText: "Service backoff time exceeded maximum",
+        headers: null,
+        message: null
+      }
+    }
 
     // return response
     return {

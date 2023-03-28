@@ -62,7 +62,7 @@ export function markdownItManager() {
   
       // Create MarkdownIt instance
       const allOptions = resolveOptions(widget, options, providers);
-      let md = new MarkdownIt('commonmark', allOptions);
+      let md = new MarkdownIt('default', allOptions);
   
       // Lifecycle hooks
       const preParseHooks: Hook<string, string>[] = [];

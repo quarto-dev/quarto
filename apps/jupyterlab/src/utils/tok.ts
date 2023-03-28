@@ -15,3 +15,5 @@ export const kTokTableOpen = "table_open";
 export const kTokTableClose = "table_close";
 
 export const kTokText = "text";
+
+export const kTokHeadingOpen = "heading_open";

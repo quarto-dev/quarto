@@ -1,4 +1,3 @@
-/// <reference types="node" />/
 /*
  * index.ts
  *
@@ -15,53 +14,11 @@
  */
 
 import { setInterval } from "timers";
-import { Library, zoteroApi } from "./api";
+import { syncWebCollections } from "./sync";
 
-const dump = (obj: unknown) => {
-  console.log(JSON.stringify(obj, undefined, 2))
-}
-
-// https://github.com/retorquere/zotero-sync/blob/main/index.ts
-
-// see rate limiting and caching: https://www.zotero.org/support/dev/web_api/v3/basics
-
-
-const zotero = zoteroApi("");
-
-
-zotero.user().then(async (user) => {
-  dump(user);
-  const userLibrary: Library = { type: "user", id: user.userID };
-
-  /*
-  dump(await zotero.groupVersions(user.userID));
-  dump(await zotero.group(2226282));
-  */
-
-  /*
-  const groupLibrary: Library = { type: "group", id: 2558114 };
-  const userLibrary: Library = { type: "user", id: user.userID };
-  */
- 
-  
-  /*
-  const collections = await zotero.collectionVersions(userLibrary, 3);
-  dump(collections);
-  if (collections) {
-    dump(await zotero.collections(userLibrary, Object.keys(collections.data).slice(0,1)));
-  }
-  */
- 
-
-  const items = await zotero.itemVersions(userLibrary, 0);
-  dump(items);
-  if (items) {
-    dump((await zotero.items(userLibrary, Object.keys(items.data))).map(item => item.key));
-  }
+syncWebCollections("").then(() => {
+  console.log("done");
 });
-
-
-
 
 // ensure that the deno runtime won't exit b/c of the event queue being empty
 setInterval(() => { /* */ }, 1000);

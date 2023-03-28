@@ -24,6 +24,7 @@ export const math = markdownItExtension({
 
           const configEl = document.createElement("script");
           configEl.innerText = `
+
 MathJax = {
   svg: {
     fontCache: 'global'
@@ -32,10 +33,34 @@ MathJax = {
     typeset: false,
     pageReady: () => {
       MathJax.startup.promise.then(() => {
-        const mathEls = document.querySelectorAll('.quarto-inline-math, .quarto-display-math');
-        for (const mathEl of mathEls) {
-          MathJax.typeset([mathEl]);
-        }
+        
+        const typesetMath = (el) => {
+          const mathEls = el.querySelectorAll('.quarto-inline-math, .quarto-display-math');
+          if (mathEls.length > 0) {
+            MathJax.startup.promise = MathJax.startup.promise.then(() => { console.log("Typeset " + mathEls.length ); MathJax.typesetPromise([...mathEls])} ).catch((err) => console.log('Typeset failed: ' + err.message));
+            return MathJax.startup.promise;  
+          } else {
+            return Promise.resolve();
+          }
+        };
+        
+        typesetMath(document.body).then(() => {
+          const nbObserver = new MutationObserver((mutationList, observer) => {
+            mutationList.forEach((mutation) => { 
+              mutation.addedNodes.forEach((addedNode) => {
+                if (addedNode.nodeType === 1) {
+                  typesetMath(addedNode);
+                }
+              });
+            });
+          });
+          
+          const nbEl = document.querySelector('.jp-Notebook');
+          nbObserver.observe(nbEl, { 
+            childList: true,
+            subtree: true
+          });
+        });
       });
     },
   }

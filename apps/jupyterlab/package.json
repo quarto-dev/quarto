@@ -1,15 +1,15 @@
 {
   "name": "jupyter_quarto",
-  "version": "0.1.0",
-  "description": "Quarto extension for Jupyter Lab.",
+  "version": "0.1.4",
+  "description": "Jupyter extension to enable authoring of Quarto documents within Juptyerlab Notebooks.",
   "keywords": [
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://github.com/dragonstyle/jupyter_quarto",
+  "homepage": "https://github.com/quarto-dev/quarto",
   "bugs": {
-    "url": "https://github.com/dragonstyle/jupyter_quarto/issues"
+    "url": "https://github.com/quarto-dev/quarto/issues/"
   },
   "license": "BSD-3-Clause",
   "author": {
@@ -27,7 +27,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dragonstyle/jupyter_quarto.git"
+    "url": "https://github.com/quarto-dev/quarto/jupyter_quarto.git"
   },
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",

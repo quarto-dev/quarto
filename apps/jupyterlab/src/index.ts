@@ -31,6 +31,7 @@ import { math } from './providers/math';
 import { figures } from './providers/figures';
 import { figureDivs } from './providers/figure-divs';
 import { tableCaptions } from './providers/table-captions';
+import { spans } from './providers/spans';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
@@ -48,6 +49,7 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
 // Markdown It Extensions which provide base Pandoc behavior
 const kPandocExtensions = [
   footnotes, // footnote seriously render in the cell in which they appear in :(
+  spans,
   attrs,
   deflist,
   figures,

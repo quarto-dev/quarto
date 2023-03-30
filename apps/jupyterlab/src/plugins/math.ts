@@ -1,3 +1,10 @@
+/*
+ * math.ts
+ *
+ * Copyright (C) 2020-2023 Posit Software, PBC
+ *
+ */
+
 // From https://github.com/tani/markdown-it-mathjax3
 /* Process inline math */
 /*

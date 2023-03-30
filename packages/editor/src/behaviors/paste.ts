@@ -13,6 +13,7 @@
  *
  */
 
+import { isWindows } from 'core-browser';
 import { ResolvedPos, Schema, Fragment, Slice, Node as ProsemirrorNode } from 'prosemirror-model';
 import { Plugin, PluginKey } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
@@ -59,12 +60,15 @@ function pasteWordPlugin(schema: Schema) {
 
         if (event.clipboardData) {
 
-          // if this contains office content then handle it
+          // if this contains office content or we are on windows then handle it
+          // (office content has excessive internal vertical space, windows has
+          // issues w/ prosemirror freezing in its paste implementation when handling
+          // multiple paragraphs)
           const kTextHtml = "text/html";
           const kWordSchema = "urn:schemas-microsoft-com:office:word";
           if (event.clipboardData.types.includes(kTextHtml)) {
             const html = event.clipboardData.getData(kTextHtml);
-            if (html.includes(kWordSchema)) {
+            if (html.includes(kWordSchema) || isWindows()) {
               // filter out nodes with empty paragraphs
               const nodes: ProsemirrorNode[] = [];
               for (let i = 0; i < slice.content.childCount; i++) {

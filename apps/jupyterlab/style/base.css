@@ -116,6 +116,11 @@
   border-radius: 3px;
 }
 
+/* Tables */
+.quarto-rendered-md.jp-RenderedHTMLCommon table {
+  margin-left: inherit;
+  margin-right: inherit;
+}
 
 /* Callouts */
 /* TODO: Need to automate ingesting this */

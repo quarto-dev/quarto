@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * trace.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,18 +13,15 @@
  *
  */
 
-
-import { setInterval } from "timers";
-import { syncWebCollections } from "./sync";
-
-syncWebCollections("").then(() => {
-  //
-});
-
-// ensure that we continue running for dev hot reloads
-setInterval(() => { /* */ }, 1000);
+import path from "path";
+import { quartoDataDir } from "quarto-core";
 
 
+export function zoteroTrace(msg: string) {
+  console.log(`[zotero]: ${msg}`);
+}
 
 
-
+export function webCollectionsDir(userId: number) {
+  return quartoDataDir(path.join("zotero", "collections", "web", String(userId)));
+}

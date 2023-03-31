@@ -4,8 +4,15 @@
 
 The JupyterLab Quarto extension allows JupyterLab to render notebooks which include Quarto markdown content.
 
+&nbsp;
+<p align="center">
+<img src="https://user-images.githubusercontent.com/261654/229227775-9b1cb1d7-36a6-4ad0-926a-bf8d3293d858.png" width="60%">
+</p>
 
 ## Requirements
+
+
+
 
 - JupyterLab >= 3.0
 

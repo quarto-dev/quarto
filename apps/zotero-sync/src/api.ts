@@ -111,7 +111,7 @@ export function zoteroApi(key: string) : ZoteroApi {
     },
 
     group: (groupID: number) => {
-      return zoteroVersionedRequest<Group>(key, `/groups/${groupID}`, 0);
+      return zoteroVersionedRequest<Group>(key, `/groups/${groupID}`, 0, x => x.data);
     },
 
     collectionVersions: (library: Library, since: number) => {
@@ -180,8 +180,9 @@ const zoteroRequest = async <T>(key: string, path: string) : Promise<T> => {
   }
 }
 
-const zoteroVersionedRequest = async <T>(key: string, path: string, since: number) : Promise<VersionedResponse<T>> => {
-  const response = await zoteroFetch<T>(key, path, { ["If-Modified-Since-Version"]: String(since) });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const zoteroVersionedRequest = async <T>(key: string, path: string, since: number, extract?: (x: any) => T) : Promise<VersionedResponse<T>> => {
+  const response = await zoteroFetch<T>(key, path, { ["If-Modified-Since-Version"]: String(since) }, extract);
   if (response.status === 200 && response.message) {
     const version = Number(response.headers?.get("Last-Modified-Version"));
     return {
@@ -198,8 +199,12 @@ const zoteroVersionedRequest = async <T>(key: string, path: string, since: numbe
 const zoteroFetch = async <T>(
   key: string, 
   path: string, 
-  headers = {} as Record<string,string>
+  headers?: Record<string,string>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  extract?: (x: any) => T
 ) : Promise<ZoteroResponse<T>> => {
+  headers = headers || {};
+  extract = extract || (x => x as T);
   try {
     const kMaxWait = 5 * 60;
     let totalWait = 0;
@@ -241,7 +246,7 @@ const zoteroFetch = async <T>(
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
-      message: response.ok ? await response.json() as T  : null,
+      message: response.ok ? extract(await response.json())  : null,
     }
 
   } catch(error) {

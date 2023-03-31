@@ -4,7 +4,24 @@ The extension can be published to `PyPI` and `npm` manually or using the [Jupyte
 
 ## Manual release
 
-### Python package
+### Set the Version
+
+Bump the version using `hatch`. 
+
+```bash
+hatch version <new-version>
+```
+
+### Publish Source Extension to NPM
+
+To publish the source extension as a NPM package, do:
+
+```bash
+npm login
+npm publish --access public
+```
+
+### Publish Prebuilt Extension to PyPi
 
 This extension can be distributed as Python
 packages. All of the Python
@@ -15,12 +32,7 @@ Python package. Before generating a package, we first need to install `build`.
 pip install build twine hatch
 ```
 
-Bump the version using `hatch`. By default this will create a tag.
-See the docs on [hatch-nodejs-version](https://github.com/agoose77/hatch-nodejs-version#semver) for details.
-
-```bash
-hatch version <new-version>
-```
+**Before building, note that you must temporarily update the `package.json` file to remove the `@quarto` prefix from the package name.**
 
 To create a Python source package (`.tar.gz`) and the binary package (`.whl`) in the `dist/` directory, do:
 
@@ -34,15 +46,6 @@ Then to upload the package to PyPI, do:
 
 ```bash
 twine upload dist/*
-```
-
-### NPM package
-
-To publish the frontend part of the extension as a NPM package, do:
-
-```bash
-npm login
-npm publish --access public
 ```
 
 ## Automated releases with the Jupyter Releaser

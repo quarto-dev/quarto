@@ -1,6 +1,6 @@
 {
     "name": "@quarto/jupyterlab-quarto",
-    "version": "0.1.31",
+    "version": "0.1.37",
     "description": "Jupyter extension to enable authoring of Quarto documents within Jupyterlab Notebooks.",
     "keywords": [
         "jupyter",
@@ -109,7 +109,7 @@
     },
     "jupyterlab": {
         "extension": true,
-        "outputDir": "jupyter-quarto/labextension",
+        "outputDir": "jupyterlab-quarto/labextension",
         "schemaDir": "schema",
         "disabledExtensions": [
             "jupyterlab-myst:plugin",

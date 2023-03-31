@@ -110,6 +110,11 @@
     "jupyterlab": {
         "extension": true,
         "outputDir": "jupyter_quarto/labextension",
-        "schemaDir": "schema"
+        "schemaDir": "schema",
+        "disabledExtensions": [
+            "jupyterlab-myst:plugin",
+            "jupyterlab-myst:legacyPlugin",
+            "jupyterlab-myst:executor"
+        ]
     }
 }

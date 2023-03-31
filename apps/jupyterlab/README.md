@@ -1,4 +1,9 @@
-# jupyter_quarto
+# JupyterLab Quarto Extension
+
+[Quarto](https://www.quarto.org) is an open source project that combines Jupyter notebooks with flexible options to use a single source document to produce high-quality articles, reports, presentations, websites, and books in HTML, PDF, MS Word, ePub, and more. Quarto supports a wide variety of useful new features useful in technical documents, including support for LaTeX equations, citations, cross-references, figure panels, callouts, advanced page layout, and more. 
+
+The JupyterLab Quarto extension allows JupyterLab to render notebooks which include Quarto markdown content.
+
 
 ## Requirements
 

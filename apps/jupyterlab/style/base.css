@@ -191,10 +191,6 @@
   margin-top: 0.2em;
 }
 
-.callout:not(.callout-titled) .callout-body {
-    display: flex;
-}
-
 .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
   padding-left: 1.6em;
 }

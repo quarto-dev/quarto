@@ -1,6 +1,6 @@
 {
     "name": "@quarto/jupyterlab-quarto",
-    "version": "0.1.29",
+    "version": "0.1.31",
     "description": "Jupyter extension to enable authoring of Quarto documents within Jupyterlab Notebooks.",
     "keywords": [
         "jupyter",

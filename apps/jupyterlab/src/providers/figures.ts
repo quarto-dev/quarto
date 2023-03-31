@@ -1,24 +1,16 @@
 /*
-* deflist.ts
+* figures.ts
 *
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
+import { figuresPlugin } from '../plugins/figures';
 import { markdownItExtension } from './provider';
 
 export const figures = markdownItExtension({
   id: '@quarto/figures',
-  title: 'Figures',
+  title: 'Quarto figures',
   plugin: async () => {
-    const options = {
-      figcaption: true,
-    };
-
-
-    const plugin = await import(
-      'markdown-it-implicit-figures'
-    );
-    return [plugin.default, options];
+    return [figuresPlugin, { figcaption: true, copyAttrs: true }];
   }
 });
-

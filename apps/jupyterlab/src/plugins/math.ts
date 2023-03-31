@@ -1,3 +1,10 @@
+/*
+ * math.ts
+ *
+ * Copyright (C) 2020-2023 Posit Software, PBC
+ *
+ */
+
 // From https://github.com/tani/markdown-it-mathjax3
 /* Process inline math */
 /*
@@ -12,6 +19,9 @@ import type MarkdownIt from "markdown-it";
 import type Token from "markdown-it/lib/token";
 import type StateInline from "markdown-it/lib/rules_inline/state_inline";
 import type StateBlock from "markdown-it/lib/rules_block/state_block";
+
+export const kTokMathBlock = "math_block";
+export const kTokMathInline = "math_inline";
 
 
 interface ConvertOptions {
@@ -159,6 +169,7 @@ function math_block(
     found = true;
   }
 
+  let attrStr = undefined;
   for (next = start; !found; ) {
     next++;
 
@@ -174,17 +185,23 @@ function math_block(
       break;
     }
 
-    if (state.src.slice(pos, max).trim().slice(-2) === "$$") {
+    const line = state.src.slice(pos, max).trim();
+    const match = line.match(/^\$\$\s*(\{.*\})?\s*$/);
+    if (match) {
       lastPos = state.src.slice(0, max).lastIndexOf("$$");
       lastLine = state.src.slice(pos, lastPos);
+      attrStr = match[1];
       found = true;
     }
   }
 
   state.line = next + 1;
 
-  const token = state.push("math_block", "math", 0);
+  const token = state.push(kTokMathBlock, "math", 0);
   token.block = true;
+  if (attrStr) {
+    token.info = attrStr;
+  }
   token.content =
     (firstLine && firstLine.trim() ? firstLine + "\n" : "") +
     state.getLines(start + 1, next, state.tShift[start], true) +
@@ -202,8 +219,8 @@ export function mathjaxPlugin(md: MarkdownIt, options: any) {
   }
 
   // set MathJax as the renderer for markdown-it-simplemath
-  md.inline.ruler.after("escape", "math_inline", math_inline);
-  md.block.ruler.after("blockquote", "math_block", math_block, {
+  md.inline.ruler.after("escape", kTokMathInline, math_inline);
+  md.block.ruler.after("blockquote", kTokMathBlock, math_block, {
     alt: ["paragraph", "reference", "blockquote", "list"],
   });
   md.renderer.rules.math_inline = function (tokens: Token[], idx: number) {

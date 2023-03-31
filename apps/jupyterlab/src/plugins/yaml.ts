@@ -211,7 +211,7 @@ function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Opt
     if (Object.keys(frontMatter).length > 0) {
 
       // decorator
-      const decor = decorator(["Other Options"]);
+      const decor = decorator(["Options"]);
       titleLines.push(decor);
 
       // yaml

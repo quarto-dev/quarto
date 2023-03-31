@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.79.0 (Unreleased)
+## 1.79.0 (Release on 30 March 2023)
 
 - Improved handling/display of errors during visual editor initialization
+- Prevent freeze during multi-block paste on windows.
 
 ## 1.78.0 (Release on 23 March 2023)
 

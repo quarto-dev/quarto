@@ -21,6 +21,7 @@ const kTokCalloutContentOpen = "quarto_callout_content_open";
 const kTokCalloutContentClose = "quarto_callout_content_close";
 
 const kCalloutPrefix = "callout-";
+const kCalloutRuleName = "quarto-callouts";
 
 interface Callout {
   type: "note" | "caution" | "warning" | "important" | "tip" | string;
@@ -35,7 +36,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
   
   // Handle pandoc-style divs
   md.core.ruler.push(
-    kDivRuleName,
+    kCalloutRuleName,
     (state) => {
       const noteStartCallout = (callout: Callout, depth: number) => {
         if (calloutDepth == -1) {

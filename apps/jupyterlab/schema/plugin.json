@@ -1,7 +1,7 @@
 {
   "jupyter.lab.shortcuts": [],
-  "title": "jupyter_quarto",
-  "description": "jupyter_quarto settings.",
+  "title": "jupyterlab-quarto",
+  "description": "jupyterlab-quarto settings.",
   "type": "object",
   "properties": {},
   "additionalProperties": false

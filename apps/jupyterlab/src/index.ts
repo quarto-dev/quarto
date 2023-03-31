@@ -38,7 +38,7 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   autoStart: true,
   provides: kMarkdownItMgr,
   activate: (_app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension jupyter_quarto is activated!');
+    console.log('JupyterLab extension jupyterlab-quarto is activated!');
 
     // Create a markdown rendering manager 
     return markdownItManager();

@@ -53,6 +53,9 @@ export async function syncGroups(zotero: ZoteroApi, user: User) {
 
   // save groups
   writeGroupMetadata(user.userID, localGroups);
+
+  // return the groups
+  return localGroups;
 }
 
 

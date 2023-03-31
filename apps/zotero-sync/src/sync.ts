@@ -16,23 +16,24 @@
 
 import { zoteroApi } from "./api";
 import { syncGroups } from "./groups";
+import { syncLibraries } from "./libraries";
 import { zoteroTrace } from "./utils";
-
-// this is how we transform zotero rest api requests into ZoteroCollection
-// https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
 
 export async function syncWebCollections(userKey: string) {
 
   // start
   zoteroTrace("Beginning library sync")
-
-  // get user info
   const zotero = zoteroApi(userKey);
+
+  // user
   const user = await zotero.user();
   zoteroTrace(`Syncing user ${user.username} (id: ${user.userID})`);
 
-  // sync groups
-  syncGroups(zotero,  user);
+  // groups
+  const groups = await syncGroups(zotero,  user);
+
+  // libraries
+  await syncLibraries(user, groups, zotero);
 
   // end
   zoteroTrace("Library sync complete")

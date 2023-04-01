@@ -16,67 +16,90 @@
 import * as fs from "fs";
 import path from "path";
 import { Group, User, ZoteroApi } from "./api";
-import { webCollectionsDir, zoteroTrace } from "./utils";
+import { userWebCollectionsDir } from "./storage";
+import { SyncAction } from "./sync";
+import { zoteroTrace } from "./trace";
 
-export async function syncGroups(zotero: ZoteroApi, user: User) {
+export function groupsLocal(user: User) : Group[] {
+  const groupsFile = readGroupMetadata(user);
+  if (fs.existsSync(groupsFile)) {
+   return JSON.parse(fs.readFileSync(groupsFile, { encoding: "utf8"})) as Group[];
+  } else {
+   return [];
+  }
+}
+
+export async function groupsSyncActions(user: User, groups: Group[], zotero: ZoteroApi) {
   
+  // sync actions
+  const actions: SyncAction<Group>[] = [];
+
   // get existing group metadata
   zoteroTrace("Syncing groups")
-  let localGroups = readGroupMetadata(user.userID);
   const serverGroupVersions = await zotero.groupVersions(user.userID);
   const serverGroupIds = Object.keys(serverGroupVersions).map(Number);
 
   // remove groups
-  const removeGroups = localGroups.filter(group => !serverGroupIds.includes(group.id));
+  const removeGroups = groups.filter(group => !serverGroupIds.includes(group.id));
   for (const group of removeGroups) {
     traceGroupAction("Removing", group);
-    localGroups = localGroups.filter(localGroup => localGroup.id !== group.id);
+    actions.push( { action: "delete", data: group });
   }
   
   // update/add groups
   for (const serverGroupId of serverGroupIds) {
     const serverGroup = await zotero.group(serverGroupId);
     if (serverGroup) {
-      const localGroup = localGroups.find(group => group.id === serverGroup.data.id);
+      const localGroup = groups.find(group => group.id === serverGroup.data.id);
       if (localGroup) {
         if (serverGroup.version !== localGroup.version) {
           traceGroupAction("Updating", serverGroup.data);
-          Object.assign(localGroup, serverGroup.data);
+          actions.push({ action: "update", data: serverGroup.data });
         }
       } else {
         const newGroup = serverGroup.data;
         traceGroupAction("Adding", newGroup);
-        localGroups.push(newGroup);
+        actions.push({ action: "add", data: newGroup });
       }
     }
   } 
 
-  // save groups
-  writeGroupMetadata(user.userID, localGroups);
-
-  // return the groups
-  return localGroups;
+  // return the sync actions
+  return actions;
 }
 
+export function groupsSync(groups: Group[], actions: SyncAction<Group>[]) {
+  let newGroups = [...groups];
+  for (const action of actions) {
+    switch(action.action) {
+      case "add":
+        newGroups.push(action.data);
+        break;
+      case "update":
+      case "delete":
+        newGroups = newGroups.filter(group => group.id !== action.data.id);
+        if (action.action === "update") {
+          newGroups.push(action.data);
+        }
+        break;
+    }
+  }
+  return newGroups;
+}
+
+
+export function writeGroupMetadata(collectionsDir: string, groups: Group[]) {
+  const groupsFile = path.join(collectionsDir, kGroupsFile);
+  fs.writeFileSync(groupsFile, JSON.stringify(groups, undefined, 2));
+}
+
+const kGroupsFile = "groups.json";
+
+function readGroupMetadata(user: User) {
+  return path.join(userWebCollectionsDir(user), kGroupsFile);
+}
 
 function traceGroupAction(action: string, group: Group) {
   zoteroTrace(`${action} group ${group.name} (id: ${group.id}, version ${group.version})`);
 }
 
-function readGroupMetadata(userId: number) : Group[] {
-   const groupsFile = groupMetadataFile(userId);
-   if (fs.existsSync(groupsFile)) {
-    return JSON.parse(fs.readFileSync(groupsFile, { encoding: "utf8"})) as Group[];
-   } else {
-    return [];
-   }
-}
-
-function writeGroupMetadata(userId: number, groups: Group[]) {
-  const groupsFile = groupMetadataFile(userId);
-  fs.writeFileSync(groupsFile, JSON.stringify(groups, undefined, 2));
-}
-
-function groupMetadataFile(userId: number) {
-  return path.join(webCollectionsDir(userId), "groups.json");
-}

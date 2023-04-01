@@ -15,26 +15,45 @@
 
 
 import { zoteroApi } from "./api";
-import { syncGroups } from "./groups";
+import { groupsLocal, groupsSync, groupsSyncActions, writeGroupMetadata } from "./groups";
 import { syncLibraries } from "./libraries";
-import { zoteroTrace } from "./utils";
+import { assignUserWebCollectionsDir, provisionUserWebCollectionsDir, userWebCollectionsDir } from "./storage";
+import { zoteroTrace } from "./trace";
+
+export interface SyncAction<T> {
+  action: "update" | "add" | "delete";
+  data: T
+}
 
 export async function syncWebCollections(userKey: string) {
 
   // start
-  zoteroTrace("Beginning library sync")
-  const zotero = zoteroApi(userKey);
+  try {
+    zoteroTrace("Beginning library sync")
+    const zotero = zoteroApi(userKey);
 
-  // user
-  const user = await zotero.user();
-  zoteroTrace(`Syncing user ${user.username} (id: ${user.userID})`);
+    // user
+    const user = await zotero.user();
+    zoteroTrace(`Syncing user ${user.username} (id: ${user.userID})`);
 
-  // groups
-  const groups = await syncGroups(zotero,  user);
+    // groups
+    const groups = groupsLocal(user);
+    const groupsActions = await groupsSyncActions(user, groups, zotero);
+    
+    // if there are sync actions then provision a new dir for the user
+    if (groupsActions.length > 0) {
+      const newCollectionDir = provisionUserWebCollectionsDir(user);
+      
+      writeGroupMetadata(newCollectionDir, groupsSync(groups, groupsActions));
 
-  // libraries
-  await syncLibraries(user, groups, zotero);
-
-  // end
-  zoteroTrace("Library sync complete")
+      // final atomic assign
+      assignUserWebCollectionsDir(user, newCollectionDir);
+    }
+  
+    // end
+    zoteroTrace("Library sync complete")
+  } catch(error) {
+    zoteroTrace("Error occurred during sync:");
+    console.error(error);
+  }
 }

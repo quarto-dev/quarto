@@ -1,5 +1,5 @@
 /*
- * trace.ts
+ * uuid.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,15 +13,8 @@
  *
  */
 
-import path from "path";
-import { quartoDataDir } from "quarto-core";
+import * as uuid from "uuid";
 
-
-export function zoteroTrace(msg: string) {
-  console.log(`[zotero]: ${msg}`);
-}
-
-
-export function webCollectionsDir(userId: number) {
-  return quartoDataDir(path.join("zotero", "collections", "web", String(userId)));
+export function shortUuid() {
+  return uuid.v4().replace(/-/g, "").slice(0, 8);
 }

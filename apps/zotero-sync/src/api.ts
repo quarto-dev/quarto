@@ -17,6 +17,7 @@ import { sleep } from "core";
 import fetch from "cross-fetch";
 
 import { CSL } from "editor-types";
+import { zoteroTrace } from "./trace";
 
 export interface Library {
   type: "user" | "group";
@@ -220,6 +221,7 @@ const zoteroFetch = async <T>(
           ...headers
         }
       });
+      zoteroTrace(`  ${url} (${response.status})`);
 
       // handle backoff headers
       // https://www.zotero.org/support/dev/web_api/v3/basics#rate_limiting

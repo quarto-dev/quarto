@@ -53,13 +53,11 @@ export function assignUserWebCollectionsDir(user: User, dir: string) {
   // write the file
   const userRefFile = userWebCollectionsRefFile(user);
   fs.writeFileSync(userRefFile, path.basename(dir), { encoding: "utf8" });
-
-  // cleanup invalidated dirs
-  cleanupOldUserWebCollectionsDirs(user, dir);
 }
 
-function cleanupOldUserWebCollectionsDirs(user: User, currentDir: string) {
+export function cleanupUserWebCollectionsDirs(user: User) {
   // cleanup invalidated dirs
+  const currentDir = userWebCollectionsDir(user);
   const listing = fs.readdirSync(webCollectionsDir(), { withFileTypes: true });
   listing.forEach(dirent => {
     if (dirent.isDirectory() && dirent.name.startsWith(`${user.userID}-`)) {

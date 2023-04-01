@@ -16,8 +16,8 @@
 
 import { zoteroApi } from "./api";
 import { groupsLocal, groupsSync, groupsSyncActions, writeGroupMetadata } from "./groups";
-import { syncLibraries } from "./libraries";
-import { assignUserWebCollectionsDir, provisionUserWebCollectionsDir, userWebCollectionsDir } from "./storage";
+import { hasLibrarySyncActions, libraryCopy, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteCollections } from "./libraries";
+import { assignUserWebCollectionsDir, cleanupUserWebCollectionsDirs, provisionUserWebCollectionsDir, userWebCollectionsDir } from "./storage";
 import { zoteroTrace } from "./trace";
 
 export interface SyncAction<T> {
@@ -29,7 +29,7 @@ export async function syncWebCollections(userKey: string) {
 
   // start
   try {
-    zoteroTrace("Beginning library sync")
+    zoteroTrace("Beginning sync")
     const zotero = zoteroApi(userKey);
 
     // user
@@ -39,19 +39,44 @@ export async function syncWebCollections(userKey: string) {
     // groups
     const groups = groupsLocal(user);
     const groupsActions = await groupsSyncActions(user, groups, zotero);
-    
+    const updatedGroups = groupsSync(groups, groupsActions);
+
+    // compute libraries and sync actions for libraries
+    const libraries = libraryList(user, updatedGroups);
+    const librariesSync: LibrarySyncActions[] = [];
+    for (const library of libraries) {
+      librariesSync.push(await librarySyncActions(user, library));
+    }
+
     // if there are sync actions then provision a new dir for the user
-    if (groupsActions.length > 0) {
+    if (groupsActions.length > 0 || librariesSync.some(hasLibrarySyncActions)) {
+      // note old dir (for copying) and provision new dir
+      const collectionDir = userWebCollectionsDir(user);
       const newCollectionDir = provisionUserWebCollectionsDir(user);
       
-      writeGroupMetadata(newCollectionDir, groupsSync(groups, groupsActions));
+      // update groups
+      writeGroupMetadata(newCollectionDir, updatedGroups);
+
+      // for each library, either apply the sync actions or just copy
+      // the current library dir if there are no changes
+      for (const sync of librariesSync) {
+        if (hasLibrarySyncActions(sync)) {
+          const collections = librarySync(user, sync);
+          libraryWriteCollections(newCollectionDir, sync.library, collections);
+        } else {
+          libraryCopy(user, sync.library, collectionDir, newCollectionDir);
+        }
+      }
 
       // final atomic assign
       assignUserWebCollectionsDir(user, newCollectionDir);
+
+      // cleanup old collection dirs
+      cleanupUserWebCollectionsDirs(user);
     }
   
     // end
-    zoteroTrace("Library sync complete")
+    zoteroTrace("Sync complete")
   } catch(error) {
     zoteroTrace("Error occurred during sync:");
     console.error(error);

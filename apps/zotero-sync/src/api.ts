@@ -69,7 +69,7 @@ export interface Collection {
 
 export interface Item {
   key: string;
-  version: string;
+  version: number;
   csljson: CSL;
   data: Record<string,unknown>;
 }
@@ -89,7 +89,7 @@ export interface ZoteroApi {
   user() : Promise<User>;
 
   groupVersions(userID: number) : Promise<ObjectVersions>;
-  group(groupID: number) : Promise<VersionedResponse<Group>>;
+  group(groupID: number, since: number) : Promise<VersionedResponse<Group>>;
 
   collectionVersions(library: Library, since: number) : Promise<VersionedResponse<ObjectVersions>>;
   collections(library: Library, keys: string[]) : Promise<Collection[]>;
@@ -97,7 +97,7 @@ export interface ZoteroApi {
   itemVersions(library: Library, since: number) : Promise<VersionedResponse<ObjectVersions>>;
   items(library: Library, keys: string[]) : Promise<Item[]>;
 
-  deleted(library: Library, since: number) : Promise<Deleted>;
+  deleted(library: Library, since: number) : Promise<VersionedResponse<Deleted>>;
 }
 
 export function zoteroApi(key: string) : ZoteroApi {
@@ -111,8 +111,8 @@ export function zoteroApi(key: string) : ZoteroApi {
       return zoteroRequest<ObjectVersions>(key, `/users/${userID}/groups?format=versions`);
     },
 
-    group: (groupID: number) => {
-      return zoteroVersionedRequest<Group>(key, `/groups/${groupID}`, 0, x => x.data);
+    group: (groupID: number, since: number) => {
+      return zoteroVersionedRequest<Group>(key, `/groups/${groupID}?since=${since}`, since, x => x.data);
     },
 
     collectionVersions: (library: Library, since: number) => {
@@ -141,7 +141,7 @@ export function zoteroApi(key: string) : ZoteroApi {
     deleted: (library: Library, since: number) => {
       const prefix = objectPrefix(library);
       const query = `/deleted?since=${since}`;
-      return zoteroRequest<Deleted>(key, `${prefix}${query}`);
+      return zoteroVersionedRequest<Deleted>(key, `${prefix}${query}`, since);
     }
   }
 }

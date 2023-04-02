@@ -48,18 +48,20 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
   
   // update/add groups
   for (const serverGroupId of serverGroupIds) {
-    const serverGroup = await zotero.group(serverGroupId);
-    if (serverGroup) {
-      const localGroup = groups.find(group => group.id === serverGroup.data.id);
-      if (localGroup) {
-        if (serverGroup.version !== localGroup.version) {
-          traceGroupAction("Updating", serverGroup.data);
-          actions.push({ action: "update", data: serverGroup.data });
+    const localGroup = groups.find(group => group.id === serverGroupId);
+    if (!localGroup || (localGroup.version !== serverGroupVersions[localGroup.id])) {
+      const serverGroup = await zotero.group(serverGroupId, localGroup?.version || 0);
+      if (serverGroup) { 
+        if (localGroup) {
+          if (serverGroup.version !== localGroup.version) {
+            traceGroupAction("Updating", serverGroup.data);
+            actions.push({ action: "update", data: serverGroup.data });
+          }
+        } else {
+          const newGroup = serverGroup.data;
+          traceGroupAction("Adding", newGroup);
+          actions.push({ action: "add", data: newGroup });
         }
-      } else {
-        const newGroup = serverGroup.data;
-        traceGroupAction("Adding", newGroup);
-        actions.push({ action: "add", data: newGroup });
       }
     }
   } 

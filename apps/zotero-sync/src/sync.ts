@@ -14,11 +14,15 @@
  */
 
 
-import { zoteroApi } from "./api";
+import { Library, zoteroApi } from "./api";
 import { groupsLocal, groupsSync, groupsSyncActions, writeGroupMetadata } from "./groups";
-import { hasLibrarySyncActions, libraryCopy, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteCollections } from "./libraries";
+import { hasLibrarySyncActions, libraryCopy, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteObjects } from "./libraries";
 import { assignUserWebCollectionsDir, cleanupUserWebCollectionsDirs, provisionUserWebCollectionsDir, userWebCollectionsDir } from "./storage";
 import { zoteroTrace } from "./trace";
+
+// TODO: if the API key doesn't work surface an error to the user 
+// (and possibly allow reset of ID?)
+
 
 export interface SyncAction<T> {
   action: "update" | "add" | "delete";
@@ -43,13 +47,13 @@ export async function syncWebCollections(userKey: string) {
 
     // compute libraries and sync actions for libraries
     const libraries = libraryList(user, updatedGroups);
-    const librariesSync: LibrarySyncActions[] = [];
+    const librariesSync: Array<{ library: Library, actions: LibrarySyncActions }> = [];
     for (const library of libraries) {
-      librariesSync.push(await librarySyncActions(user, library));
+      librariesSync.push({ library, actions: (await librarySyncActions(user, library, zotero))});
     }
 
     // if there are sync actions then provision a new dir for the user
-    if (groupsActions.length > 0 || librariesSync.some(hasLibrarySyncActions)) {
+    if (groupsActions.length > 0 || librariesSync.map(sync => sync.actions).some(hasLibrarySyncActions)) {
       // note old dir (for copying) and provision new dir
       const collectionDir = userWebCollectionsDir(user);
       const newCollectionDir = provisionUserWebCollectionsDir(user);
@@ -60,9 +64,9 @@ export async function syncWebCollections(userKey: string) {
       // for each library, either apply the sync actions or just copy
       // the current library dir if there are no changes
       for (const sync of librariesSync) {
-        if (hasLibrarySyncActions(sync)) {
-          const collections = librarySync(user, sync);
-          libraryWriteCollections(newCollectionDir, sync.library, collections);
+        if (hasLibrarySyncActions(sync.actions)) {
+          const collections = librarySync(user, sync.library, sync.actions);
+          libraryWriteObjects(newCollectionDir, sync.library, collections);
         } else {
           libraryCopy(user, sync.library, collectionDir, newCollectionDir);
         }

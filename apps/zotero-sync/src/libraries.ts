@@ -16,24 +16,35 @@
 import fs from "fs";
 import path from "path";
 
-import { Collection, Group, Item, Library, User } from "./api";
+import { Collection, Group, Item, Library, User, ZoteroApi } from "./api";
+import { userWebCollectionsDir } from "./storage";
 import { SyncAction } from "./sync";
 
 // this is how we transform zotero rest api requests into ZoteroCollection
 // https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
 
-// TODO: need to delete libraries when groups are deleted
 
-export interface LibrarySyncActions {
-  library: Library;
-  collection: SyncAction<Collection>[];
-  item: SyncAction<Item>[];
-}
-
-export interface LibraryCollections{
+export interface LibraryObjects {
+  versions: LibraryVersions;
   collections: Collection[];
   items: Item[];
 }
+
+export interface LibraryVersions {
+  collections: number;
+  items: number;
+  deleted: number;
+}
+
+export interface LibrarySyncActions {
+  versions: LibraryVersions;
+  actions: {
+    collections: SyncAction<Collection>[],
+    items: SyncAction<Item>[]
+  }
+}
+
+
 
 export function libraryList(user: User, groups: Group[]) : Library[] {
   return [{ type: "user", id: user.userID } as Library]
@@ -41,45 +52,173 @@ export function libraryList(user: User, groups: Group[]) : Library[] {
 }
 
 
-export async function librarySyncActions(_user: User, library: Library) : Promise<LibrarySyncActions> {
+export async function librarySyncActions(user: User, library: Library, zotero: ZoteroApi) : Promise<LibrarySyncActions> {
 
-  const actions: LibrarySyncActions = { library, collection: [], item: [] };
+  // actions we will return
+  const syncActions: LibrarySyncActions = { 
+    versions: { collections: 0, items: 0, deleted: 0 }, 
+    actions: { collections: [], items: [] } 
+  };
 
-  // read existing collection and item version lists (if any)
-  // see if there are any changes
-  // query for deletes
+  // get library version numbers already synced to
+  const versions = libraryVersions(user, library);
 
-  return actions;
+  // check for deletes
+  const deleted = await zotero.deleted(library, versions.deleted);
+  if (deleted) {
+    syncActions.versions.deleted = deleted.version || syncActions.versions.deleted;
+    for (const deletedCollection of deleted.data.collections) {
+
+    }
+    for (const deletedItem of deleted.data.items) {
+
+    }
+  }
+
+  // check for collections
+  const collectionChanges = await zotero.collectionVersions(library, versions.collections);
+  if (collectionChanges) {
+    // update version
+    syncActions.versions.collections = collectionChanges.version || syncActions.versions.collections;
+    // process changes
+
+  }
+
+  // check for items
+  const itemChanges = await zotero.itemVersions(library, versions.items);
+  if (itemChanges) {
+    // update version
+    syncActions.versions.items = itemChanges?.version || syncActions.versions.items;
+    // process changes
+  }
+
+
+  return syncActions;
+}
+
+export function librarySync(user: User, library: Library, syncActions: LibrarySyncActions) : LibraryObjects {
+
+  // read collections and apply actions
+  const dir = libraryDir(user, library);
+  const collectionsFile = libraryCollectionsFile(dir);
+  let collections: Collection[] = fs.existsSync(collectionsFile) 
+    ? JSON.parse(fs.readFileSync(collectionsFile, { encoding: "utf-8" }))
+    : [];
+  for (const action of syncActions.actions.collections) {
+    switch(action.action) {
+      case "add":
+        collections.push(action.data);
+        break;
+      case "update":
+      case "delete":
+        collections = collections.filter(collection => collection.key !== action.data.key);
+        if (action.action === "update") {
+          collections.push(action.data);
+        }
+        break;
+    }
+  }
+
+  // read items and apply actions
+  const itemsFile = libraryItemsFile(dir);
+  let items: Item[] = fs.existsSync(itemsFile)
+    ? JSON.parse(fs.readFileSync(itemsFile, { encoding: "utf-8" }))
+    : [];
+  for (const action of syncActions.actions.items) {
+    switch(action.action) {
+      case "add":
+        items.push(action.data);
+        break;
+      case "update":
+      case "delete":
+        items = items.filter(item => item.key !== action.data.key);
+        if (action.action === "update") {
+          items.push(action.data);
+        }
+        break;
+    }
+  }
+  
+  // return objects
+  return { 
+    versions: syncActions.versions,
+    collections,
+    items
+  };
+}
+
+export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
+  // write versions
+  libraryWriteVersions(collectionsDir, objects.versions)
+  
+  // write collections
+  fs.writeFileSync(
+    libraryCollectionsFile(collectionsDir),
+    JSON.stringify(objects.collections, undefined, 2),
+    { encoding: "utf-8" } 
+  );
+
+  // write items
+  fs.writeFileSync(
+    libraryItemsFile(collectionsDir),
+    JSON.stringify(objects.items, undefined, 2),
+    { encoding: "utf-8" } 
+  );
 
 }
 
-export function librarySync(user: User, actions: LibrarySyncActions) : LibraryCollections {
-
-  const collections: LibraryCollections = { collections: [], items: [] };
-
-  // read existing collection and item data (if any)
-
-  // apply actions and return new collections
-
-  return collections;
-
-
-}
-
-export function libraryWriteCollections(collectionsDir: string, library: Library, collections: LibraryCollections) {
-  // write version lists
-  // write actual data
-}
 
 export function libraryCopy(_user: User, library: Library, fromDir: string, toDir: string) {
-  const libraryDir = `${library.type}-${library.id}`;
+  const libraryDir = libraryDirName(library);
   const libraryFrom = path.join(fromDir, libraryDir);
   const libraryTo = path.join(toDir, libraryDir);
-  fs.cpSync(libraryFrom, libraryTo, { recursive: true });
+  if (fs.existsSync(libraryFrom)) {
+    fs.cpSync(libraryFrom, libraryTo, { recursive: true });
+  }
 }
 
 export function hasLibrarySyncActions(sync: LibrarySyncActions) {
-  return sync.collection.length > 0 || sync.item.length > 0;
+  return sync.actions.collections.length > 0 || sync.actions.items.length > 0;
+}
+
+function libraryVersions(user: User, library: Library) : LibraryVersions {
+  const versionsFile = libraryVersionsFile(libraryDir(user, library));
+  if (fs.existsSync(versionsFile)) {
+    return JSON.parse(fs.readFileSync(versionsFile, { encoding: "utf-8" })) as LibraryVersions;
+  } else {
+    return {
+      deleted: 0,
+      collections: 0,
+      items: 0
+    }
+  }
+}
+
+function libraryWriteVersions(collectionsDir: string, versions: LibraryVersions) {
+  const versionsFile = libraryVersionsFile(collectionsDir);
+  fs.writeFileSync(versionsFile, JSON.stringify(versions, undefined, 2));
+}
+
+
+function libraryVersionsFile(collectionsDir: string) {
+  return path.join(collectionsDir, "versions.json");
+}
+
+function libraryCollectionsFile(collectionsDir: string) {
+  return path.join(collectionsDir, "collections.json");
+}
+
+function libraryItemsFile(collectionsDir: string) {
+  return path.join(collectionsDir, "items.json");
+}
+
+function libraryDir(user: User, library: Library) {
+  const collectionsDir = userWebCollectionsDir(user);
+  return path.join(collectionsDir, libraryDirName(library));
+}
+
+function libraryDirName(library: Library) {
+  return `${library.type}-${library.id}`;
 }
 
 

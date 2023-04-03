@@ -150,7 +150,6 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
 export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
   // create dir
   const libraryDir = path.join(collectionsDir, libraryDirName(library));
-  console.log(library);
   if (!fs.existsSync(libraryDir)) {
     fs.mkdirSync(libraryDir);
   }

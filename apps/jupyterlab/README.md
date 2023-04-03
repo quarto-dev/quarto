@@ -1,4 +1,13 @@
-# jupyter_quarto
+# JupyterLab Quarto Extension
+
+[Quarto](https://www.quarto.org) is an open source project that combines Jupyter notebooks with flexible options to use a single source document to produce high-quality articles, reports, presentations, websites, and books in HTML, PDF, MS Word, ePub, and more. Quarto supports a wide variety of useful new features useful in technical documents, including support for LaTeX equations, citations, cross-references, figure panels, callouts, advanced page layout, and more. 
+
+The JupyterLab Quarto extension allows JupyterLab to render notebooks which include Quarto markdown content.
+
+&nbsp;
+<p align="center">
+<img src="https://user-images.githubusercontent.com/261654/229227775-9b1cb1d7-36a6-4ad0-926a-bf8d3293d858.png" width="60%">
+</p>
 
 ## Requirements
 
@@ -9,7 +18,7 @@
 To install the extension, execute:
 
 ```bash
-pip install jupyter_quarto
+pip install jupyterlab-quarto
 ```
 
 ## Uninstall
@@ -17,7 +26,7 @@ pip install jupyter_quarto
 To remove the extension, execute:
 
 ```bash
-pip uninstall jupyter_quarto
+pip uninstall jupyterlab-quarto
 ```
 
 ## Contributing
@@ -59,12 +68,12 @@ jupyter lab build --minimize=False
 ### Development uninstall
 
 ```bash
-pip uninstall jupyter_quarto
+pip uninstall jupyterlab-quarto
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
-folder is located. Then you can remove the symlink named `jupyter_quarto` within that folder.
+folder is located. Then you can remove the symlink named `jupyterlab-quarto` within that folder.
 
 ### Packaging the extension
 

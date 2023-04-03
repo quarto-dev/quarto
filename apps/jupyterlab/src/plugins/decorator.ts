@@ -10,7 +10,8 @@ import Renderer from "markdown-it/lib/renderer";
 import { attributeDecorator, decorator, DecoratorOptions } from "../utils/html";
 import { kTokDivOpen } from "./divs";
 import { kTokFigureOpen } from "./figures";
-import { kTokTableOpen } from "../utils/tok";
+import { kTokHeadingOpen, kTokTableOpen } from "../utils/tok";
+import { kTokMathBlock } from "./math";
 
 
 const kTokDecorator = "quarto_decorator";
@@ -24,13 +25,15 @@ export const decoratorPlugin = (md: MarkdownIt) => {
     for (const token of state.tokens) {
       if (token.type === "fence" && !token.attrs && token.info) {
         outTokens.push(decoratorTokForToken(token));
-      } else if (token.type === "heading_open" && token.attrs) {
+      } else if (token.type === kTokHeadingOpen && token.attrs) {
         outTokens.push(decoratorTokForToken(token));
       } else if (token.type === kTokDivOpen && token.attrs) {
         outTokens.push(decoratorTokForToken(token));
       } else if (token.type === kTokFigureOpen && token.attrs) {
         outTokens.push(decoratorTokForToken(token, { hide: { attributes: true }}));
       } else if (token.type === kTokTableOpen && token.attrs) {
+        outTokens.push(decoratorTokForToken(token));
+      } else if (token.type === kTokMathBlock && token.attrs) {
         outTokens.push(decoratorTokForToken(token));
       }
       outTokens.push(token);

@@ -32,13 +32,14 @@ import { figures } from './providers/figures';
 import { figureDivs } from './providers/figure-divs';
 import { tableCaptions } from './providers/table-captions';
 import { shortcodes } from './providers/shortcodes';
+import { spans } from './providers/spans';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
   autoStart: true,
   provides: kMarkdownItMgr,
   activate: (_app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension jupyter_quarto is activated!');
+    console.log('JupyterLab extension jupyterlab-quarto is activated!');
 
     // Create a markdown rendering manager 
     return markdownItManager();
@@ -49,6 +50,7 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
 // Markdown It Extensions which provide base Pandoc behavior
 const kPandocExtensions = [
   footnotes, // footnote seriously render in the cell in which they appear in :(
+  spans,
   attrs,
   deflist,
   figures,

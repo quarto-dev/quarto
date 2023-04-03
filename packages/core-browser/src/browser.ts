@@ -23,3 +23,7 @@ export function qtWebEngineVersion() {
     return undefined;
   }
 }
+
+export function isWindows() {
+  return navigator.userAgent.search('Windows') !== -1;
+}

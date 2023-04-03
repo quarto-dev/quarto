@@ -15,7 +15,7 @@
 
 
 import { Library, zoteroApi } from "./api";
-import { groupsLocal, groupsSync, groupsSyncActions, writeGroupMetadata } from "./groups";
+import { groupsLocal, groupsSync, groupsSyncActions, hasGroupSyncActions, writeGroupMetadata } from "./groups";
 import { hasLibrarySyncActions, libraryCopy, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteObjects } from "./libraries";
 import { assignUserWebCollectionsDir, cleanupUserWebCollectionsDirs, provisionUserWebCollectionsDir, userWebCollectionsDir } from "./storage";
 import { zoteroTrace } from "./trace";
@@ -24,9 +24,9 @@ import { zoteroTrace } from "./trace";
 // (and possibly allow reset of ID?)
 
 
-export interface SyncAction<T> {
-  action: "update" | "add" | "delete";
-  data: T
+export interface SyncActions<T> {
+  deleted: string[];
+  updated: T[];
 }
 
 export async function syncWebCollections(userKey: string) {
@@ -53,7 +53,8 @@ export async function syncWebCollections(userKey: string) {
     }
 
     // if there are sync actions then provision a new dir for the user
-    if (groupsActions.length > 0 || librariesSync.map(sync => sync.actions).some(hasLibrarySyncActions)) {
+    if (hasGroupSyncActions(groupsActions)|| 
+        librariesSync.map(sync => sync.actions).some(hasLibrarySyncActions)) {
       // note old dir (for copying) and provision new dir
       const collectionDir = userWebCollectionsDir(user);
       const newCollectionDir = provisionUserWebCollectionsDir(user);

@@ -17,8 +17,13 @@ import * as fs from "fs";
 import path from "path";
 import { Group, User, ZoteroApi } from "./api";
 import { userWebCollectionsDir } from "./storage";
-import { SyncAction } from "./sync";
 import { zoteroTrace } from "./trace";
+
+export interface GroupSyncActions {
+  deleted: number[];
+  updated: Group[];
+  added: Group[];
+}
 
 export function groupsLocal(user: User) : Group[] {
   const groupsFile = readGroupMetadata(user);
@@ -32,7 +37,8 @@ export function groupsLocal(user: User) : Group[] {
 export async function groupsSyncActions(user: User, groups: Group[], zotero: ZoteroApi) {
   
   // sync actions
-  const actions: SyncAction<Group>[] = [];
+  const actions: GroupSyncActions = { deleted: [], updated: [], added: [] };
+
 
   // get existing group metadata
   zoteroTrace("Syncing groups")
@@ -43,7 +49,7 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
   const removeGroups = groups.filter(group => !serverGroupIds.includes(group.id));
   for (const group of removeGroups) {
     traceGroupAction("Removing", group);
-    actions.push( { action: "delete", data: group });
+    actions.deleted.push(group.id);
   }
   
   // update/add groups
@@ -55,12 +61,12 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
         if (localGroup) {
           if (serverGroup.version !== localGroup.version) {
             traceGroupAction("Updating", serverGroup.data);
-            actions.push({ action: "update", data: serverGroup.data });
+            actions.updated.push(serverGroup.data);
           }
         } else {
           const newGroup = serverGroup.data;
           traceGroupAction("Adding", newGroup);
-          actions.push({ action: "add", data: newGroup });
+          actions.added.push(newGroup);
         }
       }
     }
@@ -70,23 +76,27 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
   return actions;
 }
 
-export function groupsSync(groups: Group[], actions: SyncAction<Group>[]) {
+export function groupsSync(groups: Group[], actions: GroupSyncActions) {
   let newGroups = [...groups];
-  for (const action of actions) {
-    switch(action.action) {
-      case "add":
-        newGroups.push(action.data);
-        break;
-      case "update":
-      case "delete":
-        newGroups = newGroups.filter(group => group.id !== action.data.id);
-        if (action.action === "update") {
-          newGroups.push(action.data);
-        }
-        break;
-    }
-  }
+  // apply deletes
+  newGroups = newGroups.filter(group => !actions.deleted.includes(group.id));
+
+  // apply updates (remove then add)
+  const updatedIds = actions.updated.map(group => group.id);
+  newGroups = newGroups.filter(group => !updatedIds.includes(group.id));
+  newGroups.push(...actions.updated);
+
+  // apply adds
+  newGroups.push(...actions.added);
+
+  // return new groups
   return newGroups;
+}
+
+export function hasGroupSyncActions(actions: GroupSyncActions) {
+  return actions.deleted.length > 0 ||
+         actions.added.length > 0 ||
+         actions.updated.length > 0;
 }
 
 

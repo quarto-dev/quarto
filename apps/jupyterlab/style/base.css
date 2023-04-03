@@ -259,8 +259,9 @@ div.callout-caution .callout-header {
 
 span.shortcode {
   font-family: var(--jp-code-font-family);
-  /* ???? */
-  color: var(--jp-content-font-color1);
-  border: solid 1px var(--jp-border-color1);
-  background-color: var(--jp-input-background);
+  line-height: var(--jp-code-line-height);
+  color: var(--jp-content-link-color);
+  background-color: var(--jp-layout-color2);
+  padding: 1px 1px;
+  white-space: pre-wrap;
 }

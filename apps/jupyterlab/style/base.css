@@ -126,8 +126,10 @@
 /* TODO: Need to automate ingesting this */
 
 .callout {
-  padding: 1em;
-  margin-bottom: 1.5em;
+  padding: 0.75em;
+  margin-top: 1em;
+  margin-bottom: 1em;  
+  border-radius: .25rem;
 }
 
 .callout-header {
@@ -135,35 +137,20 @@
   align-content: center;
 }
 
-.callout-note h2,
-.callout-warning h2,
-.callout-tip h2,
-.callout-important h2,
-.callout-caution h2 {
-  font-size: 1.1em;
-  font-weight: 700;
-}
-
-/* TODO NEEDS TO BE GENERATED */
-
-.callout {
-  margin-top: 1em;
-  margin-bottom: 1em;  
-  border-radius: .25rem;
-}
-
 .callout-title-container {
+  font-size: 1.1em;
   font-weight: 600;
   opacity: 80%;
+  padding-bottom: 0.5em;
 }
 
-.callout.callout-style-simple { 
-  padding: 0em 0.5em;
-  border-left: solid #acacac .3rem;
-  border-right: solid 1px silver;
-  border-top: solid 1px silver;
-  border-bottom: solid 1px silver;
-  display: flex;
+.callout.callout-style-default  div.callout-title {
+  border-bottom: none;
+  font-weight: 600;
+  opacity: 85%;
+  font-size: 0.9rem;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }
 
 .callout.callout-style-default {
@@ -176,10 +163,8 @@
 .callout .callout-body-container {
   flex-grow: 1;
 }
-
-.callout.callout-style-simple .callout-body {
-  font-size: 1rem;
-  font-weight: 400;
+.callout .callout-body-container p:last-of-type {
+  margin-bottom: 0;
 }
 
 .callout.callout-style-default .callout-body {
@@ -187,91 +172,26 @@
   font-weight: 400;
 }
 
-.callout.callout-titled.callout-style-simple .callout-body {
-  margin-top: 0.2em;
-}
-
-.callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
-  padding-left: 1.6em;
-}
-
-.callout.callout-titled .callout-header {
-  padding-top: 0.2em;
-  margin-bottom: -0.2em;
-}
-
-.callout.callout-titled .callout-title  p {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-  
-.callout.callout-titled.callout-style-simple .callout-content  p {
-  margin-top: 0;
-}
-
-.callout.callout-titled.callout-style-default .callout-content  p {
-  margin-top: 0.7em;
-}
-
-.callout.callout-style-simple div.callout-title {
-  border-bottom: none;
-  font-size: .9rem;
-  font-weight: 600;
-  opacity: 75%;
-}
-
-.callout.callout-style-default  div.callout-title {
-  border-bottom: none;
-  font-weight: 600;
-  opacity: 85%;
-  font-size: 0.9rem;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-}
-
 .callout.callout-style-default div.callout-content {
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
 
-.callout.callout-style-simple .callout-icon::before {
+.callout.callout-style-default .callout-icon::before {
   height: 1rem;
   width: 1rem;
   display: inline-block;
   content: "";
   background-repeat: no-repeat;
   background-size: 1rem 1rem;
-}
-
-.callout.callout-style-default .callout-icon::before {
-  height: 0.9rem;
-  width: 0.9rem;
-  display: inline-block;
-  content: "";
-  background-repeat: no-repeat;
-  background-size: 0.9rem 0.9rem;
+  margin-bottom: -3px;
+  padding-right: .4rem;
 }
 
 .callout-title {
   display: flex
 }
   
-.callout-icon::before {
-  padding-right: .5rem;
-}
-
-.callout.no-icon::before {
-  display: none !important;
-}
-
-.callout.callout-titled .callout-body > .callout-content > :last-child {
-  margin-bottom: 0.5rem;
-}
-
-.callout.callout-titled .callout-icon::before {
-  margin-top: .5rem;
-  padding-right: .5rem;
-}
 
 /* Callout Types */
 

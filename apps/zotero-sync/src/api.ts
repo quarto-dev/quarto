@@ -123,7 +123,9 @@ export function zoteroApi(key: string) : ZoteroApi {
     collections: async (library: Library, keys: string[]) => {
       return (await zoteroKeyedItems<{ data: Collection }>(key, library, keys, pageKeys => {
         return `/collections?collectionKey=${pageKeys.join(',')}`;
-      })).map(collection => collection.data);
+      })).map(collection => {
+        return collection.data;
+      });
     },
 
     itemVersions: (library: Library, since: number) => {

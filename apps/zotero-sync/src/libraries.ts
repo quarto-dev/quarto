@@ -82,7 +82,7 @@ export async function librarySyncActions(user: User, library: Library, zotero: Z
     
     // process deleted collections
     for (const deletedCollection of deleted.data.collections) {
-      traceAction("Removing", "collection", `(key: ${deletedCollection}`);
+      traceAction("Removing", "collection", `key: ${deletedCollection}`);
       syncActions.collections.deleted.push(deletedCollection);
     }
     
@@ -112,8 +112,14 @@ export async function librarySyncActions(user: User, library: Library, zotero: Z
     // process changes
     const items = await zotero.items(library, Object.keys(itemChanges.data));
     for (const item of items) {
-      traceAction("Updating", "item", `${item.csljson.title || "Untitled"} - ${item.key}`);
-      syncActions.items.updated.push(item);
+      if (item.data["deleted"]) {
+        traceAction("Removing", "item", `key: ${item.key}`);
+        syncActions.items.deleted.push(item.key);
+      } else {
+        traceAction("Updating", "item", `${item.csljson.title || "Untitled"} - ${item.key}`);
+        syncActions.items.updated.push(item);
+      }
+     
     }
     // update version
     syncActions.versions.items = itemChanges?.version || syncActions.versions.items;

@@ -53,6 +53,8 @@ export function libraryList(user: User, groups: Group[]) : Library[] {
 
 export async function librarySyncActions(user: User, library: Library, zotero: ZoteroApi) : Promise<LibrarySyncActions> {
 
+  zoteroTrace(`Syncing library (${libraryDirName(library)})`);
+
   // actions we will return
   const syncActions: LibrarySyncActions = { 
     versions: { 

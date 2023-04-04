@@ -13,65 +13,21 @@
  *
  */
 
-
-import path, { join } from "path";
 import fs from "fs";
+import path from "path";
 
-import { shortUuid } from "core-node";
 import { quartoDataDir } from "quarto-core";
 import { User } from "./api";
 
 export function userWebCollectionsDir(user: User) {
-
-  // find already provisioned dir
-  const userRefFile = userWebCollectionsRefFile(user);
-  if (fs.existsSync(userRefFile)) {
-    const userSubDir = fs.readFileSync(userRefFile, { encoding: "utf8" });
-    const userDir = path.join(webCollectionsDir(), userSubDir);
-    if (fs.existsSync(userDir)) {
-      return userDir;
-    }
+  const dir = path.join(webCollectionsDir(), String(user.userID));
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-
-  // provision a new dir
-  const newDir = provisionUserWebCollectionsDir(user);
-  assignUserWebCollectionsDir(user, newDir);
-  return newDir;  
-}
-
-export function provisionUserWebCollectionsDir(user: User) {
-  const rootDir = webCollectionsDir();
-  let userDir: string | undefined;
-  do {
-    userDir = path.join(rootDir, `${user.userID}-${shortUuid()}`);
-  } while(fs.existsSync(userDir));
-  fs.mkdirSync(userDir, { recursive: true });
-  return userDir;
-}
-
-export function assignUserWebCollectionsDir(user: User, dir: string) {
-  // write the file
-  const userRefFile = userWebCollectionsRefFile(user);
-  fs.writeFileSync(userRefFile, path.basename(dir), { encoding: "utf8" });
-}
-
-export function cleanupUserWebCollectionsDirs(user: User) {
-  // cleanup invalidated dirs
-  const currentDir = userWebCollectionsDir(user);
-  const listing = fs.readdirSync(webCollectionsDir(), { withFileTypes: true });
-  listing.forEach(dirent => {
-    if (dirent.isDirectory() && dirent.name.startsWith(`${user.userID}-`)) {
-      if (dirent.name !== path.basename(currentDir)) {
-        fs.rmSync(join(webCollectionsDir(), dirent.name), { recursive: true, force: true });
-      }
-    }
-  })
-}
-
-function userWebCollectionsRefFile(user: User) {
-  return path.join(webCollectionsDir(), String(user.userID));
+  return dir;
 }
 
 function webCollectionsDir() {
   return quartoDataDir(path.join("zotero", "collections", "web"));
 }
+

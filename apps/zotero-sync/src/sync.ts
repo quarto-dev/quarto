@@ -16,8 +16,8 @@
 
 import { Library, zoteroApi } from "./api";
 import { groupsLocal, groupsSync, groupsSyncActions, hasGroupSyncActions, writeGroupMetadata } from "./groups";
-import { hasLibrarySyncActions, libraryCopy, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteObjects } from "./libraries";
-import { assignUserWebCollectionsDir, cleanupUserWebCollectionsDirs, provisionUserWebCollectionsDir, userWebCollectionsDir } from "./storage";
+import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteObjects } from "./libraries";
+import { userWebCollectionsDir } from "./storage";
 import { zoteroTrace } from "./trace";
 
 
@@ -32,6 +32,9 @@ import { zoteroTrace } from "./trace";
 // TODO: write code to go all the way through to sync a collection
 
 // TODO: implement realtime API to optmize this
+
+// this is how we transform zotero rest api requests into ZoteroCollection
+// https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
 
 export interface SyncActions<T> {
   deleted: string[];
@@ -66,27 +69,18 @@ export async function syncWebCollections(userKey: string) {
         librariesSync.map(sync => sync.actions).some(hasLibrarySyncActions)) {
       // note old dir (for copying) and provision new dir
       const collectionDir = userWebCollectionsDir(user);
-      const newCollectionDir = provisionUserWebCollectionsDir(user);
       
       // update groups
-      writeGroupMetadata(newCollectionDir, updatedGroups);
+      writeGroupMetadata(collectionDir, updatedGroups);
 
       // for each library, either apply the sync actions or just copy
       // the current library dir if there are no changes
       for (const sync of librariesSync) {
         if (hasLibrarySyncActions(sync.actions)) {
           const collections = librarySync(user, sync.library, sync.actions);
-          libraryWriteObjects(newCollectionDir, sync.library, collections);
-        } else {
-          libraryCopy(user, sync.library, collectionDir, newCollectionDir);
-        }
+          libraryWriteObjects(collectionDir, sync.library, collections);
+        } 
       }
-
-      // final atomic assign
-      assignUserWebCollectionsDir(user, newCollectionDir);
-
-      // cleanup old collection dirs
-      cleanupUserWebCollectionsDirs(user);
     }
   
     // end

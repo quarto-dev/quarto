@@ -21,20 +21,16 @@ import { userWebCollectionsDir } from "./storage";
 import { SyncActions } from "./sync";
 import { zoteroTrace } from "./trace";
 
-// this is how we transform zotero rest api requests into ZoteroCollection
-// https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
-
+export interface LibraryVersions {
+  collections: number;
+  items: number;
+  deleted: number;
+}
 
 export interface LibraryObjects {
   versions: LibraryVersions;
   collections: Collection[];
   items: Item[];
-}
-
-export interface LibraryVersions {
-  collections: number;
-  items: number;
-  deleted: number;
 }
 
 export interface LibrarySyncActions {
@@ -50,10 +46,9 @@ export function libraryList(user: User, groups: Group[]) : Library[] {
             .concat(groups.map(group => ({ type: "group", id: group.id })));
 }
 
-
 export async function librarySyncActions(user: User, library: Library, zotero: ZoteroApi) : Promise<LibrarySyncActions> {
 
-  zoteroTrace(`Syncing library (${libraryDirName(library)})`);
+  zoteroTrace(`Syncing library (${library.type}-${library.id})`);
 
   // actions we will return
   const syncActions: LibrarySyncActions = { 
@@ -135,17 +130,8 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
 
   // read collections and apply actions
   const dir = userWebCollectionsDir(user);
-  const collectionsFile = libraryCollectionsFile(dir, library);
-  const localCollections: Collection[] = fs.existsSync(collectionsFile) 
-    ? JSON.parse(fs.readFileSync(collectionsFile, { encoding: "utf-8" }))
-    : [];
+  const { collections: localCollections, items: localItems } = libraryReadObjects(dir, library);
   const collections = syncObjects(localCollections, syncActions.collections);
-
-  // read items and apply actions
-  const itemsFile = libraryItemsFile(dir, library);
-  const localItems: Item[] = fs.existsSync(itemsFile)
-    ? JSON.parse(fs.readFileSync(itemsFile, { encoding: "utf-8" }))
-    : [];
   const items = syncObjects(localItems, syncActions.items);
   
   // return objects
@@ -157,38 +143,27 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
 }
 
 export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
-  // create dir
-  const libraryDir = path.join(collectionsDir, libraryDirName(library));
-  if (!fs.existsSync(libraryDir)) {
-    fs.mkdirSync(libraryDir);
-  }
-  
-  // write versions
-  libraryWriteVersions(collectionsDir, library, objects.versions)
-  
-  // write collections
   fs.writeFileSync(
-    libraryCollectionsFile(collectionsDir, library),
-    JSON.stringify(objects.collections, undefined, 2),
+    libraryFileName(collectionsDir, library),
+    JSON.stringify(objects, null, 2),
     { encoding: "utf-8" } 
   );
-
-  // write items
-  fs.writeFileSync(
-    libraryItemsFile(collectionsDir, library),
-    JSON.stringify(objects.items, undefined, 2),
-    { encoding: "utf-8" } 
-  );
-
 }
 
-
-export function libraryCopy(_user: User, library: Library, fromDir: string, toDir: string) {
-  const libraryDir = libraryDirName(library);
-  const libraryFrom = path.join(fromDir, libraryDir);
-  const libraryTo = path.join(toDir, libraryDir);
-  if (fs.existsSync(libraryFrom)) {
-    fs.cpSync(libraryFrom, libraryTo, { recursive: true });
+export function libraryReadObjects(collectionsDir: string, library: Library) : LibraryObjects {
+  const libraryFile = libraryFileName(collectionsDir, library);
+  if (fs.existsSync(libraryFile)) {
+    return JSON.parse(fs.readFileSync(libraryFile, { encoding: "utf8" })) as LibraryObjects
+  } else {
+    return {
+      versions: {
+        collections: 0,
+        items: 0,
+        deleted: 0,
+      },
+      collections: [],
+      items: []
+    }
   }
 }
 
@@ -200,16 +175,8 @@ export function hasLibrarySyncActions(sync: LibrarySyncActions) {
 }
 
 function libraryVersions(user: User, library: Library) : LibraryVersions {
-  const versionsFile = libraryVersionsFile(userWebCollectionsDir(user), library);
-  if (fs.existsSync(versionsFile)) {
-    return JSON.parse(fs.readFileSync(versionsFile, { encoding: "utf-8" })) as LibraryVersions;
-  } else {
-    return {
-      deleted: 0,
-      collections: 0,
-      items: 0
-    }
-  }
+  const dir = userWebCollectionsDir(user);
+  return libraryReadObjects(dir, library).versions;
 }
 
 function syncObjects<T extends { key: string }>(objects: T[], syncActions: SyncActions<T>) {
@@ -227,26 +194,8 @@ function syncObjects<T extends { key: string }>(objects: T[], syncActions: SyncA
 }
 
 
-function libraryWriteVersions(collectionsDir: string, library: Library, versions: LibraryVersions) {
-  const versionsFile = libraryVersionsFile(collectionsDir, library);
-  fs.writeFileSync(versionsFile, JSON.stringify(versions, undefined, 2));
-}
-
-
-function libraryVersionsFile(collectionsDir: string, library: Library) {
-  return path.join(collectionsDir, libraryDirName(library), "versions.json");
-}
-
-function libraryCollectionsFile(collectionsDir: string, library: Library) {
-  return path.join(collectionsDir, libraryDirName(library), "collections.json");
-}
-
-function libraryItemsFile(collectionsDir: string, library: Library) {
-  return path.join(collectionsDir, libraryDirName(library), "items.json");
-}
-
-function libraryDirName(library: Library) {
-  return `${library.type}-${library.id}`;
+function libraryFileName(collectionsDir: string, library: Library) {
+  return path.join(collectionsDir, `${library.type}-${library.id}.json`);
 }
 
 type ObjectType = "collection" | "item";

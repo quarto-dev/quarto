@@ -16,6 +16,8 @@
 import fs from "fs";
 import path from "path";
 
+import readline from 'readline';
+
 import { Collection, Group, Item, Library, User, ZoteroApi } from "./api";
 import { userWebCollectionsDir } from "./storage";
 import { SyncActions } from "./sync";
@@ -68,7 +70,7 @@ export async function librarySyncActions(user: User, library: Library, zotero: Z
   };
 
   // get library version numbers already synced to
-  const versions = libraryVersions(user, library);
+  const versions = await libraryReadVersions(user, library);
 
   // check for deletes
   const deleted = await zotero.deleted(library, versions.deleted);
@@ -142,12 +144,62 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
   };
 }
 
-export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
-  fs.writeFileSync(
-    libraryFileName(collectionsDir, library),
-    JSON.stringify(objects, null, 2),
-    { encoding: "utf-8" } 
-  );
+async function libraryReadVersions(user: User, library: Library) : Promise<LibraryVersions> {
+  // determine library file
+  const dir = userWebCollectionsDir(user);
+  const libraryFile = libraryFileName(dir, library);
+
+  const noVersions =  {
+    collections: 0,
+    items: 0,
+    deleted: 0
+  }
+
+  if (fs.existsSync(libraryFile)) {
+    return new Promise((resolve, reject) => {
+      
+      const fileStream = fs.createReadStream(libraryFile, { encoding: 'utf-8' });
+      const rl = readline.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity,
+      });
+
+      let versionBuffer: string[] | undefined;
+
+      rl.on('line', (line) => {
+        if (!versionBuffer) {
+          if (line.match(/^\s*"versions":\s*\{\s*$/)) {
+            versionBuffer = ["{"];
+          }
+        } else if (line.match(/^\s*\},\s*$/)) {
+          versionBuffer.push("}");
+          const versions = versionBuffer.join("\n");
+          try {
+            resolve(JSON.parse(versions));
+          } catch(error) {
+            reject(error);
+          } finally {
+            rl.close();
+            fileStream.destroy();
+          }
+        } else {
+          versionBuffer.push(line);
+        }
+      });
+
+      rl.on('close', () => {
+        if (versionBuffer === undefined) {
+          resolve(noVersions);
+        }
+      })
+
+      rl.on('error', (error) => {
+        reject(error);
+      })
+
+    });
+  }
+  return noVersions;
 }
 
 export function libraryReadObjects(collectionsDir: string, library: Library) : LibraryObjects {
@@ -167,16 +219,21 @@ export function libraryReadObjects(collectionsDir: string, library: Library) : L
   }
 }
 
+export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
+  fs.writeFileSync(
+    libraryFileName(collectionsDir, library),
+    JSON.stringify(objects, null, 2),
+    { encoding: "utf-8" } 
+  );
+}
+
+
+
 export function hasLibrarySyncActions(sync: LibrarySyncActions) {
   return sync.collections.deleted.length > 0 ||
          sync.collections.updated.length > 0 ||
          sync.items.deleted.length > 0 ||
          sync.items.updated.length > 0;
-}
-
-function libraryVersions(user: User, library: Library) : LibraryVersions {
-  const dir = userWebCollectionsDir(user);
-  return libraryReadObjects(dir, library).versions;
 }
 
 function syncObjects<T extends { key: string }>(objects: T[], syncActions: SyncActions<T>) {

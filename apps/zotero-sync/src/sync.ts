@@ -16,8 +16,8 @@
 
 import { Library, zoteroApi } from "./api";
 import { groupsDelete, groupsLocal, groupsSync, groupsSyncActions } from "./groups";
-import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteObjects } from "./libraries";
-import { userWebCollectionsDir } from "./storage";
+import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions } from "./libraries";
+import { libraryWriteObjects, userWebLibrariesDir } from "./storage";
 import { zoteroTrace } from "./trace";
 
 
@@ -78,11 +78,11 @@ export async function syncWebCollections(userKey: string) {
     }
 
     // write synced libraries
-    const collectionDir = userWebCollectionsDir(user);
+    const dir = userWebLibrariesDir(user);
     for (const sync of librariesSync) {
       if (hasLibrarySyncActions(sync.actions)) {
         const objects = librarySync(user, sync.library, sync.actions);
-        libraryWriteObjects(collectionDir, sync.library, objects);
+        libraryWriteObjects(dir, sync.library, objects);
       } 
     }
   

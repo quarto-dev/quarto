@@ -13,13 +13,9 @@
  *
  */
 
-import fs from "fs";
-import path from "path";
-
-import readline from 'readline';
 
 import { Collection, Group, Item, Library, User, ZoteroApi } from "./api";
-import { userWebCollectionsDir } from "./storage";
+import { libraryReadObjects, libraryReadVersions, userWebLibrariesDir } from "./storage";
 import { SyncActions } from "./sync";
 import { zoteroTrace } from "./trace";
 
@@ -139,7 +135,7 @@ export async function librarySyncActions(
 export function librarySync(user: User, library: Library, syncActions: LibrarySyncActions) : LibraryObjects {
 
   // read collections and apply actions
-  const dir = userWebCollectionsDir(user);
+  const dir = userWebLibrariesDir(user);
   const { collections: localCollections, items: localItems } = libraryReadObjects(dir, library);
   const collections = syncObjects(localCollections, syncActions.collections);
   const items = syncObjects(localItems, syncActions.items);
@@ -151,106 +147,6 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
     collections,
     items
   };
-}
-
-export async function libraryReadGroup(user: User, library: Library) : Promise<Group | null> {
-  return libraryReadObject<Group>(user, library, "group", null)
-}
-
-export async function libraryReadVersions(user: User, library: Library) : Promise<LibraryVersions> {
-  const noVersions = {
-    collections: 0,
-    items: 0,
-    deleted: 0
-  };
-  return (await libraryReadObject<LibraryVersions>(user, library, "versions", noVersions)) || noVersions;
-}
-
-export async function libraryReadObject<T>(user: User, library: Library, name: string, defaultValue: T | null) : Promise<T | null> {
-  // determine library file
-  const dir = userWebCollectionsDir(user);
-  const libraryFile = libraryFileName(dir, library);
-
-  if (fs.existsSync(libraryFile)) {
-
-    return new Promise((resolve, reject) => {
-      
-      const fileStream = fs.createReadStream(libraryFile, { encoding: 'utf-8' });
-      const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity,
-      });
-      const closeStream = () => {
-        rl.close();
-        fileStream.destroy();
-      }
-
-      const nullObjectRegEx = new RegExp('^\\s*"' + name + '":\\s*\\null,\\s*$');
-      const startObjectRegEx = new RegExp('^\\s*"' + name + '":\\s*\\{\\s*$');
-      let objectBuffer: string[] | undefined;
-
-      rl.on('line', (line) => {
-        if (!objectBuffer) {
-          if (line.match(nullObjectRegEx)) {
-            resolve(null);
-            closeStream();
-          } else if (line.match(startObjectRegEx)) {
-            objectBuffer = ["{"];
-          }
-        } else if (line.match(/^\s*\},\s*$/)) {
-          objectBuffer.push("}");
-          const versions = objectBuffer.join("\n");
-          try {
-            resolve(JSON.parse(versions));
-          } catch(error) {
-            reject(error);
-          } finally {
-            closeStream();
-          }
-        } else {
-          objectBuffer.push(line);
-        }
-      });
-
-      rl.on('close', () => {
-        if (objectBuffer === undefined) {
-          resolve(defaultValue);
-        }
-      })
-
-      rl.on('error', (error) => {
-        reject(error);
-      })
-
-    });
-  } else {
-    return defaultValue;
-  }
-}
-
-export function libraryReadObjects(collectionsDir: string, library: Library) : LibraryObjects {
-  const libraryFile = libraryFileName(collectionsDir, library);
-  if (fs.existsSync(libraryFile)) {
-    return JSON.parse(fs.readFileSync(libraryFile, { encoding: "utf8" })) as LibraryObjects
-  } else {
-    return {
-      versions: {
-        collections: 0,
-        items: 0,
-        deleted: 0,
-      },
-      collections: [],
-      items: []
-    }
-  }
-}
-
-export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
-  fs.writeFileSync(
-    libraryFileName(collectionsDir, library),
-    JSON.stringify(objects, null, 2),
-    { encoding: "utf-8" } 
-  );
 }
 
 
@@ -275,11 +171,6 @@ function syncObjects<T extends { key: string }>(objects: T[], syncActions: SyncA
 
   // return
   return objects;
-}
-
-
-function libraryFileName(collectionsDir: string, library: Library) {
-  return path.join(collectionsDir, `${library.type}-${library.id}.json`);
 }
 
 type ObjectType = "collection" | "item";

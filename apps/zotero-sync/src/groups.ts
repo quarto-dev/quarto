@@ -16,14 +16,13 @@
 import * as fs from "fs";
 import path from "path";
 import { Group, User, ZoteroApi } from "./api";
-import { libraryReadGroup } from "./libraries";
-import { userWebCollectionsDir } from "./storage";
+import { libraryReadGroup, userWebLibrariesDir } from "./storage";
 import { SyncActions } from "./sync";
 import { zoteroTrace } from "./trace";
 
 export async function groupsLocal(user: User) : Promise<Group[]> {
   const groups: Group[] = [];
-  const dir = userWebCollectionsDir(user);
+  const dir = userWebLibrariesDir(user);
   for (const file of fs.readdirSync(dir)) {
     const match = file.match(/^group-(\d+)\.json$/);
     if (match) {
@@ -37,7 +36,7 @@ export async function groupsLocal(user: User) : Promise<Group[]> {
 }
 
 export function groupsDelete(user: User, groupId: number) {
-  const dir = userWebCollectionsDir(user);
+  const dir = userWebLibrariesDir(user);
   const groupDir = path.join(dir, `group-${groupId}`);
   if (fs.existsSync(groupDir)) {
     fs.rmSync(groupDir, { recursive: true, force: true });

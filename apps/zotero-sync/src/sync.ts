@@ -15,12 +15,14 @@
 
 
 import { Library, zoteroApi } from "./api";
-import { groupsLocal, groupsSync, groupsSyncActions, hasGroupSyncActions, writeGroupMetadata } from "./groups";
+import { groupsDelete, groupsLocal, groupsSync, groupsSyncActions } from "./groups";
 import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions, libraryWriteObjects } from "./libraries";
 import { userWebCollectionsDir } from "./storage";
 import { zoteroTrace } from "./trace";
 
 
+
+// TODO: groups file should be in the main file
 
 // TODO: ability to do foreground sync (for initial config)
 
@@ -52,35 +54,36 @@ export async function syncWebCollections(userKey: string) {
     const user = await zotero.user();
     zoteroTrace(`Syncing user ${user.username} (id: ${user.userID})`);
 
-    // groups
-    const groups = groupsLocal(user);
+    // read current groups and deduce group actions
+    const groups = await groupsLocal(user);
     const groupsActions = await groupsSyncActions(user, groups, zotero);
+
+    // remove deleted groups
+    for (const groupId of groupsActions.deleted) {
+      groupsDelete(user, Number(groupId));
+    }
+
+    // determine updated groups
     const updatedGroups = groupsSync(groups, groupsActions);
 
     // compute libraries and sync actions for libraries
     const libraries = libraryList(user, updatedGroups);
     const librariesSync: Array<{ library: Library, actions: LibrarySyncActions }> = [];
     for (const library of libraries) {
-      librariesSync.push({ library, actions: (await librarySyncActions(user, library, zotero))});
+      const groupSync = groupsActions.updated.find(group => group.id === library.id) || null;
+      librariesSync.push({ 
+        library, 
+        actions: (await librarySyncActions(user, library, groupSync, zotero))
+      });
     }
 
-    // if there are sync actions then provision a new dir for the user
-    if (hasGroupSyncActions(groupsActions)|| 
-        librariesSync.map(sync => sync.actions).some(hasLibrarySyncActions)) {
-      // note old dir (for copying) and provision new dir
-      const collectionDir = userWebCollectionsDir(user);
-      
-      // update groups
-      writeGroupMetadata(collectionDir, updatedGroups);
-
-      // for each library, either apply the sync actions or just copy
-      // the current library dir if there are no changes
-      for (const sync of librariesSync) {
-        if (hasLibrarySyncActions(sync.actions)) {
-          const collections = librarySync(user, sync.library, sync.actions);
-          libraryWriteObjects(collectionDir, sync.library, collections);
-        } 
-      }
+    // write synced libraries
+    const collectionDir = userWebCollectionsDir(user);
+    for (const sync of librariesSync) {
+      if (hasLibrarySyncActions(sync.actions)) {
+        const objects = librarySync(user, sync.library, sync.actions);
+        libraryWriteObjects(collectionDir, sync.library, objects);
+      } 
     }
   
     // end

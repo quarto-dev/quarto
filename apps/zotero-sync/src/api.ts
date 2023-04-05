@@ -22,6 +22,7 @@ import { zoteroTrace } from "./trace";
 export interface Library {
   type: "user" | "group";
   id: number;
+  group?: Group;
 }
 
 export interface User {

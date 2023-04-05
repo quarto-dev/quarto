@@ -16,29 +16,39 @@
 import * as fs from "fs";
 import path from "path";
 import { Group, User, ZoteroApi } from "./api";
+import { libraryReadGroup } from "./libraries";
 import { userWebCollectionsDir } from "./storage";
+import { SyncActions } from "./sync";
 import { zoteroTrace } from "./trace";
 
-export interface GroupSyncActions {
-  deleted: number[];
-  updated: Group[];
-  added: Group[];
+export async function groupsLocal(user: User) : Promise<Group[]> {
+  const groups: Group[] = [];
+  const dir = userWebCollectionsDir(user);
+  for (const file of fs.readdirSync(dir)) {
+    const match = file.match(/^group-(\d+)\.json$/);
+    if (match) {
+      const group = await libraryReadGroup(user, { type: "group", id: Number(match[1])});
+      if (group) {
+        groups.push(group);
+      }
+    }
+  }
+  return groups;
 }
 
-export function groupsLocal(user: User) : Group[] {
-  const groupsFile = readGroupMetadata(user);
-  if (fs.existsSync(groupsFile)) {
-   return JSON.parse(fs.readFileSync(groupsFile, { encoding: "utf8"})) as Group[];
-  } else {
-   return [];
+export function groupsDelete(user: User, groupId: number) {
+  const dir = userWebCollectionsDir(user);
+  const groupDir = path.join(dir, `group-${groupId}`);
+  if (fs.existsSync(groupDir)) {
+    fs.rmSync(groupDir, { recursive: true, force: true });
   }
 }
+
 
 export async function groupsSyncActions(user: User, groups: Group[], zotero: ZoteroApi) {
   
   // sync actions
-  const actions: GroupSyncActions = { deleted: [], updated: [], added: [] };
-
+  const actions: SyncActions<Group> = { deleted: [], updated: [] };
 
   // get existing group metadata
   zoteroTrace("Syncing groups")
@@ -49,7 +59,7 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
   const removeGroups = groups.filter(group => !serverGroupIds.includes(group.id));
   for (const group of removeGroups) {
     traceGroupAction("Removing", group);
-    actions.deleted.push(group.id);
+    actions.deleted.push(String(group.id));
   }
   
   // update/add groups
@@ -66,7 +76,7 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
         } else {
           const newGroup = serverGroup.data;
           traceGroupAction("Adding", newGroup);
-          actions.added.push(newGroup);
+          actions.updated.push(newGroup);
         }
       }
     }
@@ -76,40 +86,20 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
   return actions;
 }
 
-export function groupsSync(groups: Group[], actions: GroupSyncActions) {
+export function groupsSync(groups: Group[], actions: SyncActions<Group>) {
   let newGroups = [...groups];
   // apply deletes
-  newGroups = newGroups.filter(group => !actions.deleted.includes(group.id));
+  newGroups = newGroups.filter(group => !actions.deleted.includes(String(group.id)));
 
-  // apply updates (remove then add)
+  // apply updates (remove any existing then add)
   const updatedIds = actions.updated.map(group => group.id);
   newGroups = newGroups.filter(group => !updatedIds.includes(group.id));
   newGroups.push(...actions.updated);
-
-  // apply adds
-  newGroups.push(...actions.added);
 
   // return new groups
   return newGroups;
 }
 
-export function hasGroupSyncActions(actions: GroupSyncActions) {
-  return actions.deleted.length > 0 ||
-         actions.added.length > 0 ||
-         actions.updated.length > 0;
-}
-
-
-export function writeGroupMetadata(collectionsDir: string, groups: Group[]) {
-  const groupsFile = path.join(collectionsDir, kGroupsFile);
-  fs.writeFileSync(groupsFile, JSON.stringify(groups, undefined, 2));
-}
-
-const kGroupsFile = "groups.json";
-
-function readGroupMetadata(user: User) {
-  return path.join(userWebCollectionsDir(user), kGroupsFile);
-}
 
 function traceGroupAction(action: string, group: Group) {
   zoteroTrace(`${action} group ${group.name} (id: ${group.id}, version ${group.version})`);

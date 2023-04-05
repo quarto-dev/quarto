@@ -30,12 +30,14 @@ export interface LibraryVersions {
 }
 
 export interface LibraryObjects {
+  group?: Group;
   versions: LibraryVersions;
   collections: Collection[];
   items: Item[];
 }
 
 export interface LibrarySyncActions {
+  group?: Group;
   versions: LibraryVersions;
   collections: SyncActions<Collection>,
   items: SyncActions<Item>
@@ -45,10 +47,15 @@ export interface LibrarySyncActions {
 
 export function libraryList(user: User, groups: Group[]) : Library[] {
   return [{ type: "user", id: user.userID } as Library]
-            .concat(groups.map(group => ({ type: "group", id: group.id })));
+            .concat(groups.map(group => ({ type: "group", id: group.id, group })));
 }
 
-export async function librarySyncActions(user: User, library: Library, zotero: ZoteroApi) : Promise<LibrarySyncActions> {
+export async function librarySyncActions(
+  user: User, 
+  library: Library, 
+  groupSync: Group | null, 
+  zotero: ZoteroApi
+) : Promise<LibrarySyncActions> {
 
   zoteroTrace(`Syncing library (${library.type}-${library.id})`);
 
@@ -59,6 +66,7 @@ export async function librarySyncActions(user: User, library: Library, zotero: Z
       items: 0, 
       deleted: 0 
     }, 
+    group: groupSync || undefined,
     collections: { 
       deleted: [], 
       updated: []
@@ -138,24 +146,33 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
   
   // return objects
   return { 
+    group: syncActions.group || library.group,
     versions: syncActions.versions,
     collections,
     items
   };
 }
 
-async function libraryReadVersions(user: User, library: Library) : Promise<LibraryVersions> {
+export async function libraryReadGroup(user: User, library: Library) : Promise<Group | null> {
+  return libraryReadObject<Group>(user, library, "group", null)
+}
+
+export async function libraryReadVersions(user: User, library: Library) : Promise<LibraryVersions> {
+  const noVersions = {
+    collections: 0,
+    items: 0,
+    deleted: 0
+  };
+  return (await libraryReadObject<LibraryVersions>(user, library, "versions", noVersions)) || noVersions;
+}
+
+export async function libraryReadObject<T>(user: User, library: Library, name: string, defaultValue: T | null) : Promise<T | null> {
   // determine library file
   const dir = userWebCollectionsDir(user);
   const libraryFile = libraryFileName(dir, library);
 
-  const noVersions =  {
-    collections: 0,
-    items: 0,
-    deleted: 0
-  }
-
   if (fs.existsSync(libraryFile)) {
+
     return new Promise((resolve, reject) => {
       
       const fileStream = fs.createReadStream(libraryFile, { encoding: 'utf-8' });
@@ -163,33 +180,41 @@ async function libraryReadVersions(user: User, library: Library) : Promise<Libra
         input: fileStream,
         crlfDelay: Infinity,
       });
+      const closeStream = () => {
+        rl.close();
+        fileStream.destroy();
+      }
 
-      let versionBuffer: string[] | undefined;
+      const nullObjectRegEx = new RegExp('^\\s*"' + name + '":\\s*\\null,\\s*$');
+      const startObjectRegEx = new RegExp('^\\s*"' + name + '":\\s*\\{\\s*$');
+      let objectBuffer: string[] | undefined;
 
       rl.on('line', (line) => {
-        if (!versionBuffer) {
-          if (line.match(/^\s*"versions":\s*\{\s*$/)) {
-            versionBuffer = ["{"];
+        if (!objectBuffer) {
+          if (line.match(nullObjectRegEx)) {
+            resolve(null);
+            closeStream();
+          } else if (line.match(startObjectRegEx)) {
+            objectBuffer = ["{"];
           }
         } else if (line.match(/^\s*\},\s*$/)) {
-          versionBuffer.push("}");
-          const versions = versionBuffer.join("\n");
+          objectBuffer.push("}");
+          const versions = objectBuffer.join("\n");
           try {
             resolve(JSON.parse(versions));
           } catch(error) {
             reject(error);
           } finally {
-            rl.close();
-            fileStream.destroy();
+            closeStream();
           }
         } else {
-          versionBuffer.push(line);
+          objectBuffer.push(line);
         }
       });
 
       rl.on('close', () => {
-        if (versionBuffer === undefined) {
-          resolve(noVersions);
+        if (objectBuffer === undefined) {
+          resolve(defaultValue);
         }
       })
 
@@ -198,8 +223,9 @@ async function libraryReadVersions(user: User, library: Library) : Promise<Libra
       })
 
     });
+  } else {
+    return defaultValue;
   }
-  return noVersions;
 }
 
 export function libraryReadObjects(collectionsDir: string, library: Library) : LibraryObjects {
@@ -230,7 +256,8 @@ export function libraryWriteObjects(collectionsDir: string, library: Library, ob
 
 
 export function hasLibrarySyncActions(sync: LibrarySyncActions) {
-  return sync.collections.deleted.length > 0 ||
+  return sync.group ||
+         sync.collections.deleted.length > 0 ||
          sync.collections.updated.length > 0 ||
          sync.items.deleted.length > 0 ||
          sync.items.updated.length > 0;

@@ -17,19 +17,15 @@
 import { Library, zoteroApi } from "./api";
 import { groupsDelete, groupsLocal, groupsSync, groupsSyncActions } from "./groups";
 import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions } from "./libraries";
-import { libraryWriteObjects, userWebLibrariesDir } from "./storage";
+import { libraryWrite, userWebLibrariesDir } from "./storage";
 import { zoteroTrace } from "./trace";
 
 
-
-// TODO: groups file should be in the main file
 
 // TODO: ability to do foreground sync (for initial config)
 
 // TODO: if the API key doesn't work surface an error to the user 
 // (and possibly allow reset of ID?)
-
-// TODO: write a single file per-library (incrementally read versions using line by line)
 
 // TODO: write code to go all the way through to sync a collection
 
@@ -82,7 +78,7 @@ export async function syncWebCollections(userKey: string) {
     for (const sync of librariesSync) {
       if (hasLibrarySyncActions(sync.actions)) {
         const objects = librarySync(user, sync.library, sync.actions);
-        libraryWriteObjects(dir, sync.library, objects);
+        libraryWrite(dir, sync.library, objects);
       } 
     }
   

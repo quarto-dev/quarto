@@ -16,12 +16,11 @@
 import fs from "fs";
 import path from "path";
 
-
 import readline from 'readline';
 
 import { quartoDataDir } from "quarto-core";
 import { Group, Library, User } from "./api";
-import { LibraryObjects, LibraryVersions } from "./libraries";
+import { LibraryData, LibraryVersions } from "./libraries";
 
 export function userWebLibrariesDir(user: User) {
   const dir = path.join(webLibrariesDir(), String(user.userID));
@@ -31,16 +30,14 @@ export function userWebLibrariesDir(user: User) {
   return dir;
 }
 
-
-export function libraryFileName(collectionsDir: string, library: Library) {
-  return path.join(collectionsDir, `${library.type}-${library.id}.json`);
+export function libraryFileName(librariesDir: string, library: Library) {
+  return path.join(librariesDir, `${library.type}-${library.id}.json`);
 }
 
-
-export function libraryReadObjects(collectionsDir: string, library: Library) : LibraryObjects {
-  const libraryFile = libraryFileName(collectionsDir, library);
+export function libraryRead(librariesDir: string, library: Library) : LibraryData {
+  const libraryFile = libraryFileName(librariesDir, library);
   if (fs.existsSync(libraryFile)) {
-    return JSON.parse(fs.readFileSync(libraryFile, { encoding: "utf8" })) as LibraryObjects
+    return JSON.parse(fs.readFileSync(libraryFile, { encoding: "utf8" })) as LibraryData
   } else {
     return {
       versions: {
@@ -54,14 +51,13 @@ export function libraryReadObjects(collectionsDir: string, library: Library) : L
   }
 }
 
-export function libraryWriteObjects(collectionsDir: string, library: Library, objects: LibraryObjects) {
+export function libraryWrite(librariesDir: string, library: Library, libraryData: LibraryData) {
   fs.writeFileSync(
-    libraryFileName(collectionsDir, library),
-    JSON.stringify(objects, null, 2),
+    libraryFileName(librariesDir, library),
+    JSON.stringify(libraryData, null, 2),
     { encoding: "utf-8" } 
   );
 }
-
 
 export async function libraryReadGroup(user: User, library: Library) : Promise<Group | null> {
   return libraryReadObject<Group>(user, library, "group", null)
@@ -137,9 +133,6 @@ export async function libraryReadObject<T>(user: User, library: Library, name: s
     return defaultValue;
   }
 }
-
-
-
 
 function webLibrariesDir() {
   return quartoDataDir(path.join("zotero", "collections", "web"));

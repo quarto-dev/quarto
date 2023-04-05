@@ -13,9 +13,8 @@
  *
  */
 
-
 import { Collection, Group, Item, Library, User, ZoteroApi } from "./api";
-import { libraryReadObjects, libraryReadVersions, userWebLibrariesDir } from "./storage";
+import { libraryRead, libraryReadVersions, userWebLibrariesDir } from "./storage";
 import { SyncActions } from "./sync";
 import { zoteroTrace } from "./trace";
 
@@ -25,7 +24,7 @@ export interface LibraryVersions {
   deleted: number;
 }
 
-export interface LibraryObjects {
+export interface LibraryData {
   group?: Group;
   versions: LibraryVersions;
   collections: Collection[];
@@ -38,8 +37,6 @@ export interface LibrarySyncActions {
   collections: SyncActions<Collection>,
   items: SyncActions<Item>
 }
-
-
 
 export function libraryList(user: User, groups: Group[]) : Library[] {
   return [{ type: "user", id: user.userID } as Library]
@@ -131,12 +128,11 @@ export async function librarySyncActions(
   return syncActions;
 }
 
-
-export function librarySync(user: User, library: Library, syncActions: LibrarySyncActions) : LibraryObjects {
+export function librarySync(user: User, library: Library, syncActions: LibrarySyncActions) : LibraryData {
 
   // read collections and apply actions
   const dir = userWebLibrariesDir(user);
-  const { collections: localCollections, items: localItems } = libraryReadObjects(dir, library);
+  const { collections: localCollections, items: localItems } = libraryRead(dir, library);
   const collections = syncObjects(localCollections, syncActions.collections);
   const items = syncObjects(localItems, syncActions.items);
   
@@ -148,8 +144,6 @@ export function librarySync(user: User, library: Library, syncActions: LibrarySy
     items
   };
 }
-
-
 
 export function hasLibrarySyncActions(sync: LibrarySyncActions) {
   return sync.group ||

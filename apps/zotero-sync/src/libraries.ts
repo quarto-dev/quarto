@@ -50,7 +50,10 @@ export async function librarySyncActions(
   zotero: ZoteroApi
 ) : Promise<LibrarySyncActions> {
 
-  zoteroTrace(`Syncing library (${library.type}-${library.id})`);
+  // check for group update
+  if (groupSync) {
+    zoteroTrace(`Updating metadata for group (id: ${library.id})`);
+  }
 
   // actions we will return
   const syncActions: LibrarySyncActions = { 

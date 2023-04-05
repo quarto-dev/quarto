@@ -20,6 +20,10 @@ import { libraryReadGroup, userWebLibrariesDir } from "./storage";
 import { SyncActions } from "./sync";
 import { zoteroTrace } from "./trace";
 
+export async function groupLocal(user: User, groupId: number) {
+  return libraryReadGroup(user, { type: "group", id: groupId});
+}
+
 export async function groupsLocal(user: User) : Promise<Group[]> {
   const groups: Group[] = [];
   const dir = userWebLibrariesDir(user);
@@ -35,7 +39,7 @@ export async function groupsLocal(user: User) : Promise<Group[]> {
   return groups;
 }
 
-export function groupsDelete(user: User, groupId: number) {
+export function groupDelete(user: User, groupId: number) {
   const dir = userWebLibrariesDir(user);
   const groupDir = path.join(dir, `group-${groupId}`);
   if (fs.existsSync(groupDir)) {
@@ -69,12 +73,10 @@ export async function groupsSyncActions(user: User, groups: Group[], zotero: Zot
       if (serverGroup) { 
         if (localGroup) {
           if (serverGroup.version !== localGroup.version) {
-            traceGroupAction("Updating", serverGroup.data);
             actions.updated.push(serverGroup.data);
           }
         } else {
           const newGroup = serverGroup.data;
-          traceGroupAction("Adding", newGroup);
           actions.updated.push(newGroup);
         }
       }

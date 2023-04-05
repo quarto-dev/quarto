@@ -86,6 +86,12 @@ export type ObjectVersions = { [objectId: string]: number };
 
 export type VersionedResponse<T> = { data: T, version: number | null } | null;
 
+export class ZoteroObjectNotFoundError extends Error {
+  constructor(url: string) {
+    super(`Not found: ${url.split('?')[0]}`);
+  }
+}
+
 export interface ZoteroApi {
   user() : Promise<User>;
 
@@ -179,6 +185,8 @@ const zoteroRequest = async <T>(key: string, path: string) : Promise<T> => {
   const response = await zoteroFetch<T>(key, path);
   if (response.status === 200 && response.message) {
     return response.message;
+  } else if (response.status === 404) {
+    throw new ZoteroObjectNotFoundError(path);
   } else {
     throw new Error(response.statusText || "Unknown error");
   }
@@ -195,6 +203,8 @@ const zoteroVersionedRequest = async <T>(key: string, path: string, since: numbe
     }
   } else if (response.status === 304) {
     return null;
+  } else if (response.status === 404) {
+    throw new ZoteroObjectNotFoundError(path);
   } else {
     throw new Error(response.statusText || "Unknown error");
   }

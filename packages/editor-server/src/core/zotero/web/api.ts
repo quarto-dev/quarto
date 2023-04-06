@@ -86,14 +86,29 @@ export type ObjectVersions = { [objectId: string]: number };
 
 export type VersionedResponse<T> = { data: T, version: number | null } | null;
 
-export class ZoteroObjectNotFoundError extends Error {
+export class ZoteroAuthorizationError extends Error {
   constructor(url: string) {
-    super(`Not found: ${url.split('?')[0]}`);
+    super(`Unauthorized: ${plainUrl(url)}`);
   }
 }
 
+export class ZoteroObjectNotFoundError extends Error {
+  constructor(url: string) {
+    super(`Not found: ${plainUrl(url)}`);
+  }
+}
+
+export class ZoteroServiceUnavailable extends Error {
+  constructor(url: string) {
+    super(`Service unavailable: ${plainUrl(url)}`);
+  }
+}
+
+
+
 export interface ZoteroApi {
-  user() : Promise<User>;
+  
+  readonly user: User;
 
   groupVersions(userID: number) : Promise<ObjectVersions>;
   group(groupID: number, since: number) : Promise<VersionedResponse<Group>>;
@@ -107,12 +122,12 @@ export interface ZoteroApi {
   deleted(library: Library, since: number) : Promise<VersionedResponse<Deleted>>;
 }
 
-export function zoteroApi(key: string) : ZoteroApi {
+export async function zoteroApi(key: string) : Promise<ZoteroApi> {
+
+  const user = await zoteroRequest<User>(key, "/keys/current");
 
   return {
-    user: () => {
-      return zoteroRequest<User>(key, "/keys/current");
-    },
+    user,
 
     groupVersions: (userID: number) => {
       return zoteroRequest<ObjectVersions>(key, `/users/${userID}/groups?format=versions`);
@@ -155,6 +170,17 @@ export function zoteroApi(key: string) : ZoteroApi {
   }
 }
 
+export async function validateApiKey(key: string) {
+  try {
+    await zoteroApi(key);
+  } catch(error) {
+    if (!(error instanceof ZoteroObjectNotFoundError)) {
+      console.error(error);
+    }
+    return false;
+  }
+}
+
 const objectPrefix = (library: Library) => {
   return `/${library.type}s/${library.id}`;
 };
@@ -185,10 +211,8 @@ const zoteroRequest = async <T>(key: string, path: string) : Promise<T> => {
   const response = await zoteroFetch<T>(key, path);
   if (response.status === 200 && response.message) {
     return response.message;
-  } else if (response.status === 404) {
-    throw new ZoteroObjectNotFoundError(path);
   } else {
-    throw new Error(response.statusText || "Unknown error");
+    throw handleErrorResponse(response, path);
   }
 }
 
@@ -203,10 +227,8 @@ const zoteroVersionedRequest = async <T>(key: string, path: string, since: numbe
     }
   } else if (response.status === 304) {
     return null;
-  } else if (response.status === 404) {
-    throw new ZoteroObjectNotFoundError(path);
   } else {
-    throw new Error(response.statusText || "Unknown error");
+    throw handleErrorResponse(response, path);
   }
 }
 
@@ -275,3 +297,19 @@ const zoteroFetch = async <T>(
   }
 }
 
+function handleErrorResponse(response: ZoteroResponse<unknown>, path: string) {
+  path = plainUrl(path);
+  if (response.status === 403) {
+    return new ZoteroAuthorizationError(path);
+  } else if (response.status === 404) {
+    return new ZoteroObjectNotFoundError(path);
+  } else if (response.status === 503) {
+    return new ZoteroServiceUnavailable(path);
+  } else {
+    return new Error(response.statusText || "Unknown error");
+  }
+}
+
+function plainUrl(url: string) {
+  return url.split('?')[0];
+}

@@ -106,7 +106,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
           Array.isArray(this.zoteroConfig) ? this.zoteroConfig : [],
         );
         if (specResult && specResult.status === 'ok') {
-          this.allCollectionSpecs = (specResult.message as ZoteroCollection[]).map((spec: ZoteroCollectionSpec) =>
+          this.allCollectionSpecs = (specResult.message as ZoteroCollectionSpec[]).map((spec: ZoteroCollectionSpec) =>
             this.toBibliographyCollection(spec),
           );
         } else {

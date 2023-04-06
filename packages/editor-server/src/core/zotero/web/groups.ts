@@ -48,20 +48,19 @@ export function groupDelete(user: User, groupId: number) {
 }
 
 
-export async function groupsSyncActions(user: User, groups: Group[], zotero: ZoteroApi) {
+export async function groupsSyncActions(zotero: ZoteroApi, groups: Group[]) {
   
   // sync actions
   const actions: SyncActions<Group> = { deleted: [], updated: [] };
 
   // get existing group metadata
   zoteroTrace("Syncing groups")
-  const serverGroupVersions = await zotero.groupVersions(user.userID);
+  const serverGroupVersions = await zotero.groupVersions(zotero.user.userID);
   const serverGroupIds = Object.keys(serverGroupVersions).map(Number);
 
   // remove groups
   const removeGroups = groups.filter(group => !serverGroupIds.includes(group.id));
   for (const group of removeGroups) {
-    traceGroupAction("Removing", group);
     actions.deleted.push(String(group.id));
   }
   
@@ -93,16 +92,10 @@ export function groupsSync(groups: Group[], actions: SyncActions<Group>) {
   newGroups = newGroups.filter(group => !actions.deleted.includes(String(group.id)));
 
   // apply updates (remove any existing then add)
-  const updatedIds = actions.updated.map(group => group.id);
+  const updatedIds = actions.updated.map((group: Group) => group.id);
   newGroups = newGroups.filter(group => !updatedIds.includes(group.id));
   newGroups.push(...actions.updated);
 
   // return new groups
   return newGroups;
 }
-
-
-function traceGroupAction(action: string, group: Group) {
-  zoteroTrace(`${action} group ${group.name} (id: ${group.id}, version ${group.version})`);
-}
-

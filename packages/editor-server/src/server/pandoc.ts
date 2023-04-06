@@ -46,7 +46,7 @@ import {
   isJsonBibliography, 
   isYamlBibliography, 
   resolveBiblioOptions 
-} from '../biblio';
+} from '../core/biblio';
 
 import { runPandoc as pandoc } from '../pandoc';
 

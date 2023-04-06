@@ -14,25 +14,11 @@
  */
 
 
-import { Group, Library, User, ZoteroApi, ZoteroObjectNotFoundError, zoteroApi } from "./api";
+import { Group, Library, ZoteroApi, ZoteroObjectNotFoundError } from "./api";
 import { groupDelete, groupLocal, groupsLocal, groupsSync, groupsSyncActions } from "./groups";
 import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions } from "./libraries";
 import { libraryWrite, userWebLibrariesDir } from "./storage";
 import { zoteroTrace } from "./trace";
-
-
-
-// TODO: ability to do foreground sync (for initial config)
-
-// TODO: if the API key doesn't work surface an error to the user 
-// (and possibly allow reset of ID?)
-
-// TODO: write code to go all the way through to sync a collection
-
-// TODO: implement realtime API to optmize this
-
-// this is how we transform zotero rest api requests into ZoteroCollection
-// https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
 
 export interface SyncActions<T> {
   deleted: string[];
@@ -41,11 +27,13 @@ export interface SyncActions<T> {
 
 export async function syncLibrary(
   zotero: ZoteroApi, 
-  user: User, 
   type: "user" | "group", 
   id: number
 ) {
   
+  // alias user
+  const user = zotero.user;
+
   // status
   zoteroTrace(`Syncing library (${type}-${id})`);
 
@@ -77,7 +65,7 @@ export async function syncLibrary(
   }
 
   // check for library sync actions
-  const syncActions = await librarySyncActions(user, library, groupSync, zotero);
+  const syncActions = await librarySyncActions(zotero, library, groupSync);
   if (hasLibrarySyncActions(syncActions)) {
     const objects = librarySync(user, library, syncActions);
     libraryWrite(userWebLibrariesDir(user), library, objects);
@@ -87,21 +75,23 @@ export async function syncLibrary(
 }
 
 
-export async function syncAllLibraries(zotero: ZoteroApi, user: User) {
+export async function syncAllLibraries(zotero: ZoteroApi) {
 
   // start
   try {
     zoteroTrace("Beginning sync")
 
-    // user
+    // alias user then sync
+    const user = zotero.user;
     zoteroTrace(`Syncing user ${user.username} (id: ${user.userID})`);
 
     // read current groups and deduce group actions
     const groups = await groupsLocal(user);
-    const groupsActions = await groupsSyncActions(user, groups, zotero);
+    const groupsActions = await groupsSyncActions(zotero, groups);
 
     // remove deleted groups
     for (const groupId of groupsActions.deleted) {
+      zoteroTrace(`Removing group ${groupId}`);
       groupDelete(user, Number(groupId));
     }
 
@@ -113,10 +103,10 @@ export async function syncAllLibraries(zotero: ZoteroApi, user: User) {
     const librariesSync: Array<{ library: Library, actions: LibrarySyncActions }> = [];
     for (const library of libraries) {
       zoteroTrace(`Syncing library (${library.type}-${library.id})`);
-      const groupSync = groupsActions.updated.find(group => group.id === library.id) || null;
+      const groupSync = groupsActions.updated.find((group: Group) => group.id === library.id) || null;
       librariesSync.push({ 
         library, 
-        actions: (await librarySyncActions(user, library, groupSync, zotero))
+        actions: (await librarySyncActions(zotero, library, groupSync))
       });
     }
 

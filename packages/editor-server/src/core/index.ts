@@ -13,19 +13,10 @@
  *
  */
 
-export * from './core'; 
 
-export type { EditorServerOptions } from './server/server';
-export type { PubMedServerOptions } from './server/pubmed';
-export type { CrossrefServerOptions } from './server/crossref';
-
-export { 
-  editorServer, 
-  editorServerMethods,
-  defaultEditorServerOptions,
-  fsEditorServerDocuments
-} from './server/server';
-
-export * from './services/services';
+export * from './mathjax';
+export * from './biblio';
+export * from './xref';
+export * from './pandoc';
 
 

@@ -14,17 +14,24 @@
  */
 
 
-import { setInterval } from "timers";
-import { syncWebCollections } from "./sync";
 
-syncWebCollections("").then(() => {
-  //
-});
+// TODO: if the API key doesn't work surface an error to the user 
+// (and possibly allow reset of ID?)
 
-// ensure that we continue running for dev hot reloads
-setInterval(() => { /* */ }, 1000);
+// TODO: write code to go all the way through to sync a collection
+// TODO: implement realtime API to optmize this
+
+// this is how we transform zotero rest api requests into ZoteroCollection
+// https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
 
 
+
+
+export { zoteroApi, validateApiKey } from './api';
+
+export { syncLibrary, syncAllLibraries } from './sync';
+
+export { webCollectionSource } from './source';
 
 
 

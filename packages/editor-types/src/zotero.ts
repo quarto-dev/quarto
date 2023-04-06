@@ -28,7 +28,7 @@ export interface ZoteroResult {
     | 'notfound' // invalid api key
     | 'nohost' // no internet connectivity
     | 'error'; // unexpected error (details in 'error')
-  message: ZoteroCollection[] | string | null;
+  message: ZoteroCollection[] | ZoteroCollectionSpec[] | string | string[] | null;
   warning: string;
   error: string;
 }
@@ -47,6 +47,17 @@ export interface ZoteroCollection extends ZoteroCollectionSpec {
 export interface ZoteroCSL extends CSL {
   libraryID: string;
   collectionKeys: string[];
+}
+
+export const kZoteroMyLibrary = "My Library";
+
+export interface ZoteroCollectionSource {
+  getCollections: (
+    collections: string[], 
+    cached: ZoteroCollectionSpec[]
+  ) => Promise<ZoteroResult> ;
+  getLibraryNames: () => Promise<ZoteroResult>;
+  getActiveCollectionSpecs: (collections: string[]) => Promise<ZoteroResult>;
 }
 
 export interface ZoteroServer {

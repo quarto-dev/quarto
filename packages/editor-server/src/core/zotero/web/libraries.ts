@@ -44,10 +44,9 @@ export function libraryList(user: User, groups: Group[]) : Library[] {
 }
 
 export async function librarySyncActions(
-  user: User, 
+  zotero: ZoteroApi,
   library: Library, 
   groupSync: Group | null, 
-  zotero: ZoteroApi
 ) : Promise<LibrarySyncActions> {
 
   // check for group update
@@ -74,7 +73,7 @@ export async function librarySyncActions(
   };
 
   // get library version numbers already synced to
-  const versions = await libraryReadVersions(user, library);
+  const versions = await libraryReadVersions(zotero.user, library);
 
   // check for deletes
   const deleted = await zotero.deleted(library, versions.deleted);

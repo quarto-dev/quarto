@@ -19,7 +19,7 @@ import path from "path";
 import readline from 'readline';
 
 import { quartoDataDir } from "quarto-core";
-import { Group, Library, User } from "./api";
+import { Collection, Group, Library, User } from "./api";
 import { LibraryData, LibraryVersions } from "./libraries";
 
 export function userWebLibrariesDir(user: User) {
@@ -72,7 +72,17 @@ export async function libraryReadVersions(user: User, library: Library) : Promis
   return (await libraryReadObject<LibraryVersions>(user, library, "versions", noVersions)) || noVersions;
 }
 
-export async function libraryReadObject<T>(user: User, library: Library, name: string, defaultValue: T | null) : Promise<T | null> {
+export async function libraryReadCollections(user: User, library: Library) : Promise<Collection[]> {
+  return (await libraryReadObject<Collection[]>(user, library, "collections", [])) || [];
+}
+
+export async function libraryReadObject<T>(
+  user: User, 
+  library: Library, 
+  name: string, 
+  defaultValue: T | null,
+  delim = ['{', '}']
+) : Promise<T | null> {
   // determine library file
   const dir = userWebLibrariesDir(user);
   const libraryFile = libraryFileName(dir, library);
@@ -91,8 +101,9 @@ export async function libraryReadObject<T>(user: User, library: Library, name: s
         fileStream.destroy();
       }
 
-      const nullObjectRegEx = new RegExp('^\\s*"' + name + '":\\s*\\null,\\s*$');
-      const startObjectRegEx = new RegExp('^\\s*"' + name + '":\\s*\\{\\s*$');
+      const nullObjectRegEx = new RegExp('^"' + name + '":\\s*\\null,\\s*$');
+      const startObjectRegEx = new RegExp('^"' + name + '":\\s*\\' + delim[0] + '\\s*$');
+      const endObjectRegEx = new RegExp('^\\' + delim[1] + ',\\s*$');
       let objectBuffer: string[] | undefined;
 
       rl.on('line', (line) => {
@@ -101,10 +112,10 @@ export async function libraryReadObject<T>(user: User, library: Library, name: s
             resolve(null);
             closeStream();
           } else if (line.match(startObjectRegEx)) {
-            objectBuffer = ["{"];
+            objectBuffer = [delim[0]];
           }
-        } else if (line.match(/^\s*\},\s*$/)) {
-          objectBuffer.push("}");
+        } else if (line.match(endObjectRegEx)) {
+          objectBuffer.push(delim[1]);
           const versions = objectBuffer.join("\n");
           try {
             resolve(JSON.parse(versions));

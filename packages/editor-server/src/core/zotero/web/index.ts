@@ -14,20 +14,9 @@
  */
 
 
-// TODO: consolidate getCollections and getCollectionSpecs
-
-// TODO: on completion we lose our popup w/ streaming
-
-// TODO: insert sequence calls getCollections over and over
 
 // TODO: if the API key doesn't work surface an error to the user 
 // (and possibly allow reset of ID?)
-
-// TODO: write code to go all the way through to sync a collection
-// TODO: implement realtime API to optmize this
-
-// this is how we transform zotero rest api requests into ZoteroCollection
-// https://github.com/rstudio/rstudio/blob/main/src/cpp/session/modules/zotero/ZoteroCollectionsWeb.cpp#L240
 
 
 export { zoteroApi, validateApiKey } from './api';

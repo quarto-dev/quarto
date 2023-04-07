@@ -26,7 +26,7 @@ import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
 import { JsonRpcServerMethod } from 'core';
 import { QuartoContext } from "quarto-core";
-import { PandocServerOptions } from "../pandoc";
+import { PandocServerOptions } from "../core";
 
 export interface EditorServerDocuments {
   getCode(filePath: string) : string;

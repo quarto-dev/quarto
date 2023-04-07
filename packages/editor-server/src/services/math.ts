@@ -16,7 +16,7 @@
 import { JsonRpcServerMethod } from "core";
 import { kMathMathjaxTypesetSvg, MathjaxTypesetOptions, MathServer } from "editor-types";
 
-import { mathjaxTypeset } from "../mathjax";
+import { mathjaxTypeset } from "../core/mathjax";
 import { EditorServerDocuments } from "../server/server";
 
 export function mathServer(documents: EditorServerDocuments) : MathServer {

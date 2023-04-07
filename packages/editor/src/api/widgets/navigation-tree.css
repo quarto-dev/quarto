@@ -23,5 +23,7 @@
   font-size: 1.1em;
   opacity: .8;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 

@@ -654,7 +654,7 @@ export async function insertCitation(
   provider?: string,
 ) {
   // ensure the bib manager is loaded before proceeding
-  await bibManager.load(ui, view.state.doc);
+  await bibManager.loadLocal(ui, view.state.doc);
 
   // We try not call this function if the entry for this DOI is already in the bibliography,
   // but it can happen. So we need to check here if it is already in the bibliography and
@@ -769,7 +769,7 @@ export async function ensureSourcesInBibliography(
   server: PandocServer,
 ): Promise<boolean> {
   // Write entry to a bibliography file if it isn't already present
-  await bibManager.load(ui, view.state.doc);
+  await bibManager.loadLocal(ui, view.state.doc);
 
   // See if there is a warning for the selected provider. If there is, we may need to surface
   // that to the user. If there is no provider specified, no need to care about warnings.

@@ -88,7 +88,7 @@ function citationDOICompletions(ui: EditorUI, _server: DOIServer, bibliographyMa
         completions: async () => {
           // If we have a local source that matches this DOI, just show the
           // completion for the entry
-          await bibliographyManager.load(ui, context.doc);
+          await bibliographyManager.loadLocal(ui, context.doc);
           const source = bibliographyManager.findDoiInLocalBibliography(parsedDOI.token);
           if (source) {
             return [

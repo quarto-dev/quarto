@@ -73,7 +73,7 @@ export async function libraryReadVersions(user: User, library: Library) : Promis
 }
 
 export async function libraryReadCollections(user: User, library: Library) : Promise<Collection[]> {
-  return (await libraryReadObject<Collection[]>(user, library, "collections", [])) || [];
+  return (await libraryReadObject<Collection[]>(user, library, "collections", [], ['[',']'])) || [];
 }
 
 export async function libraryReadObject<T>(
@@ -102,8 +102,8 @@ export async function libraryReadObject<T>(
       }
 
       const nullObjectRegEx = new RegExp('^"' + name + '":\\s*\\null,\\s*$');
-      const startObjectRegEx = new RegExp('^"' + name + '":\\s*\\' + delim[0] + '\\s*$');
-      const endObjectRegEx = new RegExp('^\\' + delim[1] + ',\\s*$');
+      const startObjectRegEx = new RegExp('^  "' + name + '":\\s*\\' + delim[0] + '\\s*$');
+      const endObjectRegEx = new RegExp('^  \\' + delim[1] + ',\\s*$');
       let objectBuffer: string[] | undefined;
 
       rl.on('line', (line) => {

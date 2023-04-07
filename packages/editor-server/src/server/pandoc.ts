@@ -48,7 +48,7 @@ import {
   resolveBiblioOptions 
 } from '../core/biblio';
 
-import { runPandoc as pandoc } from '../pandoc';
+import { runPandoc as pandoc } from '../core/pandoc';
 
 import { EditorServerOptions } from './server';
 

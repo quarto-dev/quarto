@@ -40,7 +40,7 @@ export function citePopupPlugin(schema: Schema, ui: EditorUI, bibMgr: Bibliograp
     dismissOnEdit: true,
     makeLinksAccessible: true,
     createPopup: async (view: EditorView, target: TextPopupTarget, style: React.CSSProperties) => {
-      await bibMgr.load(ui, view.state.doc);
+      await bibMgr.loadLocal(ui, view.state.doc);
 
       const citeId = target.text.replace(/^-@|^@/, '');
 

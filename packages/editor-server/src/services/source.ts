@@ -18,7 +18,7 @@ import path from "path";
 import { JsonRpcServerMethod, lines } from "core";
 import { kSourceGetSourcePosLocations, SourcePosLocation, SourcePosBlock, SourceServer } from "editor-types";
 
-import { PandocServerOptions, runPandoc } from "../pandoc";
+import { PandocServerOptions, runPandoc } from "../core/pandoc";
 
 
 export function sourceServer(pandoc: PandocServerOptions) : SourceServer {

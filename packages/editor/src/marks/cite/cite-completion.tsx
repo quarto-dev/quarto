@@ -189,7 +189,8 @@ function citationCompletions(ui: EditorUI, completionProviders: CiteCompletionPr
         completions: async () => {
 
           // If all providers have entries already loaded, we can use those and stream any updates
-          const hasCurrentEntries = completionProviders.every(provider => provider.currentEntries());
+          const hasCurrentEntries = completionProviders.some(provider => provider.currentEntries());
+
           if (hasCurrentEntries) {
 
             let currentEntries: CiteCompletionEntry[] = [];
@@ -206,15 +207,16 @@ function citationCompletions(ui: EditorUI, completionProviders: CiteCompletionPr
             citeSearch.setEntries(currentEntries);
 
             // kick off another load which we'll stream in by setting entries
+            let streamedEntries: CiteCompletionEntry[] | null = null;
             let loadedEntries: CiteCompletionEntry[] = [];
             let providerCount = 0;
             completionProviders.forEach(provider => {
               provider.streamEntries(context.doc, (entries: CiteCompletionEntry[]) => {
                 providerCount = providerCount + 1;
-
                 const updatedEntries = [...loadedEntries, ...entries];
                 loadedEntries = sortEntries(updatedEntries);
-                if (providerCount >= completionProviders.length) {
+                if (providerCount === completionProviders.length) {
+                  streamedEntries = loadedEntries;
                   citeSearch.setEntries(loadedEntries);
                 }
               });
@@ -223,7 +225,7 @@ function citationCompletions(ui: EditorUI, completionProviders: CiteCompletionPr
             // return stream
             return {
               items: currentEntries,
-              stream: () => loadedEntries,
+              stream: () => streamedEntries,
             };
 
           } else {

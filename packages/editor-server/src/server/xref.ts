@@ -26,7 +26,7 @@ import {
   XRefServer 
 } from "editor-types";
 import { projectDirForDocument, } from "quarto-core";
-import { xrefsForFile } from "../xref";
+import { xrefsForFile } from "../core/xref";
 import { EditorServerOptions } from "./server";
 
 export function xrefServer(options: EditorServerOptions) : XRefServer {

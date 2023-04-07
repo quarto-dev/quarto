@@ -15,12 +15,16 @@
  */
 
 import { JsonRpcServerMethod } from "core";
-import { kZoteroBetterBibtexExport, kZoteroGetActiveCollectionSpecs, kZoteroGetCollections, kZoteroGetLibraryNames, kZoteroValidateWebApiKey, ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
+import { kZoteroBetterBibtexExport, kZoteroGetActiveCollectionSpecs, kZoteroGetCollections, kZoteroGetLibraryNames, kZoteroMyLibrary, kZoteroValidateWebApiKey, ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
+import { validateApiKey, webCollectionSource, zoteroApi } from "../core/zotero/web";
 
 export function zoteroServer(): ZoteroServer {
+
+  const source = webCollectionSource("");
+
   return {
     validateWebAPIKey(key: string): Promise<boolean> {
-      throw new Error("not supported");
+      return validateApiKey(key);
     },
 
     async getCollections(
@@ -29,28 +33,24 @@ export function zoteroServer(): ZoteroServer {
       cached: ZoteroCollectionSpec[],
       useCache: boolean
     ): Promise<ZoteroResult> {
-      return {
-        status: 'ok',
-        message: [],
-        warning: '',
-        error: ''
+      if (collections.length === 0) {
+        collections.push(kZoteroMyLibrary);
       }
+      return await source.getCollections(collections, cached);
     },
 
     getLibraryNames(): Promise<ZoteroResult> {
-      throw new Error("not supported");
+      return source.getLibraryNames();
     },
 
     async getActiveCollectionSpecs(
       file: string | null,
       collections: string[]
     ): Promise<ZoteroResult> {
-      return {
-        status: 'ok',
-        message: [],
-        warning: '',
-        error: ''
+      if (collections.length === 0) {
+        collections.push(kZoteroMyLibrary);
       }
+      return await source.getActiveCollectionSpecs(collections);
     },
 
     // Return status: nohost w/ warning text if it fails to

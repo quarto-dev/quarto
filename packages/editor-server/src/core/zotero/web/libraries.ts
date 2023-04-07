@@ -13,6 +13,7 @@
  *
  */
 
+import { kZoteroMyLibrary } from "editor-types";
 import { Collection, Group, Item, Library, User, ZoteroApi } from "./api";
 import { libraryRead, libraryReadVersions, userWebLibrariesDir } from "./storage";
 import { SyncActions } from "./sync";
@@ -36,6 +37,10 @@ export interface LibrarySyncActions {
   versions: LibraryVersions;
   collections: SyncActions<Collection>,
   items: SyncActions<Item>
+}
+
+export function libraryCollectionName(library: Library) {
+  return library.type === "user" ? kZoteroMyLibrary : (library.group?.name || "(Untitled)");
 }
 
 export function libraryList(user: User, groups: Group[]) : Library[] {

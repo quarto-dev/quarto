@@ -13,21 +13,29 @@
  *
  */
 
-import { CSL, ZoteroCSL, ZoteroCollection, ZoteroCollectionSource, ZoteroCollectionSpec, ZoteroResult, kZoteroMyLibrary } from "editor-types"
-import { Item, Library, User, ZoteroApi, ZoteroAuthorizationError, ZoteroObjectNotFoundError, ZoteroServiceUnavailable } from "./api";
+import { CSL, ZoteroCSL, ZoteroCollection, ZoteroCollectionSource, ZoteroCollectionSpec, ZoteroResult } from "editor-types"
+import { Item, Library, User, ZoteroApi, ZoteroAuthorizationError, ZoteroObjectNotFoundError, ZoteroServiceUnavailable, zoteroApi } from "./api";
 import { groupsLocal } from "./groups";
-import { libraryList } from "./libraries";
+import { libraryCollectionName, libraryList } from "./libraries";
 import { libraryRead, libraryReadCollections, libraryReadVersions, userWebLibrariesDir } from "./storage";
+import { syncAllLibraries, syncLibrary } from "./sync";
+import { zoteroTrace } from "./trace";
 
 
-export function webCollectionSource(zotero: ZoteroApi) : ZoteroCollectionSource {
+export function webCollectionSource(zoteroKey: string) : ZoteroCollectionSource {
+  let zotero: ZoteroApi | undefined;
   return {
     async getCollections(collections: string[], cached: ZoteroCollectionSpec[]) : Promise<ZoteroResult> {
-      
       try {
-        const libraries = await collectionNamesToLibraries(zotero.user, collections);
+        zotero = zotero || await zoteroApi(zoteroKey);
+
+        const libraries = collections.length === 0 
+          ? await localLibraries(zotero.user)
+          : await collectionNamesToLibraries(zotero.user, collections);
         const zoteroCollections: ZoteroCollection[] = [];
         for (const library of libraries) {
+          // ensure we have the most up to date version of the library
+          await syncLibrary(zotero, library.type, library.id);
           const versions = await libraryReadVersions(zotero.user, library);
           const cachedSpec = cached.find(spec => spec.key === String(library.id));
           if (cachedSpec?.version === versions.items) {
@@ -35,7 +43,7 @@ export function webCollectionSource(zotero: ZoteroApi) : ZoteroCollectionSource 
           } else {
             const libraryData = libraryRead(userWebLibrariesDir(zotero.user), library);
             zoteroCollections.push({
-              name: library.type === "user" ? kZoteroMyLibrary : (libraryData.group?.name || "(Untitled)"),
+              name: libraryCollectionName(library),
               version: libraryData.versions.items,
               key: String(library.id),
               parentKey: "",
@@ -57,7 +65,14 @@ export function webCollectionSource(zotero: ZoteroApi) : ZoteroCollectionSource 
 
     async getLibraryNames(): Promise<ZoteroResult> {
       try {
-        const names = (await localLibraries(zotero.user)).map(libraryName);
+        // ensure we have access to the api
+        zotero = zotero || await zoteroApi(zoteroKey);
+
+        // sync all libraries so our list of libraries is up to date
+        await syncAllLibraries(zotero);
+
+        // return names
+        const names = (await localLibraries(zotero.user)).map(libraryCollectionName);
         return {
           status: "ok",
           message: names,
@@ -71,22 +86,32 @@ export function webCollectionSource(zotero: ZoteroApi) : ZoteroCollectionSource 
     },
 
     async getActiveCollectionSpecs(collections: string[]): Promise<ZoteroResult> {
-
       try { 
+        // ensure we have access to the api
+        zotero = zotero || await zoteroApi(zoteroKey);
+
+        // get libraries
         const libraries = collections.length === 0 
           ? await localLibraries(zotero.user)
           : await collectionNamesToLibraries(zotero.user, collections);
+
+        // read collections specs
         const collectionSpecs: ZoteroCollectionSpec[] = [];
         for (const library of libraries) {
+
+          // NOTE: we don't perform a full sync on the library here because
+          // this call always follows a call to getCollections which does the sync
           const versions = await libraryReadVersions(zotero.user, library);
+          
           // read main library
           collectionSpecs.push({
-            name: library.type === "user" ? kZoteroMyLibrary : library.group?.name || "(Untitled)",
+            name: libraryCollectionName(library),
             version: versions.items,
             key: String(library.id),
             parentKey: ""
           });
-          // read collections
+
+          // read sub-collections
           const collections = await libraryReadCollections(zotero.user, library);
           for (const collection of collections) {
             collectionSpecs.push({
@@ -117,15 +142,19 @@ async function localLibraries(user: User) {
   return libraryList(user, groups);
 }
 
-function libraryName(library: Library) {
-  return library.type === "user" ? kZoteroMyLibrary : (library.group?.name || "(Untitled)");
-}
 
 async function collectionNamesToLibraries(user: User, collections: string[]) {
+  const libraries: Library[] = [];
   const allLibraries = await localLibraries(user);
-  return allLibraries.filter(library => {
-    return collections.includes(libraryName(library));
-  });
+  for (const collection of collections) {
+    const library = allLibraries.find(lib => collection === libraryCollectionName(lib));
+    if (library) {
+      libraries.push(library);
+    } else {
+      zoteroTrace(`Library named "${collection}" not found for user ${user.username}`);
+    }
+  }
+  return libraries;
 }
 
 function asCollectionSourceItems(library: Library, items: Item[]) : ZoteroCSL[] {

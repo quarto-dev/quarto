@@ -149,7 +149,11 @@ export class BibliographyManager {
     await this.load(ui, doc, true);
   }
 
-  public async load(ui: EditorUI, doc: ProsemirrorNode, refreshCollectionData?: boolean): Promise<void> {
+  public async loadLocal(ui: EditorUI, doc: ProsemirrorNode) {
+    await this.load(ui, doc, false, true);
+  }
+
+  public async load(ui: EditorUI, doc: ProsemirrorNode, refreshCollectionData?: boolean, localOnly?: boolean): Promise<void> {
     // read the Yaml blocks from the document
     const parsedYamlNodes = parseYamlNodes(doc);
 
@@ -157,8 +161,9 @@ export class BibliographyManager {
     const docPath = ui.context.getDocumentPath();
 
     // Load each provider
+    const providers = localOnly ? this.providers.filter(provider => provider.requiresWritable === false) : this.providers;
     const providersNeedUpdate = await Promise.all(
-      this.providers.map(provider =>
+      providers.map(provider =>
         provider.load(ui, docPath, ui.context.getDefaultResourceDir(), parsedYamlNodes, refreshCollectionData),
       ),
     );

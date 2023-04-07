@@ -173,6 +173,7 @@ export async function zoteroApi(key: string) : Promise<ZoteroApi> {
 export async function validateApiKey(key: string) {
   try {
     await zoteroApi(key);
+    return true;
   } catch(error) {
     if (!(error instanceof ZoteroObjectNotFoundError)) {
       console.error(error);

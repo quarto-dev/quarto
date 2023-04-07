@@ -15,16 +15,37 @@
  */
 
 import { JsonRpcServerMethod } from "core";
-import { kZoteroBetterBibtexExport, kZoteroGetActiveCollectionSpecs, kZoteroGetCollections, kZoteroGetLibraryNames, kZoteroMyLibrary, kZoteroValidateWebApiKey, ZoteroCollectionSpec, ZoteroResult, ZoteroServer } from "editor-types";
-import { validateApiKey, webCollectionSource, zoteroApi } from "../core/zotero/web";
+import { 
+  kZoteroBetterBibtexExport, 
+  kZoteroGetActiveCollectionSpecs, 
+  kZoteroGetCollections, 
+  kZoteroGetLibraryNames, 
+  kZoteroMyLibrary, 
+  kZoteroSetWebApiKey,
+  kZoteroValidateWebApiKey, 
+  ZoteroCollectionSource, 
+  ZoteroCollectionSpec, 
+  ZoteroResult,  
+  ZoteroServer 
+} from "editor-types";
+import { zoteroValidateApiKey, zoteroWebCollectionSource } from "../core/zotero/web";
 
 export function zoteroServer(): ZoteroServer {
 
-  const source = webCollectionSource("");
+  let source: ZoteroCollectionSource | undefined;
 
   return {
-    validateWebAPIKey(key: string): Promise<boolean> {
-      return validateApiKey(key);
+
+    async setWebAPIKey(key: string): Promise<void> {
+      if (key) {
+        source = zoteroWebCollectionSource(key);
+      } else {
+        source = undefined;
+      }
+    },
+
+    async validateWebAPIKey(key: string): Promise<boolean> {
+      return zoteroValidateApiKey(key);
     },
 
     async getCollections(
@@ -33,24 +54,36 @@ export function zoteroServer(): ZoteroServer {
       cached: ZoteroCollectionSpec[],
       useCache: boolean
     ): Promise<ZoteroResult> {
-      if (collections.length === 0) {
-        collections.push(kZoteroMyLibrary);
+      if (source) {
+        if (collections.length === 0) {
+          collections.push(kZoteroMyLibrary);
+        }
+        return await source.getCollections(collections, cached);
+      } else {
+        return zoteroResultEmpty();
       }
-      return await source.getCollections(collections, cached);
     },
 
-    getLibraryNames(): Promise<ZoteroResult> {
-      return source.getLibraryNames();
+    async getLibraryNames(): Promise<ZoteroResult> {
+      if (source) {
+        return source.getLibraryNames();
+      } else {
+        return zoteroResultEmpty();
+      }
     },
 
     async getActiveCollectionSpecs(
       file: string | null,
       collections: string[]
     ): Promise<ZoteroResult> {
-      if (collections.length === 0) {
-        collections.push(kZoteroMyLibrary);
+      if (source) {
+        if (collections.length === 0) {
+          collections.push(kZoteroMyLibrary);
+        }
+        return await source.getActiveCollectionSpecs(collections);
+      } else {
+        return zoteroResultEmpty();
       }
-      return await source.getActiveCollectionSpecs(collections);
     },
 
     // Return status: nohost w/ warning text if it fails to
@@ -69,6 +102,7 @@ export function zoteroServer(): ZoteroServer {
 export function zoteroServerMethods() : Record<string, JsonRpcServerMethod> {
   const server = zoteroServer();
   const methods: Record<string, JsonRpcServerMethod> = {
+    [kZoteroSetWebApiKey]: args => server.setWebAPIKey(args[0]),
     [kZoteroValidateWebApiKey]: args => server.validateWebAPIKey(args[0]),
     [kZoteroGetCollections]: args => server.getCollections(args[0], args[1], args[2], args[3]),
     [kZoteroGetLibraryNames]: () => server.getLibraryNames(),
@@ -76,4 +110,14 @@ export function zoteroServerMethods() : Record<string, JsonRpcServerMethod> {
     [kZoteroBetterBibtexExport]: args => server.betterBibtexExport(args[0], args[1], args[2])
   }
   return methods;
+}
+
+
+function zoteroResultEmpty(message = []) : ZoteroResult {
+  return {
+    status: 'ok',
+    message,
+    warning: '',
+    error: ''
+  }
 }

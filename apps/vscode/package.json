@@ -423,6 +423,11 @@
         "title": "Toggle Code",
         "category": "Quarto",
         "when": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+      },
+      {
+        "command": "quarto.configureZotero",
+        "category": "Quarto",
+        "title": "Configure Zotero"
       }
     ],
     "keybindings": [
@@ -781,6 +786,9 @@
         {
           "command": "quarto.walkthrough.render",
           "when": "false"
+        },
+        {
+          "command": "quarto.configureZotero"
         }
       ],
       "view/title": [

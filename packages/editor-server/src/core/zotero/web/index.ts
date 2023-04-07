@@ -14,16 +14,11 @@
  */
 
 
+export { zoteroApi, zoteroValidateApiKey } from './api';
 
-// TODO: if the API key doesn't work surface an error to the user 
-// (and possibly allow reset of ID?)
+export { zoteroSyncWebLibrary, zoteroSyncWebLibraries } from './sync';
 
-
-export { zoteroApi, validateApiKey } from './api';
-
-export { syncLibrary, syncAllLibraries } from './sync';
-
-export { webCollectionSource } from './source';
+export { zoteroWebCollectionSource } from './source';
 
 
 

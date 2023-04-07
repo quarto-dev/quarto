@@ -47,6 +47,7 @@ import {
   kZoteroGetCollections,
   kZoteroGetLibraryNames,
   kZoteroValidateWebApiKey,
+  kZoteroSetWebApiKey,
   PandocAst,
   PandocCapabilitiesResult,
   PandocServer,
@@ -171,6 +172,10 @@ export function editorPubMedJsonRpcServer(request: JsonRpcRequestTransport) : Pu
 
 export function editorZoteroJsonRpcServer(request: JsonRpcRequestTransport) : ZoteroServer {
   return {
+    setWebAPIKey(key: string): Promise<void> {
+      return request(kZoteroSetWebApiKey, [key])
+    },
+
     validateWebAPIKey(key: string): Promise<boolean> {
       return request(kZoteroValidateWebApiKey, [key]);
     },

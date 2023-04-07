@@ -18,5 +18,6 @@ export * from './mathjax';
 export * from './biblio';
 export * from './xref';
 export * from './pandoc';
+export * from './zotero';
 
 

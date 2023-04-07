@@ -16,11 +16,14 @@
 
 import { CSL } from './csl';
 
+export const kZoteroSetWebApiKey = 'zotero_set_web_api_key';
 export const kZoteroValidateWebApiKey = 'zotero_validate_web_api_key';
 export const kZoteroGetCollections = 'zotero_get_collections';
 export const kZoteroGetLibraryNames = 'zotero_get_library_names';
 export const kZoteroGetActiveCollectionSpecs = 'zotero_get_active_collection_specs';
 export const kZoteroBetterBibtexExport = 'zotero_better_bibtex_export';
+
+export type ZoteroResultMessage = ZoteroCollection[] | ZoteroCollectionSpec[] | string | string[] | null;
 
 export interface ZoteroResult {
   status:
@@ -28,7 +31,7 @@ export interface ZoteroResult {
     | 'notfound' // invalid api key
     | 'nohost' // no internet connectivity
     | 'error'; // unexpected error (details in 'error')
-  message: ZoteroCollection[] | ZoteroCollectionSpec[] | string | string[] | null;
+  message: ZoteroResultMessage;
   warning: string;
   error: string;
 }
@@ -61,6 +64,9 @@ export interface ZoteroCollectionSource {
 }
 
 export interface ZoteroServer {
+
+  setWebAPIKey: (key: string) => Promise<void>;
+
   validateWebAPIKey: (key: string) => Promise<boolean>;
 
   getCollections: (

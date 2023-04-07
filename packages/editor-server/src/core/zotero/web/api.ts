@@ -170,7 +170,7 @@ export async function zoteroApi(key: string) : Promise<ZoteroApi> {
   }
 }
 
-export async function validateApiKey(key: string) {
+export async function zoteroValidateApiKey(key: string) {
   try {
     await zoteroApi(key);
     return true;

@@ -18,11 +18,11 @@ import { Item, Library, User, ZoteroApi, ZoteroAuthorizationError, ZoteroObjectN
 import { groupsLocal } from "./groups";
 import { libraryCollectionName, libraryList } from "./libraries";
 import { libraryRead, libraryReadCollections, libraryReadVersions, userWebLibrariesDir } from "./storage";
-import { syncAllLibraries, syncLibrary } from "./sync";
+import { zoteroSyncWebLibraries, zoteroSyncWebLibrary } from "./sync";
 import { zoteroTrace } from "./trace";
 
 
-export function webCollectionSource(zoteroKey: string) : ZoteroCollectionSource {
+export function zoteroWebCollectionSource(zoteroKey: string) : ZoteroCollectionSource {
   let zotero: ZoteroApi | undefined;
   return {
     async getCollections(collections: string[], cached: ZoteroCollectionSpec[]) : Promise<ZoteroResult> {
@@ -35,7 +35,7 @@ export function webCollectionSource(zoteroKey: string) : ZoteroCollectionSource 
         const zoteroCollections: ZoteroCollection[] = [];
         for (const library of libraries) {
           // ensure we have the most up to date version of the library
-          await syncLibrary(zotero, library.type, library.id);
+          await zoteroSyncWebLibrary(zotero, library.type, library.id);
           const versions = await libraryReadVersions(zotero.user, library);
           const cachedSpec = cached.find(spec => spec.key === String(library.id));
           if (cachedSpec?.version === versions.items) {
@@ -69,7 +69,7 @@ export function webCollectionSource(zoteroKey: string) : ZoteroCollectionSource 
         zotero = zotero || await zoteroApi(zoteroKey);
 
         // sync all libraries so our list of libraries is up to date
-        await syncAllLibraries(zotero);
+        await zoteroSyncWebLibraries(zotero);
 
         // return names
         const names = (await localLibraries(zotero.user)).map(libraryCollectionName);

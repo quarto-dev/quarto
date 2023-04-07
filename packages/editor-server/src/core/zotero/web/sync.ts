@@ -25,7 +25,7 @@ export interface SyncActions<T> {
   updated: T[];
 }
 
-export async function syncLibrary(
+export async function zoteroSyncWebLibrary(
   zotero: ZoteroApi, 
   type: "user" | "group", 
   id: number
@@ -75,7 +75,7 @@ export async function syncLibrary(
 }
 
 
-export async function syncAllLibraries(zotero: ZoteroApi) {
+export async function zoteroSyncWebLibraries(zotero: ZoteroApi) {
 
   // start
   try {

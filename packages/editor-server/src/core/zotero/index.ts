@@ -13,5 +13,16 @@
  *
  */
 
+// TODO: console log messages occurr in front end during sync
+// (perhaps we should have those logs be done in 'progress')
 
+// TODO: when we finish a complete from zotero we get a sync
 
+// TODO: detect auth error in front end and wipe key
+// (and prompt to re-auth)
+
+// TODO: configuration for multiple libraries
+
+// TODO: respect the client cache (transmit)
+
+export * from './web';

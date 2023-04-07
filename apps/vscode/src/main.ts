@@ -31,6 +31,7 @@ import { activateCreate } from "./providers/create/create";
 import { activatePaste } from "./providers/paste";
 import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
+import { activateZotero } from "./providers/zotero/zotero";
 
 export async function activate(context: vscode.ExtensionContext) {
   // create markdown engine
@@ -69,6 +70,10 @@ export async function activate(context: vscode.ExtensionContext) {
     // provide visual editor
     const editorCommands = activateEditor(context, quartoContext, lspClient, engine);
     commands.push(...editorCommands);
+
+    // zotero 
+    const zoteroCommands = await activateZotero(context, lspClient);
+    commands.push(...zoteroCommands);
 
     // assist panel
     const assistCommands = activateQuartoAssistPanel(context, engine);

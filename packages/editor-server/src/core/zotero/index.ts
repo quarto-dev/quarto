@@ -12,8 +12,8 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-
-// TODO: console log messages occurr in front end during sync
+ 
+// TODO: console log messages occur in front end during sync
 // (perhaps we should have those logs be done in 'progress')
 
 // TODO: when we finish a complete from zotero we get a sync

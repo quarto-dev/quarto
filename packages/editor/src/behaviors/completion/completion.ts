@@ -130,17 +130,17 @@ class CompletionPlugin extends Plugin<CompletionState> {
                 // check if the previous state had a completion from the same handler
                 let prevToken: string | undefined;
 
-                // If this completion shares scope with the previous completion
-                // and this is a completion transaction, skip
-                if (tr.getMeta(kInsertCompletionTransaction) && completionsShareScope(handler, prevState.handler)) {
+                // if we are using the same handler at the same position, and it has
+                // a completions filter, then forward the token
+                if (handler.id === prevState.handler?.id &&
+                    result.pos === prevState.result?.pos &&
+                    handler.filter) {
+                  prevToken = prevState.result.token;
+                
+                // bypass if this was an insert with the same scope
+                } else if (tr.getMeta(kInsertCompletionTransaction) && 
+                           completionsShareScope(handler, prevState.handler)) {
                   continue;
-                }
-
-                if (handler.id === prevState.handler?.id) {
-                  // pass the prevToken on if the completion was for the same position
-                  if (result.pos === prevState.result?.pos) {
-                    prevToken = prevState.result.token;
-                  }
                 }
 
                 // return state

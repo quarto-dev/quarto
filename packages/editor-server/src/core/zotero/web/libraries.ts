@@ -16,8 +16,7 @@
 import { kZoteroMyLibrary } from "editor-types";
 import { Collection, Group, Item, Library, User, ZoteroApi } from "./api";
 import { libraryRead, libraryReadVersions, userWebLibrariesDir } from "./storage";
-import { SyncActions } from "./sync";
-import { zoteroTrace } from "./trace";
+import { SyncActions, SyncProgress } from "./types";
 
 export interface LibraryVersions {
   collections: number;
@@ -52,11 +51,12 @@ export async function librarySyncActions(
   zotero: ZoteroApi,
   library: Library, 
   groupSync: Group | null, 
+  progress: SyncProgress
 ) : Promise<LibrarySyncActions> {
 
   // check for group update
   if (groupSync) {
-    zoteroTrace(`Updating metadata for group (id: ${library.id})`);
+    progress.report(`Updating group (id: ${library.id})`);
   }
 
   // actions we will return
@@ -89,13 +89,13 @@ export async function librarySyncActions(
     
     // process deleted collections
     for (const deletedCollection of deleted.data.collections) {
-      traceAction("Removing", "collection", `key: ${deletedCollection}`);
+      logActions("Removing", "collection", `key: ${deletedCollection}`, progress);
       syncActions.collections.deleted.push(deletedCollection);
     }
     
     // process deleted items
     for (const deletedItem of deleted.data.items) {
-      traceAction("Removing", "item", `key: ${deletedItem}`);
+      logActions("Removing", "item", `key: ${deletedItem}`, progress);
       syncActions.items.deleted.push(deletedItem);
     }
   }
@@ -106,7 +106,7 @@ export async function librarySyncActions(
     // process changes
     const collections = await zotero.collections(library, Object.keys(collectionChanges.data));
     for (const collection of collections) {
-      traceAction("Updating", "collection", `${collection.name} - ${collection.key}`)
+      logActions("Updating", "collection", `key: ${collection.key}`, progress)
       syncActions.collections.updated.push(collection);
     }
     // update version
@@ -120,10 +120,10 @@ export async function librarySyncActions(
     const items = await zotero.items(library, Object.keys(itemChanges.data));
     for (const item of items) {
       if (item.data["deleted"]) {
-        traceAction("Removing", "item", `key: ${item.key}`);
+        logActions("Removing", "item", `key: ${item.key}`, progress);
         syncActions.items.deleted.push(item.key);
       } else {
-        traceAction("Updating", "item", `${item.csljson.title || "Untitled"} - ${item.key}`);
+        logActions("Updating", "item", `key: ${item.key}`, progress);
         syncActions.items.updated.push(item);
       }
      
@@ -176,8 +176,8 @@ function syncObjects<T extends { key: string }>(objects: T[], syncActions: SyncA
 
 type ObjectType = "collection" | "item";
 
-function traceAction(action: string, type: ObjectType, summary: string) {
-  zoteroTrace(`${action} ${type} (${summary})`);
+function logActions(action: string, type: ObjectType, summary: string, progress: SyncProgress) {
+  progress.log(`${action} ${type} (${summary})`);
 }
 
 

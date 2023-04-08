@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * types.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -12,12 +12,14 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
- 
 
+export interface SyncActions<T> {
+  deleted: string[];
+  updated: T[];
+}
 
-// TODO: detect auth error in front end and wipe key
-// (and prompt to re-auth)
-
-// TODO: configuration for multiple libraries
-
-export * from './web';
+export interface SyncProgress {
+  report: (message: string, increment?: number) => void;
+  log: (message: string) => void;
+  cancelled: () => boolean;
+}

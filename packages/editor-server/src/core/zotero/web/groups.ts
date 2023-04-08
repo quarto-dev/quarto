@@ -17,8 +17,7 @@ import * as fs from "fs";
 import path from "path";
 import { Group, User, ZoteroApi } from "./api";
 import { libraryReadGroup, userWebLibrariesDir } from "./storage";
-import { SyncActions } from "./sync";
-import { zoteroTrace } from "./trace";
+import { SyncActions, SyncProgress } from "./types";
 
 export async function groupLocal(user: User, groupId: number) {
   return libraryReadGroup(user, { type: "group", id: groupId});
@@ -48,14 +47,14 @@ export function groupDelete(user: User, groupId: number) {
 }
 
 
-export async function groupsSyncActions(zotero: ZoteroApi, groups: Group[]) {
+export async function groupsSyncActions(zotero: ZoteroApi, groups: Group[], progress: SyncProgress) {
   
   // sync actions
   const actions: SyncActions<Group> = { deleted: [], updated: [] };
 
   // get existing group metadata
-  zoteroTrace("Syncing groups")
-  const serverGroupVersions = await zotero.groupVersions(zotero.user.userID);
+  progress.report("Syncing groups")
+   const serverGroupVersions = await zotero.groupVersions(zotero.user.userID);
   const serverGroupIds = Object.keys(serverGroupVersions).map(Number);
 
   // remove groups

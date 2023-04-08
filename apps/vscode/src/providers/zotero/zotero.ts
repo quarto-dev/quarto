@@ -13,7 +13,7 @@
  *
  */
 
-import { ExtensionContext, window } from "vscode";
+import { ExtensionContext, ProgressLocation, commands, window, workspace } from "vscode";
 import { zoteroApi, zoteroSyncWebLibraries, zoteroValidateApiKey } from "editor-server";
 
 import { Command } from "../../core/command";
@@ -23,6 +23,9 @@ import { editorZoteroJsonRpcServer } from "editor-core";
 import { ZoteroServer } from "editor-types";
 
 const kQuartoZoteroWebApiKey = "quartoZoteroWebApiKey";
+
+const kZoteroConfigureLibrary = "quarto.zoteroConfigureLibrary";
+const kZoteroSyncWebLibrary = "quarto.zoteroSyncWebLibrary";
 
 export async function activateZotero(context: ExtensionContext, lspClient: LanguageClient) : Promise<Command[]> {
 
@@ -36,13 +39,42 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
 
   const commands: Command[] = [];
 
-  commands.push(new ConfigureZoteroCommand("quarto.configureZotero", context, zotero));
+  commands.push(new ZoteroConfigureLibraryCommand(kZoteroConfigureLibrary, context, zotero));
+  commands.push(new ZoteroSyncWebLibraryCommand(kZoteroSyncWebLibrary, context, zotero));
 
   return commands;
 
 }
 
-export class ConfigureZoteroCommand implements Command {
+export class ZoteroSyncWebLibraryCommand implements Command {
+  constructor(
+    public readonly id: string,
+    private readonly context: ExtensionContext,
+    private readonly zotero: ZoteroServer
+  ) {}
+
+  async execute() {
+    const apiKey = await this.context.secrets.get(kQuartoZoteroWebApiKey);
+    if (apiKey) {
+      await syncWebLibraries(apiKey);
+    } else {
+      const result = await window.showInformationMessage(
+        "Zotero Web Library Not Configured",
+        { 
+          modal: true, 
+          detail: `You do not currently have a Zotero web library configured.` +
+                  `Do you want to configure a web library now?` },
+        "Yes",
+        "No"
+      );
+      if (result === "Yes") {
+        await commands.executeCommand(kZoteroConfigureLibrary);
+      }
+    }
+  }
+}
+
+export class ZoteroConfigureLibraryCommand implements Command {
   constructor(
     public readonly id: string,
     private readonly context: ExtensionContext,
@@ -60,25 +92,31 @@ export class ConfigureZoteroCommand implements Command {
     inputBox.placeholder = "Zotero Web API Key";
     inputBox.onDidAccept(async () => {
     
-      // validate key
+      // get key 
       const apiKey = inputBox.value.trim();
-      const valid = await zoteroValidateApiKey(apiKey);
-      if (!valid) {
-        inputBox.validationMessage = "The API key you entered could not be validated with the Zotero web service. " + 
-                                     "Please ensure that you have entered the key correctly and that it is currently valid.";
-      } else {
-        // save the secret and notify the server
+
+      // helper to save it
+      const saveApiKey = async () => {
         await this.context.secrets.store(kQuartoZoteroWebApiKey,apiKey);
         await this.zotero.setWebAPIKey(apiKey);
-
-        // hide the input box
         inputBox.hide();
+      };
 
-        // kickoff a sync
-        const zotero = await zoteroApi(apiKey);
-        zoteroSyncWebLibraries(zotero);
-      }
-     
+      if (apiKey) {
+        const valid = await zoteroValidateApiKey(apiKey);
+        if (!valid) {
+          inputBox.validationMessage = "The API key you entered could not be validated with the Zotero web service. " + 
+                                      "Please ensure that you have entered the key correctly and that it is currently valid.";
+        } else {
+          // save the secret and notify the server
+          await saveApiKey();
+
+          // kickoff a sync
+          await syncWebLibraries(apiKey);
+        }
+      } else {
+        await saveApiKey();
+      }     
     });
     inputBox.onDidChangeValue(() => {
       inputBox.validationMessage = "";
@@ -87,4 +125,35 @@ export class ConfigureZoteroCommand implements Command {
     inputBox.show();
   }
 
+}
+
+async function syncWebLibraries(apiKey: string) {
+
+  window.withProgress({
+    title: "Zotero Sync",
+    location: ProgressLocation.Notification,
+    cancellable: true
+  }, async (progress, token) => {
+
+    // progress handler
+    let progressRemaining = 100;
+    const progressHandler = {
+      report(message: string, increment?: number) {
+        increment = increment || (progressRemaining * 0.1);
+        progressRemaining -= increment;
+        progress.report( { message, increment });
+      },
+      log() {
+        // don't log in foreground sync
+      },
+      cancelled() {
+        return token.isCancellationRequested;
+      }
+    };
+
+    // perform sync
+    const zotero = await zoteroApi(apiKey, progressHandler);
+    await zoteroSyncWebLibraries(zotero, progressHandler);
+  });
+ 
 }

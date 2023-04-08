@@ -17,7 +17,8 @@ import { sleep } from "core";
 import fetch from "cross-fetch";
 
 import { CSL } from "editor-types";
-import { zoteroTrace } from "./trace";
+import { zoteroTraceProgress } from "./trace";
+import { SyncProgress } from "./types";
 
 export interface Library {
   type: "user" | "group";
@@ -122,30 +123,32 @@ export interface ZoteroApi {
   deleted(library: Library, since: number) : Promise<VersionedResponse<Deleted>>;
 }
 
-export async function zoteroApi(key: string) : Promise<ZoteroApi> {
+export async function zoteroApi(key: string, progress?: SyncProgress) : Promise<ZoteroApi> {
 
-  const user = await zoteroRequest<User>(key, "/keys/current");
+  progress = progress || zoteroTraceProgress();
+
+  const user = await zoteroRequest<User>(key, "/keys/current", progress);
 
   return {
     user,
 
     groupVersions: (userID: number) => {
-      return zoteroRequest<ObjectVersions>(key, `/users/${userID}/groups?format=versions`);
+      return zoteroRequest<ObjectVersions>(key, `/users/${userID}/groups?format=versions`, progress!);
     },
 
     group: (groupID: number, since: number) => {
-      return zoteroVersionedRequest<Group>(key, `/groups/${groupID}?since=${since}`, since, x => x.data);
+      return zoteroVersionedRequest<Group>(key, `/groups/${groupID}?since=${since}`, since, progress!, x => x.data);
     },
 
     collectionVersions: (library: Library, since: number) => {
       const prefix = objectPrefix(library);
-      return zoteroVersionedRequest<ObjectVersions>(key, `${prefix}/collections?since=${since}&format=versions`, since);
+      return zoteroVersionedRequest<ObjectVersions>(key, `${prefix}/collections?since=${since}&format=versions`, since, progress!);
     },
 
     collections: async (library: Library, keys: string[]) => {
       return (await zoteroKeyedItems<{ data: Collection }>(key, library, keys, pageKeys => {
         return `/collections?collectionKey=${pageKeys.join(',')}`;
-      })).map(collection => {
+      }, progress!)).map(collection => {
         return collection.data;
       });
     },
@@ -153,19 +156,19 @@ export async function zoteroApi(key: string) : Promise<ZoteroApi> {
     itemVersions: (library: Library, since: number) => {
       const prefix = objectPrefix(library);
       const query = `/items?since=${since}&itemType=-attachment&format=versions&includeTrashed=1`;
-      return zoteroVersionedRequest<ObjectVersions>(key, `${prefix}${query}`, since);
+      return zoteroVersionedRequest<ObjectVersions>(key, `${prefix}${query}`, since, progress!);
     },
 
     items: async (library: Library, keys: string[]) => {
       return zoteroKeyedItems<Item>(key, library, keys, (pageKeys => {
         return  `/items?itemKey=${pageKeys.join(',')}&format=json&include=csljson,data&includeTrashed=1`
-      }));
+      }), progress!);
     },
 
     deleted: (library: Library, since: number) => {
       const prefix = objectPrefix(library);
       const query = `/deleted?since=${since}`;
-      return zoteroVersionedRequest<Deleted>(key, `${prefix}${query}`, since);
+      return zoteroVersionedRequest<Deleted>(key, `${prefix}${query}`, since, progress!);
     }
   }
 }
@@ -186,14 +189,20 @@ const objectPrefix = (library: Library) => {
   return `/${library.type}s/${library.id}`;
 };
 
-const zoteroKeyedItems = async<T>(key: string, library: Library, keys: string[], query: (pageKeys: string[]) => string ) => {
+const zoteroKeyedItems = async<T>(
+  key: string, 
+  library: Library, 
+  keys: string[], 
+  query: (pageKeys: string[]) => string,
+  progress: SyncProgress ) => {
   const kPageSize = 50;
   let retreived = 0;
   const results: T[] = [];
   const prefix = objectPrefix(library);
   while (retreived < keys.length) {
     const pageKeys = keys.slice(retreived, retreived + kPageSize);
-    results.push(...(await zoteroRequest<T[]>(key, `${prefix}${query(pageKeys)}`)));
+    progress.report(`Syncing items for library (${library.type}-${library.id})`);
+    results.push(...(await zoteroRequest<T[]>(key, `${prefix}${query(pageKeys)}`, progress)));
     retreived += pageKeys.length;
   }
   return results;
@@ -208,8 +217,8 @@ interface ZoteroResponse<T> {
 }
 
 // normal request handler
-const zoteroRequest = async <T>(key: string, path: string) : Promise<T> => {
-  const response = await zoteroFetch<T>(key, path);
+const zoteroRequest = async <T>(key: string, path: string, progress: SyncProgress) : Promise<T> => {
+  const response = await zoteroFetch<T>(key, path, progress);
   if (response.status === 200 && response.message) {
     return response.message;
   } else {
@@ -218,8 +227,8 @@ const zoteroRequest = async <T>(key: string, path: string) : Promise<T> => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const zoteroVersionedRequest = async <T>(key: string, path: string, since: number, extract?: (x: any) => T) : Promise<VersionedResponse<T>> => {
-  const response = await zoteroFetch<T>(key, path, { ["If-Modified-Since-Version"]: String(since) }, extract);
+const zoteroVersionedRequest = async <T>(key: string, path: string, since: number, progress: SyncProgress, extract?: (x: any) => T) : Promise<VersionedResponse<T>> => {
+  const response = await zoteroFetch<T>(key, path, progress, { ["If-Modified-Since-Version"]: String(since) }, extract);
   if (response.status === 200 && response.message) {
     const version = Number(response.headers?.get("Last-Modified-Version"));
     return {
@@ -235,7 +244,8 @@ const zoteroVersionedRequest = async <T>(key: string, path: string, since: numbe
 
 const zoteroFetch = async <T>(
   key: string, 
-  path: string, 
+  path: string,
+  progress: SyncProgress, 
   headers?: Record<string,string>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extract?: (x: any) => T
@@ -257,7 +267,7 @@ const zoteroFetch = async <T>(
           ...headers
         }
       });
-      zoteroTrace(`  ${url} (${response.status})`);
+      progress.log(`${url} (${response.status})`);
 
       // handle backoff headers
       // https://www.zotero.org/support/dev/web_api/v3/basics#rate_limiting

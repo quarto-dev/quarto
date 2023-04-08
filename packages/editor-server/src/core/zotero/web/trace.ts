@@ -13,7 +13,23 @@
  *
  */
 
+import { SyncProgress } from "./types";
+
 
 export function zoteroTrace(msg: string) {
   console.log(`[zotero]: ${msg}`);
+}
+
+export function zoteroTraceProgress() : SyncProgress {
+  return {
+    report(message: string) {
+      zoteroTrace(message);
+    },
+    log(url) {
+      zoteroTrace(url);
+    },
+    cancelled() {
+      return false;
+    },
+  }
 }

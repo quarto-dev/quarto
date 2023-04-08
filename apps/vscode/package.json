@@ -425,9 +425,14 @@
         "when": "editorTextFocus && !editorReadonly && editorLangId == quarto"
       },
       {
-        "command": "quarto.configureZotero",
+        "command": "quarto.zoteroConfigureLibrary",
         "category": "Quarto",
-        "title": "Configure Zotero"
+        "title": "Zotero - Configure Library"
+      },
+      {
+        "command": "quarto.zoteroSyncWebLibrary",
+        "category": "Quarto",
+        "title": "Zotero - Sync Web Library"
       }
     ],
     "keybindings": [
@@ -788,7 +793,10 @@
           "when": "false"
         },
         {
-          "command": "quarto.configureZotero"
+          "command": "quarto.zoteroConfigureLibrary"
+        },
+        {
+          "command": "quarto.zoteroSyncWebLibrary"
         }
       ],
       "view/title": [

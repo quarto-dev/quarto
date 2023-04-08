@@ -18,24 +18,27 @@ import { Group, Library, ZoteroApi, ZoteroObjectNotFoundError } from "./api";
 import { groupDelete, groupLocal, groupsLocal, groupsSync, groupsSyncActions } from "./groups";
 import { hasLibrarySyncActions, libraryList, librarySync, librarySyncActions, LibrarySyncActions } from "./libraries";
 import { libraryWrite, userWebLibrariesDir } from "./storage";
-import { zoteroTrace } from "./trace";
+import { zoteroTraceProgress } from "./trace";
 
-export interface SyncActions<T> {
-  deleted: string[];
-  updated: T[];
-}
+import { SyncProgress } from "./types";
+
+export type { SyncProgress } from "./types";
 
 export async function zoteroSyncWebLibrary(
   zotero: ZoteroApi, 
   type: "user" | "group", 
-  id: number
+  id: number,
+  progress?: SyncProgress
 ) {
-  
+
+  // default progress
+  progress = progress || zoteroTraceProgress();
+
   // alias user
   const user = zotero.user;
 
   // status
-  zoteroTrace(`Syncing library (${type}-${id})`);
+  progress.report(`Syncing library (${type}-${id})`, 10);
 
   // see if we need to update group info
   const library: Library = { type, id };
@@ -57,7 +60,7 @@ export async function zoteroSyncWebLibrary(
     } catch(error) {
       // if it no longer exists then remove it
       if (error instanceof ZoteroObjectNotFoundError) {
-        zoteroTrace(`Removing library (${type}-${id})`);
+        progress.report(`Removing library (${type}-${id})`);
         groupDelete(user, id);
         return;
       }
@@ -65,33 +68,36 @@ export async function zoteroSyncWebLibrary(
   }
 
   // check for library sync actions
-  const syncActions = await librarySyncActions(zotero, library, groupSync);
+  const syncActions = await librarySyncActions(zotero, library, groupSync, progress);
   if (hasLibrarySyncActions(syncActions)) {
     const objects = librarySync(user, library, syncActions);
     libraryWrite(userWebLibrariesDir(user), library, objects);
   } 
 
-  zoteroTrace("Sync complete");
+  progress.report("Sync complete");
 }
 
 
-export async function zoteroSyncWebLibraries(zotero: ZoteroApi) {
+export async function zoteroSyncWebLibraries(zotero: ZoteroApi, progress?: SyncProgress) {
+
+  // default progress
+  progress = progress || zoteroTraceProgress();
 
   // start
   try {
-    zoteroTrace("Beginning sync")
+    progress.report("Beginning sync", 10);
 
     // alias user then sync
     const user = zotero.user;
-    zoteroTrace(`Syncing user ${user.username} (id: ${user.userID})`);
+    progress.report(`Syncing user ${user.username} (id: ${user.userID})`);
 
     // read current groups and deduce group actions
     const groups = await groupsLocal(user);
-    const groupsActions = await groupsSyncActions(zotero, groups);
+    const groupsActions = await groupsSyncActions(zotero, groups, progress);
 
     // remove deleted groups
     for (const groupId of groupsActions.deleted) {
-      zoteroTrace(`Removing group ${groupId}`);
+      progress.report(`Removing group ${groupId}`);
       groupDelete(user, Number(groupId));
     }
 
@@ -102,11 +108,11 @@ export async function zoteroSyncWebLibraries(zotero: ZoteroApi) {
     const libraries = libraryList(user, updatedGroups);
     const librariesSync: Array<{ library: Library, actions: LibrarySyncActions }> = [];
     for (const library of libraries) {
-      zoteroTrace(`Syncing library (${library.type}-${library.id})`);
+      progress.report(`Syncing library (${library.type}-${library.id})`);
       const groupSync = groupsActions.updated.find((group: Group) => group.id === library.id) || null;
       librariesSync.push({ 
         library, 
-        actions: (await librarySyncActions(zotero, library, groupSync))
+        actions: (await librarySyncActions(zotero, library, groupSync, progress))
       });
     }
 
@@ -120,9 +126,9 @@ export async function zoteroSyncWebLibraries(zotero: ZoteroApi) {
     }
   
     // end
-    zoteroTrace("Sync complete")
+    progress.report("Sync complete")
   } catch(error) {
-    zoteroTrace("Error occurred during sync:");
+    progress.report("Error occurred during sync");
     console.error(error);
   }
 }

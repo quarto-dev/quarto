@@ -153,7 +153,9 @@ const extension = (context: ExtensionContext): Extension | null => {
 
     plugins: (schema: Schema) => [xrefPopupPlugin(schema, ui, server)],
 
-    completionHandlers: () => [xrefCompletionHandler(ui, server.xref)],
+    completionHandlers: () => format.rmdExtensions.bookdownXRefUI 
+      ? [xrefCompletionHandler(ui, server.xref)]
+      : [],
 
     commands: (schema: Schema) => {
       if (format.rmdExtensions.bookdownXRefUI) {

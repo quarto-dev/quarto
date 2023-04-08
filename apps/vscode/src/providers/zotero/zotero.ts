@@ -84,7 +84,7 @@ export class ZoteroConfigureLibraryCommand implements Command {
   async execute() {
 
     const inputBox = window.createInputBox();
-    inputBox.title = "Configure Zotero";
+    inputBox.title = "Connect Zotero Web Library";
     inputBox.prompt = "Provide a Zotero Web API key to enable support for Zotero citations in " +
                       "the Quarto Visual Editor. You can generate keys at https://www.zotero.org/settings/keys";
     inputBox.password = true;     
@@ -139,6 +139,9 @@ async function syncWebLibraries(apiKey: string) {
     let progressRemaining = 100;
     const progressHandler = {
       report(message: string, increment?: number) {
+        if (token.isCancellationRequested) {
+          throw new SyncCancelledError();
+        }
         increment = increment || (progressRemaining * 0.1);
         progressRemaining -= increment;
         progress.report( { message, increment });
@@ -152,8 +155,21 @@ async function syncWebLibraries(apiKey: string) {
     };
 
     // perform sync
-    const zotero = await zoteroApi(apiKey, progressHandler);
-    await zoteroSyncWebLibraries(zotero, progressHandler);
+    try {
+      const zotero = await zoteroApi(apiKey, progressHandler);
+      await zoteroSyncWebLibraries(zotero, progressHandler);
+    } catch(error) {
+      if (!(error instanceof SyncCancelledError)) {
+        const message = error instanceof Error ? error.message : JSON.stringify(error);
+        window.showErrorMessage("Error occurred during sync: " + message);
+        console.error(error);
+      }
+    }
   });
- 
+}
+
+class SyncCancelledError extends Error {
+  constructor() {
+    super("Sync Cancelled");
+  }
 }

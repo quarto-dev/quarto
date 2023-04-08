@@ -427,7 +427,7 @@
       {
         "command": "quarto.zoteroConfigureLibrary",
         "category": "Quarto",
-        "title": "Zotero - Configure Library"
+        "title": "Zotero - Connect Web Library"
       },
       {
         "command": "quarto.zoteroSyncWebLibrary",

@@ -13,7 +13,7 @@
  *
  */
  
-
+// TODO: handle cancel
 
 // TODO: detect auth error in front end and wipe key
 // (and prompt to re-auth)

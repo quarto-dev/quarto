@@ -84,51 +84,47 @@ export async function zoteroSyncWebLibraries(zotero: ZoteroApi, progress?: SyncP
   progress = progress || zoteroTraceProgress();
 
   // start
-  try {
-    progress.report("Beginning sync", 10);
-
-    // alias user then sync
-    const user = zotero.user;
-    progress.report(`Syncing user ${user.username} (id: ${user.userID})`);
-
-    // read current groups and deduce group actions
-    const groups = await groupsLocal(user);
-    const groupsActions = await groupsSyncActions(zotero, groups, progress);
-
-    // remove deleted groups
-    for (const groupId of groupsActions.deleted) {
-      progress.report(`Removing group ${groupId}`);
-      groupDelete(user, Number(groupId));
-    }
-
-    // determine updated groups
-    const updatedGroups = groupsSync(groups, groupsActions);
-
-    // compute libraries and sync actions for libraries
-    const libraries = libraryList(user, updatedGroups);
-    const librariesSync: Array<{ library: Library, actions: LibrarySyncActions }> = [];
-    for (const library of libraries) {
-      progress.report(`Syncing library (${library.type}-${library.id})`);
-      const groupSync = groupsActions.updated.find((group: Group) => group.id === library.id) || null;
-      librariesSync.push({ 
-        library, 
-        actions: (await librarySyncActions(zotero, library, groupSync, progress))
-      });
-    }
-
-    // write synced libraries
-    const dir = userWebLibrariesDir(user);
-    for (const sync of librariesSync) {
-      if (hasLibrarySyncActions(sync.actions)) {
-        const objects = librarySync(user, sync.library, sync.actions);
-        libraryWrite(dir, sync.library, objects);
-      } 
-    }
   
-    // end
-    progress.report("Sync complete")
-  } catch(error) {
-    progress.report("Error occurred during sync");
-    console.error(error);
+  progress.report("Beginning sync", 10);
+
+  // alias user then sync
+  const user = zotero.user;
+  progress.report(`Syncing user ${user.username} (id: ${user.userID})`);
+
+  // read current groups and deduce group actions
+  const groups = await groupsLocal(user);
+  const groupsActions = await groupsSyncActions(zotero, groups, progress);
+
+  // remove deleted groups
+  for (const groupId of groupsActions.deleted) {
+    progress.report(`Removing group ${groupId}`);
+    groupDelete(user, Number(groupId));
   }
+
+  // determine updated groups
+  const updatedGroups = groupsSync(groups, groupsActions);
+
+  // compute libraries and sync actions for libraries
+  const libraries = libraryList(user, updatedGroups);
+  const librariesSync: Array<{ library: Library, actions: LibrarySyncActions }> = [];
+  for (const library of libraries) {
+    progress.report(`Syncing library (${library.type}-${library.id})`);
+    const groupSync = groupsActions.updated.find((group: Group) => group.id === library.id) || null;
+    librariesSync.push({ 
+      library, 
+      actions: (await librarySyncActions(zotero, library, groupSync, progress))
+    });
+  }
+
+  // write synced libraries
+  const dir = userWebLibrariesDir(user);
+  for (const sync of librariesSync) {
+    if (hasLibrarySyncActions(sync.actions)) {
+      const objects = librarySync(user, sync.library, sync.actions);
+      libraryWrite(dir, sync.library, objects);
+    } 
+  }
+
+  // end
+  progress.report("Sync complete");
 }

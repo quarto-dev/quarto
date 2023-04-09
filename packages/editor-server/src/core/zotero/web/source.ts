@@ -27,7 +27,13 @@ export function zoteroWebCollectionSource(zoteroKey: string) : ZoteroCollectionS
   return {
     async getCollections(collections: string[], cached: ZoteroCollectionSpec[]) : Promise<ZoteroResult> {
       try {
-        zotero = zotero || await zoteroApi(zoteroKey);
+        try {
+          zotero = zotero || await zoteroApi(zoteroKey);
+        } catch(error) {
+          console.error(error);
+          return handleZoteroError(error);
+        }
+      
 
         const libraries = collections.length === 0 
           ? await localLibraries(zotero.user)
@@ -220,7 +226,8 @@ function handleZoteroError(error: unknown) : ZoteroResult {
       status: 'notfound',
       message: null,
       warning: '',
-      error: error.message
+      error: error.message,
+      unauthorized: error instanceof ZoteroAuthorizationError,
     }
   } else if (error instanceof ZoteroServiceUnavailable) {
     return {

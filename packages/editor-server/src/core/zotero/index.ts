@@ -13,11 +13,10 @@
  *
  */
  
-// TODO: handle cancel
 
-// TODO: detect auth error in front end and wipe key
-// (and prompt to re-auth)
 
 // TODO: configuration for multiple libraries
+
+// TODO: json parsing should be async
 
 export * from './web';

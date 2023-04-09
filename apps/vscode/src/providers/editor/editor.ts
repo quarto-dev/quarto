@@ -388,6 +388,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         await commands.executeCommand("quarto.renderShortcut");
       },
 
+      onZoteroUnauthorized: async () => {
+        await commands.executeCommand("quarto.zoteroUnauthorized");
+      },
+
       // map resources to uris valid in the editor
       editorResourceUri: async (path: string) => {
         const uri = webviewPanel.webview.asWebviewUri(Uri.file(path)).toString();

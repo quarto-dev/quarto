@@ -53,7 +53,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
   public requiresWritable = true;
 
   public async load(
-    _ui: EditorUI,
+    ui: EditorUI,
     docPath: string,
     _resourcePath: string,
     yamlBlocks: ParsedYaml[],
@@ -91,6 +91,10 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
             });
             hasUpdates = hasUpdates || newCollections.length !== this.collections.length;
             this.allCollections = newCollections;
+          }
+        } else if (result.status === 'notfound' && result.unauthorized) {
+          if (ui.context.onZoteroUnauthorized) {
+            ui.context.onZoteroUnauthorized();
           }
         } else {
           // console.log(result.status);

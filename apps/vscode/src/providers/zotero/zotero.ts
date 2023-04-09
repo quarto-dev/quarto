@@ -26,6 +26,7 @@ const kQuartoZoteroWebApiKey = "quartoZoteroWebApiKey";
 
 const kZoteroConfigureLibrary = "quarto.zoteroConfigureLibrary";
 const kZoteroSyncWebLibrary = "quarto.zoteroSyncWebLibrary";
+const kZoteroUnauthorized = "quarto.zoteroUnauthorized";
 
 export async function activateZotero(context: ExtensionContext, lspClient: LanguageClient) : Promise<Command[]> {
 
@@ -38,13 +39,41 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
   }
 
   const commands: Command[] = [];
-
   commands.push(new ZoteroConfigureLibraryCommand(kZoteroConfigureLibrary, context, zotero));
   commands.push(new ZoteroSyncWebLibraryCommand(kZoteroSyncWebLibrary, context, zotero));
-
+  commands.push(new ZoteroUnauthorizedCommand(kZoteroUnauthorized, context, zotero));
   return commands;
 
 }
+
+export class ZoteroUnauthorizedCommand implements Command {
+  constructor(
+    public readonly id: string,
+    private readonly context: ExtensionContext,
+    private readonly zotero: ZoteroServer
+  ) {}
+
+  async execute() {
+    const kYes = "Configure Zotero API Key";
+    const kNo =  "Disable Zotero Connection";
+    const result = await window.showInformationMessage(
+      "Zotero API Key Unauthorized",
+      { 
+        modal: true, 
+        detail: `Your Zotero API key is no longer authorized. ` +
+                `Do you want to configure a new API key now?` },
+      kYes,
+      kNo
+    );
+    if (result === kYes) {
+      await commands.executeCommand(kZoteroConfigureLibrary);
+    } else if (result === kNo) {
+      await this.context.secrets.store(kQuartoZoteroWebApiKey,"");
+      await this.zotero.setWebAPIKey("");
+    }
+  }
+}
+
 
 export class ZoteroSyncWebLibraryCommand implements Command {
   constructor(

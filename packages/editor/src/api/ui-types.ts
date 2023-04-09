@@ -122,6 +122,9 @@ export interface EditorUIContext extends EditorUIImageResolver {
 
   // executable languages
   executableLanguges?: () => string[]
+
+  // notify of zotero authorization error
+  onZoteroUnauthorized?: () => void;
 }
 
 export interface EditorUIMath {

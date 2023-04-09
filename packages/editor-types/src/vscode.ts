@@ -41,6 +41,7 @@ export const VSC_VEH_FlushEditorUpdates = 'vsc_veh_flush_editor_updates';
 export const VSC_VEH_SaveDocument = 'vsc_veh_save_document';
 export const VSC_VEH_RenderDocument = 'vsc_veh_render_document';
 export const VSC_VEH_EditorResourceUri = 'vsc_veh_editor_resource_url';
+export const VSC_VEH_OnZoteroUnauthorized = 'vsc_veh_on_zotero_unauthorized';
 
 export const VSC_VEH_OpenURL = 'vsc_veh_open_url';
 export const VSC_VEH_NavigateToXRef = 'vsc_veh_navigate_to_xref';
@@ -83,6 +84,7 @@ export interface VSCodeVisualEditorHost extends EditorDisplay, EditorUIImageReso
   saveDocument: () => Promise<void>;
   renderDocument: () => Promise<void>;
   editorResourceUri: (path: string) => Promise<string>;
+  onZoteroUnauthorized: () => Promise<void>;
 }
 
 

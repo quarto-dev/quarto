@@ -433,6 +433,11 @@
         "command": "quarto.zoteroSyncWebLibrary",
         "category": "Quarto",
         "title": "Zotero - Sync Web Library"
+      },
+      {
+        "command": "quarto.zoteroUnauthorized",
+        "category": "Quarto",
+        "title": "Zotero - Reconnect Web Library"
       }
     ],
     "keybindings": [
@@ -797,6 +802,10 @@
         },
         {
           "command": "quarto.zoteroSyncWebLibrary"
+        },
+        {
+          "command": "quarto.zoteroUnauthorized",
+          "when": "false"
         }
       ],
       "view/title": [

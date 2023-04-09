@@ -177,6 +177,10 @@ class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
     return this.context.executableLanguages;
   }
 
+  public onZoteroUnauthorized() {
+    this.host.onZoteroUnauthorized();
+  } 
+
   // get the default directory for resources (e.g. where relative links point to)
   public getDefaultResourceDir(): string {
     return this.context.resourceDir;

@@ -34,6 +34,7 @@ export interface ZoteroResult {
   message: ZoteroResultMessage;
   warning: string;
   error: string;
+  unauthorized?: boolean;
 }
 
 export interface ZoteroCollectionSpec {

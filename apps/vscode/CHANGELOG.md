@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.80.0 (Release on 09 April 2023)
+
+- Support Zotero Web Libraries in visual editor citation insert/completions
+
 ## 1.79.0 (Release on 30 March 2023)
 
 - Improved handling/display of errors during visual editor initialization

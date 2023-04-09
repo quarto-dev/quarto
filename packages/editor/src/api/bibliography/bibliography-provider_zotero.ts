@@ -53,7 +53,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
   public requiresWritable = true;
 
   public async load(
-    ui: EditorUI,
+    _ui: EditorUI,
     docPath: string,
     _resourcePath: string,
     yamlBlocks: ParsedYaml[],

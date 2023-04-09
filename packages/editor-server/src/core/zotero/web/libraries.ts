@@ -135,11 +135,15 @@ export async function librarySyncActions(
   return syncActions;
 }
 
-export function librarySync(user: User, library: Library, syncActions: LibrarySyncActions) : LibraryData {
+export async function librarySync(
+  user: User, 
+  library: Library, 
+  syncActions: LibrarySyncActions
+) : Promise<LibraryData> {
 
   // read collections and apply actions
   const dir = userWebLibrariesDir(user);
-  const { collections: localCollections, items: localItems } = libraryRead(dir, library);
+  const { collections: localCollections, items: localItems } = await libraryRead(dir, library);
   const collections = syncObjects(localCollections, syncActions.collections);
   const items = syncObjects(localItems, syncActions.items);
   

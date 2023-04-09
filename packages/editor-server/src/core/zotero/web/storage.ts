@@ -14,6 +14,8 @@
  */
 
 import fs from "fs";
+const fsPromises = fs.promises;
+
 import path from "path";
 
 import readline from 'readline';
@@ -34,10 +36,11 @@ export function libraryFileName(librariesDir: string, library: Library) {
   return path.join(librariesDir, `${library.type}-${library.id}.json`);
 }
 
-export function libraryRead(librariesDir: string, library: Library) : LibraryData {
+export async function libraryRead(librariesDir: string, library: Library) : Promise<LibraryData> {
   const libraryFile = libraryFileName(librariesDir, library);
   if (fs.existsSync(libraryFile)) {
-    return JSON.parse(fs.readFileSync(libraryFile, { encoding: "utf8" })) as LibraryData
+    const libraryJson = await fsPromises.readFile(libraryFile, { encoding: "utf8" });
+    return JSON.parse(libraryJson) as LibraryData
   } else {
     return {
       versions: {
@@ -51,11 +54,11 @@ export function libraryRead(librariesDir: string, library: Library) : LibraryDat
   }
 }
 
-export function libraryWrite(librariesDir: string, library: Library, libraryData: LibraryData) {
-  fs.writeFileSync(
+export async function libraryWrite(librariesDir: string, library: Library, libraryData: LibraryData) {
+  return fsPromises.writeFile(
     libraryFileName(librariesDir, library),
     JSON.stringify(libraryData, null, 2),
-    { encoding: "utf-8" } 
+    { encoding: "utf-8" },
   );
 }
 

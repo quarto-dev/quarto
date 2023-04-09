@@ -70,8 +70,8 @@ export async function zoteroSyncWebLibrary(
   // check for library sync actions
   const syncActions = await librarySyncActions(zotero, library, groupSync, progress);
   if (hasLibrarySyncActions(syncActions)) {
-    const objects = librarySync(user, library, syncActions);
-    libraryWrite(userWebLibrariesDir(user), library, objects);
+    const objects = await librarySync(user, library, syncActions);
+    await libraryWrite(userWebLibrariesDir(user), library, objects);
   } 
 
   progress.report("Sync complete");
@@ -120,8 +120,8 @@ export async function zoteroSyncWebLibraries(zotero: ZoteroApi, progress?: SyncP
   const dir = userWebLibrariesDir(user);
   for (const sync of librariesSync) {
     if (hasLibrarySyncActions(sync.actions)) {
-      const objects = librarySync(user, sync.library, sync.actions);
-      libraryWrite(dir, sync.library, objects);
+      const objects = await librarySync(user, sync.library, sync.actions);
+      await libraryWrite(dir, sync.library, objects);
     } 
   }
 

@@ -47,7 +47,7 @@ export function zoteroWebCollectionSource(zoteroKey: string) : ZoteroCollectionS
           if (cachedSpec?.version === versions.items) {
             zoteroCollections.push({...cachedSpec, items: []});
           } else {
-            const libraryData = libraryRead(userWebLibrariesDir(zotero.user), library);
+            const libraryData = await libraryRead(userWebLibrariesDir(zotero.user), library);
             zoteroCollections.push({
               name: libraryCollectionName(library),
               version: libraryData.versions.items,

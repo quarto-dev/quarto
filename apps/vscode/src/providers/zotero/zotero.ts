@@ -13,14 +13,16 @@
  *
  */
 
-import { ExtensionContext, ProgressLocation, commands, window, workspace } from "vscode";
+import { ExtensionContext, ProgressLocation, commands, window, workspace, Uri } from "vscode";
 import { zoteroApi, zoteroSyncWebLibraries, zoteroValidateApiKey } from "editor-server";
 
 import { Command } from "../../core/command";
 import { LanguageClient } from "vscode-languageclient/node";
 import { lspClientTransport } from "core-node";
 import { editorZoteroJsonRpcServer } from "editor-core";
-import { ZoteroServer } from "editor-types";
+import { ZoteroCollectionSpec, ZoteroResult, ZoteroServer, kZoteroMyLibrary } from "editor-types";
+import { zoteroServerMethods } from "editor-server/src/server/zotero";
+import { JsonRpcRequestTransport } from "core";
 
 const kQuartoZoteroWebApiKey = "quartoZoteroWebApiKey";
 
@@ -44,6 +46,70 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
   commands.push(new ZoteroUnauthorizedCommand(kZoteroUnauthorized, context, zotero));
   return commands;
 
+}
+
+export function zoteroLspProxy(lspRequest: JsonRpcRequestTransport){
+
+  const zoteroLsp = editorZoteroJsonRpcServer(lspRequest); 
+
+  const handleZoteroResult = (result: ZoteroResult) => {
+    if (result.status === 'notfound' && result.unauthorized) {
+      commands.executeCommand(kZoteroUnauthorized);
+    }
+    return result;
+  };
+
+  const collectionsForFile = (collections: string[], file: string | null) => {
+    const fileCollections = [...collections];
+    if (fileCollections.length === 0) {
+      const zoteroConfig = workspace.getConfiguration(
+        "quarto.zotero", 
+        file ? Uri.file(file) : null
+      );
+      const groupLibraries = zoteroConfig.get<string[]>("groupLibraries", []);
+      fileCollections.push(...groupLibraries);
+    }
+    if (!fileCollections.includes(kZoteroMyLibrary)) {
+      fileCollections.push(kZoteroMyLibrary);
+    }
+    return fileCollections;
+  };
+
+  return zoteroServerMethods({
+    
+    ...zoteroLsp,
+
+    getCollections: async (
+      file: string | null,
+      collections: string[],
+      cached: ZoteroCollectionSpec[],
+      useCache: boolean,
+    ) : Promise<ZoteroResult> => {
+      return handleZoteroResult(
+        await zoteroLsp.getCollections(
+          file, 
+          collectionsForFile(collections, file), 
+          cached, 
+          useCache
+        )
+      );
+    },
+
+    getLibraryNames: async () : Promise<ZoteroResult> => {
+      return handleZoteroResult(
+        await zoteroLsp.getLibraryNames()
+      );
+    },
+  
+    getActiveCollectionSpecs: async (file: string | null, collections: string[]) : Promise<ZoteroResult> => {
+      return handleZoteroResult(
+        await zoteroLsp.getActiveCollectionSpecs(
+          file, 
+          collectionsForFile(collections, file)
+        )
+      );
+    }
+  });
 }
 
 export class ZoteroUnauthorizedCommand implements Command {

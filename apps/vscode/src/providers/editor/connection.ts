@@ -26,7 +26,6 @@ import {
   VSC_VE_GetActiveBlockContext,
   VSC_VE_SetBlockSelection,
   VSC_VEH_EditorResourceUri,
-  VSC_VEH_OnZoteroUnauthorized,
   VSC_VEH_GetHostContext, 
   VSC_VEH_ReopenSourceMode,
   VSC_VEH_OnEditorUpdated,
@@ -67,6 +66,7 @@ import {
   prefsServerMethods,
   codeViewServerMethods
 } from "editor-server";
+import { zoteroLspProxy } from "../zotero/zotero";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorClient(webviewPanel: WebviewPanel) 
@@ -104,7 +104,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
 // host interface provided to visual editor (vscode custom editor embedded in iframe)
 export function visualEditorServer(
   webviewPanel: WebviewPanel,
-  request: JsonRpcRequestTransport,
+  lspRequest: JsonRpcRequestTransport,
   host: VSCodeVisualEditorHost,
   prefsServer: PrefsServer,
   codeViewServer: CodeViewServer
@@ -116,6 +116,7 @@ export function visualEditorServer(
     ...prefsServerMethods(prefsServer),
     ...codeViewServerMethods(codeViewServer),
     ...editorHostMethods(host),
+    ...zoteroLspProxy(lspRequest)
   };
 
   // proxy unknown methods to the lsp
@@ -123,7 +124,7 @@ export function visualEditorServer(
     if (extensionMethods[name]) {
       return extensionMethods[name];
     } else {
-      return (params: unknown[]) => request(name, params);
+      return (params: unknown[]) => lspRequest(name, params);
     }
   };
 
@@ -148,7 +149,6 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
     [VSC_VEH_SaveDocument]: () => host.saveDocument(),
     [VSC_VEH_RenderDocument]: () => host.renderDocument(),
     [VSC_VEH_EditorResourceUri]: args => host.editorResourceUri(args[0]),
-    [VSC_VEH_OnZoteroUnauthorized]: args => host.onZoteroUnauthorized(),
     [VSC_VEH_OpenURL]: args => voidPromise(host.openURL(args[0])),
     [VSC_VEH_NavigateToXRef]: args => voidPromise(host.navigateToXRef(args[0], args[1])),
     [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0])),

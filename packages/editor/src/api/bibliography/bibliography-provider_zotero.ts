@@ -92,10 +92,6 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
             hasUpdates = hasUpdates || newCollections.length !== this.collections.length;
             this.allCollections = newCollections;
           }
-        } else if (result.status === 'notfound' && result.unauthorized) {
-          if (ui.context.onZoteroUnauthorized) {
-            ui.context.onZoteroUnauthorized();
-          }
         } else {
           // console.log(result.status);
         }

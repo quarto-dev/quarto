@@ -64,6 +64,7 @@ import {
   reopenEditorInSourceMode 
 } from "./toggle";
 import { executableLanguages } from "../cell/executors";
+import { zoteroLspProxy } from "../zotero/zotero";
 
 
 export interface QuartoVisualEditor extends QuartoEditor {
@@ -386,10 +387,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
       renderDocument: async () => {
         await commands.executeCommand("quarto.renderShortcut");
-      },
-
-      onZoteroUnauthorized: async () => {
-        await commands.executeCommand("quarto.zoteroUnauthorized");
       },
 
       // map resources to uris valid in the editor

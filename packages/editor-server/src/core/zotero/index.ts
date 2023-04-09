@@ -15,8 +15,6 @@
  
 
 
-// TODO: configuration for multiple libraries
-
-// TODO: json parsing should be async
+// sync when libraries pref changes
 
 export * from './web';

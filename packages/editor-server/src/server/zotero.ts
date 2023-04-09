@@ -99,15 +99,15 @@ export function zoteroServer(): ZoteroServer {
   };
 }
 
-export function zoteroServerMethods() : Record<string, JsonRpcServerMethod> {
-  const server = zoteroServer();
+export function zoteroServerMethods(server?: ZoteroServer) : Record<string, JsonRpcServerMethod> {
+  server = server || zoteroServer();
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kZoteroSetWebApiKey]: args => server.setWebAPIKey(args[0]),
-    [kZoteroValidateWebApiKey]: args => server.validateWebAPIKey(args[0]),
-    [kZoteroGetCollections]: args => server.getCollections(args[0], args[1], args[2], args[3]),
-    [kZoteroGetLibraryNames]: () => server.getLibraryNames(),
-    [kZoteroGetActiveCollectionSpecs]: args => server.getActiveCollectionSpecs(args[0], args[1]),
-    [kZoteroBetterBibtexExport]: args => server.betterBibtexExport(args[0], args[1], args[2])
+    [kZoteroSetWebApiKey]: args => server!.setWebAPIKey(args[0]),
+    [kZoteroValidateWebApiKey]: args => server!.validateWebAPIKey(args[0]),
+    [kZoteroGetCollections]: args => server!.getCollections(args[0], args[1], args[2], args[3]),
+    [kZoteroGetLibraryNames]: () => server!.getLibraryNames(),
+    [kZoteroGetActiveCollectionSpecs]: args => server!.getActiveCollectionSpecs(args[0], args[1]),
+    [kZoteroBetterBibtexExport]: args => server!.betterBibtexExport(args[0], args[1], args[2])
   }
   return methods;
 }

@@ -1115,6 +1115,16 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Write markdown links as references rather than inline. Reference links are written to the location specified in `#quarto.visualEditor.markdownReferences#`."
+        },
+        "quarto.zotero.groupLibraries": {
+          "scope": "window",
+          "type": "array",
+          "default": [],
+          "markdownDescription": "Zotero Group Libraries to enable (in addition to **My Library**, which is always enabled). Libraries should be specified using the full name of their Zotero Group. You can see a list of the group libraries your account has access to at <https://www.zotero.org/groups/>.",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
         }
       }
     },

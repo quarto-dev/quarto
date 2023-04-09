@@ -17,6 +17,7 @@
   padding-right: 4px;
   padding-left: 2px;
   vertical-align: middle;
+  max-width: none;
 }
 
 .pm-navigation-tree-node-label-div {

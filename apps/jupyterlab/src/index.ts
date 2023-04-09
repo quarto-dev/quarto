@@ -32,13 +32,14 @@ import { figures } from './providers/figures';
 import { figureDivs } from './providers/figure-divs';
 import { tableCaptions } from './providers/table-captions';
 import { spans } from './providers/spans';
+import { shortcodes } from './providers/shortcodes';
 
 const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   id: `${kPackageNamespace}:plugin`,
   autoStart: true,
   provides: kMarkdownItMgr,
   activate: (_app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension jupyter_quarto is activated!');
+    console.log('JupyterLab extension jupyterlab-quarto is activated!');
 
     // Create a markdown rendering manager 
     return markdownItManager();
@@ -69,7 +70,8 @@ const kQuartoExtensions = [
   mermaid,
   callouts,
   decorator,
-  yaml
+  yaml,
+  shortcodes
 ];
 
 

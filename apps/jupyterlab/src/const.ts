@@ -9,7 +9,7 @@ import { MarkdownItManager } from "./types";
 
 
 // The namespace for this project
-export const kPackageNamespace = 'jupyter_quarto';
+export const kPackageNamespace = 'jupyterlab-quarto';
 
 // The MarkdownIt manager token.
 export const kMarkdownItMgr = new Token<MarkdownItManager>(kPackageNamespace);

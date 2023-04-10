@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.81.0 (Unreleased)
+
+- Correct hover behavior for multiple equations on a single line
+
 ## 1.80.0 (Release on 09 April 2023)
 
 - Support Zotero Web Libraries in visual editor citation insert/completions

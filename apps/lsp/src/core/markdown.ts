@@ -149,12 +149,13 @@ class MarkdownTokens {
 
 const markdownTokens = new MarkdownTokens();
 
-const kInlineMathPattern = /\$([^ ].*?[^ ]?)\$/;
+const kInlineMathPattern = /\$([^ ].*?[^ ]?)\$/g;
 const kSingleLineDisplayMathPattern = /\$\$([^\n]+?)\$\$/;
 
 function inlineMathRange(pos: Position, line: string, pattern: RegExp) {
-  const match = line.match(pattern);
-  if (match) {
+  pattern.lastIndex = 0;
+  let match = pattern.exec(line);
+  while (match) {
     const range = Range.create(
       Position.create(pos.line, match.index || 0),
       Position.create(pos.line, (match.index || 0) + match[0].length)
@@ -168,6 +169,7 @@ function inlineMathRange(pos: Position, line: string, pattern: RegExp) {
         range,
       };
     }
+    match = pattern.exec(line);
   }
   return null;
 }

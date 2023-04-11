@@ -16,7 +16,7 @@
 
 import { CSL } from './csl';
 
-export const kZoteroSetWebApiKey = 'zotero_set_web_api_key';
+export const kZoteroSetLibraryConfig = 'zotero_set_library_config';
 export const kZoteroValidateWebApiKey = 'zotero_validate_web_api_key';
 export const kZoteroGetCollections = 'zotero_get_collections';
 export const kZoteroGetLibraryNames = 'zotero_get_library_names';
@@ -64,9 +64,15 @@ export interface ZoteroCollectionSource {
   getActiveCollectionSpecs: (collections: string[]) => Promise<ZoteroResult>;
 }
 
+export interface ZoteroLibraryConfig {
+  type: "none" | "local" | "web",
+  dataDir?: string,
+  apiKey?: string,
+}
+
 export interface ZoteroServer {
 
-  setWebAPIKey: (key: string) => Promise<void>;
+  setLibraryConfig: (config: ZoteroLibraryConfig) => Promise<void>;
 
   validateWebAPIKey: (key: string) => Promise<boolean>;
 

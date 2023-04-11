@@ -36,47 +36,87 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
   const lspRequest = lspClientTransport(lspClient);
   const zotero = editorZoteroJsonRpcServer(lspRequest);  
 
-  // set api key in back end if we have one
-  const zoteroKey = await context.secrets.get(kQuartoZoteroWebApiKey);
-  if (zoteroKey) {
-    await zotero.setWebAPIKey(zoteroKey);
-  }
+  // set quarto config for back end
+  await syncZoteroConfig(context, zotero);
 
   // register commands
   const commands: Command[] = [];
   commands.push(new ZoteroConfigureLibraryCommand(kZoteroConfigureLibrary, context, zotero));
   commands.push(new ZoteroSyncWebLibraryCommand(kZoteroSyncWebLibrary, context, zotero));
   commands.push(new ZoteroUnauthorizedCommand(kZoteroUnauthorized, context, zotero));
-  
-  // monitor changes to group libraries config and perform a foreground re-sync
-  monitorNewGroupLibraries(context);
- 
+   
   // return commands
   return commands;
-
 }
 
-function monitorNewGroupLibraries(context: ExtensionContext) {
+
+async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer) {
 
   const kZoteroConfig = "quarto.zotero";
+  const kLibrary = "library";
+  const kZoteroLibrary = `${kZoteroConfig}.${kLibrary}`;
+  const kDataDir = "dataDir";
+  const kZoteroDataDir = `${kZoteroConfig}.${kDataDir}`;
   const kGroupLibraries = "groupLibraries";
   const kZoteroGroupLibraries = `${kZoteroConfig}.${kGroupLibraries}`;
 
+  // set initial config
+  const setLspLibraryConfig = async () => {
+    const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
+    const type = zoteroConfig.get<"none"|"local"|"web">(kLibrary, "local");
+    const dataDir = zoteroConfig.get<string>(kDataDir, "~/Zotero");
+    const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
+    await zotero.setLibraryConfig({
+      type,
+      dataDir,
+      apiKey
+    });
+  };
+  await setLspLibraryConfig();
+
+  // note initial group library config (for detecting changes)
   const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
   let groupLibraries = zoteroConfig.get<string[]>(kGroupLibraries, []);
 
+  // monitor changes to web api key and update lsp
+  context.secrets.onDidChange(async (e) => {
+    if (e.key === kQuartoZoteroWebApiKey) {
+      await setLspLibraryConfig();
+    }
+  });
+
+  // monitor changes to configuration
   context.subscriptions.push(workspace.onDidChangeConfiguration(async (e) => {
+    
+    // sync changes to base config
+    if (e.affectsConfiguration(kZoteroLibrary) || 
+        e.affectsConfiguration(kZoteroDataDir)) {
+
+      // if we are switching to web then prompt for an api key if we don't have one
+      const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
+      if (zoteroConfig.get(kLibrary) === "web" && 
+          !(await context.secrets.get(kQuartoZoteroWebApiKey))) {
+        await commands.executeCommand(kZoteroConfigureLibrary);
+      } else {
+        await setLspLibraryConfig();
+      }
+    }
+
+    // initiate a sync for web group libraries
     if (e.affectsConfiguration(kZoteroGroupLibraries)) {
       // read updated library list
       const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
       const updatedGroupLibraries =  zoteroConfig.get<string[]>(kGroupLibraries, []);
-      // sync if there are new libraries added
-      if (updatedGroupLibraries.length > groupLibraries.length) {
+      
+      // sync if we are in web mode and there are new libraries added
+      if (zoteroConfig.get(kLibrary) === "web" && 
+          updatedGroupLibraries.length > groupLibraries.length) {
         const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
         if (apiKey) {
           await syncWebLibraries(apiKey);
         }
       }
+
       // update persistent list
       groupLibraries = updatedGroupLibraries;
     }
@@ -175,7 +215,6 @@ class ZoteroConfigureLibraryCommand implements Command {
       // helper to save it
       const saveApiKey = async () => {
         await this.context.secrets.store(kQuartoZoteroWebApiKey,apiKey);
-        await this.zotero.setWebAPIKey(apiKey);
         inputBox.hide();
       };
 
@@ -240,7 +279,7 @@ class ZoteroUnauthorizedCommand implements Command {
 
   async execute() {
     const kYes = "Configure Zotero API Key";
-    const kNo =  "Disable Zotero Connection";
+    const kNo =  "Disable Zotero Web Library";
     const result = await window.showInformationMessage(
       "Zotero API Key Unauthorized",
       { 
@@ -253,8 +292,7 @@ class ZoteroUnauthorizedCommand implements Command {
     if (result === kYes) {
       await commands.executeCommand(kZoteroConfigureLibrary);
     } else if (result === kNo) {
-      await this.context.secrets.store(kQuartoZoteroWebApiKey,"");
-      await this.zotero.setWebAPIKey("");
+      await this.context.secrets.store(kQuartoZoteroWebApiKey, "");
     }
   }
 }

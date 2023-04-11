@@ -21,10 +21,11 @@ import {
   kZoteroGetCollections, 
   kZoteroGetLibraryNames, 
   kZoteroMyLibrary, 
-  kZoteroSetWebApiKey,
+  kZoteroSetLibraryConfig,
   kZoteroValidateWebApiKey, 
   ZoteroCollectionSource, 
   ZoteroCollectionSpec, 
+  ZoteroLibraryConfig, 
   ZoteroResult,  
   ZoteroServer 
 } from "editor-types";
@@ -36,12 +37,15 @@ export function zoteroServer(): ZoteroServer {
 
   return {
 
-    async setWebAPIKey(key: string): Promise<void> {
-      if (key) {
-        source = zoteroWebCollectionSource(key);
-      } else {
-        source = undefined;
+    async setLibraryConfig(config: ZoteroLibraryConfig): Promise<void> {
+      // reconfigure source
+      source = undefined;
+
+      // set to web if we have an api key
+      if (config.type === "web" && config.apiKey) {
+        source = zoteroWebCollectionSource(config.apiKey); 
       }
+      
     },
 
     async validateWebAPIKey(key: string): Promise<boolean> {
@@ -102,7 +106,7 @@ export function zoteroServer(): ZoteroServer {
 export function zoteroServerMethods(server?: ZoteroServer) : Record<string, JsonRpcServerMethod> {
   server = server || zoteroServer();
   const methods: Record<string, JsonRpcServerMethod> = {
-    [kZoteroSetWebApiKey]: args => server!.setWebAPIKey(args[0]),
+    [kZoteroSetLibraryConfig]: args => server!.setLibraryConfig(args[0]),
     [kZoteroValidateWebApiKey]: args => server!.validateWebAPIKey(args[0]),
     [kZoteroGetCollections]: args => server!.getCollections(args[0], args[1], args[2], args[3]),
     [kZoteroGetLibraryNames]: () => server!.getLibraryNames(),

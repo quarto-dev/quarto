@@ -1163,7 +1163,7 @@
           "scope": "window",
           "type": "string",
           "default": "~/Zotero",
-          "markdownDescription": "Zotero data directory (used in `local` library configuration). Note that this can normally be auto-detected. Specify explicitly only if required."
+          "markdownDescription": "Zotero data directory (used in `local` library configuration). Note that this can normally be auto-detected (specify explicitly only if required)."
         },
         "quarto.zotero.groupLibraries": {
           "order": 52,

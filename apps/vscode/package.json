@@ -875,6 +875,7 @@
       "title": "Quarto",
       "properties": {
         "quarto.assist.updateMode": {
+          "order": 18,
           "type": "string",
           "description": "Controls how the Quarto Assist panel is updated when the cursor moves.",
           "default": "sticky",
@@ -888,24 +889,28 @@
           ]
         },
         "quarto.cells.hoverHelp.enabled": {
+          "order": 23,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Show help when hovering over functions."
         },
         "quarto.cells.signatureHelp.enabled": {
+          "order": 24,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Show parameter help when editing function calls."
         },
         "quarto.cells.background.enabled": {
+          "order": 19,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Enable coloring the background of executable code cells."
         },
         "quarto.cells.background.light": {
+          "order": 20,
           "scope": "window",
           "type": "string",
           "format": "color",
@@ -913,6 +918,7 @@
           "markdownDescription": "CSS color for background of executable code cells on light themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
         },
         "quarto.cells.background.dark": {
+          "order": 21,
           "scope": "window",
           "type": "string",
           "format": "color",
@@ -920,18 +926,21 @@
           "markdownDescription": "CSS color for background of executable code cells on dark themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
         },
         "quarto.cells.background.delay": {
+          "order": 22,
           "scope": "window",
           "type": "integer",
           "default": 250,
           "markdownDescription": "Millisecond delay between background color updates."
         },
         "quarto.mathjax.scale": {
+          "order": 15,
           "scope": "window",
           "type": "number",
           "default": 1,
           "markdownDescription": "Scaling of MathJax preview."
         },
         "quarto.mathjax.extensions": {
+          "order": 16,
           "scope": "window",
           "type": "array",
           "default": [],
@@ -966,23 +975,27 @@
           "uniqueItems": true
         },
         "quarto.lua.provideTypes": {
+          "order": 17,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Automatically provide Pandoc and Quarto Lua types (.luarc.json) in workspaces with Quarto Lua scripts."
         },
         "quarto.path": {
+          "order": 11,
           "scope": "window",
           "type": "string",
           "default": "",
           "markdownDescription": "If there is a version of Quarto on your `PATH`, that version will always be used. If Quarto is not on your `PATH`, you may specify a Quarto executable location here."
         },
         "quarto.render.renderOnSave": {
+          "order": 12,
           "scope": "window",
           "type": "boolean",
           "markdownDescription": "Automatically render documents when they are saved. Note that you can also use the `render-on-save` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  render-on-save: true\n---\n```\n"
         },
         "quarto.render.previewType": {
+          "order": 13,
           "scope": "window",
           "type": "string",
           "markdownDescription": "Location for document preview after render",
@@ -999,30 +1012,35 @@
           ]
         },
         "quarto.render.previewReveal": {
+          "order": 14,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
         },
         "quarto.visualEditor.fontSize": {
+          "order": 31,
           "scope": "resource",
           "type": "number",
           "default": 0,
           "markdownDescription": "Controls the font size in pixels for the Visual Editor. When set to 0, the `#editor.fontSize#` is used."
         },
         "quarto.visualEditor.fontFamily": {
+          "order": 32,
           "scope": "resource",
           "type": "string",
           "default": "",
           "markdownDescription": "Controls the font family for the visual editor. When unspecified, the Markdown Preview font family is used."
         },
         "quarto.visualEditor.maxContentWidth": {
+          "order": 30,
           "scope": "resource",
           "type": "number",
           "default": 1000,
           "markdownDescription": "Controls the maximum width (in pixels) of the editor's content"
         },
         "quarto.visualEditor.defaultListSpacing": {
+          "order": 35,
           "scope": "resource",
           "type": "string",
           "markdownDescription": "Default spacing between list items",
@@ -1033,18 +1051,21 @@
           ]
         },
         "quarto.visualEditor.lineNumbers": {
+          "order": 33,
           "scope": "resource",
           "type": "boolean",
           "default": "true",
           "markdownDescription": "Show line numbers in executable code cells"
         },
         "quarto.visualEditor.spelling": {
+          "order": 40,
           "scope": "resource",
           "type": "boolean",
           "default": "true",
           "markdownDescription": "Enable spell checking"
         },
         "quarto.visualEditor.spellingDictionary": {
+          "order": 41,
           "scope": "resource",
           "type": "string",
           "default": "en_US",
@@ -1073,6 +1094,7 @@
           ]
         },
         "quarto.visualEditor.markdownWrap": {
+          "order": 36,
           "scope": "resource",
           "type": "string",
           "markdownDescription": "Automatic text wrapping (line breaks). Note that you can also use the `editor: markdown: wrap` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    wrap: column\n---\n```\n",
@@ -1089,12 +1111,14 @@
           ]
         },
         "quarto.visualEditor.markdownWrapColumn": {
+          "order": 37,
           "scope": "resource",
           "type": "number",
           "default": 72,
           "markdownDescription": "Column to wrap at when `markdownWrap` is set to `column`. Note that you can also use the `editor: markdown: wrap` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    wrap: 72\n---\n```\n"
         },
         "quarto.visualEditor.markdownReferences": {
+          "order": 38,
           "scope": "resource",
           "type": "string",
           "markdownDescription": "Scope to write markdown references (footnotes and reference links) at the end of. Note that you can also use the `editor: markdown: references: location` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  markdown:\n    references:\n      location: document\n---\n```\n",
@@ -1111,12 +1135,38 @@
           ]
         },
         "quarto.visualEditor.markdownReferenceLinks": {
+          "order": 39,
           "scope": "resource",
           "type": "boolean",
           "default": false,
           "markdownDescription": "Write markdown links as references rather than inline. Reference links are written to the location specified in `#quarto.visualEditor.markdownReferences#`."
         },
+        "quarto.zotero.library": {
+          "order": 50,
+          "scope": "window",
+          "type": "string",
+          "markdownDescription": "Location of Zotero references library (`local`, `web`, or `none`).",
+          "default": "local",
+          "enum": [
+            "none",
+            "local",
+            "web"
+          ],
+          "markdownEnumDescriptions": [
+            "Do not use Zotero libraries for inserting references.",
+            "Use my locally installed copy of Zotero for inserting references.",
+            "Use my Zotero Web Library for inserting references. "
+          ]
+        },
+        "quarto.zotero.dataDir": {
+          "order": 51,
+          "scope": "window",
+          "type": "string",
+          "default": "(Auto Detect)",
+          "markdownDescription": "Zotero data directory (used in `local` library configuration). Note that this can normally be auto-detected. Specify explicitly only if required."
+        },
         "quarto.zotero.groupLibraries": {
+          "order": 52,
           "scope": "window",
           "type": "array",
           "default": [],

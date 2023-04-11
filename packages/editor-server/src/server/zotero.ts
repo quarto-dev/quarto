@@ -30,6 +30,7 @@ import {
   ZoteroServer 
 } from "editor-types";
 import { zoteroValidateApiKey, zoteroWebCollectionSource } from "../core/zotero/web";
+import { zoteroLocalCollectionSource } from "../core";
 
 export function zoteroServer(): ZoteroServer {
 
@@ -41,11 +42,15 @@ export function zoteroServer(): ZoteroServer {
       // reconfigure source
       source = undefined;
 
-      // set to web if we have an api key
+      // web
       if (config.type === "web" && config.apiKey) {
         source = zoteroWebCollectionSource(config.apiKey); 
+
+      // local
+      } else if (config.type === "local") {
+        source = zoteroLocalCollectionSource(config.dataDir);
       }
-      
+
     },
 
     async validateWebAPIKey(key: string): Promise<boolean> {
@@ -53,10 +58,10 @@ export function zoteroServer(): ZoteroServer {
     },
 
     async getCollections(
-      file: string | null,
+      _file: string | null,
       collections: string[],
       cached: ZoteroCollectionSpec[],
-      useCache: boolean
+      _useCache: boolean
     ): Promise<ZoteroResult> {
       if (source) {
         if (collections.length === 0) {

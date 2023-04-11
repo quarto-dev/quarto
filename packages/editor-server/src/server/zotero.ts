@@ -99,9 +99,9 @@ export function zoteroServer(): ZoteroServer {
     // communciate w/ Better BibTeX. Otherwise returns
     // status: ok with exported text in message.
     betterBibtexExport(
-      itemKeys: string[],
-      translatorId: string,
-      libraryId: number
+      _itemKeys: string[],
+      _translatorId: string,
+      _libraryId: number
     ): Promise<ZoteroResult> {
       throw new Error("not supported");
     },

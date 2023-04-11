@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * platform.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -14,14 +14,16 @@
  */
 
 
-export * from './jsonrpc';
-export * from './jsonrpc-lsp'
-export * from './appdirs';
-export * from './exec';
-export * from './git';
-export * from './mime';
-export * from './path';
-export * from './uuid';
-export * from './platform';
+export function isWindows() {
+  return process.platform === "win32";
+}
+
+export function isMac() {
+  return process.platform === "darwin";
+}
+
+export function isLinux() {
+  return process.platform === "linux";
+}
 
 

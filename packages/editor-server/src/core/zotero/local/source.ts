@@ -14,10 +14,14 @@
  */
 
 import { ZoteroCollectionSource, ZoteroCollectionSpec, ZoteroResult } from "editor-types";
+import { zoteroDataDir } from "./datadir";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollectionSource {
  
+  // resolve data dir
+  dataDir = zoteroDataDir(dataDir);
+  
   return {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getCollections(collections: string[], cached: ZoteroCollectionSpec[]) : Promise<ZoteroResult> {

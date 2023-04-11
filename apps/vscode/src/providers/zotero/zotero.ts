@@ -64,7 +64,7 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
   const setLspLibraryConfig = async () => {
     const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
     const type = zoteroConfig.get<"none"|"local"|"web">(kLibrary, "local");
-    const dataDir = zoteroConfig.get<string>(kDataDir, "~/Zotero");
+    const dataDir = zoteroConfig.get<string>(kDataDir, "");
     const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
     await zotero.setLibraryConfig({
       type,

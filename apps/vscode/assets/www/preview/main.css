@@ -86,10 +86,10 @@ button:focus {
 }
 
 .content {
+  --scale-factor: 0.80;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
+  overflow: hidden;
 }
 
 iframe {
@@ -97,6 +97,23 @@ iframe {
   height: 100%;
   border: none;
   background: var(--vscode-editor-background);
+  zoom: var(--scale-factor);
+  transform-origin: 0 0;
+  -moz-transform-origin: 0 0;
+  -o-transform-origin: 0 0;
+  -webkit-transform-origin: 0 0;
+  transform: scale(var(--scale-factor));
+  -moz-transform: scale(var(--scale-factor));
+  -o-transform: scale(var(--scale-factor));
+  -webkit-transform: scale(var(--scale-factor));
+  width: calc(1/var(--scale-factor) * 100%);
+  height: calc(1/var(--scale-factor) * 100%);
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  iframe {
+    zoom: 1;
+  }
 }
 
 .iframe-focused-alert {
@@ -117,3 +134,8 @@ iframe {
 .iframe-focused.enable-focus-lock-indicator .iframe-focused-alert {
   display: none;
 }
+
+:root {
+  --scale-factor: 0.75;
+}
+

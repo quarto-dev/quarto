@@ -12,22 +12,8 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
+ 
 
-import { zoteroTrace } from "../trace";
-import { SyncProgress } from "./types";
-
-export { zoteroTrace } from "../trace";
-
-export function zoteroTraceProgress() : SyncProgress {
-  return {
-    report(message: string) {
-      zoteroTrace(message);
-    },
-    log(url) {
-      zoteroTrace(url);
-    },
-    cancelled() {
-      return false;
-    },
-  }
+export function zoteroTrace(msg: string) {
+  console.log(`[zotero]: ${msg}`);
 }

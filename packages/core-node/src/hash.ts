@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * hash.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,16 +13,8 @@
  *
  */
 
+import { createHash } from "crypto"
 
-export * from './jsonrpc';
-export * from './jsonrpc-lsp'
-export * from './appdirs';
-export * from './exec';
-export * from './git';
-export * from './mime';
-export * from './path';
-export * from './uuid';
-export * from './platform';
-export * from './hash';
-
-
+export function md5Hash(content: string) : string {
+  return createHash("md5").update(content).digest("hex")
+}

@@ -159,6 +159,13 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
       <input class="url-input" type="text">
 
       <nav class="controls">
+        <select id="zoom">
+          <option value="auto">Zoom: (Auto)</option>
+          <option value="70">Zoom: 70%</option>
+          <option value="80" selected>Zoom: 80%</option>
+          <option value="90">Zoom: 90%</option>
+          <option value="100">Zoom: 100%</option>
+        </select>
         <button
           title="Open in browser"
           class="open-external-button icon"><i class="codicon codicon-link-external"></i></button>

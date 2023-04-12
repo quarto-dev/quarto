@@ -33,6 +33,37 @@ const updateAddressBar = (href) => {
   vscode.setState({ url: url.toString() });
 };
 
+// preview zoom level
+const zoomEl = document.querySelector("#zoom");
+const root = document.querySelector(':root');
+const updateScaleFactor = () => {
+  const zoom = zoomEl.value;
+  let scaleFactor = 1;
+  if (zoom === "auto") {
+    // we want to always show at least 1050px zoomed
+    const kBreakpoint = 1050;
+    if (window.innerWidth < kBreakpoint) {
+      scaleFactor = window.innerWidth / kBreakpoint;
+    }
+  } else {
+    scaleFactor = Number(zoomEl.value) / 100;
+  }
+  root.style.setProperty("--scale-factor", scaleFactor);
+};
+updateScaleFactor();
+zoomEl.addEventListener("change", updateScaleFactor);
+let throttled = false;
+window.addEventListener("resize", () => {
+  if (!throttled) {
+    updateScaleFactor();
+    throttled = true;
+    setTimeout(() => {
+      throttled = false; 
+    }, 200);
+  }
+});
+
+
 window.addEventListener("message", (e) => {
   switch (e.data.type || e.data.message) {
     // forward keydown events so shortcuts can work in vscode, see:

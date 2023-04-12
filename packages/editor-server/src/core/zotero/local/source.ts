@@ -13,8 +13,10 @@
  *
  */
 
-import { ZoteroCollectionSource, ZoteroCollectionSpec, ZoteroResult } from "editor-types";
+
+import { ZoteroCollection, ZoteroCollectionSource, ZoteroCollectionSpec, ZoteroResult } from "editor-types";
 import { zoteroDataDir } from "./datadir";
+import { withZoteroDb } from "./db";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollectionSource {
@@ -25,15 +27,26 @@ export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollection
   return {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getCollections(collections: string[], cached: ZoteroCollectionSpec[]) : Promise<ZoteroResult> {
-      try {
-        return {
-          status: 'ok',
-          message: [],
-          warning: '',
-          error: ''
+      if (dataDir) {
+        try {
+           // get collections
+          const collections = await withZoteroDb<ZoteroCollection[]>(dataDir, async () => {
+            return [];
+          });
+
+          // return result
+          return {
+            status: 'ok',
+            message: collections,
+            warning: '',
+            error: ''
+          }
+        } catch(error) {
+          console.error(error);
+          return handleZoteroError(error);
         }
-      } catch(error) {
-        return handleZoteroError(error);
+      } else {
+        return zoteroResultEmpty();
       }
     },
 
@@ -72,5 +85,14 @@ function handleZoteroError(error: unknown) : ZoteroResult {
     message: null,
     warning: '',
     error: error instanceof Error ? error.message : JSON.stringify(error)
+  }
+}
+
+function zoteroResultEmpty(message = []) : ZoteroResult {
+  return {
+    status: 'ok',
+    message,
+    warning: '',
+    error: ''
   }
 }

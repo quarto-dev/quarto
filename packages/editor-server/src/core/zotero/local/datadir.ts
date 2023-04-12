@@ -1,5 +1,5 @@
 /*
- * detect.ts
+ * datadir.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -63,7 +63,7 @@ function zoteroProfilesDir() {
 // https://www.zotero.org/support/zotero_data
 function zoteroDefaultDataDir() {
   const homeDir = userHomeDir();
-  return path.join("Zotero");
+  return path.join(homeDir, "Zotero");
 }
 
 function platformProfileDir(profilePath: string) {

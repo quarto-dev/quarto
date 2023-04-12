@@ -57,13 +57,23 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
   const kZoteroGroupLibraries = `${kZoteroConfig}.${kGroupLibraries}`;
 
   // set initial config
-  const setLspLibraryConfig = async () => {
-    const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
-    await zotero.setLibraryConfig({
-      type: "web",
-      dataDir: "",
-      apiKey
-    });
+  const setLspLibraryConfig = async (retry?: number) => {
+    if (retry === 5) {
+      return;
+    }
+    try {
+      const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
+      await zotero.setLibraryConfig({
+        type: "web",
+        dataDir: "",
+        apiKey
+      });
+    } catch(error) {
+      const message = error instanceof Error ? error.message : JSON.stringify(error);
+      console.log("Error setting zotero library config: " + message);
+      setTimeout(() => setLspLibraryConfig((retry || 0) + 1), 1000);
+    }
+    
   };
   await setLspLibraryConfig();
 

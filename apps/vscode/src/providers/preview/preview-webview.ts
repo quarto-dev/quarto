@@ -13,6 +13,7 @@
  *
  */
 
+
 import {
   env,
   Uri,
@@ -20,11 +21,15 @@ import {
   workspace,
   window,
   ColorThemeKind,
+  ExtensionContext,
 } from "vscode";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
 
+const kQuarotPreviewZoomLevel = "quartoPreviewZoomLevel";
+
 export interface QuartoPreviewState {
   url: string;
+  zoomLevel?: "auto" | number;
   slideIndex?: number;
 }
 
@@ -47,15 +52,18 @@ export class QuartoPreviewWebviewManager extends QuartoWebviewManager<
       this.activeView_.setOnError(handler);
     }
   }
+  public getZoomLevelConfig() : "auto" | number {
+    return this.context.globalState.get<"auto" | number>(kQuarotPreviewZoomLevel, "auto");
+  }
 }
 
 export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
   public constructor(
-    extensionUri: Uri,
+    context: ExtensionContext,
     state: QuartoPreviewState,
     webviewPanel: WebviewPanel
   ) {
-    super(extensionUri, state, webviewPanel);
+    super(context, state, webviewPanel);
 
     this._register(
       this._webviewPanel.webview.onDidReceiveMessage((e) => {
@@ -72,6 +80,9 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
             if (this.onError_) {
               this.onError_(e.msg);
             }
+            break;
+          case "zoomLevelChanged":
+            context.globalState.update(kQuarotPreviewZoomLevel, e.msg);
             break;
         }
       })
@@ -131,6 +142,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
     <meta id="simple-browser-settings" data-settings="${this.escapeAttribute(
       JSON.stringify({
         url: state.url,
+        zoomLevel: state.zoomLevel,
         slideIndex: state.slideIndex,
         focusLockEnabled: configuration.get<boolean>(
           "focusLockIndicator.enabled",
@@ -162,7 +174,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
         <select id="zoom">
           <option value="auto">Zoom: (Auto)</option>
           <option value="70">Zoom: 70%</option>
-          <option value="80" selected>Zoom: 80%</option>
+          <option value="80">Zoom: 80%</option>
           <option value="90">Zoom: 90%</option>
           <option value="100">Zoom: 100%</option>
         </select>

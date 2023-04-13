@@ -634,7 +634,11 @@ class PreviewManager {
     ) {
       // https://code.visualstudio.com/api/advanced-topics/remote-extensions
       const previewUrl = (await vscode.env.asExternalUri(Uri.parse(this.previewUrl_!))).toString();
-      this.webviewManager_.showWebview( { url: previewUrl, slideIndex: this.previewSlideIndex_ }, {
+      this.webviewManager_.showWebview({ 
+        url: previewUrl, 
+        zoomLevel: this.zoomLevel(this.previewOutputFile_),
+        slideIndex: this.previewSlideIndex_ 
+      }, {
         preserveFocus: true,
         viewColumn: ViewColumn.Beside,
       });
@@ -668,6 +672,15 @@ class PreviewManager {
       return Uri.file(path.join(this.targetDir()!, file));
     }
   }
+
+  private zoomLevel(uri?: Uri) {
+    if (isHtmlContent(uri?.toString())) {
+      return this.webviewManager_.getZoomLevelConfig();
+    } else {
+      return undefined;
+    }
+  }
+
 
   private isBrowserPreviewable(uri?: Uri) {
     return (

@@ -36,8 +36,8 @@ const updateAddressBar = (href) => {
 // preview zoom level
 const zoomEl = document.querySelector("#zoom");
 const root = document.querySelector(':root');
+const body = document.body;
 const updateScaleFactor = () => {
-  const zoom = zoomEl.value;
   let scaleFactor = 1;
   if (zoom === "auto") {
     // we want to always show at least 1050px zoomed
@@ -45,23 +45,38 @@ const updateScaleFactor = () => {
     if (window.innerWidth < kBreakpoint) {
       scaleFactor = window.innerWidth / kBreakpoint;
     }
-  } else {
+  } else if (zoomEl.value) {
     scaleFactor = Number(zoomEl.value) / 100;
   }
   root.style.setProperty("--scale-factor", scaleFactor);
 };
-updateScaleFactor();
-zoomEl.addEventListener("change", updateScaleFactor);
-let throttled = false;
-window.addEventListener("resize", () => {
-  if (!throttled) {
+const disableScaleFactor = () => {
+  body.classList.remove("scaled");
+};
+if (settings.zoomLevel) {
+  body.classList.add("scaled");
+  zoomEl.value = settings.zoomLevel;
+  updateScaleFactor();
+  zoomEl.addEventListener("change", () => {
     updateScaleFactor();
-    throttled = true;
-    setTimeout(() => {
-      throttled = false; 
-    }, 200);
-  }
-});
+    vscode.postMessage({
+      type: "zoomLevelChanged",
+      msg: zoomEl.value,
+    });
+  });
+  let throttled = false;
+  window.addEventListener("resize", () => {
+    if (!throttled) {
+      updateScaleFactor();
+      throttled = true;
+      setTimeout(() => {
+        throttled = false; 
+      }, 200);
+    }
+  });
+} else {
+  disableScaleFactor();
+}
 
 
 window.addEventListener("message", (e) => {
@@ -111,6 +126,8 @@ window.addEventListener("message", (e) => {
       break;
     }
     case "reveal-init": {
+      // disable scaling
+      disableScaleFactor();
       // set the slide index
       const slides = e.data.data.slides;
       const index = slideIndex || settings.slideIndex;

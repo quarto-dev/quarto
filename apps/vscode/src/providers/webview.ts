@@ -34,11 +34,11 @@ export interface ShowOptions {
 
 export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
   constructor(
-    context: ExtensionContext,
+    protected readonly context: ExtensionContext,
     private readonly viewType_: string,
     private readonly title_: string,
     private webviewType_: new (
-      extensionUri: Uri,
+      context: ExtensionContext,
       state: S,
       webviewPanel: WebviewPanel
     ) => T
@@ -63,7 +63,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     if (this.activeView_) {
       this.activeView_.show(state, options);
     } else {
-      const view = this.createWebview(this.extensionUri_, state, options);
+      const view = this.createWebview(this.context, state, options);
       this.registerWebviewListeners(view);
       this.activeView_ = view;
     }
@@ -108,7 +108,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
   */
 
   private createWebview(
-    extensionUri: Uri,
+    context: ExtensionContext,
     state: S,
     showOptions?: ShowOptions
   ): T {
@@ -123,11 +123,11 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
         enableScripts: true,
         enableForms: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [Uri.joinPath(extensionUri, "assets", "www")],
+        localResourceRoots: [Uri.joinPath(context.extensionUri, "assets", "www")],
       }
     );
 
-    const quartoWebview = new this.webviewType_(extensionUri, state, webview);
+    const quartoWebview = new this.webviewType_(context, state, webview);
 
     return quartoWebview;
   }
@@ -167,7 +167,7 @@ export abstract class QuartoWebview<T> extends Disposable {
   public readonly onDispose = this._onDidDispose.event;
 
   public constructor(
-    private readonly extensionUri: Uri,
+    private readonly context: ExtensionContext,
     state: T,
     webviewPanel: WebviewPanel
   ) {
@@ -277,7 +277,7 @@ export abstract class QuartoWebview<T> extends Disposable {
 
   protected extensionResourceUrl(parts: string[]): Uri {
     return this._webviewPanel.webview.asWebviewUri(
-      Uri.joinPath(this.extensionUri, ...parts)
+      Uri.joinPath(this.context.extensionUri, ...parts)
     );
   }
 

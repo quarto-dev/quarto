@@ -108,6 +108,17 @@ iframe {
   height: 100%;
   border: none;
   background: var(--vscode-editor-background);
+}
+
+#zoom {
+  display: none;
+}
+
+.scaled #zoom {
+  display: initial;
+}
+
+.scaled iframe {
   zoom: var(--scale-factor);
   transform-origin: 0 0;
   -moz-transform-origin: 0 0;
@@ -122,10 +133,11 @@ iframe {
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
-  iframe {
+  .scaled iframe {
     zoom: 1;
   }
 }
+
 
 .iframe-focused-alert {
   display: none;

@@ -19,10 +19,23 @@ import type { RendererContext } from 'vscode-notebook-renderer';
 
 import attrPlugin from "markdown-it-attrs";
 import footnotes from "markdown-it-footnote";
+import deflistPlugin from "markdown-it-deflist";
+import subPlugin from "markdown-it-sub";
+import supPlugin from 'markdown-it-sup';
+import taskListPlugin from 'markdown-it-task-lists';
+
+import { figuresPlugin } from './plugins/figures';
+import { figureDivsPlugin } from './plugins/figure-divs';
+import { tableCaptionPlugin } from './plugins/table-captions';
+import { spansPlugin } from './plugins/spans';
 import { citationPlugin } from './plugins/cites';
 import { divPlugin } from './plugins/divs';
 import { calloutPlugin } from './plugins/callouts';
 import { decoratorPlugin } from './plugins/decorator';
+import gridTableRulePlugin from './plugins/gridtables';
+import { shortcodePlugin } from './plugins/shortcodes';
+import { yamlPlugin } from './plugins/yaml';
+//import mermaidPlugin from "./plugins/mermaid";
 
 
 const styleHref = import.meta.url.replace(/index.js$/, 'styles.css');
@@ -58,46 +71,32 @@ export async function activate(ctx: RendererContext<void>) {
 
 
 	markdownItRenderer.extendMarkdownIt((md: MarkdownIt) => {
-
     const render = md.render.bind(md);
+    md.render = (src: string, env: Record<string,unknown>) => {      
 
-    md.render = (src: string, env: Record<string,unknown>) => {
-      
+      // TODO: Process divs 
+
       return render(src, env);
     }
 
 
 		return md.use(footnotes, {})
-             .use(citationPlugin, {})
+             .use(spansPlugin, {})
              .use(attrPlugin, {})
+             .use(deflistPlugin, {})
+             .use(figuresPlugin, {})
+             .use(gridTableRulePlugin, {})
+             .use(subPlugin, {})
+             .use(supPlugin, {})
+             .use(taskListPlugin, {})
              .use(divPlugin, {})
+             .use(figureDivsPlugin, {})
+             .use(tableCaptionPlugin, {})
+             .use(citationPlugin, {})
+             //.use(mermaidPlugin, {}) // TODO: mermaid breaks other plugins
              .use(calloutPlugin, {})
              .use(decoratorPlugin, {})
-
-
+             .use(yamlPlugin)
+             .use(shortcodePlugin, {})
 	});
 }
-
-/*
-  footnotes, // footnote seriously render in the cell in which they appear in :(
-  spans,
-  attrs,
-  deflist,
-  figures,
-  gridtables,
-  sub,
-  sup,
-  tasklists,
-  divs,
-  math
-  figureDivs,
-  tableCaptions,
-  cites,
-  mermaid,
-  callouts,
-  decorator,
-  yaml,
-  shortcodes
-
-
-  */

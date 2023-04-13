@@ -46,7 +46,12 @@
 
 .quarto-frontmatter {
   font-size: 0.9em !important;
-  line-height: 0.9em !important;
+  line-height: 0.9em !important;  
+}
+
+pre.quarto-frontmatter-container {
+  border: solid var(--vscode-panel-border) 1px;
+  width: calc(100% - 0.6em);  
 }
 
 .quarto-abstract {
@@ -55,12 +60,20 @@
 
 /* Decorated Divs */
 
+pre {
+  border: solid var(--vscode-panel-border) 1px;
+  width: calc(100% - 0.6em)
+}
+
 .quarto-div {
-  border: solid 1px var(--jp-border-color0);
+  border: solid 1px var(--vscode-panel-border);
   border-radius: 3px;
-  background-color: #EEEEEE33;
+  background-color: #EEEEEE11;
+  color: var(--vscode-foreground);
   padding: 1em;
   margin-bottom: 1em;
+  box-sizing: border-box;
+  width: calc(100% - 0.6em);
 }
 
 .quarto-attribute-decorator + h1,
@@ -88,11 +101,10 @@
 }
 
 .quarto-attribute-decorator .quarto-attribute-decorator-content {
-  color: var(--jp-content-font-color1);
-  border: solid 1px var(--jp-border-color1);
-  background-color: var(--jp-input-background);
+  border: solid var(--vscode-panel-border) 1px;
+  background-color: var(--theme-input-background);
   border-radius: 20px;
-  margin-right: 6px;
+  margin-right: 1.5em;
   padding-bottom: 2px;
   padding-left: 7px;
   padding-right: 7px;
@@ -112,7 +124,7 @@
   margin-left: .1em;
   margin-right: 0;
   padding: 0.5em;
-  border: solid 1px var(--jp-border-color0);
+  border: solid 1px var(--vscode-panel-border);
   border-radius: 3px;
 }
 
@@ -129,13 +141,16 @@
   margin-top: 1em;
   margin-bottom: 1em;  
   border-radius: .25rem;
+  box-sizing: border-box;
+  width: calc(100% - 0.6em);
 }
 
 .callout-header {
   display: flex;
+  justify-content: left;
   align-content: center;
   padding: 0.35em 0.75em;
-  opacity: 80%;
+  box-sizing: border-box;
 }
 
 .callout-title-container {
@@ -146,22 +161,22 @@
 .callout.callout-style-default  div.callout-title {
   border-bottom: none;
   font-weight: 600;
-  opacity: 85%;
   font-size: 0.9rem;
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
 
 .callout.callout-style-default {
-  border-left: solid #acacac .3rem;
-  border-right: solid 1px silver;
-  border-top: solid 1px silver;
-  border-bottom: solid 1px silver;
+  border-left: solid var(--vscode-panel-border) .3rem;
+  border-right: solid 1px var(--vscode-panel-border);
+  border-top: solid 1px var(--vscode-panel-border);
+  border-bottom: solid 1px var(--vscode-panel-border);
 }
 
 .callout .callout-body-container {
   padding: 0.75em;
   flex-grow: 1;
+  box-sizing: border-box;
 }
 .callout .callout-body-container p:last-of-type {
   margin-bottom: 0;
@@ -175,6 +190,9 @@
 .callout.callout-style-default div.callout-content {
   padding-left: 0.5em;
   padding-right: 0.5em;
+}
+.callout.callout-style-default .callout-icon-container {
+  width: auto;
 }
 
 .callout.callout-style-default .callout-icon::before {
@@ -260,8 +278,14 @@ div.callout-caution .callout-header {
 span.shortcode {
   font-family: var(--jp-code-font-family);
   line-height: var(--jp-code-line-height);
-  color: var(--jp-content-link-color);
-  background-color: var(--jp-layout-color2);
-  padding: 1px 1px;
+  background: var(--vscode-textPreformat-background);
+  color: var(--vscode-textPreformat-foreground);
+  padding-left: 1px;
+  padding-right: 1px;
   white-space: pre-wrap;
+}
+
+/* Footnotes */
+hr.footnotes-sep {
+  width: calc(100% - 0.6em);
 }

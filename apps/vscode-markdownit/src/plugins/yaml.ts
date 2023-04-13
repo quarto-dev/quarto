@@ -25,7 +25,7 @@ import { decorator } from "./utils/html";
 //       This is a copy with rendering added - the core tokenizing function is identical (or should be)
 const kTokFrontMatter = 'front_matter';
 
-export function markdownitFrontMatterPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
+export function yamlPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
   const min_markers = 3,
     marker_str = "-",
     marker_char = marker_str.charCodeAt(0),
@@ -43,6 +43,8 @@ export function markdownitFrontMatterPlugin(md: MarkdownIt, cb?: (yaml: unknown)
       auto_closed = false,
       start = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
+
+
 
     // Check out the first character of the first line quickly,
     // this should filter out non-front matter
@@ -129,6 +131,7 @@ export function markdownitFrontMatterPlugin(md: MarkdownIt, cb?: (yaml: unknown)
       break;
     }
 
+
     const old_parent = state.parentType;
     const old_line_max = state.lineMax;
     state.parentType = "root";
@@ -169,7 +172,6 @@ function renderFrontMatter(tokens: Token[], idx: number): string {
   const frontUnknown = parseFrontMatterStr(token.markup);
 
   // Extract important content
-  
   if (typeof(frontUnknown) === "object") {
     const titleBlock: TitleBlock = {};
     const frontMatter = frontUnknown as Record<string, unknown>;
@@ -215,10 +217,11 @@ function renderFrontMatter(tokens: Token[], idx: number): string {
 
       // yaml
       const yamlDump = yaml.dump(frontMatter);
-      const otherYamlRendered = `<pre><code class="cm-s-jupyter language-yaml quarto-frontmatter">${yamlDump}</code></pre>`;
+      const otherYamlRendered = `<pre class="quarto-frontmatter-container"><code class="cm-s-jupyter language-yaml quarto-frontmatter">${yamlDump}</code></pre>`;
 
       titleLines.push(otherYamlRendered);
     }
+
     return titleLines.join("\n");
   } else {
     return "";

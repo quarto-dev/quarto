@@ -18,9 +18,12 @@ import type * as MarkdownIt from 'markdown-it';
 import type { RendererContext } from 'vscode-notebook-renderer';
 
 import attrPlugin from "markdown-it-attrs";
+import footnotes from "markdown-it-footnote";
 import { citationPlugin } from './plugins/cites';
 import { divPlugin } from './plugins/divs';
 import { calloutPlugin } from './plugins/callouts';
+import { decoratorPlugin } from './plugins/decorator';
+
 
 const styleHref = import.meta.url.replace(/index.js$/, 'styles.css');
 
@@ -64,9 +67,37 @@ export async function activate(ctx: RendererContext<void>) {
     }
 
 
-		return md.use(citationPlugin, {})
+		return md.use(footnotes, {})
+             .use(citationPlugin, {})
              .use(attrPlugin, {})
              .use(divPlugin, {})
              .use(calloutPlugin, {})
+             .use(decoratorPlugin, {})
+
+
 	});
 }
+
+/*
+  footnotes, // footnote seriously render in the cell in which they appear in :(
+  spans,
+  attrs,
+  deflist,
+  figures,
+  gridtables,
+  sub,
+  sup,
+  tasklists,
+  divs,
+  math
+  figureDivs,
+  tableCaptions,
+  cites,
+  mermaid,
+  callouts,
+  decorator,
+  yaml,
+  shortcodes
+
+
+  */

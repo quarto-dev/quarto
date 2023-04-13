@@ -2357,6 +2357,13 @@
   dependencies:
     "@types/markdown-it" "*"
 
+"@types/markdown-it-footnote@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/markdown-it-footnote/-/markdown-it-footnote-3.0.0.tgz#e93dafcd52fe5428f74e313a4426293690fef8bf"
+  integrity sha512-d6KGv1ZhzDdjMB0F+PmuCFuc4QPIsiyWbzldwxAqWz0TZHvSiHwTp5cj5D/6Qfqfv8mJ0HScaMgLt1zlcKjpyw==
+  dependencies:
+    "@types/markdown-it" "*"
+
 "@types/markdown-it-highlightjs@^3.3.1":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/markdown-it-highlightjs/-/markdown-it-highlightjs-3.3.1.tgz#1e051211e7754ba478449fea7faeab3d177ca892"

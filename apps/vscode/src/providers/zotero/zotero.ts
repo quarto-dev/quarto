@@ -63,11 +63,13 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
     }
     try {
       const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
-      await zotero.setLibraryConfig({
-        type: "web",
-        dataDir: "",
-        apiKey
-      });
+      if (apiKey) {
+        await zotero.setLibraryConfig({
+          type: "web",
+          dataDir: "",
+          apiKey
+        });
+      }
     } catch(error) {
       const message = error instanceof Error ? error.message : JSON.stringify(error);
       console.log("Error setting zotero library config: " + message);

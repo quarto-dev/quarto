@@ -17,6 +17,11 @@
 import type * as MarkdownIt from 'markdown-it';
 import type { RendererContext } from 'vscode-notebook-renderer';
 
+import attrPlugin from "markdown-it-attrs";
+import { citationPlugin } from './plugins/cites';
+import { divPlugin } from './plugins/divs';
+import { calloutPlugin } from './plugins/callouts';
+
 const styleHref = import.meta.url.replace(/index.js$/, 'styles.css');
 
 
@@ -49,10 +54,6 @@ export async function activate(ctx: RendererContext<void>) {
 	document.head.appendChild(styleTemplate);
 
 
-  const attrPlugin = (await import('markdown-it-attrs')).default;
-  const citePlugin = (await import('./plugins/cites')).citationPlugin;
-  const divPlugin = (await import('./plugins/divs')).divPlugin;
-  const calloutPlugin = (await import('./plugins/callouts')).calloutPlugin;
 	markdownItRenderer.extendMarkdownIt((md: MarkdownIt) => {
 
     const render = md.render.bind(md);
@@ -63,7 +64,7 @@ export async function activate(ctx: RendererContext<void>) {
     }
 
 
-		return md.use(citePlugin, {})
+		return md.use(citationPlugin, {})
              .use(attrPlugin, {})
              .use(divPlugin, {})
              .use(calloutPlugin, {})

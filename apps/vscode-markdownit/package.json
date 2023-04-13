@@ -1,0 +1,44 @@
+{
+  "name": "quarto-vscode-markdownit",
+  "type": "module",
+  "version": "0.0.1",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    }
+  },
+  "private": true,
+  "license": "agpl-3.0",
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "tsc --noEmit && vite build --mode=development",
+    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "markdown-it": "^12.2.3",
+    "markdown-it-attrs": "^4.1.6",
+    "markdown-it-deflist": "^2.0.3",
+    "markdown-it-footnote": "^3.0.2",
+    "markdown-it-implicit-figures": "^0.11.0",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "markdown-it-task-lists": "^1.3.0",
+    "mermaid": "^9.1.7",
+    "wcwidth": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode-notebook-renderer": "^1.72.0",
+    "@types/wcwidth": "^1.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.5.2",
+    "vite": "^3.0.0",
+    "vite-plugin-static-copy": "^0.13.0"
+  }
+}

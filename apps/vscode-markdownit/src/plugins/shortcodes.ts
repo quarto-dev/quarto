@@ -6,11 +6,8 @@
 */
 import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
-import Renderer from "markdown-it/lib/renderer";
-import { addClass } from "./utils/markdownit";
 
 import StateInline from "markdown-it/lib/rules_inline/state_inline";
-import StateBlock from "markdown-it/lib/rules_block/state_block";
 import { escapeHtml } from "markdown-it/lib/common/utils";
 
 export const kShortcode = "shortcode";
@@ -40,7 +37,7 @@ export const shortcodePlugin = (md: MarkdownIt) => {
   }
   md.inline.ruler.after("escape", kShortcode, shortcode);
 
-  const renderShortcode = (tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string => {
+  const renderShortcode = (tokens: Token[], idx: number): string => {
     const token = tokens[idx];
     const content = token.content;
     // insert shortcode braces and escape content's html entities

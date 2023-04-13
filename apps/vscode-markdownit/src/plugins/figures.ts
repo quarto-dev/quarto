@@ -34,11 +34,11 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
 
   md.core.ruler.before("linkify", "implicit_figures", (state) => {
     // reset tabIndex on md.render()
-    var tabIndex = 1;
+    let tabIndex = 1;
 
     // do not process first and last token
-    for (var i = 1, l = state.tokens.length; i < l - 1; ++i) {
-      var token = state.tokens[i];
+    for (let i = 1, l = state.tokens.length; i < l - 1; ++i) {
+      const token = state.tokens[i];
 
       if (token.type !== "inline") {
         continue;
@@ -78,7 +78,7 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       }
 
       // The image
-      var image = token.children.length === 1 ? token.children[0] : token.children[1];
+      const image = token.children.length === 1 ? token.children[0] : token.children[1];
       
       // The image must have a caption to count as a figure
       if (!image.children || image.children.length === 0) {
@@ -89,7 +89,7 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
       // Previous token is paragraph open.
       // Next token is paragraph close.
       // Lets replace the paragraph tokens with figure tokens.
-      var figure = state.tokens[i - 1];
+      const figure = state.tokens[i - 1];
       mutateToFigureTok(figure, "open");
       mutateToFigureTok(state.tokens[i + 1], "close");
 
@@ -123,7 +123,7 @@ export function figuresPlugin(md: MarkdownIt, options: FigureOptions) {
 
       if (options.copyAttrs && image.attrs) {
         const f = options.copyAttrs === true ? "" : options.copyAttrs;
-        figure.attrs = image.attrs.filter(([k, v]) => k.match(f));
+        figure.attrs = image.attrs.filter(([k]) => k.match(f));
       }
 
       if (options.tabindex == true) {

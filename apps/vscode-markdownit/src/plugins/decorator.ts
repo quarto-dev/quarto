@@ -6,7 +6,6 @@
 */
 import type MarkdownIt from "markdown-it/lib"
 import Token from "markdown-it/lib/token"
-import Renderer from "markdown-it/lib/renderer";
 import { attributeDecorator, decorator, DecoratorOptions } from "./utils/html";
 import { kTokDivOpen } from "./divs";
 import { kTokFigureOpen } from "./figures";
@@ -57,7 +56,7 @@ function decoratorTokForToken(token: Token, options?: DecoratorOptions) {
 
 
 // Render pandoc-style divs
-function renderDecorator(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+function renderDecorator(tokens: Token[], idx: number): string {
   const token = tokens[idx];
   const decoratorOptions = token.meta?.[kQuartoDecoratorOptions];
   if (token.info) {

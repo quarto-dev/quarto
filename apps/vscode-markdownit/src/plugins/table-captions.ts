@@ -60,7 +60,7 @@ export const tableCaptionPlugin = (md: MarkdownIt) => {
           
           const isText = maybeCaption.children !== null && maybeCaption.children.length > 0 && maybeCaption.children[0].type === kTokText;
           const maybeCaptionText = isText ? maybeCaption.children![0].content : "";
-          const match = maybeCaptionText.match(/^:\s([^\{\}]*)(?:\{.*\}){0,1}$/);
+          const match = maybeCaptionText.match(/^:\s([^{}]*)(?:\{.*\}){0,1}$/);
           if (match && match[1]) {
 
             // Carve out the existing tokens
@@ -83,13 +83,9 @@ export const tableCaptionPlugin = (md: MarkdownIt) => {
             capTokens[2].tag = "caption";
 
             tokens.splice(tblStartPos + 1, 0, ...capTokens);
-          } else {
-            return undefined;
-          }
-      }
-    } else {
-      return undefined;
-    }
+          } 
+      } 
+    } 
   }
 
   interface TablePos {

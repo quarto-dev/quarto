@@ -17,7 +17,7 @@ export const kTokDivClose = 'pandoc_div_close';
 export const divPlugin = (md: MarkdownIt) => {
   
   // Render pandoc-style divs
-  function renderStartDiv(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  function renderStartDiv(tokens: Token[], idx: number, _options: MarkdownIt.Options, _env: unknown, self: Renderer): string {
 
     // Add a class to designate that this is a quarto dev
     const token = tokens[idx];
@@ -27,7 +27,7 @@ export const divPlugin = (md: MarkdownIt) => {
   }
 
   // Render pandoc-style divs
-  function renderEndDiv(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+  function renderEndDiv(): string {
     return `</div>`;
   }
 
@@ -36,7 +36,7 @@ export const divPlugin = (md: MarkdownIt) => {
   md.block.ruler.before(
     "fence",
     kDivRuleName,
-    (state, start, end, silent) => {
+    (state, start, _end, silent) => {
 
       // This is a validation run, can ignore
       if (silent) {
@@ -68,7 +68,7 @@ export const divPlugin = (md: MarkdownIt) => {
       const divBraceRegex = /^(:::+)\s*(?:(\{[\s\S]+?\}))?$/;
 
       // Three or more colons followed by a string with no braces
-      const divNoBraceRegex = /^(:::+)\s*(?:([^\{\}\s]+?))?$/;
+      const divNoBraceRegex = /^(:::+)\s*(?:([^{}\s]+?))?$/;
 
       const matchers = [divBraceRegex, divNoBraceRegex];
 

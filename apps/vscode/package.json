@@ -1239,6 +1239,16 @@
           }
         ]
       }
+    ],
+    "notebookRenderer": [
+      {
+        "id": "quarto.markdown-it.qmd-extension",
+        "displayName": "Markdown It Quarto Renderer",
+        "entrypoint": {
+          "extends": "vscode.markdown-it-renderer",
+          "path": "./out/markdownit/index.js"
+        }
+      }
     ]
   },
   "scripts": {
@@ -1267,6 +1277,7 @@
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-vscode-editor": "*",
+    "quarto-vscode-markdownit": "*",
     "semver": "^7.3.8",
     "tmp": "^0.2.1",
     "uuid": "^9.0.0",

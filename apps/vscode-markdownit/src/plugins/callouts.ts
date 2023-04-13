@@ -8,7 +8,7 @@ import type MarkdownIt from "markdown-it/lib"
 import Renderer from "markdown-it/lib/renderer";
 import Token from "markdown-it/lib/token";
 import { addClass, readAttrValue } from "./utils/markdownit";
-import { kDivRuleName, kTokDivClose, kTokDivOpen } from "./divs";
+import { kTokDivClose, kTokDivOpen } from "./divs";
 
 
 const kTokCalloutOpen = "quarto_callout_open";
@@ -165,7 +165,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
 
 
 // Render pandoc-style divs
-function renderStartCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+function renderStartCallout(tokens: Token[], idx: number, _options: MarkdownIt.Options, _env: unknown, self: Renderer): string {
   const token = tokens[idx];
   const callout = token.meta as Callout;
 
@@ -179,11 +179,11 @@ function renderStartCallout(tokens: Token[], idx: number, options: MarkdownIt.Op
 }
 
 // Render pandoc-style divs
-function renderEndCallout(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+function renderEndCallout(): string {
   return `</div>`;
 }
 
-function renderStartCalloutTitle(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+function renderStartCalloutTitle(tokens: Token[], idx: number): string {
   const token = tokens[idx];
   const title = readAttrValue("title", token.attrs) || "";
   const startContent = `
@@ -196,7 +196,7 @@ function renderStartCalloutTitle(tokens: Token[], idx: number, options: Markdown
   return startContent;
 }
 
-function renderEndCalloutTitle(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+function renderEndCalloutTitle(): string {
   return `</div>\n</div>`;
 }
 
@@ -252,7 +252,7 @@ const parseCallout = (attrs: null | [string, string][]) : Callout | undefined =>
 }
 
 const appearanceClass = (appearance?:  "default" | "minimal" | "simple") => {
-  let style = appearance || "default";
+  const style = appearance || "default";
   return `callout-style-${style}`;
 }
 

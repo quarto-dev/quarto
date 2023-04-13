@@ -15,7 +15,6 @@
  */
 
 import MarkdownIt from "markdown-it";
-import Renderer from "markdown-it/lib/renderer";
 import StateBlock from "markdown-it/lib/rules_block/state_block";
 import Token from "markdown-it/lib/token";
 import * as yaml from "js-yaml";
@@ -163,7 +162,7 @@ export function markdownitFrontMatterPlugin(md: MarkdownIt, cb?: (yaml: unknown)
   md.renderer.rules[kTokFrontMatter] = renderFrontMatter
 }
 
-function renderFrontMatter(tokens: Token[], idx: number, options: MarkdownIt.Options, env: any, self: Renderer): string {
+function renderFrontMatter(tokens: Token[], idx: number): string {
   const token = tokens[idx];
 
   // Parse the markup
@@ -386,9 +385,10 @@ function parseAuthor(author: unknown) : Author[] {
         affiliations.push(affiliationSimple);
       } else if (authorRaw.affiliations) {
         const affils = Array.isArray(authorRaw.affiliations) ? authorRaw.affiliations as unknown[] : [authorRaw.affiliations];
-        affils.forEach((affilRaw) => {
+        affils.forEach((affilRaw: unknown) => {
           if (typeof(affilRaw) === "string") {
             affiliations.push(affilRaw);
+          // eslint-disable-next-line no-constant-condition
           } else if (typeof(affilRaw === "object")) {
             const affilRecord = affilRaw as Record<string, unknown>;
             const name = affilRecord.name;

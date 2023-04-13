@@ -2,6 +2,7 @@
 
 ## 1.81.0 (Unreleased)
 
+- Configurable zoom behavior for html preview 
 - Correct hover behavior for multiple equations on a single line
 
 ## 1.80.0 (Release on 09 April 2023)

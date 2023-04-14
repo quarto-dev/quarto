@@ -51,7 +51,9 @@
 
 pre.quarto-frontmatter-container {
   border: solid var(--vscode-panel-border) 1px;
-  width: calc(100% - 0.6em);  
+  width: calc(100% - 1.1em);  
+  padding: 0.5em 0 0.5em 0.5em!important;
+  margin-right: 0.6em;
 }
 
 .quarto-abstract {

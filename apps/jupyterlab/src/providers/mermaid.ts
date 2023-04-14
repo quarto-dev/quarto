@@ -11,7 +11,10 @@ export const mermaid = markdownItExtension(
   {id: '@quarto/mermaid',
   title: 'Mermaid',
   plugin: async () => {
-    return [mermaidPlugin];
+    // Figure out whether this is dark mode
+    const isDark = document.body.getAttribute("data-jp-theme-light") === "false";
+
+    return [mermaidPlugin, { dark: isDark }];
   }}
 );
 

@@ -46,7 +46,6 @@ const plugin: JupyterFrontEndPlugin<MarkdownItManager> = {
   }
 };
 
-
 // Markdown It Extensions which provide base Pandoc behavior
 const kPandocExtensions = [
   footnotes, // footnote seriously render in the cell in which they appear in :(

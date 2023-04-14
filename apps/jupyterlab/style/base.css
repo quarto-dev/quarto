@@ -143,6 +143,10 @@
   font-weight: 600;
 }
 
+body[data-jp-theme-light="false"] .callout-title-container {
+  color: var(--jp-input-background);
+}
+
 .callout.callout-style-default  div.callout-title {
   border-bottom: none;
   font-weight: 600;

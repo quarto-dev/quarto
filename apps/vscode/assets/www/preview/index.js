@@ -39,7 +39,7 @@ const root = document.querySelector(':root');
 const body = document.body;
 const updateScaleFactor = () => {
   let scaleFactor = 1;
-  if (zoom === "auto") {
+  if (zoomEl.value === "auto") {
     // we want to always show at least 1050px zoomed
     const kBreakpoint = 1050;
     if (window.innerWidth < kBreakpoint) {

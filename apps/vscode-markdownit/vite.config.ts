@@ -20,10 +20,6 @@ export default defineConfig(env => {
           {
             src: normalizePath(path.resolve(__dirname, './dist/*')),
             dest: normalizePath(path.resolve(__dirname, '../vscode/out/markdownit'))
-          },
-          {
-            src: normalizePath(path.resolve(__dirname, './assets/*')),
-            dest: normalizePath(path.resolve(__dirname, '../vscode/out/markdownit'))
           }
         ]
       })

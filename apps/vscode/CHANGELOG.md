@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.81.0 (Unreleased)
+## 1.81.0 (Release on 14 April 2023)
 
-- Configurable zoom behavior for html preview 
+- Configurable zoom behavior for HTML document preview 
 - Notebook markdown renderer for Pandoc/Quarto markdown extensions 
 - Correct hover behavior for multiple equations on a single line
 

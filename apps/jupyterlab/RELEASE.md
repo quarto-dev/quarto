@@ -37,7 +37,11 @@ pip install build twine hatch
 To create a Python source package (`.tar.gz`) and the binary package (`.whl`) in the `dist/` directory, do:
 
 ```bash
+<update name in package.json to 'jupyterlab-quarto'>
+rm dist/*
+yarn build
 python -m build
+<update name in package.json to '@quarto/jupyterlab-quarto'>
 ```
 
 > `python setup.py sdist bdist_wheel` is deprecated and will not work for this package.

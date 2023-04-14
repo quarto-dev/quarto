@@ -35,11 +35,9 @@ import { decoratorPlugin } from './plugins/decorator';
 import gridTableRulePlugin from './plugins/gridtables';
 import { shortcodePlugin } from './plugins/shortcodes';
 import { yamlPlugin } from './plugins/yaml';
-//import mermaidPlugin from "./plugins/mermaid";
+import mermaidPlugin from "./plugins/mermaid";
 
-
-const styleHref = import.meta.url.replace(/index.js$/, 'styles.css');
-
+const styleHref = import.meta.url.replace(/index\.[\d\S]*\.?js$/, 'styles.css');
 
 interface MarkdownItRenderer {
 	extendMarkdownIt(fn: (md: MarkdownIt) => void): void;
@@ -53,15 +51,22 @@ export async function activate(ctx: RendererContext<void>) {
 		throw new Error(`Could not load 'quarto.markdown-it.qmd-extension'`);
 	}
 
+  // Check whether this is a dark theme
+  const isDark = document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast');
+
+  // The shared stylesheet
   const link = document.createElement('link');
 	link.rel = 'stylesheet';
 	link.classList.add('markdown-style');
 	link.href = styleHref;
 
+  // Inline styles
   const style = document.createElement('style');
-	style.textContent = `
-  
-	`;
+	style.textContent = isDark ? `
+  .callout-title-container  {
+    color: var(--vscode-titleBar-activeBackground) !important;
+  }
+  ` : "";
 
   const styleTemplate = document.createElement('template');
 	styleTemplate.classList.add('markdown-style');
@@ -69,19 +74,16 @@ export async function activate(ctx: RendererContext<void>) {
 	styleTemplate.content.appendChild(link);
 	document.head.appendChild(styleTemplate);
 
-  const kCloseDivNoBlock = /([^\s])\n(:::+(?:\{.*\})?)/gm;
-
 	markdownItRenderer.extendMarkdownIt((md: MarkdownIt) => {
     const render = md.render.bind(md);
     md.render = (src: string, env: Record<string,unknown>) => {      
 
+      // Do any text based transformations before the markdown is rendered
+
       // Ensure that there are new lines at end divs
-
       src = src.replace(kCloseDivNoBlock, `$1\n\n$2`);
-
       return render(src, env);
     }
-
 
 		return md.use(footnotes, {})
              .use(spansPlugin, {})
@@ -96,10 +98,12 @@ export async function activate(ctx: RendererContext<void>) {
              .use(figureDivsPlugin, {})
              .use(tableCaptionPlugin, {})
              .use(citationPlugin, {})
-             //.use(mermaidPlugin, {}) // TODO: mermaid breaks other plugins
+             .use(mermaidPlugin, { dark: isDark }) // TODO: mermaid breaks other plugins
              .use(calloutPlugin, {})
              .use(decoratorPlugin, {})
              .use(yamlPlugin)
              .use(shortcodePlugin, {})
 	});
 }
+
+const kCloseDivNoBlock = /([^\s])\n(:::+(?:\{.*\})?)/gm;

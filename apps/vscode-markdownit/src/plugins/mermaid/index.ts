@@ -2,7 +2,7 @@
 import MarkdownIt from "markdown-it";
 import Mermaid from "mermaid";
 
-export default function mermaidPlugin(md: MarkdownIt, options: any) {
+export default function mermaidPlugin(md: MarkdownIt, options: { dark?: boolean}) {
 
 
   const kLang = "mermaid";
@@ -10,6 +10,7 @@ export default function mermaidPlugin(md: MarkdownIt, options: any) {
 
   Mermaid.initialize({
     securityLevel: "loose",
+    theme: options.dark ? "dark" : "default",
     ...options,
   });
 

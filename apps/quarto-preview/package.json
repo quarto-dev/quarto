@@ -1,0 +1,34 @@
+{
+  "name": "quarto-preview",
+  "type": "module",
+  "version": "0.0.1",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/preview.js",
+  "exports": {
+    ".": {
+      "require": "./dist/preview.js"
+    }
+  },
+  "private": true,
+  "license": "agpl-3.0",
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "tsc --noEmit && vite build --mode=development",
+    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@fluentui/react": "^8.107.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "tsconfig": "*",
+    "typescript": "^4.5.2",
+    "vite": "^3.0.0",
+    "vite-plugin-static-copy": "^0.13.0"
+  }
+}

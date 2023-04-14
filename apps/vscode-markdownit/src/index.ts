@@ -69,12 +69,15 @@ export async function activate(ctx: RendererContext<void>) {
 	styleTemplate.content.appendChild(link);
 	document.head.appendChild(styleTemplate);
 
+  const kCloseDivNoBlock = /([^\s])\n(:::+(?:\{.*\})?)/gm;
 
 	markdownItRenderer.extendMarkdownIt((md: MarkdownIt) => {
     const render = md.render.bind(md);
     md.render = (src: string, env: Record<string,unknown>) => {      
 
-      // TODO: Process divs 
+      // Ensure that there are new lines at end divs
+
+      src = src.replace(kCloseDivNoBlock, `$1\n\n$2`);
 
       return render(src, env);
     }

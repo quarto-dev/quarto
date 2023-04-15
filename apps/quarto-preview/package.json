@@ -5,10 +5,10 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/preview.js",
+  "main": "./dist/quarto-preview.js",
   "exports": {
     ".": {
-      "require": "./dist/preview.js"
+      "require": "./dist/quarto-preview.js"
     }
   },
   "private": true,

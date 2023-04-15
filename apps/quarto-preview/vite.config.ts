@@ -31,13 +31,13 @@ export default defineConfig(env => {
         formats: ['umd'],
         name: "QuartoPreview",
         
-        fileName: () => 'preview.js',
+        fileName: () => 'quarto-preview.js',
       
       },
       rollupOptions: {
         external: [],
         output: {
-          assetFileNames: "preview.[ext]",
+          assetFileNames: "quarto-preview.[ext]",
         },
       },
       sourcemap: dev ? 'inline' : false

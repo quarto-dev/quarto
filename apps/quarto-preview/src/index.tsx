@@ -16,14 +16,28 @@
 import React from "react";
 import { createRoot } from 'react-dom/client';
 
-
 import Preview from "./Preview";
+
+import { handleIFrameClicks } from "./iframe";
 
 import "./styles.scss"
 
+export interface Options {
+  origin: string | null,
+  search: string | null,
+  inputFile: string | null,
+  isPresentation: boolean;
+}
 
-async function init() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function init(options: Options) {
   try {
+
+    // handle iframe clicks
+    if (options.origin && options.search) {
+      handleIFrameClicks(options.origin, options.search);
+    }
+
     const previewEl = document.createElement("div");
     document.body.appendChild(previewEl);
     const root = createRoot(previewEl);
@@ -33,6 +47,6 @@ async function init() {
   }
 }
 
-init();
+
 
 

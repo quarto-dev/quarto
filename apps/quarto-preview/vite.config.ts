@@ -1,6 +1,7 @@
 import path from 'path'
 import { defineConfig, normalizePath } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 
 
 export default defineConfig(env => {
@@ -15,6 +16,7 @@ export default defineConfig(env => {
       'process.platform': '""'
     },
     plugins: [
+      cssInjectedByJsPlugin(),
       viteStaticCopy({
         targets: [
           {
@@ -28,11 +30,9 @@ export default defineConfig(env => {
       watch: dev ? {} : null,
       lib: {
         entry: 'src/index.tsx',
-        formats: ['umd'],
+        formats: ["umd"],
         name: "QuartoPreview",
-        
         fileName: () => 'quarto-preview.js',
-      
       },
       rollupOptions: {
         external: [],

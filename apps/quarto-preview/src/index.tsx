@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * index.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -19,6 +19,8 @@ import { createRoot } from 'react-dom/client';
 import Preview from "./Preview";
 
 import { handleIFrameClicks } from "./iframe";
+import { handleRevealMessages } from "./reveal";
+import { handleViewerMessages } from "./viewer";
 
 import "./styles.scss"
 
@@ -29,13 +31,21 @@ export interface Options {
   isPresentation: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function init(options: Options) {
+async function init(options: Options) {
   try {
 
     // handle iframe clicks
     if (options.origin && options.search) {
       handleIFrameClicks(options.origin, options.search);
+    }
+
+    // handle messages
+    if (options.isPresentation) {
+      handleRevealMessages(() => {
+        // TODO: close dev server
+      })
+    } else {
+      handleViewerMessages();
     }
 
     const previewEl = document.createElement("div");
@@ -46,6 +56,9 @@ export async function init(options: Options) {
     console.error(error);
   }
 }
+
+
+export { init }
 
 
 

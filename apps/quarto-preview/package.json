@@ -20,10 +20,13 @@
   },
   "dependencies": {
     "@fluentui/react": "^8.107.5",
+    "ansi_up": "^5.2.1",
+    "micromodal": "^0.4.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@types/micromodal": "^0.3.3",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",

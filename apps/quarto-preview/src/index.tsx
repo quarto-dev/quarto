@@ -23,6 +23,7 @@ import { handleRevealMessages } from "./reveal";
 import { handleViewerMessages } from "./viewer";
 
 import "./styles.scss"
+import { initializeDevserverCore } from "./core";
 
 export interface Options {
   origin: string | null,
@@ -34,6 +35,9 @@ export interface Options {
 async function init(options: Options) {
   try {
 
+    // devserver core
+    const closeDevServer = initializeDevserverCore();
+
     // handle iframe clicks
     if (options.origin && options.search) {
       handleIFrameClicks(options.origin, options.search);
@@ -41,9 +45,7 @@ async function init(options: Options) {
 
     // handle messages
     if (options.isPresentation) {
-      handleRevealMessages(() => {
-        // TODO: close dev server
-      })
+      handleRevealMessages(closeDevServer)
     } else {
       handleViewerMessages();
     }

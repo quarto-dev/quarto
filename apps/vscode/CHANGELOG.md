@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.82.0 (Unreleased)
+
+- Fixed position for preview toolbar and content frame
+
 ## 1.81.0 (Release on 14 April 2023)
 
 - Configurable zoom behavior for HTML document preview 

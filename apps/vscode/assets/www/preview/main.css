@@ -25,6 +25,12 @@ body {
   grid-template-rows: auto 1fr;
 }
 
+input[type="text"] {
+  height: 17px;
+  font-size: 0.9em;
+  margin-top: 1px;
+}
+
 input:not([type="checkbox"]),
 textarea {
   display: block;
@@ -72,7 +78,7 @@ select {
   outline-color: var(--vscode-input-border);
   background-color: var(--vscode-input-background);
   border: none;
-  height: 19px;
+  height: 20px;
   margin-top: 1px;
 }
 
@@ -83,12 +89,7 @@ button:focus {
 
 .header {
   display: flex;
-  margin: 0.4em 1em;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 24px;
+  margin: 0.2em 1em 0;
 }
 
 .url-input {
@@ -104,12 +105,21 @@ button:focus {
   margin-right: 0.3em;
 }
 
+.content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
 iframe {
-  position: fixed;
-  top: 25px;
+  position: absolute;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100%;
+  height: 100%;
   border: none;
   background: var(--vscode-editor-background);
 }

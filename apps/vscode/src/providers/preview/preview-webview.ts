@@ -47,7 +47,7 @@ export class QuartoPreviewWebviewManager extends QuartoWebviewManager<
       this.activeView_.setSlideIndex(slideIndex);
     }
   }
-  public setOnError(handler: (msg: string) => void) {
+  public setOnError(handler: () => void) {
     if (this.activeView_) {
       this.activeView_.setOnError(handler);
     }
@@ -78,7 +78,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
             break;
           case "previewError":
             if (this.onError_) {
-              this.onError_(e.msg);
+              this.onError_();
             }
             break;
           case "zoomLevelChanged":
@@ -118,7 +118,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
     );
   }
 
-  public setOnError(handler: (msg: string) => void) {
+  public setOnError(handler: () => void) {
     this.onError_ = handler;
   }
 
@@ -203,5 +203,5 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
     return ["assets", "www", "preview", asset];
   }
 
-  private onError_: ((msg: string) => void) | undefined;
+  private onError_: (() => void) | undefined;
 }

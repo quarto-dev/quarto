@@ -97,8 +97,7 @@ window.addEventListener("message", (e) => {
 
     case "error": {
       vscode.postMessage({
-        type: "previewError",
-        msg: e.data.msg,
+        type: "previewError"
       });
       break;
     }

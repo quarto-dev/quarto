@@ -182,8 +182,12 @@ export async function insertXref(
 
       // Read the xrefs
       const loadXRefs = async () => {
-        await ui.context.withSavedDocument();
-        return (await server.xref.quartoIndexForFile(docPath)).refs;
+        if (docPath) {
+          await ui.context.withSavedDocument();
+          return (await server.xref.quartoIndexForFile(docPath)).refs;
+        } else {
+          return [];
+        }
       };
 
       const onCancel = () => {

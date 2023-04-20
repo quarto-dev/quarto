@@ -119,7 +119,6 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
   }
 
   protected getHtml(state: QuartoPreviewState): string {
-    const configuration = workspace.getConfiguration("simpleBrowser");
 
     const headerHtml = `
     <meta id="simple-browser-settings" data-settings="${this.escapeAttribute(

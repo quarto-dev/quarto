@@ -72,6 +72,8 @@ select {
   outline-color: var(--vscode-input-border);
   background-color: var(--vscode-input-background);
   border: none;
+  height: 19px;
+  margin-top: 1px;
 }
 
 input:focus,
@@ -82,6 +84,11 @@ button:focus {
 .header {
   display: flex;
   margin: 0.4em 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
 }
 
 .url-input {
@@ -97,15 +104,12 @@ button:focus {
   margin-right: 0.3em;
 }
 
-.content {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
 iframe {
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  top: 25px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border: none;
   background: var(--vscode-editor-background);
 }

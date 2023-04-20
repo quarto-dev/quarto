@@ -162,10 +162,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
           class="open-external-button icon"><i class="codicon codicon-link-external"></i></button>
       </nav>
     </header>
-    <div class="content">
-      <iframe sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-downloads"></iframe>
-    </div>
-    
+    <iframe sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-downloads"></iframe>
     `;
 
     return this.webviewHTML(

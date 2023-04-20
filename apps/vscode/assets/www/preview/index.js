@@ -148,11 +148,7 @@ window.addEventListener("message", (e) => {
       updateAddressBar(e.data.data.href);
       break;
     }
-    case "didChangeFocusLockIndicatorEnabled": {
-      toggleFocusLockIndicatorEnabled(e.data.enabled);
-      break;
-    }
-
+   
     case "didChangeActiveColorTheme": {
       navigateTo(input.value, e.data.theme);
       break;
@@ -224,7 +220,6 @@ onceDocumentLoaded(() => {
   navigateTo(settings.url);
   input.value = settings.url;
 
-  toggleFocusLockIndicatorEnabled(settings.focusLockIndicatorEnabled);
 });
 
 function navigateTo(rawUrl, theme) {
@@ -249,6 +244,3 @@ function navigateTo(rawUrl, theme) {
   vscode.setState({ url: rawUrl });
 }
 
-function toggleFocusLockIndicatorEnabled(enabled) {
-  document.body.classList.toggle("enable-focus-lock-indicator", enabled);
-}

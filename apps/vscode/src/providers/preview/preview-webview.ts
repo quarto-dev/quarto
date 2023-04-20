@@ -89,23 +89,6 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
     );
 
     this._register(
-      workspace.onDidChangeConfiguration((e) => {
-        if (
-          e.affectsConfiguration("simpleBrowser.focusLockIndicator.enabled")
-        ) {
-          const configuration = workspace.getConfiguration("simpleBrowser");
-          this._webviewPanel.webview.postMessage({
-            type: "didChangeFocusLockIndicatorEnabled",
-            focusLockEnabled: configuration.get<boolean>(
-              "focusLockIndicator.enabled",
-              true
-            ),
-          });
-        }
-      })
-    );
-
-    this._register(
       window.onDidChangeActiveColorTheme((_e) => {
         this._webviewPanel.webview.postMessage({
           type: "didChangeActiveColorTheme",
@@ -143,11 +126,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
       JSON.stringify({
         url: state.url,
         zoomLevel: state.zoomLevel,
-        slideIndex: state.slideIndex,
-        focusLockEnabled: configuration.get<boolean>(
-          "focusLockIndicator.enabled",
-          true
-        ),
+        slideIndex: state.slideIndex
       })
     )}">
     `;
@@ -184,7 +163,6 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
       </nav>
     </header>
     <div class="content">
-      <div class="iframe-focused-alert">Focus Lock</div>
       <iframe sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock allow-downloads"></iframe>
     </div>
     

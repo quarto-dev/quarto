@@ -138,23 +138,3 @@ iframe {
   }
 }
 
-
-.iframe-focused-alert {
-  display: none;
-  position: absolute;
-  bottom: 1em;
-  background: var(--vscode-editorWidget-background);
-  color: var(--vscode-editorWidget-foreground);
-  padding: 0.2em 0.2em;
-  border-radius: 4px;
-
-  font-size: 8px;
-  font-family: monospace;
-  user-select: none;
-  pointer-events: none;
-}
-
-.iframe-focused.enable-focus-lock-indicator .iframe-focused-alert {
-  display: none;
-}
-

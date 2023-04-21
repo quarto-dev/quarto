@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.82.0 (Unreleased)
+## 1.82.0 (Release on 21 April 2023)
 
-- Fixed position for preview toolbar and content frame
+- Fixed position for preview toolbar and content frame.
 
 ## 1.81.0 (Release on 14 April 2023)
 

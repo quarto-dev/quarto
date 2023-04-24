@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.83.0 (Unreleased)
+
+- Correct syntax highlighting for list items and blockquote character
+
 ## 1.82.0 (Release on 21 April 2023)
 
 - Fixed position for preview toolbar and content frame.

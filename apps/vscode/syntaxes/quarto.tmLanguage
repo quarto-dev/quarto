@@ -88,7 +88,7 @@
           <key>2</key>
           <dict>
             <key>name</key>
-            <string>punctuation.definition.quote.begin.quarto</string>
+            <string>punctuation.definition.quote.begin.markdown.quarto</string>
           </dict>
         </dict>
         <key>name</key>
@@ -112,7 +112,7 @@
           <key>2</key>
           <dict>
             <key>name</key>
-            <string>punctuation.definition.quote.begin.quarto</string>
+            <string>punctuation.definition.quote.begin.markdown.quarto</string>
           </dict>
         </dict>
         <key>name</key>
@@ -4017,7 +4017,7 @@
               <key>3</key>
               <dict>
                 <key>name</key>
-                <string>punctuation.definition.list.begin.quarto</string>
+                <string>punctuation.definition.list.begin.markdown.quarto</string>
               </dict>
             </dict>
             <key>comment</key>
@@ -4046,7 +4046,7 @@
               <key>3</key>
               <dict>
                 <key>name</key>
-                <string>punctuation.definition.list.begin.quarto</string>
+                <string>punctuation.definition.list.begin.markdown.quarto</string>
               </dict>
             </dict>
             <key>name</key>
@@ -4449,7 +4449,7 @@
   (\))
 </string>
         <key>name</key>
-        <string>meta.image.inline.quarto</string>
+        <string>meta.image.inline.markdown.quarto</string>
       </dict>
       <key>image-ref</key>
       <dict>

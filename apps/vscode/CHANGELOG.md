@@ -4,6 +4,7 @@
 
 - Correct syntax highlighting for list items and blockquote character
 - Enable Quarto: Render Project command for Hugo and Docusausus projects
+- Exclude parens from cite/crossref highlighting in visual editor
 
 ## 1.82.0 (Release on 21 April 2023)
 

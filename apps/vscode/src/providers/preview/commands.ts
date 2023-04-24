@@ -18,7 +18,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { TextDocument, window, Uri, workspace, commands } from "vscode";
-import { hasQuartoProject, projectDirForDocument, QuartoContext } from "quarto-core";
+import { projectDirForDocument, QuartoContext, quartoProjectConfig } from "quarto-core";
 
 import { Command } from "../../core/command";
 import {
@@ -180,6 +180,10 @@ class RenderProjectCommand extends RenderCommand implements Command {
   private static readonly id = "quarto.renderProject";
   public readonly id = RenderProjectCommand.id;
 
+  constructor(private readonly quartoContext: QuartoContext) {
+    super(quartoContext);
+  }
+
   async doExecute() {
     await workspace.saveAll(false);
     // start by using the currently active or visible source files
@@ -195,7 +199,8 @@ class RenderProjectCommand extends RenderCommand implements Command {
     // next check any open workspaces for a project file
     if (workspace.workspaceFolders) {
       for (const folder of workspace.workspaceFolders) {
-        if (hasQuartoProject(folder.uri.fsPath)) {
+        const config = await quartoProjectConfig(this.quartoContext.runQuarto, folder.uri.fsPath);
+        if (config) {
           previewProject(folder.uri);
           return;
         }

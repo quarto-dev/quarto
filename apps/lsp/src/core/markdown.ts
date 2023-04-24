@@ -22,6 +22,7 @@ import { markdownitFrontMatterPlugin, markdownitMathPlugin } from "quarto-core";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { parseFrontMatterStr } from "quarto-core";
+import { lines } from "core";
 
 export function mathRange(doc: TextDocument, pos: Position) {
   // see if we are in a math block
@@ -36,6 +37,26 @@ export function mathRange(doc: TextDocument, pos: Position) {
       ),
     };
   }
+
+  // markdown-it can't see math blocks in lists if they are 
+  // indented 4 spaces, so attempt to parse math out of 
+  // non-fenced "code_block"
+  const codeBlock = tokens.find(isBlockTypeAtPosition(["code_block"], pos));
+  if (codeBlock && codeBlock.map) {
+    const codeBlockLines = lines(codeBlock.content.trim());
+    if (codeBlockLines.length > 2 && 
+        codeBlockLines[0].startsWith("$$") && 
+        codeBlockLines[codeBlockLines.length-1].startsWith("$$")) {
+      return {
+        math: codeBlockLines.slice(1, -1).join("\n"),
+        range: Range.create(
+          Position.create(codeBlock.map[0], 0),
+          Position.create(codeBlock.map[1] + 1, 0)
+        ),
+      };
+    }
+  }
+  
 
   // see if we are in an inline range
   const line = doc

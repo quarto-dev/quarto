@@ -22,7 +22,7 @@ import { JsonRpcServerMethod } from 'core';
 import { prefsServer, prefsServerMethods } from "./prefs";
 import { EditorServerDocuments } from "../server/server";
 import { sourceServer, sourceServerMethods } from "./source";
-import { PandocServerOptions } from "../pandoc";
+import { PandocServerOptions } from "../core/pandoc";
 import { codeViewServerMethods } from "./codeview";
 
 export {

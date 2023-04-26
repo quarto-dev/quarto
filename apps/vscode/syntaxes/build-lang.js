@@ -68,6 +68,12 @@ const languages = [
     source: "source.mmd",
   },
   {
+    name: "plantuml",
+    language: "plantuml",
+    identifiers: ["plantuml"],
+    source: "source.wsd"
+  },
+  {
     name: "ruby",
     language: "ruby",
     identifiers: [

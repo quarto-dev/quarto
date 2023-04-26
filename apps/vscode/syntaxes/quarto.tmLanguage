@@ -710,6 +710,59 @@
           </dict>
         </array>
       </dict>
+      <key>fenced_code_block_plantuml</key>
+      <dict>
+        <key>begin</key>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{[\{\.=]?)?(?i:(plantuml)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <key>name</key>
+        <string>markup.fenced_code.block.markdown</string>
+        <key>end</key>
+        <string>(^|\G)(\2|\s{0,3})(\3)\s*$</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>3</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.definition.markdown</string>
+          </dict>
+          <key>4</key>
+          <dict>
+            <key>name</key>
+            <string>fenced_code.block.language.markdown</string>
+          </dict>
+          <key>5</key>
+          <dict>
+            <key>name</key>
+            <string>fenced_code.block.language.attributes.markdown</string>
+          </dict>
+        </dict>
+        <key>endCaptures</key>
+        <dict>
+          <key>3</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.definition.markdown</string>
+          </dict>
+        </dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>begin</key>
+            <string>(^|\G)(\s*)(.*)</string>
+            <key>while</key>
+            <string>(^|\G)(?!\s*([`~]{3,})\s*$)</string>
+            <key>contentName</key>
+            <string>meta.embedded.block.plantuml</string>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>source.wsd</string>
+              </dict>
+            </array>
+          </dict>
+        </array>
+      </dict>
       <key>fenced_code_block_ruby</key>
       <dict>
         <key>begin</key>
@@ -3252,6 +3305,10 @@
           <dict>
             <key>include</key>
             <string>#fenced_code_block_mermaid</string>
+          </dict>
+          <dict>
+            <key>include</key>
+            <string>#fenced_code_block_plantuml</string>
           </dict>
           <dict>
             <key>include</key>

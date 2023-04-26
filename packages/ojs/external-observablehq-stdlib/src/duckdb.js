@@ -1,5 +1,6 @@
-import {getArrowTableSchema, isArrowTable} from "./arrow.js";
-import {arrow9 as arrow, duckdb} from "./dependencies.js";
+import {isArqueroTable} from "./arquero.js";
+import {getArrowTableSchema, isArrowTable, loadArrow} from "./arrow.js";
+import {duckdb} from "./dependencies.js";
 import {FileAttachment} from "./fileAttachment.js";
 import {cdn} from "./require.js";
 
@@ -31,6 +32,8 @@ import {cdn} from "./require.js";
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
+
+let promise;
 
 export class DuckDBClient {
   constructor(db) {
@@ -111,7 +114,7 @@ export class DuckDBClient {
   }
 
   async describeColumns({table} = {}) {
-    const columns = await this.query(`DESCRIBE ${table}`);
+    const columns = await this.query(`DESCRIBE ${this.escape(table)}`);
     return columns.map(({column_name, column_type, null: nullable}) => ({
       name: column_name,
       type: getDuckDBType(column_type),
@@ -125,6 +128,9 @@ export class DuckDBClient {
     if (config.query?.castTimestampToDate === undefined) {
       config = {...config, query: {...config.query, castTimestampToDate: true}};
     }
+    if (config.query?.castBigIntToDouble === undefined) {
+      config = {...config, query: {...config.query, castBigIntToDouble: true}};
+    }
     await db.open(config);
     await Promise.all(
       Object.entries(sources).map(async ([name, source]) => {
@@ -134,6 +140,8 @@ export class DuckDBClient {
           await insertArrowTable(db, name, source);
         } else if (Array.isArray(source)) { // bare array of objects
           await insertArray(db, name, source);
+        } else if (isArqueroTable(source)) {
+          await insertArqueroTable(db, name, source);
         } else if ("data" in source) { // data + options
           const {data, ...options} = source;
           if (isArrowTable(data)) {
@@ -163,17 +171,26 @@ async function insertFile(database, name, file, options) {
     const buffer = await file.arrayBuffer();
     await database.registerFileBuffer(file.name, new Uint8Array(buffer));
   } else {
-    await database.registerFileURL(file.name, url);
+    await database.registerFileURL(file.name, url, 4); // duckdb.DuckDBDataProtocol.HTTP
   }
   const connection = await database.connect();
   try {
     switch (file.mimeType) {
       case "text/csv":
+      case "text/tab-separated-values": {
         return await connection.insertCSVFromPath(file.name, {
           name,
           schema: "main",
           ...options
+        }).catch(async (error) => {
+          // If initial attempt to insert CSV resulted in a conversion
+          // error, try again, this time treating all columns as strings.
+          if (error.toString().includes("Could not convert")) {
+            return await insertUntypedCSV(connection, file, name);
+          }
+          throw error;
         });
+      }
       case "application/json":
         return await connection.insertJSONFromPath(file.name, {
           name,
@@ -201,12 +218,17 @@ async function insertFile(database, name, file, options) {
   }
 }
 
+async function insertUntypedCSV(connection, file, name) {
+  const statement = await connection.prepare(
+    `CREATE TABLE '${name}' AS SELECT * FROM read_csv_auto(?, ALL_VARCHAR=TRUE)`
+  );
+  return await statement.send(file.name);
+}
+
 async function insertArrowTable(database, name, table, options) {
-  const arrow = await loadArrow();
-  const buffer = arrow.tableToIPC(table);
   const connection = await database.connect();
   try {
-    await connection.insertArrowFromIPCStream(buffer, {
+    await connection.insertArrowTable(table, {
       name,
       schema: "main",
       ...options
@@ -216,15 +238,23 @@ async function insertArrowTable(database, name, table, options) {
   }
 }
 
+async function insertArqueroTable(database, name, source) {
+  // TODO When we have stdlib versioning and can upgrade Arquero to version 5,
+  // we can then call source.toArrow() directly, with insertArrowTable()
+  const arrow = await loadArrow();
+  const table = arrow.tableFromIPC(source.toArrowBuffer());
+  return await insertArrowTable(database, name, table);
+}
+
 async function insertArray(database, name, array, options) {
   const arrow = await loadArrow();
   const table = arrow.tableFromJSON(array);
   return await insertArrowTable(database, name, table, options);
 }
 
-async function createDuckDB() {
-  const duck = await import(`${cdn}${duckdb.resolve()}`);
-  const bundle = await duck.selectBundle({
+async function loadDuckDB() {
+  const module = await import(`${cdn}${duckdb.resolve()}`);
+  const bundle = await module.selectBundle({
     mvp: {
       mainModule: `${cdn}${duckdb.resolve("dist/duckdb-mvp.wasm")}`,
       mainWorker: `${cdn}${duckdb.resolve("dist/duckdb-browser-mvp.worker.js")}`
@@ -234,15 +264,17 @@ async function createDuckDB() {
       mainWorker: `${cdn}${duckdb.resolve("dist/duckdb-browser-eh.worker.js")}`
     }
   });
-  const logger = new duck.ConsoleLogger();
-  const worker = await duck.createWorker(bundle.mainWorker);
-  const db = new duck.AsyncDuckDB(logger, worker);
-  await db.instantiate(bundle.mainModule);
-  return db;
+  const logger = new module.ConsoleLogger();
+  return {module, bundle, logger};
 }
 
-async function loadArrow() {
-  return await import(`${cdn}${arrow.resolve()}`);
+async function createDuckDB() {
+  if (promise === undefined) promise = loadDuckDB();
+  const {module, bundle, logger} = await promise;
+  const worker = await module.createWorker(bundle.mainWorker);
+  const db = new module.AsyncDuckDB(logger, worker);
+  await db.instantiate(bundle.mainModule);
+  return db;
 }
 
 // https://duckdb.org/docs/sql/data_types/overview
@@ -254,6 +286,7 @@ function getDuckDBType(type) {
       return "bigint";
     case "DOUBLE":
     case "REAL":
+    case "FLOAT":
       return "number";
     case "INTEGER":
     case "SMALLINT":

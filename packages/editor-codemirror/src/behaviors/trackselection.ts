@@ -45,13 +45,16 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
               } 
             })
           } else if (tr.getMeta(kCodeViewNextLineTransaction) === true) {
+            // NOTE: this is a special directive to advance to the next line. as distinct
+            // from the block above it is not a reporting of a change in the PM selection
+            // but rather an instruction to move the CM selection to the next line. as 
+            // such we do not encose the code in State.Updating, because we want an update
+            // to the PM selection to occur
             const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
             if (cmSelection) {
-              context.withState(State.Updating, () => {
-                if (cursorLineDown(cmView)) {
-                  cursorLineStart(cmView);
-                }
-              })
+              if (cursorLineDown(cmView)) {
+                cursorLineStart(cmView);
+              } 
             }
           }
         } 

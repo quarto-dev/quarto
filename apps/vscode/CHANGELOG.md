@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.83.0 (Unreleased)
+## 1.83.0 (Release on 28 April 2023)
 
 - Correct syntax highlighting for list items and blockquote character
 - Enable Quarto: Render Project command for Hugo and Docusausus projects
@@ -11,6 +11,7 @@
 - Only update Quarto Assist panel for Quarto docs
 - Visual mode select all in codeblock now targets just the code block
 - Correctly advance selection for line-by-line execution in visual mode
+
 ## 1.82.0 (Release on 21 April 2023)
 
 - Fixed position for preview toolbar and content frame.

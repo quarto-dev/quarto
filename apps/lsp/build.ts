@@ -19,10 +19,14 @@ import { runBuild } from "build";
 const args = process.argv;
 const dev = args[2] === "dev";
 
+const nodeSqlLiteWasm = '../../node_modules/node-sqlite3-wasm/dist/*.wasm';
+
 runBuild({
   entryPoints: ['./src/server.ts'],
   outfile: './dist/lsp.js',
   assets: [
+    { from: [nodeSqlLiteWasm], to: '../vscode/out/' },
+    { from: [nodeSqlLiteWasm], to: './dist/' },
     { from: ['../../packages/editor-server/src/resources/**'], to: './dist/resources/' },
     { from: ['./dist/**'], to: ['../vscode/out/lsp/'] }],
   dev

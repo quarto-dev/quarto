@@ -18,7 +18,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-// import createDb, { Database } from "better-sqlite3";
+import { Database } from "node-sqlite3-wasm";
 
 import { quartoCacheDir } from "quarto-core";
 import { md5Hash } from "core-node";
@@ -43,21 +43,17 @@ export async function withZoteroDb<T>(dataDir: string, f: (db: unknown) => Promi
     fs.utimesSync(dbCopyFile, dbFileStat.atime, dbFileStat.mtime);
   }
 
-  // NOTE: remove this once we have db working
-  return f(null);
-
-   /*
    // create connection
    let db : Database | undefined;
    try {
      // attempt open
-     db = createDb(dbCopyFile, { readonly: true });
+     db = new Database(dbCopyFile, { fileMustExist: true });
     
      try {
       db.exec("SELECT * FROM libraries");
     } catch(error) {
       const closeDb = db;
-      db = undefined; // this will trigger removal in finally
+      db = undefined;
       closeDb.close();
       console.error(error);
       throw error;
@@ -83,7 +79,7 @@ export async function withZoteroDb<T>(dataDir: string, f: (db: unknown) => Promi
       }
     }
   }
-  */
+
 }
 
 function zoteroSqliteDir() {

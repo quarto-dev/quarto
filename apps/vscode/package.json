@@ -1135,6 +1135,30 @@
           "default": false,
           "markdownDescription": "Write markdown links as references rather than inline. Reference links are written to the location specified in `#quarto.visualEditor.markdownReferences#`."
         },
+        "quarto.zotero.library": {
+          "order": 50,
+          "scope": "window",
+          "type": "string",
+          "markdownDescription": "Location of Zotero references library (`local`, `web`, or `none`).",
+          "default": "local",
+          "enum": [
+            "none",
+            "local",
+            "web"
+          ],
+          "markdownEnumDescriptions": [
+            "Do not use Zotero libraries for inserting references.",
+            "Use my locally installed copy of Zotero for inserting references.",
+            "Use my Zotero Web Library for inserting references. "
+          ]
+        },
+        "quarto.zotero.dataDir": {
+          "order": 51,
+          "scope": "window",
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Zotero data directory (used in `local` library configuration). Note that this can normally be auto-detected (specify explicitly only if required)."
+        },
         "quarto.zotero.groupLibraries": {
           "order": 52,
           "scope": "window",

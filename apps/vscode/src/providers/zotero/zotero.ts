@@ -53,6 +53,10 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
 async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer) {
 
   const kZoteroConfig = "quarto.zotero";
+  const kLibrary = "library";
+  const kZoteroLibrary = `${kZoteroConfig}.${kLibrary}`;
+  const kDataDir = "dataDir";
+  const kZoteroDataDir = `${kZoteroConfig}.${kDataDir}`;
   const kGroupLibraries = "groupLibraries";
   const kZoteroGroupLibraries = `${kZoteroConfig}.${kGroupLibraries}`;
 
@@ -61,21 +65,21 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
     if (retry === 5) {
       return;
     }
+    const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
+    const type = zoteroConfig.get<"none"|"local"|"web">(kLibrary, "local");
+    const dataDir = zoteroConfig.get<string>(kDataDir, "");
+    const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
     try {
-      const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
-      if (apiKey) {
-        await zotero.setLibraryConfig({
-          type: "web",
-          dataDir: "",
-          apiKey
-        });
-      }
+      await zotero.setLibraryConfig({
+        type,
+        dataDir,
+        apiKey
+      });
     } catch(error) {
       const message = error instanceof Error ? error.message : JSON.stringify(error);
       console.log("Error setting zotero library config: " + message);
       setTimeout(() => setLspLibraryConfig((retry || 0) + 1), 1000);
-    }
-    
+    }   
   };
   await setLspLibraryConfig();
 
@@ -93,14 +97,29 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
   // monitor changes to configuration
   context.subscriptions.push(workspace.onDidChangeConfiguration(async (e) => {
     
+    // sync changes to base config
+    if (e.affectsConfiguration(kZoteroLibrary) || 
+        e.affectsConfiguration(kZoteroDataDir)) {
+
+      // if we are switching to web then prompt for an api key if we don't have one
+      const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
+      if (zoteroConfig.get(kLibrary) === "web" && 
+          !(await context.secrets.get(kQuartoZoteroWebApiKey))) {
+        await commands.executeCommand(kZoteroConfigureLibrary);
+      } else {
+        await setLspLibraryConfig();
+      }
+    }
+
     // initiate a sync for web group libraries
     if (e.affectsConfiguration(kZoteroGroupLibraries)) {
       // read updated library list
       const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
       const updatedGroupLibraries =  zoteroConfig.get<string[]>(kGroupLibraries, []);
       
-      // sync if there are new libraries added
-      if (updatedGroupLibraries.length > groupLibraries.length) {
+      // sync if we are in web mode and there are new libraries added
+      if (zoteroConfig.get(kLibrary) === "web" && 
+          updatedGroupLibraries.length > groupLibraries.length) {
         const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
         if (apiKey) {
           await syncWebLibraries(apiKey);

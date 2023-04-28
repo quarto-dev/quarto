@@ -31,6 +31,7 @@ import {
   SignatureInformation,
 } from "vscode";
 import { escapeRegExpCharacters } from "core";
+import { isQuartoDoc, isQuartoYaml } from "../../core/doc";
 
 const kAssistHelp = "Quarto: Help";
 const kAssistEquation = "Quarto: Equation";
@@ -76,8 +77,15 @@ export async function renderActiveAssist(
   asWebviewUri: (uri: Uri) => Uri,
   token: CancellationToken
 ): Promise<Assist | undefined> {
+
+  // must have an active text editor
   const editor = window.activeTextEditor;
   if (!editor) {
+    return undefined;
+  }
+
+  // must be a quarto document
+  if (!isQuartoDoc(editor.document) && !isQuartoYaml(editor.document)) {
     return undefined;
   }
 

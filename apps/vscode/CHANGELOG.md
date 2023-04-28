@@ -8,7 +8,7 @@
 - Correct hover/preview behavior for display math in lists
 - Syntax highlighthing for `plantuml` code blocks
 - Remove custom paste hadling for links (too many unwanted side effects)
-
+- Only update Quarto Assist panel for Quarto docs
 ## 1.82.0 (Release on 21 April 2023)
 
 - Fixed position for preview toolbar and content frame.

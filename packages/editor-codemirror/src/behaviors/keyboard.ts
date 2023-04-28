@@ -15,7 +15,7 @@
 
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { undo, redo } from "prosemirror-history";
-import { exitCode, selectAll, setBlockType } from "prosemirror-commands";
+import { exitCode, setBlockType } from "prosemirror-commands";
 
 import { EditorView, KeyBinding, keymap } from "@codemirror/view";
 

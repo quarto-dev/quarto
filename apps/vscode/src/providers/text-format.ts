@@ -46,7 +46,12 @@ class ToggleCommand implements Command {
   }
 
   async execute(): Promise<void> {
-    const editor = window.activeTextEditor!;
+    // ensure we are dealing with a text editor
+    const editor = window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+
     let selections = editor.selections;
 
     let batchEdit = new WorkspaceEdit();

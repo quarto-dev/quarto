@@ -28,7 +28,6 @@ import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
 import { activateCreate } from "./providers/create/create";
-import { activatePaste } from "./providers/paste";
 import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
@@ -96,10 +95,6 @@ export async function activate(context: vscode.ExtensionContext) {
     kQuartoDocSelector,
     quartoCellExecuteCodeLensProvider(engine)
   );
-
-  // provide paste handling
-  const pasteCommands = activatePaste();
-  commands.push(...pasteCommands);
 
   // provide file copy/drop handling
   activateCopyFiles(context);

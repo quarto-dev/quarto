@@ -74,14 +74,6 @@ export function keyboardBehavior(context: BehaviorContext, keys: KeyBinding[]) :
       run: (cmView: EditorView) => backspaceHandler(view, cmView),
     },
     {
-      key: "Mod-a",
-      run: () => {
-        const result = selectAll(view.state, view.dispatch);
-        view.focus();
-        return result;
-      },
-    },
-    {
       key: "Shift-Enter",
       run: (cmView: EditorView) => {
         const sel = cmView.state.selection.main;

@@ -6,9 +6,11 @@
 - Enable Quarto: Render Project command for Hugo and Docusausus projects
 - Exclude parens from cite/crossref highlighting in visual editor
 - Correct hover/preview behavior for display math in lists
-- Syntax highlighthing for `plantuml` code blocks
+- Syntax highlighting for `plantuml` code blocks
 - Remove custom paste hadling for links (too many unwanted side effects)
 - Only update Quarto Assist panel for Quarto docs
+- Visual mode select all in codeblock now targets just the code block
+- Correctly advance selection for line-by-line execution in visual mode
 ## 1.82.0 (Release on 21 April 2023)
 
 - Fixed position for preview toolbar and content frame.

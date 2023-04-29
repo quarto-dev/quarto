@@ -50,8 +50,7 @@ export async function withZoteroDb<T>(dataDir: string, f: (db: Database) => Prom
      db = new Database(dbCopyFile, { fileMustExist: true });
     // try a simple query to validate the connection
      try {
-      const r = db.all("SELECT * FROM libraries");
-      console.log(r);
+      db.exec("SELECT * FROM libraries");
     } catch(error) {
       const closeDb = db;
       db = undefined;

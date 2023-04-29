@@ -13,6 +13,5 @@
  *
  */
  
-export * from './local';
 export * from './web';
 

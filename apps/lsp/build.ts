@@ -25,7 +25,6 @@ runBuild({
   entryPoints: ['./src/server.ts'],
   outfile: './dist/lsp.js',
   assets: [
-    { from: [nodeSqlLiteWasm], to: '../vscode/out/' },
     { from: [nodeSqlLiteWasm], to: './dist/' },
     { from: ['../../packages/editor-server/src/resources/**'], to: './dist/resources/' },
     { from: ['./dist/**'], to: ['../vscode/out/lsp/'] }],

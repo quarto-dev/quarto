@@ -25,7 +25,7 @@ import { md5Hash } from "core-node";
 import { zoteroTrace } from "../trace";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function withZoteroDb<T>(dataDir: string, f: (db: unknown) => Promise<T>) {
+export async function withZoteroDb<T>(dataDir: string, f: (db: Database) => Promise<T>) {
 
   // get path to actual sqlite db
   const dbFile = path.join(dataDir, "zotero.sqlite");
@@ -48,9 +48,10 @@ export async function withZoteroDb<T>(dataDir: string, f: (db: unknown) => Promi
    try {
      // attempt open
      db = new Database(dbCopyFile, { fileMustExist: true });
-    
+    // try a simple query to validate the connection
      try {
-      db.exec("SELECT * FROM libraries");
+      const r = db.all("SELECT * FROM libraries");
+      console.log(r);
     } catch(error) {
       const closeDb = db;
       db = undefined;

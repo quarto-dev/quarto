@@ -30,7 +30,6 @@ import {
   ZoteroServer 
 } from "editor-types";
 import { zoteroValidateApiKey, zoteroWebCollectionSource } from "../core/zotero/web";
-import { zoteroLocalCollectionSource } from "../core";
 
 export function zoteroServer(): ZoteroServer {
 
@@ -48,6 +47,7 @@ export function zoteroServer(): ZoteroServer {
 
       // local
       } else if (config.type === "local") {
+        const { zoteroLocalCollectionSource } = await import("../core/zotero/local");
         source = zoteroLocalCollectionSource(config.dataDir);
       }
 

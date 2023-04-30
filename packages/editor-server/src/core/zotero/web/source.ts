@@ -20,6 +20,7 @@ import { libraryCollectionName, libraryList } from "./libraries";
 import { libraryRead, libraryReadCollections, libraryReadVersions, userWebLibrariesDir } from "./storage";
 import { zoteroSyncWebLibraries, zoteroSyncWebLibrary } from "./sync";
 import { zoteroTrace } from "./trace";
+import { resolveCslJsonCheaterKeyForValue } from "../util";
 
 
 export function zoteroWebCollectionSource(zoteroKey: string) : ZoteroCollectionSource {
@@ -186,39 +187,16 @@ function cslJsonFromItem(item: Item) {
  
   const dataExtra = item.data["extra"];
   if (typeof(dataExtra) === "string") {
-    resolveCslJsonCheaterKey(csljson, dataExtra);
+    resolveCslJsonCheaterKeyForValue(csljson, dataExtra);
   }
   const cslNote = csljson["note"];
   if (typeof(cslNote) === "string") {
-    resolveCslJsonCheaterKey(csljson, cslNote);
+    resolveCslJsonCheaterKeyForValue(csljson, cslNote);
   }
 
   return csljson;
 }
 
-const kKeyPattern = /((.*?)\s*:\s*([^\s]+))/g;
-
-function resolveCslJsonCheaterKey(csl: CSL, cheaterValue: string) {
-  kKeyPattern.lastIndex = 0;
-  let match = kKeyPattern.exec(cheaterValue);
-  while (match !== null) {
-    const key = match[1].trim();
-    const value = match[2].trim();
-    if (key && value) {
-      csl[cheaterKey(key)] = value;
-    }
-    match = kKeyPattern.exec(cheaterValue);
-  }  
-  kKeyPattern.lastIndex = 0;
-}
-
-function cheaterKey(cslKey: string) {
-  if (cslKey === "Citation Key") {
-    return "id";
-  } else {
-    return cslKey;
-  }
-}
 
 function handleZoteroError(error: unknown) : ZoteroResult {
   if (error instanceof ZoteroAuthorizationError || error instanceof ZoteroObjectNotFoundError) {

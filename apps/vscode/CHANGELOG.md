@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.84.0 (Unreleased)
+
+- Support for local Zotero databases in visaul editor citations
+
 ## 1.83.0 (Release on 28 April 2023)
 
 - Correct syntax highlighting for list items and blockquote character

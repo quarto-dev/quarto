@@ -44,16 +44,29 @@ export function mathRange(doc: TextDocument, pos: Position) {
   const codeBlock = tokens.find(isBlockTypeAtPosition(["code_block"], pos));
   if (codeBlock && codeBlock.map) {
     const codeBlockLines = lines(codeBlock.content.trim());
-    if (codeBlockLines.length > 2 && 
-        codeBlockLines[0].startsWith("$$") && 
-        codeBlockLines[codeBlockLines.length-1].startsWith("$$")) {
-      return {
-        math: codeBlockLines.slice(1, -1).join("\n"),
-        range: Range.create(
-          Position.create(codeBlock.map[0], 0),
-          Position.create(codeBlock.map[1] + 1, 0)
-        ),
-      };
+    let codeBegin: number | undefined;
+    for (let i=0; i<codeBlockLines.length; i++) {
+      const line = codeBlockLines[i];
+      if (line.startsWith("$$")) {
+        if (codeBegin !== undefined) {
+          // ensure we have at least one "\" to indicate this is math
+          const math = codeBlockLines.slice(1 + codeBegin, i).join("\n");
+          if (math.includes("\\")) {
+            return {
+              math,
+              range: Range.create(
+                Position.create(codeBlock.map[0] + codeBegin, 0),
+                Position.create(codeBlock.map[0] + i + 1, 0)
+              ),
+            };
+          } else {
+            codeBegin = undefined; // not math, reset
+          }
+          
+        } else {
+          codeBegin = i;
+        }
+      }
     }
   }
   

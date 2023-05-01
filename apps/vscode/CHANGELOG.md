@@ -4,6 +4,7 @@
 
 - Support for local Zotero databases in visaul editor citations
 - Toggle comment (%%) for Mermaid diagram editing
+- Support math preview in list items with > 2 blocks
 
 ## 1.83.0 (Release on 28 April 2023)
 

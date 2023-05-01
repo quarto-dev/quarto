@@ -5,6 +5,7 @@
 - Support for local Zotero databases in visaul editor citations
 - Toggle comment (%%) for Mermaid diagram editing
 - Support math preview in list items with > 2 blocks
+- Don't show GitLens hovers in Quarto Assist panel
 
 ## 1.83.0 (Release on 28 April 2023)
 

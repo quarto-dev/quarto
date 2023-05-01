@@ -133,7 +133,8 @@ function getAssistFromHovers(hovers: Hover[], asWebviewUri: (uri: Uri) => Uri) {
   const parts = hovers
     .flatMap((hover) => hover.contents)
     .map((content) => getMarkdown(content))
-    .filter((content) => content.length > 0);
+    .filter((content) => content.length > 0)
+    .filter(content => !content.includes("command:gitlens"));
 
   if (parts.length === 0) {
     return undefined;

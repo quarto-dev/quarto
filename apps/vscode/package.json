@@ -102,7 +102,8 @@
         ],
         "extensions": [
           ".mmd"
-        ]
+        ],
+        "configuration": "./languages/mermaid/mermaid.configuration.json"
       }
     ],
     "grammars": [

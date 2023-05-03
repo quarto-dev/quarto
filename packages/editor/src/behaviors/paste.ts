@@ -56,10 +56,22 @@ function pasteWordPlugin(schema: Schema) {
 
     props: {
 
+      // NOTE: this issue is fixed in later versions of prosemirror so we can 
+      // remove once we've upgraded. see https://github.com/ProseMirror/prosemirror-view/pull/144
+      transformPastedHTML(html) {
+        if (isWindows()) {
+          const fragments = html.match(/<!--StartFragment-->(.*)<!--EndFragment-->/); 
+          if (fragments) {
+            return fragments[1];
+          }
+        }
+        return html;
+      },
+
       handlePaste: (view: EditorView, event: ClipboardEvent, slice: Slice) : boolean | void => {
 
         if (event.clipboardData) {
-
+          
           // if this contains office content or we are on windows then handle it
           // (office content has excessive internal vertical space, windows has
           // issues w/ prosemirror freezing in its paste implementation when handling
@@ -84,6 +96,7 @@ function pasteWordPlugin(schema: Schema) {
                   nodes.push(newNode || node);
                 }
               }
+              
               const fragment = Fragment.fromArray(nodes);
               const newSlice = new Slice(fragment, slice.openStart, slice.openEnd);
               view.dispatch(view.state.tr.replaceSelection(newSlice));

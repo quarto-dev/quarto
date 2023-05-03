@@ -40,11 +40,9 @@ export function yamlPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
     let pos,
       nextLine,
       start_content,
-      auto_closed = false,
+      user_closed = false,
       start = state.bMarks[startLine] + state.tShift[startLine],
       max = state.eMarks[startLine];
-
-
 
     // Check out the first character of the first line quickly,
     // this should filter out non-front matter
@@ -75,7 +73,6 @@ export function yamlPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
 
     // Search for the end of the block
     nextLine = startLine;
-
     for (;;) {
       nextLine++;
       if (nextLine >= endLine) {
@@ -127,34 +124,39 @@ export function yamlPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
       }
 
       // found!
-      auto_closed = true;
+      user_closed = true;
       break;
     }
 
-
-    const old_parent = state.parentType;
-    const old_line_max = state.lineMax;
-    state.parentType = "root";
-
-    // this will prevent lazy continuations from ever going past our end marker
-    state.lineMax = nextLine;
-
-    const token = state.push("front_matter", "", 0);
-    token.hidden = true;
-    token.markup = state.src.slice(startLine, pos);
-    token.block = true;
-    token.map = [startLine, pos];
-    token.meta = state.src.slice(start_content, start - 1);
-
-    state.parentType = old_parent;
-    state.lineMax = old_line_max;
-    state.line = nextLine + (auto_closed ? 1 : 0);
-
-    if (cb) {
-      cb(token.meta);
+    // Ensure that we have real yaml here
+    const markup = state.src.slice(startLine, pos);
+    const yaml = parseFrontMatterStr(markup);
+    const isYamlBlock = yaml !== null && typeof(yaml) === "object";
+    
+    // If this is yaml, render it
+    if (isYamlBlock && user_closed) {
+      const old_parent = state.parentType;
+      const old_line_max = state.lineMax;
+  
+      const token = state.push(kTokFrontMatter, "", 0);
+      token.hidden = true;
+      token.markup = markup;
+      token.block = true;
+      token.map = [startLine, pos];
+      token.meta = state.src.slice(start_content, start - 1);
+  
+      if (cb) {
+        cb(token.meta);
+      }    
+      state.parentType = old_parent;
+      state.lineMax = old_line_max;  
+      state.line = nextLine + (user_closed ? 1 : 0);
+      return true;
+    } else {
+      // This is not yaml, just continue
+      state.line = nextLine + 1;
+      return false;
     }
-
-    return true;
   }
 
   md.block.ruler.before("table", kTokFrontMatter, frontMatter, {
@@ -221,7 +223,6 @@ function renderFrontMatter(tokens: Token[], idx: number): string {
 
       titleLines.push(otherYamlRendered);
     }
-
     return titleLines.join("\n");
   } else {
     return "";

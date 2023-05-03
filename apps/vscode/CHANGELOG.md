@@ -1,12 +1,13 @@
 # Changelog
 
-## 1.84.0 (Unreleased)
+## 1.84.0 (Release on 03 May 2023)
 
 - Support for local Zotero databases in visaul editor citations
 - Toggle comment (%%) for Mermaid diagram editing
 - Support math preview in list items with > 2 blocks
 - Don't show GitLens hovers in Quarto Assist panel
 - Restore Quarto Assist for non-qmd file types
+- Fix issue w/ Visual Editor paste behavior on Windows
 
 ## 1.83.0 (Release on 28 April 2023)
 

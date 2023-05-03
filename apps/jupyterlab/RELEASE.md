@@ -17,6 +17,7 @@ hatch version <new-version>
 To publish the source extension as a NPM package, do:
 
 ```bash
+yarn build
 npm login
 npm publish --access public
 ```

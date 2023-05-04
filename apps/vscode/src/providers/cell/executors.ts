@@ -19,7 +19,7 @@
 import semver from "semver";
 
 import Token from "markdown-it/lib/token";
-import { commands, extensions, Position, TextDocument, window } from "vscode";
+import { commands, extensions, Position, TextDocument, Uri, window } from "vscode";
 
 import { lines } from "core";
 
@@ -81,11 +81,12 @@ export function codeFromBlock(token: Token) {
 
 export async function executeInteractive(
   language: string,
-  blocks: string[]
+  blocks: string[],
+  document: TextDocument
 ): Promise<void> {
   const executor = kCellExecutors.find((x) => x.language === language);
   if (executor) {
-    return await executor.execute(blocks);
+    return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
   }
 }
 
@@ -207,7 +208,7 @@ interface CellExecutor {
   requiredExtension?: string[];
   requiredVersion?: string;
   isYamlOption: (line: string) => boolean;
-  execute: (blocks: string[]) => Promise<void>;
+  execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
   executeSelection?: () => Promise<void>;
 }
 
@@ -244,13 +245,15 @@ const juliaCellExecutor: CellExecutor = {
   requiredExtensionName: "Julia",
   requiredVersion: "1.4.0",
   isYamlOption: isYamlHashOption,
-  execute: async (blocks: string[]) => {
+  execute: async (blocks: string[], editorUri?: Uri) => {
     const extension = extensions.getExtension("julialang.language-julia");
     if (extension) {
       if (!extension.isActive) {
         await extension.activate();
       }
-      extension.exports.executeInREPL(blocks.join("\n"), {});
+      extension.exports.executeInREPL(blocks.join("\n"), {
+        filename: editorUri ? editorUri.fsPath : 'code'
+      });
     } else {
       window.showErrorMessage("Unable to execute code in Julia REPL");
     }

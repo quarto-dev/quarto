@@ -141,7 +141,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   public readonly id = RunCurrentCellCommand.id;
 
   override async doExecute(
-    _editor: TextEditor,
+    editor: TextEditor,
     _tokens: Token[],
     _line: number,
     block?: Token
@@ -149,7 +149,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
     if (block) {
       const language = languageNameFromBlock(block);
       const code = codeFromBlock(block);
-      await executeInteractive(language, [code]);
+      await executeInteractive(language, [code], editor.document);
     }
   }
 
@@ -159,7 +159,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ) : Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
-      await executeInteractive(context.activeLanguage, [activeBlock.code]);
+      await executeInteractive(context.activeLanguage, [activeBlock.code], editor.document);
       await activateIfRequired(editor);
     }
   }
@@ -189,7 +189,7 @@ class RunNextCellCommand extends RunCommand implements Command {
     if (nextBlock) {
       await editor.setBlockSelection(context, "nextblock");
       if (hasExecutor(nextBlock.language)) {
-        await executeInteractive(nextBlock.language, [nextBlock.code]);
+        await executeInteractive(nextBlock.language, [nextBlock.code], editor.document);
         await activateIfRequired(editor);
       }
     } else {
@@ -223,7 +223,7 @@ class RunPreviousCellCommand extends RunCommand implements Command {
     if (prevBlock) {
       await editor.setBlockSelection(context, "prevblock");
       if (hasExecutor(prevBlock.language)) {
-        await executeInteractive(prevBlock.language, [prevBlock.code]);
+        await executeInteractive(prevBlock.language, [prevBlock.code], editor.document);
         await activateIfRequired(editor);
       }
     } else {
@@ -277,7 +277,7 @@ class RunSelectionCommand extends RunCommand implements Command {
       }
 
       // run code
-      await executeInteractive(language, [selection]);
+      await executeInteractive(language, [selection], editor.document);
     }
   }
 
@@ -297,7 +297,7 @@ class RunSelectionCommand extends RunCommand implements Command {
     }
 
     // run code
-    await executeInteractive(context.activeLanguage, [selection]);
+    await executeInteractive(context.activeLanguage, [selection], editor.document);
     
     // advance cursor if necessary
     if (action) {
@@ -318,7 +318,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
   }
 
   override async doExecute(
-    _editor: TextEditor,
+    editor: TextEditor,
     tokens: Token[],
     line: number,
     block?: Token
@@ -350,7 +350,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
       }
 
       // execute
-      await executeInteractive(language, code);
+      await executeInteractive(language, code, editor.document);
     }
   }
   
@@ -367,7 +367,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
       }
     }
     if (code.length > 0) {
-      await executeInteractive(context.activeLanguage, code);
+      await executeInteractive(context.activeLanguage, code, editor.document);
       await activateIfRequired(editor);
     }
   }
@@ -385,7 +385,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
   }
 
   override async doExecute(
-    _editor: TextEditor,
+    editor: TextEditor,
     tokens: Token[],
     line: number,
     block?: Token
@@ -412,7 +412,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     }
     // execute
     if (language && blocks.length > 0) {
-      await executeInteractive(language, blocks);
+      await executeInteractive(language, blocks, editor.document);
     }
   }
 
@@ -430,7 +430,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
       }
     }
     if (code && code.length > 0) {
-      await executeInteractive(context.activeLanguage, code);
+      await executeInteractive(context.activeLanguage, code, editor.document);
       await activateIfRequired(editor);
     }
   }
@@ -448,7 +448,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
   }
 
   override async doExecute(
-    _editor: TextEditor,
+    editor: TextEditor,
     tokens: Token[],
     _line: number,
     _block?: Token
@@ -465,7 +465,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
       }
     }
     if (language && blocks.length > 0) {
-      await executeInteractive(language, blocks);
+      await executeInteractive(language, blocks, editor.document);
     }
   }
 
@@ -480,7 +480,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
       }
     }
     if (code.length > 0) {
-      await executeInteractive(context.activeLanguage, code);
+      await executeInteractive(context.activeLanguage, code, editor.document);
       await activateIfRequired(editor);
     }
   }
@@ -549,7 +549,7 @@ async function runAdjacentBlock(editor: TextEditor, block: Token) {
   if (block.map) {
     navigateToBlock(editor, block);
     const language = languageNameFromBlock(block);
-    await executeInteractive(language, [codeFromBlock(block)]);
+    await executeInteractive(language, [codeFromBlock(block)], editor.document);
   }
 }
 

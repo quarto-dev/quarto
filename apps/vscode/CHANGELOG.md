@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.85.0 (Release on 04 May 2023)
+## 1.85.0 (Unreleased)
 
 - Pass working directory to Julia REPL when executing cells
 

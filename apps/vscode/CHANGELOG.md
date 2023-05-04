@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.85.0 (Release on 04 May 2023)
+
+- Pass working directory to Julia REPL when executing cells
+
 ## 1.84.0 (Release on 03 May 2023)
 
 - Support for local Zotero databases in visaul editor citations

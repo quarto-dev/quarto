@@ -42,7 +42,7 @@ const Workbench: React.FC = () => {
     cmDispatch({ type: "ADD_COMMANDS", payload: [
       keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
     ]});
-  }); 
+  }, []); 
    
   // render workbench
   return (

@@ -25,7 +25,8 @@ import {
   CodeViewCompletionContext, 
   CodeViewExecute, 
   CodeViewActiveBlockContext, 
-  DiagramState 
+  DiagramState, 
+  CodeViewCellContext
 } from 'editor-types';
 
 export * from './spelling';
@@ -129,6 +130,7 @@ export interface EditorUIMath {
 }
 
 export interface EditorUICodeView {
+  codeViewAssist: (context: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;

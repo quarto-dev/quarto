@@ -37,6 +37,7 @@ import {
 import { JsonRpcRequestTransport } from "core";
 
 import { 
+  CodeViewCellContext,
   CodeViewCompletionContext, 
   CodeViewExecute, 
   CodeViewServer, 
@@ -50,8 +51,11 @@ import { vdocCompletions } from "../../vdoc/vdoc-completion";
 import { MarkdownEngine } from "../../markdown/engine";
 
 
-export function vscodeCodeViewServer(engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport) : CodeViewServer {
+export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport) : CodeViewServer {
   return {
+    async codeViewAssist(context: CodeViewCellContext) {
+      await commands.executeCommand("quarto.codeViewAssist", context, lspRequest);
+    },
     async codeViewExecute(execute: CodeViewExecute) {
       switch(execute) {
         case "cell":

@@ -28,12 +28,13 @@ import {
 import { LspConnection, registerLspServerMethods } from "core-node";
 import { QuartoContext, userDictionaryDir } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
-import { Position, TextDocuments } from "vscode-languageserver/node";
+import { Hover, Position, TextDocuments } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { CodeViewCompletionContext, kCodeViewGetCompletions } from "editor-types";
+import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
 import { codeEditorContext } from "./quarto/quarto";
 import { yamlCompletions } from "./providers/completion/completion-yaml";
+import { yamlHover } from "./providers/hover/hover-yaml";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
@@ -72,9 +73,24 @@ export function registerCustomMethods(
     ...dictionaryServerMethods(dictionary),
     ...mathServerMethods(options.documents),
     ...sourceServerMethods(options.pandoc),
-    // we have the yaml completions here so provide an entry point for it
+    // we have the yaml hover and completions here so provide entry points for them
+    [kCodeViewAssist]: args => codeViewAssist(args[0]),
     [kCodeViewGetCompletions]: args => codeViewCompletions(args[0]),
   });
+}
+
+
+async function codeViewAssist(context: CodeViewCellContext) : Promise<Hover | undefined> {
+  
+  const edContext = codeEditorContext(
+    context.filepath,
+    context.language == "yaml" ? "yaml" : "script",
+    context.code.join("\n"),
+    Position.create(context.selection.start.line, context.selection.start.character),
+    false
+  );  
+
+  return await yamlHover(edContext) || undefined;
 }
 
 async function codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {

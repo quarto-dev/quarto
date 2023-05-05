@@ -381,6 +381,11 @@
         "title": "Show Assist Panel"
       },
       {
+        "command": "quarto.codeViewAssist",
+        "category": "Quarto",
+        "title": "Code View Assist"
+      },
+      {
         "command": "quarto.assist.pin",
         "title": "Pin Assist Panel",
         "icon": "$(pin)",
@@ -703,6 +708,10 @@
         },
         {
           "command": "quarto.showAssist"
+        },
+        {
+          "command": "quarto.codeViewAssist",
+          "when": "false"
         },
         {
           "command": "quarto.renderShortcut",

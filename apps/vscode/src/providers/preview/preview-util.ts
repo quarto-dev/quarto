@@ -23,49 +23,11 @@ import {
   metadataFilesForDocument,
   yamlFromMetadataFile,
 } from "quarto-core";
-import { isNotebook, quartoEditor, QuartoEditor } from "../../core/doc";
-import { VisualEditorProvider } from "../editor/editor";
+import { isNotebook } from "../../core/doc";
 
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
 
-
-export function findEditor(
-  filter: (doc: vscode.TextDocument) => boolean,
-  includeVisible = true
-) : QuartoEditor | undefined {
-
-  // first check for an active visual editor
-  const activeVisualEditor = VisualEditorProvider.activeEditor();
-  if (activeVisualEditor && filter(activeVisualEditor.document)) {
-    return activeVisualEditor;
-  }
-
-  // active text editor
-  const textEditor = vscode.window.activeTextEditor;
-  if (textEditor && filter(textEditor.document)) {
-    return quartoEditor(textEditor);
-  // check visible text editors
-  } else if (includeVisible) {
-    // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
-    const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
-    if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
-      return visibleVisualEditor;
-    }
-
-    // visible text editors
-    const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
-      filter(editor.document)
-    );
-    if (visibleEditor) {
-      return quartoEditor(visibleEditor);
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
-  }
-}
 
 export function previewDirForDocument(uri: Uri) {
   // first check for a quarto project

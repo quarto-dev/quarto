@@ -38,7 +38,9 @@ import {
   renderCacheKeyEquals,
   renderCacheKeyNone,
 } from "./render-cache";
-import { renderActiveAssist, renderWebviewHtml } from "./render-assist";
+import { Assist, renderActiveAssist, renderCodeViewAssist, renderWebviewHtml } from "./render-assist";
+import { CodeViewCellContext } from "editor-types";
+import { JsonRpcRequestTransport } from "core";
 
 enum UpdateMode {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -50,7 +52,7 @@ export class QuartoAssistViewProvider
 {
   public static readonly viewType = "quarto-assist";
 
-  constructor(context: ExtensionContext, _engine: MarkdownEngine) {
+  constructor(context: ExtensionContext) {
     this.extensionUri_ = context.extensionUri;
 
     window.onDidChangeActiveTextEditor(
@@ -125,6 +127,17 @@ export class QuartoAssistViewProvider
     }
   }
 
+  public codeViewAssist(context: CodeViewCellContext, lspRequest: JsonRpcRequestTransport) {
+    if (this.view_?.visible) {
+      this.render(true, async (
+        asWebviewUri: (uri: Uri) => Uri,
+        token: CancellationToken
+      ) : Promise<Assist | undefined> => {
+        return renderCodeViewAssist(context, lspRequest, asWebviewUri, token);
+      });
+    }
+  }
+
   public pin() {
     this.updatePinned(true);
   }
@@ -155,17 +168,12 @@ export class QuartoAssistViewProvider
     this.render();
   }
 
-  private async render(ignoreCache = false) {
-    // ignore if we have no view
-    if (!this.view_) {
+  private async render(ignoreCache = false, renderFn = renderActiveAssist) {
+    
+    if (!this.shouldRender()) {
       return;
     }
-
-    // ignore if we are pinned
-    if (this.pinned_) {
-      return;
-    }
-
+   
     // don't render if the editor state hasn't changed (i.e. the cursor
     // isn't on a new word range)
     const newRenderCacheKey = createRenderCacheKey(window.activeTextEditor);
@@ -190,7 +198,7 @@ export class QuartoAssistViewProvider
     // promise used to perform updates (this will be raced with a progress indicator)
     const renderPromise = (async () => {
       // get html
-      const assist = await renderActiveAssist(
+      const assist = await renderFn(
         (uri: Uri) => this.view_!.webview.asWebviewUri(uri),
         renderingEntry.cts.token
       );
@@ -248,6 +256,23 @@ export class QuartoAssistViewProvider
       }),
     ]);
   }
+
+  private shouldRender() {
+    // ignore if we have no view
+    if (!this.view_) {
+     return false;
+   }
+
+   // ignore if we are pinned
+   else if (this.pinned_) {
+     return false ;
+   }
+
+   else {
+     return true;
+   }
+ }
+
 
   private updateConfiguration() {
     const config = workspace.getConfiguration("quarto");

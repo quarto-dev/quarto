@@ -44,6 +44,7 @@ import { fileCrossrefIndexStorage, QuartoContext } from "quarto-core";
 import { previewCommands } from "./commands";
 import { Command } from "../../core/command";
 import {
+  findQuartoEditor,
   isNotebook,
   isQuartoDoc,
   preserveEditorFocus,
@@ -69,7 +70,6 @@ import {
   QuartoPreviewWebviewManager,
 } from "./preview-webview";
 import {
-  findEditor,
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
   previewDirForDocument,
@@ -108,7 +108,7 @@ export function activatePreview(
 
   // render on save
   const onSave = async (docUri: Uri) => {
-    const editor = findEditor(
+    const editor = findQuartoEditor(
       (editorDoc) => editorDoc.uri.fsPath === docUri.fsPath
     );
     if (editor) {
@@ -186,7 +186,7 @@ export async function previewDoc(
   }
 
   // execute the preview (rerefresh the reference after save)
-  const previewEditor = findEditor(
+  const previewEditor = findQuartoEditor(
     (editorDoc) => editorDoc.uri.fsPath === editor.document.uri.fsPath
   );
   if (previewEditor) {
@@ -603,7 +603,7 @@ class PreviewManager {
 
       // find existing visible instance
       const fileUri = Uri.file(errorLoc.file);
-      const editor = findEditor((doc) => doc.uri.fsPath === fileUri.fsPath);
+      const editor = findQuartoEditor((doc) => doc.uri.fsPath === fileUri.fsPath);
       if (editor) {
         if (editor.textEditor) {
           // if the current selection is outside of the error region then

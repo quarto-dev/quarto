@@ -18,7 +18,7 @@ import { Command } from "../../core/command";
 import { kQuartoDocSelector } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import { quartoLensCodeLensProvider } from "./codelens";
-import { PreviewMathCommand, ShowAssistCommand } from "./commands";
+import { PreviewMathCommand, ShowAssistCommand, CodeViewAssistCommand } from "./commands";
 import { QuartoAssistViewProvider } from "./webview";
 
 export function activateQuartoAssistPanel(
@@ -33,7 +33,7 @@ export function activateQuartoAssistPanel(
     true
   );
 
-  const provider = new QuartoAssistViewProvider(context, engine);
+  const provider = new QuartoAssistViewProvider(context);
   context.subscriptions.push(provider);
 
   context.subscriptions.push(
@@ -64,6 +64,7 @@ export function activateQuartoAssistPanel(
 
   return [
     new ShowAssistCommand(provider),
+    new CodeViewAssistCommand(provider),
     new PreviewMathCommand(provider, engine),
   ];
 }

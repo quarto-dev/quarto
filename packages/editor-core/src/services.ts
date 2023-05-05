@@ -23,6 +23,7 @@ import {
   DictionaryServer,
   EditorServices,
   IgnoredWord,
+  kCodeViewAssist,
   kCodeViewGetCompletions,
   kCodeViewExecute,
   kCodeViewPreviewDiagram,
@@ -46,6 +47,7 @@ import {
   CodeViewExecute,
   CodeViewActiveBlockContext,
   DiagramState,
+  CodeViewCellContext,
   
 } from "editor-types";
 
@@ -79,6 +81,9 @@ export function editorMathJsonRpcServer(request: JsonRpcRequestTransport) : Math
 
 export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport) : CodeViewServer {
   return {
+    codeViewAssist(context: CodeViewCellContext) {
+      return request(kCodeViewAssist, [context]);
+    },
     codeViewExecute(execute: CodeViewExecute, context: CodeViewActiveBlockContext) {
       return request(kCodeViewExecute, [execute, context]);
     },

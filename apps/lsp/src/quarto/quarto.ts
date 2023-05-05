@@ -54,7 +54,7 @@ export function codeEditorContext(
   code: string,
   pos: Position,
   embedded: boolean,
-  explicit: boolean,
+  explicit?: boolean,
   trigger?: string
 ) {
   const line = lines(code)[pos.line];
@@ -73,7 +73,7 @@ export function codeEditorContext(
     line,
     code,
     position,
-    explicit,
+    explicit: !!explicit,
     trigger,
     formats,
     project_formats: [],

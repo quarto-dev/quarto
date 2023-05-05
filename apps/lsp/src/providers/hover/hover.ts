@@ -19,6 +19,7 @@ import { Hover, ServerCapabilities } from "vscode-languageserver/node";
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
+import { docEditorContext } from "../../quarto/quarto";
 
 export const kHoverCapabilities: ServerCapabilities = {
   hoverProvider: true,
@@ -29,6 +30,6 @@ export async function onHover(
   pos: Position
 ): Promise<Hover | null> {
   return (
-    (await refHover(doc, pos)) || mathHover(doc, pos) || (await yamlHover(doc, pos))
+    (await refHover(doc, pos)) || mathHover(doc, pos) || (await yamlHover(docEditorContext(doc, pos, true)))
   );
 }

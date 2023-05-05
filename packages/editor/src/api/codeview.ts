@@ -31,7 +31,7 @@ import { editingRootNode } from './node';
 import { editorScrollContainer } from './scroll';
 
 import { rmdChunk } from './rmd';
-import { CodeViewActiveBlockContext, CodeViewCompletionContext, CodeViewSelectionAction } from 'editor-types';
+import { CodeViewActiveBlockContext, CodeViewCellContext, CodeViewCompletionContext, CodeViewSelectionAction } from 'editor-types';
 import { navigateToPos } from './navigation';
 
 export const kCodeViewNextLineTransaction = "codeViewNextLine";
@@ -339,8 +339,16 @@ function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, no
 }
 
 
-
 export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean) : CodeViewCompletionContext | undefined {
+  const context = codeViewCellContext(filepath, state);
+  if (context) {
+    return { ...context, explicit };
+  } else {
+    return undefined;
+  }
+}
+
+export function codeViewCellContext(filepath: string, state: EditorState) : CodeViewCellContext | undefined {
 
   // get blocks (for active language only)
   const activeBlockContext = codeViewBlockContext(state, true);
@@ -357,7 +365,6 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
         cellBegin: 0,
         cellEnd: codeLines.length - 1,
         selection: activeBlockContext.selection,
-        explicit
       }
     // concatenate together all of the code, and indicate start/end lines of active block
     } else {
@@ -390,7 +397,6 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
             character: activeBlockContext?.selection.end.character
           }
         },
-        explicit
       }
     }
   } else {

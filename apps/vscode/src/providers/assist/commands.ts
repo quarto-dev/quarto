@@ -19,6 +19,8 @@ import { isQuartoDoc, preserveEditorFocus } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import { languageBlockAtPosition } from "../../markdown/language";
 import { QuartoAssistViewProvider } from "./webview";
+import { CodeViewCellContext } from "editor-types";
+import { JsonRpcRequestTransport } from "core";
 
 export class PreviewMathCommand implements Command {
   private static readonly id = "quarto.previewMath";
@@ -63,6 +65,18 @@ export class ShowAssistCommand implements Command {
     activateAssistPanel(this.provider_);
   }
 }
+
+
+export class CodeViewAssistCommand implements Command {
+  private static readonly id = "quarto.codeViewAssist";
+  public readonly id = CodeViewAssistCommand.id;
+  constructor(private readonly provider_: QuartoAssistViewProvider) {}
+  async execute(context: CodeViewCellContext, lspRequest: JsonRpcRequestTransport): Promise<void> {
+    this.provider_.codeViewAssist(context, lspRequest);
+  }
+}
+
+
 
 function activateAssistPanel(provider: QuartoAssistViewProvider) {
   // attempt to activate (if we fail to the view has been closed so

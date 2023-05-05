@@ -16,11 +16,8 @@
 import * as path from "path";
 import {
   ExtensionContext,
-  Hover,
-  SignatureHelp,
   SignatureHelpContext,
   workspace,
-  MarkdownString,
   ProviderResult,
   Location,
   LocationLink,
@@ -41,7 +38,6 @@ import {
   TextDocument,
 } from "vscode";
 import {
-  MarkedString,
   Middleware,
   ProvideCompletionItemsSignature,
   ProvideDefinitionSignature,
@@ -65,6 +61,7 @@ import {
   embeddedDocumentFormattingProvider,
   embeddedDocumentRangeFormattingProvider,
 } from "../providers/format";
+import { getHover, getSignatureHelpHover } from "../core/hover";
 
 let client: LanguageClient;
 
@@ -217,25 +214,7 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
       // execute hover
       try {
-        const hovers = await commands.executeCommand<Hover[]>(
-          "vscode.executeHoverProvider",
-          vdocUri.uri,
-          adjustedPosition(vdoc.language, position)
-        );
-        if (hovers && hovers.length > 0) {
-          // consolidate content
-          const contents = new Array<MarkdownString | MarkedString>();
-          hovers.forEach((hover) => {
-            hover.contents.forEach((hoverContent) => {
-              contents.push(hoverContent);
-            });
-          });
-          // adjust range if required
-          const range = hovers[0].range
-            ? unadjustedRange(vdoc.language, hovers[0].range)
-            : undefined;
-          return new Hover(contents, range);
-        }
+        return getHover(vdocUri, vdoc.language, position);
       } catch (error) {
         console.log(error);
       } finally {
@@ -262,12 +241,7 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
     if (vdoc) {
       const vdocUri = await virtualDocUri(vdoc, document.uri, "signature");
       try {
-        return await commands.executeCommand<SignatureHelp>(
-          "vscode.executeSignatureHelpProvider",
-          vdocUri.uri,
-          adjustedPosition(vdoc.language, position),
-          context.triggerCharacter
-        );
+        return getSignatureHelpHover(vdocUri, vdoc.language, position, context.triggerCharacter);
       } catch (error) {
         return undefined;
       } finally {

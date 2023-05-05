@@ -13,28 +13,23 @@
  *
  */
 
-import { Position, TextDocument } from "vscode-languageserver-textdocument";
-import { Hover } from "vscode-languageserver/node";
+import { Hover, MarkupKind } from "vscode-languageserver/node";
 
-import { docEditorContext, quarto } from "../../quarto/quarto";
+import { EditorContext, quarto } from "../../quarto/quarto";
 
-export async function yamlHover(
-  doc: TextDocument,
-  pos: Position
-): Promise<Hover | null> {
+export async function yamlHover(context: EditorContext): Promise<Hover | null> {
   // bail if no quarto connection
   if (!quarto?.getHover) {
     return null;
   }
   try {
-    const context = docEditorContext(doc, pos, true);
     const result = await quarto.getHover(context);
     if (result === null) {
       return null;
     }
     return {
       contents: {
-        kind: "markdown",
+        kind: MarkupKind.Markdown,
         value: result.content,
       },
       range: result.range,

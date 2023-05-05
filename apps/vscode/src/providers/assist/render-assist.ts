@@ -23,14 +23,22 @@ import {
   CancellationToken,
   Webview,
   TextEditor,
-  Hover,
   commands,
   MarkedString,
+  Hover,
   MarkdownString,
   SignatureHelp,
   SignatureInformation,
+  Range,
+  Position,
 } from "vscode";
-import { escapeRegExpCharacters } from "core";
+import { JsonRpcRequestTransport, escapeRegExpCharacters } from "core";
+import { CodeViewCellContext, kCodeViewAssist } from "editor-types";
+import { embeddedLanguage } from "../../vdoc/languages";
+import { virtualDocForCode, virtualDocUri, withVirtualDocUri } from "../../vdoc/vdoc";
+import { getHover, getSignatureHelpHover } from "../../core/hover";
+import { Hover as LspHover, MarkupKind } from "vscode-languageserver-types";
+import { MarkupContent } from "vscode-languageclient";
 
 const kAssistHelp = "Quarto: Help";
 const kAssistEquation = "Quarto: Equation";
@@ -72,12 +80,80 @@ export interface Assist {
   html: string;
 }
 
+export async function renderCodeViewAssist(
+  context: CodeViewCellContext,
+  lspRequest: JsonRpcRequestTransport,
+  asWebviewUri: (uri: Uri) => Uri,
+  token: CancellationToken
+): Promise<Assist | undefined> {
+
+  if (context.language === "yaml") {
+    const hover = (await lspRequest(kCodeViewAssist, [context])) as LspHover | undefined;
+    if (hover) {
+      const contents = [new MarkdownString((hover.contents as MarkupContent).value)];
+      const range = hover.range 
+        ? new Range(
+            hover.range.start.line, 
+            hover.range.start.character, 
+            hover.range.end.line, 
+            hover.range.end.character
+          ) 
+        : undefined;
+      const assist = getAssistFromHovers([{ contents, range }], asWebviewUri);
+      if (assist) {
+        return assist;
+      }
+    } 
+    return undefined;
+  
+  } else {
+    const language = embeddedLanguage(context.language);
+    if (language) {
+      const vdoc = virtualDocForCode(context.code, language);    
+      const vdocUri = await virtualDocUri(vdoc, Uri.file(context.filepath), "hover");
+      return await withVirtualDocUri<Assist | undefined>(vdocUri, async () => {
+        try {
+          const position = new Position(context.selection.start.line, context.selection.start.character);
+        
+          // check for hover
+          const hover = await getHover(vdocUri, language, position);
+          if (hover) {
+            const assist = getAssistFromHovers([hover], asWebviewUri);
+            if (assist) {
+              return assist;
+            }
+          }
+      
+          if (token.isCancellationRequested) {
+            return undefined;
+          }
+
+          // check for signature tip
+          const signatureHover = await getSignatureHelpHover(vdocUri, language, position);
+          if (signatureHover) {
+            return getAssistFromSignatureHelp(signatureHover);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      
+        return undefined;
+    
+      });
+    } else {
+      return undefined;
+    }
+  }
+
+  
+}
+
 export async function renderActiveAssist(
   asWebviewUri: (uri: Uri) => Uri,
   token: CancellationToken
 ): Promise<Assist | undefined> {
 
-  // must have an active text editor
+  // first check for an active text editor
   const editor = window.activeTextEditor;
   if (!editor) {
     return undefined;

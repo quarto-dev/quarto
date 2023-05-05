@@ -13,6 +13,8 @@
  *
  */
 
+import debounce from 'lodash.debounce';
+
 import { EditorView as PMEditorView } from "prosemirror-view";
 import { TextSelection, Transaction } from "prosemirror-state";
 
@@ -20,19 +22,32 @@ import { EditorSelection } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { cursorLineDown, cursorLineStart } from "@codemirror/commands";
 
-import { DispatchEvent, kCodeViewNextLineTransaction } from "editor";
+import { DispatchEvent, codeViewCellContext, kCodeViewNextLineTransaction } from "editor";
 
 import { Behavior, BehaviorContext, State } from ".";
 
 // track the selection in prosemirror
 export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
 
-  let unsubscibe: VoidFunction;
+  let unsubscribe: VoidFunction;
+
+  // 500ms debounced function for code view assist request
+  const codeViewAssist = debounce(() => {
+    // get path and context (bail if we can't)
+    const filepath = context.pmContext.ui.context.getDocumentPath();
+    if (!filepath) {
+      return;
+    }
+    const cvContext = codeViewCellContext(filepath, context.view.state);
+    if (cvContext) {
+      context.pmContext.ui.codeview?.codeViewAssist(cvContext);
+    }
+  }, 500);
 
   return {
 
     init(_pmNode, cmView) {
-      unsubscibe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
+      unsubscribe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
         if (tr) {
           // track selection changes that occur when we don't have focus
           if (!cmView.hasFocus && tr.selectionSet && !tr.docChanged && (tr.selection instanceof TextSelection)) {
@@ -56,13 +71,16 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
                 cursorLineStart(cmView);
               } 
             }
+          // for other selection changes 
+          } else if (cmView.hasFocus && tr.selectionSet && (tr.selection instanceof TextSelection)) {
+            codeViewAssist();
           }
         } 
       });
     },
 
     cleanup: () => {
-      unsubscibe?.();
+      unsubscribe?.();
     }
   };
 

@@ -28,9 +28,9 @@ import {
   previewProject,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { isNotebook } from "../../core/doc";
+import { findQuartoEditor, isNotebook } from "../../core/doc";
 import { promptForQuartoInstallation } from "../../core/quarto";
-import { findEditor, renderOnSave } from "./preview-util";
+import { renderOnSave } from "./preview-util";
 
 export function previewCommands(
   quartoContext: QuartoContext,
@@ -79,7 +79,7 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
     super(quartoContext);
   }
   protected async renderFormat(format?: string | null, onShow?: () => void) {
-    const targetEditor = findEditor(canPreviewDoc);
+    const targetEditor = findQuartoEditor(canPreviewDoc);
     if (targetEditor) {
       const render =
         !(await renderOnSave(this.engine_, targetEditor.document)) ||
@@ -187,7 +187,7 @@ class RenderProjectCommand extends RenderCommand implements Command {
   async doExecute() {
     await workspace.saveAll(false);
     // start by using the currently active or visible source files
-    const targetEditor = findEditor(canPreviewDoc);
+    const targetEditor = findQuartoEditor(canPreviewDoc);
     if (targetEditor) {
       const projectDir = projectDirForDocument(targetEditor.document.uri.fsPath);
       if (projectDir) {
@@ -218,7 +218,7 @@ class ClearCacheCommand implements Command {
 
   async execute(): Promise<void> {
     // see if there is a cache to clear
-    const doc = findEditor(canPreviewDoc)?.document;
+    const doc = findQuartoEditor(canPreviewDoc)?.document;
     if (doc) {
       const cacheDir = cacheDirForDocument(doc);
       if (cacheDir) {

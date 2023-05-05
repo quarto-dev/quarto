@@ -3,6 +3,7 @@
 ## 1.85.0 (Unreleased)
 
 - Pass working directory to Julia REPL when executing cells
+- Show Quarto Assist contextual help when editing cells in visual mode
 
 ## 1.84.0 (Release on 03 May 2023)
 

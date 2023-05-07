@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.85.0 (Unreleased)
+## 1.85.0 (elease on 07 May 2023)
 
 - Pass working directory to Julia REPL when executing cells
 - Show Quarto Assist contextual help when editing cells in visual mode

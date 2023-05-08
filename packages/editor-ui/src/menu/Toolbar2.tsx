@@ -27,6 +27,7 @@ import {
   MenuPopover,
   MenuTrigger,
   Slot, 
+  makeStyles, 
   webLightTheme
 } from "@fluentui/react-components";
 
@@ -76,16 +77,26 @@ export const ToolbarDivider2: React.FC = () => {
 
 
 export interface ToolbarMenuProps2  {
-  text: string;
+  icon?: React.JSX.Element;
+  text?: string;
   disabled?: boolean;
 }
 
 export const ToolbarMenu2: React.FC<PropsWithChildren<ToolbarMenuProps2>> = props => {
 
+  const classes = useStyles() ;
+
   return (
     <Menu hasIcons={true}>
       <MenuTrigger>
-        <Button disabled={!!props.disabled} appearance={"subtle"} icon={<ChevronDownIcon/>} iconPosition="after">
+        <Button 
+          className={classes.toolbarMenuButton} 
+          disabled={!!props.disabled} 
+          appearance={"subtle"} 
+          icon={<ChevronDownIcon/>} 
+          iconPosition="after"
+        >
+          {props.icon || null}
           {props.text || null}
         </Button>
       </MenuTrigger>
@@ -110,3 +121,11 @@ export const ToolbarMenuItem2: React.FC<ToolbarMenuItem2Props> = (props) => {
     </MenuItem>
   );
 }
+
+const useStyles = makeStyles({
+  toolbarMenuButton: {
+    minWidth: 'unset',
+    paddingLeft: '5px',
+    paddingRight: '5px'
+  }
+});

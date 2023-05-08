@@ -24,7 +24,7 @@ import EditorPane from '../panes/editor/EditorPane';
 import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
-import WorkbenchToolbar from './WorkbenchToolbar';
+import WorkbenchToolbar from './WorkbenchToolbar2';
 
 import './Workbench.scss';
 

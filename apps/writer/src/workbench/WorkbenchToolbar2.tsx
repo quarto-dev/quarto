@@ -15,8 +15,6 @@
 
 import React, { useContext } from 'react';
 
-import { IconNames } from '@blueprintjs/icons';
-
 import { EditorCommandId } from 'editor';
 
 import { 
@@ -32,15 +30,15 @@ import {
 import { WorkbenchCommandId } from './commands';
 
 import {
-  TextBoldFilled, 
-  TextBoldRegular,
-  TextItalicFilled,
-  TextItalicRegular,
+  TextBold16Filled, 
+  TextBold16Regular,
+  TextItalic16Filled,
+  TextItalic16Regular,
   bundleIcon
 } from "@fluentui/react-icons"
 
-const TextBoldIcon = bundleIcon(TextBoldFilled, TextBoldRegular);
-const TextItalicIcon = bundleIcon(TextItalicFilled, TextItalicRegular);
+const TextBoldIcon = bundleIcon(TextBold16Filled, TextBold16Regular);
+const TextItalicIcon = bundleIcon(TextItalic16Filled, TextItalic16Regular);
 
 import styles from './WorkbenchToolbar.module.scss';
 
@@ -54,10 +52,9 @@ const EditorToolbar: React.FC = () => {
     <div className={styles.toolbar}>
       <Toolbar2>
         <ToolbarButton2 icon={<TextBoldIcon/>} title="Bold" enabled={true} active={false} onClick={() => true} />
-        <ToolbarDivider2 />
         <ToolbarButton2 icon={<TextItalicIcon/>} title="Itatlic" enabled={true} active={false} onClick={() => true} />
         <ToolbarDivider2 />
-        <ToolbarMenu2 text="Format">
+        <ToolbarMenu2 icon={<TextBoldIcon/>} >
           <ToolbarMenuItem2 text='First' />
           <ToolbarMenuItem2 text='Second' />
         </ToolbarMenu2>

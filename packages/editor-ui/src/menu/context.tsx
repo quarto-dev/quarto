@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * context.ts
  *
@@ -13,14 +14,35 @@
  *
  */
 
-import React from "react";
+import React, { useEffect, useMemo } from "react";
+import { createRoot } from 'react-dom/client';
 
-import { ContextMenu, Menu, MenuDivider, MenuItem } from "@blueprintjs/core";
+import {
+  Menu, 
+  MenuPopover, 
+  MenuList, 
+  MenuItem, 
+  FluentProvider, 
+  webLightTheme,
+  PositioningImperativeRef, 
+  PositioningVirtualElement, 
+  MenuDivider,
+  MenuTrigger,
+  makeStyles
+} from "@fluentui/react-components";
 
-import { v4 as uuidv4 } from 'uuid';
+import {
+  Checkmark16Filled, 
+  Checkmark16Regular,
+  bundleIcon
+} from "@fluentui/react-icons"
+
+const CheckmarkIcon = bundleIcon(Checkmark16Filled, Checkmark16Regular);
+
+import { Commands } from "editor-ui";
 
 import { EditorMenuItem } from "editor-types";
-import { CommandMenuItem, CommandMenuItemActive, Commands, CommandSubMenu } from "editor-ui";
+
 
 export async function showContextMenu(
   commands: Commands,
@@ -28,23 +50,109 @@ export async function showContextMenu(
   clientX: number,
   clientY: number
 ): Promise<boolean> {
-  return new Promise(resolve => { 
-    const menuItem = (item: EditorMenuItem) => {
-      if (item.separator) {
-        return <MenuDivider key={uuidv4()}/>;
-      } else if (item.command) {
-        return <CommandMenuItem id={item.command} key={item.command} text={item.text} active={CommandMenuItemActive.Check} commands={commands}/>;
-      } else if (item.subMenu && item.text) {
-        return <CommandSubMenu text={item.text} key={uuidv4()} commands={commands}>{item.subMenu.items.map(menuItem)}</CommandSubMenu>;
-      } else if (item.text && item.exec) {
-        return <MenuItem text={item.text} key={uuidv4()} onClick={item.exec}/>
-      } else {
-        return null;
-      }
-    }  
-    const menuItems = items.map(menuItem);
-    ContextMenu.show(<Menu>{menuItems}</Menu>, { left: clientX, top: clientY }, () => {
+
+  return new Promise<boolean>(resolve => {
+
+    const parent = globalThis.document.createElement("div");
+    const root = createRoot(parent);
+    const onClosed = () => {
+      root.unmount();
+      parent.remove();
       resolve(true);
-    });
-  }); 
+    }
+    
+    root.render(
+      <FluentProvider theme={webLightTheme}>
+         <ContextMenu commands={commands} items={items} clientX={clientX} clientY={clientY} onClosed={onClosed} />
+      </FluentProvider>
+    );
+  });
 }
+
+
+interface ContextMenuProps {
+  commands: Commands,
+  items: EditorMenuItem[],
+  clientX: number,
+  clientY: number,
+  onClosed: VoidFunction;
+}
+
+const ContextMenu : React.FC<ContextMenuProps> = (props) => {
+
+  const positioningRef = React.useRef<PositioningImperativeRef>(null);
+
+  useEffect(() => {
+    const virtualElement: PositioningVirtualElement = {
+      getBoundingClientRect: () => ({ 
+        width: 0, 
+        height: 0, 
+        top: props.clientY, 
+        right: props.clientX,
+        bottom: props.clientY,
+        left: props.clientX,
+        x: props.clientX,
+        y: props.clientY
+      })
+    };
+    positioningRef.current?.setTarget(virtualElement);
+  }, []);
+
+  const classes = useStyles();
+
+  const menuItem = useMemo(() => (item: EditorMenuItem) => {
+    if (item.separator) {
+      return <MenuDivider />;
+    } else if (item.command) {
+      const command = props.commands[item.command];
+      return (
+        <MenuItem 
+          className={classes.item}
+          icon={command.isActive() ? <CheckmarkIcon /> : undefined}
+          disabled={!command.isEnabled()} 
+          onClick={command.execute}
+          >
+            {command.menuText}
+          </MenuItem>
+        );
+    } else if (item.subMenu && item.text) {
+      return (
+        <Menu hasIcons={true}>
+          <MenuTrigger disableButtonEnhancement>
+            <MenuItem className={classes.item}>{item.text}</MenuItem>
+          </MenuTrigger>
+          <MenuPopover>
+            <MenuList>
+              {item.subMenu.items.map(menuItem)}
+            </MenuList>
+          </MenuPopover>
+        </Menu>
+      );
+    } else if (item.text && item.exec) {
+      return <MenuItem className={classes.item} onClick={item.exec}>{item.text}</MenuItem>
+    } else {
+      return null;
+    }
+  }, [props.items, props.commands]);
+
+  return (
+    <Menu 
+      positioning={{ positioningRef }} 
+      hasIcons={true}
+      open={true} 
+      onOpenChange={(_e, data) => { if (!data.open) props.onClosed(); }}>
+    <MenuPopover>
+      <MenuList>
+        {props.items.map(menuItem)}
+      </MenuList>
+    </MenuPopover>
+  </Menu>);
+}
+
+
+const useStyles = makeStyles({
+  item: {
+    height: '1.5em',
+    paddingLeft: 0
+  }
+});

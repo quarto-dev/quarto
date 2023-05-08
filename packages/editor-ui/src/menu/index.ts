@@ -15,4 +15,5 @@
 
 export * from './Menu';
 export * from './Toolbar';
+export * from './Toolbar2';
 export * from './context';

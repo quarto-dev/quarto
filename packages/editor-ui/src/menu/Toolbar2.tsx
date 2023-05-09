@@ -21,11 +21,14 @@ import {
   ToolbarDivider as FluentToolbarDivider,
   Slot, 
 } from "@fluentui/react-components";
+import { useMenuStyles } from "./styles";
+
 
 
 export const Toolbar2: React.FC<PropsWithChildren> = props => {
+  const classes = useMenuStyles();
   return (
-    <FluentToolbar size="small">
+    <FluentToolbar size="small" className={classes.toolbar}>
       {props.children}
     </FluentToolbar>
   );
@@ -40,10 +43,12 @@ export interface ToolbarButtonProps2 {
 }
 
 export const ToolbarButton2: React.FC<ToolbarButtonProps2> = props => {
+  const classes = useMenuStyles();
   return (
     <FluentToolbarButton
+      className={props.active ? classes.toolbarButtonLatched : undefined }
       title={props.title}
-      appearance={props.active ? "primary" : "subtle"}
+      appearance={"subtle"}
       icon={props.icon}
       disabled={!props.enabled}
       onClick={props.onClick}

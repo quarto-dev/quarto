@@ -14,7 +14,7 @@
  */
 
 
-import { makeStyles } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
 export const useMenuStyles = makeStyles({
   item: {
@@ -30,5 +30,13 @@ export const useMenuStyles = makeStyles({
   menubarMenuButton: {
     paddingLeft: '10px',
     paddingRight: '10px'
+  },
+  toolbar: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderBottom('none')
+  },
+  toolbarButtonLatched: {
+    color: tokens.colorNeutralForeground2Hover,
+    backgroundColor: tokens.colorSubtleBackgroundHover
   }
 });

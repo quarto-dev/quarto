@@ -13,11 +13,15 @@
  *
  */
 
+import React from "react"
+
 import { Command, EditorUICommandId, t } from 'editor-ui';
 
 import { MaybeElement } from '@blueprintjs/core';
 
 import { IconName, IconNames } from '@blueprintjs/icons';
+
+import { Slot } from '@fluentui/react-components';
 
 import { Editor, EditorCommand, EditorCommandId } from 'editor';
 
@@ -76,19 +80,72 @@ export function editorDebugCommands(editor: Editor): Command[] {
 
 interface CommandDefs {
   [group: string]: {
-    [name in EditorCommandId]?: { icon?: IconName | MaybeElement; menuText: string; keysHidden?: boolean };
+    [name in EditorCommandId]?: { icon?: IconName | MaybeElement; icon2?: Slot<"span">, menuText: string; keysHidden?: boolean };
   };
 }
+
+import {
+  ArrowUndo16Filled, 
+  ArrowUndo16Regular,
+  ArrowRedo16Filled, 
+  ArrowRedo16Regular,
+  ClearFormatting16Filled,
+  ClearFormatting16Regular,
+  TextBold16Filled, 
+  TextBold16Regular,
+  TextItalic16Filled,
+  TextItalic16Regular,
+  Code16Filled,
+  Code16Regular,
+  TextUnderline16Filled,
+  TextUnderline16Regular,
+  TextParagraph16Filled,
+  TextParagraph16Regular,
+  TextBulletListLtr16Filled,
+  TextBulletListLtr16Regular,
+  TextNumberListLtr16Filled,
+  TextNumberListLtr16Regular,
+  TextQuote16Filled,
+  TextQuote16Regular,
+  Table16Filled,
+  Table16Regular,
+  Link16Filled,
+  Link16Regular,
+  Image16Filled,
+  Image16Regular,
+  Comment16Filled,
+  Comment16Regular,
+  bundleIcon
+  
+} from "@fluentui/react-icons"
+
+const ArrowUndoIcon = bundleIcon(ArrowUndo16Filled, ArrowUndo16Regular);
+const ArrowRedoIcon = bundleIcon(ArrowRedo16Filled, ArrowRedo16Regular);
+const ClearFormattingIcon = bundleIcon(ClearFormatting16Filled, ClearFormatting16Regular);
+const TextBoldIcon = bundleIcon(TextBold16Filled, TextBold16Regular);
+const TextItalicIcon = bundleIcon(TextItalic16Filled, TextItalic16Regular);
+const CodeIcon = bundleIcon(Code16Filled, Code16Regular);
+const TextUnderlineIcon = bundleIcon(TextUnderline16Filled, TextUnderline16Regular);
+const TextParagraphIcon = bundleIcon(TextParagraph16Filled, TextParagraph16Regular);
+const TextBulletedListIcon = bundleIcon(TextBulletListLtr16Filled, TextBulletListLtr16Regular);
+const TextNumberListIcon = bundleIcon(TextNumberListLtr16Filled, TextNumberListLtr16Regular);
+const QuoteIcon = bundleIcon(TextQuote16Filled, TextQuote16Regular);
+const TableIcon = bundleIcon(Table16Filled, Table16Regular);
+const LinkIcon = bundleIcon(Link16Filled, Link16Regular);
+const ImageIcon = bundleIcon(Image16Filled, Image16Regular);
+const CommentIcon = bundleIcon(Comment16Filled, Comment16Regular);
 
 function editorCommandDefs(): CommandDefs {
   return {
     [t('commands:group_text_editing')]: {
       [EditorCommandId.Undo]: {
         icon: IconNames.UNDO,
+        icon2: <ArrowUndoIcon />,
         menuText: t('commands:undo_menu_text'),
       },
       [EditorCommandId.Redo]: {
         icon: IconNames.REDO,
+        icon2: <ArrowRedoIcon />,
         menuText: t('commands:redo_menu_text'),
       },
       [EditorCommandId.SelectAll]: {
@@ -96,20 +153,24 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.ClearFormatting]: {
         icon: IconNames.CLEAN,
+        icon2: <ClearFormattingIcon />,
         menuText: t('commands:clear_formatting_menu_text'),
       }
     },
     [t('commands:group_formatting')]: {
       [EditorCommandId.Strong]: {
         icon: IconNames.BOLD,
+        icon2: <TextBoldIcon />,
         menuText: t('commands:strong_menu_text'),
       },
       [EditorCommandId.Em]: {
         icon: IconNames.ITALIC,
+        icon2: <TextItalicIcon />,
         menuText: t('commands:em_menu_text'),
       },
       [EditorCommandId.Code]: {
         icon: IconNames.CODE,
+        icon2: <CodeIcon />,
         menuText: t('commands:code_menu_text'),
       },
       [EditorCommandId.Strikeout]: {
@@ -126,10 +187,12 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.Underline]: {
         icon: IconNames.UNDERLINE,
+        icon2: <TextUnderlineIcon />,
         menuText: t('commands:underline_menu_text'),
       },
       [EditorCommandId.Paragraph]: {
         icon: IconNames.PARAGRAPH,
+        icon2: <TextParagraphIcon />,
         menuText: t('commands:paragraph_menu_text'),
       },
       [EditorCommandId.Heading1]: {
@@ -157,14 +220,17 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.CodeBlock]: {
         icon: IconNames.CODE,
+        icon2: <CodeIcon />,
         menuText: t('commands:code_block_menu_text'),
       },
       [EditorCommandId.CodeBlockFormat]: {
         icon: IconNames.CODE,
+        icon2: <CodeIcon />,
         menuText: t('commands:code_block_format_menu_text'),
       },
       [EditorCommandId.Blockquote]: {
         icon: IconNames.CITATION,
+        icon2: <QuoteIcon />,
         menuText: t('commands:blockquote_menu_text'),
       },
       [EditorCommandId.LineBlock]: {
@@ -187,10 +253,12 @@ function editorCommandDefs(): CommandDefs {
     [t('commands:group_lists')]: {
       [EditorCommandId.BulletList]: {
         icon: IconNames.PROPERTIES,
+        icon2: <TextBulletedListIcon />,
         menuText: t('commands:bullet_list_menu_text'),
       },
       [EditorCommandId.OrderedList]: {
         icon: IconNames.NUMBERED_LIST,
+        icon2: <TextNumberListIcon />,
         menuText: t('commands:ordered_list_menu_text'),
       },
       [EditorCommandId.TightList]: {
@@ -219,6 +287,7 @@ function editorCommandDefs(): CommandDefs {
     [t('commands:group_tables')]: {
       [EditorCommandId.TableInsertTable]: {
         icon: IconNames.TH,
+        icon2: <TableIcon />,
         menuText: t('commands:table_insert_table'),
       },
       [EditorCommandId.TableToggleHeader]: {
@@ -282,10 +351,12 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.Table]: {
         icon: IconNames.ListColumns,
+        icon2: <TableIcon />,
         menuText: t('commands:table_menu_text')
       },
       [EditorCommandId.Link]: {
         icon: IconNames.LINK,
+        icon2: <LinkIcon />,
         menuText: t('commands:link_menu_text'),
       },
       [EditorCommandId.RemoveLink]: {
@@ -293,6 +364,7 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.Image]: {
         icon: IconNames.MEDIA,
+        icon2: <ImageIcon />,
         menuText: t('commands:image_menu_text'),
       },
       [EditorCommandId.Footnote]: {
@@ -300,6 +372,7 @@ function editorCommandDefs(): CommandDefs {
       },
       [EditorCommandId.ParagraphInsert]: {
         icon: IconNames.PARAGRAPH,
+        icon2: <TextParagraphIcon />,
         menuText: t('commands:paragraph_insert_menu_text'),
       },
       [EditorCommandId.HorizontalRule]: {
@@ -381,6 +454,7 @@ function editorCommandDefs(): CommandDefs {
       // user comments
       [EditorCommandId.UserComment]: {
         icon: IconNames.Comment,
+        icon2: <CommentIcon />,
         menuText: t('commands:user_comment_menu_text'),
       },
       // chunk

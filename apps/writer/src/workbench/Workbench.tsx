@@ -17,6 +17,8 @@ import React, { useContext, useEffect, useMemo } from 'react';
 
 import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+
 import { commandHotkeys, CommandManagerContext, keyboardShortcutsCommand } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
@@ -24,7 +26,7 @@ import EditorPane from '../panes/editor/EditorPane';
 import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
-import WorkbenchToolbar from './WorkbenchToolbar2';
+import WorkbenchToolbar from './WorkbenchToolbar';
 
 import './Workbench.scss';
 
@@ -46,15 +48,17 @@ const Workbench: React.FC = () => {
    
   // render workbench
   return (
-    <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-      <WorkbenchNavbar />
-      <WorkbenchToolbar />
-      <div className={'workspace'}>
-        <EditorPane />
+    <FluentProvider theme={webLightTheme}>
+      <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
+        <WorkbenchNavbar />
+        <WorkbenchToolbar />
+        <div className={'workspace'}>
+          <EditorPane />
+        </div>
+        <WorkbenchClipboard />
+        <WorkbenchPrefsDialog />
       </div>
-      <WorkbenchClipboard />
-      <WorkbenchPrefsDialog />
-    </div>
+    </FluentProvider>
   );
 };
 

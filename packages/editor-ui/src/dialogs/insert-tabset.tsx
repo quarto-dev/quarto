@@ -61,7 +61,7 @@ type InsertTabsetDialogValues = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const InsertTabsetDialog: React.FC<{ 
   values: InsertTabsetDialogValues,
-  options: undefined,
+  options: null | undefined,
   onClosed: (values?: InsertTabsetDialogValues) => void }
 > = props => {
 

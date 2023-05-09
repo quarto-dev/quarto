@@ -16,40 +16,20 @@
 import React, { PropsWithChildren } from "react"
 
 import { 
-  Button,
-  FluentProvider,
   Toolbar as FluentToolbar,
   ToolbarButton as FluentToolbarButton,
   ToolbarDivider as FluentToolbarDivider,
-  Menu,
-  MenuItem,
-  MenuList,
-  MenuPopover,
-  MenuTrigger,
   Slot, 
-  makeStyles, 
-  webLightTheme
 } from "@fluentui/react-components";
-
-import {
-  ChevronDown16Filled, 
-  ChevronDown16Regular,
-  bundleIcon
-} from "@fluentui/react-icons"
-
-const ChevronDownIcon = bundleIcon(ChevronDown16Filled, ChevronDown16Regular);
 
 
 export const Toolbar2: React.FC<PropsWithChildren> = props => {
   return (
-    <FluentProvider theme={webLightTheme}>
-      <FluentToolbar size="small">
-        {props.children}
-      </FluentToolbar>
-    </FluentProvider>
+    <FluentToolbar size="small">
+      {props.children}
+    </FluentToolbar>
   );
 };
-
 
 export interface ToolbarButtonProps2 {
   icon?: Slot<"span">;
@@ -74,58 +54,3 @@ export const ToolbarButton2: React.FC<ToolbarButtonProps2> = props => {
 export const ToolbarDivider2: React.FC = () => {
   return <FluentToolbarDivider  />
 }
-
-
-export interface ToolbarMenuProps2  {
-  icon?: React.JSX.Element;
-  text?: string;
-  disabled?: boolean;
-}
-
-export const ToolbarMenu2: React.FC<PropsWithChildren<ToolbarMenuProps2>> = props => {
-
-  const classes = useStyles() ;
-
-  return (
-    <Menu hasIcons={true}>
-      <MenuTrigger>
-        <Button 
-          className={classes.toolbarMenuButton} 
-          disabled={!!props.disabled} 
-          appearance={"subtle"} 
-          icon={<ChevronDownIcon/>} 
-          iconPosition="after"
-        >
-          {props.icon || null}
-          {props.text || null}
-        </Button>
-      </MenuTrigger>
-      <MenuPopover>
-        <MenuList>
-          {props.children}
-        </MenuList>
-      </MenuPopover>
-    </Menu>
-  );
-  
-};
-
-export interface ToolbarMenuItem2Props {
-  text: string;
-}
-
-export const ToolbarMenuItem2: React.FC<ToolbarMenuItem2Props> = (props) => {
-  return(
-    <MenuItem>
-      {props.text}
-    </MenuItem>
-  );
-}
-
-const useStyles = makeStyles({
-  toolbarMenuButton: {
-    minWidth: 'unset',
-    paddingLeft: '5px',
-    paddingRight: '5px'
-  }
-});

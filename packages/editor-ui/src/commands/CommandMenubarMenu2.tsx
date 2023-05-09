@@ -1,5 +1,5 @@
 /*
- * WithCommand.tsx
+ * CommandMenubarMenu.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,19 +13,26 @@
  *
  */
 
-import React, { PropsWithChildren, useContext } from 'react';
 
-import { CommandManagerContext } from 'editor-ui';
+import React from "react";
 
-export interface WithCommandProps {
-  id: string;
+import { EditorMenuItem } from "editor-types";
+
+import { CommandMenuItems2 } from "./CommandMenuItems2";
+import { Menu2 } from "../menu/Menu2";
+
+export interface CommandMenubarMenuProps2 {
+  text: string;
+  menu: EditorMenuItem[];
 }
 
-export const WithCommand: React.FC<PropsWithChildren<WithCommandProps>> = props => {
-  const [cmState] = useContext(CommandManagerContext);
-  if (cmState.commands[props.id]) {
-    return <>{props.children}</>;
-  } else {
-    return null;
-  }
+export const CommandMenubarMenu2: React.FC<CommandMenubarMenuProps2> = (props) => {
+  return (
+    <Menu2 text={props.text}>
+      <CommandMenuItems2 {...props}/>
+    </Menu2>
+  )
+
 };
+
+

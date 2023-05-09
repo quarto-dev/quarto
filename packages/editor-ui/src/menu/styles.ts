@@ -1,5 +1,5 @@
 /*
- * WorkbenchMenubar.module.scss
+ * styles.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,22 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
 
-.menubarButtons {
-  margin-top: 1px !important;
-}
+import { makeStyles } from "@fluentui/react-components";
 
+export const useMenuStyles = makeStyles({
+  item: {
+    height: '1.5em',
+    paddingLeft: 0
+  },
+  menuButton: {
+    minWidth: 'unset',
+    paddingLeft: '5px',
+    paddingRight: '5px',
+    justifyContent: 'start'
+  },
+  menubarMenuButton: {
+    paddingLeft: '10px',
+    paddingRight: '10px'
+  }
+});

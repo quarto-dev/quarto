@@ -19,6 +19,8 @@ import * as uuid from 'uuid';
 
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+
 import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
 
 import { 
@@ -97,25 +99,28 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }
   
   return (
-    <div 
-      className={styles.editorParent} 
-      onKeyDown={keyboardEventHandler(handleKeyDown)} 
-      onKeyUp={keyboardEventHandler(handleKeyUp)}
-    >
-      <EditorToolbar/>
-      <Editor
-        className={styles.editorFrame} 
-        request={props.request}
-        uiContext={uiContext}
-        display={editorDisplay(props.host)}
-        onEditorInit={onEditorInit}
-        options={{
-          cannotEditUntitled: true,
-          defaultCellTypePython: true,
-          initialTheme: editorThemeFromVSCode() 
-        }}
-      />
-    </div>
+    <FluentProvider theme={webLightTheme}>
+      <div 
+        className={styles.editorParent} 
+        onKeyDown={keyboardEventHandler(handleKeyDown)} 
+        onKeyUp={keyboardEventHandler(handleKeyUp)}
+      >
+        <EditorToolbar/>
+        <Editor
+          className={styles.editorFrame} 
+          request={props.request}
+          uiContext={uiContext}
+          display={editorDisplay(props.host)}
+          onEditorInit={onEditorInit}
+          options={{
+            cannotEditUntitled: true,
+            defaultCellTypePython: true,
+            initialTheme: editorThemeFromVSCode() 
+          }}
+        />
+      </div>
+    </FluentProvider>
+   
   );
 }
 

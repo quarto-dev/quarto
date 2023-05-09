@@ -17,6 +17,9 @@
 import React, { useEffect, useMemo } from "react";
 import { createRoot } from 'react-dom/client';
 
+import { v4 as uuidv4 } from 'uuid';
+
+
 import {
   Menu, 
   MenuPopover, 
@@ -27,7 +30,6 @@ import {
   PositioningImperativeRef, 
   PositioningVirtualElement, 
   MenuDivider,
-  MenuTrigger,
   makeStyles
 } from "@fluentui/react-components";
 
@@ -39,7 +41,7 @@ import {
 
 const CheckmarkIcon = bundleIcon(Checkmark16Filled, Checkmark16Regular);
 
-import { Commands } from "editor-ui";
+import { Commands, SubMenu2 } from "editor-ui";
 
 import { EditorMenuItem } from "editor-types";
 
@@ -102,11 +104,12 @@ const ContextMenu : React.FC<ContextMenuProps> = (props) => {
 
   const menuItem = useMemo(() => (item: EditorMenuItem) => {
     if (item.separator) {
-      return <MenuDivider />;
+      return <MenuDivider key={uuidv4()} />;
     } else if (item.command) {
       const command = props.commands[item.command];
       return (
         <MenuItem 
+          key={command.id}
           className={classes.item}
           icon={command.isActive() ? <CheckmarkIcon /> : undefined}
           disabled={!command.isEnabled()} 
@@ -117,19 +120,12 @@ const ContextMenu : React.FC<ContextMenuProps> = (props) => {
         );
     } else if (item.subMenu && item.text) {
       return (
-        <Menu hasIcons={true}>
-          <MenuTrigger disableButtonEnhancement>
-            <MenuItem className={classes.item}>{item.text}</MenuItem>
-          </MenuTrigger>
-          <MenuPopover>
-            <MenuList>
-              {item.subMenu.items.map(menuItem)}
-            </MenuList>
-          </MenuPopover>
-        </Menu>
+        <SubMenu2 key={uuidv4()} text={item.text}>
+          {item.subMenu.items.map(menuItem)}
+        </SubMenu2>
       );
     } else if (item.text && item.exec) {
-      return <MenuItem className={classes.item} onClick={item.exec}>{item.text}</MenuItem>
+      return <MenuItem key={uuidv4()} className={classes.item} onClick={item.exec}>{item.text}</MenuItem>
     } else {
       return null;
     }

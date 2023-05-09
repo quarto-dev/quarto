@@ -1,5 +1,5 @@
 /*
- * WithCommand.tsx
+ * CommandToolbarButton.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,18 +13,33 @@
  *
  */
 
-import React, { PropsWithChildren, useContext } from 'react';
+import React, { useContext } from 'react';
 
+
+import { ToolbarButton2 } from '../menu/Toolbar2';
+import { commandTooltipText } from './commands';
 import { CommandManagerContext } from 'editor-ui';
 
-export interface WithCommandProps {
-  id: string;
+export interface CommandToolbarButtonProps2  {
+  command: string;
 }
 
-export const WithCommand: React.FC<PropsWithChildren<WithCommandProps>> = props => {
+export const CommandToolbarButton2: React.FC<CommandToolbarButtonProps2> = (props) => {
+  // force re-render when the selection changes
   const [cmState] = useContext(CommandManagerContext);
-  if (cmState.commands[props.id]) {
-    return <>{props.children}</>;
+
+  // get command
+  const command = cmState.commands[props.command];
+  if (command) {
+    return (
+      <ToolbarButton2
+        icon={command.icon2}
+        title={commandTooltipText(command)}
+        enabled={command.isEnabled()}
+        active={command.isActive()}
+        onClick={command.execute}
+      />
+    );
   } else {
     return null;
   }

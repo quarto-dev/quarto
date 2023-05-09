@@ -16,6 +16,7 @@
 import { IconName, MaybeElement } from '@blueprintjs/core';
 
 import { toKeyCode, keyCodeString } from './keycodes';
+import { Slot } from '@fluentui/react-components';
 
 export interface Command {
   // unique  id
@@ -29,6 +30,9 @@ export interface Command {
 
   // optional blueprint icon for toolbar/menu
   readonly icon?: IconName | MaybeElement;
+
+  // optional fluent icon for toolbar/menu
+  readonly icon2?: Slot<"span">;
 
   // keys to bind to
   readonly keymap: readonly string[];

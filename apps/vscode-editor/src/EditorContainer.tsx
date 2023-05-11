@@ -19,7 +19,7 @@ import * as uuid from 'uuid';
 
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { FluentProvider, webLightTheme, webDarkTheme } from '@fluentui/react-components';
 
 import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
 
@@ -30,15 +30,16 @@ import {
   Editor,  
   EditorUIStore,  
   keyboardShortcutsCommand, 
+  readPrefsApi, 
   showContextMenu
 } from 'editor-ui';
 
-import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
+import { EditorMenuItem, EditorOperations, EditorTheme, EditorUIContext, HostContext, XRef } from 'editor';
 
 
 import { editorHostCommands, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
-import { editorThemeFromVSCode } from './theme';
+import { applyDarkMode, editorThemeFromVSCode } from './theme';
 
 
 import styles from './Editor.module.scss';
@@ -73,10 +74,20 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
  
   // one time creation of editorUIContext
   const [uiContext] = useState(() => new HostEditorUIContext(props.context, props.host));
- 
+
+  // setup state for theme
+  const prefs = readPrefsApi(props.store);
+  const [fluentTheme, setFluentTheme] = useState(prefs.darkMode ? webDarkTheme : webLightTheme);
+  const applyTheme = useCallback((theme: EditorTheme) => {
+    // apply blueprint theme global class
+    applyDarkMode(theme.darkMode);
+    // apply fluent theme
+    setFluentTheme(theme.darkMode ? webDarkTheme : webLightTheme);
+  }, []);
+
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, uiContext, props.host, props.store);
+    syncEditorToHost(editor, uiContext, props.host, props.store, applyTheme);
     return Promise.resolve();
   }, []);
 
@@ -99,7 +110,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }
   
   return (
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={fluentTheme}>
       <div 
         className={styles.editorParent} 
         onKeyDown={keyboardEventHandler(handleKeyDown)} 

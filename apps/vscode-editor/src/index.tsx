@@ -46,7 +46,7 @@ async function runEditor() {
 
     // render
     const root = createRoot(document.getElementById('root')!);
-    applyDarkMode(prefs);
+    applyDarkMode(prefs.darkMode);
     root.render(<App store={store} host={host} context={context} request={request}/>);
   } catch (error) {
     console.error(error);

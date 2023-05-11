@@ -15,12 +15,12 @@
 
 
 import { defaultTheme } from "editor";
-import { Prefs, defaultPrefs } from "editor-types";
+import { defaultPrefs } from "editor-types";
 import { isSolarizedThemeActive } from "editor-ui";
 
-export function applyDarkMode(prefs: Prefs) {
+export function applyDarkMode(darkMode: boolean) {
   const root = document.getElementById('root');
-  if (prefs.darkMode) {
+  if (darkMode) {
     root?.classList.add('bp4-dark');  
   } else {
     root?.classList.remove('bp4-dark');

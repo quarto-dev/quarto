@@ -24,11 +24,19 @@ import {
 import { useMenuStyles } from "./styles";
 
 
+export interface Toolbar2Props {
+  className?: string;
+}
 
-export const Toolbar2: React.FC<PropsWithChildren> = props => {
+
+export const Toolbar2: React.FC<PropsWithChildren<Toolbar2Props>> = props => {
   const classes = useMenuStyles();
+  let toolbarClasses = classes.toolbar;
+  if (props.className) {
+    toolbarClasses = `${toolbarClasses} ${props.className}`; 
+  }
   return (
-    <FluentToolbar size="small" className={classes.toolbar}>
+    <FluentToolbar size="small" className={toolbarClasses}>
       {props.children}
     </FluentToolbar>
   );

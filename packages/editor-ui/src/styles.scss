@@ -1,10 +1,5 @@
 @import '@blueprintjs/core/lib/scss/variables.scss';
 
-// a bit less air in menus
-.bp4-menu-item {
-  padding: 3px 7px;
-}
-
 // no glass for modals
 .bp4-overlay-backdrop {
   background-color: transparent;

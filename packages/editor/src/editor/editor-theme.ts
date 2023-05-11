@@ -292,15 +292,6 @@ export function applyTheme(theme: EditorTheme) {
     .pm-toolbar-text-color, .pm-toolbar-text-color .bp4-button-text {
       color: ${theme.toolbarTextColor} !important;
     }
-    .bp4-portal .bp4-menu,
-    .bp4-portal .bp4-menu .bp4-menu-item:not(:hover) * {
-      color: ${theme.toolbarTextColor} !important;
-      background-color: ${theme.toolbarBackgroundColor} !important;
-    }
-    .bp4-portal .bp4-menu a.bp4-menu-item.bp4-disabled,
-    .bp4-portal .bp4-menu a.bp4-menu-item.bp4-disabled * {
-      color: ${theme.disabledTextColor} !important;
-    }
     .pm-find-text,
     .pm-list-item-selected,
     .pm-grid-item-selected {

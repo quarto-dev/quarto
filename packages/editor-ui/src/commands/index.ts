@@ -14,17 +14,11 @@
  */
 
 export * from './CommandManager';
-export * from './CommandMenubarMenu';
-export * from './CommandMenuItem';
-export * from './CommandMenuItems';
 export * from './CommandMenubarMenu2';
 export * from './CommandMenuItem2';
 export * from './CommandMenuItems2';
 export * from './commands';
 export * from './commands-ui';
-export * from './CommandSubMenu';
-export * from './CommandToolbarButton';
-export * from './CommandToolbarMenu';
 export * from './CommandSubMenu2';
 export * from './CommandToolbarButton2';
 export * from './CommandToolbarMenu2';

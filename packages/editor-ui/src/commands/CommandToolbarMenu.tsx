@@ -30,7 +30,6 @@ const kSeparator = '---';
 export interface CommandToolbarMenuProps {
   commands: Array<string | '---'>;
   minWidth?: number;
-  className?: string;
 }
 
 export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props) => {
@@ -74,7 +73,7 @@ export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props) => 
 
     // return JSX popover + menu items
     return (
-      <Menu className={props.className} text={selected} type="toolbar" minWidth={props.minWidth}>
+      <Menu  text={selected} type="toolbar" minWidth={props.minWidth}>
         {menuItems}
       </Menu>
     );

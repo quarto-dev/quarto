@@ -19,7 +19,8 @@ import {
   Toolbar as FluentToolbar,
   ToolbarButton as FluentToolbarButton,
   ToolbarDivider as FluentToolbarDivider,
-  Slot, 
+  Slot,
+  mergeClasses, 
 } from "@fluentui/react-components";
 import { useMenuStyles } from "./styles";
 
@@ -52,9 +53,13 @@ export interface ToolbarButtonProps {
 
 export const ToolbarButton: React.FC<ToolbarButtonProps> = props => {
   const classes = useMenuStyles();
+  let className = classes.toolbarButton;
+  if (props.active) {
+    className = mergeClasses(className, classes.toolbarButtonLatched);
+  }
   return (
     <FluentToolbarButton
-      className={props.active ? classes.toolbarButtonLatched : undefined }
+      className={className}
       title={props.title}
       appearance={"subtle"}
       icon={props.icon}
@@ -65,5 +70,6 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = props => {
 };
 
 export const ToolbarDivider: React.FC = () => {
-  return <FluentToolbarDivider  />
+  const classes = useMenuStyles();
+  return <FluentToolbarDivider className={classes.toolbarDivider}  />
 }

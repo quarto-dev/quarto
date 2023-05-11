@@ -45,8 +45,7 @@ const EditorToolbar: React.FC = () => {
     return (
       <Toolbar className={[styles.editorToolbar, 'pm-pane-border-color', 'pm-toolbar-background-color', 'pm-toolbar-text-color'].join(' ')}>
         <CommandToolbarMenu
-          minWidth={130}
-          className={styles.toolbarBlockFormatMenu}
+          minWidth={115}
           commands={[
             CommandId.Paragraph,
             '---',
@@ -78,12 +77,11 @@ const EditorToolbar: React.FC = () => {
         <Menu type="toolbar" text={t('insert_menu') as string}>
           <CommandMenuItems menu={cmState.menus.insert} />
         </Menu>
-        <ToolbarDivider />
         <WithCommand id={CommandId.TableInsertTable}>
+          <ToolbarDivider />
           <Menu type="toolbar" text={t('table_menu') as string}>
             <CommandMenuItems menu={cmState.menus.table} />
           </Menu>
-          <ToolbarDivider />
         </WithCommand>
        
       </Toolbar>

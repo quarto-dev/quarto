@@ -42,7 +42,6 @@ export interface MenuProps  {
   text?: string;
   disabled?: boolean;
   minWidth?: number;
-  className?: string;
 }
 
 export const Menu: React.FC<PropsWithChildren<MenuProps>> = props => {
@@ -56,7 +55,7 @@ export const Menu: React.FC<PropsWithChildren<MenuProps>> = props => {
   if (type === "main") {
     classNames.push(classes.menubarMenuButton);
   }
-  const className = mergeClasses(...classNames) + props.className ? ` ${props.className}` : "";
+  const className = mergeClasses(...classNames);
   return (
     <FluentMenu hasIcons={true}>
       <MenuTrigger>

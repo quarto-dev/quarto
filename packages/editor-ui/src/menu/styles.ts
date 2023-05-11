@@ -25,18 +25,35 @@ export const useMenuStyles = makeStyles({
     minWidth: 'unset',
     paddingLeft: '5px',
     paddingRight: '5px',
-    justifyContent: 'start'
+    justifyContent: 'start',
+    paddingTop: 0,
+    paddingBottom: 0,
+    fontWeight: tokens.fontWeightRegular,
+    fontSize: tokens.fontSizeBase300
   },
   menubarMenuButton: {
     paddingLeft: '10px',
     paddingRight: '10px'
   },
   toolbar: {
+    paddingTop: '2px',
+    paddingBottom: '2px',
+    columnGap: '2px',
     backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderBottom('none')
+    ...shorthands.borderBottom('none'),
+  },
+  toolbarButton: {
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: '2px',
+    paddingRight: '2px',
   },
   toolbarButtonLatched: {
     color: tokens.colorNeutralForeground2Hover,
     backgroundColor: tokens.colorSubtleBackgroundHover
+  },
+  toolbarDivider: {
+    paddingLeft: '2px',
+    paddingRight: '2px'
   }
 });

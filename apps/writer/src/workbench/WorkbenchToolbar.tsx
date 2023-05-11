@@ -19,12 +19,12 @@ import { EditorCommandId } from 'editor';
 
 import { 
   CommandManagerContext, 
-  CommandMenuItems2, 
-  Toolbar2, 
-  ToolbarDivider2, 
-  Menu2, 
-  CommandToolbarButton2, 
-  CommandToolbarMenu2,
+  CommandMenuItems, 
+  Toolbar, 
+  ToolbarDivider, 
+  Menu, 
+  CommandToolbarButton, 
+  CommandToolbarMenu,
   WithCommand 
 } from 'editor-ui';
 
@@ -47,11 +47,11 @@ const EditorToolbar: React.FC = () => {
 
   return (
     <div className={styles.toolbar}>
-      <Toolbar2>
-        <CommandToolbarButton2 command={CommandId.Undo} />
-        <CommandToolbarButton2 command={CommandId.Redo} />
-        <ToolbarDivider2 />
-        <CommandToolbarMenu2
+      <Toolbar>
+        <CommandToolbarButton command={CommandId.Undo} />
+        <CommandToolbarButton command={CommandId.Redo} />
+        <ToolbarDivider />
+        <CommandToolbarMenu
           minWidth={115}
           commands={[
             CommandId.Paragraph,
@@ -66,24 +66,24 @@ const EditorToolbar: React.FC = () => {
             CommandId.CodeBlock,
           ]}
         />
-        <ToolbarDivider2 />
-        <CommandToolbarButton2 command={CommandId.Strong} />
-        <CommandToolbarButton2 command={CommandId.Em} />
-        <CommandToolbarButton2 command={CommandId.Code} />
-        <ToolbarDivider2 />
-        <CommandToolbarButton2 command={CommandId.BulletList} />
-        <CommandToolbarButton2 command={CommandId.OrderedList} />
-        <CommandToolbarButton2 command={CommandId.Blockquote} />
-        <ToolbarDivider2 />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Strong} />
+        <CommandToolbarButton command={CommandId.Em} />
+        <CommandToolbarButton command={CommandId.Code} />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.BulletList} />
+        <CommandToolbarButton command={CommandId.OrderedList} />
+        <CommandToolbarButton command={CommandId.Blockquote} />
+        <ToolbarDivider />
         <WithCommand id={CommandId.TableInsertTable}>
-          <Menu2 type="toolbar" icon={<TableIcon />}>
-            <CommandMenuItems2 menu={cmState.menus.table}/>
-          </Menu2>
-          <ToolbarDivider2 />
+          <Menu type="toolbar" icon={<TableIcon />}>
+            <CommandMenuItems menu={cmState.menus.table}/>
+          </Menu>
+          <ToolbarDivider />
         </WithCommand>
-        <CommandToolbarButton2 command={CommandId.Link} />
-        <CommandToolbarButton2 command={CommandId.Image} />
-      </Toolbar2>
+        <CommandToolbarButton command={CommandId.Link} />
+        <CommandToolbarButton command={CommandId.Image} />
+      </Toolbar>
     </div>
    
   );

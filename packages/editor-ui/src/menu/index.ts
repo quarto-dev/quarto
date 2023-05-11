@@ -13,6 +13,6 @@
  *
  */
 
-export * from './Menu2';
-export * from './Toolbar2';
+export * from './Menu';
+export * from './Toolbar';
 export * from './context';

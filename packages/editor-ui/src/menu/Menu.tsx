@@ -36,7 +36,7 @@ import { useMenuStyles } from "./styles";
 const ChevronDownIcon = bundleIcon(ChevronDown16Filled, ChevronDown16Regular);
 
 
-export interface MenuProps2  {
+export interface MenuProps  {
   type?: "main" | "toolbar";
   icon?: React.JSX.Element;
   text?: string;
@@ -45,7 +45,7 @@ export interface MenuProps2  {
   className?: string;
 }
 
-export const Menu2: React.FC<PropsWithChildren<MenuProps2>> = props => {
+export const Menu: React.FC<PropsWithChildren<MenuProps>> = props => {
 
   const classes = useMenuStyles() ;
 
@@ -82,12 +82,12 @@ export const Menu2: React.FC<PropsWithChildren<MenuProps2>> = props => {
   
 };
 
-export interface SubMenuProps2 {
+export interface SubMenuProps {
   text: string;
   icon?: Slot<"span">;
 }
 
-export const SubMenu2: React.FC<PropsWithChildren<SubMenuProps2>> = props => {
+export const SubMenu: React.FC<PropsWithChildren<SubMenuProps>> = props => {
 
   const classes = useMenuStyles();
 

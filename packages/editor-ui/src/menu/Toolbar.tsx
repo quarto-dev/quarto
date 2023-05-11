@@ -24,12 +24,12 @@ import {
 import { useMenuStyles } from "./styles";
 
 
-export interface Toolbar2Props {
+export interface ToolbarProps {
   className?: string;
 }
 
 
-export const Toolbar2: React.FC<PropsWithChildren<Toolbar2Props>> = props => {
+export const Toolbar: React.FC<PropsWithChildren<ToolbarProps>> = props => {
   const classes = useMenuStyles();
   let toolbarClasses = classes.toolbar;
   if (props.className) {
@@ -42,7 +42,7 @@ export const Toolbar2: React.FC<PropsWithChildren<Toolbar2Props>> = props => {
   );
 };
 
-export interface ToolbarButtonProps2 {
+export interface ToolbarButtonProps {
   icon?: Slot<"span">;
   title: string;
   enabled: boolean;
@@ -50,7 +50,7 @@ export interface ToolbarButtonProps2 {
   onClick: () => void;
 }
 
-export const ToolbarButton2: React.FC<ToolbarButtonProps2> = props => {
+export const ToolbarButton: React.FC<ToolbarButtonProps> = props => {
   const classes = useMenuStyles();
   return (
     <FluentToolbarButton
@@ -64,6 +64,6 @@ export const ToolbarButton2: React.FC<ToolbarButtonProps2> = props => {
   );
 };
 
-export const ToolbarDivider2: React.FC = () => {
+export const ToolbarDivider: React.FC = () => {
   return <FluentToolbarDivider  />
 }

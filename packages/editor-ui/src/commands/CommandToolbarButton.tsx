@@ -16,15 +16,15 @@
 import React, { useContext } from 'react';
 
 
-import { ToolbarButton2 } from '../menu/Toolbar2';
+import { ToolbarButton } from '../menu/Toolbar';
 import { commandTooltipText } from './commands';
 import { CommandManagerContext } from 'editor-ui';
 
-export interface CommandToolbarButtonProps2  {
+export interface CommandToolbarButtonProps  {
   command: string;
 }
 
-export const CommandToolbarButton2: React.FC<CommandToolbarButtonProps2> = (props) => {
+export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props) => {
   // force re-render when the selection changes
   const [cmState] = useContext(CommandManagerContext);
 
@@ -32,7 +32,7 @@ export const CommandToolbarButton2: React.FC<CommandToolbarButtonProps2> = (prop
   const command = cmState.commands[props.command];
   if (command) {
     return (
-      <ToolbarButton2
+      <ToolbarButton
         icon={command.icon2}
         title={commandTooltipText(command)}
         enabled={command.isEnabled()}

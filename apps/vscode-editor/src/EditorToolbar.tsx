@@ -21,15 +21,15 @@ import { EditorCommandId } from 'editor';
 
 import {
   CommandManagerContext,
-  CommandMenuItems2,
-  Toolbar2,
-  ToolbarDivider2,
-  CommandToolbarButton2,
-  CommandToolbarMenu2,
+  CommandMenuItems,
+  Toolbar,
+  ToolbarDivider,
+  CommandToolbarButton,
+  CommandToolbarMenu,
   WithCommand,
   t,
   editorLoaded,
-  Menu2
+  Menu
 } from 'editor-ui';
 
 import styles from './Editor.module.scss';
@@ -43,8 +43,8 @@ const EditorToolbar: React.FC = () => {
 
   if (loaded) {
     return (
-      <Toolbar2 className={[styles.editorToolbar, 'pm-pane-border-color', 'pm-toolbar-background-color', 'pm-toolbar-text-color'].join(' ')}>
-        <CommandToolbarMenu2
+      <Toolbar className={[styles.editorToolbar, 'pm-pane-border-color', 'pm-toolbar-background-color', 'pm-toolbar-text-color'].join(' ')}>
+        <CommandToolbarMenu
           className={styles.toolbarBlockFormatMenu}
           commands={[
             CommandId.Paragraph,
@@ -59,33 +59,33 @@ const EditorToolbar: React.FC = () => {
             CommandId.CodeBlock,
           ]}
         />
-        <ToolbarDivider2 />
-        <CommandToolbarButton2 command={CommandId.Strong} />
-        <CommandToolbarButton2 command={CommandId.Em} />
-        <CommandToolbarButton2 command={CommandId.Code} />
-        <ToolbarDivider2 />
-        <CommandToolbarButton2 command={CommandId.BulletList} />
-        <CommandToolbarButton2 command={CommandId.OrderedList} />
-        <ToolbarDivider2 />
-        <CommandToolbarButton2 command={CommandId.Link} />
-        <CommandToolbarButton2 command={CommandId.Image} />
-        <ToolbarDivider2 />
-        <Menu2 type="toolbar" text={t('format_menu') as string}>
-          <CommandMenuItems2 menu={cmState.menus.format} />
-        </Menu2>
-        <ToolbarDivider2 />
-        <Menu2 type="toolbar" text={t('insert_menu') as string}>
-          <CommandMenuItems2 menu={cmState.menus.insert} />
-        </Menu2>
-        <ToolbarDivider2 />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Strong} />
+        <CommandToolbarButton command={CommandId.Em} />
+        <CommandToolbarButton command={CommandId.Code} />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.BulletList} />
+        <CommandToolbarButton command={CommandId.OrderedList} />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Link} />
+        <CommandToolbarButton command={CommandId.Image} />
+        <ToolbarDivider />
+        <Menu type="toolbar" text={t('format_menu') as string}>
+          <CommandMenuItems menu={cmState.menus.format} />
+        </Menu>
+        <ToolbarDivider />
+        <Menu type="toolbar" text={t('insert_menu') as string}>
+          <CommandMenuItems menu={cmState.menus.insert} />
+        </Menu>
+        <ToolbarDivider />
         <WithCommand id={CommandId.TableInsertTable}>
-          <Menu2 type="toolbar" text={t('table_menu') as string}>
-            <CommandMenuItems2 menu={cmState.menus.table} />
-          </Menu2>
-          <ToolbarDivider2 />
+          <Menu type="toolbar" text={t('table_menu') as string}>
+            <CommandMenuItems menu={cmState.menus.table} />
+          </Menu>
+          <ToolbarDivider />
         </WithCommand>
        
-      </Toolbar2>
+      </Toolbar>
     );
   } else {
     return null;

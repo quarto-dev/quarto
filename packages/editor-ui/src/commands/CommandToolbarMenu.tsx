@@ -21,19 +21,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { CommandManagerContext } from './CommandManager';
 import { Command } from './commands';
-import { Menu2 } from '../menu/Menu2';
+import { Menu } from '../menu/Menu';
 
-import { CommandMenuItem2, CommandMenuItemActive2 } from './CommandMenuItem2';
+import { CommandMenuItem, CommandMenuItemActive } from './CommandMenuItem';
 
 const kSeparator = '---';
 
-export interface CommandToolbarMenuProps2 {
+export interface CommandToolbarMenuProps {
   commands: Array<string | '---'>;
   minWidth?: number;
   className?: string;
 }
 
-export const CommandToolbarMenu2: React.FC<CommandToolbarMenuProps2> = (props) => {
+export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props) => {
   // force re-render when the selection changes
   const [cmState] = useContext(CommandManagerContext);
 
@@ -62,7 +62,7 @@ export const CommandToolbarMenu2: React.FC<CommandToolbarMenuProps2> = (props) =
         if (command.isActive()) {
           selected = command.menuText;
         }
-        return <CommandMenuItem2 key={command.id} id={command.id} active={CommandMenuItemActive2.Check} />;
+        return <CommandMenuItem key={command.id} id={command.id} active={CommandMenuItemActive.Check} />;
       }
     });
 
@@ -74,9 +74,9 @@ export const CommandToolbarMenu2: React.FC<CommandToolbarMenuProps2> = (props) =
 
     // return JSX popover + menu items
     return (
-      <Menu2 className={props.className} text={selected} type="toolbar" minWidth={props.minWidth}>
+      <Menu className={props.className} text={selected} type="toolbar" minWidth={props.minWidth}>
         {menuItems}
-      </Menu2>
+      </Menu>
     );
   } else {
     return null;

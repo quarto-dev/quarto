@@ -31,25 +31,25 @@ import { CommandManagerContext, Commands } from 'editor-ui';
 import { MenuItem } from '@fluentui/react-components';
 import { useMenuStyles } from '../menu/styles';
 
-export enum CommandMenuItemActive2 {
+export enum CommandMenuItemActive {
   Check = 'check',
   Latch = 'latch',
   None = 'none',
 }
 
-export interface CommandMenuItemProps2 {
+export interface CommandMenuItemProps {
   id: string;
   text?: string;
   keyCode?: string;
-  active?: CommandMenuItemActive2;
+  active?: CommandMenuItemActive;
   commands?: Commands;
 }
 
-export const CommandMenuItem2: React.FC<CommandMenuItemProps2> = props => {
+export const CommandMenuItem: React.FC<CommandMenuItemProps> = props => {
 
   const classes = useMenuStyles();
 
-  const { id, keyCode, active = CommandMenuItemActive2.None } = props;
+  const { id, keyCode, active = CommandMenuItemActive.None } = props;
 
   // force re-render when the selection changes
   const [cmState] = useContext(CommandManagerContext);

@@ -24,10 +24,10 @@ import {
   WithCommand, 
   CommandManagerContext,  
   EditorUICommandId,
-  CommandMenuItem2,
-  CommandMenuItemActive2,
-  CommandMenubarMenu2,
-  Menu2,
+  CommandMenuItem,
+  CommandMenuItemActive,
+  CommandMenubarMenu,
+  Menu,
 
 } from 'editor-ui';
 
@@ -39,51 +39,51 @@ const CommandId = { ...EditorCommandId,  ...EditorUICommandId, ...WorkbenchComma
 
 const FileMenu: React.FC = () => {
   return (
-    <Menu2 text={t('file_menu') as string}>
-      <CommandMenuItem2 id={CommandId.Rename} />
-    </Menu2>
+    <Menu text={t('file_menu') as string}>
+      <CommandMenuItem id={CommandId.Rename} />
+    </Menu>
   );
 };
 
 const EditMenu: React.FC = () => {
   return (
-    <Menu2 text={t('edit_menu') as string} >
-      <CommandMenuItem2 id={CommandId.Undo} />
-      <CommandMenuItem2 id={CommandId.Redo} />
+    <Menu text={t('edit_menu') as string} >
+      <CommandMenuItem id={CommandId.Undo} />
+      <CommandMenuItem id={CommandId.Redo} />
       <MenuDivider />
-      <CommandMenuItem2 id={CommandId.Cut} />
-      <CommandMenuItem2 id={CommandId.Copy} />
-      <CommandMenuItem2 id={CommandId.Paste} />
+      <CommandMenuItem id={CommandId.Cut} />
+      <CommandMenuItem id={CommandId.Copy} />
+      <CommandMenuItem id={CommandId.Paste} />
       <MenuDivider />
-      <CommandMenuItem2 id={CommandId.SelectAll} />
+      <CommandMenuItem id={CommandId.SelectAll} />
       <MenuDivider />
-      <CommandMenuItem2 id={CommandId.Find} />
-      <CommandMenuItem2 id={CommandId.FindNext} />
-      <CommandMenuItem2 id={CommandId.FindPrevious} />
-      <CommandMenuItem2 id={CommandId.ReplaceAndFind} />
+      <CommandMenuItem id={CommandId.Find} />
+      <CommandMenuItem id={CommandId.FindNext} />
+      <CommandMenuItem id={CommandId.FindPrevious} />
+      <CommandMenuItem id={CommandId.ReplaceAndFind} />
       <MenuDivider />
-      <CommandMenuItem2 id={CommandId.Prefs} />
-    </Menu2>
+      <CommandMenuItem id={CommandId.Prefs} />
+    </Menu>
   );
 };
 
 const ViewMenu: React.FC = () => {
   return (
-    <Menu2 text={t('view_menu') as string}>
-      <CommandMenuItem2 id={CommandId.ShowOutline} active={CommandMenuItemActive2.Check} />
+    <Menu text={t('view_menu') as string}>
+      <CommandMenuItem id={CommandId.ShowOutline} active={CommandMenuItemActive.Check} />
       <MenuDivider />
-      <CommandMenuItem2 id={CommandId.ActivateEditor} />
-    </Menu2>
+      <CommandMenuItem id={CommandId.ActivateEditor} />
+    </Menu>
   );
 };
 
 const HelpMenu: React.FC = () => {
   return (
-    <Menu2 text={t('help_menu') as string}>
-      <CommandMenuItem2 id={CommandId.EnableDevTools} />
+    <Menu text={t('help_menu') as string}>
+      <CommandMenuItem id={CommandId.EnableDevTools} />
       <MenuDivider />
-      <CommandMenuItem2 id={CommandId.KeyboardShortcuts} />
-    </Menu2>
+      <CommandMenuItem id={CommandId.KeyboardShortcuts} />
+    </Menu>
   );
 };
 
@@ -100,10 +100,10 @@ const WorkbenchMenubar: React.FC = () => {
       <EditMenu />
       <ViewMenu />
       
-      <CommandMenubarMenu2 text={t('insert_menu')} menu={cmState.menus.insert} />
-      <CommandMenubarMenu2 text={t('format_menu')} menu={cmState.menus.format} />
+      <CommandMenubarMenu text={t('insert_menu')} menu={cmState.menus.insert} />
+      <CommandMenubarMenu text={t('format_menu')} menu={cmState.menus.format} />
       <WithCommand id={CommandId.TableInsertTable}>
-        <CommandMenubarMenu2 text={t('table_menu')} menu={cmState.menus.table} />
+        <CommandMenubarMenu text={t('table_menu')} menu={cmState.menus.table} />
       </WithCommand>
       <HelpMenu />
     </>

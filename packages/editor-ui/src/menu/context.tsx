@@ -41,7 +41,7 @@ import {
 
 const CheckmarkIcon = bundleIcon(Checkmark16Filled, Checkmark16Regular);
 
-import { Commands, SubMenu2 } from "editor-ui";
+import { Commands, SubMenu } from "editor-ui";
 
 import { EditorMenuItem } from "editor-types";
 
@@ -120,9 +120,9 @@ const ContextMenu : React.FC<ContextMenuProps> = (props) => {
         );
     } else if (item.subMenu && item.text) {
       return (
-        <SubMenu2 key={uuidv4()} text={item.text}>
+        <SubMenu key={uuidv4()} text={item.text}>
           {item.subMenu.items.map(menuItem)}
-        </SubMenu2>
+        </SubMenu>
       );
     } else if (item.text && item.exec) {
       return <MenuItem key={uuidv4()} className={classes.item} onClick={item.exec}>{item.text}</MenuItem>

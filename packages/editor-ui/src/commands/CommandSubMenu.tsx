@@ -15,17 +15,17 @@
 
 import React, { PropsWithChildren, useContext } from 'react';
 
-import { SubMenuProps2, SubMenu2 } from '../menu/Menu2';
+import { SubMenuProps, SubMenu } from '../menu/Menu';
 
-import { CommandMenuItem2 } from './CommandMenuItem2';
+import { CommandMenuItem } from './CommandMenuItem';
 
 import { CommandManagerContext, Commands } from './CommandManager';
 
-export interface CommandSubMenuProps2 extends SubMenuProps2 {
+export interface CommandSubMenuProps extends SubMenuProps {
   commands?: Commands;
 }
 
-export const CommandSubMenu2: React.FC<PropsWithChildren<CommandSubMenuProps2>> = props => {
+export const CommandSubMenu: React.FC<PropsWithChildren<CommandSubMenuProps>> = props => {
   // get command manager for command lookup
   const [cmState] = useContext(CommandManagerContext);
 
@@ -36,7 +36,7 @@ export const CommandSubMenu2: React.FC<PropsWithChildren<CommandSubMenuProps2>> 
 
     if (
       React.isValidElement(child) &&
-      child.type === CommandMenuItem2 
+      child.type === CommandMenuItem 
     ) {
       // get command
       let command = props.commands?.[child.props.id];
@@ -52,7 +52,7 @@ export const CommandSubMenu2: React.FC<PropsWithChildren<CommandSubMenuProps2>> 
 
 
   if (haveCommands) {
-    return <SubMenu2 {...props} />;
+    return <SubMenu {...props} />;
   } else {
     return null;
   }

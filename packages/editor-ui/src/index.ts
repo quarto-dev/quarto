@@ -16,7 +16,6 @@
 export * from './context';
 export * from './dialogs';
 export * from './commands';
-export * from './widgets';
 export * from './menu';
 export * from './editor';
 export * from './store';

@@ -25,10 +25,10 @@ import EditorPane from '../panes/editor/EditorPane';
 
 import WorkbenchClipboard from './WorkbenchClipboard';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
+import WorkbenchMenubar from './WorkbenchMenubar';
 import WorkbenchToolbar from './WorkbenchToolbar';
 
 import './Workbench.scss';
-import WorkbenchMenubar from './WorkbenchMenubar';
 
 const Workbench: React.FC = () => {
  

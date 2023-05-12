@@ -15,12 +15,21 @@
 
 import React, { useContext } from 'react';
 
-import { Button } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
+import {
+  TextAlignJustify20Filled,
+  TextAlignJustify20Regular,
+  bundleIcon
+} from "@fluentui/react-icons"
+
+const TextAlignJustifyIcon = bundleIcon(TextAlignJustify20Filled, TextAlignJustify20Regular);
+
+import { Button } from '@fluentui/react-components';
+
 
 import { CommandManagerContext, commandTooltipText, EditorUICommandId } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
+
 
 export interface EditorOutlineButtonProps {
   visible: boolean;
@@ -35,13 +44,12 @@ export const EditorOutlineButton: React.FC<EditorOutlineButtonProps> = props => 
   if (props.visible) {
     return (
       <div className={styles.showOutlineButtonGutter}>
-        <Button
-          icon={IconNames.ALIGN_JUSTIFY}
-          title={title}
-          large={true}
-          minimal={true}
-          className={styles.showOutlineButton}
-          onClick={props.onClick}
+        <Button 
+          title={title} 
+          className={styles.showOutlineButton} 
+          icon={<TextAlignJustifyIcon />} 
+          appearance='transparent'  
+          onClick={props.onClick} 
         />
       </div>
     );

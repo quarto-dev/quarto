@@ -51,16 +51,21 @@ $buttonOpacity: 0.6;
 .outlineHeaderToggle {
   cursor: pointer;
   opacity: $buttonOpacity;
+  padding: 0 !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
 }
 
 .outlineHeaderText {
   visibility: hidden;
   margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .outlineCloseIcon {
   visibility: hidden;
-  margin-left: auto;
+  margin-left: auto !important;
   cursor: pointer;
   opacity: $buttonOpacity;
 }
@@ -120,8 +125,8 @@ $buttonOpacity: 0.6;
 
 .showOutlineButton {
   position: absolute;
-  left: 0;
-  top: $verticalPadding;
+  left: 6px;
+  top: calc(#{$verticalPadding} + 8px);
   z-index:  $zIndexOverlay;
   background-color: transparent!important;
   padding: 0 !important;

@@ -16,8 +16,18 @@
 import React from 'react';
 
 
-import { Icon } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
+import { Button } from '@fluentui/react-components';
+
+import {
+  TextAlignJustify20Filled,
+  TextAlignJustify20Regular, 
+  ChevronLeft16Filled,
+  ChevronLeft16Regular,
+  bundleIcon
+} from "@fluentui/react-icons"
+
+const ChevronLeftIcon = bundleIcon(ChevronLeft16Filled, ChevronLeft16Regular);
+const TextAlignJustifyIcon = bundleIcon(TextAlignJustify20Filled, TextAlignJustify20Regular);
 
 import { t } from 'editor-ui';
 
@@ -31,12 +41,18 @@ export const EditorOutlineHeader: React.FC<EditorOutlineHeaderProps> = props => 
 
   return (
     <div className={[styles.outlineHeader, 'pm-surface-widget-text-color'].join(' ')}>
-      <Icon icon={IconNames.ALIGN_JUSTIFY} className={styles.outlineHeaderToggle}  onClick={props.onCloseClicked} />
+      <Button 
+        className={styles.outlineHeaderToggle} 
+        icon={<TextAlignJustifyIcon />} 
+        appearance='transparent'  
+        onClick={props.onCloseClicked} 
+      />
       <div className={styles.outlineHeaderText}>{t('outline_header_text')}</div>
-      <Icon
-        icon={IconNames.CHEVRON_LEFT}
-        htmlTitle={t('close_button_title') as string}
+      <Button
+        icon={<ChevronLeftIcon />}
+        title={t('close_button_title') as string}
         className={styles.outlineCloseIcon}
+        appearance='transparent'  
         onClick={props.onCloseClicked}
       />
     </div>

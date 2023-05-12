@@ -13,7 +13,6 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
 
 @import '../variables.scss';
 
@@ -25,7 +24,7 @@ $sidebarInset: 4px;
   left: $sidebarInset;
   width: $sideGutterWidth;
   bottom: 0;
-  z-index: $pt-z-index-overlay;
+  z-index: $zIndexOverlay;
 }
 
 .editorSidebar {

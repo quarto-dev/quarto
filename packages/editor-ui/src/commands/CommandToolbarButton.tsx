@@ -33,7 +33,7 @@ export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props)
   if (command) {
     return (
       <ToolbarButton
-        icon={command.icon2}
+        icon={command.icon}
         title={commandTooltipText(command)}
         enabled={command.isEnabled()}
         active={command.isActive()}

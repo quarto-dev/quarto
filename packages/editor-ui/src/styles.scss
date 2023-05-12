@@ -1,4 +1,3 @@
-@import '@blueprintjs/core/lib/scss/variables.scss';
 
 // no glass for modals
 .bp4-overlay-backdrop {
@@ -15,7 +14,7 @@
 .bp4-dark .bp4-input {
   box-shadow: none;
   -webkit-box-shadow: none;
-  border: 1px solid $pt-dark-divider-white;
+  border: 1px solid rgb(17 20 24 / 20%);
   background-color: transparent;
 }
 

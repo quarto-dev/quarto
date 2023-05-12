@@ -13,8 +13,6 @@
  *
  */
 
-import { IconName, MaybeElement } from '@blueprintjs/core';
-
 import { toKeyCode, keyCodeString } from './keycodes';
 import { Slot } from '@fluentui/react-components';
 
@@ -28,11 +26,8 @@ export interface Command {
   // group (for display in keyboard shortcuts dialog)
   readonly group: string;
 
-  // optional blueprint icon for toolbar/menu
-  readonly icon?: IconName | MaybeElement;
-
   // optional fluent icon for toolbar/menu
-  readonly icon2?: Slot<"span">;
+  readonly icon?: Slot<"span">;
 
   // keys to bind to
   readonly keymap: readonly string[];

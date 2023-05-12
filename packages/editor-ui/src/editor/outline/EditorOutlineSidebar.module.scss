@@ -13,8 +13,6 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
-
 @import 'editor-ui/src/variables.scss';
 
 $verticalPadding: 1px;
@@ -27,9 +25,9 @@ $buttonOpacity: 0.6;
   bottom: $verticalPadding;
   width: 0;
   font-size: 0.9em;
-  color: $gray1;
+  color: gray;
   border-right: $paneBorder;
-  z-index: $pt-z-index-overlay;
+  z-index: $zIndexOverlay;
   display: none;
 
 }
@@ -124,7 +122,7 @@ $buttonOpacity: 0.6;
   position: absolute;
   left: 0;
   top: $verticalPadding;
-  z-index: $pt-z-index-overlay;
+  z-index:  $zIndexOverlay;
   background-color: transparent!important;
   padding: 0 !important;
   opacity: $buttonOpacity;

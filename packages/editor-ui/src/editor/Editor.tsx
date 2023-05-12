@@ -18,8 +18,6 @@ import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Intent, Spinner } from '@blueprintjs/core';
-
 import { JsonRpcRequestTransport } from 'core';
 
 import { 
@@ -99,6 +97,7 @@ import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 import { EditorFind } from './EditorFind';
 import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
 import { EditorLoadFailed } from './EditorLoadFailed';
+import { Spinner } from '@fluentui/react-components';
 
 
 export interface EditorProps {
@@ -466,7 +465,7 @@ const editorLoadingUI = (uiContext: EditorUIContext, loading: boolean, loadError
     return (
       <div className={['ProseMirror'].join(' ')}>
         <div className='body pm-editing-root-node pm-text-color pm-background-color'>
-          <Spinner className={styles.editorLoadingSpinner} intent={Intent.NONE} ></Spinner>
+          <Spinner className={styles.editorLoadingSpinner} size="huge"  />
         </div>
       </div>
     );

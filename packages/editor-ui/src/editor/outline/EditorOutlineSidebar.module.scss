@@ -85,35 +85,6 @@ $buttonOpacity: 0.6;
   padding: 5px 0;
 }
 
-.outlineTree {
-  :global {
-    .bp4-tree-node-caret-none {
-      min-width: 10px !important;
-    }
-    .bp4-tree-node-content {
-      padding-right: 15px;
-      height: 1.7em;
-    }
-    .bp4-tree-node-content-0 {
-      padding-left: 3px;
-    }
-    .bp4-tree-node-content-1 {
-      padding-left: 10px !important;
-    }
-    .bp4-tree-node-content-2 {
-      padding-left: 17px;
-    }
-    .bp4-tree-node-content-3 {
-      padding-left: 24px;
-    }
-    .bp4-tree-node-content-4 {
-      padding-left: 31px;
-    }
-    .bp4-tree-node-content-5 {
-      padding-left: 38px;
-    }
-  }
-}
 
 .showOutlineButtonGutter {
   position: absolute;

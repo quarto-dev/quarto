@@ -13,18 +13,40 @@
  *
  */
 
+// TODO: portal to automatically pick up theme
+// TODO: localization of 'ok' and 'cancel'
+// TODO: get rid of glass behind dialog
+
 import React, { useState } from 'react';
 
-import { Classes, ControlGroup, Icon, IconName, Intent, Label } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
+import { 
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogTrigger,
+  Button,
+  FluentProvider,
+  webLightTheme,
+  makeStyles,
+  tokens
+} from "@fluentui/react-components"
+
+
+import {
+  Info24Regular,
+  ErrorCircle24Regular,
+  Warning24Regular
+} from "@fluentui/react-icons"
+
 
 import { FormikValues } from 'formik';
 
 import { kAlertTypeError, kAlertTypeInfo, kAlertTypeWarning } from 'editor-types';
 
-import { FormikDialog, showValueEditorDialog } from 'ui-widgets';
-
-import styles from './styles.module.scss';
+import { showValueEditorDialog } from 'ui-widgets';
 
 export function alert(title: string, message: string | JSX.Element, type: number): Promise<boolean> {
   return alertDialog(title, message, type, true);
@@ -61,43 +83,67 @@ const AlertDialog: React.FC<{
     props.onClosed(values);
   }
 
-  let icon: IconName;
-  let intent: Intent;
-  switch (props.options.type) {
-    case kAlertTypeError:
-      icon = IconNames.ERROR;
-      intent = Intent.DANGER;
-      break;
-    case kAlertTypeWarning:
-      icon = IconNames.WARNING_SIGN;
-      intent = Intent.WARNING;
-      break;
-    case kAlertTypeInfo:
-    default:
-      icon = IconNames.INFO_SIGN;
-      intent = Intent.PRIMARY;
-      break;
+  const alertIcon = () => {
+    const color = props.options.type === kAlertTypeError 
+      ? tokens.colorPaletteRedForeground1
+      : props.options.type === kAlertTypeWarning 
+      ? tokens.colorPaletteDarkOrangeForeground1
+      : tokens.colorPaletteBlueForeground2;
+    switch (props.options.type) {
+      case kAlertTypeError:
+        return <ErrorCircle24Regular color={color} />;
+      case kAlertTypeWarning:
+        return <Warning24Regular color={color} />
+      case kAlertTypeInfo:
+      default:
+        return <Info24Regular color={color} />
+    }
   }
+  
+  const classes = useStyles();
 
-   return (
-    <FormikDialog
-      title={props.options.title} 
-      okCaption={props.options.okLabel}
-      noCancelButton={props.options.noCancelButton}
-      cancelCaption={props.options.cancelLabel}
-      focusOKButton={true}
-      isOpen={isOpen} 
-      initialValues={props.values} 
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
-      className={styles.alertDialog}
-    >
-      <ControlGroup vertical={false} fill={true}>
-        <Icon icon={icon} size={36} intent={intent} className={Classes.FIXED} />
-        <Label>{props.options.message}</Label>
-      </ControlGroup>
-     
-    </FormikDialog>
+  return (
+    <FluentProvider theme={webLightTheme}>
+      <Dialog 
+        modalType={props.options.noCancelButton ? "modal" : "alert"} 
+        open={isOpen} 
+        onOpenChange={(_event,data) => {
+          if (!data.open) {
+            close();
+          }
+        }} 
+      >
+        <DialogSurface>
+          <DialogBody>
+            <DialogTitle>
+              <div className={classes.title}>
+                {alertIcon()}&nbsp;&nbsp;{props.options.title}
+              </div></DialogTitle>
+            <DialogContent>
+              {props.options.message}
+            </DialogContent>
+            <DialogActions>
+              {!props.options.noCancelButton 
+                ? <DialogTrigger disableButtonEnhancement>
+                    <Button onClick={() => close()} appearance="secondary">{props.options.cancelLabel || "Cancel"}</Button>
+                  </DialogTrigger>
+                : null
+              }
+              <Button onClick={() => close({})} appearance="primary">{props.options.okLabel || "OK"}</Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
+    </FluentProvider>
+    
   );
   
 };
+
+
+const useStyles = makeStyles({
+  title: {
+    display: 'inline-flex',
+    alignItems: 'center'
+  }
+})

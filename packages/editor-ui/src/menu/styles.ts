@@ -29,18 +29,22 @@ export const useMenuStyles = makeStyles({
     paddingTop: 0,
     paddingBottom: 0,
     fontWeight: tokens.fontWeightRegular,
-    fontSize: tokens.fontSizeBase300
+    fontSize: tokens.fontSizeBase200
   },
   menubarMenuButton: {
     paddingLeft: '10px',
-    paddingRight: '10px'
+    paddingRight: '10px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    fontWeight: tokens.fontWeightMedium,
+    fontSize: tokens.fontSizeBase300
   },
   toolbar: {
     paddingTop: '2px',
     paddingBottom: '2px',
     columnGap: '2px',
     backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderBottom('none'),
+    ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
   },
   toolbarButton: {
     paddingTop: 0,

@@ -45,7 +45,7 @@ const EditorToolbar: React.FC = () => {
     return (
       <Toolbar className={[styles.editorToolbar, 'pm-pane-border-color', 'pm-toolbar-background-color', 'pm-toolbar-text-color'].join(' ')}>
         <CommandToolbarMenu
-          minWidth={115}
+          minWidth={105}
           commands={[
             CommandId.Paragraph,
             '---',

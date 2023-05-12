@@ -52,7 +52,7 @@ const EditorToolbar: React.FC = () => {
         <CommandToolbarButton command={CommandId.Redo} />
         <ToolbarDivider />
         <CommandToolbarMenu
-          minWidth={115}
+          minWidth={105}
           commands={[
             CommandId.Paragraph,
             '---',

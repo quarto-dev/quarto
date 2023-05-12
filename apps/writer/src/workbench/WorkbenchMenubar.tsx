@@ -40,7 +40,7 @@ const CommandId = { ...EditorCommandId,  ...EditorUICommandId, ...WorkbenchComma
 const FileMenu: React.FC = () => {
   return (
     <Menu text={t('file_menu') as string}>
-      <CommandMenuItem id={CommandId.Rename} />
+     
     </Menu>
   );
 };

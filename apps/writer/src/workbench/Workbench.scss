@@ -13,8 +13,6 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
-
 @import 'editor-ui/src/variables.scss';
  
  .workbench {
@@ -23,7 +21,6 @@
    left: 0;
    right: 0;
    bottom: 0;
-   background-color: $light-gray5;
  }
  
  .workbench .navbar {

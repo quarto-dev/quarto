@@ -23,12 +23,12 @@ import { commandHotkeys, CommandManagerContext, keyboardShortcutsCommand } from 
 
 import EditorPane from '../panes/editor/EditorPane';
 
-import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
 import WorkbenchToolbar from './WorkbenchToolbar';
 
 import './Workbench.scss';
+import WorkbenchMenubar from './WorkbenchMenubar';
 
 const Workbench: React.FC = () => {
  
@@ -50,7 +50,7 @@ const Workbench: React.FC = () => {
   return (
     <FluentProvider theme={webLightTheme}>
       <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-        <WorkbenchNavbar />
+        <WorkbenchMenubar />
         <WorkbenchToolbar />
         <div className={'workspace'}>
           <EditorPane />

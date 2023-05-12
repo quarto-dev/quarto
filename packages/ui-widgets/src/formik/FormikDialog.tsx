@@ -19,7 +19,7 @@ import { Classes, Button, Intent, Dialog } from '@blueprintjs/core';
 
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 
-import { modalDialogProps } from '../dialog';
+import { modalDialogProps } from '../dialog-props';
 
 import FormikFocusError from './FormikFocusError';
 

@@ -14,7 +14,6 @@
  */
 
 // TODO: portal to automatically pick up theme
-// TODO: localization of 'ok' and 'cancel'
 // TODO: get rid of glass behind dialog
 
 import React, { useState } from 'react';
@@ -44,9 +43,12 @@ import {
 
 import { FormikValues } from 'formik';
 
+
 import { kAlertTypeError, kAlertTypeInfo, kAlertTypeWarning } from 'editor-types';
 
 import { showValueEditorDialog } from 'ui-widgets';
+
+import { t } from './translate';
 
 export function alert(title: string, message: string | JSX.Element, type: number): Promise<boolean> {
   return alertDialog(title, message, type, true);
@@ -125,11 +127,11 @@ const AlertDialog: React.FC<{
             <DialogActions>
               {!props.options.noCancelButton 
                 ? <DialogTrigger disableButtonEnhancement>
-                    <Button onClick={() => close()} appearance="secondary">{props.options.cancelLabel || "Cancel"}</Button>
+                    <Button onClick={() => close()} appearance="secondary">{props.options.cancelLabel || t("Cancel")}</Button>
                   </DialogTrigger>
                 : null
               }
-              <Button onClick={() => close({})} appearance="primary">{props.options.okLabel || "OK"}</Button>
+              <Button onClick={() => close({})} appearance="primary">{props.options.okLabel || t("OK")}</Button>
             </DialogActions>
           </DialogBody>
         </DialogSurface>

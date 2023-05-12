@@ -18,8 +18,23 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { CSSTransition } from 'react-transition-group';
 import { useDebounce } from 'use-debounce';
 
-import { Button, Checkbox, ControlGroup, InputGroup } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
+import { Button, Checkbox, Input } from '@fluentui/react-components';
+import {
+  ChevronLeft16Filled,
+  ChevronLeft16Regular,
+  ChevronRight16Filled,
+  ChevronRight16Regular,
+  ChevronDoubleRight16Filled,
+  ChevronDoubleRight16Regular,
+  Dismiss16Filled,
+  Dismiss16Regular,
+  bundleIcon
+} from "@fluentui/react-icons";
+
+const ChevronLeftIcon = bundleIcon(ChevronLeft16Filled, ChevronLeft16Regular);
+const ChevronRightIcon = bundleIcon(ChevronRight16Filled, ChevronRight16Regular);
+const ChevronDoubleRightIcon = bundleIcon(ChevronDoubleRight16Filled, ChevronDoubleRight16Regular);
+const DismissIcon = bundleIcon(Dismiss16Filled, Dismiss16Regular);
 
 import { focusInput } from 'core-browser';
 
@@ -32,7 +47,6 @@ import { t } from '../i18n';
 import { EditorOperationsContext } from './EditorOperationsContext';
 
 import styles from './EditorFind.module.scss';
-
 
 export const EditorFind: React.FC = () => {
 
@@ -165,7 +179,7 @@ export const EditorFind: React.FC = () => {
   }, [active, replaceText, replaceAndFind]);
 
 
-   // perform find when find text changes (debounced)
+  // perform find when find text changes (debounced)
   useEffect(() => {
     performFind();
   }, [debouncedFindText, matchCase, matchRegex]);
@@ -175,6 +189,8 @@ export const EditorFind: React.FC = () => {
     editor.getFindReplace()?.clear();
     if (!active) {
       setFindText('');
+      setReplaceText('');
+      
     }
   }, [active])
 
@@ -196,15 +212,15 @@ export const EditorFind: React.FC = () => {
   // show nav buttons when we have find text
   const navButtons = 
     <span style={ { visibility: findText.length ? 'visible' : 'hidden' }}>
-      <Button icon={IconNames.ChevronLeft} title={t('find_previous') as string} onClick={findPrevious} minimal={true} small={true} />
-      <Button icon={IconNames.ChevronRight} title={t('find_next') as string} onClick={findNext} minimal={true} small={true} />
+      <Button icon={<ChevronLeftIcon />} title={t('find_previous') as string} onClick={findPrevious} appearance="transparent" size="small" />
+      <Button icon={<ChevronRightIcon />} title={t('find_next') as string} onClick={findNext} appearance="transparent" size="small"  />
     </span>;
 
   // show replace buttons when we have replace text
   const replaceButtons = 
     <span style={ { visibility: replaceText.length ? 'visible' : 'hidden' }}>
-      <Button icon={IconNames.ChevronRight} title={t('replace_and_find') as string} onClick={replaceAndFind} minimal={true} small={true} />
-      <Button icon={IconNames.DoubleChevronRight} title={t('replace_all') as string} onClick={replaceAll} minimal={true} small={true} />
+      <Button icon={<ChevronRightIcon />} title={t('replace_and_find') as string} onClick={replaceAndFind} appearance="transparent" size="small" />
+      <Button icon={<ChevronDoubleRightIcon />} title={t('replace_all') as string} onClick={replaceAll} appearance="transparent" size="small"  />
     </span>;
 
   // component
@@ -217,30 +233,36 @@ export const EditorFind: React.FC = () => {
         'pm-popup pm-background-color pm-text-color pm-pane-border-color'].join(' ')}
       >
         <div className={styles.find}>
-          <ControlGroup className={styles.findRow}>
-            <InputGroup
-              inputRef={findInputRef}
-              className={styles.findInput}
+          <div className={styles.findRow}>
+            <Input
+              input={{ ref: findInputRef }}
+              size="small"
               value={findText}
               onChange={ev => setFindText(ev.target.value)}
               onKeyDown={handleFindKeyDown}
               onFocus={performFind}
-              small={true}
               placeholder={t('find_placeholder') as string}    
-              rightElement={navButtons}
+              contentAfter={navButtons}
             />
-            <Button icon={IconNames.Cross} title={t('find_close_panel') as string} minimal={true} small={true} onClick={close} />
-          </ControlGroup>
-          <InputGroup
-            inputRef={replaceInputRef}
-            className={[styles.findInput, styles.findRow].join(' ')}
-            value={replaceText}
-            onChange={ev => setReplaceText(ev.target.value)}
-            onKeyDown={handleReplaceKeyDown}
-            small={true}
-            placeholder={t('replace_placeholder') as string}  
-            rightElement={replaceButtons}
-          /> 
+            <Button 
+              icon={<DismissIcon />} 
+              title={t('find_close_panel') as string} 
+              appearance="transparent" 
+              size="small" 
+              onClick={close} 
+            />
+          </div>
+          <div className={styles.findRow}>
+            <Input
+              input={{ ref: replaceInputRef }}
+              size="small"
+              value={replaceText}
+              onChange={ev => setReplaceText(ev.target.value)}
+              onKeyDown={handleReplaceKeyDown}
+              placeholder={t('replace_placeholder') as string}  
+              contentAfter={replaceButtons}
+            /> 
+          </div>
           <Checkbox checked={matchCase} onChange={ev => setMatchCase(ev.currentTarget.checked)} label={t('find_match_case') as string} /> 
           <Checkbox checked={matchRegex} onChange={ev => setMatchRegex(ev.currentTarget.checked)} label={t('find_match_regex') as string} /> 
         </div>

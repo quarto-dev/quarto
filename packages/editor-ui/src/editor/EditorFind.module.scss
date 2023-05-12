@@ -17,7 +17,7 @@
 
 @import '../variables.scss';
 
-$findHeight: 140px;
+$findHeight: 160px;
 $findWidth: 270px;
 $rightPadding: 20px;
 
@@ -44,34 +44,11 @@ $rightPadding: 20px;
   border-bottom-left-radius: $sidebarBottomBorderRadius;
 }
 
-.find {
-  :global(.bp4-button),
-  :global(.bp4-input-group.bp4-small .bp4-button) {
-    padding: 0 4px;
-    min-width: 15px;
-  }
-}
-
-.find {
-  :global(.bp4-control-group > :not(:last-child)) {
-    margin-right: 0;
-  }
-}
-
-.find {
-  :global(.bp4-checkbox) {
-    font-size: 0.8rem;
-  }
-}
-
-.findInput {
-  width: calc(#{$findWidth} - 60px);
-}
 
 .findRow {
+  display: flex;
   margin-bottom: 10px;
 }
-
 
 /* transition */
 

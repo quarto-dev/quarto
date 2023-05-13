@@ -3,6 +3,9 @@
 .bp4-overlay-backdrop {
   background-color: transparent;
 }
+.fui-DialogSurface__backdrop {
+  background-color: transparent !important;
+}
 
 // eliminate bevel border for inputs
 .bp4-input,

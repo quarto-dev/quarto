@@ -35,9 +35,9 @@ import {
 
 
 import {
-  Info24Regular,
-  ErrorCircle24Regular,
-  Warning24Regular
+  InfoRegular,
+  ErrorCircleRegular,
+  WarningRegular
 } from "@fluentui/react-icons"
 
 
@@ -85,6 +85,8 @@ const AlertDialog: React.FC<{
     props.onClosed(values);
   }
 
+  const classes = useStyles();
+
   const alertIcon = () => {
     const color = props.options.type === kAlertTypeError 
       ? tokens.colorPaletteRedForeground1
@@ -93,16 +95,15 @@ const AlertDialog: React.FC<{
       : tokens.colorPaletteBlueForeground2;
     switch (props.options.type) {
       case kAlertTypeError:
-        return <ErrorCircle24Regular color={color} />;
+        return <ErrorCircleRegular color={color} className={classes.titleIcon} />;
       case kAlertTypeWarning:
-        return <Warning24Regular color={color} />
+        return <WarningRegular color={color} className={classes.titleIcon}/>
       case kAlertTypeInfo:
       default:
-        return <Info24Regular color={color} />
+        return <InfoRegular color={color} className={classes.titleIcon} />
     }
   }
-  
-  const classes = useStyles();
+
 
   return (
     <FluentProvider theme={webLightTheme}>
@@ -147,5 +148,8 @@ const useStyles = makeStyles({
   title: {
     display: 'inline-flex',
     alignItems: 'center'
+  },
+  titleIcon: {
+    fontSize: '36px'
   }
 })

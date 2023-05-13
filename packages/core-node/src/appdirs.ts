@@ -15,9 +15,9 @@
 
 // https://stackoverflow.com/questions/19275776/node-js-how-to-get-the-os-platforms-user-data-folder
 
-import path from "path";
-import fs from "fs";
-import process from 'process';
+import path from "node:path";
+import fs from "node:fs";
+import process from 'node:process';
 
 export function appDataDir(appName: string, subdir?: string, roaming = false) {
   return appDir(appName, userDataDir, subdir, roaming);

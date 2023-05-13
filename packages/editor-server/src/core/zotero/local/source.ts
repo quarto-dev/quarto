@@ -28,8 +28,7 @@ import { Database } from "node-sqlite3-wasm";
 
 import { zoteroDataDir } from "./datadir";
 import { withZoteroDb } from "./db";
-import { equalsIgnoreCase, lines } from "core";
-import { zoteroTrace } from "../trace";
+import { equalsIgnoreCase } from "core";
 import { resolveCslJsonCheaterKeys } from "../util";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -14,7 +14,7 @@
  *
  */
 
-import { extname } from "path";
+import { extname } from "node:path";
 
 export const kTextHtml = "text/html";
 export const kTextMarkdown = "text/markdown";

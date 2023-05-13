@@ -13,7 +13,7 @@
  *
  */
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 export function hasExtension(file: string, ext: string | string[]) {
   if (!Array.isArray(ext)) {

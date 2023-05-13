@@ -13,8 +13,8 @@
  *
  */
 
-import stream from 'stream';
-import * as child_process from "child_process";
+import stream from 'node:stream';
+import * as child_process from "node:child_process";
 
 
 export interface PandocServerOptions {

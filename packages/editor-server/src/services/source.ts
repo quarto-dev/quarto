@@ -13,7 +13,7 @@
  *
  */
 
-import path from "path";
+import path from "node:path";
 
 import { JsonRpcServerMethod, lines } from "core";
 import { kSourceGetSourcePosLocations, SourcePosLocation, SourcePosBlock, SourceServer } from "editor-types";

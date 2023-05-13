@@ -13,12 +13,12 @@
  *
  */
 
-import fs from "fs";
+import fs from "node:fs";
 const fsPromises = fs.promises;
 
-import path from "path";
+import path from "node:path";
 
-import readline from 'readline';
+import readline from 'node:readline';
 
 import { quartoDataDir } from "quarto-core";
 import { Collection, Group, Library, User } from "./api";

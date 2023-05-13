@@ -15,8 +15,8 @@
  */
 
 
-import path from 'path';
-import * as fs from "fs";
+import path from 'node:path';
+import * as fs from "node:fs";
 import * as uuid from 'uuid';
 
 import { JsonRpcServerMethod } from 'core';

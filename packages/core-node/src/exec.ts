@@ -13,7 +13,7 @@
  *
  */
 
-import * as child_process from "child_process";
+import * as child_process from "node:child_process";
 
 const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100
 

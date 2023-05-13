@@ -13,8 +13,8 @@
  *
  */
 
-import path from 'path';
-import process from 'process';
+import path from 'node:path';
+import process from 'node:process';
 import { initQuartoContext } from 'quarto-core';
 import { createServer } from './server';
 

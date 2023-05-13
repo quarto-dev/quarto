@@ -13,8 +13,8 @@
  *
  */
 
-import * as fs from "fs";
-import path from "path";
+import * as fs from "node:fs";
+import path from "node:path";
 import { Group, User, ZoteroApi } from "./api";
 import { libraryReadGroup, userWebLibrariesDir } from "./storage";
 import { SyncActions, SyncProgress } from "./types";

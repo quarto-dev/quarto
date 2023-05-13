@@ -13,7 +13,7 @@
  *
  */
 
-import { createHash } from "crypto"
+import { createHash } from "node:crypto"
 
 export function md5Hash(content: string) : string {
   return createHash("md5").update(content).digest("hex")

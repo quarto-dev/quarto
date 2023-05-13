@@ -13,8 +13,8 @@
  *
  */
 
-import path, { isAbsolute } from "path";
-import fs from "fs";
+import path, { isAbsolute } from "node:path";
+import fs from "node:fs";
 import * as tmp from "tmp";
 tmp.setGracefulCleanup();
 

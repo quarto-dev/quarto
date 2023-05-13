@@ -17,9 +17,9 @@ import React, { useContext, useEffect, useMemo } from 'react';
 
 import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { FluentProvider } from '@fluentui/react-components';
 
-import { commandHotkeys, CommandManagerContext, keyboardShortcutsCommand } from 'editor-ui';
+import { commandHotkeys, CommandManagerContext, fluentTheme, keyboardShortcutsCommand } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
 
@@ -48,7 +48,7 @@ const Workbench: React.FC = () => {
    
   // render workbench
   return (
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={fluentTheme()}>
       <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
         <WorkbenchMenubar />
         <WorkbenchToolbar />

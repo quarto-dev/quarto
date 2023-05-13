@@ -16,15 +16,13 @@
 
 import { defaultTheme } from "editor";
 import { defaultPrefs } from "editor-types";
-import { isSolarizedThemeActive } from "editor-ui";
+import { EditorUIStore, isSolarizedThemeActive, readPrefsApi } from "editor-ui";
 
-export function applyDarkMode(darkMode: boolean) {
-  const root = document.getElementById('root');
-  if (darkMode) {
-    root?.classList.add('bp4-dark');  
-  } else {
-    root?.classList.remove('bp4-dark');
-  }
+
+export function editorThemeFromStore(store: EditorUIStore) {
+  const prefs = readPrefsApi(store);
+  const theme = editorThemeFromVSCode(prefs.fontFamily, prefs.fontSize);
+  return theme;
 }
 
 export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) {

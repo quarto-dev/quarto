@@ -14,15 +14,13 @@
  */
 
 import { DialogProps } from "@blueprintjs/core";
+import { isDarkThemeActive, kDarkThemeClass } from "./theme";
 
 export function modalDialogProps(classes: string[], style?: React.CSSProperties, themed?: boolean) : Omit<DialogProps, "isOpen"> {
 
   // if we have a 'root' element in dark mode then propagate to the dialog
-  if (themed) {
-    const rootEl = globalThis.document.getElementById('root');
-    if (rootEl?.classList.contains('bp4-dark')) {
-      classes = [...classes, 'bp4-dark'];
-    }
+  if (themed && isDarkThemeActive()) {
+    classes = [...classes, kDarkThemeClass];
   }
 
   return {

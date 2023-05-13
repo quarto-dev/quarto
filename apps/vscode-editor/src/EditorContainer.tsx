@@ -19,7 +19,7 @@ import * as uuid from 'uuid';
 
 import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
 
-import { FluentProvider, webLightTheme, webDarkTheme } from '@fluentui/react-components';
+import { FluentProvider } from '@fluentui/react-components';
 
 import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
 
@@ -30,16 +30,16 @@ import {
   Editor,  
   EditorUIStore,  
   keyboardShortcutsCommand, 
-  readPrefsApi, 
+  setEditorTheme, 
+  fluentTheme,
   showContextMenu
 } from 'editor-ui';
 
 import { EditorMenuItem, EditorOperations, EditorTheme, EditorUIContext, HostContext, XRef } from 'editor';
 
-
 import { editorHostCommands, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
-import { applyDarkMode, editorThemeFromVSCode } from './theme';
+import { editorThemeFromVSCode } from './theme';
 
 
 import styles from './Editor.module.scss';
@@ -76,13 +76,13 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   const [uiContext] = useState(() => new HostEditorUIContext(props.context, props.host));
 
   // setup state for theme
-  const prefs = readPrefsApi(props.store);
-  const [fluentTheme, setFluentTheme] = useState(prefs.darkMode ? webDarkTheme : webLightTheme);
+  const [activeFluentTheme, setActiveFluentTheme] = useState(fluentTheme());
   const applyTheme = useCallback((theme: EditorTheme) => {
-    // apply blueprint theme global class
-    applyDarkMode(theme.darkMode);
+    // set editor theme
+    setEditorTheme(theme);
+
     // apply fluent theme
-    setFluentTheme(theme.darkMode ? webDarkTheme : webLightTheme);
+    setActiveFluentTheme(fluentTheme());
   }, []);
 
   // pair editor w/ host on on init
@@ -110,7 +110,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }
   
   return (
-    <FluentProvider theme={fluentTheme}>
+    <FluentProvider theme={activeFluentTheme}>
       <div 
         className={styles.editorParent} 
         onKeyDown={keyboardEventHandler(handleKeyDown)} 

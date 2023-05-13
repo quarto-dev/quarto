@@ -26,7 +26,6 @@ import {
   MenuList, 
   MenuItem, 
   FluentProvider, 
-  webLightTheme,
   PositioningImperativeRef, 
   PositioningVirtualElement, 
   MenuDivider,
@@ -41,7 +40,7 @@ import {
 
 const CheckmarkIcon = bundleIcon(Checkmark16Filled, Checkmark16Regular);
 
-import { Commands, SubMenu } from "editor-ui";
+import { Commands, SubMenu, fluentTheme } from "editor-ui";
 
 import { EditorMenuItem } from "editor-types";
 
@@ -64,7 +63,7 @@ export async function showContextMenu(
     }
     
     root.render(
-      <FluentProvider theme={webLightTheme}>
+      <FluentProvider theme={fluentTheme()}>
          <ContextMenu commands={commands} items={items} clientX={clientX} clientY={clientY} onClosed={onClosed} />
       </FluentProvider>
     );

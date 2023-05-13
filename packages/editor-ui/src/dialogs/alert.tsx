@@ -13,9 +13,6 @@
  *
  */
 
-// TODO: portal to automatically pick up theme
-// TODO: get rid of glass behind dialog
-
 import React, { useState } from 'react';
 
 import { 
@@ -28,7 +25,6 @@ import {
   DialogTrigger,
   Button,
   FluentProvider,
-  webLightTheme,
   makeStyles,
   tokens
 } from "@fluentui/react-components"
@@ -46,9 +42,14 @@ import { FormikValues } from 'formik';
 
 import { kAlertTypeError, kAlertTypeInfo, kAlertTypeWarning } from 'editor-types';
 
-import { showValueEditorDialog } from 'ui-widgets';
+import {
+  showValueEditorDialog 
+} from 'ui-widgets';
+
+import { fluentTheme } from '../theme';
 
 import { t } from './translate';
+
 
 export function alert(title: string, message: string | JSX.Element, type: number): Promise<boolean> {
   return alertDialog(title, message, type, true);
@@ -106,7 +107,7 @@ const AlertDialog: React.FC<{
 
 
   return (
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={fluentTheme()}>
       <Dialog 
         modalType={props.options.noCancelButton ? "modal" : "alert"} 
         open={isOpen} 

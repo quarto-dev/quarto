@@ -81,8 +81,6 @@ const HelpMenu: React.FC = () => {
   return (
     <Menu text={t('help_menu') as string}>
       <CommandMenuItem id={CommandId.EnableDevTools} />
-      <MenuDivider />
-      <CommandMenuItem id={CommandId.KeyboardShortcuts} />
     </Menu>
   );
 };

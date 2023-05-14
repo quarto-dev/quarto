@@ -18,7 +18,9 @@ import React, { useEffect } from "react";
 import { Store } from 'redux';
 import { Provider as StoreProvider } from 'react-redux';
 
-import { FocusStyleManager, HotkeysProvider } from "@blueprintjs/core";
+import { FocusStyleManager } from "@blueprintjs/core";
+
+import { HotkeysProvider } from "ui-widgets";
 
 import { CommandManagerProvider } from "editor-ui";
 

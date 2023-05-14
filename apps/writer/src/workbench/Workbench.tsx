@@ -13,13 +13,14 @@
  *
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 
-import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 
 import { FluentProvider } from '@fluentui/react-components';
 
-import { commandHotkeys, CommandManagerContext, fluentTheme, keyboardShortcutsCommand } from 'editor-ui';
+import { useHotkeys } from "ui-widgets";
+
+import { commandHotkeys, CommandManagerContext, fluentTheme } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
 
@@ -33,19 +34,10 @@ import './Workbench.scss';
 const Workbench: React.FC = () => {
  
   // register keyboard shortcuts and get handlers
-  const showHotkeysKeyCombo = 'Ctrl+Alt+K';
-  const [cmState, cmDispatch] = useContext(CommandManagerContext);
+  const [cmState] = useContext(CommandManagerContext);
   const hotkeys = useMemo(() => { return commandHotkeys(cmState.commands); }, [cmState.commands]);
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: showHotkeysKeyCombo });
-
-  // register show keyboard shortcuts command
-  const [, hkDispatch] = useContext(HotkeysContext);
-  useEffect(() => {
-    cmDispatch({ type: "ADD_COMMANDS", payload: [
-      keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
-    ]});
-  }, []); 
-   
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, {});
+ 
   // render workbench
   return (
     <FluentProvider theme={fluentTheme()}>

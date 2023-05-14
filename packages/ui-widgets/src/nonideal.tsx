@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * nonideal.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,10 +13,24 @@
  *
  */
 
-export * from './formik'
-export * from './dialog'
-export * from './dialog-props'
-export * from './hotkeys'
-export * from './theme'
-export * from './nonideal'
+import React, { PropsWithChildren } from 'react';
+
+import { Text } from "@fluentui/react-components"
+//import { DocumentRegular, ErrorCircleFilled, ErrorCircleRegular } from "@fluentui/react-icons"
+
+export interface NonIdealStateProps {
+  title: string;
+  progress?: boolean;
+  icon?: "document" | "issue" | "error";
+  className?: string;
+}
+
+export const NonIdealState : React.FC<PropsWithChildren<NonIdealStateProps>> = props => {
+  return (
+    <div>
+      <Text align='center' as='h2' block={true}>{props.title}</Text>
+      {props.children}
+    </div>
+  );
+}
 

@@ -23,10 +23,6 @@ export interface KeyCode {
   key: string;
 }
 
-export function toBlueprintHotkeyCombo(key: string) {
-  return key.toLowerCase().replace(/-/g, ' + ');
-}
-
 export function toKeyCode(key: string) {
   if (!kMac) {
     key = key.replace('Mod-', 'Ctrl-');

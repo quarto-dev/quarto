@@ -19,7 +19,6 @@ import { HotkeyConfig } from "ui-widgets";
 
 import { Commands } from "./CommandManager";
 import { Command } from "./commands";
-import { toBlueprintHotkeyCombo } from "./keycodes";
 
 export function commandHotkeys(commands: Commands) : HotkeyConfig[] {
 
@@ -45,7 +44,8 @@ export function commandHotkeys(commands: Commands) : HotkeyConfig[] {
             command.execute();
           }
         };
-    const combo = toBlueprintHotkeyCombo(key);
+    // normalize to HotkeyConfig format
+    const combo = key.toLowerCase().replace(/-/g, ' + ');
     return {
       global: true,
       group: command.group,

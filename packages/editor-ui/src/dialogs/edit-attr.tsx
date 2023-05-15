@@ -15,7 +15,7 @@
  */
 
 import React, { useState } from "react"
-import { Button } from "@blueprintjs/core";
+import { Button } from "@fluentui/react-components";
 
 import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
 

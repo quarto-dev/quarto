@@ -15,7 +15,9 @@
 
 import React, { useEffect, useState } from "react"
 
-import { Card, ControlGroup, FormGroup, HTMLSelect, HTMLTable, Intent, NonIdealState, Spinner } from "@blueprintjs/core";
+import { Card, ControlGroup, FormGroup, HTMLSelect, HTMLTable } from "@blueprintjs/core";
+
+import { FluentProvider, Field, ProgressBar } from "@fluentui/react-components"
 
 import { FormikProps, useField, useFormikContext } from "formik";
 
@@ -30,6 +32,8 @@ import { UIToolsCitation } from "editor";
 
 import { t } from './translate';
 import { alert } from "./alert";
+
+import { fluentTheme } from "../theme";
 
 import styles from './styles.module.scss';
 
@@ -241,13 +245,19 @@ const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
     }
   }, []);
 
+
   return (
-    <NonIdealState
-      className={styles.insertCitePanel}
-      icon={<Spinner intent={Intent.PRIMARY} />}
-      title={`${t('Looking up DOI')}...`}
-      description={props.citeProps.doi}
-    />
+    <FluentProvider theme={fluentTheme()} style={{backgroundColor: 'transparent'}}>
+      <Field 
+        validationMessage={`${t('Looking up DOI ' + props.citeProps.doi)}...`} 
+        validationState="none"
+      >
+        <ProgressBar 
+          shape="rounded"
+          thickness="large"
+        />
+      </Field>
+    </FluentProvider>
   )
 }
 

@@ -27,6 +27,7 @@ import { editAttrFields } from "./edit-attr";
 import { t } from './translate';
 
 import styles from "./styles.module.scss";
+import { fluentTheme } from "../theme";
 
 
 export function editLink(attrUITools: UIToolsAttr) {
@@ -120,6 +121,7 @@ const EditLinkDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Link")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.value} 
       leftButtons={removeButton}

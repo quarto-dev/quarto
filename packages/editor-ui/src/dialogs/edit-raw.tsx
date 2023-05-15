@@ -22,6 +22,7 @@ import { FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog 
 
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export async function editRawInline(raw: RawFormatProps, outputFormats: string[]): Promise<RawFormatResult | null> {
   return showValueEditorDialog(EditRawDialog, { raw, action: 'edit' }, { outputFormats, editContent: true })
@@ -63,6 +64,7 @@ const EditRawDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Raw Format")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.raw} 
       leftButtons={props.values.raw.format ? removeButton : undefined}

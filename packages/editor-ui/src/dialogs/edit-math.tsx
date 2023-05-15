@@ -18,6 +18,7 @@ import React, { useState } from "react";
 import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 
 export async function editMath(id: string) : Promise<string | null> {
@@ -45,6 +46,7 @@ const EditMathDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Edit Math")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }

@@ -22,6 +22,7 @@ import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-ty
 import { FormikDialog, FormikTextArea, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export interface EditAttrOptions {
   caption?: string;
@@ -112,6 +113,7 @@ const EditAttrDialog: React.FC<{
   return (
     <FormikDialog
       title={props.options.caption || t("Edit Attributes")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.attr} 
       leftButtons={removeButton}

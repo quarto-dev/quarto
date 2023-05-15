@@ -30,6 +30,7 @@ import { InsertTableResult, TableCapabilities } from "editor-types";
 import { ControlGroup, FormGroup } from "@blueprintjs/core";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export async function insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
   const values: InsertTableResult = {
@@ -56,6 +57,7 @@ const InsertTableDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Insert Table")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       validationSchema={yup.object().shape({

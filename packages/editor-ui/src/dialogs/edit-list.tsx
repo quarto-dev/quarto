@@ -22,6 +22,7 @@ import { FormikProps } from "formik";
 import { FormGroup } from "@blueprintjs/core";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export function editList(list: ListProps, capabilities: ListCapabilities): Promise<ListProps | null> {
   return showValueEditorDialog(EditListDialog, list, capabilities);
@@ -43,6 +44,7 @@ const EditListDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Ordered List")}
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }

@@ -28,6 +28,7 @@ import { editAttrFields } from "./edit-attr";
 import { t } from './translate';
 
 import styles from "./styles.module.scss";
+import { fluentTheme } from "../theme";
 
 export function editImage(attrUITools: UIToolsAttr, imageResolver?: EditorUIImageResolver) {
   return async (image: ImageProps, dims: ImageDimensions | null, figure: boolean, editAttributes: boolean): Promise<ImageProps | null> => {
@@ -123,6 +124,7 @@ const EditImageDialog: React.FC<{
   return (
     <FormikDialog
       title={props.options.figure ? t("Figure") : t("Image")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }

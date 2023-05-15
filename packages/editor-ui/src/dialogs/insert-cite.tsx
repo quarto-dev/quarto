@@ -17,7 +17,7 @@ import React, { useEffect, useState } from "react"
 
 import { Card, ControlGroup, FormGroup, HTMLSelect, HTMLTable } from "@blueprintjs/core";
 
-import { FluentProvider, Field, ProgressBar } from "@fluentui/react-components"
+import { Field, ProgressBar } from "@fluentui/react-components"
 
 import { FormikProps, useField, useFormikContext } from "formik";
 
@@ -33,9 +33,8 @@ import { UIToolsCitation } from "editor";
 import { t } from './translate';
 import { alert } from "./alert";
 
-import { fluentTheme } from "../theme";
-
 import styles from './styles.module.scss';
+import { fluentTheme } from "../theme";
 
 const kIdNone = "71896BB2-16CD-4AB5-B523-6372EEB84D5D";
 
@@ -105,6 +104,7 @@ const InsertCiteDialog: React.FC<{
       initialValues={props.values}
       onSubmit={(values) => close(values.id !== kIdNone ? values : undefined)}
       onReset={() => close()}
+      theme={fluentTheme()}
       className={styles.insertCiteDialog}
       validationSchema={
         yup.object().shape({
@@ -247,17 +247,16 @@ const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
 
 
   return (
-    <FluentProvider theme={fluentTheme()} style={{backgroundColor: 'transparent'}}>
-      <Field 
-        validationMessage={`${t('Looking up DOI ' + props.citeProps.doi)}...`} 
-        validationState="none"
-      >
-        <ProgressBar 
-          shape="rounded"
-          thickness="large"
-        />
-      </Field>
-    </FluentProvider>
+    <Field 
+      style={{backgroundColor: 'transparent'}}
+      validationMessage={`${t('Looking up DOI ' + props.citeProps.doi)}...`} 
+      validationState="none"
+    >
+      <ProgressBar 
+        shape="rounded"
+        thickness="large"
+      />
+    </Field>
   )
 }
 

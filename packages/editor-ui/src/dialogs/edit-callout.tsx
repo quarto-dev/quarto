@@ -25,6 +25,8 @@ import { editAttrFields } from "./edit-attr";
 
 import { t } from './translate';
 import styles from "./styles.module.scss";
+import { fluentTheme } from "../theme";
+
 
 
 export function editCallout(attrUITools: UIToolsAttr) {
@@ -111,6 +113,7 @@ const EditCalloutDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Callout")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.values} 
       leftButtons={props.options.removeEnabled ? removeButton : undefined}

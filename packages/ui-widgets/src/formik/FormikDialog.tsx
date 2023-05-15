@@ -24,11 +24,13 @@ import { modalDialogProps } from '../dialog-props';
 import FormikFocusError from './FormikFocusError';
 
 import styles from './Formik.module.scss';
+import { FluentProvider, Theme, webLightTheme } from '@fluentui/react-components';
 
 export interface FormikDialogProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   title?: string;
   isOpen: boolean;
   className?: string;
+  theme?: Theme;
   children?: ((props: FormikProps<Values>) => React.ReactNode) | React.ReactNode;
   okCaption?: string;
   noCancelButton?: boolean;
@@ -63,24 +65,28 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
           onClose={() => formikProps.resetForm()}
           {...modalDialogProps([styles.dialog].concat(props.className || []), {}, true)}
         >
+         
           <Form onSubmit={onSubmit} ref={formRef}>
-            <FormikFocusError formRef={formRef}/>
-            <div className={[Classes.DIALOG_BODY, styles.dialogBody].join(' ')}>
-              {typeof(props.children) === "function" ? props.children(formikProps) : props.children}
-            </div>
-            <div className={[Classes.DIALOG_FOOTER, styles.dialogFooter].join(' ')}>
-              <div className={[Classes.DIALOG_FOOTER_ACTIONS, styles.dialogFooterActions].join(' ')}>
-                <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
-                <div className={styles.dialogFooterActionsRight}>
-                  {!props.noCancelButton 
-                      ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || 'Cancel'}</Button>
-                      : null
-                  }
-                  <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || 'OK'}</Button>
+            <FluentProvider theme={props.theme || webLightTheme}>
+              <FormikFocusError formRef={formRef}/>
+              <div className={[Classes.DIALOG_BODY, styles.dialogBody].join(' ')}>
+                {typeof(props.children) === "function" ? props.children(formikProps) : props.children}
+              </div>
+              <div className={[Classes.DIALOG_FOOTER, styles.dialogFooter].join(' ')}>
+                <div className={[Classes.DIALOG_FOOTER_ACTIONS, styles.dialogFooterActions].join(' ')}>
+                  <div className={styles.dialogFooterActionsLeft}>{props.leftButtons}</div>
+                  <div className={styles.dialogFooterActionsRight}>
+                    {!props.noCancelButton 
+                        ? <Button className={styles.dialogActionButton} type='reset'>{props.cancelCaption || 'Cancel'}</Button>
+                        : null
+                    }
+                    <Button autoFocus={props.focusOKButton} className={styles.dialogActionButton} intent={Intent.PRIMARY} type='submit'>{props.okCaption || 'OK'}</Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </FluentProvider>
           </Form>
+         
        </Dialog>
       }}
      

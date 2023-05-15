@@ -28,6 +28,7 @@ import { editAttrFields } from "./edit-attr";
 import { t } from "./translate";
 
 import styles from "./styles.module.scss";
+import { fluentTheme } from "../theme";
 
 
 export function insertTabset(attrUITools: UIToolsAttr) {
@@ -119,6 +120,7 @@ const InsertTabsetDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Insert Tabset")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }

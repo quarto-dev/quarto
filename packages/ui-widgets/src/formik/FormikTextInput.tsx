@@ -17,13 +17,13 @@ import React, { useEffect, useRef } from 'react';
 
 import { useField } from 'formik';
 
-import { InputGroup, InputGroupProps2, Intent } from "@blueprintjs/core";
+import { Input, InputProps } from "@fluentui/react-components"
 
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
-const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (props) => {
+const FormikTextInput: React.FC<FormikFormGroupProps & InputProps> = (props) => {
   const { name, label, labelInfo, helperText, ...inputProps } = props;
-  const [ field, meta ] = useField(name);
+  const [ field ] = useField(name);
 
   const autoFocusRef = useRef<HTMLInputElement>(null);
 
@@ -44,17 +44,15 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (prop
     >
       {({ onFocus, onBlur }) => {
         return (
-          <InputGroup
-            inputRef={autoFocusRef}
-            autoComplete={"off"}
-            intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
+          <Input
+            input={{ ref: autoFocusRef }}
+            autoComplete='off'
             type="text"
-            fill={true}
             {...field}
             {...inputProps}
             onFocus={onFocus}
             onBlur={onBlur}
-          /> 
+          />
         );
       }}
     </FormikFormGroup>

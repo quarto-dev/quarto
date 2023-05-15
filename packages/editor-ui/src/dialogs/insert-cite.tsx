@@ -172,7 +172,7 @@ const SelectBibliography: React.FC<InsertCiteDialogOptions> = (props) => {
 
     return (
       <ControlGroup vertical={false} fill={true}>
-        <FormikTextInput name="bibliographyFile" label={t('Create bibliography file')} fill={true} />
+        <FormikTextInput name="bibliographyFile" label={t('Create bibliography file')} />
         <FormGroup label={t('Format')}>
           <HTMLSelect {...typeField} multiple={undefined} fill={true} 
             onChange={event => {

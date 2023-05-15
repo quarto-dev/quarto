@@ -184,7 +184,6 @@ const ImageField: React.FC<{options: EditImageDialogOptions }> = props => {
   const imageInput = 
     <FormikTextInput 
       name="src" 
-      fill={true}
       label={t("Image")} 
       labelInfo={t("(File or URL)")} 
       autoFocus={true}

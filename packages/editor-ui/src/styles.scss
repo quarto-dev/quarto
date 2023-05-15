@@ -7,6 +7,11 @@
   background-color: transparent !important;
 }
 
+// no outline for fluent inputs
+.fui-Input input[type="text"]:focus {
+  outline: none;
+}
+
 // eliminate bevel border for inputs
 .bp4-input,
 .bp4-input.bp4-active  {

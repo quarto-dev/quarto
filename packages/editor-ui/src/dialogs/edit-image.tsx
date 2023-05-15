@@ -156,7 +156,7 @@ const ImagePanel: React.FC<{options: EditImageDialogOptions }> = props => {
      
       {formik.values.align !== undefined
         ? <FormikRadioGroup 
-            name={"align"} label={"Alignment:"} inline={true} 
+            name={"align"} label={"Alignment:"} layout="horizontal" 
             options={["default", "left", "center", "right"].map(value => { 
               return {
                 value,

@@ -17,13 +17,14 @@ import React from 'react';
 
 import { useField } from 'formik';
 
-import { TextArea, TextAreaProps, Intent } from "@blueprintjs/core";
+import { Textarea, TextareaProps } from "@fluentui/react-components";
 
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
-const FormikTextArea: React.FC<FormikFormGroupProps & TextAreaProps> = (props) => {
+const FormikTextArea: React.FC<FormikFormGroupProps & TextareaProps> = (props) => {
   const { name, label, labelInfo, helperText, ...textAreaProps } = props;
-  const [ field, meta ] = useField(name);
+  const { rows, cols, wrap, ...fluentTextAreaProps } = textAreaProps;
+  const [ field ] = useField(name);
     return (
       <FormikFormGroup 
         name={name}
@@ -33,12 +34,11 @@ const FormikTextArea: React.FC<FormikFormGroupProps & TextAreaProps> = (props) =
       >
         {({ onFocus, onBlur }) => {
           return (
-            <TextArea
+            <Textarea
               autoComplete={"off"}
-              intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-              fill={true}
               {...field}
-              {...textAreaProps}
+              {...fluentTextAreaProps}
+              textarea={{ rows, cols, wrap }}
               onFocus={onFocus}
               onBlur={onBlur}
             /> 

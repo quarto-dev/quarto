@@ -9,7 +9,8 @@
 
 // no outline for fluent inputs
 .fui-Input input[type="text"]:focus,
-.fui-Input input[type="number"]:focus {
+.fui-Input input[type="number"]:focus,
+.fui-Textarea textarea:focus {
   outline: none;
 }
 

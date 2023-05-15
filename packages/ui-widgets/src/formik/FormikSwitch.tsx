@@ -15,7 +15,7 @@
 
 import React from "react";
 
-import { Switch, SwitchProps } from "@blueprintjs/core";
+import { Switch, SwitchProps } from "@fluentui/react-components";
 
 import { useField } from "formik";
 

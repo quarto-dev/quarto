@@ -13,17 +13,17 @@
  *
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, ChangeEvent } from 'react';
 
 import { useField } from 'formik';
 
-import { Intent, NumericInput, NumericInputProps } from "@blueprintjs/core";
+import { Input, InputOnChangeData, InputProps } from "@fluentui/react-components"
 
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
-const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (props) => {
+const FormikNumericInput: React.FC<FormikFormGroupProps & InputProps> = (props) => {
   const { label, labelInfo, helperText, ...inputProps } = props;
-  const [ field, meta, helpers ] = useField(props.name);
+  const [ field, , helpers ] = useField(props.name);
   const { name, value } = field;
   const autoFocusRef = useRef<HTMLInputElement>(null);
 
@@ -44,16 +44,13 @@ const FormikNumericInput: React.FC<FormikFormGroupProps & NumericInputProps> = (
     >
       {({ onFocus, onBlur }) => {
         return (
-          <NumericInput
-            inputRef={autoFocusRef}
+          <Input 
+            input={{ ref: autoFocusRef }}
+            type="number"
             defaultValue={value}
-            onValueChange={(_value: number, strValue: string) => {
-              helpers.setValue(Number.parseFloat(strValue) || 0);
+            onChange={(_ev: ChangeEvent<HTMLInputElement>, data: InputOnChangeData) => {
+              helpers.setValue(Number.parseFloat(data.value) || 0);
             }}
-            intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-            selectAllOnFocus={true}
-            selectAllOnIncrement={true}
-            fill={true}
             {...inputProps}
             onFocus={onFocus}
             onBlur={onBlur}

@@ -61,8 +61,8 @@ const InsertTableDialog: React.FC<{
       isOpen={isOpen} 
       initialValues={props.values} 
       validationSchema={yup.object().shape({
-        rows: yup.number().min(1).max(1000),
-        cols: yup.number().min(1).max(1000),
+        rows: yup.number().positive(t('Please enter a number')),
+        cols: yup.number().positive(t('Please enter a number')),
       })}
       onSubmit={(values) => close(values) }
       onReset={() => close() }

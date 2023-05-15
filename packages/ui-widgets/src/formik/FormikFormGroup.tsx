@@ -15,10 +15,9 @@
 
 import React, { ReactNode, useState } from "react";
 
-import { FormGroup, Intent, PopoverPosition } from "@blueprintjs/core";
-import { Tooltip2 } from "@blueprintjs/popover2";
-import { useField } from "formik";
+import { Field } from "@fluentui/react-components";
 
+import { useField } from "formik";
 
 export interface FormikFormGroupFocusHandlers {
   onFocus: React.FocusEventHandler;
@@ -37,36 +36,26 @@ export interface FormGroupChildren {
   children: (focusHandlers: FormikFormGroupFocusHandlers) => ReactNode;
 } 
 
-import styles from './Formik.module.scss';
 
 const FormikFormGroup: React.FC<FormikFormGroupProps & FormGroupChildren> = props => {
   const [ field, meta ] = useField(props.name);
-  const [inputFocused, setInputFocused] = useState(false);
+  // NOTE: we currently don't use the focused state (we used to use it to show/hide a
+  // tooltip w/ the validation message however the message is now below the input).
+  // leave this logic + the onFocus/onBlur callbacks in case we want any behavior or 
+  // appearance to dervie from focus state in the future
+  const [ , setInputFocused] = useState(false);
   const onFocus = () => setInputFocused(true);
   const onBlur = (ev: unknown) => { setInputFocused(false); field.onBlur(ev)};
 
   return (
-    <FormGroup
-      label={props.label}
-      className={styles.validatedFormGroup}
-      intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-      labelInfo={props.labelInfo}
-      helperText={props.helperText}
+    <Field
+      label={props.label + (props.labelInfo ? ` ${props.labelInfo}` : "")}
+      validationState={meta.touched && meta.error ? "error" : "none" }
+      validationMessage={meta.error}
+      hint={!meta.error ? (props.helperText || <div>&nbsp;</div>) : undefined}
     >
       {props.children({ onFocus, onBlur })}
-      <Tooltip2
-        className={styles.tooltip}
-        content={meta.error}
-        disabled={!meta.error}
-        isOpen={meta.touched && !!meta.error && inputFocused}
-        placement={PopoverPosition.BOTTOM}
-        popoverClassName={styles.validationPopup}
-        enforceFocus={false}
-        canEscapeKeyClose={false}
-      >
-        <div className={styles.tooltip} tabIndex={-1} />
-      </Tooltip2> 
-    </FormGroup>
+    </Field>
   );
 }
 

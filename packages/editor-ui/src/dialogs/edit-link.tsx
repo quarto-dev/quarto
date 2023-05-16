@@ -13,9 +13,10 @@
  *
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-import { Button, Classes, ControlGroup, FormGroup, HTMLSelect, InputGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
+import { Button, Select, TabList, Tab, TabValue, SelectTabEvent, SelectTabData, Field, Input, makeStyles } from "@fluentui/react-components"
+
 import { AttrEditInput, LinkCapabilities, LinkEditResult, LinkProps, LinkTargets, LinkType, UIToolsAttr } from "editor-types";
 
 import {  FormikProps, useField, useFormikContext } from "formik";
@@ -78,7 +79,10 @@ const EditLinkDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const [selectedTabId, setSelectedTabId] = useState<TabId>("link");
+  const [selectedTab, setSelectedTab] = useState<TabValue>("link");
+  const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
+    setSelectedTab(data.value);
+  };
 
   const close = (values?: EditLinkDialogValues) => {
     setIsOpen(false);
@@ -132,17 +136,22 @@ const EditLinkDialog: React.FC<{
           const type = asLinkType(formikProps.values.type);
           if (props.options.capabilities.attributes) {
             return (
-              <Tabs
-                id="edit-link" 
-                selectedTabId={selectedTabId} 
-                onChange={tabId => setSelectedTabId(tabId)} 
+              <>
+              <TabList
+              selectedValue={selectedTab} 
+              onTabSelect={onTabSelect}
               >
-                <Tab id="link" title={t("Link")} panel={<LinkPanel options={props.options}/>}/>
+                <Tab id="link" value="link">{t("Link")}</Tab>
                 {type !== LinkType.Heading 
-                  ? <Tab id="attributes" title={t("Attributes")} panel={attributesPanel} /> 
+                  ? <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
                   : null
                 }
-              </Tabs>
+              </TabList>
+              <div>
+              {selectedTab === "link" && <LinkPanel options={props.options}/>}
+              {selectedTab === "attributes" && attributesPanel}
+            </div>
+              </>
             )
           } else {
             return  <LinkPanel options={props.options}/>;
@@ -183,11 +192,21 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
 
   const type = asLinkType(typeField.value);
 
+  const autoFocusRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    setTimeout(() => {
+      autoFocusRef.current?.focus();
+    }, 0);
+  }, []);
+  
+
+  const classes = useStyles();
+
   return (
     <div className={styles.editAttributesPanel}>
-      <FormGroup label={t("Link to")}>
-        <ControlGroup fill={true}>
-          <HTMLSelect 
+      <Field label={t("Link to")}>
+        <div className={classes.linkTo}>
+          <Select 
             {...typeField}
             onChange={ev => {
               typeField.onChange(ev);
@@ -195,7 +214,8 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
               formik.setFieldValue("href", defaultHRefForType(type));
             }}
             multiple={undefined} 
-            options={[
+          >
+            {[
               { label: t('URL'), value: LinkType.URL },
               ...(props.options.capabilities.headings && (props.options.targets.headings.length > 0)
                 ? [{ label: t('Heading'), value: LinkType.Heading }]
@@ -203,21 +223,37 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
               ...(props.options.targets.ids.length > 0
                 ? [{ label: t('ID'), value: LinkType.ID }]
                 : [])
-            ]}
-            className={Classes.FIXED}
-          />
+            ].map(option => {
+              return (
+                <option value={option.value}>
+                  {option.label || option.value}
+                </option>);
+            })}
+          </Select>
           {type === LinkType.URL ? (
-            <InputGroup {...hrefField} fill={true} autoFocus={true}/>
-          ) : (
-            <HTMLSelect 
+            <Input 
+              type="text"
+              input={{ ref: autoFocusRef }} 
               {...hrefField} 
-              multiple={undefined} 
-              fill={true}
-              options={suggestionsForType(type)}
+              autoFocus={true} 
+              autoComplete="off"
             />
+          ) : (
+            <Select 
+              className={classes.linkToSelect}
+              {...hrefField} 
+              multiple={undefined}
+            >
+              {suggestionsForType(type).map(option => {
+                return (
+                  <option value={option.value}>
+                    {option.value}
+                  </option>);
+              })}
+            </Select>
           )}
-        </ControlGroup>
-      </FormGroup>
+        </div>
+      </Field>
       {type !== LinkType.Heading ? <>
          <FormikTextInput name="text" label={t("Text")} />
          <FormikTextInput name="title" label={t("Title/Tooltip")} /> </>
@@ -232,3 +268,19 @@ const asLinkType = (linkType: LinkType) : LinkType  => {
   return typeof(linkType) === "string" ? parseInt(linkType, 10) : linkType;
 }
 
+
+
+const useStyles = makeStyles({
+  linkTo: {
+    marginBottom: '10px',
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '8px',
+    "& .fui-Input": {
+      flexGrow: 1
+    }
+  },
+  linkToSelect: {
+    flexGrow: 1
+  }
+})

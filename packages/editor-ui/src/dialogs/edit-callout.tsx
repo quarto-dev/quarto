@@ -86,7 +86,7 @@ const EditCalloutDialog: React.FC<{
       {t("Unwrap Div")}
     </Button>;
 
-const [selectedTab, setSelectedTab] = useState<TabValue>("callout");
+  const [selectedTab, setSelectedTab] = useState<TabValue>("callout");
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
     setSelectedTab(data.value);
   };

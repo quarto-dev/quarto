@@ -14,6 +14,13 @@
   outline: none;
 }
 
+// offset tabset inside forms
+.formik-Form .fui-TabList {
+  margin-top: -10px;
+  margin-left: -10px;
+  margin-bottom: 15px;
+}
+
 // eliminate bevel border for inputs
 .bp4-input,
 .bp4-input.bp4-active  {

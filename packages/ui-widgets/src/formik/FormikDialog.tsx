@@ -66,7 +66,7 @@ function FormikDialog<Values extends FormikValues = FormikValues>(props: FormikD
           {...modalDialogProps([styles.dialog].concat(props.className || []), {}, true)}
         >
          
-          <Form onSubmit={onSubmit} ref={formRef}>
+          <Form onSubmit={onSubmit} ref={formRef} className="formik-Form">
             <FluentProvider theme={props.theme || webLightTheme}>
               <FormikFocusError formRef={formRef}/>
               <div className={[Classes.DIALOG_BODY, styles.dialogBody].join(' ')}>

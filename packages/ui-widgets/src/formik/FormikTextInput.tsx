@@ -45,9 +45,9 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputProps> = (props) => 
       {({ onFocus, onBlur }) => {
         return (
           <Input
-            input={{ ref: autoFocusRef }}
-            autoComplete='off'
+            input={{ ref: autoFocusRef, autoComplete: 'off' }}
             type="text"
+            autoComplete='off'
             {...field}
             {...inputProps}
             onFocus={onFocus}

@@ -19,10 +19,10 @@ import { ListCapabilities, ListNumberDelim, ListNumberStyle, ListProps, ListType
 
 import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikNumericInput, showValueEditorDialog } from "ui-widgets";
 import { FormikProps } from "formik";
-import { FormGroup } from "@blueprintjs/core";
 
 import { t } from './translate';
 import { fluentTheme } from "../theme";
+import { Field } from "@fluentui/react-components";
 
 export function editList(list: ListProps, capabilities: ListCapabilities): Promise<ListProps | null> {
   return showValueEditorDialog(EditListDialog, list, capabilities);
@@ -55,9 +55,9 @@ const EditListDialog: React.FC<{
           <FormikHTMLSelect name="type" label={t("List type")} 
             options={Object.values(ListType)} 
           />
-          <FormGroup>
+          <Field>
             <FormikCheckbox name="tight" label={t("Tight layout (less vertical space between items)")} />
-          </FormGroup>
+          </Field>
           {formikProps.values.type === ListType.Ordered ?
             <>
             <FormikNumericInput name="order" label={t("Starting number")} />

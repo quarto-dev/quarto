@@ -19,10 +19,6 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@blueprintjs/core": "^4.13.0",
-    "@blueprintjs/icons": "^4.10.1",
-    "@blueprintjs/popover2": "^1.10.2",
-    "@blueprintjs/select": "^4.8.12",
     "@fluentui/react-components": "^9.19.1",
     "core": "*",
     "core-browser": "*",

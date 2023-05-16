@@ -351,7 +351,7 @@
     react-transition-group "^2.9.0"
     tslib "~2.3.1"
 
-"@blueprintjs/core@^4.12.0", "@blueprintjs/core@^4.13.0", "@blueprintjs/core@^4.14.1":
+"@blueprintjs/core@^4.12.0", "@blueprintjs/core@^4.14.1":
   version "4.14.1"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-4.14.1.tgz#f2a53b319d3bd715716b064d4a1ad6b612a5ef32"
   integrity sha512-0q1+KSLPpLn/CR+zsoATyG01KPbByuIHA2xfJk63Mr1uRzeX3yjyRvWH6lkM+CeKrtTbGvcJM2XNKBRqzoxEDA==
@@ -385,7 +385,7 @@
     classnames "^2.3.1"
     tslib "~2.3.1"
 
-"@blueprintjs/popover2@^1.10.1", "@blueprintjs/popover2@^1.10.2", "@blueprintjs/popover2@^1.11.1":
+"@blueprintjs/popover2@^1.10.1", "@blueprintjs/popover2@^1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-1.11.1.tgz#80573739190401ee2e1b1351b5cf5fdeb6a0380c"
   integrity sha512-BlutyaLSYz7t6TeHwzQ9QBdrOuAdIqdp+Hqq/3QJY4SR3o5Dk80OFaiVfSFfwRs6Kr7FOUqmuaZ+pe2eklTGMg==
@@ -407,7 +407,7 @@
     classnames "^2.2"
     tslib "~2.3.1"
 
-"@blueprintjs/select@^4.8.11", "@blueprintjs/select@^4.8.12":
+"@blueprintjs/select@^4.8.11":
   version "4.8.14"
   resolved "https://registry.yarnpkg.com/@blueprintjs/select/-/select-4.8.14.tgz#e042bfe5b2110c3d137a18a2036a5b9e1b6bfd15"
   integrity sha512-DgWTP2X9eCd4IL8EWr5ITGx8dDAxqPho+nE3CbvQbBwKR9yIgTT587VTgZDOklgsA0tPpFbVAaMu5VvixiznGQ==

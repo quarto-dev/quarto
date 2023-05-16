@@ -21,12 +21,13 @@ import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, Pando
 
 import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
+import { fluentTheme } from "../theme";
+
 import { editAttrFields } from "./edit-attr";
 
 import { t } from './translate';
-import styles from "./styles.module.scss";
-import { fluentTheme } from "../theme";
 
+import styles from "./styles.module.scss";
 
 
 export function editCallout(attrUITools: UIToolsAttr) {

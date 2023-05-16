@@ -104,7 +104,7 @@ const InsertTabsetDialog: React.FC<{
     );
   };
 
-  const TabsPanel = React.memo(() => 
+  const tabsPanel = 
     <div className={styles.editAttributesPanel}>
       <Field label={t("Tab names:")}>
         <TabNameInput tab="tab1" autoFocus={true} />
@@ -114,14 +114,12 @@ const InsertTabsetDialog: React.FC<{
         <TabNameInput tab="tab5" optional={true} />
         <TabNameInput tab="tab6" optional={true} />
       </Field>
-    </div>
-  );
+    </div>;
 
-  const AttributesPanel = React.memo(() =>
+  const attributesPanel = 
     <div className={styles.editAttributesPanel}>
       {editAttrFields()}
-    </div>
-  );
+    </div>;
 
   return (
     <FormikDialog
@@ -141,8 +139,8 @@ const InsertTabsetDialog: React.FC<{
         <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
       </TabList>
       <div>
-        {selectedTab === "tabs" && <TabsPanel />}
-        {selectedTab === "attributes" && <AttributesPanel />}
+        {selectedTab === "tabs" && tabsPanel}
+        {selectedTab === "attributes" && attributesPanel}
       </div>
     </FormikDialog>
   )

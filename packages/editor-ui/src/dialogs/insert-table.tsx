@@ -112,5 +112,4 @@ const useStyles = makeStyles({
       width: '50%'
     }
   },
-  
 })

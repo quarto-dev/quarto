@@ -14,7 +14,7 @@
  */
 
 import React, { useState } from "react";
-import { Button, OptionProps } from "@blueprintjs/core";
+import { Button } from "@fluentui/react-components";
 
 import { RawFormatProps, RawFormatResult } from "editor-types";
 
@@ -56,7 +56,7 @@ const EditRawDialog: React.FC<{
       {t("Remove Format")}
     </Button>;
 
-  const formats : OptionProps[] = props.options.outputFormats.map(value => ({ value }));
+  const formats = props.options.outputFormats.map(value => ({ value, label: undefined as string | undefined }));
   if (!props.values.raw.format) {
     formats.unshift({ value: '', label: "(Choose Format)" });
   }

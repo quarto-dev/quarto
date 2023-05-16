@@ -17,7 +17,10 @@ import React, { useState } from "react";
 
 import { useFormikContext } from "formik";
 
-import { Button, Classes, ControlGroup, FormGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
+import { TabList, Tab, TabValue, SelectTabEvent, SelectTabData } from "@fluentui/react-components";
+
+import { Button } from "@fluentui/react-components"
+
 
 import { capitalizeWord } from "core"
 import { FormikDialog, FormikRadioGroup, FormikTextInput, showValueEditorDialog} from "ui-widgets";
@@ -100,7 +103,10 @@ const EditImageDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const [selectedTabId, setSelectedTabId] = useState<TabId>("image");
+  const [selectedTab, setSelectedTab] = useState<TabValue>("image");
+  const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
+    setSelectedTab(data.value);
+  };
 
   const close = (values?: EditImageDialogValues) => {
     setIsOpen(false);
@@ -114,6 +120,7 @@ const EditImageDialog: React.FC<{
 
   const advancedPanel = 
     <div className={styles.editAttributesPanel}>
+      <FormikTextInput name="linkTo" label={t("Link to")} placeholder={t("(Optional)")}/>
       {props.values.env 
         ? <FormikTextInput name="env" label={t("LaTeX environment")} />
         : null
@@ -130,18 +137,24 @@ const EditImageDialog: React.FC<{
       onSubmit={(values) => close(values) }
       onReset={() => close() }
     >
-      <Tabs
+      <TabList
         id="edit-callout" 
-        selectedTabId={selectedTabId} 
-        onChange={tabId => setSelectedTabId(tabId)}
+        selectedValue={selectedTab} 
+        onTabSelect={onTabSelect}
       >
-        <Tab id="image" title={t("Image")} panel={<ImagePanel options={props.options}/>} />
+        <Tab id="image" value="image">{t("Image")}</Tab>
         {props.options.editAttributes 
-          ? <Tab id="attributes" title={t("Attributes")} panel={attributesPanel} /> 
+          ? <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
           : null
         }
-        <Tab id="advanced" title={t("Advanced")} panel={advancedPanel}/>
-      </Tabs>
+        <Tab id="advanced" value="advanced">{t("Advanced")}</Tab>
+      </TabList>
+      <div>
+        {selectedTab === "image" && <ImagePanel options={props.options}/>}
+        {selectedTab === "attributes" && attributesPanel}
+        {selectedTab === "advanced" && advancedPanel}
+
+      </div>
     </FormikDialog>
   )
 }
@@ -171,7 +184,6 @@ const ImagePanel: React.FC<{options: EditImageDialogOptions }> = props => {
         ? <FormikTextInput name="alt" label={t("Alternative text")} placeholder={t("(Optional)")}/>
         : null
       }
-      <FormikTextInput name="linkTo" label={t("Link to")} placeholder={t("(Optional)")}/>
     </div>
   );
 }
@@ -180,6 +192,17 @@ const ImageField: React.FC<{options: EditImageDialogOptions }> = props => {
 
   const formik = useFormikContext();
 
+  // button
+  const button = 
+    <Button onClick={async () => {
+      const image = await props.options.imageResolver?.selectImage?.();
+        if (image) {
+          formik.setFieldValue("src", image);
+        }
+      }}> 
+      {t("Browse...")}
+    </Button>;
+
   // image input 
   const imageInput = 
     <FormikTextInput 
@@ -187,24 +210,10 @@ const ImageField: React.FC<{options: EditImageDialogOptions }> = props => {
       label={t("Image")} 
       labelInfo={t("(File or URL)")} 
       autoFocus={true}
+      button={props.options.imageResolver?.selectImage ? button : undefined}
     />;
 
   // pair with browse button if we have a selectImage function
-  return props.options.imageResolver?.selectImage 
-    ? <ControlGroup vertical={false} fill={true}>
-        {imageInput}
-        <FormGroup label={<span>&nbsp;</span>} className={Classes.FIXED}>
-          <Button onClick={async () => {
-            const image = await props.options.imageResolver?.selectImage?.();
-            if (image) {
-              formik.setFieldValue("src", image);
-            }
-          }}> 
-            {t("Browse...")}
-          </Button>
-        </FormGroup>
-        
-      </ControlGroup>
-    : imageInput;
-
+  return imageInput;
 };
+

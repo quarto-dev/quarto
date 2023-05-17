@@ -107,7 +107,6 @@ const InsertCiteDialog: React.FC<{
       onSubmit={(values) => close(values.id !== kIdNone ? values : undefined)}
       onReset={() => close()}
       theme={fluentTheme()}
-      className={styles.insertCiteDialog}
       validationSchema={
         yup.object().shape({
           id: yup.string()

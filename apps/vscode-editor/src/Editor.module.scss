@@ -38,7 +38,7 @@ $editorToolbarHeight: 32px;
 
 .editorFrame {
   position: absolute;
-  top: calc(#{$editorToolbarHeight} + 1px);
+  top: calc(#{$editorToolbarHeight} + 6px);
   left: 0;
   right: 0;
   bottom: 0;

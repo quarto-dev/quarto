@@ -13,8 +13,6 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
-
 @import 'editor-ui/src/variables.scss';
  
  .workbench {
@@ -23,7 +21,6 @@
    left: 0;
    right: 0;
    bottom: 0;
-   background-color: $light-gray5;
  }
  
  .workbench .navbar {
@@ -33,7 +30,7 @@
 
  .workbench .workspace {
    position: fixed;
-   top: calc(#{$navbarHeight} + #{$toolbarHeight});
+   top: calc(#{$navbarHeight} + #{$toolbarHeight} + 1px);
    left: 0;
    right: 0;
    bottom: 0;

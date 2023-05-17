@@ -15,13 +15,14 @@
 
 import React from 'react';
 
-import { Button, Intent, NonIdealState } from "@blueprintjs/core";
-import { IconName, IconNames } from "@blueprintjs/icons";
+import { Button, tokens } from "@fluentui/react-components"
+import { CodeRegular } from "@fluentui/react-icons"
+
+import { EditorUIContext } from 'editor';
+import { NonIdealState } from 'ui-widgets';
+
 import { EditorError } from '../store';
 import { t } from '../i18n';
-import { EditorUIContext } from 'editor';
-
-
 export interface EditorLoadFailedProps {
   error: EditorError;
   uiContext: EditorUIContext
@@ -30,14 +31,22 @@ export interface EditorLoadFailedProps {
 export const EditorLoadFailed:  React.FC<EditorLoadFailedProps> = (props) => {
 
   const editAction = props.uiContext.reopenInSourceMode 
-    ? <Button outlined={true} text={t('return_to_source_mode')} 
-              icon={IconNames.Code} intent={Intent.PRIMARY} 
-              onClick={() => props.uiContext.reopenInSourceMode!()}/>
+    ? <Button 
+        icon={<CodeRegular />}
+        style={{ 
+          color: tokens.colorPaletteBlueBorderActive, 
+          borderColor: tokens.colorPaletteBlueBorderActive 
+        }}
+        appearance="outline"
+        onClick={() => props.uiContext.reopenInSourceMode!()}
+      >
+        {t('return_to_source_mode')} 
+      </Button>
     : undefined;
 
   return (
     <NonIdealState
-      icon={(props.error.icon || IconNames.Error) as IconName}
+      icon={props.error.icon}
       title={props.error.title}
       action={editAction}
     >

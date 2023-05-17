@@ -15,7 +15,8 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { FormGroup, InputGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
+
+import { TabList, Tab, SelectTabEvent, SelectTabData, TabValue, Input, Field, makeStyles } from "@fluentui/react-components"
 
 import { useField } from "formik";
 
@@ -23,12 +24,13 @@ import { AttrEditInput, InsertTabsetResult, PandocAttr, UIToolsAttr } from "edit
 
 import { FormikDialog, showValueEditorDialog } from "ui-widgets";
 
+import { fluentTheme } from "../theme";
+
 import { editAttrFields } from "./edit-attr";
 
 import { t } from "./translate";
 
 import styles from "./styles.module.scss";
-
 
 export function insertTabset(attrUITools: UIToolsAttr) {
   return async (): Promise<InsertTabsetResult | null> => {
@@ -65,9 +67,14 @@ const InsertTabsetDialog: React.FC<{
   onClosed: (values?: InsertTabsetDialogValues) => void }
 > = props => {
 
+  const classes = useStyles();
+
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const [selectedTabId, setSelectedTabId] = useState<TabId>("tabs");
+  const [selectedTab, setSelectedTab] = useState<TabValue>("tabs");
+  const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
+    setSelectedTab(data.value);
+  };
 
   const close = (values?: InsertTabsetDialogValues) => {
     setIsOpen(false);
@@ -87,29 +94,27 @@ const InsertTabsetDialog: React.FC<{
     }
 
     return (
-      <InputGroup 
-        inputRef={autoFocusRef}
+      <Input
+        type="text"
+        className={classes.tabName}
+        input={{ ref: autoFocusRef, autoComplete: 'off', autoFocus: props.autoFocus }}
+        placeholder={props.optional ? t("(Optional)") : undefined} 
         {...field}
-        fill={true} 
-        autoComplete={"off"}
-        className={styles.tabsetNameInput} 
-        autoFocus={props.autoFocus}
-        placeholder={props.optional ? t("(Optional)") : undefined} />
+      />
     );
   };
 
-  const TabsPanel : React.FC = () => 
+  const tabsPanel = 
     <div className={styles.editAttributesPanel}>
-      <FormGroup label={t("Tab names:")}>
+      <Field label={t("Tab names:")}>
         <TabNameInput tab="tab1" autoFocus={true} />
         <TabNameInput tab="tab2" />
         <TabNameInput tab="tab3" optional={true} />
         <TabNameInput tab="tab4" optional={true} />
         <TabNameInput tab="tab5" optional={true} />
         <TabNameInput tab="tab6" optional={true} />
-      </FormGroup>
-    </div>
-  ;
+      </Field>
+    </div>;
 
   const attributesPanel = 
     <div className={styles.editAttributesPanel}>
@@ -119,20 +124,30 @@ const InsertTabsetDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Insert Tabset")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }
       onReset={() => close() }
     >
-      <Tabs
+      <TabList
         id="insert-tabset" 
-        selectedTabId={selectedTabId} 
-        onChange={tabId => setSelectedTabId(tabId)}
+        selectedValue={selectedTab} 
+        onTabSelect={onTabSelect}
       >
-        <Tab id="tabs" title={t("Tabs")} panel={<TabsPanel />} />
-        <Tab id="attributes" title={t("Attributes")} panel={attributesPanel} /> 
-      </Tabs>
-      
+        <Tab id="tabs" value="tabs">{t("Tabs")}</Tab>
+        <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
+      </TabList>
+      <div>
+        {selectedTab === "tabs" && tabsPanel}
+        {selectedTab === "attributes" && attributesPanel}
+      </div>
     </FormikDialog>
   )
 }
+
+const useStyles = makeStyles({
+  tabName: {
+    marginBottom: '10px'
+  },
+})

@@ -17,9 +17,11 @@ import React, { useMemo, useEffect, useContext, useCallback, useState } from 're
 
 import * as uuid from 'uuid';
 
-import { HotkeysContext, useHotkeys } from "@blueprintjs/core";
+import { FluentProvider } from '@fluentui/react-components';
 
 import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
+
+import { useHotkeys } from "ui-widgets";
 
 import { 
   commandHotkeys, 
@@ -27,12 +29,12 @@ import {
   Commands, 
   Editor,  
   EditorUIStore,  
-  keyboardShortcutsCommand, 
+  setEditorTheme, 
+  fluentTheme,
   showContextMenu
 } from 'editor-ui';
 
-import { EditorMenuItem, EditorOperations, EditorUIContext, HostContext, XRef } from 'editor';
-
+import { EditorMenuItem, EditorOperations, EditorTheme, EditorUIContext, HostContext, XRef } from 'editor';
 
 import { editorHostCommands, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
 import EditorToolbar from './EditorToolbar';
@@ -51,18 +53,9 @@ export interface EditorContainerProps {
 const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   
   // register keyboard shortcuts and get handlers
-  const showHotkeysKeyCombo = 'Ctrl+Alt+K';
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
   const hotkeys = useMemo(() => { return commandHotkeys(cmState.commands); }, [cmState.commands]);
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: showHotkeysKeyCombo });
-
-  // register show keyboard shortcuts command
-  const [, hkDispatch] = useContext(HotkeysContext);
-  useEffect(() => {
-    cmDispatch({ type: "ADD_COMMANDS", payload: [
-      keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
-    ]});
-  }, []); 
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, {});
 
   // register host oriented commands (e.g. save)
   useEffect(() => {
@@ -71,10 +64,20 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
  
   // one time creation of editorUIContext
   const [uiContext] = useState(() => new HostEditorUIContext(props.context, props.host));
- 
+
+  // setup state for theme
+  const [activeFluentTheme, setActiveFluentTheme] = useState(fluentTheme());
+  const applyTheme = useCallback((theme: EditorTheme) => {
+    // set editor theme
+    setEditorTheme(theme);
+
+    // apply fluent theme
+    setActiveFluentTheme(fluentTheme());
+  }, []);
+
   // pair editor w/ host on on init
   const onEditorInit = useCallback((editor: EditorOperations) => {
-    syncEditorToHost(editor, uiContext, props.host, props.store);
+    syncEditorToHost(editor, uiContext, props.host, props.store, applyTheme);
     return Promise.resolve();
   }, []);
 
@@ -97,25 +100,28 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   }
   
   return (
-    <div 
-      className={styles.editorParent} 
-      onKeyDown={keyboardEventHandler(handleKeyDown)} 
-      onKeyUp={keyboardEventHandler(handleKeyUp)}
-    >
-      <EditorToolbar/>
-      <Editor
-        className={styles.editorFrame} 
-        request={props.request}
-        uiContext={uiContext}
-        display={editorDisplay(props.host)}
-        onEditorInit={onEditorInit}
-        options={{
-          cannotEditUntitled: true,
-          defaultCellTypePython: true,
-          initialTheme: editorThemeFromVSCode() 
-        }}
-      />
-    </div>
+    <FluentProvider theme={activeFluentTheme}>
+      <div 
+        className={styles.editorParent} 
+        onKeyDown={keyboardEventHandler(handleKeyDown)} 
+        onKeyUp={keyboardEventHandler(handleKeyUp)}
+      >
+        <EditorToolbar/>
+        <Editor
+          className={styles.editorFrame} 
+          request={props.request}
+          uiContext={uiContext}
+          display={editorDisplay(props.host)}
+          onEditorInit={onEditorInit}
+          options={{
+            cannotEditUntitled: true,
+            defaultCellTypePython: true,
+            initialTheme: editorThemeFromVSCode() 
+          }}
+        />
+      </div>
+    </FluentProvider>
+   
   );
 }
 

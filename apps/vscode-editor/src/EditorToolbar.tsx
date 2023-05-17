@@ -24,12 +24,12 @@ import {
   CommandMenuItems,
   Toolbar,
   ToolbarDivider,
-  ToolbarMenu,
   CommandToolbarButton,
   CommandToolbarMenu,
   WithCommand,
   t,
-  editorLoaded
+  editorLoaded,
+  Menu
 } from 'editor-ui';
 
 import styles from './Editor.module.scss';
@@ -45,7 +45,7 @@ const EditorToolbar: React.FC = () => {
     return (
       <Toolbar className={[styles.editorToolbar, 'pm-pane-border-color', 'pm-toolbar-background-color', 'pm-toolbar-text-color'].join(' ')}>
         <CommandToolbarMenu
-          className={styles.toolbarBlockFormatMenu}
+          minWidth={105}
           commands={[
             CommandId.Paragraph,
             '---',
@@ -70,19 +70,18 @@ const EditorToolbar: React.FC = () => {
         <CommandToolbarButton command={CommandId.Link} />
         <CommandToolbarButton command={CommandId.Image} />
         <ToolbarDivider />
-        <ToolbarMenu text={t('format_menu') as string}>
+        <Menu type="toolbar" text={t('format_menu') as string}>
           <CommandMenuItems menu={cmState.menus.format} />
-        </ToolbarMenu>
+        </Menu>
         <ToolbarDivider />
-        <ToolbarMenu text={t('insert_menu') as string}>
+        <Menu type="toolbar" text={t('insert_menu') as string}>
           <CommandMenuItems menu={cmState.menus.insert} />
-        </ToolbarMenu>
-        <ToolbarDivider />
+        </Menu>
         <WithCommand id={CommandId.TableInsertTable}>
-          <ToolbarMenu text={t('table_menu') as string}>
-            <CommandMenuItems menu={cmState.menus.table} />
-          </ToolbarMenu>
           <ToolbarDivider />
+          <Menu type="toolbar" text={t('table_menu') as string}>
+            <CommandMenuItems menu={cmState.menus.table} />
+          </Menu>
         </WithCommand>
        
       </Toolbar>

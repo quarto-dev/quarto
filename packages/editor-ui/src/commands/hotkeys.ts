@@ -15,26 +15,10 @@
 
 
 
-import { HotkeyConfig } from "@blueprintjs/core";
+import { HotkeyConfig } from "ui-widgets";
 
 import { Commands } from "./CommandManager";
 import { Command } from "./commands";
-import { EditorUICommandId } from "./commands-ui";
-import { toBlueprintHotkeyCombo } from "./keycodes";
-import { t } from "../i18n";
-
-
-export function keyboardShortcutsCommand(execute: VoidFunction, keymap?: string) : Command {
-  return  {
-    id: EditorUICommandId.KeyboardShortcuts,
-    menuText: t('commands:keyboard_shortcuts_menu_text'),
-    group: t('commands:group_utilities'),
-    keymap: keymap ? [keymap] : [],
-    isEnabled: () => true,
-    isActive: () => false,
-    execute,
-  }
-}
 
 export function commandHotkeys(commands: Commands) : HotkeyConfig[] {
 
@@ -60,7 +44,8 @@ export function commandHotkeys(commands: Commands) : HotkeyConfig[] {
             command.execute();
           }
         };
-    const combo = toBlueprintHotkeyCombo(key);
+    // normalize to HotkeyConfig format
+    const combo = key.toLowerCase().replace(/-/g, ' + ');
     return {
       global: true,
       group: command.group,

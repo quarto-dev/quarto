@@ -27,9 +27,10 @@ import {
 
 
 import { InsertTableResult, TableCapabilities } from "editor-types";
-import { ControlGroup, FormGroup } from "@blueprintjs/core";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
+import { makeStyles } from "@fluentui/react-components";
 
 export async function insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
   const values: InsertTableResult = {
@@ -53,19 +54,22 @@ const InsertTableDialog: React.FC<{
     props.onClosed(values);
   }
 
+  const styles = useStyles();
+
   return (
     <FormikDialog
       title={t("Insert Table")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       validationSchema={yup.object().shape({
-        rows: yup.number().min(1).max(1000),
-        cols: yup.number().min(1).max(1000),
+        rows: yup.number().positive(t('Please enter a number')),
+        cols: yup.number().positive(t('Please enter a number')),
       })}
       onSubmit={(values) => close(values) }
       onReset={() => close() }
     >
-      <ControlGroup fill={true}>
+      <div className={styles.dims}>
         <FormikNumericInput
           name="rows"
           label={t("Rows")}
@@ -79,7 +83,7 @@ const InsertTableDialog: React.FC<{
           min={1}
           max={1000}
         />
-      </ControlGroup>
+      </div>
 
       {props.options.captions ? (
         <FormikTextInput
@@ -90,13 +94,22 @@ const InsertTableDialog: React.FC<{
       ) : null}
 
       {props.options.headerOptional ? (
-        <FormGroup>
-          <FormikCheckbox 
-            name="header"
-            label={t("Include table header")}
-          />
-        </FormGroup>
+        <FormikCheckbox 
+          name="header"
+          label={t("Include table header")}
+        />
       ) : null}
     </FormikDialog>
   )
 }
+
+const useStyles = makeStyles({
+  dims: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '8px',
+    "& .fui-Field": {
+      width: '50%'
+    }
+  },
+})

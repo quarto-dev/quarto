@@ -22,6 +22,7 @@ import FormikRadioGroup from "./FormikRadioGroup";
 import FormikSwitch from "./FormikSwitch";
 import FormikTextArea from "./FormikTextArea";
 import FormikTextInput from "./FormikTextInput";
+import FormikFormGroup from "./FormikFormGroup";
 
 export type { 
   FormikDialogProps
@@ -35,6 +36,7 @@ export {
   FormikSwitch,
   FormikTextArea,
   FormikTextInput,
+  FormikFormGroup
 };
 
 

@@ -15,7 +15,14 @@
 
 import React, { useContext } from 'react';
 
-import { Props, Tree, TreeNodeInfo } from '@blueprintjs/core';
+import {
+  Tree,
+  TreeItem,
+  TreeItemLayout,
+  TreeNavigationData_unstable,
+} from "@fluentui/react-components/unstable";
+
+import { makeStyles } from '@fluentui/react-components';
 
 import { EditorOutline, EditorOutlineItem, NavigationType } from 'editor';
 
@@ -23,7 +30,7 @@ import { EditorOperationsContext, t } from 'editor-ui';
 
 import styles from './EditorOutlineSidebar.module.scss';
 
-export interface EditorOutlineTreeProps extends Props {
+export interface EditorOutlineTreeProps {
   outline: EditorOutline;
 }
 
@@ -45,29 +52,64 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   };
 
   // get tree nodes from outline
-  const asTreeNode = (outlineNode: EditorOutlineItem): TreeNodeInfo<number> => {
-    return {
-      id: outlineNode.navigation_id,
-      label: label(outlineNode),
-      hasCaret: false,
-      isExpanded: true,
-
-      childNodes: outlineNode.children.map(asTreeNode),
-    };
+  const classes = useStyles();
+  const asTreeItem = (outlineNode: EditorOutlineItem) => {
+    return (
+      <TreeItem 
+        content={{ className: outlineNode.children.length ? classes.parentItem : classes.item }} 
+        key={outlineNode.navigation_id} 
+        value={outlineNode.navigation_id}
+      >
+        <TreeItemLayout className={classes.itemLayout}>{label(outlineNode)}</TreeItemLayout>
+        {outlineNode.children.length > 0 
+          ? <Tree>
+              {outlineNode.children.map(asTreeItem)}
+            </Tree>
+          : null}
+      </TreeItem>
+    );
   };
-  const contents = props.outline.map(asTreeNode);
+  const contents = props.outline.map(asTreeItem);
+
+  // open all by default (collect ids)
+  const outlineIds = (items: EditorOutlineItem[]) => {
+    return items.reduce<string[]>((previous, item) => {
+      previous.push(item.navigation_id);
+      previous.push(...outlineIds(item.children));
+      return previous
+    }, new Array<string>());
+  };
 
   // drive editor selection from outline
-  // const dispatch = useDispatch();
-  const onNodeClick = (treeNode: TreeNodeInfo<number>) => {
-    editor.navigate(NavigationType.Id, treeNode.id as string, true);
+  const onNavigation = (_event: React.MouseEvent | React.KeyboardEvent, data: TreeNavigationData_unstable<string>) => {
+    editor.navigate(NavigationType.Id, data.value, true);
     editor.focus();
   };
 
-  // render truee
+  // render tree
   return (
     <div className={styles.outlineTreeContainer}>
-      <Tree className={[styles.outlineTree, 'pm-light-text-color'].join(' ')} contents={contents} onNodeClick={onNodeClick} />
+      <Tree 
+        aria-label='Outline'
+        defaultOpenItems={outlineIds(props.outline)}
+        className={[styles.outlineTree, 'pm-light-text-color'].join(' ')}  
+        size="small"
+        onNavigation_unstable={onNavigation}>
+        {contents}
+      </Tree>
     </div>
   );
 };
+
+const useStyles = makeStyles({
+  parentItem: {
+    paddingLeft: 'calc((var(--fluent-TreeItem--level, 1) - 1) * var(--spacingHorizontalS))'
+  },
+  item: {
+    paddingLeft: 'calc((16px) + (var(--fluent-TreeItem--level, 1)) * var(--spacingHorizontalS))'
+  },
+  itemLayout: {
+    minHeight: '22px'
+  }
+})
+

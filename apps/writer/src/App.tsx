@@ -13,26 +13,20 @@
  *
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Store } from 'redux';
 import { Provider as StoreProvider } from 'react-redux';
 
-import { FocusStyleManager, HotkeysProvider } from '@blueprintjs/core';
-
 import Workbench from './workbench/Workbench';
 import { CommandManagerProvider } from 'editor-ui';
+import { HotkeysProvider } from 'ui-widgets';
 
 interface AppProps {
   store: Store;
 }
 
 const App: React.FC<AppProps> = props => {
-
-  // only show focus on key navigation
-  useEffect(() => {
-    FocusStyleManager.onlyShowFocusOnTabs();
-  }, []);
 
   // render
   return (

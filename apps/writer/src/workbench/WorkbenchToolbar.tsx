@@ -15,8 +15,6 @@
 
 import React, { useContext } from 'react';
 
-import { IconNames } from '@blueprintjs/icons';
-
 import { EditorCommandId } from 'editor';
 
 import { 
@@ -24,7 +22,7 @@ import {
   CommandMenuItems, 
   Toolbar, 
   ToolbarDivider, 
-  ToolbarMenu, 
+  Menu, 
   CommandToolbarButton, 
   CommandToolbarMenu,
   WithCommand 
@@ -32,6 +30,12 @@ import {
 
 import { WorkbenchCommandId } from './commands';
 
+import {
+  Table16Filled,
+  Table16Regular,
+  bundleIcon
+} from "@fluentui/react-icons"
+const TableIcon = bundleIcon(Table16Filled, Table16Regular);
 
 import styles from './WorkbenchToolbar.module.scss';
 
@@ -42,45 +46,46 @@ const EditorToolbar: React.FC = () => {
   const [cmState] = useContext(CommandManagerContext);
 
   return (
-    <Toolbar className={styles.toolbar}>
-      <CommandToolbarButton command={CommandId.Undo} />
-      <CommandToolbarButton command={CommandId.Redo} />
-      <ToolbarDivider />
-      <CommandToolbarMenu
-        className={styles.toolbarBlockFormatMenu}
-        commands={[
-          CommandId.Paragraph,
-          '---',
-          CommandId.Heading1,
-          CommandId.Heading2,
-          CommandId.Heading3,
-          CommandId.Heading4,
-          CommandId.Heading5,
-          CommandId.Heading6,
-          '---',
-          CommandId.CodeBlock,
-        ]}
-      />
-      <ToolbarDivider />
-      <CommandToolbarButton command={CommandId.Strong} />
-      <CommandToolbarButton command={CommandId.Em} />
-      <CommandToolbarButton command={CommandId.Code} />
-      <ToolbarDivider />
-      <CommandToolbarButton command={CommandId.BulletList} />
-      <CommandToolbarButton command={CommandId.OrderedList} />
-      <CommandToolbarButton command={CommandId.Blockquote} />
-      <ToolbarDivider />
-      <WithCommand id={CommandId.TableInsertTable}>
-        <ToolbarMenu icon={IconNames.TH}>
-          <CommandMenuItems menu={cmState.menus.table}/>
-        </ToolbarMenu>
+    <div className={styles.toolbar}>
+      <Toolbar>
+        <CommandToolbarButton command={CommandId.Undo} />
+        <CommandToolbarButton command={CommandId.Redo} />
         <ToolbarDivider />
-      </WithCommand>
-      <CommandToolbarButton command={CommandId.Link} />
-      <CommandToolbarButton command={CommandId.Image} />
-      <ToolbarDivider />
-      <CommandToolbarButton command={CommandId.UserComment} />
-    </Toolbar>
+        <CommandToolbarMenu
+          minWidth={105}
+          commands={[
+            CommandId.Paragraph,
+            '---',
+            CommandId.Heading1,
+            CommandId.Heading2,
+            CommandId.Heading3,
+            CommandId.Heading4,
+            CommandId.Heading5,
+            CommandId.Heading6,
+            '---',
+            CommandId.CodeBlock,
+          ]}
+        />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Strong} />
+        <CommandToolbarButton command={CommandId.Em} />
+        <CommandToolbarButton command={CommandId.Code} />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.BulletList} />
+        <CommandToolbarButton command={CommandId.OrderedList} />
+        <CommandToolbarButton command={CommandId.Blockquote} />
+        <ToolbarDivider />
+        <WithCommand id={CommandId.TableInsertTable}>
+          <Menu type="toolbar" icon={<TableIcon />}>
+            <CommandMenuItems menu={cmState.menus.table}/>
+          </Menu>
+          <ToolbarDivider />
+        </WithCommand>
+        <CommandToolbarButton command={CommandId.Link} />
+        <CommandToolbarButton command={CommandId.Image} />
+      </Toolbar>
+    </div>
+   
   );
 };
 

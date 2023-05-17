@@ -19,9 +19,9 @@ import { ListCapabilities, ListNumberDelim, ListNumberStyle, ListProps, ListType
 
 import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikNumericInput, showValueEditorDialog } from "ui-widgets";
 import { FormikProps } from "formik";
-import { FormGroup } from "@blueprintjs/core";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export function editList(list: ListProps, capabilities: ListCapabilities): Promise<ListProps | null> {
   return showValueEditorDialog(EditListDialog, list, capabilities);
@@ -43,6 +43,7 @@ const EditListDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Ordered List")}
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }
@@ -53,11 +54,11 @@ const EditListDialog: React.FC<{
           <FormikHTMLSelect name="type" label={t("List type")} 
             options={Object.values(ListType)} 
           />
-          <FormGroup>
-            <FormikCheckbox name="tight" label={t("Tight layout (less vertical space between items)")} />
-          </FormGroup>
+       
+          <FormikCheckbox name="tight" label={t("Tight layout (less vertical space between items)")} />
+        
           {formikProps.values.type === ListType.Ordered ?
-            <>
+            <div style={{marginTop: '10px'}}>
             <FormikNumericInput name="order" label={t("Starting number")} />
             <FormikHTMLSelect name="number_style" label={t("Number style")}
               options={Object.values(ListNumberStyle).filter(
@@ -68,7 +69,7 @@ const EditListDialog: React.FC<{
                helperText={t("Pandoc HTML output does not support custom number delimiters, so the editor will always display the period style.")}
                options={Object.values(ListNumberDelim)}
             />
-            </>
+            </div>
             : null
           }
         </>)

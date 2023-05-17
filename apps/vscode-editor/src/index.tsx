@@ -18,14 +18,14 @@ import { createRoot } from 'react-dom/client';
 
 import 'vscode-webview';
 
-import { initEditorTranslations, initializeStore, readPrefsApi } from 'editor-ui';
+import { initEditorTranslations, initializeStore, setEditorTheme } from 'editor-ui';
 
 import { App } from "./App";
 import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
+import { editorThemeFromStore } from "./theme";
 
 import "editor-ui/src/styles";
 import "./styles.scss"
-import { applyDarkMode } from "./theme";
 
 async function runEditor() {
   try {
@@ -39,14 +39,13 @@ async function runEditor() {
 
     // initialize store and read initial prefs
     const store = await initializeStore(request);
-    const prefs = readPrefsApi(store)
 
     // init localization
     await initEditorTranslations();
 
     // render
     const root = createRoot(document.getElementById('root')!);
-    applyDarkMode(prefs);
+    setEditorTheme(editorThemeFromStore(store));
     root.render(<App store={store} host={host} context={context} request={request}/>);
   } catch (error) {
     console.error(error);

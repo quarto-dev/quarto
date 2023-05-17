@@ -1,5 +1,5 @@
 /*
- * CommandMenuItems.tsx
+ * CommandMenuItems2.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -16,11 +16,13 @@
 
 import React from "react";
 
+import { MenuDivider } from "@fluentui/react-components";
+
 import { v4 as uuidv4 } from 'uuid';
+
 
 import { EditorMenuItem } from "editor-types";
 import { CommandMenuItem, CommandMenuItemActive } from "./CommandMenuItem";
-import { MenuDivider } from "@blueprintjs/core";
 import { CommandSubMenu } from "./CommandSubMenu";
 import { Commands } from "./CommandManager";
 

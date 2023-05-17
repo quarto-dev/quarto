@@ -15,7 +15,9 @@
 
 import React, { useEffect, useState } from "react"
 
-import { Card, ControlGroup, FormGroup, HTMLSelect, HTMLTable, Intent, NonIdealState, Spinner } from "@blueprintjs/core";
+import { Card, makeStyles, Select, shorthands, tokens } from "@fluentui/react-components"
+
+import { Field, ProgressBar } from "@fluentui/react-components"
 
 import { FormikProps, useField, useFormikContext } from "formik";
 
@@ -32,6 +34,7 @@ import { t } from './translate';
 import { alert } from "./alert";
 
 import styles from './styles.module.scss';
+import { fluentTheme } from "../theme";
 
 const kIdNone = "71896BB2-16CD-4AB5-B523-6372EEB84D5D";
 
@@ -79,6 +82,8 @@ const InsertCiteDialog: React.FC<{
 }
 > = props => {
 
+  const classes = useStyles();
+
   const kInvalidCiteIdChars = t('Invalid characters in citation id');
   const kNonUniqueCiteId = t('This citation id already exists in your bibliography');
 
@@ -101,7 +106,7 @@ const InsertCiteDialog: React.FC<{
       initialValues={props.values}
       onSubmit={(values) => close(values.id !== kIdNone ? values : undefined)}
       onReset={() => close()}
-      className={styles.insertCiteDialog}
+      theme={fluentTheme()}
       validationSchema={
         yup.object().shape({
           id: yup.string()
@@ -120,9 +125,9 @@ const InsertCiteDialog: React.FC<{
             return (
               <div className={styles.insertCitePanel}>
                 <FormikTextInput name={"id"} label={t('Citation Id')} autoFocus={true} />
-                <FormGroup label={t('Citation')}>
-                  <Card className={styles.insertCitePreview}>
-                    <HTMLTable condensed={true} >
+                <Field label={t('Citation')}>
+                  <Card className={classes.insertCitePreview}>
+                    <table>
                       <tbody>
                         {formikProps.values.previewFields.map(field => {
                           return (
@@ -133,9 +138,9 @@ const InsertCiteDialog: React.FC<{
                           )
                         })}
                       </tbody>
-                    </HTMLTable>
+                    </table>
                   </Card>
-                </FormGroup>
+                </Field>
                 <SelectBibliography {...props.options} />
               </div>
             )
@@ -167,10 +172,10 @@ const SelectBibliography: React.FC<InsertCiteDialogOptions> = (props) => {
     const [ typeField ] = useField("bibliographyType");
 
     return (
-      <ControlGroup vertical={false} fill={true}>
-        <FormikTextInput name="bibliographyFile" label={t('Create bibliography file')} fill={true} />
-        <FormGroup label={t('Format')}>
-          <HTMLSelect {...typeField} multiple={undefined} fill={true} 
+      <div>
+        <FormikTextInput name="bibliographyFile" label={t('Create bibliography file')} />
+        <Field label={t('Format')}>
+          <Select {...typeField} multiple={undefined}
             onChange={event => {
               typeField.onChange(event);
               const extension = event.currentTarget.value;
@@ -182,14 +187,13 @@ const SelectBibliography: React.FC<InsertCiteDialogOptions> = (props) => {
                 bibliographyDefaultType: extension
               });
             }}
-            options={[
-              { value: 'bib', label: 'BibLaTeX'},
-              { value: 'yaml', label: 'CSL-YAML' },
-              { value: 'json', label: 'CSL-JSON' }
-            ]}
-          />
-        </FormGroup>
-      </ControlGroup>
+          >
+            <option value="bib">BibLaTeX</option>
+            <option value="yaml">CSL-YAML</option>
+            <option value="json">CSL-JSON</option>
+          </Select>
+        </Field>
+      </div>
     );
   }
   
@@ -241,14 +245,34 @@ const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
     }
   }, []);
 
+
   return (
-    <NonIdealState
-      className={styles.insertCitePanel}
-      icon={<Spinner intent={Intent.PRIMARY} />}
-      title={`${t('Looking up DOI')}...`}
-      description={props.citeProps.doi}
-    />
+    <Field 
+      style={{backgroundColor: 'transparent'}}
+      validationMessage={`${t('Looking up DOI ' + props.citeProps.doi)}...`} 
+      validationState="none"
+    >
+      <ProgressBar 
+        shape="rounded"
+        thickness="large"
+      />
+    </Field>
   )
 }
 
-
+const useStyles = makeStyles({
+  insertCitePreview: {
+    overflowY: 'scroll',
+    width: '100%',
+    height: '200px',
+    ...shorthands.padding('4px'),
+    marginBottom: '15px',
+    "& td": {
+      ...shorthands.padding(0,0,'4px'),
+    },
+    "& tr td:first-child": {
+      fontWeight: tokens.fontWeightSemibold,
+      paddingRight: '8px'
+    }
+  }
+});

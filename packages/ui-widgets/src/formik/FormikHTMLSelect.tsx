@@ -15,11 +15,15 @@
 
 import React, { useEffect, useRef } from "react";
 
-import { FormGroup, HTMLSelect, HTMLSelectProps } from "@blueprintjs/core";
-import { useField } from "formik";
-import { FormikFormGroupProps } from "./FormikFormGroup";
+import { Select, SelectProps } from "@fluentui/react-components"
 
-const FormikHTMLSelect: React.FC<FormikFormGroupProps & HTMLSelectProps> = (props) => {
+import { useField } from "formik";
+
+import FormikFormGroup, { FormikFormGroupProps } from "./FormikFormGroup";
+
+const FormikHTMLSelect: React.FC<FormikFormGroupProps & SelectProps & {
+  options: string[] | Array<{ label?: string, value: string | number }>
+}> = (props) => {
   const [ field ] = useField(props.name);
   const { label, labelInfo, helperText, ...selectProps } = props;
 
@@ -33,21 +37,38 @@ const FormikHTMLSelect: React.FC<FormikFormGroupProps & HTMLSelectProps> = (prop
     }, []);
   }
   
-  const htmlSelect = <HTMLSelect elementRef={autoFocusRef} fill={true} {...selectProps} {...field} multiple={undefined} />
-
-  if (label || labelInfo || helperText) {
-    return (
-      <FormGroup
-        label={label}
-        labelInfo={labelInfo}
-        helperText={helperText}
-      >
-        {htmlSelect}
-      </FormGroup>
-    );
-  } else {
-    return htmlSelect;
-  }
+  return (
+    <FormikFormGroup
+      name={field.name}
+      label={label}
+      labelInfo={labelInfo}
+      helperText={helperText}
+    >
+      {({ onFocus, onBlur }) => {
+        return (
+          <Select 
+            select={{ ref: autoFocusRef, multiple: false }} 
+            {...selectProps} 
+            {...field} 
+            onFocus={onFocus}
+            onBlur={onBlur}
+          >
+            {props.options.map(option => {
+              if (typeof(option) === "string") {
+                option = {
+                  value: option
+                }
+              }
+              return (
+                <option value={option.value}>
+                  {option.label || option.value}
+                </option>);
+            })}
+          </Select>
+        );
+      }}
+    </FormikFormGroup>
+  );
 };
 
 export default FormikHTMLSelect;

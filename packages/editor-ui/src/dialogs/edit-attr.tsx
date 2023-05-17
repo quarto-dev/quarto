@@ -15,13 +15,14 @@
  */
 
 import React, { useState } from "react"
-import { Button } from "@blueprintjs/core";
+import { Button } from "@fluentui/react-components";
 
 import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
 
 import { FormikDialog, FormikTextArea, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export interface EditAttrOptions {
   caption?: string;
@@ -61,7 +62,7 @@ export function editAttrFields(autoFocus?: boolean) {
     <FormikTextInput name="id" label={t("ID")} labelInfo={t("(e.g. #overview)")} autoFocus={autoFocus} />
     <FormikTextInput name="classes" label={t("Classes")} labelInfo={t("(e.g. .illustration)")} />
     <FormikTextInput name="style" label={t("CSS styles")} labelInfo={t("(e.g. color: gray;)")} />
-    <FormikTextArea name="keyvalue" label={t("Attributes")} labelInfo={t("(key=value, one per line)")} rows={3} />
+    <FormikTextArea name="keyvalue" label={t("Attributes")} labelInfo={t("(key=value, one per line)")} rows={3} resize="none" />
     </>
   );
 }
@@ -112,6 +113,7 @@ const EditAttrDialog: React.FC<{
   return (
     <FormikDialog
       title={props.options.caption || t("Edit Attributes")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.attr} 
       leftButtons={removeButton}

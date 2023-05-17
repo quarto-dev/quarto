@@ -33,14 +33,14 @@ export const DialogButtons: React.FC<DialogButtonsProps> = props => {
     const bprops = {
       classes: isRStudio
         ? ['pm-text-button', 'pm-input-button', 'pm-default-theme', 'pm-dialog-buttons-button', 'pm-rstudio-button']
-        : ['bp4-button'],
+        : ['fluentui-button'],
       style: (isRStudio ? {} : {minWidth: '90px'}) as React.CSSProperties
     }
     if (primary) {
       if (isRStudio) {
         bprops.style.fontWeight = 600;
       } else {
-        bprops.classes.push("bp4-intent-primary");
+        bprops.classes.push("fluentui-intent-primary");
         bprops.style.marginLeft = '8px';
       }
     }

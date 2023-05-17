@@ -73,13 +73,14 @@ import {
 
 import { 
   EditorOperations, 
+  EditorTheme, 
   PandocWriterOptions, 
   StateChangeEvent, 
   UpdateEvent 
 } from "editor";
 
 import { Command, EditorUIStore, readPrefsApi, t, updatePrefsApi } from "editor-ui";
-import { applyDarkMode, editorThemeFromVSCode } from "./theme";
+import { editorThemeFromStore } from "./theme";
 
 
 export interface VisualEditorHostClient extends VSCodeVisualEditorHost {
@@ -116,7 +117,8 @@ export async function syncEditorToHost(
   editor: EditorOperations, 
   imageChange: ImageChangeSink,
   host: VisualEditorHostClient,
-  store: EditorUIStore
+  store: EditorUIStore,
+  applyTheme: (theme: EditorTheme) => void
 )  {
 
   // get the current prefs
@@ -139,10 +141,17 @@ export async function syncEditorToHost(
 
   // apply the current theme (including bootstrap class on body)
   const applyDisplayPrefs = () => {
-    const prefs = readPrefsApi(store);
-    applyDarkMode(prefs);
-    editor.applyTheme(editorThemeFromVSCode(prefs.fontFamily, prefs.fontSize));
+    // determine current theme
+    const theme = editorThemeFromStore(store);
+
+    // callback host (allows for reactive re-render w/ new theme)
+    applyTheme(theme);
+
+    // apply theme to prosemirror editor instance
+    editor.applyTheme(theme);
+
     // NOTE: sync with variables.scss => $sideGutterNarrowWidth
+    const prefs = readPrefsApi(store);
     editor.setMaxContentWidth(prefs.maxContentWidth, 22);
   }
 

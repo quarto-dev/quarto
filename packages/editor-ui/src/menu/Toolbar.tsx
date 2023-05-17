@@ -1,5 +1,5 @@
 /*
- * Toolbar.tsx
+ * Toolbar2.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,35 +13,38 @@
  *
  */
 
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from "react"
 
-import { IconNames } from '@blueprintjs/icons';
-import {
-  Props,
-  ButtonGroup,
-  Button,
-  Text,
-  IconName,
-  Divider,
-  Position,
-  Menu,
-  MaybeElement,
-} from '@blueprintjs/core';
+import { 
+  Toolbar as FluentToolbar,
+  ToolbarButton as FluentToolbarButton,
+  ToolbarDivider as FluentToolbarDivider,
+  Slot,
+  mergeClasses, 
+} from "@fluentui/react-components";
+import { useMenuStyles } from "./styles";
 
-import { Popover2 } from '@blueprintjs/popover2'
 
-import styles from './Toolbar.module.scss';
+export interface ToolbarProps {
+  className?: string;
+}
 
-export const Toolbar: React.FC<PropsWithChildren<Props> >= props => {
+
+export const Toolbar: React.FC<PropsWithChildren<ToolbarProps>> = props => {
+  const classes = useMenuStyles();
+  let toolbarClasses = classes.toolbar;
+  if (props.className) {
+    toolbarClasses = `${toolbarClasses} ${props.className}`; 
+  }
   return (
-    <ButtonGroup className={[styles.toolbar, props.className].join(' ')} minimal={true}>
+    <FluentToolbar size="small" className={toolbarClasses}>
       {props.children}
-    </ButtonGroup>
+    </FluentToolbar>
   );
 };
 
-export interface ToolbarButtonProps extends Props {
-  icon?: IconName | MaybeElement;
+export interface ToolbarButtonProps {
+  icon?: Slot<"span">;
   title: string;
   enabled: boolean;
   active: boolean;
@@ -49,52 +52,24 @@ export interface ToolbarButtonProps extends Props {
 }
 
 export const ToolbarButton: React.FC<ToolbarButtonProps> = props => {
+  const classes = useMenuStyles();
+  let className = classes.toolbarButton;
+  if (props.active) {
+    className = mergeClasses(className, classes.toolbarButtonLatched);
+  }
   return (
-    <Button
-      className={[styles.toolbarButton, props.className].join(' ')}
+    <FluentToolbarButton
+      className={className}
       title={props.title}
+      appearance={"subtle"}
       icon={props.icon}
       disabled={!props.enabled}
-      active={props.active}
       onClick={props.onClick}
     />
   );
 };
 
 export const ToolbarDivider: React.FC = () => {
-  return <Divider className={styles.toolbarDivider} />;
-};
-
-export const ToolbarText: React.FC<PropsWithChildren<Props>> = props => {
-  return <Text className={styles.toolbarText}>{props.children}</Text>;
-};
-
-export interface ToolbarMenuProps extends Props {
-  text?: string;
-  icon?: IconName;
-  disabled?: boolean;
+  const classes = useMenuStyles();
+  return <FluentToolbarDivider className={classes.toolbarDivider}  />
 }
-
-export const ToolbarMenu: React.FC<PropsWithChildren<ToolbarMenuProps>> = props => {
-  const menu = <Menu>{props.children}</Menu>;
-  return (
-    <Popover2
-      className={[styles.toolbarMenu, props.className].join(' ')}
-      content={menu}
-      disabled={props.disabled}
-      autoFocus={false}
-      minimal={true}
-      inheritDarkTheme={false}
-      position={Position.BOTTOM_LEFT}
-    >
-      <Button
-        className={styles.toolbarMenuButton}
-        icon={props.icon}
-        disabled={props.disabled}
-        rightIcon={IconNames.CARET_DOWN}
-      >
-        {props.text}
-      </Button>
-    </Popover2>
-  );
-};

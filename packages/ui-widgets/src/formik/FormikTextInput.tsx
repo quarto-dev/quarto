@@ -17,13 +17,17 @@ import React, { useEffect, useRef } from 'react';
 
 import { useField } from 'formik';
 
-import { InputGroup, InputGroupProps2, Intent } from "@blueprintjs/core";
+import { Input, InputProps, makeStyles } from "@fluentui/react-components"
 
 import FormikFormGroup, { FormikFormGroupProps } from './FormikFormGroup';
 
-const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (props) => {
+export interface FormikTextInputProps extends FormikFormGroupProps {
+  button?: JSX.Element;
+}
+
+const FormikTextInput: React.FC<FormikTextInputProps & InputProps> = (props) => {
   const { name, label, labelInfo, helperText, ...inputProps } = props;
-  const [ field, meta ] = useField(name);
+  const [ field ] = useField(name);
 
   const autoFocusRef = useRef<HTMLInputElement>(null);
 
@@ -35,6 +39,8 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (prop
     }, []);
   }
 
+  const styles = useStyles();
+
   return (
     <FormikFormGroup 
       name={name}
@@ -44,21 +50,34 @@ const FormikTextInput: React.FC<FormikFormGroupProps & InputGroupProps2> = (prop
     >
       {({ onFocus, onBlur }) => {
         return (
-          <InputGroup
-            inputRef={autoFocusRef}
-            autoComplete={"off"}
-            intent={meta.touched && meta.error ? Intent.DANGER : Intent.NONE }
-            type="text"
-            fill={true}
-            {...field}
-            {...inputProps}
-            onFocus={onFocus}
-            onBlur={onBlur}
-          /> 
+          <div className={styles.root}>
+            <Input
+              input={{ ref: autoFocusRef, autoComplete: 'off' }}
+              type="text"
+              autoComplete='off'
+              {...field}
+              {...inputProps}
+              onFocus={onFocus}
+              onBlur={onBlur}
+            />
+            {props.button || null}
+          </div>
         );
       }}
     </FormikFormGroup>
   );
 };
+
+
+const useStyles = makeStyles({
+  root: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '8px',
+    "& .fui-Input": {
+      flexGrow: 1
+    }
+  },
+})
 
 export default FormikTextInput;

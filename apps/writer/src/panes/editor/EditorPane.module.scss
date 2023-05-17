@@ -13,13 +13,12 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
-@import 'editor-ui/src/variables.scss';
 
+@import 'editor-ui/src/variables.scss';
 
 .editorParent {
   position: absolute;
-  top: 0;
+  top: 6px;
   left: 0;
   right: 0;
   bottom: 0;

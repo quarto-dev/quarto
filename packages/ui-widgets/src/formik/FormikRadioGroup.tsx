@@ -15,32 +15,35 @@
 
 import React from "react";
 
-import { FormGroup, RadioGroup, RadioGroupProps } from "@blueprintjs/core";
+import { Radio, RadioGroup, RadioGroupProps } from "@fluentui/react-components";
 
 import { useField } from "formik";
 
-import { FormikFormGroupProps } from "./FormikFormGroup";
+import FormikFormGroup, { FormikFormGroupProps } from "./FormikFormGroup";
 
-const FormikRadioGroup: React.FC<FormikFormGroupProps & Omit<RadioGroupProps, "onChange">> = (props) => {
+const FormikRadioGroup: React.FC<FormikFormGroupProps & Omit<RadioGroupProps, "onChange"> & {
+  options: Array<{value: string, label: string}>;
+}> = (props) => {
   const [ field ] = useField(props.name);
-  const { label, labelInfo, helperText, ...radioProps } = props;
-
-  const radioGroup = <RadioGroup {...radioProps} {...field} selectedValue={field.value} />;
-  
-  if (label || labelInfo || helperText) {
-    return (
-      <FormGroup
-        label={label}
-        labelInfo={labelInfo}
-        helperText={helperText}
-        inline={props.inline}
-      >
-        {radioGroup}
-      </FormGroup>
-    );
-  } else {
-    return radioGroup
-  }
+  const { name, label, labelInfo, helperText, ...radioProps } = props;
+  return (
+    <FormikFormGroup
+      name={name}
+      label={label}
+      labelInfo={labelInfo}
+      helperText={helperText}
+    >
+        {({ onFocus, onBlur }) => {
+        return (
+          <RadioGroup {...field} {...radioProps} onFocus={onFocus} onBlur={onBlur}>
+            {props.options.map(option => {
+              return <Radio {...option} />;
+            })}
+          </RadioGroup>
+        )
+        }}
+    </FormikFormGroup>
+  );
 };
 
 export default FormikRadioGroup;

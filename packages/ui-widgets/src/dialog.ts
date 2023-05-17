@@ -16,8 +16,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import { DialogProps } from "@blueprintjs/core";
-
 export function showValueEditorDialog<T,O = undefined>(
   dialog: React.FC<{ values: T, options: O, onClosed: (values?: T) => void}>,
   values: T,
@@ -33,27 +31,4 @@ export function showValueEditorDialog<T,O = undefined>(
     }  
     root.render(React.createElement(dialog, { values, options, onClosed }));
   });
-}
-
-export function modalDialogProps(classes: string[], style?: React.CSSProperties, themed?: boolean) : Omit<DialogProps, "isOpen"> {
-
-  // if we have a 'root' element in dark mode then propagate to the dialog
-  if (themed) {
-    const rootEl = globalThis.document.getElementById('root');
-    if (rootEl?.classList.contains('bp4-dark')) {
-      classes = [...classes, 'bp4-dark'];
-    }
-  }
-
-  return {
-    autoFocus: true,
-    enforceFocus: true,
-    canEscapeKeyClose: true,
-    canOutsideClickClose: false,
-    isCloseButtonShown: true,
-    shouldReturnFocusOnClose: true,
-    transitionDuration: 150,
-    style: { userSelect: 'none', ...style},
-    className: classes.join(' ')
-  };
 }

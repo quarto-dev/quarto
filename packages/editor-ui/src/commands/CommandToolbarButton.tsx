@@ -15,17 +15,16 @@
 
 import React, { useContext } from 'react';
 
-import { Props } from '@blueprintjs/core';
 
 import { ToolbarButton } from '../menu/Toolbar';
 import { commandTooltipText } from './commands';
 import { CommandManagerContext } from 'editor-ui';
 
-export interface CommandToolbarButtonProps extends Props {
+export interface CommandToolbarButtonProps  {
   command: string;
 }
 
-export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props: CommandToolbarButtonProps) => {
+export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props) => {
   // force re-render when the selection changes
   const [cmState] = useContext(CommandManagerContext);
 
@@ -34,7 +33,6 @@ export const CommandToolbarButton: React.FC<CommandToolbarButtonProps> = (props:
   if (command) {
     return (
       <ToolbarButton
-        className={props.className}
         icon={command.icon}
         title={commandTooltipText(command)}
         enabled={command.isEnabled()}

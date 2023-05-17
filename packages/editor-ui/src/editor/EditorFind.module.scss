@@ -13,18 +13,16 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
-
 @import '../variables.scss';
 
-$findHeight: 140px;
+$findHeight: 160px;
 $findWidth: 270px;
 $rightPadding: 20px;
 
 .findContainer {
   display: none;
   position: absolute;
-  z-index: $pt-z-index-overlay;
+  z-index: $zIndexOverlay;
   right: $rightPadding;
   top: -1px;
   height: 0;
@@ -44,34 +42,11 @@ $rightPadding: 20px;
   border-bottom-left-radius: $sidebarBottomBorderRadius;
 }
 
-.find {
-  :global(.bp4-button),
-  :global(.bp4-input-group.bp4-small .bp4-button) {
-    padding: 0 4px;
-    min-width: 15px;
-  }
-}
-
-.find {
-  :global(.bp4-control-group > :not(:last-child)) {
-    margin-right: 0;
-  }
-}
-
-.find {
-  :global(.bp4-checkbox) {
-    font-size: 0.8rem;
-  }
-}
-
-.findInput {
-  width: calc(#{$findWidth} - 60px);
-}
 
 .findRow {
+  display: flex;
   margin-bottom: 10px;
 }
-
 
 /* transition */
 

@@ -18,19 +18,19 @@ import React from "react";
 
 import { EditorMenuItem } from "editor-types";
 
-import { MenubarMenu } from "../menu/Menu";
-
 import { CommandMenuItems } from "./CommandMenuItems";
+import { Menu } from "../menu/Menu";
 
 export interface CommandMenubarMenuProps {
+  text: string;
   menu: EditorMenuItem[];
 }
 
 export const CommandMenubarMenu: React.FC<CommandMenubarMenuProps> = (props) => {
   return (
-    <MenubarMenu>
+    <Menu text={props.text}>
       <CommandMenuItems {...props}/>
-    </MenubarMenu>
+    </Menu>
   )
 
 };

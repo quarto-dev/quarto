@@ -13,17 +13,20 @@
  *
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 
-import { HotkeysContext, useHotkeys } from '@blueprintjs/core';
 
-import { commandHotkeys, CommandManagerContext, keyboardShortcutsCommand } from 'editor-ui';
+import { FluentProvider } from '@fluentui/react-components';
+
+import { useHotkeys } from "ui-widgets";
+
+import { commandHotkeys, CommandManagerContext, fluentTheme } from 'editor-ui';
 
 import EditorPane from '../panes/editor/EditorPane';
 
-import WorkbenchNavbar from './WorkbenchNavbar';
 import WorkbenchClipboard from './WorkbenchClipboard';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
+import WorkbenchMenubar from './WorkbenchMenubar';
 import WorkbenchToolbar from './WorkbenchToolbar';
 
 import './Workbench.scss';
@@ -31,30 +34,23 @@ import './Workbench.scss';
 const Workbench: React.FC = () => {
  
   // register keyboard shortcuts and get handlers
-  const showHotkeysKeyCombo = 'Ctrl+Alt+K';
-  const [cmState, cmDispatch] = useContext(CommandManagerContext);
+  const [cmState] = useContext(CommandManagerContext);
   const hotkeys = useMemo(() => { return commandHotkeys(cmState.commands); }, [cmState.commands]);
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, { showDialogKeyCombo: showHotkeysKeyCombo });
-
-  // register show keyboard shortcuts command
-  const [, hkDispatch] = useContext(HotkeysContext);
-  useEffect(() => {
-    cmDispatch({ type: "ADD_COMMANDS", payload: [
-      keyboardShortcutsCommand(() => hkDispatch({ type: "OPEN_DIALOG"}), showHotkeysKeyCombo)
-    ]});
-  }, []); 
-   
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys, {});
+ 
   // render workbench
   return (
-    <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-      <WorkbenchNavbar />
-      <WorkbenchToolbar />
-      <div className={'workspace'}>
-        <EditorPane />
+    <FluentProvider theme={fluentTheme()}>
+      <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
+        <WorkbenchMenubar />
+        <WorkbenchToolbar />
+        <div className={'workspace'}>
+          <EditorPane />
+        </div>
+        <WorkbenchClipboard />
+        <WorkbenchPrefsDialog />
       </div>
-      <WorkbenchClipboard />
-      <WorkbenchPrefsDialog />
-    </div>
+    </FluentProvider>
   );
 };
 

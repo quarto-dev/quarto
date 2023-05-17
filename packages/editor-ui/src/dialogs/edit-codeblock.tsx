@@ -20,6 +20,7 @@ import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets
 
 import { t } from './translate';
 import { editAttrFields } from "./edit-attr";
+import { fluentTheme } from "../theme";
 
 export function editCodeBlock(attrUITools: UIToolsAttr) {
   return async (codeBlock: CodeBlockProps, attributes: boolean, languages: string[]): Promise<CodeBlockProps | null>  => {
@@ -59,6 +60,7 @@ const EditCodeBlockDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Code Block")}
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values} 
       onSubmit={(values) => close(values) }

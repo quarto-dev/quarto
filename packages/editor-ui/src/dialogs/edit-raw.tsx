@@ -14,7 +14,7 @@
  */
 
 import React, { useState } from "react";
-import { Button, OptionProps } from "@blueprintjs/core";
+import { Button } from "@fluentui/react-components";
 
 import { RawFormatProps, RawFormatResult } from "editor-types";
 
@@ -22,6 +22,7 @@ import { FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog 
 
 
 import { t } from './translate';
+import { fluentTheme } from "../theme";
 
 export async function editRawInline(raw: RawFormatProps, outputFormats: string[]): Promise<RawFormatResult | null> {
   return showValueEditorDialog(EditRawDialog, { raw, action: 'edit' }, { outputFormats, editContent: true })
@@ -55,7 +56,7 @@ const EditRawDialog: React.FC<{
       {t("Remove Format")}
     </Button>;
 
-  const formats : OptionProps[] = props.options.outputFormats.map(value => ({ value }));
+  const formats = props.options.outputFormats.map(value => ({ value, label: undefined as string | undefined }));
   if (!props.values.raw.format) {
     formats.unshift({ value: '', label: "(Choose Format)" });
   }
@@ -63,6 +64,7 @@ const EditRawDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Raw Format")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.raw} 
       leftButtons={props.values.raw.format ? removeButton : undefined}

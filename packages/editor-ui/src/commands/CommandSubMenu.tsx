@@ -1,5 +1,5 @@
 /*
- * CommandSubMenu.tsx
+ * CommandSubMenu2.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *

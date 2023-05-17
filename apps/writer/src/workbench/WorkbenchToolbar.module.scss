@@ -16,20 +16,12 @@
  @import 'editor-ui/src/variables.scss';
  
 .toolbar {
-  padding-left: 10px;
   position: fixed;
   top: calc(#{$navbarHeight} + 1px);
+  height: $toolbarHeight;
   left: 0;
   right: 0;
+  background-color: $backgroundColor;
 }
-
-.toolbarBlockFormatMenu {
-  :global {
-    .bp4-button-text {
-      min-width: 75px;
-    }
-  }
-}
- 
 
 

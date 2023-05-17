@@ -13,8 +13,6 @@
  *
  */
 
-@import '@blueprintjs/core/lib/scss/variables.scss';
-
 @import 'editor-ui/src/variables.scss';
 
 $verticalPadding: 1px;
@@ -27,9 +25,9 @@ $buttonOpacity: 0.6;
   bottom: $verticalPadding;
   width: 0;
   font-size: 0.9em;
-  color: $gray1;
+  color: gray;
   border-right: $paneBorder;
-  z-index: $pt-z-index-overlay;
+  z-index: $zIndexOverlay;
   display: none;
 
 }
@@ -53,16 +51,21 @@ $buttonOpacity: 0.6;
 .outlineHeaderToggle {
   cursor: pointer;
   opacity: $buttonOpacity;
+  padding: 0 !important;
+  min-width: 20px !important;
+  max-width: 20px !important;
 }
 
 .outlineHeaderText {
   visibility: hidden;
   margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .outlineCloseIcon {
   visibility: hidden;
-  margin-left: auto;
+  margin-left: auto !important;
   cursor: pointer;
   opacity: $buttonOpacity;
 }
@@ -82,35 +85,6 @@ $buttonOpacity: 0.6;
   padding: 5px 0;
 }
 
-.outlineTree {
-  :global {
-    .bp4-tree-node-caret-none {
-      min-width: 10px !important;
-    }
-    .bp4-tree-node-content {
-      padding-right: 15px;
-      height: 1.7em;
-    }
-    .bp4-tree-node-content-0 {
-      padding-left: 3px;
-    }
-    .bp4-tree-node-content-1 {
-      padding-left: 10px !important;
-    }
-    .bp4-tree-node-content-2 {
-      padding-left: 17px;
-    }
-    .bp4-tree-node-content-3 {
-      padding-left: 24px;
-    }
-    .bp4-tree-node-content-4 {
-      padding-left: 31px;
-    }
-    .bp4-tree-node-content-5 {
-      padding-left: 38px;
-    }
-  }
-}
 
 .showOutlineButtonGutter {
   position: absolute;
@@ -122,9 +96,9 @@ $buttonOpacity: 0.6;
 
 .showOutlineButton {
   position: absolute;
-  left: 0;
-  top: $verticalPadding;
-  z-index: $pt-z-index-overlay;
+  left: 6px;
+  top: calc(#{$verticalPadding} + 8px);
+  z-index:  $zIndexOverlay;
   background-color: transparent!important;
   padding: 0 !important;
   opacity: $buttonOpacity;

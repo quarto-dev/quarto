@@ -1,5 +1,5 @@
 /*
- * CommandMenuItem.tsx
+ * CommandMenuItem2.tsx
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -16,12 +16,20 @@
 
 import React, { useContext } from 'react';
 
-import { MenuItem } from '@blueprintjs/core';
-import { IconNames } from '@blueprintjs/icons';
+import {
+  Checkmark16Filled, 
+  Checkmark16Regular,
+  bundleIcon
+} from "@fluentui/react-icons"
+
+const CheckmarkIcon = bundleIcon(Checkmark16Filled, Checkmark16Regular);
+
 
 import { keyCodeString } from './keycodes';
 import { commandKeymapText } from './commands';
 import { CommandManagerContext, Commands } from 'editor-ui';
+import { MenuItem } from '@fluentui/react-components';
+import { useMenuStyles } from '../menu/styles';
 
 export enum CommandMenuItemActive {
   Check = 'check',
@@ -38,6 +46,9 @@ export interface CommandMenuItemProps {
 }
 
 export const CommandMenuItem: React.FC<CommandMenuItemProps> = props => {
+
+  const classes = useMenuStyles();
+
   const { id, keyCode, active = CommandMenuItemActive.None } = props;
 
   // force re-render when the selection changes
@@ -53,25 +64,19 @@ export const CommandMenuItem: React.FC<CommandMenuItemProps> = props => {
     // resolve label
     const label = keyCode ? keyCodeString(keyCode, true) : commandKeymapText(command, true);
 
-    // resolve icon
-    const icon =
-      active === 'check'
-        ? command.isActive()
-          ? IconNames.SMALL_TICK
-          : IconNames.BLANK
-        : command.icon || IconNames.BLANK;
-
     const isActive = active === 'latch' ? command.isActive() : false;
 
     return (
-      <MenuItem
-        icon={icon}
-        text={props.text || command.menuText}
+      <MenuItem 
+        key={command.id}
+        className={classes.item}
+        secondaryContent={label}
+        icon={isActive ? <CheckmarkIcon /> : undefined}
+        disabled={!command.isEnabled()} 
         onClick={command.execute}
-        active={isActive}
-        disabled={!command.isEnabled()}
-        label={label}
-      />
+      >
+        {props.text || command.menuText}
+      </MenuItem>
     );
   } else {
     return null;

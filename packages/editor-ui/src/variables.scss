@@ -13,10 +13,9 @@
  *
  */
 
- @import '@blueprintjs/core/lib/scss/variables.scss';
 
- $navbarHeight: 64px;
- $toolbarHeight: 42px;
+ $navbarHeight: 30px;
+ $toolbarHeight: 32px;
 
  $sideGutterWidth: 42px;
  $sideGutterNarrowWidth: 22px;
@@ -26,7 +25,7 @@
  $sidebarBottomBorderRadius: 10px;
  $sidebarTransitionTime: 300ms;
  
- $backgroundColor: $pt-app-background-color;
+ $backgroundColor: white;
  $editorBackgroundColor: white;
 
  $paneBorderColor: rgb(218, 220, 224);
@@ -34,4 +33,6 @@
  
  $paneBoxShadowColor: rgba(60, 64, 67, 0.15);
  $paneBoxShadow: 0 1px 3px 1px $paneBoxShadowColor;
+
+ $zIndexOverlay: 20;
  

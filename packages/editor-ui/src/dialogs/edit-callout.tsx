@@ -15,15 +15,19 @@
 
 import React, { useState } from "react"
 
-import { Button, ControlGroup, FormGroup, Tab, TabId, Tabs } from "@blueprintjs/core";
+
+import { Button, SelectTabData, SelectTabEvent, Tab, TabList, TabValue, makeStyles } from "@fluentui/react-components"
 
 import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr, UIToolsAttr } from "editor-types";
 
 import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
 
+import { fluentTheme } from "../theme";
+
 import { editAttrFields } from "./edit-attr";
 
 import { t } from './translate';
+
 import styles from "./styles.module.scss";
 
 
@@ -82,11 +86,15 @@ const EditCalloutDialog: React.FC<{
       {t("Unwrap Div")}
     </Button>;
 
-  const [selectedTabId, setSelectedTabId] = useState<TabId>("callout");
+  const [selectedTab, setSelectedTab] = useState<TabValue>("callout");
+  const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
+    setSelectedTab(data.value);
+  };
+  const classes = useStyles();
 
-  const calloutPanel = 
+  const calloutPanel =
     <div className={styles.editAttributesPanel}>
-      <ControlGroup vertical={false} fill={true}>
+      <div className={classes.attribs}>
         <FormikHTMLSelect 
           name="type" label={t("Type")} 
           options={["note", "tip", "important", "caution", "warning"]}
@@ -96,11 +104,9 @@ const EditCalloutDialog: React.FC<{
           name="appearance" label={t("Appearance")} 
           options={["default", "simple", "minimal"]} 
         />
-      </ControlGroup>
+      </div>
       <FormikTextInput name="caption" label="Caption" labelInfo="(Optional)" />
-      <FormGroup>
-        <FormikCheckbox name="icon" label={t("Display icon alongside callout")}/>
-      </FormGroup>
+      <FormikCheckbox name="icon" label={t("Display icon alongside callout")}/>
     </div>;
 
   const attributesPanel = 
@@ -111,21 +117,37 @@ const EditCalloutDialog: React.FC<{
   return (
     <FormikDialog
       title={t("Callout")} 
+      theme={fluentTheme()}
       isOpen={isOpen} 
       initialValues={props.values.values} 
       leftButtons={props.options.removeEnabled ? removeButton : undefined}
       onSubmit={(values) => close({ values, action: "edit" }) }
       onReset={() => close() }
     >
-      <Tabs
+      <TabList
         id="edit-callout" 
-        selectedTabId={selectedTabId} 
-        onChange={tabId => setSelectedTabId(tabId)}
+        selectedValue={selectedTab} 
+        onTabSelect={onTabSelect}
       >
-        <Tab id="callout" title={t("Callout")} panel={calloutPanel}/>
-        <Tab id="attributes" title={t("Attributes")} panel={attributesPanel} /> 
-      </Tabs>
+        <Tab id="callout" value="callout">{t("Callout")}</Tab>
+        <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
+      </TabList>
+      <div>
+        {selectedTab === "callout" && calloutPanel}
+        {selectedTab === "attributes" && attributesPanel}
+      </div>
 
     </FormikDialog>
   )
 }
+
+const useStyles = makeStyles({
+  attribs: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '8px',
+    "& .fui-Field": {
+      width: '50%'
+    }
+  },
+})

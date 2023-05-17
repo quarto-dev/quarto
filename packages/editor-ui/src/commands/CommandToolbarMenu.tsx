@@ -15,22 +15,24 @@
 
 import React, { useContext } from 'react';
 
-import { Props, MenuDivider } from '@blueprintjs/core';
+import { MenuDivider } from '@fluentui/react-components';
+
+import { v4 as uuidv4 } from 'uuid';
 
 import { CommandManagerContext } from './CommandManager';
 import { Command } from './commands';
-import { ToolbarMenu } from '../menu/Toolbar';
+import { Menu } from '../menu/Menu';
 
 import { CommandMenuItem, CommandMenuItemActive } from './CommandMenuItem';
-import { v4 as uuidv4 } from 'uuid';
 
 const kSeparator = '---';
 
-export interface CommandToolbarMenuProps extends Props {
+export interface CommandToolbarMenuProps {
   commands: Array<string | '---'>;
+  minWidth?: number;
 }
 
-export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props: CommandToolbarMenuProps) => {
+export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props) => {
   // force re-render when the selection changes
   const [cmState] = useContext(CommandManagerContext);
 
@@ -54,7 +56,7 @@ export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props: Com
     let selected = '';
     const menuItems = commands.map(command => {
       if (command === kSeparator) {
-        return <MenuDivider key={uuidv4()} />;
+        return <MenuDivider key={uuidv4()}/>;
       } else {
         if (command.isActive()) {
           selected = command.menuText;
@@ -71,9 +73,9 @@ export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props: Com
 
     // return JSX popover + menu items
     return (
-      <ToolbarMenu className={props.className} text={selected}>
+      <Menu  text={selected} type="toolbar" minWidth={props.minWidth}>
         {menuItems}
-      </ToolbarMenu>
+      </Menu>
     );
   } else {
     return null;

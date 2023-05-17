@@ -15,8 +15,6 @@
 
 import React, { PropsWithChildren } from 'react';
 
-import { Props } from '@blueprintjs/core';
-
 import { EditorMenus } from 'editor-types';
 
 import { Command } from './commands';
@@ -77,7 +75,7 @@ const commandManagerReducer = (state: CommandManagerContextState, action: Comman
 }
 
 
-export const CommandManagerProvider: React.FC<PropsWithChildren<Props>> = props => {
+export const CommandManagerProvider: React.FC<PropsWithChildren> = props => {
   const [state, dispatch] = React.useReducer(commandManagerReducer, initialCommandManagerState);
   return <CommandManagerContext.Provider value={[state, dispatch]}>{props.children}</CommandManagerContext.Provider>;
 };

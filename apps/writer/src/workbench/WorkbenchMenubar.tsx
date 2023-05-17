@@ -15,41 +15,39 @@
 
 import React, { useContext } from 'react';
 
-import { ButtonGroup, MenuDivider } from '@blueprintjs/core';
+import { MenuDivider } from '@fluentui/react-components';
 
 import { EditorCommandId } from 'editor';
 
-import { t } from "editor-ui"
-
 import { 
-  MainMenu, 
-  MenubarMenu, 
+  t,
   WithCommand, 
-  CommandMenuItem, 
-  CommandMenuItemActive, 
-  CommandManagerContext, 
-  CommandMenubarMenu, 
-  EditorUICommandId
+  CommandManagerContext,  
+  EditorUICommandId,
+  CommandMenuItem,
+  CommandMenuItemActive,
+  CommandMenubarMenu,
+  Menu,
+
 } from 'editor-ui';
 
 import { WorkbenchCommandId } from './commands';
 
-import styles from './WorkbenchMenubar.module.scss';
-
 
 const CommandId = { ...EditorCommandId,  ...EditorUICommandId, ...WorkbenchCommandId };
 
+
 const FileMenu: React.FC = () => {
   return (
-    <MenubarMenu>
-      <CommandMenuItem id={CommandId.Rename} />
-    </MenubarMenu>
+    <Menu text={t('file_menu') as string}>
+     
+    </Menu>
   );
 };
 
 const EditMenu: React.FC = () => {
   return (
-    <MenubarMenu>
+    <Menu text={t('edit_menu') as string} >
       <CommandMenuItem id={CommandId.Undo} />
       <CommandMenuItem id={CommandId.Redo} />
       <MenuDivider />
@@ -65,46 +63,48 @@ const EditMenu: React.FC = () => {
       <CommandMenuItem id={CommandId.ReplaceAndFind} />
       <MenuDivider />
       <CommandMenuItem id={CommandId.Prefs} />
-    </MenubarMenu>
+    </Menu>
   );
 };
 
 const ViewMenu: React.FC = () => {
   return (
-    <MenubarMenu>
+    <Menu text={t('view_menu') as string}>
       <CommandMenuItem id={CommandId.ShowOutline} active={CommandMenuItemActive.Check} />
       <MenuDivider />
       <CommandMenuItem id={CommandId.ActivateEditor} />
-    </MenubarMenu>
+    </Menu>
   );
 };
 
 const HelpMenu: React.FC = () => {
   return (
-    <MenubarMenu>
+    <Menu text={t('help_menu') as string}>
       <CommandMenuItem id={CommandId.EnableDevTools} />
-      <MenuDivider />
-      <CommandMenuItem id={CommandId.KeyboardShortcuts} />
-    </MenubarMenu>
+    </Menu>
   );
 };
+
+
+
 
 const WorkbenchMenubar: React.FC = () => {
 
   const [cmState] = useContext(CommandManagerContext);
 
   return (
-    <ButtonGroup className={styles.menubarButtons} minimal={true}>
-      <MainMenu text={t('file_menu')} menu={<FileMenu />} />
-      <MainMenu text={t('edit_menu')} menu={<EditMenu />} />
-      <MainMenu text={t('view_menu')} menu={<ViewMenu />} />
-      <MainMenu text={t('insert_menu')} menu={<CommandMenubarMenu menu={cmState.menus.insert} />} />
-      <MainMenu text={t('format_menu')} menu={<CommandMenubarMenu menu={cmState.menus.format} />} />
+    <>
+      <FileMenu />
+      <EditMenu />
+      <ViewMenu />
+      
+      <CommandMenubarMenu text={t('insert_menu')} menu={cmState.menus.insert} />
+      <CommandMenubarMenu text={t('format_menu')} menu={cmState.menus.format} />
       <WithCommand id={CommandId.TableInsertTable}>
-        <MainMenu text={t('table_menu')} menu={<CommandMenubarMenu menu={cmState.menus.table} />} />
+        <CommandMenubarMenu text={t('table_menu')} menu={cmState.menus.table} />
       </WithCommand>
-      <MainMenu text={t('help_menu')} menu={<HelpMenu />} />
-    </ButtonGroup>
+      <HelpMenu />
+    </>
   );
 };
 

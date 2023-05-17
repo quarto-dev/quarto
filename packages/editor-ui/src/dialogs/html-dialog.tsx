@@ -18,12 +18,19 @@ import React, { useRef, useState } from "react";
 
 import { createRoot } from "react-dom/client";
 
-import { Dialog, Intent, Position, Spinner, SpinnerSize, Toast, Toaster, Text } from "@blueprintjs/core";
-
-import { modalDialogProps } from "ui-widgets";
+import { 
+  Dialog, 
+  DialogBody, 
+  DialogContent, 
+  DialogSurface, 
+  DialogTitle, 
+  FluentProvider,
+  makeStyles,
+  webLightTheme 
+} from "@fluentui/react-components";
 
 import { EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn } from "editor-types";
-import { isSolarizedThemeActive } from "../theme";
+import { fluentTheme, isSolarizedThemeActive } from "../theme";
 
 export async function htmlDialog(
   title: string, 
@@ -96,9 +103,11 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
     () => {setProgress(null)},
     !isSolarizedThemeActive() )
   );
-  const padding = 12;
+  const kTitleHeight = 28
+  const kGridGap = 8;
+  const padding = 24;
   const width = `calc(${dialogWidgetRef.current.style.width} + ${2 * padding}px`;
-  const height = `calc(${dialogWidgetRef.current.style.height} + ${2.5 * padding}px`;
+  const height = `calc(${dialogWidgetRef.current.style.height} + ${2 * padding}px + ${kTitleHeight}px  + ${2 * kGridGap}px`;
   const themed = !isSolarizedThemeActive();
 
   const dialogBodyRef = (el: HTMLDivElement | null) => {
@@ -107,21 +116,46 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
     }
   };
 
+  const classes = useStyles();
+
   return (
-    <Dialog
-      title={props.title}
-      isOpen={isOpen}
-      onClose={onCancel}
-      {...modalDialogProps([], {width: 'auto', position: 'relative'}, themed)}
-      shouldReturnFocusOnClose={false}
-    > 
-      <div style={{width, height, padding: padding + 'px'}}>
-        <Progress message={progress} />
-        <div ref={dialogBodyRef} />  
-      </div>
-    </Dialog>
+    <FluentProvider theme={themed ? fluentTheme() : webLightTheme}>
+      <Dialog
+        modalType="modal"
+        open={isOpen}
+        onOpenChange={(_event,data) => {
+          if (!data.open) {
+            onCancel()
+          }
+        }} 
+      > 
+        <DialogSurface className={classes.dialogSurface} style={{width, height}}>
+          <DialogBody>
+            <DialogTitle>
+              {props.title}
+            </DialogTitle>
+            <DialogContent className={classes.dialogContent}>
+              <Progress message={progress} />
+              <div ref={dialogBodyRef} />  
+            </DialogContent>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
+    </FluentProvider>
   );
 };
+
+const useStyles = makeStyles({
+  dialogSurface: {
+    maxWidth: 'none'
+  },
+  dialogContent: {
+    overflowY: 'visible'
+  }
+})
+
+import { Intent, Spinner, SpinnerSize, Toast, Toaster, Text, Position } from "@blueprintjs/core";
+
 
 interface ProgressProps {
   message: string | null;

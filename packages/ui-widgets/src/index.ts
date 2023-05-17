@@ -15,7 +15,6 @@
 
 export * from './formik'
 export * from './dialog'
-export * from './dialog-props'
 export * from './hotkeys'
 export * from './theme'
 export * from './nonideal'

@@ -289,7 +289,7 @@ export function applyTheme(theme: EditorTheme) {
     .pm-toolbar-background-color {
       background-color: ${theme.toolbarBackgroundColor} !important;
     }
-    .pm-toolbar-text-color, .pm-toolbar-text-color .bp4-button-text {
+    .pm-toolbar-text-color, .pm-toolbar-text-color {
       color: ${theme.toolbarTextColor} !important;
     }
     .pm-find-text,

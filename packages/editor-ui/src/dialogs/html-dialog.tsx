@@ -25,9 +25,13 @@ import {
   DialogSurface, 
   DialogTitle, 
   FluentProvider,
+  Spinner,
   makeStyles,
-  webLightTheme 
+  webLightTheme,
+  tokens
 } from "@fluentui/react-components";
+
+import { Alert } from '@fluentui/react-components/unstable';
 
 import { EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn } from "editor-types";
 import { fluentTheme, isSolarizedThemeActive } from "../theme";
@@ -145,46 +149,41 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
   );
 };
 
-const useStyles = makeStyles({
-  dialogSurface: {
-    maxWidth: 'none'
-  },
-  dialogContent: {
-    overflowY: 'visible'
-  }
-})
-
-import { Intent, Spinner, SpinnerSize, Toast, Toaster, Text, Position } from "@blueprintjs/core";
-
 
 interface ProgressProps {
   message: string | null;
 }
 
 const Progress : React.FC<ProgressProps> = props => {
+  const classes = useStyles();
   if (props.message) {
     return (
-      <Toaster position={Position.TOP} usePortal={false} autoFocus={true}>
-        <Toast 
-          message={
-            <Text>
-              <Spinner 
-                size={SpinnerSize.SMALL} 
-                intent={Intent.PRIMARY} 
-                style={{
-                  display: 'inline-block',
-                  marginRight: 10
-                }} 
-              />
-              {props.message}
-            </Text>
-          } 
-          isCloseButtonShown={false} 
-          timeout={0}
-        />
-      </Toaster>
+      <Alert className={classes.progress}>
+        <Spinner size="tiny" label={props.message} />
+      </Alert>
     );
   } else {
     return null;
   }
 };
+
+
+const useStyles = makeStyles({
+  dialogSurface: {
+    maxWidth: 'none'
+  },
+  dialogContent: {
+    overflowY: 'visible'
+  },
+  progress: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    position: 'absolute',
+    top: '5px',
+    left: '170px',
+    right: '170px',
+    zIndex: 50
+  }
+})
+
+
+

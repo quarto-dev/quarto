@@ -990,7 +990,7 @@
           "scope": "window",
           "type": "string",
           "default": "",
-          "markdownDescription": "If there is a version of Quarto on your `PATH`, that version will always be used. If Quarto is not on your `PATH`, you may specify a Quarto executable location here."
+          "markdownDescription": "A path to the Quarto CLI executable. By default, the extension looks for Quarto CLI in the `PATH`, but if set, will use the path specified instead."
         },
         "quarto.render.renderOnSave": {
           "order": 12,

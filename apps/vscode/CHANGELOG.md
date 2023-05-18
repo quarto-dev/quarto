@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.85.0 (elease on 07 May 2023)
+## 1.86.0 (Unreleased)
+
+- Visual Editor: Use Fluent UI v9 as component library
+## 1.85.0 (Release on 07 May 2023)
 
 - Pass working directory to Julia REPL when executing cells
 - Show Quarto Assist contextual help when editing cells in visual mode

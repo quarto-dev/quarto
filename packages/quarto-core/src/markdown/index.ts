@@ -1,5 +1,5 @@
 /*
- * build.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,21 +13,5 @@
  *
  */
 
+export * from './parser'
 
-import { runBuild } from "build";
-
-const args = process.argv;
-const dev = args[2] === "dev";
-
-const nodeSqlLiteWasm = '../../node_modules/node-sqlite3-wasm/dist/*.wasm';
-
-runBuild({
-  entryPoints: ['./src/server.ts'],
-  outfile: './dist/lsp.js',
-  assets: [
-    { from: [nodeSqlLiteWasm], to: './dist/' },
-    { from: ['../../packages/quarto-core/src/resources/**'], to: './dist/resources/' },
-    { from: ['../../packages/editor-server/src/resources/**'], to: './dist/resources/' },
-    { from: ['./dist/**'], to: ['../vscode/out/lsp/'] }],
-  dev
-})

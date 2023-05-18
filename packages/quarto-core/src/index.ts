@@ -16,6 +16,7 @@
 export * from './context';
 export * from './metadata';
 export * from './appdirs';
+export * from './markdown';
 export * from './markdownit';
 export * from './storage';
 export * from './dictionaries';

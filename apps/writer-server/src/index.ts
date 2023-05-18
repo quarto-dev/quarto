@@ -13,6 +13,7 @@
  *
  */
 
+import fs from 'node:fs'
 import path from 'node:path';
 import process from 'node:process';
 import { initQuartoContext } from 'quarto-core';
@@ -26,6 +27,15 @@ const development = process.env.NODE_ENV !== 'production';
 const cwd = process.cwd();
 const editorDevResourcesDir = path.normalize(path.join(cwd, "../../packages/editor-server/src/resources"));
 const editorResourcesDir = development ? editorDevResourcesDir : editorDevResourcesDir;
+
+// copy quarto-core dependenciers to resource dir
+const quartoCoreResourcesdir = path.normalize(path.join(cwd, "../../packages/quarto-core/src/resources"));
+for (const file of fs.readdirSync(quartoCoreResourcesdir)) {
+  const match = file.match(/^.*\.lua$/);
+  if (match) {
+    fs.copyFileSync(path.join(quartoCoreResourcesdir, file), path.join(editorResourcesDir, file));
+  }
+}
 
 // configure server
 const quartoContext = initQuartoContext();

@@ -1,5 +1,8 @@
 
 
+
+// const resourcesDir = path.join(__dirname, "resources");
+
 function langaugeServiceMdParser() : IMdParser {
 
   const mdParser : IMdParser = {

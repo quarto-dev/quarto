@@ -17,7 +17,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
-import { activateLsp } from "./lsp/client";
+import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
@@ -102,3 +102,8 @@ export async function activate(context: vscode.ExtensionContext) {
   // activate providers common to browser/node
   activateCommon(context, engine, commands);
 }
+
+export async function deactivate() {
+  return deactivateLsp();
+} 
+

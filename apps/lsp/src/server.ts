@@ -177,7 +177,6 @@ connection.onDocumentRangeFormatting(async () => {
   return null;
 });
 
-
 // diagnostics on open and save (clear on doc modified)
 documents.onDidOpen(async (e) => {
   sendDiagnostics(e.document, await provideDiagnostics(e.document));

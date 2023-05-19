@@ -11,22 +11,27 @@
     "start": "node dist/lsp.js"
   },
   "dependencies": {
+    "@vscode/l10n": "^0.0.14",
     "core": "*",
     "core-node": "*",
     "editor-server": "*",
     "file-url": "^4.0.0",
     "js-yaml": "^4.1.0",
     "markdown-it": "^12.3.2",
+    "node-html-parser": "^6.1.5",
+    "picomatch": "^2.3.1",
     "quarto-core": "*",
     "uuid": "^8.3.2",
     "vscode-languageserver": "^7.0.0",
     "vscode-languageserver-textdocument": "^1.0.4",
+    "vscode-languageserver-types": "^3.17.3",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^15.12.2",
+    "@types/picomatch": "^2.3.0",
     "build": "*",
     "esbuild": "^0.16.7",
     "eslint": "^7.32.0",

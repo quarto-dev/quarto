@@ -39,15 +39,20 @@ import { MdTableOfContentsProvider } from './toc';
 import { ITextDocument } from './types/text-document';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 
-export type { LsConfiguration, PreferredMdPathExtensionStyle } from './config';
-export type { DiagnosticCode, DiagnosticLevel, DiagnosticOptions, IPullDiagnosticsManager } from './providers/diagnostics';
+export type { LsConfiguration } from './config';
+export { PreferredMdPathExtensionStyle } from './config';
+export type { DiagnosticOptions, IPullDiagnosticsManager } from './providers/diagnostics';
+export { DiagnosticCode, DiagnosticLevel} from './providers/diagnostics';
 export type { ResolvedDocumentLinkTarget } from './providers/document-links';
 export type { FileRename } from './providers/file-rename';
-export type { IncludeWorkspaceHeaderCompletions, PathCompletionOptions as MdPathCompletionOptions } from './providers/path-completions';
-export type { RenameNotSupportedAtLocationError } from './providers/rename';
-export type { ILogger, LogLevel } from './logging';
+export type { PathCompletionOptions as MdPathCompletionOptions } from './providers/path-completions';
+export { IncludeWorkspaceHeaderCompletions } from './providers/path-completions';
+export { RenameNotSupportedAtLocationError } from './providers/rename';
+export type  { ILogger } from './logging';
+export { LogLevel } from './logging';
 export type { IMdParser, Token } from './parser';
-export type { githubSlugifier, ISlugifier } from './slugify';
+export type { ISlugifier } from './slugify'
+export { githubSlugifier } from './slugify';
 export type { ITextDocument } from './types/text-document';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 

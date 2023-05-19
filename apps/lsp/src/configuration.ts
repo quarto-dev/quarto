@@ -7,7 +7,7 @@ import { Connection, Emitter } from 'vscode-languageserver';
 
 // update to v8.0.0 server: https://github.com/microsoft/vscode-languageserver-node#3170-protocol-800-json-rpc-800-client-and-800-server
 
-import { IDisposable, Disposable } from 'core';
+import { Disposable } from 'core';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 

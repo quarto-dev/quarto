@@ -15,46 +15,9 @@
 
 import path from "node:path"
 
-import { Range } from '../range';
 import { QuartoContext } from "../context";
+import { Token } from "./token";
 
-
-export type TokenType =
-  | "BlockQuote"
-  | "BulletList"
-  | "CodeBlock"
-  | "Div"
-  | "Header"
-  | "HorizontalRule"
-  | "OrderedList"
-  | "Para"
-  | "RawBlock"
-  | "Table"
-  | "Code"
-  | "Image"
-  | "Link"
-  | "Math"
-  | "Note"
-  | "RawInline"
-  | "Span";
-
-export interface Attr {
-  id: string;
-  classes: string[];
-  keyvalue: Array<[string, string]>;
-}
-
-export interface Token {
-  readonly type: TokenType;
-  range: Range;
-  attr?: Attr; 
-  data?: unknown;
-    // Header: text
-    // Image: caption
-    // Link: target
-    // Math: type
-    // CodeBlock: text
-}
 
 export function parseDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  

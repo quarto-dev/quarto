@@ -70,10 +70,10 @@ export interface LsConfiguration {
 	readonly preferredMdPathExtensionStyle?: PreferredMdPathExtensionStyle;
 }
 
-export const defaultMarkdownFileExtension = 'md';
+export const defaultMarkdownFileExtension = 'qmd';
 
 const defaultConfig: LsConfiguration = {
-	markdownFileExtensions: [defaultMarkdownFileExtension],
+	markdownFileExtensions: [defaultMarkdownFileExtension, 'md'],
 	knownLinkedToFileExtensions: [
 		'jpg',
 		'jpeg',
@@ -82,10 +82,18 @@ const defaultConfig: LsConfiguration = {
 		'webp',
 		'bmp',
 		'tiff',
+		'svg',
+		'pdf'
 	],
 	excludePaths: [
 		'**/.*',
 		'**/node_modules/**',
+		"**/renv/**", 
+		"**/packrat/**", 
+		"**/rsconnect/**",
+		"**/venv/**",
+		"**/env/**",
+		"**/_extensions/**"
 	]
 };
 

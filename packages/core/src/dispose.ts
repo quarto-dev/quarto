@@ -53,7 +53,7 @@ export abstract class Disposable {
 
 	protected _disposables: IDisposable[] = [];
 
-	public dispose(): unknown {
+	public dispose()  {
 		if (this.#isDisposed) {
 			return;
 		}

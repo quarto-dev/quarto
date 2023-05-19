@@ -14,34 +14,38 @@
  */
 
 export interface Lazy<T> {
-  readonly value: T;
-  readonly hasValue: boolean;
-  map<R>(f: (x: T) => R): Lazy<R>;
+	readonly value: T;
+	readonly hasValue: boolean;
+	map<R>(f: (x: T) => R): Lazy<R>;
 }
 
 class LazyValue<T> implements Lazy<T> {
-  private _hasValue = false;
-  private _value?: T;
+	#hasValue = false;
+	#value?: T;
 
-  constructor(private readonly _getValue: () => T) {}
+	readonly #getValue: () => T;
 
-  get value(): T {
-    if (!this._hasValue) {
-      this._hasValue = true;
-      this._value = this._getValue();
-    }
-    return this._value!;
-  }
+	constructor(getValue: () => T) {
+		this.#getValue = getValue;
+	}
 
-  get hasValue(): boolean {
-    return this._hasValue;
-  }
+	get value(): T {
+		if (!this.#hasValue) {
+			this.#hasValue = true;
+			this.#value = this.#getValue();
+		}
+		return this.#value!;
+	}
 
-  public map<R>(f: (x: T) => R): Lazy<R> {
-    return new LazyValue(() => f(this.value));
-  }
+	get hasValue(): boolean {
+		return this.#hasValue;
+	}
+
+	public map<R>(f: (x: T) => R): Lazy<R> {
+		return new LazyValue(() => f(this.value));
+	}
 }
 
 export function lazy<T>(getValue: () => T): Lazy<T> {
-  return new LazyValue<T>(getValue);
+	return new LazyValue<T>(getValue);
 }

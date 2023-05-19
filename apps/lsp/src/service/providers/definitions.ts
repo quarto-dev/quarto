@@ -16,10 +16,10 @@
 
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
+import { rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider } from '../toc';
-import { rangeContains } from '../types/range';
-import { ITextDocument } from '../types/text-document';
+import { ITextDocument } from '../util/text-document';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { HrefKind, LinkDefinitionSet, MdLink, MdLinkKind } from './document-links';

@@ -17,13 +17,12 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Position, Range } from 'vscode-languageserver-types';
+import { coalesce } from 'core';
+import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token, TokenWithMap } from '../parser';
 import { MdTableOfContentsProvider, TocEntry } from '../toc';
-import { translatePosition } from '../types/position';
-import { areRangesEqual, makeRange, modifyRange, rangeContains } from '../types/range';
-import { getLine, ITextDocument } from '../types/text-document';
-import { coalesce } from '../util/arrays';
+import { getLine, ITextDocument } from '../util/text-document';
 import { isEmptyOrWhitespace } from '../util/string';
 
 export class MdSelectionRangeProvider {

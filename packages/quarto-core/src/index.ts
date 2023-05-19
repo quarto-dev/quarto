@@ -20,3 +20,5 @@ export * from './markdown';
 export * from './markdownit';
 export * from './storage';
 export * from './dictionaries';
+export * from './position';
+export * from './range';

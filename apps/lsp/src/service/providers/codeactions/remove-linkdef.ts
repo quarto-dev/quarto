@@ -16,8 +16,8 @@
 
 import * as l10n from '@vscode/l10n';
 import * as lsp from 'vscode-languageserver-types';
-import { makeRange, rangeIntersects } from '../../types/range';
-import { getDocUri, ITextDocument } from '../../types/text-document';
+import { makeRange, rangeIntersects } from 'quarto-core';
+import { getDocUri, ITextDocument } from '../../util/text-document';
 import { WorkspaceEditBuilder } from '../../util/edit-builder';
 import { DiagnosticCode } from '../diagnostics';
 import { MdLinkDefinition } from '../document-links';

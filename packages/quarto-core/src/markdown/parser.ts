@@ -15,10 +15,7 @@
 
 import path from "node:path"
 
-import { 
-  Position as VSCodePosition, 
-  Range as VSCodeRange 
-} from "vscode-languageserver-types"
+import { Range } from '../range';
 import { QuartoContext } from "../context";
 
 
@@ -40,9 +37,6 @@ export type TokenType =
   | "Note"
   | "RawInline"
   | "Span";
-
-export type Position = VSCodePosition;
-export type Range = VSCodeRange;
 
 export interface Attr {
   id: string;

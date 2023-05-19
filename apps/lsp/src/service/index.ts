@@ -36,7 +36,7 @@ import { MdWorkspaceSymbolProvider } from './providers/workspace-symbols';
 import { ILogger } from './logging';
 import { IMdParser } from './parser';
 import { MdTableOfContentsProvider } from './toc';
-import { ITextDocument } from './types/text-document';
+import { ITextDocument } from './util/text-document';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 
 export type { LsConfiguration } from './config';
@@ -53,7 +53,7 @@ export { LogLevel } from './logging';
 export type { IMdParser, Token } from './parser';
 export type { ISlugifier } from './slugify'
 export { githubSlugifier } from './slugify';
-export type { ITextDocument } from './types/text-document';
+export type { ITextDocument } from './util/text-document';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 
 /**

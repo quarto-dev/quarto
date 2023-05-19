@@ -17,9 +17,10 @@
 import * as l10n from '@vscode/l10n';
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { comparePosition, translatePosition } from '../../types/position';
-import { makeRange, rangeIntersects } from '../../types/range';
-import { getDocUri, getLine, ITextDocument } from '../../types/text-document';
+
+import { comparePosition, translatePosition, makeRange, rangeIntersects } from 'quarto-core';
+
+import { getDocUri, getLine, ITextDocument } from '../../util/text-document';
 import { WorkspaceEditBuilder } from '../../util/edit-builder';
 import { ExternalHref, HrefKind, InternalHref, LinkDefinitionSet, MdDocumentLinksInfo, MdInlineLink, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider } from '../document-links';
 import { getExistingDefinitionBlock } from '../organize-linkdefs';

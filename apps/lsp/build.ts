@@ -22,7 +22,7 @@ const dev = args[2] === "dev";
 const nodeSqlLiteWasm = '../../node_modules/node-sqlite3-wasm/dist/*.wasm';
 
 runBuild({
-  entryPoints: ['./src/server.ts'],
+  entryPoints: ['./src/index.ts'],
   outfile: './dist/lsp.js',
   assets: [
     { from: [nodeSqlLiteWasm], to: './dist/' },

@@ -19,14 +19,15 @@ import * as picomatch from 'picomatch';
 import { CancellationToken, DiagnosticSeverity, Emitter, Event } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+
+import { Disposable, IDisposable, Limiter } from 'core';
+
+import { translatePosition, modifyRange } from 'quarto-core';
+
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider } from '../toc';
-import { translatePosition } from '../types/position';
-import { modifyRange } from '../types/range';
-import { getDocUri, ITextDocument } from '../types/text-document';
-import { Disposable, IDisposable } from '../util/dispose';
+import { getDocUri, ITextDocument } from '../util/text-document';
 import { looksLikeMarkdownUri } from '../util/file';
-import { Limiter } from '../util/limiter';
 import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';
 import { HrefKind, InternalHref, LinkDefinitionSet, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider, MdLinkSource, parseLocationInfoFromFragment, ReferenceLinkMap } from './document-links';

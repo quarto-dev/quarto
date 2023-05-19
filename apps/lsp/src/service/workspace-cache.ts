@@ -16,9 +16,10 @@
 
 import { CancellationToken, CancellationTokenSource } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
-import { getDocUri, ITextDocument } from './types/text-document';
-import { Disposable } from './util/dispose';
-import { lazy, Lazy } from './util/lazy';
+import { Disposable, lazy, Lazy } from 'core';
+
+import { getDocUri, ITextDocument } from './util/text-document';
+
 import { ResourceMap } from './util/resource-maps';
 import { IWorkspace } from './workspace';
 

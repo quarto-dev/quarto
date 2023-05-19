@@ -16,8 +16,8 @@
 
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { ITextDocument } from '../types/text-document';
-import { Disposable } from '../util/dispose';
+import { Disposable } from 'core';
+import { ITextDocument } from '../util/text-document';
 import { IWorkspace } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { MdDocumentSymbolProvider } from './document-symbols';

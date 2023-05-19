@@ -17,11 +17,10 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+import { translatePosition, modifyRange, rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../toc';
-import { translatePosition } from '../types/position';
-import { modifyRange, rangeContains } from '../types/range';
-import { ITextDocument } from '../types/text-document';
+import { ITextDocument } from '../util/text-document';
 import { tryAppendMarkdownFileExtension } from '../workspace';
 import { HrefKind, InternalHref, looksLikeLinkToResource, MdLink, MdLinkKind, MdLinkProvider } from './document-links';
 import { getFilePathRange } from './rename';

@@ -15,7 +15,7 @@
  */
 
 import { ISlugifier } from './slugify';
-import { ITextDocument } from './types/text-document';
+import { ITextDocument } from './util/text-document';
 
 export interface Token {
 	readonly type: string;

@@ -25,6 +25,10 @@ export * from './png';
 export * from './wait';
 export * from './auto-id';
 export * from './url';
+export * from './uri';
 export * from './image';
 export * from './yaml';
+export * from './dispose';
+export * from './arrays';
+export * from './limiter';
 

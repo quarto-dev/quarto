@@ -17,7 +17,7 @@
 import { Event } from 'vscode-languageserver';
 import { URI, Utils } from 'vscode-uri';
 import { defaultMarkdownFileExtension, LsConfiguration } from './config';
-import { ITextDocument } from './types/text-document';
+import { ITextDocument } from './util/text-document';
 import { ResourceMap } from './util/resource-maps';
 
 /**

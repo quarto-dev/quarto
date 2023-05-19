@@ -14,7 +14,9 @@
  *
  */
 
-import { Position } from 'vscode-languageserver-types';
+import { Position as VSCodePosition } from 'vscode-languageserver-types';
+
+export type Position = VSCodePosition;
 
 export function arePositionsEqual(a: Position, b: Position): boolean {
 	return a.line === b.line && a.character === b.character;

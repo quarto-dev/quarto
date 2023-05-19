@@ -17,14 +17,13 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+import { Disposable } from 'core';
+import { translatePosition, areRangesEqual, modifyRange, rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocEntry } from '../toc';
-import { translatePosition } from '../types/position';
-import { areRangesEqual, modifyRange, rangeContains } from '../types/range';
-import { getDocUri, ITextDocument } from '../types/text-document';
-import { Disposable } from '../util/dispose';
+import { getDocUri, ITextDocument } from '../util/text-document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';

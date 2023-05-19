@@ -18,9 +18,11 @@ import * as path from 'path';
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI, Utils } from 'vscode-uri';
+
+import { Disposable } from 'core';
+
 import { isExcludedPath, LsConfiguration, PreferredMdPathExtensionStyle } from '../config';
-import { getDocUri, ITextDocument } from '../types/text-document';
-import { Disposable } from '../util/dispose';
+import { getDocUri, ITextDocument } from '../util/text-document';
 import { WorkspaceEditBuilder } from '../util/edit-builder';
 import { looksLikeMarkdownUri } from '../util/file';
 import { isParentDir } from '../util/path';

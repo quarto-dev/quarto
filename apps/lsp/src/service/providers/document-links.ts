@@ -18,17 +18,17 @@ import { HTMLElement, parse } from 'node-html-parser';
 import type { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI, Utils } from 'vscode-uri';
+
+import { Disposable, coalesce, tryDecodeUri } from 'core';
+
+import { translatePosition, makeRange, rangeContains } from 'quarto-core';
+
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token } from '../parser';
 import { MdTableOfContentsProvider } from '../toc';
-import { translatePosition } from '../types/position';
-import { makeRange, rangeContains } from '../types/range';
-import { ITextDocument, getDocUri, getLine } from '../types/text-document';
-import { coalesce } from '../util/arrays';
-import { Disposable } from '../util/dispose';
+import { ITextDocument, getDocUri, getLine } from '../util/text-document';
 import { r } from '../util/string';
-import { tryDecodeUri } from '../util/uri';
 import { IWorkspace, getWorkspaceFolder, tryAppendMarkdownFileExtension } from '../workspace';
 import { MdDocumentInfoCache, MdWorkspaceInfoCache } from '../workspace-cache';
 

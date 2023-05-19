@@ -17,12 +17,15 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+
+import { Disposable } from 'core';
+import { makeRange } from 'quarto-core';
+
 import { ILogger, LogLevel } from './logging';
 import { IMdParser, Token } from './parser';
 import { githubSlugifier, ISlugifier, Slug } from './slugify';
-import { makeRange } from './types/range';
-import { getDocUri, getLine, ITextDocument } from './types/text-document';
-import { Disposable } from './util/dispose';
+import { getDocUri, getLine, ITextDocument } from './util/text-document';
+
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
 

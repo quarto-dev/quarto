@@ -14,8 +14,11 @@
  *
  */
 
-import { Position, Range } from 'vscode-languageserver-types';
-import { arePositionsEqual, isBefore, isPosition } from './position';
+import { Range as VSCodeRange } from 'vscode-languageserver-types';
+import { Position, arePositionsEqual, isBefore, isPosition } from './position';
+
+export type Range = VSCodeRange;
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isRange(thing: any): thing is Range {

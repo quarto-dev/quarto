@@ -13,13 +13,13 @@
  *
  */
 
-// TOOD: implement logger 
 // TODO: implement parser (refactor providers)
 // TODO: hookup service:
 //   - remove redundant impls on the client
 //   - consolidate quarto providers into service
 //   - return service capabilities
 // TODO: don't return no-op capabilities if we aren't in vscode (middleware)
+// TODO: see how _extensions plays in extension projects (check readonly?)
 // TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
 
 
@@ -50,13 +50,13 @@ import { initQuartoContext } from "quarto-core";
 import { kDefinitionCapabilities } from "./providers/definition";
 import { kFormattingCapabilities } from "./providers/format";
 import { ConfigurationManager } from "./configuration";
-import { languageServiceLogger } from "./logging";
+import { LogFunctionLogger } from "./logging";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
-// config manager
+// config manager and logging
 const configuration = new ConfigurationManager();
 
 connection.onInitialize((params: InitializeParams) => {
@@ -89,7 +89,12 @@ connection.onInitialize((params: InitializeParams) => {
     }
 
     // initialize logger
-    const logger = languageServiceLogger();
+    const logger = new LogFunctionLogger(
+      console.log.bind(console), 
+      configuration
+    );
+
+
 
     // initialize connection to quarto
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();

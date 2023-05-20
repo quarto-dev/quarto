@@ -133,7 +133,7 @@ class VSCodeWorkspaceQuartoDocumentProvider
     const docList: MarkdownTextDocument[] = [];
     const resources = await vscode.workspace.findFiles(
       "**/*.{qmd,md}",
-      "**/{node_modules,renv,packrat,venv,env}/**"
+      "**/{node_modules,renv,packrat,venv,env,_extensions,rsconnect}/**"
     );
 
     for (let i = 0; i < resources.length; i += maxConcurrent) {

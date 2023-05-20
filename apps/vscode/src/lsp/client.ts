@@ -128,11 +128,21 @@ export async function activateLsp(
     clientOptions
   );
 
-  // start the client
-  await client.start();
+  // return once the server is running
+  return new Promise<LanguageClient>((resolve, reject) => {
 
-  // return the client
-  return client;
+    const handler = client.onDidChangeState(e => {
+      if (e.newState === State.Running) {
+        handler.dispose();
+        resolve(client);
+      } else if (e.newState === State.Stopped) {
+        reject(new Error("Failed to start Quarto LSP Server"));
+      }
+    });
+
+    // Start the client. This will also launch the server
+    client.start();
+  });
 }
 
 export function deactivate(): Thenable<void> | undefined {

@@ -2,7 +2,7 @@ import { ILogger, LogLevel } from "./service";
 
 
 
-function languageServiceLogger() : ILogger {
+export function languageServiceLogger() : ILogger {
 
   const logger : ILogger = {
     level: LogLevel.Off,

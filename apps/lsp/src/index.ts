@@ -1,5 +1,5 @@
 /*
- * server.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,15 +13,24 @@
  *
  */
 
+// TOOD: implement logger 
+// TODO: implement parser (refactor providers)
+// TODO: hookup service:
+//   - remove redundant impls on the client
+//   - consolidate quarto providers into service
+//   - return service capabilities
+// TODO: don't return no-op capabilities if we aren't in vscode (middleware)
+// TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
+
+
 import {
   createConnection,
   Diagnostic,
-  DidChangeConfigurationNotification,
   InitializeParams,
   ProposedFeatures,
   TextDocumentIdentifier,
   TextDocuments,
-  TextDocumentSyncKind,
+  TextDocumentSyncKind
 } from "vscode-languageserver/node";
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -41,6 +50,7 @@ import { initQuartoContext } from "quarto-core";
 import { kDefinitionCapabilities } from "./providers/definition";
 import { kFormattingCapabilities } from "./providers/format";
 import { ConfigurationManager } from "./configuration";
+import { languageServiceLogger } from "./logging";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -78,6 +88,9 @@ connection.onInitialize((params: InitializeParams) => {
       await configuration.connect(connection);
     }
 
+    // initialize logger
+    const logger = languageServiceLogger();
+
     // initialize connection to quarto
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const workspaceDir = workspaceFolders?.length
@@ -90,6 +103,10 @@ connection.onInitialize((params: InitializeParams) => {
       workspaceDir
     );
     initializeQuarto(quartoContext);
+
+    // initialize language service workspace
+    //const workspace = lan
+
   
     const onCompletionHandler = onCompletion(configuration);
     connection.onCompletion(async (textDocumentPosition) => {

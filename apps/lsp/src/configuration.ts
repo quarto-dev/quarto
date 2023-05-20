@@ -87,22 +87,24 @@ export class ConfigurationManager extends Disposable {
 
 	public async connect(connection: Connection) {
 
-		// sync function
-		const syncSettings = async () => {
+		// function to update settings
+		const updateSettings = async () => {
 			this._settings = await connection.workspace.getConfiguration();
-			console.log("synced settings");
+			this._onDidChangeConfiguration.fire(this._settings!);
+			console.log("updated settings");
 		}
-		// sync now
-		await syncSettings();
 
+		// start with currnent settings
+		await updateSettings();
+		
 		// monitor changes
 		connection.client.register(
 			DidChangeConfigurationNotification.type,
 			undefined
 		);
-		connection.onDidChangeConfiguration(syncSettings);
-
-		console.log("connected");
+		connection.onDidChangeConfiguration(() => {
+			updateSettings();
+		});
 	}
 
 	public getSettings(): Settings | undefined {

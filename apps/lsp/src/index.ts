@@ -73,6 +73,7 @@ connection.onInitialize((params: InitializeParams) => {
 
   connection.onInitialized(async () => {  
 
+    // sync config if possible
     if (capabilities.workspace?.configuration) {
       await configuration.connect(connection);
     }

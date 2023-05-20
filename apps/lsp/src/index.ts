@@ -26,7 +26,6 @@ import {
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { isQuartoDoc, isQuartoYaml } from "./core/doc";
-import { config } from "./core/config";
 import {
   kCompletionCapabilities,
   onCompletion,
@@ -41,18 +40,18 @@ import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
 import { kDefinitionCapabilities } from "./providers/definition";
 import { kFormattingCapabilities } from "./providers/format";
+import { ConfigurationManager } from "./configuration";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
+// config manager
+const configuration = new ConfigurationManager();
+
 connection.onInitialize((params: InitializeParams) => {
 
   const capabilities = params.capabilities;
-
-  const hasConfigurationCapability = !!(
-    capabilities.workspace && !!capabilities.workspace.configuration
-  );
 
   // Create a simple text document manager. The text document manager
   // supports full document sync only
@@ -72,119 +71,96 @@ connection.onInitialize((params: InitializeParams) => {
     }
   }
 
-  connection.onInitialized(async () => {
+  connection.onInitialized(async () => {  
 
-    let workspaceDir: string | undefined;
-  
-    if (hasConfigurationCapability) {
-      // sync configuration
-      const syncConfiguration = async () => {
-        // get quarto config
-        const configuration = await connection.workspace.getConfiguration({
-          section: "quarto",
-        });
-        // add mathjax theme
-        const wbConfig = await connection.workspace.getConfiguration("workbench");
-        const mathJaxTheme =  wbConfig?.colorTheme?.includes("Light")
-          ? "light"
-          : "dark";
-        configuration.mathjax = configuration.mathjax || {};
-        configuration.mathjax.theme = mathJaxTheme;
-        // update config
-        config.update(configuration);
-      };
-      await syncConfiguration();
-  
-      // monitor changes
-      connection.client.register(
-        DidChangeConfigurationNotification.type,
-        undefined
-      );
-      connection.onDidChangeConfiguration(syncConfiguration);
-  
-      // initialize connection to quarto
-      const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-      workspaceDir = workspaceFolders?.length
-        ? URI.parse(workspaceFolders[0].uri).fsPath
-        : undefined;
+    if (capabilities.workspace?.configuration) {
+      await configuration.connect(connection);
     }
+
+    // initialize connection to quarto
+    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+    const workspaceDir = workspaceFolders?.length
+      ? URI.parse(workspaceFolders[0].uri).fsPath
+      : undefined;
+     
     // initialize quarto
-    const quartoContext = initQuartoContext(config.quartoPath(), workspaceDir);
+    const quartoContext = initQuartoContext(
+      configuration.getSettings()?.quarto.path, 
+      workspaceDir
+    );
     initializeQuarto(quartoContext);
   
+    const onCompletionHandler = onCompletion(configuration);
+    connection.onCompletion(async (textDocumentPosition) => {
+      const doc = resolveDoc(textDocumentPosition.textDocument);
+      if (doc) {
+        return await onCompletionHandler(
+          doc,
+          textDocumentPosition.position,
+          textDocumentPosition.context
+        );
+      } else {
+        return null;
+      }
+    });
+    
+    const onHoverProvider = onHover(configuration);
+    connection.onHover(async (textDocumentPosition) => {
+      const doc = resolveDoc(textDocumentPosition.textDocument);
+      if (doc) {
+        return await onHoverProvider(doc, textDocumentPosition.position);
+      } else {
+        return null;
+      }
+    });
+    
+    // methods provided just so we can intercept them w/ middleware on the client
+    connection.onSignatureHelp(async () => {
+      return null;
+    });
+    
+    connection.onDefinition(async () => {
+      return null;
+    });
+    
+    connection.onDocumentFormatting(async () => {
+      return null;
+    });
+    
+    connection.onDocumentRangeFormatting(async () => {
+      return null;
+    });
+    
+    // diagnostics on open and save (clear on doc modified)
+    documents.onDidOpen(async (e) => {
+      sendDiagnostics(e.document, await provideDiagnostics(e.document));
+    });
+    documents.onDidSave(async (e) => {
+      sendDiagnostics(e.document, await provideDiagnostics(e.document));
+    });
+    documents.onDidChangeContent(async (e) => {
+      sendDiagnostics(e.document, []);
+    });
+    function sendDiagnostics(doc: TextDocument, diagnostics: Diagnostic[]) {
+      connection.sendDiagnostics({
+        uri: doc.uri,
+        version: doc.version,
+        diagnostics,
+      });
+    }
+
     // create lsp connection (jsonrpc bridge) 
     const lspConnection: LspConnection = {
       onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
         return connection.onRequest(method, handler);
       }
     }
-  
+
     // register custom methods
     registerCustomMethods(quartoContext, lspConnection, documents);
   
   });
   
-  connection.onCompletion(async (textDocumentPosition) => {
-    const doc = resolveDoc(textDocumentPosition.textDocument);
-    if (doc) {
-      return await onCompletion(
-        doc,
-        textDocumentPosition.position,
-        textDocumentPosition.context
-      );
-    } else {
-      return null;
-    }
-  });
-  
-  connection.onHover(async (textDocumentPosition) => {
-    const doc = resolveDoc(textDocumentPosition.textDocument);
-    if (doc) {
-      if (onHover) {
-        return await onHover(doc, textDocumentPosition.position);
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  });
-  
-  // methods provided just so we can intercept them w/ middleware on the client
-  connection.onSignatureHelp(async () => {
-    return null;
-  });
-  
-  connection.onDefinition(async () => {
-    return null;
-  });
-  
-  connection.onDocumentFormatting(async () => {
-    return null;
-  });
-  
-  connection.onDocumentRangeFormatting(async () => {
-    return null;
-  });
-  
-  // diagnostics on open and save (clear on doc modified)
-  documents.onDidOpen(async (e) => {
-    sendDiagnostics(e.document, await provideDiagnostics(e.document));
-  });
-  documents.onDidSave(async (e) => {
-    sendDiagnostics(e.document, await provideDiagnostics(e.document));
-  });
-  documents.onDidChangeContent(async (e) => {
-    sendDiagnostics(e.document, []);
-  });
-  function sendDiagnostics(doc: TextDocument, diagnostics: Diagnostic[]) {
-    connection.sendDiagnostics({
-      uri: doc.uri,
-      version: doc.version,
-      diagnostics,
-    });
-  }
-
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,

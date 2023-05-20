@@ -28,8 +28,6 @@ import {
 
 import { isLatexPosition } from "../../core/markdown";
 
-import { config } from "../../core/config";
-
 interface LatexCommand {
   command: string;
   snippet?: string;
@@ -42,6 +40,7 @@ const kMathjaxCommands = mathjaxImport as Record<string, string[]>;
 import mathjaxCompletions from "./mathjax-completions.json";
 import { mathjaxLoadedExtensions } from "editor-server";
 import { MathjaxSupportedExtension } from "editor-types";
+import { ConfigurationManager } from "../../configuration";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;
 for (const key of Object.keys(kMathjaxCompletions)) {
   if (key.match(/\{.*?\}/)) {
@@ -54,74 +53,79 @@ for (const key of Object.keys(kMathjaxCompletions)) {
 
 // for latex we complete the subset of commands supported by mathjax
 // (as those will work universally in pdf and html)
-export async function latexCompletions(
-  doc: TextDocument,
-  pos: Position,
-  completionContext?: CompletionContext
-): Promise<CompletionItem[] | null> {
-  // validate trigger
-  const trigger = completionContext?.triggerCharacter;
-  if (trigger && !["\\"].includes(trigger)) {
-    return null;
-  }
+export function latexCompletions(config: ConfigurationManager) {
 
-  // check for latex position
-  if (!isLatexPosition(doc, pos)) {
-    return null;
-  }
-
-  // scan back from the cursor to see if there is a \
-  const line = doc
-    .getText(Range.create(pos.line, 0, pos.line + 1, 0))
-    .trimEnd();
-  const text = line.slice(0, pos.character);
-  const backslashPos = text.lastIndexOf("\\");
-  const spacePos = text.lastIndexOf(" ");
-  if (backslashPos !== -1 && backslashPos > spacePos && text[backslashPos-1] !== "\\") {
-    const loadedExtensions = mathjaxLoadedExtensions(config.mathJaxExtensions());
-    const token = text.slice(backslashPos + 1);
-    const completions: CompletionItem[] = Object.keys(kMathjaxCommands)
-      .filter((cmdName) => {
-        if (cmdName.startsWith(token)) {
-          // filter on loaded extensions
-          const pkgs = kMathjaxCommands[cmdName];
-          return (
-            pkgs.length === 0 ||
-            pkgs.some((pkg) => loadedExtensions.includes(pkg as MathjaxSupportedExtension))
-          );
-        } else {
-          return false;
-        }
-      })
-      .map((cmd) => {
-        const mathjaxCompletion = kMathjaxCompletions[cmd];
-        if (mathjaxCompletion) {
-          return {
-            kind: CompletionItemKind.Function,
-            label: mathjaxCompletion.command,
-            documentation: mathjaxCompletion.documentation,
-            detail: mathjaxCompletion.detail,
-            insertTextFormat: InsertTextFormat.Snippet,
-            insertText: mathjaxCompletion.snippet,
-          };
-        } else {
-          return {
-            kind: CompletionItemKind.Function,
-            label: cmd,
-          };
-        }
-      });
-
-    // single completion w/ matching token is ignored
-    if (completions.length == 1 && completions[0].label === token) {
+  return async (
+    doc: TextDocument,
+    pos: Position,
+    completionContext?: CompletionContext
+  ): Promise<CompletionItem[] | null> => {
+    // validate trigger
+    const trigger = completionContext?.triggerCharacter;
+    if (trigger && !["\\"].includes(trigger)) {
       return null;
     }
 
-    // return completions if we have them
-    if (completions.length > 0) {
-      return completions;
+    // check for latex position
+    if (!isLatexPosition(doc, pos)) {
+      return null;
     }
-  }
 
-  return null;
+    // scan back from the cursor to see if there is a \
+    const line = doc
+      .getText(Range.create(pos.line, 0, pos.line + 1, 0))
+      .trimEnd();
+    const text = line.slice(0, pos.character);
+    const backslashPos = text.lastIndexOf("\\");
+    const spacePos = text.lastIndexOf(" ");
+    if (backslashPos !== -1 && backslashPos > spacePos && text[backslashPos-1] !== "\\") {
+      const loadedExtensions = mathjaxLoadedExtensions(
+        config.getSettings()?.quarto.mathjax.extensions || []
+      );
+      const token = text.slice(backslashPos + 1);
+      const completions: CompletionItem[] = Object.keys(kMathjaxCommands)
+        .filter((cmdName) => {
+          if (cmdName.startsWith(token)) {
+            // filter on loaded extensions
+            const pkgs = kMathjaxCommands[cmdName];
+            return (
+              pkgs.length === 0 ||
+              pkgs.some((pkg) => loadedExtensions.includes(pkg as MathjaxSupportedExtension))
+            );
+          } else {
+            return false;
+          }
+        })
+        .map((cmd) => {
+          const mathjaxCompletion = kMathjaxCompletions[cmd];
+          if (mathjaxCompletion) {
+            return {
+              kind: CompletionItemKind.Function,
+              label: mathjaxCompletion.command,
+              documentation: mathjaxCompletion.documentation,
+              detail: mathjaxCompletion.detail,
+              insertTextFormat: InsertTextFormat.Snippet,
+              insertText: mathjaxCompletion.snippet,
+            };
+          } else {
+            return {
+              kind: CompletionItemKind.Function,
+              label: cmd,
+            };
+          }
+        });
+
+      // single completion w/ matching token is ignored
+      if (completions.length == 1 && completions[0].label === token) {
+        return null;
+      }
+
+      // return completions if we have them
+      if (completions.length > 0) {
+        return completions;
+      }
+    }
+
+    return null;
+  }
 }

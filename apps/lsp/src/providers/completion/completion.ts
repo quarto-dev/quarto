@@ -27,6 +27,7 @@ import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";
 import { refsCompletions } from "./refs/completion-refs";
+import { ConfigurationManager } from "../../configuration";
 
 export const kCompletionCapabilities: ServerCapabilities = {
   completionProvider: {
@@ -37,20 +38,25 @@ export const kCompletionCapabilities: ServerCapabilities = {
   },
 };
 
-export async function onCompletion(
-  doc: TextDocument,
-  pos: Position,
-  completionContext?: CompletionContext
-): Promise<CompletionItem[] | null> {
-  const explicit =
-    completionContext?.triggerKind === CompletionTriggerKind.TriggerCharacter;
-  const trigger = completionContext?.triggerCharacter;
-  const context = docEditorContext(doc, pos, explicit, trigger);
-  return (
-    (await refsCompletions(doc, pos, context)) ||
-    (await attrCompletions(context)) ||
-    (await latexCompletions(doc, pos, completionContext)) ||
-    (await yamlCompletions(context, true)) ||
-    null
-  );
+export function onCompletion(config: ConfigurationManager) {
+  
+  const latexCompletionHandler = latexCompletions(config);
+
+  return async (
+    doc: TextDocument,
+    pos: Position,
+    completionContext?: CompletionContext
+  ): Promise<CompletionItem[] | null> => {
+    const explicit =
+      completionContext?.triggerKind === CompletionTriggerKind.TriggerCharacter;
+    const trigger = completionContext?.triggerCharacter;
+    const context = docEditorContext(doc, pos, explicit, trigger);
+    return (
+      (await refsCompletions(doc, pos, context)) ||
+      (await attrCompletions(context)) ||
+      (await latexCompletionHandler(doc, pos, completionContext)) ||
+      (await yamlCompletions(context, true)) ||
+      null
+    );
+  }
 }

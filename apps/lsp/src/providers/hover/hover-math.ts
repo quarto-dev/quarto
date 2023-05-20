@@ -20,30 +20,38 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
-import { config } from "../../core/config";
 import { mathRange } from "../../core/markdown";
+import { ConfigurationManager } from "../../configuration";
 
 
-export function mathHover(doc: TextDocument, pos: Position): Hover | null {
-  const range = mathRange(doc, pos);
-  if (range) {
-    const contents = mathjaxTypesetToMarkdown(range.math, doc.getText());
-    if (contents) {
-      return {
-        contents,
-        range: range.range,
-      };
+export function mathHover(config: ConfigurationManager) {
+  
+  return (doc: TextDocument, pos: Position): Hover | null => {
+    const range = mathRange(doc, pos);
+    if (range) {
+      const contents = mathjaxTypesetToMarkdown(range.math, doc.getText(), config);
+      if (contents) {
+        return {
+          contents,
+          range: range.range,
+        };
+      }
     }
+    return null;
   }
-  return null;
 }
 
-function mathjaxTypesetToMarkdown(tex: string, docText: string) :  MarkupContent | null  {
+function mathjaxTypesetToMarkdown(
+  tex: string, 
+  docText: string,
+  config: ConfigurationManager
+) :  MarkupContent | null  {
+  const settings = config.getSettings();
   const options: MathjaxTypesetOptions = {
     format: "data-uri",
-    theme: config.mathJaxTheme(),
-    scale: config.mathJaxScale(),
-    extensions: config.mathJaxExtensions()
+    theme: settings?.workbench.colorTheme.includes("Light") ? "light" : "dark",
+    scale: settings?.quarto.mathjax.scale || 1,
+    extensions: settings?.quarto.mathjax.extensions || []
   }
   const result = mathjaxTypeset(tex, options, docText);
   if (result.math) {

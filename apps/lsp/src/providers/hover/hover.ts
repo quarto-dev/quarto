@@ -20,16 +20,20 @@ import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
 import { docEditorContext } from "../../quarto/quarto";
+import { ConfigurationManager } from "../../configuration";
 
 export const kHoverCapabilities: ServerCapabilities = {
   hoverProvider: true,
 };
 
-export async function onHover(
-  doc: TextDocument,
-  pos: Position
-): Promise<Hover | null> {
-  return (
-    (await refHover(doc, pos)) || mathHover(doc, pos) || (await yamlHover(docEditorContext(doc, pos, true)))
-  );
+export function onHover(config: ConfigurationManager) {
+  const onMathHover = mathHover(config);
+  return async (
+    doc: TextDocument,
+    pos: Position
+  ): Promise<Hover | null> => {
+    return (
+      (await refHover(doc, pos)) || onMathHover(doc, pos) || (await yamlHover(docEditorContext(doc, pos, true)))
+    );
+  } 
 }

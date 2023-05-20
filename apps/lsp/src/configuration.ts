@@ -1,17 +1,37 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+/*
+ * configuration.ts
+ *
+ * Copyright (C) 2023 by Posit Software, PBC
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ *
+ * Unless you have received this program directly from Posit Software pursuant
+ * to the terms of a commercial license agreement with Posit Software, then
+ * this program is licensed to you under the terms of version 3 of the
+ * GNU Affero General Public License. This program is distributed WITHOUT
+ * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
+ * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
+ *
+ */
 
-import { Connection, Emitter } from 'vscode-languageserver';
-
-// update to v8.0.0 server: https://github.com/microsoft/vscode-languageserver-node#3170-protocol-800-json-rpc-800-client-and-800-server
+import { Connection, DidChangeConfigurationNotification, Emitter } from 'vscode-languageserver';
 
 import { Disposable } from 'core';
+import { MathjaxSupportedExtension } from 'editor-types';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 
 export interface Settings {
+	readonly workbench: {
+		readonly colorTheme: string;
+	};
+	readonly quarto: {
+		readonly path: string;
+		readonly mathjax: {
+			readonly scale: number;
+			readonly extensions: MathjaxSupportedExtension[];
+		}
+	};
 	readonly markdown: {
 		readonly server: {
 			readonly log: 'off' | 'debug' | 'trace';
@@ -61,14 +81,28 @@ export class ConfigurationManager extends Disposable {
 
 	private _settings?: Settings;
 
-	constructor(connection: Connection) {
+	constructor() {
 		super();
+	}
 
-		// The settings have changed. Is send on server activation as well.
-		this._register(connection.onDidChangeConfiguration((change) => {
-			this._settings = change.settings;
-			this._onDidChangeConfiguration.fire(this._settings!);
-		}));
+	public async connect(connection: Connection) {
+
+		// sync function
+		const syncSettings = async () => {
+			this._settings = await connection.workspace.getConfiguration();
+			console.log("synced settings");
+		}
+		// sync now
+		await syncSettings();
+
+		// monitor changes
+		connection.client.register(
+			DidChangeConfigurationNotification.type,
+			undefined
+		);
+		connection.onDidChangeConfiguration(syncSettings);
+
+		console.log("connected");
 	}
 
 	public getSettings(): Settings | undefined {

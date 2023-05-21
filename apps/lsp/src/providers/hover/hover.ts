@@ -14,7 +14,7 @@
  */
 
 import { Position, TextDocument } from "vscode-languageserver-textdocument";
-import { Hover, ServerCapabilities } from "vscode-languageserver/node";
+import { Hover } from "vscode-languageserver/node";
 
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
@@ -22,9 +22,6 @@ import { refHover } from "./hover-ref";
 import { docEditorContext } from "../../quarto/quarto";
 import { ConfigurationManager } from "../../config";
 
-export const kHoverCapabilities: ServerCapabilities = {
-  hoverProvider: true,
-};
 
 export function onHover(config: ConfigurationManager) {
   const onMathHover = mathHover(config);

@@ -19,8 +19,7 @@ import { Position, TextDocument } from "vscode-languageserver-textdocument";
 import {
   CompletionContext,
   CompletionItem,
-  CompletionTriggerKind,
-  ServerCapabilities,
+  CompletionTriggerKind
 } from "vscode-languageserver/node";
 import { docEditorContext } from "../../quarto/quarto";
 import { attrCompletions } from "./completion-attrs";
@@ -28,15 +27,6 @@ import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";
 import { refsCompletions } from "./refs/completion-refs";
 import { ConfigurationManager } from "../../config";
-
-export const kCompletionCapabilities: ServerCapabilities = {
-  completionProvider: {
-    resolveProvider: false,
-    // register a superset of all trigger characters for embedded languages
-    // (languages are responsible for declaring which one they support if any)
-    triggerCharacters: [".", "$", "@", ":", "\\", "="],
-  },
-};
 
 export function onCompletion(config: ConfigurationManager) {
   

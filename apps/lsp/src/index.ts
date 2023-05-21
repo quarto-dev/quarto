@@ -36,23 +36,20 @@ import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { isQuartoDoc, isQuartoYaml } from "./core/doc";
 import {
-  kCompletionCapabilities,
   onCompletion,
 } from "./providers/completion/completion";
-import { kHoverCapabilities, onHover } from "./providers/hover/hover";
-import { kSignatureCapabilities } from "./providers/signature";
+import { onHover } from "./providers/hover/hover";
 import { provideDiagnostics } from "./providers/diagnostics";
 
 import { initializeQuarto } from "./quarto/quarto";
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
-import { kDefinitionCapabilities } from "./providers/definition";
-import { kFormattingCapabilities } from "./providers/format";
 import { ConfigurationManager } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { langaugeServiceMdParser } from "./parser";
+import { middlewareCapabilities, middlewareRegister } from "./middleware";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -150,24 +147,10 @@ connection.onInitialize((params: InitializeParams) => {
         return null;
       }
     });
-    
-    // methods provided just so we can intercept them w/ middleware on the client
-    connection.onSignatureHelp(async () => {
-      return null;
-    });
-    
-    connection.onDefinition(async () => {
-      return null;
-    });
-    
-    connection.onDocumentFormatting(async () => {
-      return null;
-    });
-    
-    connection.onDocumentRangeFormatting(async () => {
-      return null;
-    });
-    
+
+    // register no-op methods to enable client middleware
+    middlewareRegister(connection);
+     
     // diagnostics on open and save (clear on doc modified)
     documents.onDidOpen(async (e) => {
       sendDiagnostics(e.document, await provideDiagnostics(e.document));
@@ -197,15 +180,19 @@ connection.onInitialize((params: InitializeParams) => {
     registerCustomMethods(quartoContext, lspConnection, documents);
   
   });
-  
+
+
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      ...kCompletionCapabilities,
-      ...kHoverCapabilities,
-      ...kSignatureCapabilities,
-      ...kDefinitionCapabilities,
-      ...kFormattingCapabilities,
+      completionProvider: {
+        resolveProvider: false,
+        // register a superset of all trigger characters for embedded languages
+        // (languages are responsible for declaring which one they support if any)
+        triggerCharacters: [".", "$", "@", ":", "\\", "=", "/", "#"],
+      },
+      hoverProvider: true,
+      ...middlewareCapabilities()
     },
   };
 });

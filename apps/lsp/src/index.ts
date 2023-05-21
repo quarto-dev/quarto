@@ -52,6 +52,7 @@ import { kFormattingCapabilities } from "./providers/format";
 import { ConfigurationManager } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
+import { langaugeServiceMdParser } from "./parser";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -117,6 +118,10 @@ connection.onInitialize((params: InitializeParams) => {
       logger
     )
 
+    // initialize parser
+    const mdParser = langaugeServiceMdParser(quartoContext, "resources");
+
+    
 
     // initialize language service workspace
     //const workspace = lan

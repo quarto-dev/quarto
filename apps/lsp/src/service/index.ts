@@ -52,7 +52,7 @@ export type  { ILogger } from './logging';
 export { LogLevel } from './logging';
 export type { IMdParser, Token } from './parser';
 export type { ISlugifier } from './slugify'
-export { githubSlugifier } from './slugify';
+export { Slug, githubSlugifier } from './slugify';
 export type { ITextDocument } from './util/text-document';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 

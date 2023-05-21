@@ -92,7 +92,6 @@ export class ConfigurationManager extends Disposable {
 		const updateSettings = async () => {
 			this._settings = await connection.workspace.getConfiguration();
 			this._onDidChangeConfiguration.fire(this._settings!);
-			console.log("updated settings");
 		}
 
 		// start with currnent settings

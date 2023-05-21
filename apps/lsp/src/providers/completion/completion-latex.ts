@@ -40,7 +40,7 @@ const kMathjaxCommands = mathjaxImport as Record<string, string[]>;
 import mathjaxCompletions from "./mathjax-completions.json";
 import { mathjaxLoadedExtensions } from "editor-server";
 import { MathjaxSupportedExtension } from "editor-types";
-import { ConfigurationManager } from "../../configuration";
+import { ConfigurationManager } from "../../config";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;
 for (const key of Object.keys(kMathjaxCompletions)) {
   if (key.match(/\{.*?\}/)) {

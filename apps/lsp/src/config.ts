@@ -18,6 +18,7 @@ import { Connection, DidChangeConfigurationNotification, Emitter } from 'vscode-
 
 import { Disposable } from 'core';
 import { MathjaxSupportedExtension } from 'editor-types';
+import { PreferredMdPathExtensionStyle, getLsConfiguration } from './service/config';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 
@@ -111,3 +112,21 @@ export class ConfigurationManager extends Disposable {
 		return this._settings;
 	}
 }
+
+export function lsConfiguration(configurationManager: ConfigurationManager) {
+	const config = getLsConfiguration({});
+	return {
+		...config,
+		get preferredMdPathExtensionStyle() {
+			switch (configurationManager.getSettings()?.markdown.preferredMdPathExtensionStyle) {
+				case 'includeExtension': return PreferredMdPathExtensionStyle.includeExtension;
+				case 'removeExtension': return PreferredMdPathExtensionStyle.removeExtension;
+				case 'auto':
+				default:
+					return PreferredMdPathExtensionStyle.auto;
+			}
+		}
+	}
+}
+
+

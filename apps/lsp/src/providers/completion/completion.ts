@@ -27,7 +27,7 @@ import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";
 import { refsCompletions } from "./refs/completion-refs";
-import { ConfigurationManager } from "../../configuration";
+import { ConfigurationManager } from "../../config";
 
 export const kCompletionCapabilities: ServerCapabilities = {
   completionProvider: {

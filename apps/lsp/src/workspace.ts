@@ -40,15 +40,19 @@ import {
 import { isQuartoDoc } from "./core/doc";
 import { ResourceMap } from "./service/util/resource-maps";
 import { Limiter } from "core";
+import { ConfigurationManager, lsConfiguration } from "./config";
 
 
 export function languageServiceWorkspace(
   workspaceFolders: URI[],
   documents: TextDocuments<TextDocument>,
   connection: Connection,
-  config: LsConfiguration,
+  configuration: ConfigurationManager,
   logger: ILogger
 ) : IWorkspace {
+
+  // create config that looks up some settings dynamically
+  const lsConfig = lsConfiguration(configuration);
 
   // track changes to workspace folders
   connection.workspace.onDidChangeWorkspaceFolders(async () => {
@@ -59,7 +63,7 @@ export function languageServiceWorkspace(
   const documentCache = new ResourceMap<VsCodeDocument>();
 
   const openMarkdownDocumentFromFs = async (resource: URI): Promise<ITextDocument | undefined> => {
-		if (!looksLikeMarkdownPath(config, resource)) {
+		if (!looksLikeMarkdownPath(lsConfig, resource)) {
 			return undefined;
 		}
 
@@ -198,8 +202,8 @@ export function languageServiceWorkspace(
 
       // And then add files on disk 
       for (const workspaceFolder of this.workspaceFolders) {
-        const mdFileGlob = `**/*.{${config.markdownFileExtensions.join(',')}}`;
-        const ignore = [...config.excludePaths]; 
+        const mdFileGlob = `**/*.{${lsConfig.markdownFileExtensions.join(',')}}`;
+        const ignore = [...lsConfig.excludePaths]; 
         const resources = await glob(mdFileGlob, { ignore, cwd: workspaceFolder.toString() } );
 
         // (read max 20 at a time)

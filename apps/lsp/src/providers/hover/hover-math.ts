@@ -21,7 +21,7 @@ import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
 import { mathRange } from "../../core/markdown";
-import { ConfigurationManager } from "../../configuration";
+import { ConfigurationManager } from "../../config";
 
 
 export function mathHover(config: ConfigurationManager) {

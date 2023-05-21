@@ -22,7 +22,7 @@ import { Disposable } from 'core';
 
 import { ILogger, LogLevel } from "./service";
 
-import { ConfigurationManager } from './configuration';
+import { ConfigurationManager } from './config';
 
 export class LogFunctionLogger extends Disposable implements ILogger {
 

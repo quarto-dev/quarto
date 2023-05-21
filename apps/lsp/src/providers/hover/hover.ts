@@ -20,7 +20,7 @@ import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
 import { docEditorContext } from "../../quarto/quarto";
-import { ConfigurationManager } from "../../configuration";
+import { ConfigurationManager } from "../../config";
 
 export const kHoverCapabilities: ServerCapabilities = {
   hoverProvider: true,

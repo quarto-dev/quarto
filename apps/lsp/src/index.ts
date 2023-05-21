@@ -49,8 +49,9 @@ import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
 import { kDefinitionCapabilities } from "./providers/definition";
 import { kFormattingCapabilities } from "./providers/format";
-import { ConfigurationManager } from "./configuration";
+import { ConfigurationManager } from "./config";
 import { LogFunctionLogger } from "./logging";
+import { languageServiceWorkspace } from "./workspace";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -88,14 +89,6 @@ connection.onInitialize((params: InitializeParams) => {
       await configuration.connect(connection);
     }
 
-    // initialize logger
-    const logger = new LogFunctionLogger(
-      console.log.bind(console), 
-      configuration
-    );
-
-
-
     // initialize connection to quarto
     const workspaceFolders = await connection.workspace.getWorkspaceFolders();
     const workspaceDir = workspaceFolders?.length
@@ -108,6 +101,22 @@ connection.onInitialize((params: InitializeParams) => {
       workspaceDir
     );
     initializeQuarto(quartoContext);
+
+    // initialize logger
+    const logger = new LogFunctionLogger(
+      console.log.bind(console), 
+      configuration
+    );
+
+    // initialize workspace
+    const workspace = languageServiceWorkspace(
+      workspaceFolders?.map(value => URI.parse(value.uri)) || [],
+      documents,
+      connection,
+      configuration,
+      logger
+    )
+
 
     // initialize language service workspace
     //const workspace = lan

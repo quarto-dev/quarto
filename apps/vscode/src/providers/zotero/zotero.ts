@@ -22,7 +22,7 @@ import { lspClientTransport } from "core-node";
 import { editorZoteroJsonRpcServer } from "editor-core";
 import { ZoteroCollectionSpec, ZoteroResult, ZoteroServer, kZoteroMyLibrary } from "editor-types";
 import { zoteroServerMethods } from "editor-server/src/server/zotero";
-import { JsonRpcRequestTransport } from "core";
+import { JsonRpcRequestTransport, sleep } from "core";
 
 const kQuartoZoteroWebApiKey = "quartoZoteroWebApiKey";
 
@@ -62,7 +62,11 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
 
   // set initial config
   const setLspLibraryConfig = async (retry?: number) => {
-    if (retry === 5) {
+    // if this isn't a retry then provide an initial delay (for the lsp to be ready)
+    if (retry === undefined) {
+      await sleep(500);
+    // if this is our final retry then bail
+    } else if (retry === 5) {
       return;
     }
     const zoteroConfig = workspace.getConfiguration(kZoteroConfig);

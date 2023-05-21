@@ -28,7 +28,7 @@ import {
 import { LspConnection, registerLspServerMethods } from "core-node";
 import { QuartoContext, userDictionaryDir } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
-import { Hover, Position, TextDocuments } from "vscode-languageserver/node";
+import { Hover, Position, TextDocuments } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";

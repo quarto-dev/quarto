@@ -20,7 +20,7 @@ import {
   CompletionContext,
   CompletionItem,
   CompletionTriggerKind
-} from "vscode-languageserver/node";
+} from "vscode-languageserver";
 import { docEditorContext } from "../../quarto/quarto";
 import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";

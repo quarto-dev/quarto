@@ -13,7 +13,7 @@
  *
  */
 
-import { Hover, Position, Range } from "vscode-languageserver/node";
+import { Hover, Position, Range } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { cslRefs, CslRef } from "editor-server";
 

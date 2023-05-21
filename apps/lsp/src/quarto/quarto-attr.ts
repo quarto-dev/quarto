@@ -24,7 +24,7 @@ import {
   MarkupKind,
   Range,
   TextEdit,
-} from "vscode-languageserver/node";
+} from "vscode-languageserver";
 import { EditorContext } from "./quarto";
 
 export const kContextHeading = "heading";

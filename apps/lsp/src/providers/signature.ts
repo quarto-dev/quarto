@@ -13,7 +13,7 @@
  *
  */
 
-import { ServerCapabilities } from "vscode-languageserver/node";
+import { ServerCapabilities } from "vscode-languageserver";
 
 export const kSignatureCapabilities: ServerCapabilities = {
   signatureHelpProvider: {

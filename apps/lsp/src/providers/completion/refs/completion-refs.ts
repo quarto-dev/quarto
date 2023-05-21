@@ -16,7 +16,7 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Range, Position } from "vscode-languageserver-types";
 
-import { CompletionItem } from "vscode-languageserver/node";
+import { CompletionItem } from "vscode-languageserver";
 import { filePathForDoc } from "../../../core/doc";
 import { bypassRefIntelligence } from "../../../core/refs";
 

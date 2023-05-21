@@ -18,7 +18,7 @@ import {
   CompletionItem,
   CompletionItemKind,
   MarkupKind,
-} from "vscode-languageserver/node";
+} from "vscode-languageserver";
 
 import { XRef } from "editor-types";
 

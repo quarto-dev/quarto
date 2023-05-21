@@ -24,7 +24,7 @@ import {
   CompletionItemKind,
   InsertTextFormat,
   Range,
-} from "vscode-languageserver/node";
+} from "vscode-languageserver";
 
 import { isLatexPosition } from "../../core/markdown";
 

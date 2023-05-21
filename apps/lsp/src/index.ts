@@ -24,14 +24,16 @@
 
 
 import {
-  createConnection,
   Diagnostic,
   InitializeParams,
   ProposedFeatures,
   TextDocumentIdentifier,
   TextDocuments,
   TextDocumentSyncKind
-} from "vscode-languageserver/node";
+} from "vscode-languageserver";
+
+import { createConnection } from "vscode-languageserver/node"
+
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { isQuartoDoc, isQuartoYaml } from "./core/doc";

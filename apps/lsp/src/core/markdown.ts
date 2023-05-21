@@ -13,7 +13,7 @@
  *
  */
 
-import { Range, Position } from "vscode-languageserver/node";
+import { Range, Position } from "vscode-languageserver";
 
 import Token from "markdown-it/lib/token";
 

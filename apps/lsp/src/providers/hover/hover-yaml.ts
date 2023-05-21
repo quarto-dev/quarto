@@ -13,7 +13,7 @@
  *
  */
 
-import { Hover, MarkupKind } from "vscode-languageserver/node";
+import { Hover, MarkupKind } from "vscode-languageserver";
 
 import { EditorContext, quarto } from "../../quarto/quarto";
 

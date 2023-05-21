@@ -20,7 +20,7 @@ import {
   DiagnosticSeverity,
   Position,
   Range,
-} from "vscode-languageserver/node";
+} from "vscode-languageserver";
 import {
   docEditorContext,
   kEndColumn,

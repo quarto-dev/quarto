@@ -14,7 +14,7 @@
  *
  */
 
-import { Hover, MarkupContent, MarkupKind, Position } from "vscode-languageserver/node";
+import { Hover, MarkupContent, MarkupKind, Position } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
 import { MathjaxTypesetOptions } from "editor-types";

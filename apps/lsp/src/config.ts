@@ -89,28 +89,23 @@ export class ConfigurationManager extends Disposable {
 
 	private _settings?: Settings;
 
-	constructor() {
+	constructor(private readonly connection_: Connection) {
 		super();
 	}
 
-	public async connect(connection: Connection) {
+	public async update() {
+		this._settings = await this.connection_.workspace.getConfiguration();
+		this._onDidChangeConfiguration.fire(this._settings!);
+	}
 
-		// function to update settings
-		const updateSettings = async () => {
-			this._settings = await connection.workspace.getConfiguration();
-			this._onDidChangeConfiguration.fire(this._settings!);
-		}
-
-		// start with currnent settings
-		await updateSettings();
-		
-		// monitor changes
-		connection.client.register(
+	public subscribe() {
+		this.update();
+		this.connection_.client.register(
 			DidChangeConfigurationNotification.type,
 			undefined
 		);
-		connection.onDidChangeConfiguration(() => {
-			updateSettings();
+		this.connection_.onDidChangeConfiguration(() => {
+			this.update();
 		});
 	}
 
@@ -119,12 +114,12 @@ export class ConfigurationManager extends Disposable {
 	}
 }
 
-export function lsConfiguration(configurationManager: ConfigurationManager) : LsConfiguration {
+export function lsConfiguration(configManager: ConfigurationManager) : LsConfiguration {
 	const config = defaultLsConfiguration();
 	return {
 		...config,
 		get preferredMdPathExtensionStyle() {
-			switch (configurationManager.getSettings()?.markdown.preferredMdPathExtensionStyle) {
+			switch (configManager.getSettings()?.markdown.preferredMdPathExtensionStyle) {
 				case 'includeExtension': return PreferredMdPathExtensionStyle.includeExtension;
 				case 'removeExtension': return PreferredMdPathExtensionStyle.removeExtension;
 				case 'auto':
@@ -133,7 +128,7 @@ export function lsConfiguration(configurationManager: ConfigurationManager) : Ls
 			}
 		},
 		get includeWorkspaceHeaderCompletions() : IncludeWorkspaceHeaderCompletions {
-			switch (configurationManager.getSettings()?.markdown.suggest.paths.includeWorkspaceHeaderCompletions || config.includeWorkspaceHeaderCompletions) {
+			switch (configManager.getSettings()?.markdown.suggest.paths.includeWorkspaceHeaderCompletions || config.includeWorkspaceHeaderCompletions) {
 				case 'onSingleOrDoubleHash': return IncludeWorkspaceHeaderCompletions.onSingleOrDoubleHash;
 				case 'onDoubleHash': return IncludeWorkspaceHeaderCompletions.onDoubleHash;
 				case 'never':
@@ -141,7 +136,7 @@ export function lsConfiguration(configurationManager: ConfigurationManager) : Ls
 			}
 		},
 		get colorTheme(): "light" | "dark" {
-			const settings = configurationManager.getSettings();
+			const settings = configManager.getSettings();
 			if (settings) {
 				return settings?.workbench.colorTheme.includes("Light") ? "light" : "dark";
 			} else {
@@ -149,18 +144,18 @@ export function lsConfiguration(configurationManager: ConfigurationManager) : Ls
 			}
 		},
 		get mathjaxScale(): number {
-			return configurationManager.getSettings()?.quarto.mathjax.scale || config.mathjaxScale;
+			return configManager.getSettings()?.quarto.mathjax.scale || config.mathjaxScale;
 		},
 		get mathjaxExtensions(): readonly MathjaxSupportedExtension[] {
-			return configurationManager.getSettings()?.quarto.mathjax.extensions || [];
+			return configManager.getSettings()?.quarto.mathjax.extensions || [];
 		}
 	}
 }
 
 
 
-export function getDiagnosticsOptions(config: ConfigurationManager): DiagnosticOptions {
-	const settings = config.getSettings();
+export function getDiagnosticsOptions(configManager: ConfigurationManager): DiagnosticOptions {
+	const settings = configManager.getSettings();
 	if (!settings) {
 		return defaultDiagnosticOptions;
 	}

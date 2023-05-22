@@ -14,7 +14,6 @@
  */
 
 // TODO: investigate why path completions don't work
-// TODO: Error on workspace symbols 
 
 // TODO: investigate registerDocumentHighlightSupport and registerValidateSupport
 
@@ -28,6 +27,7 @@
 
 import {
   CancellationToken,
+  ClientCapabilities,
   CodeAction,
   Definition,
   Diagnostic,
@@ -69,23 +69,24 @@ const kOrganizeLinkDefKind = 'source.organizeLinkDefinitions';
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
-// config manager and logging
-const configuration = new ConfigurationManager();
+// Create text document manager
+const documents: TextDocuments<ITextDocument> = new TextDocuments(TextDocument);
+documents.listen(connection);
 
+// Configuration
+const configManager = new ConfigurationManager(connection);
+const config = lsConfiguration(configManager);
+
+// Capabilities 
+let capabilities: ClientCapabilities | undefined;
+
+// Markdowdn language service
 let mdLs: IMdLanguageService | undefined;
 
 connection.onInitialize((params: InitializeParams) => {
 
   // alias capabilities
-  const capabilities = params.capabilities;
-
-  // Create a simple text document manager. The text document manager
-  // supports full document sync only
-  const documents: TextDocuments<ITextDocument> = new TextDocuments(TextDocument);
-  documents.listen(connection);
-
-  // create config that looks up some settings dynamically
-  const config = lsConfiguration(configuration);
+  capabilities = params.capabilities;
 
   connection.onCompletion(async (params, token): Promise<CompletionItem[]> => {
     const document = documents.get(params.textDocument.uri);
@@ -242,7 +243,7 @@ connection.onInitialize((params: InitializeParams) => {
     sendDiagnostics(e.document, []);
   });
   async function computeDiagnostics(doc: ITextDocument) : Promise<Diagnostic[]> {
-    return mdLs?.computeDiagnostics(doc, getDiagnosticsOptions(configuration), CancellationToken.None) || [];
+    return mdLs?.computeDiagnostics(doc, getDiagnosticsOptions(configManager), CancellationToken.None) || [];
   }
   function sendDiagnostics(doc: ITextDocument, diagnostics: Diagnostic[]) {
     connection.sendDiagnostics({
@@ -251,65 +252,6 @@ connection.onInitialize((params: InitializeParams) => {
       diagnostics,
     });
   }
-
-  connection.onInitialized(async () => {  
-
-    // sync config if possible
-    if (capabilities.workspace?.configuration) {
-      await configuration.connect(connection);
-    }
-
-    // initialize connection to quarto
-    const workspaceFolders = await connection.workspace.getWorkspaceFolders();
-    const workspaceDir = workspaceFolders?.length
-      ? URI.parse(workspaceFolders[0].uri).fsPath
-      : undefined;
-     
-    // initialize quarto
-    const quartoContext = initQuartoContext(
-      configuration.getSettings()?.quarto.path, 
-      workspaceDir
-    );
-    initializeQuarto(quartoContext);
-
-   
-    // initialize logger
-    const logger = new LogFunctionLogger(
-      console.log.bind(console), 
-      configuration
-    );
-
-    // initialize workspace
-    const workspace = languageServiceWorkspace(
-      workspaceFolders?.map(value => URI.parse(value.uri)) || [],
-      documents,
-      connection,
-      config,
-      logger
-    )
-
-    // initialize parser
-    const parser = langaugeServiceMdParser(quartoContext, "resources");
-
-    // create language service
-    mdLs = createLanguageService({
-      config,
-      workspace,
-      parser, 
-      logger
-    });
-
-    // create lsp connection (jsonrpc bridge) 
-    const lspConnection: LspConnection = {
-      onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
-        return connection.onRequest(method, handler);
-      }
-    }
-
-    // register custom methods
-    registerCustomMethods(quartoContext, lspConnection, documents);
-  
-  });
 
   return {
     capabilities: {
@@ -348,6 +290,65 @@ connection.onInitialize((params: InitializeParams) => {
   };
 });
 
+// further config dependent initialization
+connection.onInitialized(async () => {  
+
+  // sync config if possible
+  if (capabilities?.workspace?.configuration) {
+    configManager.subscribe();
+  }
+
+  // initialize connection to quarto
+  const workspaceFolders = await connection.workspace.getWorkspaceFolders();
+  const workspaceDir = workspaceFolders?.length
+    ? URI.parse(workspaceFolders[0].uri).fsPath
+    : undefined;
+   
+  // initialize quarto
+  const quartoContext = initQuartoContext(
+    configManager.getSettings()?.quarto.path, 
+    workspaceDir
+  );
+  initializeQuarto(quartoContext);
+
+ 
+  // initialize logger
+  const logger = new LogFunctionLogger(
+    console.log.bind(console), 
+    configManager
+  );
+
+  // initialize workspace
+  const workspace = languageServiceWorkspace(
+    workspaceFolders?.map(value => URI.parse(value.uri)) || [],
+    documents,
+    connection,
+    config,
+    logger
+  )
+
+  // initialize parser
+  const parser = langaugeServiceMdParser(quartoContext, "resources");
+
+  // create language service
+  mdLs = createLanguageService({
+    config,
+    workspace,
+    parser, 
+    logger
+  });
+
+  // create lsp connection (jsonrpc bridge) 
+  const lspConnection: LspConnection = {
+    onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
+      return connection.onRequest(method, handler);
+    }
+  }
+
+  // register custom methods
+  registerCustomMethods(quartoContext, lspConnection, documents);
+
+});
 
 
 // ensure that the deno runtime won't exit b/c of the event queue being empty

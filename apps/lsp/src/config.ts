@@ -22,8 +22,9 @@ import {
 	DiagnosticLevel, 
 	DiagnosticOptions, 
 	IncludeWorkspaceHeaderCompletions,
-	PreferredMdPathExtensionStyle, 
-	getLsConfiguration  
+	LsConfiguration,
+	defaultLsConfiguration,
+	PreferredMdPathExtensionStyle
 } from './service';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
@@ -118,8 +119,8 @@ export class ConfigurationManager extends Disposable {
 	}
 }
 
-export function lsConfiguration(configurationManager: ConfigurationManager) {
-	const config = getLsConfiguration({});
+export function lsConfiguration(configurationManager: ConfigurationManager) : LsConfiguration {
+	const config = defaultLsConfiguration();
 	return {
 		...config,
 		get preferredMdPathExtensionStyle() {

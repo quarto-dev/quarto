@@ -110,12 +110,8 @@ const defaultConfig: LsConfiguration = {
 	mathjaxExtensions: []
 };
 
-export function getLsConfiguration(overrides: Partial<LsConfiguration>): LsConfiguration {
-	return new Proxy<LsConfiguration>(Object.create(null), {
-		get(_target, p: keyof LsConfiguration) {
-			return p in overrides ? overrides[p] : defaultConfig[p];
-		},
-	});
+export function defaultLsConfiguration(): LsConfiguration {
+	return defaultConfig;
 }
 
 export function isExcludedPath(configuration: LsConfiguration, uri: URI): boolean {

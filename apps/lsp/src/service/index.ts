@@ -43,7 +43,7 @@ import { MdCompletionProvider } from './providers/completion/completion';
 export { IncludeWorkspaceHeaderCompletions } from './providers/completion/completion';
 export type { MdCompletionProvider } from './providers/completion/completion';
 export type { LsConfiguration } from './config';
-export { PreferredMdPathExtensionStyle, getLsConfiguration } from './config';
+export { PreferredMdPathExtensionStyle, defaultLsConfiguration } from './config';
 export type { DiagnosticOptions, IPullDiagnosticsManager } from './providers/diagnostics';
 export { DiagnosticCode, DiagnosticLevel} from './providers/diagnostics';
 export type { ResolvedDocumentLinkTarget } from './providers/document-links';

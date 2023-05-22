@@ -14,7 +14,6 @@
  */
 
 
-// TODO: break out types from util
 // TODO: ensure that attr completions reflect all features
 // TODO: implement parser (refactor providers)
 // TODO: see how _extensions plays in extension projects (check readonly?)
@@ -92,7 +91,7 @@ connection.onInitialize((params: InitializeParams) => {
     if (!document) {
       return [];
     }
-    
+
     return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
   })
 

@@ -23,7 +23,7 @@ import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocEntry } from '../toc';
-import { getDocUri, ITextDocument } from '../util/text-document';
+import { getDocUri, ITextDocument } from '../document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';

@@ -24,7 +24,7 @@ import { makeRange } from 'quarto-core';
 import { ILogger, LogLevel } from './logging';
 import { IMdParser, Token } from './parser';
 import { pandocSlugifier, ISlugifier, Slug } from './slugify';
-import { getDocUri, getLine, ITextDocument } from './util/text-document';
+import { getDocUri, getLine, ITextDocument } from './document';
 
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';

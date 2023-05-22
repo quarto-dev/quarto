@@ -35,7 +35,7 @@ import { MdWorkspaceSymbolProvider } from './providers/workspace-symbols';
 import { ILogger } from './logging';
 import { IMdParser } from './parser';
 import { MdTableOfContentsProvider } from './toc';
-import { ITextDocument } from './util/text-document';
+import { ITextDocument } from './document';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
 import { MdCompletionProvider } from './providers/completion/completion';
@@ -55,7 +55,7 @@ export { LogLevel } from './logging';
 export type { IMdParser, Token } from './parser';
 export type { ISlugifier } from './slugify'
 export { Slug, pandocSlugifier } from './slugify';
-export type { ITextDocument } from './util/text-document';
+export type { ITextDocument } from './document';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 
 /**

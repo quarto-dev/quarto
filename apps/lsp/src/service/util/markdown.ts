@@ -22,7 +22,7 @@ import { markdownitFrontMatterPlugin, markdownitMathPlugin } from "quarto-core";
 
 import { parseFrontMatterStr } from "quarto-core";
 import { lines } from "core";
-import { ITextDocument } from "./text-document";
+import { ITextDocument } from "../document";
 
 export function mathRange(doc: ITextDocument, pos: Position) {
   // see if we are in a math block

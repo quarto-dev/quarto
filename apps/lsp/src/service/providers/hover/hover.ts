@@ -19,7 +19,7 @@ import { Hover } from "vscode-languageserver";
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
-import { ITextDocument } from "../../util/text-document";
+import { ITextDocument } from "../../document";
 import { LsConfiguration } from "../../config";
 import { Quarto } from "../../quarto";
 import { docEditorContext } from "../../quarto";

@@ -20,7 +20,7 @@ import * as lsp from 'vscode-languageserver-types';
 
 import { comparePosition, translatePosition, makeRange, rangeIntersects } from 'quarto-core';
 
-import { getDocUri, getLine, ITextDocument } from '../../util/text-document';
+import { getDocUri, getLine, ITextDocument } from '../../document';
 import { WorkspaceEditBuilder } from '../../util/edit-builder';
 import { ExternalHref, HrefKind, InternalHref, LinkDefinitionSet, MdDocumentLinksInfo, MdInlineLink, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider } from '../document-links';
 import { getExistingDefinitionBlock } from '../organize-linkdefs';

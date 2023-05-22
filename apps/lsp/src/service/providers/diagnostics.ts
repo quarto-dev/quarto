@@ -26,7 +26,7 @@ import { translatePosition, modifyRange } from 'quarto-core';
 
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider } from '../toc';
-import { getDocUri, ITextDocument } from '../util/text-document';
+import { getDocUri, ITextDocument } from '../document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';

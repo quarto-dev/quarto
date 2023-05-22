@@ -20,7 +20,7 @@ import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
 import { mathRange } from "../../util/markdown";
-import { ITextDocument } from "../../util/text-document";
+import { ITextDocument } from "../../document";
 import { LsConfiguration } from "../../config";
 
 

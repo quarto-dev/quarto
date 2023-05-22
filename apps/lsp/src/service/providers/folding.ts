@@ -18,7 +18,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token, TokenWithMap } from '../parser';
 import { MdTableOfContentsProvider } from '../toc';
-import { getLine, ITextDocument } from '../util/text-document';
+import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 
 const rangeLimit = 5000;

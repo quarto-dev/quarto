@@ -20,7 +20,7 @@ import { URI } from 'vscode-uri';
 import { translatePosition, modifyRange, rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../toc';
-import { ITextDocument } from '../util/text-document';
+import { ITextDocument } from '../document';
 import { tryAppendMarkdownFileExtension } from '../workspace';
 import { HrefKind, InternalHref, looksLikeLinkToResource, MdLink, MdLinkKind, MdLinkProvider } from './document-links';
 import { getFilePathRange } from './rename';

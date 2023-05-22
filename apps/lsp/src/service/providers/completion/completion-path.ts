@@ -23,7 +23,7 @@ import { isExcludedPath, LsConfiguration } from '../../config';
 import { IMdParser } from '../../parser';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../../toc';
 import { translatePosition, makeRange } from 'quarto-core';
-import { getDocUri, getLine, ITextDocument } from '../../util/text-document';
+import { getDocUri, getLine, ITextDocument } from '../../document';
 import { looksLikeMarkdownFilePath } from '../../util/file';
 import { computeRelativePath } from '../../util/path';
 import { Schemes } from '../../util/schemes';

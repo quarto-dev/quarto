@@ -16,7 +16,7 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { makeRange } from 'quarto-core';
-import { getLine, ITextDocument } from '../util/text-document';
+import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 import { HrefKind, MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 

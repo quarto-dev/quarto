@@ -22,7 +22,7 @@ import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContain
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token, TokenWithMap } from '../parser';
 import { MdTableOfContentsProvider, TocEntry } from '../toc';
-import { getLine, ITextDocument } from '../util/text-document';
+import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 
 export class MdSelectionRangeProvider {

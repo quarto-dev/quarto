@@ -40,7 +40,7 @@ const kMathjaxCommands = mathjaxImport as Record<string, string[]>;
 import mathjaxCompletions from "./mathjax-completions.json";
 import { mathjaxLoadedExtensions } from "editor-server";
 import { MathjaxSupportedExtension } from "editor-types";
-import { ITextDocument } from "../../util/text-document";
+import { ITextDocument } from "../../document";
 import { LsConfiguration } from "../../config";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;
 for (const key of Object.keys(kMathjaxCompletions)) {

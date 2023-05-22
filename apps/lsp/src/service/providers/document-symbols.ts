@@ -18,7 +18,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { isBefore, makeRange } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../toc';
-import { ITextDocument } from '../util/text-document';
+import { ITextDocument } from '../document';
 import { MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 
 interface MarkdownSymbol {

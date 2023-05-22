@@ -27,7 +27,7 @@ import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token } from '../parser';
 import { MdTableOfContentsProvider } from '../toc';
-import { ITextDocument, getDocUri, getLine } from '../util/text-document';
+import { ITextDocument, getDocUri, getLine } from '../document';
 import { r } from '../util/string';
 import { IWorkspace, getWorkspaceFolder, tryAppendMarkdownFileExtension } from '../workspace';
 import { MdDocumentInfoCache, MdWorkspaceInfoCache } from '../workspace-cache';

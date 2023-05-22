@@ -22,7 +22,7 @@ import { cslRefs } from "editor-server";
 
 import { filePathForDoc } from "../../../util/doc";
 import { documentFrontMatter } from "../../../util/markdown";
-import { ITextDocument } from "../../../util/text-document";
+import { ITextDocument } from "../../../document";
 import { Quarto } from "../../../quarto";
 
 export async function biblioCompletions(

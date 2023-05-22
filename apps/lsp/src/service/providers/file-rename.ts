@@ -22,7 +22,7 @@ import { URI, Utils } from 'vscode-uri';
 import { Disposable } from 'core';
 
 import { isExcludedPath, LsConfiguration, PreferredMdPathExtensionStyle } from '../config';
-import { getDocUri, ITextDocument } from '../util/text-document';
+import { getDocUri, ITextDocument } from '../document';
 import { WorkspaceEditBuilder } from '../util/edit-builder';
 import { looksLikeMarkdownUri } from '../util/file';
 import { isParentDir } from '../util/path';

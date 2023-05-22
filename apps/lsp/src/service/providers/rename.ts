@@ -25,7 +25,7 @@ import { arePositionsEqual, translatePosition, modifyRange, rangeContains } from
 import { defaultMarkdownFileExtension, LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { ISlugifier } from '../slugify';
-import { getDocUri, ITextDocument } from '../util/text-document';
+import { getDocUri, ITextDocument } from '../document';
 import { WorkspaceEditBuilder } from '../util/edit-builder';
 import { computeRelativePath } from '../util/path';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';

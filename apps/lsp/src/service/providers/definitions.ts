@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider } from '../toc';
-import { ITextDocument } from '../util/text-document';
+import { ITextDocument } from '../document';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { HrefKind, LinkDefinitionSet, MdLink, MdLinkKind } from './document-links';

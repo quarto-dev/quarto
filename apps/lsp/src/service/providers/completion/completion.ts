@@ -104,11 +104,11 @@ export class MdCompletionProvider {
     const trigger = context.triggerCharacter;
     const editorContext = docEditorContext(doc, pos, explicit, trigger);
     return (
+      (await this.pathCompletionProvider_.provideCompletionItems(doc, pos, context, token)) ||
       (await refsCompletions(doc, pos, editorContext)) ||
       (await attrCompletions(editorContext)) ||
       (await latexCompletions(doc, pos, context, config)) ||
       (await yamlCompletions(editorContext, true)) ||
-      (await this.pathCompletionProvider_.provideCompletionItems(doc, pos, context, token)) ||
       null
     );
 	}

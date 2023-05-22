@@ -136,7 +136,7 @@ export class MdPathCompletionProvider {
 		this.#workspaceTocCache = new MdWorkspaceInfoCache(workspace, (doc) => tocProvider.getForDocument(doc));
 	}
 
-	public async provideCompletionItems(document: ITextDocument, position: lsp.Position, context: CompletionContext, token: CancellationToken): Promise<lsp.CompletionItem[]> {
+	public async provideCompletionItems(document: ITextDocument, position: lsp.Position, _context: CompletionContext, token: CancellationToken): Promise<lsp.CompletionItem[]> {
 		const pathContext = this.#getPathCompletionContext(document, position);
 		if (!pathContext) {
 			return [];

@@ -13,7 +13,6 @@
  *
  */
 
-// TODO: investigate why path completions don't work
 
 // TODO: investigate registerDocumentHighlightSupport and registerValidateSupport
 

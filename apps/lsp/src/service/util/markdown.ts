@@ -20,11 +20,11 @@ import Token from "markdown-it/lib/token";
 import MarkdownIt from "markdown-it";
 import { markdownitFrontMatterPlugin, markdownitMathPlugin } from "quarto-core";
 
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { parseFrontMatterStr } from "quarto-core";
 import { lines } from "core";
+import { ITextDocument } from "./text-document";
 
-export function mathRange(doc: TextDocument, pos: Position) {
+export function mathRange(doc: ITextDocument, pos: Position) {
   // see if we are in a math block
   const tokens = markdownTokens.parse(doc);
   const mathBlock = tokens.find(isMathBlockAtPosition(pos));
@@ -81,14 +81,14 @@ export function mathRange(doc: TextDocument, pos: Position) {
   );
 }
 
-export function isContentPosition(doc: TextDocument, pos: Position) {
+export function isContentPosition(doc: ITextDocument, pos: Position) {
   const tokens = markdownTokens.parse(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos));
   return !codeBlock && !mathRange(doc, pos);
 }
 
 export function documentFrontMatter(
-  doc: TextDocument
+  doc: ITextDocument
 ): Record<string, unknown> {
   const tokens = markdownTokens.parse(doc);
   const yaml = tokens.find((token) => token.type === "front_matter");
@@ -104,7 +104,7 @@ export function documentFrontMatter(
   }
 }
 
-export function isLatexPosition(doc: TextDocument, pos: Position) {
+export function isLatexPosition(doc: ITextDocument, pos: Position) {
   // math is always latex
   if (mathRange(doc, pos)) {
     return true;
@@ -152,7 +152,7 @@ function isBlockTypeAtPosition(types: string[], pos: Position) {
 const kCodeBlockTokens = ["code", "fence", "html_block"];
 
 class MarkdownTokens {
-  public parse(document: TextDocument): Token[] {
+  public parse(document: ITextDocument): Token[] {
     // create parser on demand
     if (!this.md_) {
       this.md_ = MarkdownIt("zero");

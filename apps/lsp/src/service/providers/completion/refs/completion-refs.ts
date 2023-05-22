@@ -13,20 +13,20 @@
  *
  */
 
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { Range, Position } from "vscode-languageserver-types";
 
 import { CompletionItem } from "vscode-languageserver";
-import { filePathForDoc } from "../../../core/doc";
-import { bypassRefIntelligence } from "../../../core/refs";
+import { filePathForDoc } from "../../../util/doc";
+import { bypassRefIntelligence } from "../../../util/refs";
 
 import { EditorContext, quarto } from "../../../quarto/quarto";
 import { projectDirForDocument } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
+import { ITextDocument } from "../../../util/text-document";
 
 export async function refsCompletions(
-  doc: TextDocument,
+  doc: ITextDocument,
   pos: Position,
   context: EditorContext
 ): Promise<CompletionItem[] | null> {

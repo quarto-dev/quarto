@@ -14,7 +14,6 @@
  */
 
 
-import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -30,9 +29,10 @@ import {
   LintItem,
   quarto,
 } from "../quarto/quarto";
+import { ITextDocument } from "../util/text-document";
 
-export async function provideDiagnostics(
-  doc: TextDocument
+export async function provideYamlDiagnostics(
+  doc: ITextDocument
 ): Promise<Diagnostic[]> {
   // bail if no quarto connection
   if (!quarto) {

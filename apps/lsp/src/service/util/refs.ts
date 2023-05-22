@@ -13,12 +13,12 @@
  *
  */
 
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { Position } from "vscode-languageserver-types";
 import { isContentPosition } from "./markdown";
+import { ITextDocument } from "./text-document";
 
 export function bypassRefIntelligence(
-  doc: TextDocument,
+  doc: ITextDocument,
   pos: Position,
   line: string
 ): boolean {

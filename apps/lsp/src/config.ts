@@ -18,7 +18,13 @@ import { Connection, DidChangeConfigurationNotification, Emitter } from 'vscode-
 
 import { Disposable } from 'core';
 import { MathjaxSupportedExtension } from 'editor-types';
-import { PreferredMdPathExtensionStyle, getLsConfiguration } from './service/config';
+import { 
+	DiagnosticLevel, 
+	DiagnosticOptions, 
+	IncludeWorkspaceHeaderCompletions,
+	PreferredMdPathExtensionStyle, 
+	getLsConfiguration  
+} from './service';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 
@@ -124,8 +130,69 @@ export function lsConfiguration(configurationManager: ConfigurationManager) {
 				default:
 					return PreferredMdPathExtensionStyle.auto;
 			}
+		},
+		get includeWorkspaceHeaderCompletions() : IncludeWorkspaceHeaderCompletions {
+			switch (configurationManager.getSettings()?.markdown.suggest.paths.includeWorkspaceHeaderCompletions || config.includeWorkspaceHeaderCompletions) {
+				case 'onSingleOrDoubleHash': return IncludeWorkspaceHeaderCompletions.onSingleOrDoubleHash;
+				case 'onDoubleHash': return IncludeWorkspaceHeaderCompletions.onDoubleHash;
+				case 'never':
+				default: return IncludeWorkspaceHeaderCompletions.never;
+			}
+		},
+		get colorTheme(): "light" | "dark" {
+			const settings = configurationManager.getSettings();
+			if (settings) {
+				return settings?.workbench.colorTheme.includes("Light") ? "light" : "dark";
+			} else {
+				return config.colorTheme;
+			}
+		},
+		get mathjaxScale(): number {
+			return configurationManager.getSettings()?.quarto.mathjax.scale || config.mathjaxScale;
+		},
+		get mathjaxExtensions(): readonly MathjaxSupportedExtension[] {
+			return configurationManager.getSettings()?.quarto.mathjax.extensions || [];
 		}
 	}
 }
 
+
+
+export function getDiagnosticsOptions(config: ConfigurationManager): DiagnosticOptions {
+	const settings = config.getSettings();
+	if (!settings) {
+		return defaultDiagnosticOptions;
+	}
+
+	const validateFragmentLinks = convertDiagnosticLevel(settings.markdown.validate.fragmentLinks.enabled);
+	return {
+		validateFileLinks: convertDiagnosticLevel(settings.markdown.validate.fileLinks.enabled),
+		validateReferences: convertDiagnosticLevel(settings.markdown.validate.referenceLinks.enabled),
+		validateFragmentLinks: convertDiagnosticLevel(settings.markdown.validate.fragmentLinks.enabled),
+		validateMarkdownFileLinkFragments: settings.markdown.validate.fileLinks.markdownFragmentLinks === 'inherit' ? validateFragmentLinks : convertDiagnosticLevel(settings.markdown.validate.fileLinks.markdownFragmentLinks),
+		validateUnusedLinkDefinitions: convertDiagnosticLevel(settings.markdown.validate.unusedLinkDefinitions.enabled),
+		validateDuplicateLinkDefinitions: convertDiagnosticLevel(settings.markdown.validate.duplicateLinkDefinitions.enabled),
+		ignoreLinks: settings.markdown.validate.ignoredLinks,
+	};
+}
+
+const defaultDiagnosticOptions: DiagnosticOptions = {
+	validateFileLinks: DiagnosticLevel.ignore,
+	validateReferences: DiagnosticLevel.ignore,
+	validateFragmentLinks: DiagnosticLevel.ignore,
+	validateMarkdownFileLinkFragments: DiagnosticLevel.ignore,
+	validateUnusedLinkDefinitions: DiagnosticLevel.ignore,
+	validateDuplicateLinkDefinitions: DiagnosticLevel.ignore,
+	ignoreLinks: [],
+};
+
+function convertDiagnosticLevel(enabled: ValidateEnabled): DiagnosticLevel | undefined {
+	switch (enabled) {
+		case 'error': return DiagnosticLevel.error;
+		case 'warning': return DiagnosticLevel.warning;
+		case 'ignore': return DiagnosticLevel.ignore;
+		case 'hint': return DiagnosticLevel.hint;
+		default: return DiagnosticLevel.ignore;
+	}
+}
 

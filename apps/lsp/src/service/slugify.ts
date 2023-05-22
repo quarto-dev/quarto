@@ -14,6 +14,8 @@
  *
  */
 
+import { pandocAutoIdentifier } from "core";
+
 export class Slug {
 	public constructor(
 		public readonly value: string
@@ -31,9 +33,13 @@ export interface ISlugifier {
 	fromHeading(heading: string): Slug;
 }
 
-/**
- * A {@link ISlugifier slugifier} that approximates how GitHub's slugifier works.
- */
+export const pandocSlugifier: ISlugifier = new class implements ISlugifier {
+	fromHeading(heading: string): Slug {
+    const slugifiedHeading = pandocAutoIdentifier(heading);
+		return new Slug(slugifiedHeading);
+	}
+};
+
 export const githubSlugifier: ISlugifier = new class implements ISlugifier {
 	fromHeading(heading: string): Slug {
 		const slugifiedHeading = encodeURI(

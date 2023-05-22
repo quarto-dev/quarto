@@ -19,18 +19,19 @@ import { dirname, extname, resolve } from 'path';
 import type { CancellationToken, CompletionContext } from 'vscode-languageserver-protocol';
 import * as lsp from 'vscode-languageserver-types';
 import { URI, Utils } from 'vscode-uri';
-import { isExcludedPath, LsConfiguration } from '../config';
-import { IMdParser } from '../parser';
-import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../toc';
+import { isExcludedPath, LsConfiguration } from '../../config';
+import { IMdParser } from '../../parser';
+import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../../toc';
 import { translatePosition, makeRange } from 'quarto-core';
-import { getDocUri, getLine, ITextDocument } from '../util/text-document';
-import { looksLikeMarkdownFilePath } from '../util/file';
-import { computeRelativePath } from '../util/path';
-import { Schemes } from '../util/schemes';
-import { r } from '../util/string';
-import { FileStat, getWorkspaceFolder, IWorkspace, openLinkToMarkdownFile } from '../workspace';
-import { MdWorkspaceInfoCache } from '../workspace-cache';
-import { MdLinkProvider } from './document-links';
+import { getDocUri, getLine, ITextDocument } from '../../util/text-document';
+import { looksLikeMarkdownFilePath } from '../../util/file';
+import { computeRelativePath } from '../../util/path';
+import { Schemes } from '../../util/schemes';
+import { r } from '../../util/string';
+import { FileStat, getWorkspaceFolder, IWorkspace, openLinkToMarkdownFile } from '../../workspace';
+import { MdWorkspaceInfoCache } from '../../workspace-cache';
+import { MdLinkProvider } from '../document-links';
+import { IncludeWorkspaceHeaderCompletions, PathCompletionOptions } from './completion';
 
 enum CompletionContextKind {
 	/** `[...](|)` */
@@ -102,42 +103,6 @@ function tryDecodeUriComponent(str: string): string {
 	}
 }
 
-/**
- * Controls if header completions for other files in the workspace be returned.
- */
-export enum IncludeWorkspaceHeaderCompletions {
-	/**
-	 * Never return workspace header completions.
-	 */
-	never = 'never',
-
-	/**
-	 * Return workspace header completions after `##` is typed.
-	 * 
-	 * This lets the user signal 
-	 */
-	onDoubleHash = 'onDoubleHash',
-
-	/**
-	 * Return workspace header completions after either a single `#` is typed or after `##`
-	 * 
-	 * For a single hash, this means the workspace header completions will be returned along side the current file header completions.
-	 */
-	onSingleOrDoubleHash = 'onSingleOrDoubleHash',
-}
-
-/**
- * Control the type of path completions returned.
- */
-export interface PathCompletionOptions {
-	/**
-	 * Should header completions for other files in the workspace be returned when
-	 * you trigger completions.
-	 * 
-	 * Defaults to {@link IncludeWorkspaceHeaderCompletions.never never} (not returned).
-	 */
-	readonly includeWorkspaceHeaderCompletions?: IncludeWorkspaceHeaderCompletions;
-}
 
 const sortTexts = Object.freeze({
 	localHeader: '1',
@@ -171,14 +136,18 @@ export class MdPathCompletionProvider {
 		this.#workspaceTocCache = new MdWorkspaceInfoCache(workspace, (doc) => tocProvider.getForDocument(doc));
 	}
 
-	public async provideCompletionItems(document: ITextDocument, position: lsp.Position, context: CompletionContext & PathCompletionOptions, token: CancellationToken): Promise<lsp.CompletionItem[]> {
+	public async provideCompletionItems(document: ITextDocument, position: lsp.Position, context: CompletionContext, token: CancellationToken): Promise<lsp.CompletionItem[]> {
 		const pathContext = this.#getPathCompletionContext(document, position);
 		if (!pathContext) {
 			return [];
 		}
+		const pathOptions: PathCompletionOptions = {
+			includeWorkspaceHeaderCompletions: this.#configuration.includeWorkspaceHeaderCompletions as IncludeWorkspaceHeaderCompletions
+		}
+
 
 		const items: lsp.CompletionItem[] = [];
-		for await (const item of this.#provideCompletionItems(document, position, pathContext, context, token)) {
+		for await (const item of this.#provideCompletionItems(document, position, pathContext, pathOptions, token)) {
 			items.push(item);
 		}
 		return items;
@@ -525,3 +494,5 @@ export class MdPathCompletionProvider {
 		return this.#workspace.getContainingDocument?.(getDocUri(document))?.uri ?? getDocUri(document);
 	}
 }
+
+

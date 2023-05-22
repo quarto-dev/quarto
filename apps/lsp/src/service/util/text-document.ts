@@ -33,6 +33,11 @@ export interface ITextDocument {
 	readonly $uri?: URI;
 	
 	/**
+	 * The lanugageId of the document
+	 */
+	readonly languageId : string | undefined;
+
+	/**
 	 * Version number of the document's content. 
 	 */
 	readonly version: number;

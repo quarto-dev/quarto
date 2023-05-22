@@ -119,7 +119,7 @@ export class MdExtractLinkDefinitionCodeActionProvider {
 			kind: MdExtractLinkDefinitionCodeActionProvider.#kind,
 			edit: builder.getEdit(),
 			command: {
-				command: 'vscodeMarkdownLanguageservice.rename',
+				command: 'quartoLanguageservice.rename',
 				title: 'Rename',
 				arguments: [getDocUri(doc), renamePosition],
 			}

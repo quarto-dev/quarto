@@ -23,7 +23,7 @@ import { makeRange } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser, Token } from './parser';
-import { githubSlugifier, ISlugifier, Slug } from './slugify';
+import { pandocSlugifier, ISlugifier, Slug } from './slugify';
 import { getDocUri, getLine, ITextDocument } from './util/text-document';
 
 import { IWorkspace } from './workspace';
@@ -229,7 +229,7 @@ export class TableOfContents {
 			.trim();
 	}
 
-	public static readonly empty = new TableOfContents([], githubSlugifier);
+	public static readonly empty = new TableOfContents([], pandocSlugifier);
 
 	readonly #slugifier: ISlugifier;
 

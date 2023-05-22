@@ -37,22 +37,18 @@ import {
   IWorkspace
 } from "./service";
 
-import { isQuartoDoc } from "./core/doc";
+import { isQuartoDoc } from "./service/util/doc";
 import { ResourceMap } from "./service/util/resource-maps";
 import { Limiter } from "core";
-import { ConfigurationManager, lsConfiguration } from "./config";
 
 
 export function languageServiceWorkspace(
   workspaceFolders: URI[],
-  documents: TextDocuments<TextDocument>,
+  documents: TextDocuments<ITextDocument>,
   connection: Connection,
-  configuration: ConfigurationManager,
+  config: LsConfiguration,
   logger: ILogger
 ) : IWorkspace {
-
-  // create config that looks up some settings dynamically
-  const lsConfig = lsConfiguration(configuration);
 
   // track changes to workspace folders
   connection.workspace.onDidChangeWorkspaceFolders(async () => {
@@ -63,7 +59,7 @@ export function languageServiceWorkspace(
   const documentCache = new ResourceMap<VsCodeDocument>();
 
   const openMarkdownDocumentFromFs = async (resource: URI): Promise<ITextDocument | undefined> => {
-		if (!looksLikeMarkdownPath(lsConfig, resource)) {
+		if (!looksLikeMarkdownPath(config, resource)) {
 			return undefined;
 		}
 
@@ -202,8 +198,8 @@ export function languageServiceWorkspace(
 
       // And then add files on disk 
       for (const workspaceFolder of this.workspaceFolders) {
-        const mdFileGlob = `**/*.{${lsConfig.markdownFileExtensions.join(',')}}`;
-        const ignore = [...lsConfig.excludePaths]; 
+        const mdFileGlob = `**/*.{${config.markdownFileExtensions.join(',')}}`;
+        const ignore = [...config.excludePaths]; 
         const resources = await glob(mdFileGlob, { ignore, cwd: workspaceFolder.toString() } );
 
         // (read max 20 at a time)
@@ -273,7 +269,7 @@ export function languageServiceWorkspace(
 
 }
 
-function isRelevantMarkdownDocument(doc: TextDocument) {
+function isRelevantMarkdownDocument(doc: ITextDocument) {
 	return isQuartoDoc(doc) && URI.parse(doc.uri).scheme !== 'vscode-bulkeditpreview';	
 }
 
@@ -284,18 +280,22 @@ function looksLikeMarkdownPath(config: LsConfiguration, resolvedHrefPath: URI) {
 
 class VsCodeDocument implements ITextDocument {
 
-	private inMemoryDoc?: TextDocument;
-	private onDiskDoc?: TextDocument;
+	private inMemoryDoc?: ITextDocument;
+	private onDiskDoc?: ITextDocument;
 
 	readonly uri: string;
 
-	constructor(uri: string, init: { inMemoryDoc: TextDocument });
-	constructor(uri: string, init: { onDiskDoc: TextDocument });
-	constructor(uri: string, init: { inMemoryDoc?: TextDocument; onDiskDoc?: TextDocument }) {
+	constructor(uri: string, init: { inMemoryDoc: ITextDocument });
+	constructor(uri: string, init: { onDiskDoc: ITextDocument });
+	constructor(uri: string, init: { inMemoryDoc?: ITextDocument; onDiskDoc?: ITextDocument }) {
 		this.uri = uri;
 		this.inMemoryDoc = init?.inMemoryDoc;
 		this.onDiskDoc = init?.onDiskDoc;
 	}
+
+  get languageId() : string | undefined {
+    return this.inMemoryDoc?.languageId ?? this.onDiskDoc?.languageId;
+  }
 
 	get version(): number {
 		return this.inMemoryDoc?.version ?? this.onDiskDoc?.version ?? 0;
@@ -337,7 +337,7 @@ class VsCodeDocument implements ITextDocument {
 		return !this.onDiskDoc && !this.inMemoryDoc;
 	}
 
-	setInMemoryDoc(doc: TextDocument | undefined) {
+	setInMemoryDoc(doc: ITextDocument | undefined) {
 		this.inMemoryDoc = doc;
 	}
 

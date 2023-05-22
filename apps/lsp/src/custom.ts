@@ -29,17 +29,17 @@ import { LspConnection, registerLspServerMethods } from "core-node";
 import { QuartoContext, userDictionaryDir } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
 import { Hover, Position, TextDocuments } from "vscode-languageserver";
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
-import { codeEditorContext } from "./quarto/quarto";
-import { yamlCompletions } from "./providers/completion/completion-yaml";
-import { yamlHover } from "./providers/hover/hover-yaml";
+import { codeEditorContext } from "./service/quarto/quarto";
+import { yamlCompletions } from "./service/providers/completion/completion-yaml";
+import { yamlHover } from "./service/providers/hover/hover-yaml";
+import { ITextDocument } from "./service";
 
 export function registerCustomMethods(
   quartoContext: QuartoContext, 
   connection: LspConnection,
-  documents: TextDocuments<TextDocument>
+  documents: TextDocuments<ITextDocument>
 ) {
 
   const resourcesDir = path.join(__dirname, "resources");

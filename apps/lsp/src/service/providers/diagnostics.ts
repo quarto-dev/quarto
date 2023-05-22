@@ -32,6 +32,7 @@ import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';
 import { HrefKind, InternalHref, LinkDefinitionSet, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider, MdLinkSource, parseLocationInfoFromFragment, ReferenceLinkMap } from './document-links';
 import { ILogger, LogLevel } from '../logging';
+import { provideYamlDiagnostics } from './diagnostics-yaml';
 
 /**
  * The severity at which diagnostics are reported
@@ -212,6 +213,7 @@ export class DiagnosticComputer {
 			Array.from(this.#validateReferenceLinks(options, links, definitions)),
 			Array.from(this.#validateUnusedLinkDefinitions(options, links)),
 			Array.from(this.#validateDuplicateLinkDefinitions(options, links)),
+			provideYamlDiagnostics(doc)
 		])).flat();
 
 		this.#logger.log(LogLevel.Trace, 'DiagnosticComputer.compute finished', { document: doc.uri, version: doc.version, diagnostics });
@@ -679,3 +681,4 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 		this.#linkWatcher.deleteDocument(uri);
 	}
 }
+

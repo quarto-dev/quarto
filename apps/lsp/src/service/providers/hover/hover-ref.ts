@@ -14,20 +14,20 @@
  */
 
 import { Hover, Position, Range } from "vscode-languageserver";
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { cslRefs, CslRef } from "editor-server";
 
-import { bypassRefIntelligence } from "../../core/refs";
-import { documentFrontMatter } from "../../core/markdown";
-import { filePathForDoc } from "../../core/doc";
+import { bypassRefIntelligence } from "../../util/refs";
+import { documentFrontMatter } from "../../util/markdown";
+import { filePathForDoc } from "../../util/doc";
 
 import { quartoContext } from "../../quarto/quarto";
+import { ITextDocument } from "../../util/text-document";
 
 
 // cache the last ref lookup
 let lastRef: CslRef | undefined;
 
-export async function refHover(doc: TextDocument, pos: Position): Promise<Hover | null> {
+export async function refHover(doc: ITextDocument, pos: Position): Promise<Hover | null> {
   // compute the line
   const line = doc
     .getText(Range.create(pos.line, 0, pos.line + 1, 0))

@@ -20,7 +20,7 @@ export interface MathjaxTypesetOptions {
   format: "svg" | "data-uri";
   theme: "light" | "dark";
   scale: number;
-  extensions: MathjaxSupportedExtension[];
+  extensions: readonly MathjaxSupportedExtension[];
 }
 
 export interface MathjaxTypesetResult {

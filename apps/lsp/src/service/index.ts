@@ -14,10 +14,10 @@
  *
  */
 
-import type { CancellationToken } from 'vscode-languageserver';
+import type { CancellationToken, CompletionContext } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { getLsConfiguration, LsConfiguration } from './config';
+import { LsConfiguration} from './config';
 import { MdExtractLinkDefinitionCodeActionProvider } from './providers/codeactions/extract-linkdef';
 import { MdRemoveLinkDefinitionCodeActionProvider } from './providers/codeactions/remove-linkdef';
 import { MdDefinitionProvider } from './providers/definitions';
@@ -28,7 +28,6 @@ import { MdDocumentSymbolProvider } from './providers/document-symbols';
 import { FileRename, MdFileRenameProvider } from './providers/file-rename';
 import { MdFoldingProvider } from './providers/folding';
 import { MdOrganizeLinkDefinitionProvider } from './providers/organize-linkdefs';
-import { PathCompletionOptions, MdPathCompletionProvider } from './providers/path-completions';
 import { MdReferencesProvider } from './providers/references';
 import { MdRenameProvider } from './providers/rename';
 import { MdSelectionRangeProvider } from './providers/smart-select';
@@ -38,21 +37,23 @@ import { IMdParser } from './parser';
 import { MdTableOfContentsProvider } from './toc';
 import { ITextDocument } from './util/text-document';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
+import { MdHoverProvider } from './providers/hover/hover';
+import { MdCompletionProvider } from './providers/completion/completion';
 
+export { IncludeWorkspaceHeaderCompletions } from './providers/completion/completion';
+export type { MdCompletionProvider } from './providers/completion/completion';
 export type { LsConfiguration } from './config';
-export { PreferredMdPathExtensionStyle } from './config';
+export { PreferredMdPathExtensionStyle, getLsConfiguration } from './config';
 export type { DiagnosticOptions, IPullDiagnosticsManager } from './providers/diagnostics';
 export { DiagnosticCode, DiagnosticLevel} from './providers/diagnostics';
 export type { ResolvedDocumentLinkTarget } from './providers/document-links';
 export type { FileRename } from './providers/file-rename';
-export type { PathCompletionOptions as MdPathCompletionOptions } from './providers/path-completions';
-export { IncludeWorkspaceHeaderCompletions } from './providers/path-completions';
 export { RenameNotSupportedAtLocationError } from './providers/rename';
 export type  { ILogger } from './logging';
 export { LogLevel } from './logging';
 export type { IMdParser, Token } from './parser';
 export type { ISlugifier } from './slugify'
-export { Slug, githubSlugifier } from './slugify';
+export { Slug, pandocSlugifier } from './slugify';
 export type { ITextDocument } from './util/text-document';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 
@@ -120,7 +121,16 @@ export interface IMdLanguageService {
 	/**
 	 * Get completions items at a given position in a markdown file.
 	 */
-	getCompletionItems(document: ITextDocument, position: lsp.Position, context: PathCompletionOptions, token: CancellationToken): Promise<lsp.CompletionItem[]>;
+	getCompletionItems(document: ITextDocument, position: lsp.Position, context: CompletionContext | undefined, config: LsConfiguration, token: CancellationToken): Promise<lsp.CompletionItem[]>;
+
+	/**
+	 * Get hover at a given position in a markdown file.
+	 */
+	getHover(
+    doc: ITextDocument,
+    pos: lsp.Position,
+		config: LsConfiguration
+  ): Promise<lsp.Hover | null>;
 
 	/**
 	 * Get the references to a symbol at the current location.
@@ -213,7 +223,9 @@ export interface IMdLanguageService {
 /**
  * Initialization options for creating a new {@link IMdLanguageService}.
  */
-export interface LanguageServiceInitialization extends Partial<LsConfiguration> {
+export interface LanguageServiceInitialization {
+
+	readonly config: LsConfiguration;
 
 	/**
 	 * The {@link IWorkspace workspace} that the  {@link IMdLanguageService language service} uses to work with files. 
@@ -230,20 +242,22 @@ export interface LanguageServiceInitialization extends Partial<LsConfiguration> 
 	 * The {@link ILogger logger} that the  {@link IMdLanguageService language service} use for logging messages.
 	 */
 	readonly logger: ILogger;
+
 }
 
 /**
  * Create a new instance of the {@link IMdLanguageService language service}.
  */
 export function createLanguageService(init: LanguageServiceInitialization): IMdLanguageService {
-	const config = getLsConfiguration(init);
+	const config = init.config;
 	const logger = init.logger;
 
 	const tocProvider = new MdTableOfContentsProvider(init.parser, init.workspace, logger);
 	const smartSelectProvider = new MdSelectionRangeProvider(init.parser, tocProvider, logger);
 	const foldingProvider = new MdFoldingProvider(init.parser, tocProvider, logger);
 	const linkProvider = new MdLinkProvider(config, init.parser, init.workspace, tocProvider, logger);
-	const pathCompletionProvider = new MdPathCompletionProvider(config, init.workspace, init.parser, linkProvider, tocProvider);
+	const completionProvider = new MdCompletionProvider(config, init.workspace, init.parser, linkProvider, tocProvider);
+	const hoverProvider = new MdHoverProvider();
 	const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
 	const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);
 	const definitionsProvider = new MdDefinitionProvider(config, init.workspace, tocProvider, linkCache);
@@ -273,7 +287,8 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 		getFoldingRanges: foldingProvider.provideFoldingRanges.bind(foldingProvider),
 		getSelectionRanges: smartSelectProvider.provideSelectionRanges.bind(smartSelectProvider),
 		getWorkspaceSymbols: workspaceSymbolProvider.provideWorkspaceSymbols.bind(workspaceSymbolProvider),
-		getCompletionItems: pathCompletionProvider.provideCompletionItems.bind(pathCompletionProvider),
+		getCompletionItems: completionProvider.provideCompletionItems.bind(completionProvider),
+		getHover: hoverProvider.provideHover.bind(hoverProvider),
 		getReferences: referencesProvider.provideReferences.bind(referencesProvider),
 		getFileReferences: async (resource: URI, token: CancellationToken): Promise<lsp.Location[]> => {
 			return (await referencesProvider.getReferencesToFileInWorkspace(resource, token)).map(x => x.location);

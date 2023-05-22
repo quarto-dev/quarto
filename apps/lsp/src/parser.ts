@@ -16,11 +16,11 @@
 
 import MarkdownIt from "markdown-it";
 
-import { pandocAutoIdentifier } from "core";
 
 import { QuartoContext } from "quarto-core";
 
-import { IMdParser, ISlugifier, ITextDocument, Token, Slug } from "./service";
+import { IMdParser, ITextDocument, Token } from "./service";
+import { pandocSlugifier } from "./service";
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -51,14 +51,6 @@ export function langaugeServiceMdParser(_context: QuartoContext, _resourcesDir: 
   };
   return mdParser;
 }
-
-
-const pandocSlugifier: ISlugifier = new class implements ISlugifier {
-	fromHeading(heading: string): Slug {
-    const slugifiedHeading = pandocAutoIdentifier(heading);
-		return new Slug(slugifiedHeading);
-	}
-};
 
 
 

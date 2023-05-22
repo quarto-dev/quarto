@@ -962,7 +962,7 @@ export class MdLinkProvider extends Disposable {
 		// instead of using `file://path.md#L123` style uris
 		if (resource.fragment) {
 			// Match the args of `vscode.open`
-			return this.#createCommandUri('vscodeMarkdownLanguageservice.open', resource, {
+			return this.#createCommandUri('quartoLanguageservice.open', resource, {
 				selection: makeRange(pos, pos),
 			});
 		}

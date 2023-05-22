@@ -108,7 +108,7 @@ export function mathjaxTypeset(tex: string, options: MathjaxTypesetOptions, docT
   }
 }
 
-export function mathjaxLoadedExtensions(extensionConfig: MathjaxSupportedExtension[]) {
+export function mathjaxLoadedExtensions(extensionConfig: readonly MathjaxSupportedExtension[]) {
   ensureExtensionsLoaded(extensionConfig);
   return loadedExtensions;
 }
@@ -196,7 +196,7 @@ RegisterHTMLHandler(adaptor);
 let loadedExtensions = baseExtensions;
 let html = createHtmlConverter(loadedExtensions);
 
-function ensureExtensionsLoaded(extensions: string[]) {
+function ensureExtensionsLoaded(extensions: readonly string[]) {
   // if the extension list doesn't match exactly then reload it
   const targetExtensions = baseExtensions.concat(
     extensions.filter((ex) => supportedExtensionList.includes(ex)) as MathjaxSupportedExtension[]

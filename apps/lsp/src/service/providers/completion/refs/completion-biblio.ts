@@ -13,7 +13,6 @@
  *
  */
 
-import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   CompletionItem,
   CompletionItemKind,
@@ -21,13 +20,14 @@ import {
 } from "vscode-languageserver";
 import { cslRefs } from "editor-server";
 
-import { filePathForDoc } from "../../../core/doc";
-import { documentFrontMatter } from "../../../core/markdown";
+import { filePathForDoc } from "../../../util/doc";
+import { documentFrontMatter } from "../../../util/markdown";
+import { ITextDocument } from "../../../util/text-document";
 import { quartoContext } from "../../../quarto/quarto";
 
 export async function biblioCompletions(
   token: string,
-  doc: TextDocument
+  doc: ITextDocument
 ): Promise<CompletionItem[] | null> {
   if (!quartoContext) {
     return null;

@@ -15,43 +15,40 @@
  */
 
 import { Hover, MarkupContent, MarkupKind, Position } from "vscode-languageserver";
-import { TextDocument } from "vscode-languageserver-textdocument";
 
 import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
-import { mathRange } from "../../core/markdown";
-import { ConfigurationManager } from "../../config";
+import { mathRange } from "../../util/markdown";
+import { ITextDocument } from "../../util/text-document";
+import { LsConfiguration } from "../../config";
 
 
-export function mathHover(config: ConfigurationManager) {
-  
-  return (doc: TextDocument, pos: Position): Hover | null => {
-    const range = mathRange(doc, pos);
-    if (range) {
-      const contents = mathjaxTypesetToMarkdown(range.math, doc.getText(), config);
-      if (contents) {
-        return {
-          contents,
-          range: range.range,
-        };
-      }
+export function mathHover(doc: ITextDocument, pos: Position, config?: LsConfiguration | undefined): Hover | null {
+  const range = mathRange(doc, pos);
+  if (range) {
+    const contents = mathjaxTypesetToMarkdown(range.math, doc.getText(), config);
+    if (contents) {
+      return {
+        contents,
+        range: range.range,
+      };
     }
-    return null;
   }
+  return null;
 }
+
 
 function mathjaxTypesetToMarkdown(
   tex: string, 
   docText: string,
-  config: ConfigurationManager
+  config?: LsConfiguration | undefined
 ) :  MarkupContent | null  {
-  const settings = config.getSettings();
   const options: MathjaxTypesetOptions = {
     format: "data-uri",
-    theme: settings?.workbench.colorTheme.includes("Light") ? "light" : "dark",
-    scale: settings?.quarto.mathjax.scale || 1,
-    extensions: settings?.quarto.mathjax.extensions || []
+    theme: config?.colorTheme || "dark",
+    scale: config?.mathjaxScale || 1,
+    extensions: config?.mathjaxExtensions || []
   }
   const result = mathjaxTypeset(tex, options, docText);
   if (result.math) {

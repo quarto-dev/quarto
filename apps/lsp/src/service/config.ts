@@ -16,6 +16,7 @@
 
 import * as picomatch from 'picomatch';
 import { URI } from 'vscode-uri';
+import { MathjaxSupportedExtension } from 'editor-types';
 
 /**
  * Preferred style for file paths to {@link markdownFileExtensions markdown files}.
@@ -68,6 +69,14 @@ export interface LsConfiguration {
 	 * This is used for paths added by the language service, such as for path completions and on file renames.
 	 */
 	readonly preferredMdPathExtensionStyle?: PreferredMdPathExtensionStyle;
+
+
+	readonly includeWorkspaceHeaderCompletions: 'never' | 'onSingleOrDoubleHash' | 'onDoubleHash';
+
+	readonly colorTheme: "light" | "dark";
+	readonly mathjaxScale: number;
+	readonly mathjaxExtensions: readonly MathjaxSupportedExtension[];
+
 }
 
 export const defaultMarkdownFileExtension = 'qmd';
@@ -94,7 +103,11 @@ const defaultConfig: LsConfiguration = {
 		"**/venv/**",
 		"**/env/**",
 		"**/_extensions/**"
-	]
+	],
+	includeWorkspaceHeaderCompletions: 'never',
+	colorTheme: "light",
+	mathjaxScale: 1,
+	mathjaxExtensions: []
 };
 
 export function getLsConfiguration(overrides: Partial<LsConfiguration>): LsConfiguration {

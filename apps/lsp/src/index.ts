@@ -13,45 +13,57 @@
  *
  */
 
+// TODO: investigate why path completions don't work
+// TODO: Error on workspace symbols 
+
+// TODO: investigate registerDocumentHighlightSupport and registerValidateSupport
+
+
 // TODO: implement parser (refactor providers)
-// TODO: hookup service:
-//   - remove redundant impls on the client
-//   - consolidate quarto providers into service
-//   - return service capabilities
-// TODO: don't return no-op capabilities if we aren't in vscode (middleware)
 // TODO: see how _extensions plays in extension projects (check readonly?)
+// TODO: investigate more efficient diagnostics scheme (must return diagnosticsProvider from capabilities)
 // TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
+// TODO: can we make quarto a 'service' rather than a global
 
 
 import {
+  CancellationToken,
+  CodeAction,
+  Definition,
   Diagnostic,
+  DocumentLink,
+  DocumentSymbol,
+  FoldingRange,
   InitializeParams,
   ProposedFeatures,
-  TextDocumentIdentifier,
+  ResponseError,
+  SelectionRange,
   TextDocuments,
-  TextDocumentSyncKind
+  TextDocumentSyncKind,
+  WorkspaceSymbol
 } from "vscode-languageserver";
+
+import { CompletionItem, Hover, Location } from "vscode-languageserver-types"
 
 import { createConnection } from "vscode-languageserver/node"
 
+import * as l10n from '@vscode/l10n';
+
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { isQuartoDoc, isQuartoYaml } from "./core/doc";
-import {
-  onCompletion,
-} from "./providers/completion/completion";
-import { onHover } from "./providers/hover/hover";
-import { provideDiagnostics } from "./providers/diagnostics";
 
-import { initializeQuarto } from "./quarto/quarto";
+import { initializeQuarto } from "./service/quarto/quarto";
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
-import { ConfigurationManager } from "./config";
+import { ConfigurationManager, getDiagnosticsOptions, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { langaugeServiceMdParser } from "./parser";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
+import { createLanguageService, IMdLanguageService, ITextDocument, RenameNotSupportedAtLocationError } from "./service";
+
+const kOrganizeLinkDefKind = 'source.organizeLinkDefinitions';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -60,26 +72,184 @@ const connection = createConnection(ProposedFeatures.all);
 // config manager and logging
 const configuration = new ConfigurationManager();
 
+let mdLs: IMdLanguageService | undefined;
+
 connection.onInitialize((params: InitializeParams) => {
 
+  // alias capabilities
   const capabilities = params.capabilities;
 
   // Create a simple text document manager. The text document manager
   // supports full document sync only
-  const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+  const documents: TextDocuments<ITextDocument> = new TextDocuments(TextDocument);
   documents.listen(connection);
 
-  // resolve a uri from the text document manager
-  function resolveDoc(docId: TextDocumentIdentifier) {
-    const doc = documents.get(docId.uri);
-    if (!doc) {
+  // create config that looks up some settings dynamically
+  const config = lsConfiguration(configuration);
+
+  connection.onCompletion(async (params, token): Promise<CompletionItem[]> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+
+    return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
+  })
+
+  connection.onHover(async (params) : Promise<Hover | null | undefined> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
       return null;
     }
-    if (isQuartoDoc(doc) || isQuartoYaml(doc)) {
-      return doc;
-    } else {
-      return null;
+    return mdLs?.getHover(document, params.position, config);
+  })
+
+
+  connection.onDocumentLinks(async (params, token): Promise<DocumentLink[]> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
     }
+    return mdLs?.getDocumentLinks(document, token) || [];
+  });
+
+  connection.onDocumentLinkResolve(async (link, token): Promise<DocumentLink | undefined> => {
+    return mdLs?.resolveDocumentLink(link, token);
+  });
+
+  connection.onDocumentSymbol(async (params, token): Promise<DocumentSymbol[]> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+    return mdLs?.getDocumentSymbols(document, { includeLinkDefinitions: true }, token) || [];
+  });
+
+  connection.onFoldingRanges(async (params, token): Promise<FoldingRange[]> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+    return mdLs?.getFoldingRanges(document, token) || [];
+  });
+
+  connection.onSelectionRanges(async (params, token): Promise<SelectionRange[] | undefined> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+    return mdLs?.getSelectionRanges(document, params.positions, token);
+  });
+
+  connection.onWorkspaceSymbol(async (params, token): Promise<WorkspaceSymbol[]> => {
+    return mdLs?.getWorkspaceSymbols(params.query, token) || [];
+  });
+
+  connection.onReferences(async (params, token): Promise<Location[]> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return [];
+    }
+    return mdLs?.getReferences(document, params.position, params.context, token) || [];
+  });
+
+  connection.onDefinition(async (params, token): Promise<Definition | undefined> => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return undefined;
+    }
+    return mdLs?.getDefinition(document, params.position, token);
+  });
+
+  connection.onPrepareRename(async (params, token) => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return undefined;
+    }
+
+    try {
+      return await mdLs?.prepareRename(document, params.position, token);
+    } catch (e) {
+      if (e instanceof RenameNotSupportedAtLocationError) {
+        throw new ResponseError(0, e.message);
+      } else {
+        throw e;
+      }
+    }
+  });
+
+  connection.onRenameRequest(async (params, token) => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return undefined;
+    }
+    return mdLs?.getRenameEdit(document, params.position, params.newName, token);
+  });
+
+  interface OrganizeLinkActionData {
+    readonly uri: string;
+  }
+
+  connection.onCodeAction(async (params, token) => {
+    const document = documents.get(params.textDocument.uri);
+    if (!document) {
+      return undefined;
+    }
+
+    if (params.context.only?.some(kind => kind === 'source' || kind.startsWith('source.'))) {
+      const action: CodeAction = {
+        title: l10n.t("Organize link definitions"),
+        kind: kOrganizeLinkDefKind,
+        data: <OrganizeLinkActionData>{ uri: document.uri }
+      };
+      return [action];
+    }
+
+    return mdLs?.getCodeActions(document, params.range, params.context, token);
+  });
+
+  connection.onCodeActionResolve(async (codeAction, token) => {
+    if (codeAction.kind === kOrganizeLinkDefKind) {
+      const data = codeAction.data as OrganizeLinkActionData;
+      const document = documents.get(data.uri);
+      if (!document) {
+        return codeAction;
+      }
+
+      const edits = (await mdLs?.organizeLinkDefinitions(document, { removeUnused: true }, token)) || [];
+      codeAction.edit = {
+        changes: {
+          [data.uri]: edits
+        }
+      };
+      return codeAction;
+    }
+
+    return codeAction;
+  });
+ 
+  // register no-op methods to enable client middleware
+  middlewareRegister(connection);
+   
+  // diagnostics on open and save (clear on doc modified)
+  documents.onDidOpen(async (e) => {
+    sendDiagnostics(e.document, await computeDiagnostics(e.document));
+  });
+  documents.onDidSave(async (e) => {
+    sendDiagnostics(e.document, await computeDiagnostics(e.document));
+  });
+  documents.onDidChangeContent(async (e) => {
+    sendDiagnostics(e.document, []);
+  });
+  async function computeDiagnostics(doc: ITextDocument) : Promise<Diagnostic[]> {
+    return mdLs?.computeDiagnostics(doc, getDiagnosticsOptions(configuration), CancellationToken.None) || [];
+  }
+  function sendDiagnostics(doc: ITextDocument, diagnostics: Diagnostic[]) {
+    connection.sendDiagnostics({
+      uri: doc.uri,
+      version: doc.version,
+      diagnostics,
+    });
   }
 
   connection.onInitialized(async () => {  
@@ -102,6 +272,7 @@ connection.onInitialize((params: InitializeParams) => {
     );
     initializeQuarto(quartoContext);
 
+   
     // initialize logger
     const logger = new LogFunctionLogger(
       console.log.bind(console), 
@@ -113,63 +284,20 @@ connection.onInitialize((params: InitializeParams) => {
       workspaceFolders?.map(value => URI.parse(value.uri)) || [],
       documents,
       connection,
-      configuration,
+      config,
       logger
     )
 
     // initialize parser
-    const mdParser = langaugeServiceMdParser(quartoContext, "resources");
+    const parser = langaugeServiceMdParser(quartoContext, "resources");
 
-    
-
-    // initialize language service workspace
-    //const workspace = lan
-
-  
-    const onCompletionHandler = onCompletion(configuration);
-    connection.onCompletion(async (textDocumentPosition) => {
-      const doc = resolveDoc(textDocumentPosition.textDocument);
-      if (doc) {
-        return await onCompletionHandler(
-          doc,
-          textDocumentPosition.position,
-          textDocumentPosition.context
-        );
-      } else {
-        return null;
-      }
+    // create language service
+    mdLs = createLanguageService({
+      config,
+      workspace,
+      parser, 
+      logger
     });
-    
-    const onHoverProvider = onHover(configuration);
-    connection.onHover(async (textDocumentPosition) => {
-      const doc = resolveDoc(textDocumentPosition.textDocument);
-      if (doc) {
-        return await onHoverProvider(doc, textDocumentPosition.position);
-      } else {
-        return null;
-      }
-    });
-
-    // register no-op methods to enable client middleware
-    middlewareRegister(connection);
-     
-    // diagnostics on open and save (clear on doc modified)
-    documents.onDidOpen(async (e) => {
-      sendDiagnostics(e.document, await provideDiagnostics(e.document));
-    });
-    documents.onDidSave(async (e) => {
-      sendDiagnostics(e.document, await provideDiagnostics(e.document));
-    });
-    documents.onDidChangeContent(async (e) => {
-      sendDiagnostics(e.document, []);
-    });
-    function sendDiagnostics(doc: TextDocument, diagnostics: Diagnostic[]) {
-      connection.sendDiagnostics({
-        uri: doc.uri,
-        version: doc.version,
-        diagnostics,
-      });
-    }
 
     // create lsp connection (jsonrpc bridge) 
     const lspConnection: LspConnection = {
@@ -183,7 +311,6 @@ connection.onInitialize((params: InitializeParams) => {
   
   });
 
-
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -194,6 +321,28 @@ connection.onInitialize((params: InitializeParams) => {
         triggerCharacters: [".", "$", "@", ":", "\\", "=", "/", "#"],
       },
       hoverProvider: true,
+      codeActionProvider: {
+        resolveProvider: true,
+        codeActionKinds: [
+          kOrganizeLinkDefKind,
+          'quickfix',
+          'refactor',
+        ]
+      },
+      definitionProvider: true,
+      documentLinkProvider: { resolveProvider: true },
+      documentSymbolProvider: true,
+      foldingRangeProvider: true,
+      referencesProvider: true,
+      renameProvider: { prepareProvider: true, },
+      selectionRangeProvider: true,
+      workspaceSymbolProvider: true,
+      workspace: {
+        workspaceFolders: {
+          supported: true,
+          changeNotifications: true,
+        },
+      },
       ...middlewareCapabilities()
     },
   };

@@ -13,24 +13,24 @@
  *
  */
 
-import { Position, TextDocument } from "vscode-languageserver-textdocument";
+import { Position } from "vscode-languageserver-textdocument";
 import { Hover } from "vscode-languageserver";
 
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
 import { docEditorContext } from "../../quarto/quarto";
-import { ConfigurationManager } from "../../config";
+import { ITextDocument } from "../../util/text-document";
+import { LsConfiguration } from "../../config";
 
-
-export function onHover(config: ConfigurationManager) {
-  const onMathHover = mathHover(config);
-  return async (
-    doc: TextDocument,
-    pos: Position
-  ): Promise<Hover | null> => {
+export class MdHoverProvider {
+  public async provideHover(
+    doc: ITextDocument,
+    pos: Position,
+    config?: LsConfiguration
+  ): Promise<Hover | null> {
     return (
-      (await refHover(doc, pos)) || onMathHover(doc, pos) || (await yamlHover(docEditorContext(doc, pos, true)))
+      (await refHover(doc, pos)) ||  mathHover(doc, pos, config) || (await yamlHover(docEditorContext(doc, pos, true)))
     );
   } 
 }

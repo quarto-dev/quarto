@@ -13,7 +13,6 @@
  *
  */
 
-import { TextDocument } from "vscode-languageserver-textdocument";
 import { Position, CompletionItem } from "vscode-languageserver-types";
 
 import { lines } from "core";
@@ -25,10 +24,11 @@ import {
   isQuartoDoc,
   isQuartoRevealDoc,
   isQuartoYaml,
-} from "../core/doc";
+} from "../util/doc";
 import { initializeAttrCompletionProvider, AttrToken } from "./quarto-attr";
 import { initializeQuartoYamlModule, QuartoYamlModule } from "./quarto-yaml";
 import { ExecFileSyncOptions } from "child_process";
+import { ITextDocument } from "..";
 
 export interface EditorContext {
   path: string;
@@ -83,7 +83,7 @@ export function codeEditorContext(
 }
 
 export function docEditorContext(
-  doc: TextDocument,
+  doc: ITextDocument,
   pos: Position,
   explicit: boolean,
   trigger?: string

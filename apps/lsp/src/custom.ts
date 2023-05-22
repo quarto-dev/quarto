@@ -26,18 +26,18 @@ import {
 } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
-import { QuartoContext, userDictionaryDir } from "quarto-core";
+import { userDictionaryDir } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
 import { Hover, Position, TextDocuments } from "vscode-languageserver";
 import { URI } from "vscode-uri";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
-import { codeEditorContext } from "./service/quarto/quarto";
 import { yamlCompletions } from "./service/providers/completion/completion-yaml";
 import { yamlHover } from "./service/providers/hover/hover-yaml";
 import { ITextDocument } from "./service";
+import { Quarto, codeEditorContext } from "./service/quarto";
 
 export function registerCustomMethods(
-  quartoContext: QuartoContext, 
+  quarto: Quarto, 
   connection: LspConnection,
   documents: TextDocuments<ITextDocument>
 ) {
@@ -46,9 +46,9 @@ export function registerCustomMethods(
 
   const options : EditorServerOptions = {
     ...defaultEditorServerOptions(
-      quartoContext,
+      quarto,
       resourcesDir,
-      quartoContext.pandocPath
+      quarto.pandocPath
     ),
     documents: {
       getCode(filePath: string) {
@@ -74,13 +74,13 @@ export function registerCustomMethods(
     ...mathServerMethods(options.documents),
     ...sourceServerMethods(options.pandoc),
     // we have the yaml hover and completions here so provide entry points for them
-    [kCodeViewAssist]: args => codeViewAssist(args[0]),
-    [kCodeViewGetCompletions]: args => codeViewCompletions(args[0]),
+    [kCodeViewAssist]: args => codeViewAssist(quarto, args[0]),
+    [kCodeViewGetCompletions]: args => codeViewCompletions(quarto, args[0]),
   });
 }
 
 
-async function codeViewAssist(context: CodeViewCellContext) : Promise<Hover | undefined> {
+async function codeViewAssist(quarto: Quarto, context: CodeViewCellContext) : Promise<Hover | undefined> {
   
   const edContext = codeEditorContext(
     context.filepath,
@@ -90,10 +90,10 @@ async function codeViewAssist(context: CodeViewCellContext) : Promise<Hover | un
     false
   );  
 
-  return await yamlHover(edContext) || undefined;
+  return await yamlHover(quarto, edContext) || undefined;
 }
 
-async function codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
+async function codeViewCompletions(quarto: Quarto, context: CodeViewCompletionContext) : Promise<CompletionList> {
   // handle yaml completions within the lsp (the rest are currently handled in the vscode extension)
   const edContext = codeEditorContext(
     context.filepath,
@@ -103,7 +103,7 @@ async function codeViewCompletions(context: CodeViewCompletionContext) : Promise
     true,
     context.explicit
   );
-  const completions = await yamlCompletions(edContext, false);
+  const completions = await yamlCompletions(quarto, edContext, false);
   return {
     isIncomplete: false,
     items: completions || []

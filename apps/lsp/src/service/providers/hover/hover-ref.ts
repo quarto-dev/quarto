@@ -20,14 +20,14 @@ import { bypassRefIntelligence } from "../../util/refs";
 import { documentFrontMatter } from "../../util/markdown";
 import { filePathForDoc } from "../../util/doc";
 
-import { quartoContext } from "../../quarto/quarto";
 import { ITextDocument } from "../../util/text-document";
+import { Quarto } from "../../quarto";
 
 
 // cache the last ref lookup
 let lastRef: CslRef | undefined;
 
-export async function refHover(doc: ITextDocument, pos: Position): Promise<Hover | null> {
+export async function refHover(quarto: Quarto, doc: ITextDocument, pos: Position): Promise<Hover | null> {
   // compute the line
   const line = doc
     .getText(Range.create(pos.line, 0, pos.line + 1, 0))
@@ -54,8 +54,8 @@ export async function refHover(doc: ITextDocument, pos: Position): Promise<Hover
       );
       if (citeId === lastRef?.id && lastRef.cite) {
         return hoverFromCslRef(lastRef.cite, range);
-      } else if (quartoContext) {
-        const refs = cslRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
+      } else {
+        const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(doc));
         if (refs) {
           const ref = refs.find((x) => x.id === citeId);
           if (ref?.cite) {

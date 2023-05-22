@@ -13,12 +13,14 @@
  *
  */
 
+
+// TODO: break out types from util
+// TODO: ensure that attr completions reflect all features
 // TODO: implement parser (refactor providers)
 // TODO: see how _extensions plays in extension projects (check readonly?)
 // TODO: investigate more efficient diagnostics scheme (must return diagnosticsProvider from capabilities)
 // (see also registerValidateSupport, PullDiagnosticsManager, etc.)
 // TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
-// TODO: can we make quarto a 'service' rather than a global
 
 // TODO: test and tweak all of the features, updating changelog as required
 
@@ -49,7 +51,6 @@ import * as l10n from '@vscode/l10n';
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
-import { initializeQuarto } from "./service/quarto/quarto";
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
@@ -59,6 +60,7 @@ import { languageServiceWorkspace } from "./workspace";
 import { langaugeServiceMdParser } from "./parser";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService, ITextDocument, RenameNotSupportedAtLocationError } from "./service";
+import { initializeQuarto } from "./quarto";
 
 const kOrganizeLinkDefKind = 'source.organizeLinkDefinitions';
 
@@ -90,7 +92,7 @@ connection.onInitialize((params: InitializeParams) => {
     if (!document) {
       return [];
     }
-
+    
     return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
   })
 
@@ -306,9 +308,8 @@ connection.onInitialized(async () => {
     configManager.getSettings()?.quarto.path, 
     workspaceDir
   );
-  initializeQuarto(quartoContext);
+  const quarto = await initializeQuarto(quartoContext);
 
- 
   // initialize logger
   const logger = new LogFunctionLogger(
     console.log.bind(console), 
@@ -330,6 +331,7 @@ connection.onInitialized(async () => {
   // create language service
   mdLs = createLanguageService({
     config,
+    quarto,
     workspace,
     parser, 
     logger
@@ -343,7 +345,7 @@ connection.onInitialized(async () => {
   }
 
   // register custom methods
-  registerCustomMethods(quartoContext, lspConnection, documents);
+  registerCustomMethods(quarto, lspConnection, documents);
 
 });
 

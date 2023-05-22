@@ -13,15 +13,10 @@
  *
  */
 
-import { EditorContext, quarto } from "../../quarto/quarto";
-import { AttrToken } from "../../quarto/quarto-attr";
+import { AttrToken, EditorContext, Quarto } from "../../quarto";
 
-export async function attrCompletions(context: EditorContext) {
-  // bail if no quarto connection
-  if (!quarto) {
-    return null;
-  }
-
+export async function attrCompletions(quarto: Quarto, context: EditorContext) {
+  
   // validate trigger
   if (context.trigger && !["="].includes(context.trigger)) {
     return null;

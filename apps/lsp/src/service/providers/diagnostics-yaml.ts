@@ -21,43 +21,37 @@ import {
   Range,
 } from "vscode-languageserver";
 import {
-  docEditorContext,
   kEndColumn,
   kEndRow,
   kStartColumn,
   kStartRow,
   LintItem,
-  quarto,
-} from "../quarto/quarto";
+  Quarto,
+} from "../quarto";
 import { ITextDocument } from "../util/text-document";
+import { docEditorContext } from "../quarto";
 
 export async function provideYamlDiagnostics(
+  quarto: Quarto,
   doc: ITextDocument
 ): Promise<Diagnostic[]> {
-  // bail if no quarto connection
-  if (!quarto) {
-    return [];
-  }
 
-  if (quarto) {
-    const context = docEditorContext(doc, Position.create(0, 0), true);
-    const diagnostics = await quarto.getYamlDiagnostics(context);
-    return diagnostics.map((item) => {
-      return {
-        severity: lintSeverity(item),
-        range: Range.create(
-          item[kStartRow],
-          item[kStartColumn],
-          item[kEndRow],
-          item[kEndColumn]
-        ),
-        message: item.text,
-        source: "quarto",
-      };
-    });
-  } else {
-    return [];
-  }
+  const context = docEditorContext(doc, Position.create(0, 0), true);
+  const diagnostics = await quarto.getYamlDiagnostics(context);
+  return diagnostics.map((item) => {
+    return {
+      severity: lintSeverity(item),
+      range: Range.create(
+        item[kStartRow],
+        item[kStartColumn],
+        item[kEndRow],
+        item[kEndColumn]
+      ),
+      message: item.text,
+      source: "quarto",
+    };
+  });
+  
 }
 
 function lintSeverity(item: LintItem) {

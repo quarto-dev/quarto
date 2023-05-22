@@ -22,7 +22,7 @@ import {
   CompletionItem,
   CompletionTriggerKind
 } from "vscode-languageserver";
-import { docEditorContext } from "../../quarto/quarto";
+import { Quarto } from "../../quarto";
 import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";
@@ -34,6 +34,7 @@ import { MdLinkProvider } from "../document-links";
 import { MdTableOfContentsProvider } from "../../toc";
 import { ITextDocument } from "../../util/text-document";
 import { MdPathCompletionProvider } from "./completion-path";
+import { docEditorContext } from "../../quarto";
 
 /**
  * Control the type of path completions returned.
@@ -77,13 +78,17 @@ export class MdCompletionProvider {
 
   readonly pathCompletionProvider_: MdPathCompletionProvider;
 
+  readonly quarto_: Quarto;
+
 	constructor(
 		configuration: LsConfiguration,
+    quarto: Quarto,
 		workspace: IWorkspace,
 		parser: IMdParser,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
 	) {
+    this.quarto_ = quarto;
     this.pathCompletionProvider_ = new MdPathCompletionProvider(
       configuration, 
       workspace, 
@@ -104,12 +109,12 @@ export class MdCompletionProvider {
     const trigger = context.triggerCharacter;
     const editorContext = docEditorContext(doc, pos, explicit, trigger);
     return (
-      (await this.pathCompletionProvider_.provideCompletionItems(doc, pos, context, token)) ||
-      (await refsCompletions(doc, pos, editorContext)) ||
-      (await attrCompletions(editorContext)) ||
+      (await refsCompletions(this.quarto_, doc, pos, editorContext)) ||
+      (await attrCompletions(this.quarto_, editorContext)) ||
       (await latexCompletions(doc, pos, context, config)) ||
-      (await yamlCompletions(editorContext, true)) ||
-      null
+      (await yamlCompletions(this.quarto_, editorContext, true)) ||
+      (await this.pathCompletionProvider_.provideCompletionItems(doc, pos, context, token)) ||
+      []
     );
 	}
 }

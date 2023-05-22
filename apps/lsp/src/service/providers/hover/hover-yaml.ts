@@ -15,9 +15,9 @@
 
 import { Hover, MarkupKind } from "vscode-languageserver";
 
-import { EditorContext, quarto } from "../../quarto/quarto";
+import { EditorContext, Quarto } from "../../quarto";
 
-export async function yamlHover(context: EditorContext): Promise<Hover | null> {
+export async function yamlHover(quarto: Quarto, context: EditorContext): Promise<Hover | null> {
   // bail if no quarto connection
   if (!quarto?.getHover) {
     return null;

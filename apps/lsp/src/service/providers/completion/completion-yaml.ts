@@ -25,17 +25,18 @@ import {
 } from "vscode-languageserver-types";
 
 
-import { EditorContext, quarto } from "../../quarto/quarto";
+import { EditorContext, Quarto } from "../../quarto";
 
-export async function yamlCompletions(context: EditorContext, stripPadding: boolean) {
-  // bail if no quarto connection
-  if (!quarto) {
-    return null;
-  }
-
+export async function yamlCompletions(quarto: Quarto, context: EditorContext, stripPadding: boolean) {
+ 
   // get completions
   const result = await quarto.getYamlCompletions(context);
   if (result) {
+    // if there are no completions then return null
+    if (result.completions.length === 0) {
+      return null;
+    }
+
     // if there is one completion and it matches the token
     // then don't return it
     if (

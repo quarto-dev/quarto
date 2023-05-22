@@ -19,18 +19,21 @@ import { Hover } from "vscode-languageserver";
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
-import { docEditorContext } from "../../quarto/quarto";
 import { ITextDocument } from "../../util/text-document";
 import { LsConfiguration } from "../../config";
+import { Quarto } from "../../quarto";
+import { docEditorContext } from "../../quarto";
 
 export class MdHoverProvider {
+  constructor(private readonly quarto_: Quarto) {}
+
   public async provideHover(
     doc: ITextDocument,
     pos: Position,
     config?: LsConfiguration
   ): Promise<Hover | null> {
     return (
-      (await refHover(doc, pos)) ||  mathHover(doc, pos, config) || (await yamlHover(docEditorContext(doc, pos, true)))
+      (await refHover(this.quarto_, doc, pos)) ||  mathHover(doc, pos, config) || (await yamlHover(this.quarto_, docEditorContext(doc, pos, true)))
     );
   } 
 }

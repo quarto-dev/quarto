@@ -1,5 +1,5 @@
 /*
- * quarto-attr.ts
+ * quarto.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,9 +13,11 @@
  *
  */
 
-import * as path from "path";
+import * as path from "node:path";
+import * as fs from "node:fs";
+
+import fileUrl from "file-url";
 import * as yaml from "js-yaml";
-import * as fs from "fs";
 
 import {
   CompletionItem,
@@ -25,26 +27,33 @@ import {
   Range,
   TextEdit,
 } from "vscode-languageserver";
-import { EditorContext } from "./quarto";
 
-export const kContextHeading = "heading";
-export const kContextDiv = "div";
-export const kContextDivSimple = "div-simple";
-export const kContextCodeblock = "codeblock";
-export const kContextFigure = "figure";
+import { QuartoContext } from "quarto-core";
 
-export type AttrContext =
-  | "heading"
-  | "div"
-  | "div-simple"
-  | "codeblock"
-  | "figure";
+import { 
+  Quarto,
+  CompletionResult, 
+  EditorContext, 
+  HoverResult, 
+  LintItem,
+  AttrContext, 
+  AttrToken, 
+  kContextDiv, 
+  kContextDivSimple 
+} from "./service/quarto";
 
-export interface AttrToken {
-  context: AttrContext;
-  formats: string[];
-  attr: string;
-  token: string;
+export async function initializeQuarto(context: QuartoContext) : Promise<Quarto> {
+  const quartoModule = await initializeQuartoYamlModule(context.resourcePath) as QuartoYamlModule;
+  return {
+    ...context,
+    getYamlCompletions: quartoModule.getCompletions,
+    getAttrCompletions: initializeAttrCompletionProvider(
+      context.resourcePath
+    ),
+    getYamlDiagnostics: quartoModule.getLint,
+    getHover: quartoModule.getHover
+  };
+    
 }
 
 interface Attr {
@@ -72,7 +81,7 @@ interface AttrCompletion {
 // cache array of Attr
 const attrs: Attr[] = [];
 
-export function initializeAttrCompletionProvider(resourcesPath: string) {
+function initializeAttrCompletionProvider(resourcesPath: string) {
   // read attr.yml from resources
   const attrYamlPath = path.join(resourcesPath, "editor", "tools", "attrs.yml");
   try {
@@ -154,4 +163,27 @@ export function initializeAttrCompletionProvider(resourcesPath: string) {
 
 function normalizedValue(value: string, simpleDiv: boolean) {
   return simpleDiv && value.startsWith(".") ? value.slice(1) : value;
+}
+
+
+interface QuartoYamlModule {
+  getCompletions(context: EditorContext): Promise<CompletionResult>;
+  getLint(context: EditorContext): Promise<Array<LintItem>>;
+  getHover?: (context: EditorContext) => Promise<HoverResult | null>;
+}
+
+function initializeQuartoYamlModule(
+  resourcesPath: string
+): Promise<QuartoYamlModule> {
+  const modulePath = path.join(resourcesPath, "editor", "tools", "vs-code.mjs");
+  return new Promise((resolve, reject) => {
+    import(fileUrl(modulePath))
+      .then((mod) => {
+        const quartoModule = mod as QuartoYamlModule;
+        resolve(quartoModule);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 }

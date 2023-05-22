@@ -19,22 +19,19 @@ import { CompletionItem } from "vscode-languageserver";
 import { filePathForDoc } from "../../../util/doc";
 import { bypassRefIntelligence } from "../../../util/refs";
 
-import { EditorContext, quarto } from "../../../quarto/quarto";
+import { EditorContext, Quarto } from "../../../quarto";
 import { projectDirForDocument } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
 import { ITextDocument } from "../../../util/text-document";
 
 export async function refsCompletions(
+  quarto: Quarto,
   doc: ITextDocument,
   pos: Position,
   context: EditorContext
 ): Promise<CompletionItem[] | null> {
-  // bail if no quarto connection
-  if (!quarto) {
-    return null;
-  }
-
+ 
   // validate trigger
   if (context.trigger && !["@"].includes(context.trigger)) {
     return null;
@@ -62,8 +59,9 @@ export async function refsCompletions(
         // construct path
         const path = filePathForDoc(doc);
         const projectDir = projectDirForDocument(path);
-        const biblioItems = await biblioCompletions(tokenText, doc);
+        const biblioItems = await biblioCompletions(quarto, tokenText, doc);
         const crossrefItems = await crossrefCompletions(
+          quarto,
           tokenText,
           doc.getText(),
           path,

@@ -23,24 +23,19 @@ import {
 import { XRef } from "editor-types";
 
 import { xrefsForFile } from "editor-server";
-
-import { quartoContext } from "../../../quarto/quarto";
+import { Quarto } from "../../../quarto";
 
 export async function crossrefCompletions(
+  quarto: Quarto,
   token: string,
   code: string,
   filePath: string,
   projectDir?: string
 ): Promise<CompletionItem[] | null> {
-
-  if (quartoContext) {
-    const xrefs = await xrefsForFile(quartoContext, filePath, code, projectDir);
-    return xrefs
-      .map(xrefCompletion(!!projectDir))
-      .filter((ref) => ref.label.startsWith(token));
-  } else {
-    return null;
-  }
+  const xrefs = await xrefsForFile(quarto, filePath, code, projectDir);
+  return xrefs
+    .map(xrefCompletion(!!projectDir))
+    .filter((ref) => ref.label.startsWith(token));
 }
 
 function xrefCompletion(includeFilename: boolean) {

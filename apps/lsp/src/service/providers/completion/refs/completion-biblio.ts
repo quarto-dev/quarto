@@ -23,17 +23,14 @@ import { cslRefs } from "editor-server";
 import { filePathForDoc } from "../../../util/doc";
 import { documentFrontMatter } from "../../../util/markdown";
 import { ITextDocument } from "../../../util/text-document";
-import { quartoContext } from "../../../quarto/quarto";
+import { Quarto } from "../../../quarto";
 
 export async function biblioCompletions(
+  quarto: Quarto,
   token: string,
   doc: ITextDocument
 ): Promise<CompletionItem[] | null> {
-  if (!quartoContext) {
-    return null;
-  }
-
-  const refs = cslRefs(quartoContext, filePathForDoc(doc), documentFrontMatter(doc));
+  const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(doc));
   if (refs) {
     return refs
       .filter((ref) => ref.id.startsWith(token))

@@ -33,6 +33,7 @@ import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } 
 import { HrefKind, InternalHref, LinkDefinitionSet, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider, MdLinkSource, parseLocationInfoFromFragment, ReferenceLinkMap } from './document-links';
 import { ILogger, LogLevel } from '../logging';
 import { provideYamlDiagnostics } from './diagnostics-yaml';
+import { Quarto } from '../quarto';
 
 /**
  * The severity at which diagnostics are reported
@@ -168,6 +169,7 @@ class FileLinkMap {
 export class DiagnosticComputer {
 
 	readonly #configuration: LsConfiguration;
+	readonly #quarto: Quarto;
 	readonly #workspace: IWorkspace;
 	readonly #linkProvider: MdLinkProvider;
 	readonly #tocProvider: MdTableOfContentsProvider;
@@ -175,12 +177,14 @@ export class DiagnosticComputer {
 
 	constructor(
 		configuration: LsConfiguration,
+		quarto: Quarto,
 		workspace: IWorkspace,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
 		logger: ILogger,
 	) {
 		this.#configuration = configuration;
+		this.#quarto = quarto;
 		this.#workspace = workspace;
 		this.#linkProvider = linkProvider;
 		this.#tocProvider = tocProvider;
@@ -213,7 +217,7 @@ export class DiagnosticComputer {
 			Array.from(this.#validateReferenceLinks(options, links, definitions)),
 			Array.from(this.#validateUnusedLinkDefinitions(options, links)),
 			Array.from(this.#validateDuplicateLinkDefinitions(options, links)),
-			provideYamlDiagnostics(doc)
+			provideYamlDiagnostics(this.#quarto, doc)
 		])).flat();
 
 		this.#logger.log(LogLevel.Trace, 'DiagnosticComputer.compute finished', { document: doc.uri, version: doc.version, diagnostics });
@@ -620,6 +624,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 
 	constructor(
 		configuration: LsConfiguration,
+		quarto: Quarto,
 		workspace: IWorkspaceWithWatching,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
@@ -660,7 +665,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 			},
 		});
 
-		this.#computer = new DiagnosticComputer(configuration, stateCachedWorkspace, linkProvider, tocProvider, logger);
+		this.#computer = new DiagnosticComputer(configuration, quarto, stateCachedWorkspace, linkProvider, tocProvider, logger);
 
 		this._register(workspace.onDidDeleteMarkdownDocument(uri => {
 			this.#linkWatcher.deleteDocument(uri);

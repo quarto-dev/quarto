@@ -39,6 +39,7 @@ import { ITextDocument } from './util/text-document';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
 import { MdCompletionProvider } from './providers/completion/completion';
+import { Quarto } from './quarto';
 
 export { IncludeWorkspaceHeaderCompletions } from './providers/completion/completion';
 export type { MdCompletionProvider } from './providers/completion/completion';
@@ -224,25 +225,11 @@ export interface IMdLanguageService {
  * Initialization options for creating a new {@link IMdLanguageService}.
  */
 export interface LanguageServiceInitialization {
-
 	readonly config: LsConfiguration;
-
-	/**
-	 * The {@link IWorkspace workspace} that the  {@link IMdLanguageService language service} uses to work with files. 
-	 */
+	readonly quarto: Quarto;
 	readonly workspace: IWorkspace;
-
-	/**
-	 * The {@link IMdParser markdown parsing engine} that the  {@link IMdLanguageService language service} uses to
-	 * process Markdown source. 
-	 */
 	readonly parser: IMdParser;
-
-	/**
-	 * The {@link ILogger logger} that the  {@link IMdLanguageService language service} use for logging messages.
-	 */
 	readonly logger: ILogger;
-
 }
 
 /**
@@ -256,14 +243,14 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 	const smartSelectProvider = new MdSelectionRangeProvider(init.parser, tocProvider, logger);
 	const foldingProvider = new MdFoldingProvider(init.parser, tocProvider, logger);
 	const linkProvider = new MdLinkProvider(config, init.parser, init.workspace, tocProvider, logger);
-	const completionProvider = new MdCompletionProvider(config, init.workspace, init.parser, linkProvider, tocProvider);
-	const hoverProvider = new MdHoverProvider();
+	const completionProvider = new MdCompletionProvider(config, init.quarto, init.workspace, init.parser, linkProvider, tocProvider);
+	const hoverProvider = new MdHoverProvider(init.quarto);
 	const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
 	const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);
 	const definitionsProvider = new MdDefinitionProvider(config, init.workspace, tocProvider, linkCache);
 	const renameProvider = new MdRenameProvider(config, init.workspace, referencesProvider, init.parser.slugifier, logger);
 	const fileRenameProvider = new MdFileRenameProvider(config, init.workspace, linkCache, referencesProvider);
-	const diagnosticsComputer = new DiagnosticComputer(config, init.workspace, linkProvider, tocProvider, logger);
+	const diagnosticsComputer = new DiagnosticComputer(config, init.quarto, init.workspace, linkProvider, tocProvider, logger);
 	const docSymbolProvider = new MdDocumentSymbolProvider(tocProvider, linkProvider, logger);
 	const workspaceSymbolProvider = new MdWorkspaceSymbolProvider(init.workspace, docSymbolProvider);
 	const organizeLinkDefinitions = new MdOrganizeLinkDefinitionProvider(linkProvider);
@@ -314,7 +301,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 			if (!isWorkspaceWithFileWatching(init.workspace)) {
 				throw new Error(`Workspace does not support file watching. Diagnostics manager not supported`);
 			}
-			return new DiagnosticsManager(config, init.workspace, linkProvider, tocProvider, logger);
+			return new DiagnosticsManager(config, init.quarto, init.workspace, linkProvider, tocProvider, logger);
 		}
 	});
 }

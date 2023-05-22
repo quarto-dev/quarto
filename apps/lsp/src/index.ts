@@ -13,16 +13,14 @@
  *
  */
 
-
-// TODO: investigate registerDocumentHighlightSupport and registerValidateSupport
-
-
 // TODO: implement parser (refactor providers)
 // TODO: see how _extensions plays in extension projects (check readonly?)
 // TODO: investigate more efficient diagnostics scheme (must return diagnosticsProvider from capabilities)
+// (see also registerValidateSupport, PullDiagnosticsManager, etc.)
 // TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
 // TODO: can we make quarto a 'service' rather than a global
 
+// TODO: test and tweak all of the features, updating changelog as required
 
 import {
   CancellationToken,

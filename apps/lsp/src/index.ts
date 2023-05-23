@@ -13,15 +13,16 @@
  *
  */
 
-
-// TODO: ensure that attr completions reflect all features
 // TODO: implement parser (refactor providers)
-// TODO: see how _extensions plays in extension projects (check readonly?)
+
 // TODO: investigate more efficient diagnostics scheme (must return diagnosticsProvider from capabilities)
 // (see also registerValidateSupport, PullDiagnosticsManager, etc.)
 // TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
 
 // TODO: test and tweak all of the features, updating changelog as required
+
+// TODO: see how _extensions plays in extension projects (check readonly?)
+
 
 import {
   CancellationToken,

@@ -15,7 +15,7 @@
 
 import { Range } from '../range';
 
-export type TokenType =
+export type PandocTokenType =
   | "BlockQuote"
   | "BulletList"
   | "CodeBlock"
@@ -34,16 +34,16 @@ export type TokenType =
   | "RawInline"
   | "Span";
 
-export interface Attr {
+export interface PandocAttr {
   id: string;
   classes: string[];
   keyvalue: Array<[string, string]>;
 }
 
-export interface Token {
-  readonly type: TokenType;
+export interface PandocToken {
+  readonly type: PandocTokenType;
   range: Range;
-  attr?: Attr; 
+  attr?: PandocAttr; 
   data?: unknown;
     // Header: text
     // Image: caption

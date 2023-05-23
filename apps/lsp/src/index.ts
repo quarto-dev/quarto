@@ -15,21 +15,15 @@
 
 // TODO: implement parser (refactor providers)
 
-// TODO: investigate more efficient diagnostics scheme (must return diagnosticsProvider from capabilities)
-// (see also registerValidateSupport, PullDiagnosticsManager, etc.)
-// TODO: investigate whether we should support DidChangeWatchedFilesNotification (multiple?)
-
 // TODO: test and tweak all of the features, updating changelog as required
 
 // TODO: see how _extensions plays in extension projects (check readonly?)
 
 
 import {
-  CancellationToken,
   ClientCapabilities,
   CodeAction,
   Definition,
-  Diagnostic,
   DocumentLink,
   DocumentSymbol,
   FoldingRange,
@@ -54,13 +48,14 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
 import { initQuartoContext } from "quarto-core";
-import { ConfigurationManager, getDiagnosticsOptions, lsConfiguration } from "./config";
+import { ConfigurationManager, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { langaugeServiceMdParser } from "./parser";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService, ITextDocument, RenameNotSupportedAtLocationError } from "./service";
 import { initializeQuarto } from "./quarto";
+import { registerDiagnostics } from "./diagnostics";
 
 const kOrganizeLinkDefKind = 'source.organizeLinkDefinitions';
 
@@ -231,27 +226,6 @@ connection.onInitialize((params: InitializeParams) => {
   // register no-op methods to enable client middleware
   middlewareRegister(connection);
    
-  // diagnostics on open and save (clear on doc modified)
-  documents.onDidOpen(async (e) => {
-    sendDiagnostics(e.document, await computeDiagnostics(e.document));
-  });
-  documents.onDidSave(async (e) => {
-    sendDiagnostics(e.document, await computeDiagnostics(e.document));
-  });
-  documents.onDidChangeContent(async (e) => {
-    sendDiagnostics(e.document, []);
-  });
-  async function computeDiagnostics(doc: ITextDocument) : Promise<Diagnostic[]> {
-    return mdLs?.computeDiagnostics(doc, getDiagnosticsOptions(configManager), CancellationToken.None) || [];
-  }
-  function sendDiagnostics(doc: ITextDocument, diagnostics: Diagnostic[]) {
-    connection.sendDiagnostics({
-      uri: doc.uri,
-      version: doc.version,
-      diagnostics,
-    });
-  }
-
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -321,6 +295,7 @@ connection.onInitialized(async () => {
     workspaceFolders?.map(value => URI.parse(value.uri)) || [],
     documents,
     connection,
+    capabilities!, 
     config,
     logger
   )
@@ -336,6 +311,16 @@ connection.onInitialized(async () => {
     parser, 
     logger
   });
+
+  // dynamic diagnostics registration
+  registerDiagnostics(
+    connection,
+    workspace,
+    documents,
+    mdLs,
+    configManager,
+    logger
+  );
 
   // create lsp connection (jsonrpc bridge) 
   const lspConnection: LspConnection = {

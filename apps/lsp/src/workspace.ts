@@ -25,7 +25,7 @@ import path from "node:path"
 import { glob } from "glob";
 
 import { URI } from "vscode-uri";
-import { Connection, Emitter, TextDocuments } from "vscode-languageserver";
+import { Connection, Emitter, TextDocuments, DidChangeWatchedFilesNotification, WatchKind, ClientCapabilities, FileChangeType } from "vscode-languageserver";
 import { Position, Range, TextDocument } from "vscode-languageserver-textdocument";
 
 import { 
@@ -34,7 +34,9 @@ import {
   LogLevel, 
   ITextDocument, 
   LsConfiguration, 
-  IWorkspace
+  IWorkspace,
+  IWorkspaceWithWatching,
+  FileWatcherOptions
 } from "./service";
 
 import { isQuartoDoc } from "./service/util/doc";
@@ -46,9 +48,10 @@ export function languageServiceWorkspace(
   workspaceFolders: URI[],
   documents: TextDocuments<ITextDocument>,
   connection: Connection,
+  capabilities: ClientCapabilities, 
   config: LsConfiguration,
   logger: ILogger
-) : IWorkspace {
+) :  IWorkspace | IWorkspaceWithWatching {
 
   // track changes to workspace folders
   connection.workspace.onDidChangeWorkspaceFolders(async () => {
@@ -263,9 +266,123 @@ export function languageServiceWorkspace(
       const result = await fspromises.readdir(resource.fsPath, { withFileTypes: true });
       return result.map(value => [value.name, { isDirectory: value.isDirectory( )}]);
     },
+
+    
   };
 
-  return workspace;
+  // add file watching if supported on the client
+  if (capabilities.workspace?.didChangeWatchedFiles) {
+
+    // register for changes
+    connection.client.register(
+      DidChangeWatchedFilesNotification.type,
+      {
+        watchers: [
+          {
+            globPattern: `**/*.{${config.markdownFileExtensions.join(',')}}`,
+            kind: WatchKind.Create | WatchKind.Change | WatchKind.Delete
+          }
+        ]
+      }
+    );
+
+    // setup watchers
+    const watchers = new Map<string, {
+      readonly resource: URI;
+      readonly options: FileWatcherOptions;
+      readonly onDidChange: Emitter<URI>;
+      readonly onDidCreate: Emitter<URI>;
+      readonly onDidDelete: Emitter<URI>;
+    }>();
+
+    connection.onDidChangeWatchedFiles(async ({ changes }) => {
+
+      // fulfill watchers
+      for (const change of changes) {
+        const watcher = watchers.get(change.uri);
+        if (!watcher) {
+          return;
+        }
+        switch (change.type) {
+          case FileChangeType.Created: watcher.onDidCreate.fire(URI.parse(change.uri)); return;
+          case FileChangeType.Changed: watcher.onDidChange.fire(URI.parse(change.uri)); return;
+          case FileChangeType.Deleted: watcher.onDidDelete.fire(URI.parse(change.uri)); return;
+        }
+      }
+
+      // keep document cache up to date and notify clients
+      for (const change of changes) {
+				const resource = URI.parse(change.uri);
+				logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.onDidChangeWatchedFiles', { type: change.type, resource: resource.toString() });
+				switch (change.type) {
+					case FileChangeType.Changed: {
+						const entry = documentCache.get(resource);
+						if (entry) {
+							// Refresh the on-disk state
+							const document = await openMarkdownDocumentFromFs(resource);
+							if (document) {
+								onDidChangeMarkdownDocument.fire(document);
+							}
+						}
+						break;
+					}
+					case FileChangeType.Created: {
+						const entry = documentCache.get(resource);
+						if (entry) {
+							// Create or update the on-disk state
+							const document = await openMarkdownDocumentFromFs(resource);
+							if (document) {
+								onDidCreateMarkdownDocument.fire(document);
+							}
+						}
+						break;
+					}
+					case FileChangeType.Deleted: {
+						const entry = documentCache.get(resource);
+						if (entry) {
+							entry.setOnDiskDoc(undefined);
+							if (entry.isDetached()) {
+								doDeleteDocument(resource);
+							}
+						}
+						break;
+					}
+				}
+			}
+		});
+  
+    // add watching to workspace
+    const fsWorkspace: IWorkspaceWithWatching = {
+      ...workspace,
+      watchFile(resource, options) {
+		    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.watchFile', { resource: resource.toString() });
+
+        const entry = {
+          resource,
+          options,
+          onDidCreate: new Emitter<URI>(),
+          onDidChange: new Emitter<URI>(),
+          onDidDelete: new Emitter<URI>(),
+        };
+		    watchers.set(entry.resource.toString(), entry);
+        return {
+          onDidCreate: entry.onDidCreate.event,
+          onDidChange: entry.onDidChange.event,
+          onDidDelete: entry.onDidDelete.event,
+          dispose: () => {
+            logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.disposeWatcher', { resource: resource.toString() });
+            watchers.delete(entry.resource.toString());
+          }
+        };
+
+      },
+    }
+    return fsWorkspace;
+  
+  // return vanilla workspace w/o watching
+  } else {
+    return workspace;
+  }
 
 }
 

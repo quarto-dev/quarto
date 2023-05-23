@@ -32,8 +32,8 @@ import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';
 import { HrefKind, InternalHref, LinkDefinitionSet, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider, MdLinkSource, parseLocationInfoFromFragment, ReferenceLinkMap } from './document-links';
 import { ILogger, LogLevel } from '../logging';
-import { provideYamlDiagnostics } from './diagnostics-yaml';
 import { Quarto } from '../quarto';
+import { provideYamlDiagnostics } from './diagnostics-yaml';
 
 /**
  * The severity at which diagnostics are reported
@@ -60,6 +60,12 @@ export enum DiagnosticLevel {
  * Configure how diagnostics are computed.
  */
 export interface DiagnosticOptions {
+
+	/**
+	 * Should markdown be validated at all? (false disables all of the below)
+	 */
+	readonly enabled: boolean;
+
 	/**
 	 * Diagnostic level for invalid reference links, e.g. `[text][no-such-ref]`.
 	 */
@@ -166,10 +172,17 @@ class FileLinkMap {
 	}
 }
 
+export class DiagnosticOnSaveComputer {
+	constructor(private readonly quarto_: Quarto) {}
+
+	public async compute(doc: ITextDocument) : Promise<lsp.Diagnostic[]> {
+		return provideYamlDiagnostics(this.quarto_, doc);
+	}
+}
+
 export class DiagnosticComputer {
 
 	readonly #configuration: LsConfiguration;
-	readonly #quarto: Quarto;
 	readonly #workspace: IWorkspace;
 	readonly #linkProvider: MdLinkProvider;
 	readonly #tocProvider: MdTableOfContentsProvider;
@@ -177,14 +190,12 @@ export class DiagnosticComputer {
 
 	constructor(
 		configuration: LsConfiguration,
-		quarto: Quarto,
 		workspace: IWorkspace,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
 		logger: ILogger,
 	) {
 		this.#configuration = configuration;
-		this.#quarto = quarto;
 		this.#workspace = workspace;
 		this.#linkProvider = linkProvider;
 		this.#tocProvider = tocProvider;
@@ -211,15 +222,20 @@ export class DiagnosticComputer {
 		// Current doc always implicitly exists
 		statCache.set(getDocUri(doc), { exists: true });
 
-		const diagnostics = (await Promise.all([
-			this.#validateFileLinks(options, links, statCache, token),
-			this.#validateFragmentLinks(doc, options, links, token),
-			Array.from(this.#validateReferenceLinks(options, links, definitions)),
-			Array.from(this.#validateUnusedLinkDefinitions(options, links)),
-			Array.from(this.#validateDuplicateLinkDefinitions(options, links)),
-			provideYamlDiagnostics(this.#quarto, doc)
-		])).flat();
+		// base diagnostics
+		const diagnostics: lsp.Diagnostic[] = [];
 
+		// optionally produce markdown diagnostics
+		if (options.enabled) {
+			diagnostics.push(...(await Promise.all([
+				this.#validateFileLinks(options, links, statCache, token),
+				this.#validateFragmentLinks(doc, options, links, token),
+				Array.from(this.#validateReferenceLinks(options, links, definitions)),
+				Array.from(this.#validateUnusedLinkDefinitions(options, links)),
+				Array.from(this.#validateDuplicateLinkDefinitions(options, links)),
+			])).flat());
+		}
+		
 		this.#logger.log(LogLevel.Trace, 'DiagnosticComputer.compute finished', { document: doc.uri, version: doc.version, diagnostics });
 		
 		return {
@@ -624,7 +640,6 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 
 	constructor(
 		configuration: LsConfiguration,
-		quarto: Quarto,
 		workspace: IWorkspaceWithWatching,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
@@ -665,7 +680,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 			},
 		});
 
-		this.#computer = new DiagnosticComputer(configuration, quarto, stateCachedWorkspace, linkProvider, tocProvider, logger);
+		this.#computer = new DiagnosticComputer(configuration, stateCachedWorkspace, linkProvider, tocProvider, logger);
 
 		this._register(workspace.onDidDeleteMarkdownDocument(uri => {
 			this.#linkWatcher.deleteDocument(uri);

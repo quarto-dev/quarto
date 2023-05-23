@@ -157,11 +157,12 @@ export function lsConfiguration(configManager: ConfigurationManager) : LsConfigu
 export function getDiagnosticsOptions(configManager: ConfigurationManager): DiagnosticOptions {
 	const settings = configManager.getSettings();
 	if (!settings) {
-		return defaultDiagnosticOptions;
+		return kDefaultDiagnosticOptions;
 	}
 
 	const validateFragmentLinks = convertDiagnosticLevel(settings.markdown.validate.fragmentLinks.enabled);
 	return {
+		enabled: settings.markdown.validate.enabled,
 		validateFileLinks: convertDiagnosticLevel(settings.markdown.validate.fileLinks.enabled),
 		validateReferences: convertDiagnosticLevel(settings.markdown.validate.referenceLinks.enabled),
 		validateFragmentLinks: convertDiagnosticLevel(settings.markdown.validate.fragmentLinks.enabled),
@@ -172,7 +173,8 @@ export function getDiagnosticsOptions(configManager: ConfigurationManager): Diag
 	};
 }
 
-const defaultDiagnosticOptions: DiagnosticOptions = {
+export const kDefaultDiagnosticOptions: DiagnosticOptions = {
+	enabled: false,
 	validateFileLinks: DiagnosticLevel.ignore,
 	validateReferences: DiagnosticLevel.ignore,
 	validateFragmentLinks: DiagnosticLevel.ignore,

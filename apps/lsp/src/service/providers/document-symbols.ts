@@ -124,13 +124,13 @@ export class MdDocumentSymbolProvider {
 	#tocToDocumentSymbol(entry: TocEntry): lsp.DocumentSymbol {
 		return {
 			name: this.#getTocSymbolName(entry),
-			kind: lsp.SymbolKind.String,
+			kind: lsp.SymbolKind.Constant,
 			range: entry.sectionLocation.range,
 			selectionRange: entry.sectionLocation.range
 		};
 	}
 
 	#getTocSymbolName(entry: TocEntry): string {
-		return '#'.repeat(entry.level) + ' ' + entry.text;
+		return entry.text || " ";
 	}
 }

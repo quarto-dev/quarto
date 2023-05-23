@@ -22,7 +22,7 @@ import { Disposable } from 'core';
 import { makeRange } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
-import { IMdParser, Token } from './parser';
+import { IMdParser } from './parser';
 import { pandocSlugifier, ISlugifier, Slug } from './slugify';
 import { getDocUri, getLine, ITextDocument } from './document';
 
@@ -82,7 +82,7 @@ export interface TocEntry {
 export class TableOfContents {
 
 	public static async create(parser: IMdParser, document: ITextDocument, token: CancellationToken): Promise<TableOfContents> {
-		const entries = await this.#buildToc(parser, document, token);
+		const entries = await this.#buildPandocToc(parser, document, token);
 		return new TableOfContents(entries, parser.slugifier);
 	}
 
@@ -94,7 +94,7 @@ export class TableOfContents {
 				if (!doc || token.isCancellationRequested) {
 					return [];
 				}
-				return this.#buildToc(parser, doc, token);
+				return this.#buildPandocToc(parser, doc, token);
 			}))).flat();
 			return new TableOfContents(entries, parser.slugifier);
 		}
@@ -102,132 +102,91 @@ export class TableOfContents {
 		return this.create(parser, document, token);
 	}
 
-	static async #buildToc(parser: IMdParser, document: ITextDocument, token: CancellationToken): Promise<TocEntry[]> {
+	static async #buildPandocToc(parser: IMdParser, document: ITextDocument, token: CancellationToken): Promise<TocEntry[]> {
+
 		const docUri = getDocUri(document);
 
 		const toc: TocEntry[] = [];
-		const tokens = await parser.tokenize(document);
+		const elements = await parser.parsePandocElements(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
 
 		const existingSlugEntries = new Map<string, { count: number }>();
 
-		type HeaderInfo = { open: Token; body: Token[] };
 
-		const headers: HeaderInfo[] = [];
-		let currentHeader: HeaderInfo | undefined;
+		for (let i=0; i<elements.length; i++) {
+			const element = elements[i];
+			if (element.type === "Header") {
 
-		for (const token of tokens) {
-			switch (token.type) {
-				case 'heading_open': {
-					currentHeader = { open: token, body: [] };
-					headers.push(currentHeader);
-					break;
+				// text
+				const text = element.data as string;
+
+				// slug (prevent duplicates)
+				let slug = parser.slugifier.fromHeading(text);
+				const existingSlugEntry = existingSlugEntries.get(slug.value);
+				if (existingSlugEntry) {
+					++existingSlugEntry.count;
+					slug = parser.slugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
+				} else {
+					existingSlugEntries.set(slug.value, { count: 0 });
 				}
-				case 'heading_close': {
-					currentHeader = undefined;
-					break;
+
+				// line
+				const line = element.range.start.line;
+
+				// level
+				const level = element.level!;
+
+				// sectionLocation
+				const sectionStart = element.range.start;
+				const nextPeerElement = elements.slice(i+1).find(el => el.level && (el.level <= level));
+				const sectionEndLine = nextPeerElement ? nextPeerElement.range.start.line-1 : (document.lineCount-1);
+				const sectionEndCharacter = getLine(document, sectionEndLine).length;
+				const sectionLocation = makeRange(sectionStart, lsp.Position.create(sectionEndLine, sectionEndCharacter));
+
+				// headerLocation
+				const headerLocation = element.range;
+				if (headerLocation.end.character === 0) {
+					headerLocation.end.line--;
+					headerLocation.end.character = getLine(document, headerLocation.end.line).length;
 				}
-				default: {
-					currentHeader?.body.push(token);
-					break;
+
+				// headerTextLocation
+				let headerTextLocation = element.range;
+				const headerLine = getLine(document, line);
+				const headerTextMatch = headerLine.match(/(^#*\s+)([^{]+)/);
+				if (headerTextMatch) {
+					headerTextLocation = makeRange(
+						lsp.Position.create(element.range.start.line, headerTextMatch[1].length), 
+						lsp.Position.create(element.range.start.line, headerTextMatch[0].length))
 				}
+
+				const asLocation = (range: lsp.Range) : lsp.Location => {
+					return {
+						uri: docUri.toString(),
+						range
+					}
+				}
+
+				toc.push({
+					slug,
+					text,
+					level,
+					line,
+					sectionLocation: asLocation(sectionLocation),
+					headerLocation: asLocation(headerLocation),
+					headerTextLocation: asLocation(headerTextLocation)
+				});
 			}
 		}
 
-		for (const { open, body } of headers) {
-			if (!open.map) {
-				continue;
-			}
+		console.log(JSON.stringify(toc, undefined, 2));
 
-			const lineNumber = open.map[0];
-			const line = getLine(document, lineNumber);
-			const bodyText = TableOfContents.#getHeaderTitleAsPlainText(body);
+		return toc;
 
-			let slug = parser.slugifier.fromHeading(bodyText);
-			const existingSlugEntry = existingSlugEntries.get(slug.value);
-			if (existingSlugEntry) {
-				++existingSlugEntry.count;
-				slug = parser.slugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
-			} else {
-				existingSlugEntries.set(slug.value, { count: 0 });
-			}
-
-			const headerLocation: lsp.Location = {
-				uri: docUri.toString(),
-				range: makeRange(lineNumber, 0, lineNumber, line.length)
-			};
-
-			const headerTextLocation: lsp.Location = {
-				uri: docUri.toString(),
-				range: makeRange(lineNumber, line.match(/^#+\s*/)?.[0].length ?? 0, lineNumber, line.length - (line.match(/\s*#*$/)?.[0].length ?? 0))
-			};
-
-			toc.push({
-				slug,
-				text: line.replace(/^\s*#+\s*(.*?)(\s+#+)?$/, (_, word) => word.trim()),
-				level: TableOfContents.#getHeaderLevel(open.markup),
-				line: lineNumber,
-				sectionLocation: headerLocation, // Populated in next steps
-				headerLocation,
-				headerTextLocation
-			});
-		}
-
-		// Get full range of section
-		return toc.map((entry, startIndex): TocEntry => {
-			let end: number | undefined = undefined;
-			for (let i = startIndex + 1; i < toc.length; ++i) {
-				if (toc[i].level <= entry.level) {
-					end = toc[i].line - 1;
-					break;
-				}
-			}
-			const endLine = end ?? document.lineCount - 1;
-			return {
-				...entry,
-				sectionLocation: {
-					uri: docUri.toString(),
-					range: makeRange(
-						entry.sectionLocation.range.start,
-						{ line: endLine, character: getLine(document, endLine).length })
-				}
-			};
-		});
 	}
 
-	static #getHeaderLevel(markup: string): number {
-		if (markup === '=') {
-			return 1;
-		} else if (markup === '-') {
-			return 2;
-		} else { // '#', '##', ...
-			return markup.length;
-		}
-	}
-
-	static #tokenToPlainText(token: Token): string {
-		if (token.children) {
-			return token.children.map(TableOfContents.#tokenToPlainText).join('');
-		}
-
-		switch (token.type) {
-			case 'text':
-			case 'emoji':
-			case 'code_inline':
-				return token.content;
-			default:
-				return '';
-		}
-	}
-
-	static #getHeaderTitleAsPlainText(headerTitleParts: readonly Token[]): string {
-		return headerTitleParts
-			.map(TableOfContents.#tokenToPlainText)
-			.join('')
-			.trim();
-	}
 
 	public static readonly empty = new TableOfContents([], pandocSlugifier);
 

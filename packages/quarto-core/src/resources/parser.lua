@@ -82,15 +82,20 @@ local function extractToken(el)
       type = type,
       range = {
         start = {
-          line = tonumber(beginLine),
-          character = tonumber(beginChar)
+          line = tonumber(beginLine) - 1,
+          character = tonumber(beginChar) - 1
         },
         ["end"] = {
-          line = tonumber(endLine),
-          character = tonumber(endChar)
+          line = tonumber(endLine) - 1,
+          character = tonumber(endChar) - 1
         }
       }
     }
+
+    -- level if this is a header
+    if type == "Header" then
+      token["level"] = el.level
+    end
 
     -- attributes if we have any
     if not attrEmpty(attr) then

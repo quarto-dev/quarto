@@ -15,10 +15,15 @@
 
 // TODO: implement parser (refactor providers)
 
+// TODO: include code cells and yaml front matter in outline
+// (exclude headings within callouts)
+// https://github.com/quarto-dev/quarto/blob/827bf68e6026b51e9a2d76fe9b38a4d68b3a62fa/apps/vscode/src/markdown/toc.ts
+
 // TODO: test and tweak all of the features, updating changelog as required
 
 // TODO: see how _extensions plays in extension projects (check readonly?)
 
+import path from "node:path"
 
 import {
   ClientCapabilities,
@@ -301,7 +306,8 @@ connection.onInitialized(async () => {
   )
 
   // initialize parser
-  const parser = langaugeServiceMdParser(quartoContext, "resources");
+  const resourcesDir = path.join(__dirname, "resources");
+  const parser = langaugeServiceMdParser(quartoContext, resourcesDir);
 
   // create language service
   mdLs = createLanguageService({

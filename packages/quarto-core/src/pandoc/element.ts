@@ -43,6 +43,7 @@ export interface PandocElementAttr {
 export interface PandocElement {
   readonly type: PandocElementType;
   range: Range;
+  level?: number;
   attr?: PandocElementAttr; 
   data?: unknown;
     // Header: text

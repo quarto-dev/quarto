@@ -17,14 +17,14 @@
 import MarkdownIt from "markdown-it";
 
 
-import { QuartoContext } from "quarto-core";
+import { PandocElement, QuartoContext, parsePandocDocument } from "quarto-core";
 
 import { IMdParser, ITextDocument, Token } from "./service";
 import { pandocSlugifier } from "./service";
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function langaugeServiceMdParser(_context: QuartoContext, _resourcesDir: string) : IMdParser {
+export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: string) : IMdParser {
 
   // markdownit instance
   const mdIt = MarkdownIt({ html: true });
@@ -33,6 +33,11 @@ export function langaugeServiceMdParser(_context: QuartoContext, _resourcesDir: 
   let tokenCache: Token[] | undefined;
   let tokenCacheDocUri: string | undefined;
   let tokenCacheDocVersion: number | undefined;
+
+  // pandoc element cache for last document requested
+  let elementCache: PandocElement[] | undefined;
+  let elementCacheDocUri: string | undefined;
+  let elementCacheDocVersion: number | undefined;
 
   const mdParser : IMdParser = {
     slugifier: pandocSlugifier,
@@ -47,7 +52,19 @@ export function langaugeServiceMdParser(_context: QuartoContext, _resourcesDir: 
         tokenCacheDocVersion = doc.version;
       }
       return tokenCache;
-    }
+    },
+    async parsePandocElements(doc: ITextDocument): Promise<PandocElement[]> {
+      if (
+        !elementCache ||
+        doc.uri.toString() !== elementCacheDocUri ||
+        doc.version !== elementCacheDocVersion
+      ) {
+        elementCache = parsePandocDocument(context, resourcesDir, doc.getText());
+        elementCacheDocUri = doc.uri.toString();
+        elementCacheDocVersion = doc.version;
+      }
+      return elementCache;
+    },
   };
   return mdParser;
 }

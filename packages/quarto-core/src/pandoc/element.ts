@@ -1,5 +1,5 @@
 /*
- * token.ts
+ * element.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,7 +15,7 @@
 
 import { Range } from '../range';
 
-export type PandocTokenType =
+export type PandocElementType =
   | "BlockQuote"
   | "BulletList"
   | "CodeBlock"
@@ -34,16 +34,16 @@ export type PandocTokenType =
   | "RawInline"
   | "Span";
 
-export interface PandocAttr {
+export interface PandocElementAttr {
   id: string;
   classes: string[];
   keyvalue: Array<[string, string]>;
 }
 
-export interface PandocToken {
-  readonly type: PandocTokenType;
+export interface PandocElement {
+  readonly type: PandocElementType;
   range: Range;
-  attr?: PandocAttr; 
+  attr?: PandocElementAttr; 
   data?: unknown;
     // Header: text
     // Image: caption

@@ -16,10 +16,10 @@
 import path from "node:path"
 
 import { QuartoContext } from "../context";
-import { PandocToken } from "./token";
+import { PandocElement } from "./element";
 
 
-export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : PandocToken[] {
+export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : PandocElement[] {
  
   const output = context.runPandoc(
     { input: markdown },
@@ -28,7 +28,7 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
      "--lua-filter", path.join(resourcePath, 'parser.lua')
   );
 
-  const outputJson = JSON.parse(output) as Record<string,PandocToken>;
+  const outputJson = JSON.parse(output) as Record<string,PandocElement>;
   return Object.values(outputJson);
 }
 

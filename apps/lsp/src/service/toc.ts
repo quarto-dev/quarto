@@ -181,10 +181,7 @@ export class TableOfContents {
 			}
 		}
 
-		console.log(JSON.stringify(toc, undefined, 2));
-
 		return toc;
-
 	}
 
 

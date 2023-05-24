@@ -57,3 +57,12 @@ export interface PandocToken {
 }
 
 
+export function isCallout(token: PandocToken) {
+  if (token.type === "Div") {
+    const classes = token.attr![kAttrClasses];
+    return !!classes.find(clz => clz.startsWith("callout-"));
+  } else {
+    return false;
+  }
+}
+

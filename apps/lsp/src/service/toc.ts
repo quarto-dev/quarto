@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
 import { Disposable } from 'core';
-import { PandocToken, makeRange, parseFrontMatterStr } from 'quarto-core';
+import { PandocToken, isCallout, makeRange, parseFrontMatterStr } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
@@ -124,6 +124,19 @@ export class TableOfContents {
 			return [];
 		}
 
+		// compute restricted ranges (ignore headings in these ranges)
+		const restrictedRanges = tokens.reduce((ranges, token) => {
+			if (isCallout(token)) {
+				ranges.push({ begin: token.range.start.line, end: token.range.end.line });
+			}
+			return ranges;
+		}, new Array<{ begin: number, end: number }>())
+		const isWithinRestrictedRange = (token: PandocToken) => {
+			return restrictedRanges.find(range => {
+				return token.range.start.line >= range.begin && token.range.end.line <= range.end;
+			})
+		};
+
 		const existingSlugEntries = new Map<string, { count: number }>();
 
 		const toSlug = (text: string) => {
@@ -174,7 +187,7 @@ export class TableOfContents {
 						sectionLocation: asLocation(token.range),
 					})
 				 }
-			} else if (token.type === "Header") {
+			} else if (token.type === "Header" && !isWithinRestrictedRange(token)) {
 
 				// type
 				const type = TocEntryType.Header;

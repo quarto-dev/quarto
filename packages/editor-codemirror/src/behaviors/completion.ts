@@ -87,7 +87,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
             // if we aren't explcit then filter based on match (letter + wordchar + optional trigger chars)
             if (!context.explicit) {
               const trigger = (language.trigger || ["."]);
-              const match = context.matchBefore(new RegExp('(^|[ \t])[A-Za-z_\\.][\\w_\\(\\)\\[\\]' +  escapeRegExpCharacters(trigger.join('')) + ']*'));
+              const match = context.matchBefore(new RegExp('(^|[ \t])[\\\\A-Za-z_\\.][\\w_\\(\\)\\[\\]' +  escapeRegExpCharacters(trigger.join('')) + ']*'));
               if (!match) {
                 return null;
               }

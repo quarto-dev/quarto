@@ -3,6 +3,7 @@
 ## 1.86.0 (Unreleased)
 
 - Visual Editor: Use Fluent UI v9 as component library
+- Visual Editor: Allow for \ in completion token (Julia symbol completions)
 ## 1.85.0 (Release on 07 May 2023)
 
 - Pass working directory to Julia REPL when executing cells

@@ -16,15 +16,16 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { ILogger, LogLevel } from '../logging';
-import { IMdParser, Token, TokenWithMap } from '../parser';
+import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
+import { PandocToken } from 'quarto-core';
 
 const rangeLimit = 5000;
 
 interface RegionMarker {
-	readonly token: TokenWithMap;
+	readonly line: number;
 	readonly isStart: boolean;
 }
 
@@ -49,15 +50,16 @@ export class MdFoldingProvider {
 
 		const foldables = await Promise.all([
 			this.#getRegions(document, token),
+			this.#getBlockFoldingRanges(document, token),
 			this.#getHeaderFoldingRanges(document, token),
-			this.#getBlockFoldingRanges(document, token)
+		
 		]);
 		const result = foldables.flat();
 		return result.length > rangeLimit ? result.slice(0, rangeLimit) : result;
 	}
 
 	async #getRegions(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = await this.#parser.tokenize(document);
+		const tokens = await this.#parser.parsePandocTokens(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -65,7 +67,7 @@ export class MdFoldingProvider {
 		return Array.from(this.#getRegionsFromTokens(tokens));
 	}
 
-	*#getRegionsFromTokens(tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
+	*#getRegionsFromTokens(tokens: readonly PandocToken[]): Iterable<lsp.FoldingRange> {
 		const nestingStack: RegionMarker[] = [];
 		for (const token of tokens) {
 			const marker = asRegionMarker(token);
@@ -73,7 +75,7 @@ export class MdFoldingProvider {
 				if (marker.isStart) {
 					nestingStack.push(marker);
 				} else if (nestingStack.length && nestingStack[nestingStack.length - 1].isStart) {
-					yield { startLine: nestingStack.pop()!.token.map[0], endLine: marker.token.map[0], kind: lsp.FoldingRangeKind.Region };
+					yield { startLine: nestingStack.pop()!.line, endLine: marker.line, kind: lsp.FoldingRangeKind.Region };
 				} else {
 					// noop: invalid nesting (i.e. [end, start] or [start, end, end])
 				}
@@ -97,18 +99,19 @@ export class MdFoldingProvider {
 	}
 
 	async #getBlockFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = await this.#parser.tokenize(document);
+		const tokens = await this.#parser.parsePandocTokens(document);
+
 		if (token.isCancellationRequested) {
 			return [];
 		}
 		return Array.from(this.#getBlockFoldingRangesFromTokens(document, tokens));
 	}
 
-	*#getBlockFoldingRangesFromTokens(document: ITextDocument, tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
+	*#getBlockFoldingRangesFromTokens(document: ITextDocument, tokens: readonly PandocToken[]): Iterable<lsp.FoldingRange> {
 		for (const token of tokens) {
 			if (isFoldableToken(token)) {
-				const startLine = token.map[0];
-				let endLine = token.map[1] - 1;
+				const startLine = token.range.start.line;
+				let endLine = token.range.end.line - 1;
 				if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= startLine + 1) {
 					endLine = endLine - 1;
 				}
@@ -120,49 +123,59 @@ export class MdFoldingProvider {
 		}
 	}
 
-	#getFoldingRangeKind(listItem: Token): lsp.FoldingRangeKind | undefined {
-		return listItem.type === 'html_block' && listItem.content.startsWith('<!--')
-			? lsp.FoldingRangeKind.Comment
-			: undefined;
+	#getFoldingRangeKind(listItem: PandocToken): lsp.FoldingRangeKind | undefined {
+		const html = asHtmlBlock(listItem);
+		return html && html.startsWith('!--') ? lsp.FoldingRangeKind.Comment : undefined;
 	}
 }
 
 function isStartRegion(t: string) { return /^\s*<!--\s*#?region\b.*-->/.test(t); }
 function isEndRegion(t: string) { return /^\s*<!--\s*#?endregion\b.*-->/.test(t); }
 
-function asRegionMarker(token: Token): RegionMarker | undefined {
-	if (!token.map || token.type !== 'html_block') {
+function asRegionMarker(token: PandocToken): RegionMarker | undefined {
+	const html = asHtmlBlock(token);
+	if (html === undefined) {
 		return undefined;
 	}
-
-	if (isStartRegion(token.content)) {
-		return { token: token as TokenWithMap, isStart: true };
+	
+	if (isStartRegion(html)) {
+		return { line: token.range.start.line, isStart: true };
 	}
 
-	if (isEndRegion(token.content)) {
-		return { token: token as TokenWithMap, isStart: false };
+	if (isEndRegion(html)) {
+		return { line: token.range.start.line, isStart: false };
 	}
 
 	return undefined;
 }
 
-function isFoldableToken(token: Token): token is TokenWithMap {
-	if (!token.map) {
-		return false;
+function asHtmlBlock(token: PandocToken) : string | undefined {
+	if (token.type !== 'RawBlock') {
+		return undefined;
 	}
+	const { format, text } = token.data as { format: string, text: string };
+	if (format !== "html") {
+		return undefined;
+	}
+	return text;
+}
 
+function isFoldableToken(token: PandocToken) {
+	
 	switch (token.type) {
-		case 'fence':
-		case 'list_item_open':
-		case 'table_open':
-		case 'blockquote_open':
-			return token.map[1] > token.map[0];
+		case 'CodeBlock':
+		case 'Div':
+		case 'BlockQuote':
+		case 'Table':
+		case 'OrderedList':
+		case 'BulletList':
+			return token.range.end.line > token.range.start.line;
 
-		case 'html_block':
+		case 'RawBlock':
 			if (asRegionMarker(token)) {
 				return false;
 			}
-			return token.map[1] > token.map[0] + 1;
+			return token.range.end.line > token.range.start.line + 1;	
 
 		default:
 			return false;

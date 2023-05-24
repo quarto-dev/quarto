@@ -111,6 +111,11 @@ local function extractToken(el)
       token["data"] = el.target
     elseif type == "Math" then
       token["data"] = el.mathtype
+    elseif type == "RawBlock" then
+      token["data"] = {
+        format = el.format,
+        text = el.text
+      }
     end
 
     -- insert token

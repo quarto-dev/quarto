@@ -13,6 +13,9 @@
  *
  */
 
+// TODO: heading regions need to be bounded by containing div
+// TODO: tabset headings should exist for folding but should be excluded from toc
+
 // TODO: implement parser (refactor providers)
 
 // TODO: test and tweak all of the features, updating changelog as required

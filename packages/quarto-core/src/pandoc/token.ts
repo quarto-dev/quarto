@@ -54,6 +54,7 @@ export interface PandocToken {
     // Link: target
     // Math: type
     // CodeBlock: text
+    // RawBlock: { format: string, text: string }
 }
 
 

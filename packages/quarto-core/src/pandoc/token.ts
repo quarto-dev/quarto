@@ -66,3 +66,21 @@ export function isCallout(token: PandocToken) {
   }
 }
 
+export function isTheorem(token: PandocToken) {
+  if (token.type === "Div") {
+    const id = token.attr![kAttrIdentifier];
+    return ["thm", "lem", "cor", "prp", "cnj", "def", "exm", "exr"]
+      .some(prefix => id.startsWith(`${prefix}-`));
+  } else {
+    return false;
+  }
+}
+
+export function isProof(token: PandocToken) {
+  if (token.type === "Div") {
+    const classes = token.attr![kAttrClasses];
+    return ["proof", "remark", "solution"].some(clz => classes.includes(clz));
+  } else {
+    return false;
+  }
+}

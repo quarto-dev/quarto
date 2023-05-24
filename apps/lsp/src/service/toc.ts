@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
 import { Disposable } from 'core';
-import { PandocToken, isCallout, makeRange, parseFrontMatterStr } from 'quarto-core';
+import { PandocToken, isCallout, isProof, isTheorem, makeRange, parseFrontMatterStr } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
@@ -126,7 +126,7 @@ export class TableOfContents {
 
 		// compute restricted ranges (ignore headings in these ranges)
 		const restrictedRanges = tokens.reduce((ranges, token) => {
-			if (isCallout(token)) {
+			if (isCallout(token) || isTheorem(token) || isProof(token)) {
 				ranges.push({ begin: token.range.start.line, end: token.range.end.line });
 			}
 			return ranges;

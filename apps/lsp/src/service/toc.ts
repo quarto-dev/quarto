@@ -27,7 +27,9 @@ import {
 	makeRange, 
 	parseFrontMatterStr, 
 	isExecutableLanguageBlock, 
-	isFencedCode 
+	isFencedCode, 
+	isWithinRange,
+	isTabset
 } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
@@ -133,17 +135,8 @@ export class TableOfContents {
 		}
 
 		// compute restricted ranges (ignore headings in these ranges)
-		const restrictedRanges = tokens.reduce((ranges, token) => {
-			if (isCallout(token) || isTheorem(token) || isProof(token)) {
-				ranges.push({ begin: token.range.start.line, end: token.range.end.line });
-			}
-			return ranges;
-		}, new Array<{ begin: number, end: number }>())
-		const isWithinRestrictedRange = (token: PandocToken) => {
-			return restrictedRanges.find(range => {
-				return token.range.start.line >= range.begin && token.range.end.line <= range.end;
-			})
-		};
+		const isWithinIgnoredRange = isWithinRange(tokens, token =>isCallout(token) || isTheorem(token) || isProof(token));
+		const isWithinTabset = isWithinRange(tokens, isTabset);
 
 		const existingSlugEntries = new Map<string, { count: number }>();
 
@@ -195,7 +188,7 @@ export class TableOfContents {
 						sectionLocation: asLocation(token.range),
 					})
 				 }
-			} else if (token.type === "Header" && !isWithinRestrictedRange(token)) {
+			} else if (token.type === "Header" && !isWithinIgnoredRange(token)) {
 
 				// type
 				const type = TocEntryType.Header;
@@ -210,13 +203,13 @@ export class TableOfContents {
 				const line = token.range.start.line;
 
 				// level
-				const level = token.level!;
-				lastLevel = level;
+				const level = isWithinTabset(token) ? lastLevel+1 : token.level!;
+				lastLevel = token.level! + 1;
 
 				// sectionLocation
 				const sectionStart = token.range.start;
 				const containingDivElement = tokens.slice(0, i).reverse().find(el => el.type === "Div" && el.range.end.line > sectionStart.line);
-				const nextPeerElement = tokens.slice(i+1).find(el => el.level && (el.level <= level));
+				const nextPeerElement = tokens.slice(i+1).find(el => !isWithinTabset(el) && el.level && (el.level <= level));
 				const sectionEndLine = (nextPeerElement && containingDivElement)
 					?  Math.min(nextPeerElement.range.start.line-1, containingDivElement.range.end.line-2)
 					: nextPeerElement

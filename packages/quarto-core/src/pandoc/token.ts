@@ -67,6 +67,15 @@ export function isCallout(token: PandocToken) {
   }
 }
 
+export function isTabset(token: PandocToken) {
+  if (token.type === "Div") {
+    const classes = token.attr![kAttrClasses];
+    return !!classes.find(clz => clz === "panel-tabset");
+  } else {
+    return false;
+  }
+}
+
 export function isTheorem(token: PandocToken) {
   if (token.type === "Div") {
     const id = token.attr![kAttrIdentifier];
@@ -84,4 +93,18 @@ export function isProof(token: PandocToken) {
   } else {
     return false;
   }
+}
+
+export function isWithinRange(tokens: PandocToken[], rangePredicate: (token: PandocToken) => boolean) {
+  const ranges = tokens.reduce((ranges, token) => {
+    if (rangePredicate(token)) {
+      ranges.push({ begin: token.range.start.line, end: token.range.end.line });
+    }
+    return ranges;
+  }, new Array<{ begin: number, end: number }>())
+  return (token: PandocToken) => {
+    return ranges.find(range => {
+      return token.range.start.line >= range.begin && token.range.end.line <= range.end;
+    })
+  };
 }

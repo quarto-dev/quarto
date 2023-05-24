@@ -15,5 +15,6 @@
 
 export * from './token'
 export * from './parser'
+export * from './language'
 
 

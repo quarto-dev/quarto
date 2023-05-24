@@ -19,7 +19,16 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
 import { Disposable } from 'core';
-import { PandocToken, isCallout, isProof, isTheorem, makeRange, parseFrontMatterStr } from 'quarto-core';
+import { 
+	PandocToken, 
+	isCallout, 
+	isProof, 
+	isTheorem, 
+	makeRange, 
+	parseFrontMatterStr, 
+	isExecutableLanguageBlock, 
+	isFencedCode 
+} from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
@@ -28,7 +37,6 @@ import { getDocUri, getLine, ITextDocument } from './document';
 
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
-import { isExecutableLanguageBlock, isFencedCode } from 'quarto-core/src/pandoc/language';
 
 export enum TocEntryType { Title, Header, CodeCell };
 

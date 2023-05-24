@@ -15,12 +15,13 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
+import { PandocToken, isDisplayMath } from 'quarto-core';
+
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
-import { PandocToken } from 'quarto-core';
 
 const rangeLimit = 5000;
 
@@ -100,7 +101,6 @@ export class MdFoldingProvider {
 
 	async #getBlockFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
 		const tokens = await this.#parser.parsePandocTokens(document);
-
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -161,7 +161,7 @@ function asHtmlBlock(token: PandocToken) : string | undefined {
 }
 
 function isFoldableToken(token: PandocToken) {
-	
+
 	switch (token.type) {
 		case 'CodeBlock':
 		case 'Div':
@@ -170,6 +170,9 @@ function isFoldableToken(token: PandocToken) {
 		case 'OrderedList':
 		case 'BulletList':
 			return token.range.end.line > token.range.start.line;
+
+		case 'Math':
+			return isDisplayMath(token) && token.range.end.line > token.range.start.line;
 
 		case 'RawBlock':
 			if (asRegionMarker(token)) {

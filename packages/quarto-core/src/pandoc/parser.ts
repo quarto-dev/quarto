@@ -17,6 +17,9 @@ import path from "node:path"
 
 import { QuartoContext } from "../context";
 import { PandocElement } from "./element";
+import { partitionYamlFrontMatter } from "../metadata";
+import { lines } from "core";
+import { makeRange } from "../range";
 
 
 export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : PandocElement[] {
@@ -28,8 +31,23 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
      "--lua-filter", path.join(resourcePath, 'parser.lua')
   );
 
+
   const outputJson = JSON.parse(output) as Record<string,PandocElement>;
-  return Object.values(outputJson);
+  const elements = Object.values(outputJson) as PandocElement[];
+
+  // add a FrontMatter token if there is front matter
+  const result = partitionYamlFrontMatter(markdown);
+  if (result) {
+    const yamlLines = lines(result.yaml);
+    const yamlEl: PandocElement = {
+      type: "FrontMatter",
+      data: result.yaml,
+      range: makeRange(0, 0, yamlLines.length - 1, 0)
+    }
+    elements.unshift(yamlEl);
+  }
+
+  return elements;
 }
 
 

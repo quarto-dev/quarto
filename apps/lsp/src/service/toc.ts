@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
 import { Disposable } from 'core';
-import { makeRange } from 'quarto-core';
+import { PandocElement, makeRange, parseFrontMatterStr } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
@@ -29,7 +29,10 @@ import { getDocUri, getLine, ITextDocument } from './document';
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
 
+export enum TocEntryType { Title, Header, CodeCell };
+
 export interface TocEntry {
+	readonly type: TocEntryType;
 	readonly slug: Slug;
 	readonly text: string;
 	readonly level: number;
@@ -49,7 +52,9 @@ export interface TocEntry {
 	 * This is the range from `# Head #` to `# Next head #`
 	 */
 	readonly sectionLocation: lsp.Location;
+}
 
+export interface TocHeaderEntry extends TocEntry {
 	/**
 	 * The range of the header declaration.
 	 *
@@ -77,6 +82,12 @@ export interface TocEntry {
 	 * This is the range of `Head`
 	 */
 	readonly headerTextLocation: lsp.Location;
+}
+
+export function isTocHeaderEntry(entry?: TocEntry): entry is TocHeaderEntry {
+	return entry !== undefined && 
+	       'headerLocation' in entry && 
+				 'headerTextLocation' in entry;
 }
 
 export class TableOfContents {
@@ -114,24 +125,56 @@ export class TableOfContents {
 
 		const existingSlugEntries = new Map<string, { count: number }>();
 
+		const toSlug = (text: string) => {
+			let slug = parser.slugifier.fromHeading(text);
+			const existingSlugEntry = existingSlugEntries.get(slug.value);
+			if (existingSlugEntry) {
+				++existingSlugEntry.count;
+				slug = parser.slugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
+			} else {
+				existingSlugEntries.set(slug.value, { count: 0 });
+			}
+			return slug;
+		}
+
+		const asLocation = (range: lsp.Range) : lsp.Location => {
+			return {
+				uri: docUri.toString(),
+				range
+			}
+		}
+
+		const maxHeadingLevel = elements.reduce((max: number, element: PandocElement) => {
+			return element.level && element.level < max ? element.level : max;
+		}, 2);
+
 
 		for (let i=0; i<elements.length; i++) {
 			const element = elements[i];
-			if (element.type === "Header") {
+			if (element.type === "FrontMatter") {
+				 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+				 const meta = parseFrontMatterStr(element.data as string) as any;
+				 if (typeof(meta) === "object" && typeof(meta.title) === "string") {
+					toc.push({
+						type: TocEntryType.Title,
+						slug: toSlug(meta.title),
+						text: meta.title,
+						level: maxHeadingLevel,
+						line: element.range.start.line,
+						sectionLocation: asLocation(element.range),
+					})
+				 }
+			} else if (element.type === "Header") {
+
+				// type
+				const type = TocEntryType.Header;
 
 				// text
 				const text = element.data as string;
 
-				// slug (prevent duplicates)
-				let slug = parser.slugifier.fromHeading(text);
-				const existingSlugEntry = existingSlugEntries.get(slug.value);
-				if (existingSlugEntry) {
-					++existingSlugEntry.count;
-					slug = parser.slugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
-				} else {
-					existingSlugEntries.set(slug.value, { count: 0 });
-				}
-
+				// slug 
+				const slug = toSlug(text);
+			
 				// line
 				const line = element.range.start.line;
 
@@ -162,14 +205,8 @@ export class TableOfContents {
 						lsp.Position.create(element.range.start.line, headerTextMatch[0].length))
 				}
 
-				const asLocation = (range: lsp.Range) : lsp.Location => {
-					return {
-						uri: docUri.toString(),
-						range
-					}
-				}
-
-				toc.push({
+				const tocEntry: TocHeaderEntry = {
+					type,
 					slug,
 					text,
 					level,
@@ -177,7 +214,9 @@ export class TableOfContents {
 					sectionLocation: asLocation(sectionLocation),
 					headerLocation: asLocation(headerLocation),
 					headerTextLocation: asLocation(headerTextLocation)
-				});
+				}
+
+				toc.push(tocEntry);
 			}
 		}
 

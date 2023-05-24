@@ -17,7 +17,7 @@ import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { isBefore, makeRange } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
-import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../toc';
+import { MdTableOfContentsProvider, TableOfContents, TocEntry, TocEntryType } from '../toc';
 import { ITextDocument } from '../document';
 import { MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 
@@ -124,11 +124,25 @@ export class MdDocumentSymbolProvider {
 	#tocToDocumentSymbol(entry: TocEntry): lsp.DocumentSymbol {
 		return {
 			name: this.#getTocSymbolName(entry),
-			kind: lsp.SymbolKind.Constant,
+			kind: this.#getTocSymbolKind(entry),
 			range: entry.sectionLocation.range,
 			selectionRange: entry.sectionLocation.range
 		};
 	}
+
+	#getTocSymbolKind(entry: TocEntry): lsp.SymbolKind {
+    switch (entry.type) {
+      case TocEntryType.Title: {
+        return lsp.SymbolKind.File;
+      }
+      case TocEntryType.Header: {
+        return lsp.SymbolKind.Constant;
+      }
+      case TocEntryType.CodeCell: {
+        return lsp.SymbolKind.Function;
+      }
+    }
+  }
 
 	#getTocSymbolName(entry: TocEntry): string {
 		return entry.text || " ";

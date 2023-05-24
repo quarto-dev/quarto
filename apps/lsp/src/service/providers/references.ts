@@ -22,7 +22,7 @@ import { translatePosition, areRangesEqual, modifyRange, rangeContains } from 'q
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
-import { MdTableOfContentsProvider, TocEntry } from '../toc';
+import { MdTableOfContentsProvider, TocHeaderEntry, isTocHeaderEntry } from '../toc';
 import { getDocUri, ITextDocument } from '../document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
@@ -125,7 +125,7 @@ export class MdReferencesProvider extends Disposable {
 		}
 
 		const header = toc.entries.find(entry => entry.line === position.line);
-		if (header) {
+		if (isTocHeaderEntry(header)) {
 			return this.#getReferencesToHeader(document, header, token);
 		} else {
 			return this.#getReferencesToLinkAtPosition(document, position, token);
@@ -143,7 +143,9 @@ export class MdReferencesProvider extends Disposable {
 		return Array.from(this.#findLinksToFile(resource, allLinksInWorkspace, undefined));
 	}
 
-	async #getReferencesToHeader(document: ITextDocument, header: TocEntry, token: CancellationToken): Promise<MdReference[]> {
+	async #getReferencesToHeader(document: ITextDocument, header: TocHeaderEntry, token: CancellationToken): Promise<MdReference[]> {
+		
+	
 		const links = await this.#getAllLinksInWorkspace();
 		if (token.isCancellationRequested) {
 			return [];
@@ -241,7 +243,7 @@ export class MdReferencesProvider extends Disposable {
 		if (resolvedResource && this.#isMarkdownPath(resolvedResource) && sourceLink.href.fragment && sourceLink.source.fragmentRange && rangeContains(sourceLink.source.fragmentRange, triggerPosition)) {
 			const toc = await this.#tocProvider.get(resolvedResource);
 			const entry = toc.lookup(sourceLink.href.fragment);
-			if (entry) {
+			if (isTocHeaderEntry(entry)) {
 				references.push({
 					kind: MdReferenceKind.Header,
 					isTriggerLocation: false,

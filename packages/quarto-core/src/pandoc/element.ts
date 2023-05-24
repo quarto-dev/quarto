@@ -16,6 +16,7 @@
 import { Range } from '../range';
 
 export type PandocElementType =
+  | "FrontMatter"
   | "BlockQuote"
   | "BulletList"
   | "CodeBlock"
@@ -41,11 +42,12 @@ export interface PandocElementAttr {
 }
 
 export interface PandocElement {
-  readonly type: PandocElementType;
+  type: PandocElementType;
   range: Range;
   level?: number;
   attr?: PandocElementAttr; 
   data?: unknown;
+    // FrontMatter: yaml
     // Header: text
     // Image: caption
     // Link: target

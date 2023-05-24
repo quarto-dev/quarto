@@ -17,7 +17,7 @@ import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token, TokenWithMap } from '../parser';
-import { MdTableOfContentsProvider } from '../toc';
+import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 
@@ -87,7 +87,7 @@ export class MdFoldingProvider {
 			return [];
 		}
 
-		return toc.entries.map((entry): lsp.FoldingRange => {
+		return toc.entries.filter(entry => isTocHeaderEntry(entry)).map((entry): lsp.FoldingRange => {
 			let endLine = entry.sectionLocation.range.end.line;
 			if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= entry.line + 1) {
 				endLine = endLine - 1;

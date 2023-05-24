@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { translatePosition, modifyRange, rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
-import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../toc';
+import { MdTableOfContentsProvider, TableOfContents, TocHeaderEntry, isTocHeaderEntry } from '../toc';
 import { ITextDocument } from '../document';
 import { tryAppendMarkdownFileExtension } from '../workspace';
 import { HrefKind, InternalHref, looksLikeLinkToResource, MdLink, MdLinkKind, MdLinkProvider } from './document-links';
@@ -53,14 +53,14 @@ export class MdDocumentHighlightProvider {
 		}
 
 		const header = toc.entries.find(entry => entry.line === position.line);
-		if (header) {
+		if (isTocHeaderEntry(header)) {
 			return [...this.#getHighlightsForHeader(document, header, links, toc)];
 		}
 
 		return [...this.#getHighlightsForLinkAtPosition(document, position, links, toc)];
 	}
 
-	*#getHighlightsForHeader(document: ITextDocument, header: TocEntry, links: readonly MdLink[], toc: TableOfContents): Iterable<lsp.DocumentHighlight> {
+	*#getHighlightsForHeader(document: ITextDocument, header: TocHeaderEntry, links: readonly MdLink[], toc: TableOfContents): Iterable<lsp.DocumentHighlight> {
 		yield { range: header.headerLocation.range, kind: lsp.DocumentHighlightKind.Write };
 
 		const docUri = document.uri.toString();
@@ -116,7 +116,7 @@ export class MdDocumentHighlightProvider {
 
 		if (targetDoc.toString() === document.uri) {
 			const header = toc.lookup(fragment);
-			if (header) {
+			if (isTocHeaderEntry(header)) {
 				yield { range: header.headerLocation.range, kind: lsp.DocumentHighlightKind.Write };
 			}
 		}

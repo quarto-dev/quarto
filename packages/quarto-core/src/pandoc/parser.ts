@@ -20,7 +20,7 @@ import { PandocToken, kAttrClasses } from "./token";
 import { partitionYamlFrontMatter } from "../metadata";
 import { lines } from "core";
 import { makeRange } from "../range";
-import { isExecutableLanguageBlock, languageNameFromBlock } from "./language";
+import { isExecutableLanguageBlock, isFencedCode, languageNameFromBlock } from "./language";
 
 export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : PandocToken[] {
  
@@ -36,7 +36,7 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
   const tokens = (Object.values(outputJson).map(token => {
 
     // fixup lang
-    if (isExecutableLanguageBlock(token)) {
+    if (isFencedCode(token) && isExecutableLanguageBlock(token)) {
       const lang = languageNameFromBlock(token);
       token.attr![kAttrClasses][0] = `{${lang}}`;
     } 

@@ -21,7 +21,7 @@ import { coalesce } from 'core';
 import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token, TokenWithMap } from '../parser';
-import { MdTableOfContentsProvider, TocEntry } from '../toc';
+import { MdTableOfContentsProvider, TocEntry, isTocHeaderEntry } from '../toc';
 import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 
@@ -98,7 +98,7 @@ export class MdSelectionRangeProvider {
 }
 
 function getHeadersForPosition(toc: readonly TocEntry[], position: Position): { headers: TocEntry[]; headerOnThisLine: boolean } {
-	const enclosingHeaders = toc.filter(header => header.sectionLocation.range.start.line <= position.line && header.sectionLocation.range.end.line >= position.line);
+	const enclosingHeaders = toc.filter(header => isTocHeaderEntry(header) && header.sectionLocation.range.start.line <= position.line && header.sectionLocation.range.end.line >= position.line);
 	const sortedHeaders = enclosingHeaders.sort((header1, header2) => (header1.line - position.line) - (header2.line - position.line));
 	const onThisLine = toc.find(header => header.line === position.line) !== undefined;
 	return {

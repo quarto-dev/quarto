@@ -28,7 +28,7 @@ import { getDocUri, getLine, ITextDocument } from './document';
 
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
-import { isExecutableLanguageBlock } from 'quarto-core/src/pandoc/language';
+import { isExecutableLanguageBlock, isFencedCode } from 'quarto-core/src/pandoc/language';
 
 export enum TocEntryType { Title, Header, CodeCell };
 
@@ -145,6 +145,14 @@ export class TableOfContents {
 			}
 		}
 
+		const trimRange = (range: lsp.Range) : lsp.Range => {
+			if (range.end.character === 0) {
+				range.end.line--;
+				range.end.character = getLine(document, range.end.line).length;
+			} 
+			return range;
+		}
+
 		const maxHeadingLevel = tokens.reduce((max: number, element: PandocToken) => {
 			return element.level && element.level < max ? element.level : max;
 		}, 2);
@@ -192,11 +200,7 @@ export class TableOfContents {
 				const sectionLocation = makeRange(sectionStart, lsp.Position.create(sectionEndLine, sectionEndCharacter));
 
 				// headerLocation
-				const headerLocation = token.range;
-				if (headerLocation.end.character === 0) {
-					headerLocation.end.line--;
-					headerLocation.end.character = getLine(document, headerLocation.end.line).length;
-				}
+				const headerLocation = trimRange(token.range);
 
 				// headerTextLocation
 				let headerTextLocation = token.range;
@@ -221,18 +225,17 @@ export class TableOfContents {
 
 				toc.push(tocEntry);
 
-			} else if (isExecutableLanguageBlock(token)) {
+			} else if (isFencedCode(token) && isExecutableLanguageBlock(token)) {
 				const match = (token.data as string).match(/(?:#|\/\/|)\| label:\s+(.+)/);
-				if (match) {
-					toc.push({
-						type: TocEntryType.CodeCell,
-						slug: toSlug(match[1]),
-						text: match[1],
-						level: lastLevel,
-						line: token.range.start.line,
-						sectionLocation: asLocation(token.range),
-					})
-				}
+				const text = match ? match[1] : `(code cell)`
+				toc.push({
+					type: TocEntryType.CodeCell,
+					slug: toSlug(text),
+					text: text,
+					level: lastLevel,
+					line: token.range.start.line,
+					sectionLocation: asLocation(trimRange(token.range)),
+				})
 			}
 		}
 

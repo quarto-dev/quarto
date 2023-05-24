@@ -18,7 +18,7 @@ import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
-import { MdTableOfContentsProvider } from '../toc';
+import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { ITextDocument } from '../document';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
@@ -50,7 +50,7 @@ export class MdDefinitionProvider {
 		}
 
 		const header = toc.entries.find(entry => entry.line === position.line);
-		if (header) {
+		if (isTocHeaderEntry(header)) {
 			return header.headerLocation;
 		}
 
@@ -87,7 +87,10 @@ export class MdDefinitionProvider {
 		}
 
 		const toc = await this.#tocProvider.get(resolvedResource);
-		return toc.lookup(sourceLink.href.fragment)?.headerLocation;
+		const entry = toc.lookup(sourceLink.href.fragment);
+		if (isTocHeaderEntry(entry)) {
+			return entry.headerLocation;
+		}
 	}
 
 	#getDefinitionOfRef(ref: string, allLinksInFile: readonly MdLink[]) {

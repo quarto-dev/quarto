@@ -72,7 +72,7 @@ export class MdDocumentSymbolProvider {
 			range: makeRange(0, 0, document.lineCount + 1, 0),
 		};
 		const additionalSymbols = [...linkSymbols];
-		this.#buildTocSymbolTree(root, toc.entries, additionalSymbols);
+		this.#buildTocSymbolTree(root, toc.entries.filter(entry => entry.type !== TocEntryType.Title), additionalSymbols);
 		// Put remaining link definitions into top level document instead of last header
 		root.children.push(...additionalSymbols);
 		return root.children;

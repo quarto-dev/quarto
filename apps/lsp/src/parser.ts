@@ -17,7 +17,7 @@
 import MarkdownIt from "markdown-it";
 
 
-import { PandocElement, QuartoContext, parsePandocDocument } from "quarto-core";
+import { PandocToken, QuartoContext, parsePandocDocument } from "quarto-core";
 
 import { IMdParser, ITextDocument, Token } from "./service";
 import { pandocSlugifier } from "./service";
@@ -35,7 +35,7 @@ export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: st
   let tokenCacheDocVersion: number | undefined;
 
   // pandoc element cache for last document requested
-  let elementCache: PandocElement[] | undefined;
+  let elementCache: PandocToken[] | undefined;
   let elementCacheDocUri: string | undefined;
   let elementCacheDocVersion: number | undefined;
 
@@ -53,7 +53,7 @@ export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: st
       }
       return tokenCache;
     },
-    async parsePandocElements(doc: ITextDocument): Promise<PandocElement[]> {
+    async parsePandocTokens(doc: ITextDocument): Promise<PandocToken[]> {
       if (
         !elementCache ||
         doc.uri.toString() !== elementCacheDocUri ||

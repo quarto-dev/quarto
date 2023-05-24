@@ -15,7 +15,7 @@
 
 import { Range } from '../range';
 
-export type PandocElementType =
+export type PandocTokenType =
   | "FrontMatter"
   | "BlockQuote"
   | "BulletList"
@@ -35,17 +35,18 @@ export type PandocElementType =
   | "RawInline"
   | "Span";
 
-export interface PandocElementAttr {
-  id: string;
-  classes: string[];
-  keyvalue: Array<[string, string]>;
-}
 
-export interface PandocElement {
-  type: PandocElementType;
+export const kAttrIdentifier = 0;
+export const kAttrClasses = 1;
+export const kAttrAttributes = 2;
+export type PandocTokenAttr = [string, Array<string>, Array<[string,string]>];
+
+
+export interface PandocToken {
+  type: PandocTokenType;
   range: Range;
   level?: number;
-  attr?: PandocElementAttr; 
+  attr?: PandocTokenAttr; 
   data?: unknown;
     // FrontMatter: yaml
     // Header: text

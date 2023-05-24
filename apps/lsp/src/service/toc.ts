@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
 import { Disposable } from 'core';
-import { PandocElement, makeRange, parseFrontMatterStr } from 'quarto-core';
+import { PandocToken, makeRange, parseFrontMatterStr } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
@@ -28,6 +28,7 @@ import { getDocUri, getLine, ITextDocument } from './document';
 
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
+import { isExecutableLanguageBlock } from 'quarto-core/src/pandoc/language';
 
 export enum TocEntryType { Title, Header, CodeCell };
 
@@ -118,7 +119,7 @@ export class TableOfContents {
 		const docUri = getDocUri(document);
 
 		const toc: TocEntry[] = [];
-		const elements = await parser.parsePandocElements(document);
+		const tokens = await parser.parsePandocTokens(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -144,65 +145,67 @@ export class TableOfContents {
 			}
 		}
 
-		const maxHeadingLevel = elements.reduce((max: number, element: PandocElement) => {
+		const maxHeadingLevel = tokens.reduce((max: number, element: PandocToken) => {
 			return element.level && element.level < max ? element.level : max;
 		}, 2);
 
+		let lastLevel = 2;
 
-		for (let i=0; i<elements.length; i++) {
-			const element = elements[i];
-			if (element.type === "FrontMatter") {
+		for (let i=0; i<tokens.length; i++) {
+			const token = tokens[i];
+			if (token.type === "FrontMatter") {
 				 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-				 const meta = parseFrontMatterStr(element.data as string) as any;
+				 const meta = parseFrontMatterStr(token.data as string) as any;
 				 if (typeof(meta) === "object" && typeof(meta.title) === "string") {
 					toc.push({
 						type: TocEntryType.Title,
 						slug: toSlug(meta.title),
 						text: meta.title,
 						level: maxHeadingLevel,
-						line: element.range.start.line,
-						sectionLocation: asLocation(element.range),
+						line: token.range.start.line,
+						sectionLocation: asLocation(token.range),
 					})
 				 }
-			} else if (element.type === "Header") {
+			} else if (token.type === "Header") {
 
 				// type
 				const type = TocEntryType.Header;
 
 				// text
-				const text = element.data as string;
+				const text = token.data as string;
 
 				// slug 
 				const slug = toSlug(text);
 			
 				// line
-				const line = element.range.start.line;
+				const line = token.range.start.line;
 
 				// level
-				const level = element.level!;
+				const level = token.level!;
+				lastLevel = level;
 
 				// sectionLocation
-				const sectionStart = element.range.start;
-				const nextPeerElement = elements.slice(i+1).find(el => el.level && (el.level <= level));
+				const sectionStart = token.range.start;
+				const nextPeerElement = tokens.slice(i+1).find(el => el.level && (el.level <= level));
 				const sectionEndLine = nextPeerElement ? nextPeerElement.range.start.line-1 : (document.lineCount-1);
 				const sectionEndCharacter = getLine(document, sectionEndLine).length;
 				const sectionLocation = makeRange(sectionStart, lsp.Position.create(sectionEndLine, sectionEndCharacter));
 
 				// headerLocation
-				const headerLocation = element.range;
+				const headerLocation = token.range;
 				if (headerLocation.end.character === 0) {
 					headerLocation.end.line--;
 					headerLocation.end.character = getLine(document, headerLocation.end.line).length;
 				}
 
 				// headerTextLocation
-				let headerTextLocation = element.range;
+				let headerTextLocation = token.range;
 				const headerLine = getLine(document, line);
 				const headerTextMatch = headerLine.match(/(^#*\s+)([^{]+)/);
 				if (headerTextMatch) {
 					headerTextLocation = makeRange(
-						lsp.Position.create(element.range.start.line, headerTextMatch[1].length), 
-						lsp.Position.create(element.range.start.line, headerTextMatch[0].length))
+						lsp.Position.create(token.range.start.line, headerTextMatch[1].length), 
+						lsp.Position.create(token.range.start.line, headerTextMatch[0].length))
 				}
 
 				const tocEntry: TocHeaderEntry = {
@@ -217,6 +220,19 @@ export class TableOfContents {
 				}
 
 				toc.push(tocEntry);
+
+			} else if (isExecutableLanguageBlock(token)) {
+				const match = (token.data as string).match(/(?:#|\/\/|)\| label:\s+(.+)/);
+				if (match) {
+					toc.push({
+						type: TocEntryType.CodeCell,
+						slug: toSlug(match[1]),
+						text: match[1],
+						level: lastLevel,
+						line: token.range.start.line,
+						sectionLocation: asLocation(token.range),
+					})
+				}
 			}
 		}
 

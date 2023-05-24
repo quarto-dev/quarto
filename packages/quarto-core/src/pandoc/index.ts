@@ -13,7 +13,7 @@
  *
  */
 
-export * from './element'
+export * from './token'
 export * from './parser'
 
 

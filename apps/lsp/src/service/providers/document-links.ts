@@ -26,7 +26,7 @@ import { translatePosition, makeRange, rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser, Token } from '../parser';
-import { MdTableOfContentsProvider } from '../toc';
+import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { ITextDocument, getDocUri, getLine } from '../document';
 import { r } from '../util/string';
 import { IWorkspace, getWorkspaceFolder, tryAppendMarkdownFileExtension } from '../workspace';
@@ -897,7 +897,7 @@ export class MdLinkProvider extends Disposable {
 		if (doc) {
 			const toc = await this.#tocProvider.getForContainingDoc(doc, token);
 			const entry = toc.lookup(linkFragment);
-			if (entry) {
+			if (isTocHeaderEntry(entry)) {
 				return { kind: 'file', uri: URI.parse(entry.headerLocation.uri), position: entry.headerLocation.range.start, fragment: linkFragment };
 			}
 		}

@@ -127,7 +127,7 @@ export function pandocImageHandler(figure: boolean, imageAttributes: boolean) {
     // get attributes
     const target = tok.c[IMAGE_TARGET];
     const attrs = {
-      src: decodeURI(target[TARGET_URL]),
+      src: target[TARGET_URL],
       title: readPandocTitle(target[TARGET_TITLE]),
       caption: '',
       ...(imageAttributes ? pandocAttrReadAST(tok, IMAGE_ATTR) : {}),
@@ -164,7 +164,7 @@ export function imagePandocOutputWriter(figure: boolean) {
             output.writeText(node.attrs.caption);
           }
         });
-        output.write([encodeURI(node.attrs.src), node.attrs.title || '']);
+        output.write([node.attrs.src, node.attrs.title || '']);
       });
     };
 

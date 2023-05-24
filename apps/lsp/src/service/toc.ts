@@ -48,7 +48,7 @@ export interface TocEntry {
 	readonly line: number;
 
 	/**
-	 * The entire range of the header section.
+	 * The entire range of the entry.
 	 *
 	* For the doc:
 	 *
@@ -215,8 +215,15 @@ export class TableOfContents {
 
 				// sectionLocation
 				const sectionStart = token.range.start;
+				const containingDivElement = tokens.slice(0, i).reverse().find(el => el.type === "Div" && el.range.end.line > sectionStart.line);
 				const nextPeerElement = tokens.slice(i+1).find(el => el.level && (el.level <= level));
-				const sectionEndLine = nextPeerElement ? nextPeerElement.range.start.line-1 : (document.lineCount-1);
+				const sectionEndLine = (nextPeerElement && containingDivElement)
+					?  Math.min(nextPeerElement.range.start.line-1, containingDivElement.range.end.line-2)
+					: nextPeerElement
+					? nextPeerElement.range.start.line - 1
+					: containingDivElement
+					? containingDivElement.range.end.line - 2
+					: (document.lineCount-1);
 				const sectionEndCharacter = getLine(document, sectionEndLine).length;
 				const sectionLocation = makeRange(sectionStart, lsp.Position.create(sectionEndLine, sectionEndCharacter));
 

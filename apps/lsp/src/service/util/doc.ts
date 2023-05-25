@@ -16,7 +16,8 @@
 import { URI } from "vscode-uri";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { ITextDocument } from "..";
+
+import { Document } from "quarto-core"
 
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
@@ -38,14 +39,14 @@ export function docType(doc: TextDocument) {
   }
 }
 
-export function isQuartoDoc(doc: ITextDocument) {
+export function isQuartoDoc(doc: Document) {
   return (
     doc.languageId === kQuartoLanguageId ||
     doc.languageId === kMarkdownLanguageId
   );
 }
 
-export function isQuartoYaml(doc: ITextDocument) {
+export function isQuartoYaml(doc: Document) {
   return (
     doc.languageId === kYamlLanguageId &&
     (doc.uri.match(/_quarto(-.*?)?\.ya?ml$/) ||
@@ -54,7 +55,7 @@ export function isQuartoYaml(doc: ITextDocument) {
   );
 }
 
-export function filePathForDoc(doc: ITextDocument) {
+export function filePathForDoc(doc: Document) {
   return URI.parse(doc.uri).fsPath;
 }
 

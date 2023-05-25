@@ -28,11 +28,12 @@ import { URI } from "vscode-uri";
 import { Connection, Emitter, TextDocuments, DidChangeWatchedFilesNotification, WatchKind, ClientCapabilities, FileChangeType } from "vscode-languageserver";
 import { Position, Range, TextDocument } from "vscode-languageserver-textdocument";
 
+import { Document } from "quarto-core";
+
 import { 
   FileStat, 
   ILogger, 
   LogLevel, 
-  ITextDocument, 
   LsConfiguration, 
   IWorkspace,
   IWorkspaceWithWatching,
@@ -46,7 +47,7 @@ import { Limiter } from "core";
 
 export function languageServiceWorkspace(
   workspaceFolders: URI[],
-  documents: TextDocuments<ITextDocument>,
+  documents: TextDocuments<Document>,
   connection: Connection,
   capabilities: ClientCapabilities, 
   config: LsConfiguration,
@@ -61,7 +62,7 @@ export function languageServiceWorkspace(
   // in-memory document cache
   const documentCache = new ResourceMap<VsCodeDocument>();
 
-  const openMarkdownDocumentFromFs = async (resource: URI): Promise<ITextDocument | undefined> => {
+  const openMarkdownDocumentFromFs = async (resource: URI): Promise<Document | undefined> => {
 		if (!looksLikeMarkdownPath(config, resource)) {
 			return undefined;
 		}
@@ -93,8 +94,8 @@ export function languageServiceWorkspace(
 	}
 
   // track changes to documents
-  const onDidChangeMarkdownDocument = new Emitter<ITextDocument>();
-  const onDidCreateMarkdownDocument =  new Emitter<ITextDocument>();
+  const onDidChangeMarkdownDocument = new Emitter<Document>();
+  const onDidCreateMarkdownDocument =  new Emitter<Document>();
   const onDidDeleteMarkdownDocument = new Emitter<URI>();
 
   const doDeleteDocument = (uri: URI) => {
@@ -189,12 +190,12 @@ export function languageServiceWorkspace(
     onDidCreateMarkdownDocument: onDidCreateMarkdownDocument.event,
     onDidDeleteMarkdownDocument: onDidDeleteMarkdownDocument.event,
 
-    async getAllMarkdownDocuments(): Promise<Iterable<ITextDocument>> {
+    async getAllMarkdownDocuments(): Promise<Iterable<Document>> {
       // Add opened files (such as untitled files)
       const openTextDocumentResults = documents.all()
         .filter(doc => isRelevantMarkdownDocument(doc));
 
-      const allDocs = new ResourceMap<ITextDocument>();
+      const allDocs = new ResourceMap<Document>();
       for (const doc of openTextDocumentResults) {
         allDocs.set(URI.parse(doc.uri), doc);
       }
@@ -207,7 +208,7 @@ export function languageServiceWorkspace(
 
         // (read max 20 at a time)
         const maxConcurrent = 20;
-        const limiter = new Limiter<ITextDocument | undefined>(maxConcurrent);
+        const limiter = new Limiter<Document | undefined>(maxConcurrent);
         await Promise.all(resources.map(strResource => {
           return limiter.queue(async () => {
             const resource = URI.parse(strResource);
@@ -231,7 +232,7 @@ export function languageServiceWorkspace(
       return !!documents.get(resource.toString());
     },
 
-    async openMarkdownDocument(resource: URI): Promise<ITextDocument | undefined> {
+    async openMarkdownDocument(resource: URI): Promise<Document | undefined> {
       const existing = documentCache.get(resource);
       if (existing) {
         return existing;
@@ -386,7 +387,7 @@ export function languageServiceWorkspace(
 
 }
 
-function isRelevantMarkdownDocument(doc: ITextDocument) {
+function isRelevantMarkdownDocument(doc: Document) {
 	return isQuartoDoc(doc) && URI.parse(doc.uri).scheme !== 'vscode-bulkeditpreview';	
 }
 
@@ -395,16 +396,16 @@ function looksLikeMarkdownPath(config: LsConfiguration, resolvedHrefPath: URI) {
 	return config.markdownFileExtensions.includes(path.extname(resolvedHrefPath.fsPath).toLowerCase().replace('.', ''));
 }
 
-class VsCodeDocument implements ITextDocument {
+class VsCodeDocument implements Document {
 
-	private inMemoryDoc?: ITextDocument;
-	private onDiskDoc?: ITextDocument;
+	private inMemoryDoc?: Document;
+	private onDiskDoc?: Document;
 
 	readonly uri: string;
 
-	constructor(uri: string, init: { inMemoryDoc: ITextDocument });
-	constructor(uri: string, init: { onDiskDoc: ITextDocument });
-	constructor(uri: string, init: { inMemoryDoc?: ITextDocument; onDiskDoc?: ITextDocument }) {
+	constructor(uri: string, init: { inMemoryDoc: Document });
+	constructor(uri: string, init: { onDiskDoc: Document });
+	constructor(uri: string, init: { inMemoryDoc?: Document; onDiskDoc?: Document }) {
 		this.uri = uri;
 		this.inMemoryDoc = init?.inMemoryDoc;
 		this.onDiskDoc = init?.onDiskDoc;
@@ -454,7 +455,7 @@ class VsCodeDocument implements ITextDocument {
 		return !this.onDiskDoc && !this.inMemoryDoc;
 	}
 
-	setInMemoryDoc(doc: ITextDocument | undefined) {
+	setInMemoryDoc(doc: Document | undefined) {
 		this.inMemoryDoc = doc;
 	}
 

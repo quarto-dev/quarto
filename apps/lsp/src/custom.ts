@@ -26,20 +26,19 @@ import {
 } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
-import { userDictionaryDir } from "quarto-core";
+import { userDictionaryDir, Document } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
 import { Hover, Position, TextDocuments } from "vscode-languageserver";
 import { URI } from "vscode-uri";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
 import { yamlCompletions } from "./service/providers/completion/completion-yaml";
 import { yamlHover } from "./service/providers/hover/hover-yaml";
-import { ITextDocument } from "./service";
 import { Quarto, codeEditorContext } from "./service/quarto";
 
 export function registerCustomMethods(
   quarto: Quarto, 
   connection: LspConnection,
-  documents: TextDocuments<ITextDocument>
+  documents: TextDocuments<Document>
 ) {
 
   const resourcesDir = path.join(__dirname, "resources");

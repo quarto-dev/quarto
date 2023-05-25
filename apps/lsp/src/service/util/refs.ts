@@ -15,12 +15,12 @@
 
 import { Position } from "vscode-languageserver-types";
 import { isContentPosition } from "./markdown";
-import { ITextDocument } from "../document";
+import { Document } from "../document";
 import { IMdParser } from "../parser";
 
 export function bypassRefIntelligence(
   parser: IMdParser,
-  doc: ITextDocument,
+  doc: Document,
   pos: Position,
   line: string
 ): boolean {

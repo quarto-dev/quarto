@@ -796,6 +796,9 @@ export class MdLinkProvider extends Disposable {
 	}
 
 	public async provideDocumentLinks(document: ITextDocument, token: CancellationToken): Promise<lsp.DocumentLink[]> {
+		if (token.isCancellationRequested) {
+			return [];
+		}
 		const { links, definitions } = await this.getLinks(document);
 		if (token.isCancellationRequested) {
 			return [];
@@ -805,6 +808,10 @@ export class MdLinkProvider extends Disposable {
 	}
 
 	public async resolveDocumentLink(link: lsp.DocumentLink, token: CancellationToken): Promise<lsp.DocumentLink | undefined> {
+		if (token.isCancellationRequested) {
+			return undefined;
+		}
+
 		const href = this.#reviveLinkHrefData(link);
 		if (!href) {
 			return undefined;
@@ -831,6 +838,10 @@ export class MdLinkProvider extends Disposable {
 	}
 
 	public async resolveLinkTarget(linkText: string, sourceDoc: URI, token: CancellationToken): Promise<ResolvedDocumentLinkTarget | undefined> {
+		if (token.isCancellationRequested) {
+			return undefined;
+		}
+		
 		const href = createHref(sourceDoc, linkText, this.#workspace);
 		if (href?.kind !== HrefKind.Internal) {
 			return undefined;

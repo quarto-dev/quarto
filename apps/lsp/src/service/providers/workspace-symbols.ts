@@ -38,7 +38,12 @@ export class MdWorkspaceSymbolProvider extends Disposable {
 	}
 
 	public async provideWorkspaceSymbols(query: string, token: CancellationToken): Promise<lsp.WorkspaceSymbol[]> {
+		if (token.isCancellationRequested) {
+			return [];
+		}
+	
 		const allSymbols = await this.#cache.values();
+		
 		if (token.isCancellationRequested) {
 			return [];
 		}

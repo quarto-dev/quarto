@@ -51,6 +51,10 @@ export class MdDocumentSymbolProvider {
 	public async provideDocumentSymbols(document: ITextDocument, options: ProvideDocumentSymbolOptions, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
 		this.#logger.log(LogLevel.Debug, 'DocumentSymbolProvider.provideDocumentSymbols', { document: document.uri, version: document.version });
 
+		if (token.isCancellationRequested) {
+			return [];
+		}
+
 		const linkSymbols = await (options.includeLinkDefinitions ? this.#provideLinkDefinitionSymbols(document, token) : []);
 		if (token.isCancellationRequested) {
 			return [];

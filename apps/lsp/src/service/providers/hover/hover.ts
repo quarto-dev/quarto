@@ -14,7 +14,7 @@
  */
 
 import { Position } from "vscode-languageserver-textdocument";
-import { Hover } from "vscode-languageserver";
+import { CancellationToken, Hover } from "vscode-languageserver";
 
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
@@ -31,8 +31,12 @@ export class MdHoverProvider {
   public async provideHover(
     doc: ITextDocument,
     pos: Position,
-    config?: LsConfiguration
+    config: LsConfiguration,
+    token: CancellationToken
   ): Promise<Hover | null> {
+    if (token.isCancellationRequested) {
+      return null;
+    }
     return (
       (await refHover(this.quarto_, this.parser_, doc, pos)) || mathHover(this.parser_, doc, pos, config) || (await yamlHover(this.quarto_, docEditorContext(doc, pos, true)))
     );

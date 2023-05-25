@@ -107,6 +107,11 @@ export class MdCompletionProvider {
     config: LsConfiguration,
     token: CancellationToken,
   ): Promise<CompletionItem[]> {
+		
+		if (token.isCancellationRequested) {
+			return [];
+		}
+
     const explicit = context.triggerKind === CompletionTriggerKind.TriggerCharacter;
     const trigger = context.triggerCharacter;
     const editorContext = docEditorContext(doc, pos, explicit, trigger);

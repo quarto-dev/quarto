@@ -42,7 +42,13 @@ export class MdDocumentHighlightProvider {
 	}
 
 	public async getDocumentHighlights(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]> {
+		
+		if (token.isCancellationRequested) {
+			return [];
+		}
+		
 		const toc = await this.#tocProvider.getForDocument(document);
+		
 		if (token.isCancellationRequested) {
 			return [];
 		}

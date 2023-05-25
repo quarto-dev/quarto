@@ -130,7 +130,8 @@ export interface IMdLanguageService {
 	getHover(
     doc: ITextDocument,
     pos: lsp.Position,
-		config: LsConfiguration
+		config: LsConfiguration,
+		token: CancellationToken
   ): Promise<lsp.Hover | null>;
 
 	/**

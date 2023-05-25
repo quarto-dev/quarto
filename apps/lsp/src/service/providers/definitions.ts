@@ -44,7 +44,13 @@ export class MdDefinitionProvider {
 	}
 
 	async provideDefinition(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
+		
+		if (token.isCancellationRequested) {
+			return [];
+		}
+
 		const toc = await this.#tocProvider.getForDocument(document);
+		
 		if (token.isCancellationRequested) {
 			return [];
 		}

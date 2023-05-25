@@ -29,7 +29,12 @@ export class MdOrganizeLinkDefinitionProvider {
 	}
 
 	async getOrganizeLinkDefinitionEdits(doc: ITextDocument, options: { readonly removeUnused?: boolean }, token: CancellationToken): Promise<lsp.TextEdit[]> {
+		if (token.isCancellationRequested) {
+			return [];
+		}
+		
 		const links = await this.#linkProvider.getLinks(doc);
+		
 		if (token.isCancellationRequested) {
 			return [];
 		}

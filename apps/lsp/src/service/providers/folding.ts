@@ -49,6 +49,10 @@ export class MdFoldingProvider {
 	public async provideFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
 		this.#logger.log(LogLevel.Debug, 'MdFoldingProvider.provideFoldingRanges', { document: document.uri, version: document.version });
 
+		if (token.isCancellationRequested) {
+			return [];
+		}
+
 		const foldables = await Promise.all([
 			this.#getRegions(document, token),
 			this.#getBlockFoldingRanges(document, token),

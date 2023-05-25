@@ -81,6 +81,10 @@ export class MdRenameProvider extends Disposable {
 	public async prepareRename(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<undefined | { range: lsp.Range; placeholder: string }> {
 		this.#logger.log(LogLevel.Debug, 'RenameProvider.prepareRename', { document: document.uri, version: document.version });
 
+		if (token.isCancellationRequested) {
+			return undefined;
+		}
+
 		const allRefsInfo = await this.#getAllReferences(document, position, token);
 		if (token.isCancellationRequested) {
 			return undefined;
@@ -133,7 +137,12 @@ export class MdRenameProvider extends Disposable {
 	public async provideRenameEdits(document: ITextDocument, position: lsp.Position, newName: string, token: CancellationToken): Promise<lsp.WorkspaceEdit | undefined> {
 		this.#logger.log(LogLevel.Debug, 'RenameProvider.provideRenameEdits', { document: document.uri, version: document.version });
 
+		if (token.isCancellationRequested) {
+			return undefined;
+		}
+
 		const allRefsInfo = await this.#getAllReferences(document, position, token);
+		
 		if (token.isCancellationRequested || !allRefsInfo || !allRefsInfo.references.length) {
 			return undefined;
 		}

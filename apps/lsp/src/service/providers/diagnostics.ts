@@ -688,7 +688,13 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 	}
 
 	public async computeDiagnostics(doc: ITextDocument, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]> {
+		
+		if (token.isCancellationRequested) {
+			return [];
+		}
+		
 		const results = await this.#computer.compute(doc, options, token);
+		
 		if (token.isCancellationRequested) {
 			return [];
 		}

@@ -55,6 +55,11 @@ export class MdExtractLinkDefinitionCodeActionProvider {
 	}
 
 	async getActions(doc: ITextDocument, range: lsp.Range, context: lsp.CodeActionContext, token: CancellationToken): Promise<lsp.CodeAction[]> {
+		
+		if (token.isCancellationRequested) {
+			return [];
+		}
+		
 		if (!this.#isEnabled(context)) {
 			return [];
 		}

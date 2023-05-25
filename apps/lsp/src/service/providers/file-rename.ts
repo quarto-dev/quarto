@@ -68,6 +68,10 @@ export class MdFileRenameProvider extends Disposable {
 		const builder = new WorkspaceEditBuilder();
 		const participatingRenames: FileRename[] = [];
 
+		if (token.isCancellationRequested) {
+			return undefined;
+		}
+
 		for (const edit of edits) {
 			const stat = await this.#workspace.stat(edit.newUri);
 			if (token.isCancellationRequested) {

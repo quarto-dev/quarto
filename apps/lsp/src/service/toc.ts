@@ -35,7 +35,8 @@ import {
 	getDocUri, 
 	getLine, 
 	Document,
-	Parser
+	Parser,
+	trimRange
 } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
@@ -163,14 +164,6 @@ export class TableOfContents {
 			}
 		}
 
-		const trimRange = (range: lsp.Range) : lsp.Range => {
-			if (range.end.character === 0) {
-				range.end.line--;
-				range.end.character = getLine(document, range.end.line).length;
-			} 
-			return range;
-		}
-
 		const maxHeadingLevel = tokens.reduce((max: number, element: Token) => {
 			return element.level && element.level < max ? element.level : max;
 		}, 2);
@@ -225,7 +218,7 @@ export class TableOfContents {
 				const sectionLocation = makeRange(sectionStart, lsp.Position.create(sectionEndLine, sectionEndCharacter));
 
 				// headerLocation
-				const headerLocation = trimRange(token.range);
+				const headerLocation = trimRange(document, token.range);
 
 				// headerTextLocation
 				let headerTextLocation = token.range;
@@ -259,7 +252,7 @@ export class TableOfContents {
 					text: text,
 					level: lastLevel,
 					line: token.range.start.line,
-					sectionLocation: asLocation(trimRange(token.range)),
+					sectionLocation: asLocation(trimRange(document, token.range)),
 				})
 			}
 		}

@@ -16,6 +16,7 @@
 
 import { Range as VSCodeRange } from 'vscode-languageserver-types';
 import { Position, arePositionsEqual, isBefore, isPosition } from './position';
+import { getLine, Document } from './document';
 
 export type Range = VSCodeRange;
 
@@ -65,4 +66,12 @@ export function rangeIntersects(a: Range, b: Range): boolean {
 	}
 	// Check case where `a` is entirely contained in `b`
 	return rangeContains(b, a.start) || rangeContains(b, a.end);
+}
+
+export function trimRange(document: Document, range: Range) : Range {
+	if (range.end.character === 0) {
+		range.end.line--;
+		range.end.character = getLine(document, range.end.line).length;
+	} 
+	return range;
 }

@@ -27,9 +27,11 @@ import {
 	makeRange, 
 	parseFrontMatterStr, 
 	isExecutableLanguageBlock, 
-	isFencedCode, 
 	isWithinRange,
-	isTabset
+	isTabset,
+	isFrontMatter,
+	isHeader,
+	isCodeBlock
 } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
@@ -175,9 +177,9 @@ export class TableOfContents {
 
 		for (let i=0; i<tokens.length; i++) {
 			const token = tokens[i];
-			if (token.type === "FrontMatter") {
+			if (isFrontMatter(token)) {
 				 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-				 const meta = parseFrontMatterStr(token.data as string) as any;
+				 const meta = parseFrontMatterStr(token.data) as any;
 				 if (typeof(meta) === "object" && typeof(meta.title) === "string") {
 					toc.push({
 						type: TocEntryType.Title,
@@ -188,13 +190,13 @@ export class TableOfContents {
 						sectionLocation: asLocation(token.range),
 					})
 				 }
-			} else if (token.type === "Header" && !isWithinIgnoredRange(token)) {
+			} else if (isHeader(token) && !isWithinIgnoredRange(token)) {
 
 				// type
 				const type = TocEntryType.Header;
 
 				// text
-				const text = token.data as string;
+				const text = token.data;
 
 				// slug 
 				const slug = toSlug(text);
@@ -246,8 +248,8 @@ export class TableOfContents {
 
 				toc.push(tocEntry);
 
-			} else if (isFencedCode(token) && isExecutableLanguageBlock(token)) {
-				const match = (token.data as string).match(/(?:#|\/\/|)\| label:\s+(.+)/);
+			} else if (isCodeBlock(token) && isExecutableLanguageBlock(token)) {
+				const match = (token.data).match(/(?:#|\/\/|)\| label:\s+(.+)/);
 				const text = match ? match[1] : `(code cell)`
 				toc.push({
 					type: TocEntryType.CodeCell,

@@ -119,6 +119,8 @@ local function extractToken(el)
         format = el.format,
         text = el.text
       }
+    else
+      token["data"] = nil
     end
 
     -- insert token

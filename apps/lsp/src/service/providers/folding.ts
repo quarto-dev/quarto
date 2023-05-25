@@ -15,7 +15,7 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { Token, isDisplayMath } from 'quarto-core';
+import { Token, isDisplayMath, isRawBlock } from 'quarto-core';
 
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
@@ -150,14 +150,13 @@ function asRegionMarker(token: Token): RegionMarker | undefined {
 }
 
 function asHtmlBlock(token: Token) : string | undefined {
-	if (token.type !== 'RawBlock') {
+	if (!(isRawBlock(token))) {
 		return undefined;
 	}
-	const { format, text } = token.data as { format: string, text: string };
-	if (format !== "html") {
+	if (token.data.format !== "html") {
 		return undefined;
 	}
-	return text;
+	return token.data.text;
 }
 
 function isFoldableToken(token: Token) {

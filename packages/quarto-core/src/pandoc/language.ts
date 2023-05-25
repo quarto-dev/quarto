@@ -15,10 +15,10 @@
 
 import { Position } from "../position";
 
-import { Token, kAttrClasses  } from "./token";
+import { Token, TokenMath, isCodeBlock, isMath, kAttrClasses  } from "./token";
 
 export function isLanguageBlock(token: Token) {
-  return isFencedCode(token) || isDisplayMath(token);
+  return isCodeBlock(token) || isDisplayMath(token);
 }
 
 // a language block that will be executed with its results
@@ -27,7 +27,7 @@ export function isLanguageBlock(token: Token) {
 export function isExecutableLanguageBlock(token: Token) {
   if (isDisplayMath(token)) {
     return true;
-  } else if (isFencedCode(token)) {
+  } else if (isCodeBlock(token)) {
     const clz = token.attr?.[kAttrClasses][0];
     if (!clz) {
       return false;
@@ -57,13 +57,10 @@ export function languageBlockAtPosition(
   return undefined;
 }
 
-export function isFencedCode(token: Token) {
-  return token.type === "CodeBlock";
-}
 
-export function isDisplayMath(token: Token) {
-  if (token.type === "Math") {
-    const math = token.data as { type: string, text: string };
+export function isDisplayMath(token: Token): token is TokenMath {
+  if (isMath(token)) {
+    const math = token.data;
     return math.type === "DisplayMath";
   } else {
     return false;
@@ -80,7 +77,7 @@ export function isDiagram(token: Token) {
 export function languageNameFromBlock(token: Token) {
   if (isDisplayMath(token)) {
     return "tex";
-  } else if (isFencedCode(token)) {
+  } else if (isCodeBlock(token)) {
     const match = token.attr?.[kAttrClasses][0].match(/^\{?=?([a-zA-Z0-9_-]+)/);
     if (match) {
       return match[1].split("-").pop() || "";

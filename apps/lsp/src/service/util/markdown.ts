@@ -15,7 +15,7 @@
 
 import { Range, Position } from "vscode-languageserver";
 
-import { Token, isDisplayMath, kAttrClasses } from "quarto-core";
+import { Token, TokenMath, isDisplayMath, isFrontMatter, isRawBlock, kAttrClasses } from "quarto-core";
 
 import { parseFrontMatterStr } from "quarto-core";
 import { ITextDocument } from "../document";
@@ -27,7 +27,7 @@ export function mathRange(parser: IMdParser, doc: ITextDocument, pos: Position) 
   const mathBlock = tokens.find(isMathBlockAtPosition(pos));
   if (mathBlock) {
     return {
-      math: (mathBlock.data as { text: string }).text,
+      math: mathBlock.data.text,
       range: mathBlock.range,
     };
   }
@@ -53,9 +53,9 @@ export function documentFrontMatter(
   doc: ITextDocument
 ): Record<string, unknown> {
   const tokens = parser.parsePandocTokens(doc);
-  const yaml = tokens.find((token) => token.type === "FrontMatter");
+  const yaml = tokens.find(isFrontMatter);
   if (yaml) {
-    const frontMatter = parseFrontMatterStr(yaml.data as string);
+    const frontMatter = parseFrontMatterStr(yaml.data);
     if (frontMatter && typeof frontMatter === "object") {
       return frontMatter as Record<string, unknown>;
     } else {
@@ -84,7 +84,7 @@ export function isLatexPosition(parser: IMdParser, doc: ITextDocument, pos: Posi
 }
 
 function isMathBlockAtPosition(pos: Position) {
-  return (token: Token) => {
+  return (token: Token) : token is TokenMath => {
     return isDisplayMath(token) && posIsWithinToken(pos, token);
   }
 }
@@ -101,8 +101,8 @@ function posIsWithinToken(pos: Position, token: Token) {
 
 function isLatexCodeBlock(token: Token) {
   const formats = ["tex", "latex"];
-  if (token.type === "RawBlock") {
-    const raw = token.data as { format: string, text: string };
+  if (isRawBlock(token)) {
+    const raw = token.data;
     return formats.includes(raw.format);
   } else if (token.type === "CodeBlock") {
     return formats.includes(token.attr?.[kAttrClasses][0] || "");

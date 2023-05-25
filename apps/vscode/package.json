@@ -223,227 +223,268 @@
       {
         "command": "quarto.newDocument",
         "title": "New Document (qmd)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.fileNewDocument",
         "title": "Quarto Document (qmd)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.newPresentation",
         "title": "New Presentation",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.fileNewPresentation",
         "title": "Quarto Presentation",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.newNotebook",
         "title": "New Notebook (ipynb)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.fileNewNotebook",
         "title": "Quarto Notebook (ipynb)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.createProject",
         "title": "Create Project",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.fileCreateProject",
         "title": "Quarto Project",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.renderProject",
         "title": "Render Project",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.render",
         "title": "Render",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.renderShortcut",
         "title": "Render",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.renderHTML",
         "title": "Render HTML",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.renderPDF",
         "title": "Render PDF",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.renderDOCX",
         "title": "Render DOCX",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.editInSourceMode",
         "title": "Edit in Source Mode",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.editInVisualMode",
         "title": "Edit in Visual Mode",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.clearCache",
         "title": "Clear Cache...",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.insertCodeCell",
         "title": "Insert Code Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runSelection",
         "title": "Run Selected Line(s)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runCurrentCell",
         "title": "Run Current Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runPreviousCell",
         "title": "Run Previous Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runNextCell",
         "title": "Run Next Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runCellsAbove",
         "title": "Run Cells Above",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runCellsBelow",
         "title": "Run Cells Below",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.runAllCells",
         "title": "Run All Cells",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.goToNextCell",
         "title": "Go to Next Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.goToPreviousCell",
         "title": "Go to Previous Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.formatCell",
         "title": "Format Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.previewMath",
         "category": "Quarto",
-        "title": "Preview Math"
+        "title": "Preview Math",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.previewDiagram",
         "category": "Quarto",
-        "title": "Preview Diagram"
+        "title": "Preview Diagram",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.previewShortcut",
         "title": "Preview",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.showAssist",
         "category": "Quarto",
-        "title": "Show Assist Panel"
+        "title": "Show Assist Panel",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.codeViewAssist",
         "category": "Quarto",
-        "title": "Code View Assist"
+        "title": "Code View Assist",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.assist.pin",
         "title": "Pin Assist Panel",
         "icon": "$(pin)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.assist.unpin",
         "title": "Unpin Assist Panel",
         "icon": "$(pinned)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.walkthrough.newDocument",
         "title": "New Document (qmd)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.walkthrough.verifyInstallation",
         "title": "Verify Installation",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.walkthrough.render",
         "title": "Render",
-        "category": "Quarto"
+        "category": "Quarto",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.toggleBold",
         "title": "Toggle Bold",
         "category": "Quarto",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+        "enablement": "quartoAvailable && editorTextFocus && !editorReadonly && editorLangId == quarto"
       },
       {
         "command": "quarto.toggleItalic",
         "title": "Toggle Italic",
         "category": "Quarto",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+        "enablement": "quartoAvailable && editorTextFocus && !editorReadonly && editorLangId == quarto"
       },
       {
         "command": "quarto.toggleCode",
         "title": "Toggle Code",
         "category": "Quarto",
-        "when": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+        "enablement": "quartoAvailable && editorTextFocus && !editorReadonly && editorLangId == quarto"
       },
       {
         "command": "quarto.zoteroConfigureLibrary",
         "category": "Quarto",
-        "title": "Zotero - Connect Web Library"
+        "title": "Zotero - Connect Web Library",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.zoteroSyncWebLibrary",
         "category": "Quarto",
-        "title": "Zotero - Sync Web Library"
+        "title": "Zotero - Sync Web Library",
+        "enablement": "quartoAvailable"
       },
       {
         "command": "quarto.zoteroUnauthorized",
         "category": "Quarto",
-        "title": "Zotero - Reconnect Web Library"
+        "title": "Zotero - Reconnect Web Library",
+        "enablement": "quartoAvailable"
       }
     ],
     "keybindings": [
@@ -570,92 +611,100 @@
       "editor/context": [
         {
           "command": "quarto.formatCell",
-          "when": "editorLangId == quarto && !editorHasSelection",
+          "when": "quartoAvailable && editorLangId == quarto && !editorHasSelection",
           "group": "1_modification"
         },
         {
           "command": "quarto.editInVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
+          "when": "quartoAvailable && resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
           "group": "0_editorMode"
         }
       ],
       "webview/context": [
         {
           "command": "quarto.editInSourceMode",
-          "when": "activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "quartoAvailable && activeCustomEditorId == 'quarto.visualEditor'",
           "group": "navigation"
         }
       ],
       "editor/title": [
         {
           "command": "quarto.insertCodeCell",
-          "when": "editorLangId == quarto",
+          "when": "quartoAvailable && editorLangId == quarto",
           "group": "q_execute"
         },
         {
           "command": "quarto.clearCache",
-          "when": "editorLangId == quarto",
+          "when": "quartoAvailable && editorLangId == quarto",
           "group": "q_execute"
         },
         {
           "command": "quarto.editInVisualMode",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
+          "when": "quartoAvailable && resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
           "group": "q_switch"
         },
         {
           "command": "quarto.editInSourceMode",
-          "when": "activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "quartoAvailable && activeCustomEditorId == 'quarto.visualEditor'",
           "group": "q_switch"
         }
       ],
       "editor/title/run": [
         {
           "command": "quarto.render",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "quartoAvailable && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "quartoAvailable && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "quartoAvailable && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.renderDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "quartoAvailable && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.previewShortcut",
-          "when": "editorLangId == mermaid || editorLangId == dot"
+          "when": "quartoAvailable && editorLangId == mermaid || editorLangId == dot"
         }
       ],
       "notebook/toolbar": [
         {
-          "command": "quarto.render"
+          "command": "quarto.render",
+          "when": "quartoAvailable"
         },
         {
-          "command": "quarto.renderHTML"
+          "command": "quarto.renderHTML",
+          "when": "quartoAvailable"
         },
         {
-          "command": "quarto.renderPDF"
+          "command": "quarto.renderPDF",
+          "when": "quartoAvailable"
         },
         {
-          "command": "quarto.renderDOCX"
+          "command": "quarto.renderDOCX",
+          "when": "quartoAvailable"
         }
       ],
       "file/newFile": [
         {
-          "command": "quarto.fileNewDocument"
+          "command": "quarto.fileNewDocument",
+          "when": "quartoAvailable"
         },
         {
-          "command": "quarto.fileNewNotebook"
+          "command": "quarto.fileNewNotebook",
+          "when": "quartoAvailable"
         },
         {
-          "command": "quarto.fileNewPresentation"
+          "command": "quarto.fileNewPresentation",
+          "when": "quartoAvailable"
         },
         {
-          "command": "quarto.fileCreateProject"
+          "command": "quarto.fileCreateProject",
+          "when": "quartoAvailable"
         }
       ],
       "commandPalette": [
@@ -1187,7 +1236,7 @@
         "id": "quarto",
         "title": "Get started with Quarto",
         "description": "Learn the basics of using Quarto with VS Code",
-        "when": "shellExecutionSupported",
+        "when": "quartoAvailable && shellExecutionSupported",
         "featuredFor": [
           "*.qmd",
           "_quarto.yml"

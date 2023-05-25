@@ -51,6 +51,14 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.showWarningMessage
   );
   if (quartoContext.available) {
+
+    // enable commands conditional on quarto installation
+    vscode.commands.executeCommand(
+      "setContext",
+      "quartoAvailable",
+      true
+    );
+
     // ensure quarto is on the path
     context.environmentVariableCollection.prepend(
       "PATH",

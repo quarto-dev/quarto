@@ -24,9 +24,17 @@ import { isExecutableLanguageBlock, languageNameFromBlock } from "./language";
 
 export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  
+  // remove the yaml front matter by replacing it with blank lines 
+  // (if its invalid it will prevent parsing of the document)
+  const partitioned = partitionYamlFrontMatter(markdown);
+  const yaml = partitioned ? partitioned.yaml : null;
+  const input = partitioned 
+    ? "\n".repeat(lines(partitioned.yaml).length-1) +  partitioned.markdown
+    : markdown;
+
   try {
     const output = context.runPandoc(
-      { input: markdown },
+      { input },
       "--from", "commonmark_x+sourcepos",
        "--to", "plain",
        "--lua-filter", path.join(resourcePath, 'parser.lua')
@@ -48,12 +56,11 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
   
   
     // add a FrontMatter token if there is front matter
-    const result = partitionYamlFrontMatter(markdown);
-    if (result) {
-      const yamlLines = lines(result.yaml);
+    if (yaml) {
+      const yamlLines = lines(yaml);
       const yamlToken: TokenFrontMatter = {
         type: "FrontMatter",
-        data: result.yaml,
+        data: yaml,
         range: makeRange(0, 0, yamlLines.length - 1, 0)
       }
       tokens.unshift(yamlToken);

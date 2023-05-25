@@ -48,13 +48,13 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
-import { initQuartoContext } from "quarto-core";
+import { initQuartoContext, Document } from "quarto-core";
 import { ConfigurationManager, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { langaugeServiceMdParser } from "./parser";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
-import { createLanguageService, IMdLanguageService, ITextDocument, RenameNotSupportedAtLocationError } from "./service";
+import { createLanguageService, IMdLanguageService, RenameNotSupportedAtLocationError } from "./service";
 import { initializeQuarto } from "./quarto";
 import { registerDiagnostics } from "./diagnostics";
 
@@ -65,7 +65,7 @@ const kOrganizeLinkDefKind = 'source.organizeLinkDefinitions';
 const connection = createConnection(ProposedFeatures.all);
 
 // Create text document manager
-const documents: TextDocuments<ITextDocument> = new TextDocuments(TextDocument);
+const documents: TextDocuments<Document> = new TextDocuments(TextDocument);
 documents.listen(connection);
 
 // Configuration

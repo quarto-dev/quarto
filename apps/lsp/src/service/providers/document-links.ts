@@ -21,13 +21,12 @@ import { URI, Utils } from 'vscode-uri';
 
 import { Disposable, coalesce, tryDecodeUri } from 'core';
 
-import { translatePosition, makeRange, rangeContains, Token, isDisplayMath, TokenType } from 'quarto-core';
+import { translatePosition, makeRange, rangeContains, Token, isDisplayMath, TokenType, Document, getDocUri, getLine } from 'quarto-core';
 
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
-import { Document, getDocUri, getLine } from '../document';
 import { r } from '../util/string';
 import { IWorkspace, getWorkspaceFolder, tryAppendMarkdownFileExtension } from '../workspace';
 import { MdDocumentInfoCache, MdWorkspaceInfoCache } from '../workspace-cache';

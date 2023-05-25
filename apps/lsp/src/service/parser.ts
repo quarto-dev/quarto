@@ -15,8 +15,7 @@
  */
 
 import { ISlugifier } from './slugify';
-import { Document } from './document';
-import { Token } from 'quarto-core';
+import { Token, Document } from 'quarto-core';
 
 /**
  * Parses Markdown text into a stream of tokens.

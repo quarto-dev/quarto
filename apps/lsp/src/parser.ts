@@ -15,9 +15,9 @@
  */
 
 
-import { Token, QuartoContext, parsePandocDocument } from "quarto-core";
+import { Token, QuartoContext, parsePandocDocument, Document } from "quarto-core";
 
-import { IMdParser, ITextDocument } from "./service";
+import { IMdParser } from "./service";
 import { pandocSlugifier } from "./service";
 
 
@@ -31,7 +31,7 @@ export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: st
 
   const mdParser : IMdParser = {
     slugifier: pandocSlugifier,
-    tokenize(doc: ITextDocument): Token[] {
+    tokenize(doc: Document): Token[] {
       if (
         !elementCache ||
         doc.uri.toString() !== elementCacheDocUri ||

@@ -22,11 +22,10 @@ import { URI } from 'vscode-uri';
 
 import { Disposable, IDisposable, Limiter } from 'core';
 
-import { translatePosition, modifyRange } from 'quarto-core';
+import { translatePosition, modifyRange, Document, getDocUri } from 'quarto-core';
 
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider } from '../toc';
-import { getDocUri, Document } from '../document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';

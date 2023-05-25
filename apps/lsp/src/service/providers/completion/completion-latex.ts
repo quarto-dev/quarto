@@ -40,7 +40,7 @@ const kMathjaxCommands = mathjaxImport as Record<string, string[]>;
 import mathjaxCompletions from "./mathjax-completions.json";
 import { mathjaxLoadedExtensions } from "editor-server";
 import { MathjaxSupportedExtension } from "editor-types";
-import { Document } from "../../document";
+import { Document } from "quarto-core";
 import { LsConfiguration } from "../../config";
 import { IMdParser } from "../../parser";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;

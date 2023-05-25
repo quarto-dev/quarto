@@ -22,7 +22,7 @@ import { cslRefs } from "editor-server";
 
 import { filePathForDoc } from "../../../util/doc";
 import { documentFrontMatter } from "../../../util/markdown";
-import { Document } from "../../../document";
+import { Document } from "quarto-core";
 import { Quarto } from "../../../quarto";
 import { IMdParser } from "../../../parser";
 

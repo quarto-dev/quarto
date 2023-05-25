@@ -20,10 +20,9 @@ import { filePathForDoc } from "../../../util/doc";
 import { bypassRefIntelligence } from "../../../util/refs";
 
 import { EditorContext, Quarto } from "../../../quarto";
-import { projectDirForDocument } from "quarto-core";
+import { projectDirForDocument, Document } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
-import { Document } from "../../../document";
 import { IMdParser } from "../../../parser";
 
 export async function refsCompletions(

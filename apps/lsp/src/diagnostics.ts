@@ -24,14 +24,16 @@ import {
   UnchangedDocumentDiagnosticReport,
 } from "vscode-languageserver";
 
+
 import { URI } from "vscode-uri";
 import { disposeAll } from "core";
+
+import { Document } from "quarto-core";
 
 import {
   DiagnosticOptions,
   ILogger,
   IMdLanguageService,
-  ITextDocument,
   IWorkspace,
   LogLevel,
 } from "./service";
@@ -46,7 +48,7 @@ import { isWorkspaceWithFileWatching } from "./service/workspace";
 export async function registerDiagnostics(
   connection: Connection,
   workspace: IWorkspace,
-  documents: TextDocuments<ITextDocument>,
+  documents: TextDocuments<Document>,
   mdLs: IMdLanguageService,
   configManager: ConfigurationManager,
   logger: ILogger
@@ -57,8 +59,8 @@ export async function registerDiagnostics(
   
 
   // baseline diagnostics sent on save (and cleared on change)
-  const saveDiagnosticsSources: Array<(doc: ITextDocument) => Promise<Diagnostic[]>> = [];
-  saveDiagnosticsSources.push((doc: ITextDocument) => {
+  const saveDiagnosticsSources: Array<(doc: Document) => Promise<Diagnostic[]>> = [];
+  saveDiagnosticsSources.push((doc: Document) => {
     return mdLs.computeOnSaveDiagnostics(doc);
   });
   // diagnostics on open and save (clear on doc modified)
@@ -78,11 +80,11 @@ export async function registerDiagnostics(
     })
   );
   const computeDiagnostics = async (
-    doc: ITextDocument
+    doc: Document
   ): Promise<Diagnostic[]> => {
     return (await Promise.all(saveDiagnosticsSources.map(src => src(doc)))).flat();
   };
-  const sendDiagnostics = (doc: ITextDocument, diagnostics: Diagnostic[]) => {
+  const sendDiagnostics = (doc: Document, diagnostics: Diagnostic[]) => {
     connection.sendDiagnostics({
       uri: doc.uri,
       version: doc.version,
@@ -169,7 +171,7 @@ export async function registerDiagnostics(
     );
   } else {
     // run diagnostics on save (and clear on edit)
-    saveDiagnosticsSources.push((doc: ITextDocument) => {
+    saveDiagnosticsSources.push((doc: Document) => {
       return mdLs?.computeDiagnostics(
         doc,
         getDiagnosticsOptions(configManager),

@@ -17,7 +17,7 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Disposable } from 'core';
-import { Document } from '../document';
+import { Document } from 'quarto-core';
 import { IWorkspace } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { MdDocumentSymbolProvider } from './document-symbols';

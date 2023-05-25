@@ -15,10 +15,9 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { isBefore, makeRange } from 'quarto-core';
+import { isBefore, makeRange, Document } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry, TocEntryType } from '../toc';
-import { Document } from '../document';
 import { MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 
 interface MarkdownSymbol {

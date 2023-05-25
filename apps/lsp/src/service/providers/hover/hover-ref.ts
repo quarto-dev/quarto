@@ -20,7 +20,7 @@ import { bypassRefIntelligence } from "../../util/refs";
 import { documentFrontMatter } from "../../util/markdown";
 import { filePathForDoc } from "../../util/doc";
 
-import { Document } from "../../document";
+import { Document } from "quarto-core";
 import { Quarto } from "../../quarto";
 import { IMdParser } from "../../parser";
 

@@ -20,6 +20,9 @@ import {
   Position,
   Range,
 } from "vscode-languageserver";
+
+import { Document } from "quarto-core";
+
 import {
   kEndColumn,
   kEndRow,
@@ -27,9 +30,8 @@ import {
   kStartRow,
   LintItem,
   Quarto,
+  docEditorContext
 } from "../quarto";
-import { Document } from "../document";
-import { docEditorContext } from "../quarto";
 
 export async function provideYamlDiagnostics(
   quarto: Quarto,

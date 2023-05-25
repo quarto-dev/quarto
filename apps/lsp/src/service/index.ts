@@ -17,6 +17,7 @@
 import type { CancellationToken, CompletionContext } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
+import { Document } from "quarto-core"
 import { LsConfiguration} from './config';
 import { MdExtractLinkDefinitionCodeActionProvider } from './providers/codeactions/extract-linkdef';
 import { MdRemoveLinkDefinitionCodeActionProvider } from './providers/codeactions/remove-linkdef';
@@ -35,7 +36,6 @@ import { MdWorkspaceSymbolProvider } from './providers/workspace-symbols';
 import { ILogger } from './logging';
 import { IMdParser } from './parser';
 import { MdTableOfContentsProvider } from './toc';
-import { Document } from './document';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
 import { MdCompletionProvider } from './providers/completion/completion';
@@ -55,7 +55,6 @@ export { LogLevel } from './logging';
 export type { IMdParser } from './parser';
 export type { ISlugifier } from './slugify'
 export { Slug, pandocSlugifier } from './slugify';
-export type { Document as ITextDocument } from './document';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 
 /**

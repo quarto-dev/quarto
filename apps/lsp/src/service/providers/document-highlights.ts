@@ -17,10 +17,9 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { translatePosition, modifyRange, rangeContains } from 'quarto-core';
+import { translatePosition, modifyRange, rangeContains, Document } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider, TableOfContents, TocHeaderEntry, isTocHeaderEntry } from '../toc';
-import { Document } from '../document';
 import { tryAppendMarkdownFileExtension } from '../workspace';
 import { HrefKind, InternalHref, looksLikeLinkToResource, MdLink, MdLinkKind, MdLinkProvider } from './document-links';
 import { getFilePathRange } from './rename';

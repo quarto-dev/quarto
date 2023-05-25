@@ -31,13 +31,15 @@ import {
 	isTabset,
 	isFrontMatter,
 	isHeader,
-	isCodeBlock
+	isCodeBlock,
+	getDocUri, 
+	getLine, 
+	Document
 } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
 import { pandocSlugifier, ISlugifier, Slug } from './slugify';
-import { getDocUri, getLine, Document } from './document';
 
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';

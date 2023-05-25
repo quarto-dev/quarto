@@ -22,3 +22,4 @@ export * from './storage';
 export * from './dictionaries';
 export * from './position';
 export * from './range';
+export * from './document';

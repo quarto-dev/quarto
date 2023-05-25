@@ -13,10 +13,9 @@
  *
  */
 
-import { QuartoContext } from "quarto-core";
+import { QuartoContext, Document } from "quarto-core";
 import { CompletionItem, Position } from "vscode-languageserver-types";
 import { filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml } from "./util/doc";
-import { Document } from "./document";
 import { lines } from "core";
 
 

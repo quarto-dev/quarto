@@ -10,5 +10,5 @@
   },
   "exclude": ["node_modules"],
   "extends": "tsconfig/base.json",
-  "include": ["src", "../../packages/core/src/dispose.ts"]
+  "include": ["src"]
 }

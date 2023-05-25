@@ -32,7 +32,7 @@ import { IWorkspace } from "../../workspace";
 import { IMdParser } from "../../parser";
 import { MdLinkProvider } from "../document-links";
 import { MdTableOfContentsProvider } from "../../toc";
-import { Document } from "../../document";
+import { Document } from "quarto-core";
 import { MdPathCompletionProvider } from "./completion-path";
 import { docEditorContext } from "../../quarto";
 

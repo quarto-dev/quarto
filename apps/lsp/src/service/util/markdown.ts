@@ -17,8 +17,7 @@ import { Range, Position } from "vscode-languageserver";
 
 import { Token, TokenMath, isDisplayMath, isFrontMatter, isRawBlock, kAttrClasses } from "quarto-core";
 
-import { parseFrontMatterStr } from "quarto-core";
-import { Document } from "../document";
+import { parseFrontMatterStr, Document } from "quarto-core";
 import { IMdParser } from "../parser";
 
 export function mathRange(parser: IMdParser, doc: Document, pos: Position) {

@@ -20,7 +20,7 @@ import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
 import { mathRange } from "../../util/markdown";
-import { Document } from "../../document";
+import { Document } from "quarto-core";
 import { LsConfiguration } from "../../config";
 import { IMdParser } from "../../parser";
 

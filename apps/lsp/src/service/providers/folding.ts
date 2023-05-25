@@ -15,12 +15,11 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { Token, isDisplayMath, isRawBlock } from 'quarto-core';
+import { Token, isDisplayMath, isRawBlock, getLine, Document } from 'quarto-core';
 
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
-import { getLine, Document } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 
 const rangeLimit = 5000;

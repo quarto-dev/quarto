@@ -22,7 +22,7 @@ import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContain
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocEntry, isTocHeaderEntry } from '../toc';
-import { getLine, Document } from '../document';
+import { getLine, Document } from 'quarto-core';
 import { isEmptyOrWhitespace } from '../util/string';
 
 export class MdSelectionRangeProvider {

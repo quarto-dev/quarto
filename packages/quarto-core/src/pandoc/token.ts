@@ -67,6 +67,10 @@ export function isCallout(token: PandocToken) {
   }
 }
 
+export function isList(token: PandocToken) {
+  return ["BulletList", "OrderedList"].includes(token.type);
+}
+
 export function isTabset(token: PandocToken) {
   if (token.type === "Div") {
     const classes = token.attr![kAttrClasses];

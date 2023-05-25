@@ -18,9 +18,9 @@ import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Position, Range } from 'vscode-languageserver-types';
 import { coalesce } from 'core';
-import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains } from 'quarto-core';
+import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains, PandocToken, isList } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
-import { IMdParser, Token, TokenWithMap } from '../parser';
+import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocEntry, isTocHeaderEntry } from '../toc';
 import { getLine, ITextDocument } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
@@ -63,7 +63,7 @@ export class MdSelectionRangeProvider {
 	}
 
 	async #getBlockSelectionRange(document: ITextDocument, position: Position, parent: lsp.SelectionRange | undefined, token: CancellationToken): Promise<lsp.SelectionRange | undefined> {
-		const tokens = await this.#parser.tokenize(document);
+		const tokens = await this.#parser.parsePandocTokens(document);
 		if (token.isCancellationRequested) {
 			return undefined;
 		}
@@ -127,23 +127,24 @@ function createHeaderRange(header: TocEntry, isClosestHeaderToPosition: boolean,
 	}
 }
 
-function getBlockTokensForPosition(tokens: readonly Token[], position: Position, parent: lsp.SelectionRange | undefined): TokenWithMap[] {
-	const enclosingTokens = tokens.filter((token): token is TokenWithMap => !!token.map && (token.map[0] <= position.line && token.map[1] > position.line) && (!parent || (token.map[0] >= parent.range.start.line && token.map[1] <= parent.range.end.line + 1)) && isBlockElement(token));
+function getBlockTokensForPosition(tokens: readonly PandocToken[], position: Position, parent: lsp.SelectionRange | undefined): PandocToken[] {
+
+	const enclosingTokens = tokens.filter(token => token.range.start.line <= position.line && token.range.end.line > position.line && (!parent || (token.range.start.line >= parent.range.start.line && token.range.end.line <= parent.range.end.line + 1)) && token.range.start.line !== token.range.end.line);
 	if (enclosingTokens.length === 0) {
 		return [];
 	}
-	const sortedTokens = enclosingTokens.sort((token1, token2) => (token2.map[1] - token2.map[0]) - (token1.map[1] - token1.map[0]));
+	const sortedTokens = enclosingTokens.sort((token1, token2) => (token2.range.end.line - token2.range.start.line) - (token1.range.end.line - token1.range.start.line));
 	return sortedTokens;
 }
 
-function createBlockRange(block: TokenWithMap, document: ITextDocument, cursorLine: number, parent: lsp.SelectionRange | undefined): lsp.SelectionRange {
-	if (block.type === 'fence') {
+function createBlockRange(block: PandocToken, document: ITextDocument, cursorLine: number, parent: lsp.SelectionRange | undefined): lsp.SelectionRange {
+	if (block.type === 'CodeBlock') {
 		return createFencedRange(block, cursorLine, document, parent);
 	}
 
-	let startLine = isEmptyOrWhitespace(getLine(document, block.map[0])) ? block.map[0] + 1 : block.map[0];
-	let endLine = startLine === block.map[1] ? block.map[1] : block.map[1] - 1;
-	if (block.type === 'paragraph_open' && block.map[1] - block.map[0] === 2) {
+	let startLine = isEmptyOrWhitespace(getLine(document, block.range.start.line)) ? block.range.start.line + 1 : block.range.start.line;
+	let endLine = startLine === block.range.end.line ? block.range.end.line : block.range.end.line - 1;
+	if (block.type === 'Para' && block.range.end.line - block.range.end.line === 2) {
 		startLine = endLine = cursorLine;
 	} else if (isList(block) && isEmptyOrWhitespace(getLine(document, endLine))) {
 		endLine = endLine - 1;
@@ -175,9 +176,9 @@ function createInlineRange(document: ITextDocument, cursorPosition: Position, pa
 	return inlineCodeBlockSelection ?? linkSelection ?? comboSelection ?? boldSelection ?? italicSelection;
 }
 
-function createFencedRange(token: TokenWithMap, cursorLine: number, document: ITextDocument, parent?: lsp.SelectionRange): lsp.SelectionRange {
-	const startLine = token.map[0];
-	const endLine = token.map[1] - 1;
+function createFencedRange(token: PandocToken, cursorLine: number, document: ITextDocument, parent?: lsp.SelectionRange): lsp.SelectionRange {
+	const startLine = token.range.start.line;
+	const endLine = token.range.end.line - 1;
 	const onFenceLine = cursorLine === startLine || cursorLine === endLine;
 	const fenceRange = makeRange(startLine, 0, endLine, getLine(document, endLine).length);
 	const contentRange = endLine - startLine > 2 && !onFenceLine ? makeRange(startLine + 1, 0, endLine - 1, getLine(document, endLine - 1).length) : undefined;
@@ -257,13 +258,7 @@ function createLinkRange(lineText: string, cursorChar: number, cursorLine: numbe
 	return undefined;
 }
 
-function isList(token: Token): boolean {
-	return token.type ? ['ordered_list_open', 'list_item_open', 'bullet_list_open'].includes(token.type) : false;
-}
 
-function isBlockElement(token: Token): boolean {
-	return !['list_item_close', 'paragraph_close', 'bullet_list_close', 'inline', 'heading_close', 'heading_open'].includes(token.type);
-}
 
 function getFirstChildHeader(document: ITextDocument, header?: TocEntry, toc?: readonly TocEntry[]): Position | undefined {
 	let childRange: Position | undefined;

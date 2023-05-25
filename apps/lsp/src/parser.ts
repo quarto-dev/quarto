@@ -14,25 +14,15 @@
  *
  */
 
-import MarkdownIt from "markdown-it";
-
 
 import { PandocToken, QuartoContext, parsePandocDocument } from "quarto-core";
 
-import { IMdParser, ITextDocument, Token } from "./service";
+import { IMdParser, ITextDocument } from "./service";
 import { pandocSlugifier } from "./service";
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: string) : IMdParser {
-
-  // markdownit instance
-  const mdIt = MarkdownIt({ html: true });
-
-  // token cache for last document requested
-  let tokenCache: Token[] | undefined;
-  let tokenCacheDocUri: string | undefined;
-  let tokenCacheDocVersion: number | undefined;
 
   // pandoc element cache for last document requested
   let elementCache: PandocToken[] | undefined;
@@ -41,18 +31,6 @@ export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: st
 
   const mdParser : IMdParser = {
     slugifier: pandocSlugifier,
-    async tokenize(doc: ITextDocument): Promise<Token[]> {
-      if (
-        !tokenCache ||
-        doc.uri.toString() !== tokenCacheDocUri ||
-        doc.version !== tokenCacheDocVersion
-      ) {
-        tokenCache = mdIt.parse(doc.getText(), {});
-        tokenCacheDocUri = doc.uri.toString();
-        tokenCacheDocVersion = doc.version;
-      }
-      return tokenCache;
-    },
     async parsePandocTokens(doc: ITextDocument): Promise<PandocToken[]> {
       if (
         !elementCache ||

@@ -41,11 +41,6 @@ export interface IMdParser {
 	readonly slugifier: ISlugifier;
 	
 	/**
-	 * Parse `document` into a stream of tokens.
-	 */
-	tokenize(document: ITextDocument): Promise<Token[]>;
-
-	/**
 	 * Parse `document` into a stream of pandoc elements
 	 */
 	parsePandocTokens(document: ITextDocument): Promise<PandocToken[]>;

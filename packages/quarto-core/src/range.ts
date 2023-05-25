@@ -70,8 +70,13 @@ export function rangeIntersects(a: Range, b: Range): boolean {
 
 export function trimRange(document: Document, range: Range) : Range {
 	if (range.end.character === 0) {
-		range.end.line--;
-		range.end.character = getLine(document, range.end.line).length;
-	} 
-	return range;
+		return makeRange(
+			range.start.line, 
+			range.start.character, 
+			range.end.line--, 
+			getLine(document, range.end.line).length
+		);
+	} else {
+		return range;
+	}
 }

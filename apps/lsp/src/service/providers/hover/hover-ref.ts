@@ -17,10 +17,8 @@ import { Hover, Position, Range } from "vscode-languageserver";
 import { cslRefs, CslRef } from "editor-server";
 
 import { bypassRefIntelligence } from "../../util/refs";
-import { documentFrontMatter } from "../../util/markdown";
-import { filePathForDoc } from "../../util/doc";
 
-import { Document, Parser } from "quarto-core";
+import { Document, Parser, filePathForDoc, documentFrontMatter } from "quarto-core";
 import { Quarto } from "../../quarto";
 
 

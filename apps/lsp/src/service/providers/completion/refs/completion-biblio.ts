@@ -20,9 +20,7 @@ import {
 } from "vscode-languageserver";
 import { cslRefs } from "editor-server";
 
-import { filePathForDoc } from "../../../util/doc";
-import { documentFrontMatter } from "../../../util/markdown";
-import { Document, Parser } from "quarto-core";
+import { Document, Parser, filePathForDoc, documentFrontMatter } from "quarto-core";
 import { Quarto } from "../../../quarto";
 
 export async function biblioCompletions(

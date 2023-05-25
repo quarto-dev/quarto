@@ -28,7 +28,7 @@ import { URI } from "vscode-uri";
 import { Connection, Emitter, TextDocuments, DidChangeWatchedFilesNotification, WatchKind, ClientCapabilities, FileChangeType } from "vscode-languageserver";
 import { Position, Range, TextDocument } from "vscode-languageserver-textdocument";
 
-import { Document } from "quarto-core";
+import { Document, isQuartoDoc } from "quarto-core";
 
 import { 
   FileStat, 
@@ -40,7 +40,6 @@ import {
   FileWatcherOptions
 } from "./service";
 
-import { isQuartoDoc } from "./service/util/doc";
 import { ResourceMap } from "./service/util/resource-maps";
 import { Limiter } from "core";
 

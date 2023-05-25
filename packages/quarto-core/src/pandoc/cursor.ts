@@ -1,5 +1,5 @@
 /*
- * markdown.ts
+ * latex.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -15,9 +15,13 @@
 
 import { Range, Position } from "vscode-languageserver";
 
-import { Parser, Token, TokenMath, isDisplayMath, isFrontMatter, isRawBlock, kAttrClasses } from "quarto-core";
+import { Document } from "../document";
 
-import { parseFrontMatterStr, Document } from "quarto-core";
+import { Parser } from "./parser";
+import { Token, TokenMath, isRawBlock, kAttrClasses } from "./token";
+import { isDisplayMath } from "./language";
+
+
 
 export function mathRange(parser: Parser, doc: Document, pos: Position) {
   // see if we are in a math block
@@ -40,30 +44,6 @@ export function mathRange(parser: Parser, doc: Document, pos: Position) {
   );
 }
 
-export function isContentPosition(parser: Parser, doc: Document, pos: Position) {
-  const tokens = parser(doc);
-  const codeBlock = tokens.find(isCodeBlockAtPosition(pos))
-  return !codeBlock && !mathRange(parser, doc, pos);
-}
-
-export function documentFrontMatter(
-  parser: Parser,
-  doc: Document
-): Record<string, unknown> {
-  const tokens = parser(doc);
-  const yaml = tokens.find(isFrontMatter);
-  if (yaml) {
-    const frontMatter = parseFrontMatterStr(yaml.data);
-    if (frontMatter && typeof frontMatter === "object") {
-      return frontMatter as Record<string, unknown>;
-    } else {
-      return {};
-    }
-  } else {
-    return {};
-  }
-}
-
 export function isLatexPosition(parser: Parser, doc: Document, pos: Position) {
   // math is always latex
   if (mathRange(parser, doc, pos)) {
@@ -79,6 +59,12 @@ export function isLatexPosition(parser: Parser, doc: Document, pos: Position) {
     // non code block is latex
     return true;
   }
+}
+
+export function isContentPosition(parser: Parser, doc: Document, pos: Position) {
+  const tokens = parser(doc);
+  const codeBlock = tokens.find(isCodeBlockAtPosition(pos))
+  return !codeBlock && !mathRange(parser, doc, pos);
 }
 
 function isMathBlockAtPosition(pos: Position) {
@@ -131,3 +117,4 @@ function inlineMathRange(pos: Position, line: string, pattern: RegExp) {
   }
   return null;
 }
+

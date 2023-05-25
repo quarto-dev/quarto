@@ -15,9 +15,8 @@
 
 import { Position } from "vscode-languageserver-types";
 
-import { Document, Parser } from "quarto-core";
+import { Document, Parser, isContentPosition } from "quarto-core";
 
-import { isContentPosition } from "./markdown";
 
 export function bypassRefIntelligence(
   parser: Parser,

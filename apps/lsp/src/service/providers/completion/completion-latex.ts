@@ -26,7 +26,7 @@ import {
   Range,
 } from "vscode-languageserver";
 
-import { isLatexPosition } from "../../util/markdown";
+import { isLatexPosition } from "quarto-core";
 
 interface LatexCommand {
   command: string;

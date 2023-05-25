@@ -13,6 +13,8 @@
  *
  */
 
+// TODO: ensure that yaml front matter is foldable
+
 // TODO: replace markdown-it within main vscode extension (test)
 
 // TODO: test and tweak all of the features, updating changelog as required

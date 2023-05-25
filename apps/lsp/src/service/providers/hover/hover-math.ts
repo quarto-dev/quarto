@@ -19,8 +19,7 @@ import { Hover, MarkupContent, MarkupKind, Position } from "vscode-languageserve
 import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
-import { mathRange } from "../../util/markdown";
-import { Document, Parser } from "quarto-core";
+import { Document, Parser, mathRange } from "quarto-core";
 import { LsConfiguration } from "../../config";
 
 

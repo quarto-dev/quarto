@@ -17,7 +17,7 @@ import path from "node:path"
 
 import { QuartoContext } from "../context";
 import { Token, TokenFrontMatter, isCodeBlock, kAttrClasses } from "./token";
-import { partitionYamlFrontMatter } from "../metadata";
+import { partitionYamlFrontMatter } from "./yaml";
 import { lines } from "core";
 import { makeRange } from "../range";
 import { Document } from "../document";

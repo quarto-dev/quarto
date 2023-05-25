@@ -67,3 +67,67 @@ export function getLine(doc: Document, line: number): string {
 export function getDocUri(doc: Document): URI {
 	return doc.$uri ?? URI.parse(doc.uri);
 }
+
+
+export const kQuartoLanguageId = "quarto";
+export const kMarkdownLanguageId = "markdown";
+export const kYamlLanguageId = "yaml";
+
+export enum DocType {
+  None,
+  Qmd,
+  Yaml,
+}
+
+export function docType(doc: Document) {
+  if (isQuartoDoc(doc)) {
+    return DocType.Qmd;
+  } else if (isQuartoYaml(doc)) {
+    return DocType.Yaml;
+  } else {
+    return DocType.None;
+  }
+}
+
+export function isQuartoDoc(doc: Document) {
+  return (
+    doc.languageId === kQuartoLanguageId ||
+    doc.languageId === kMarkdownLanguageId
+  );
+}
+
+export function isQuartoYaml(doc: Document) {
+  return (
+    doc.languageId === kYamlLanguageId &&
+    (doc.uri.match(/_quarto(-.*?)?\.ya?ml$/) ||
+      doc.uri.match(/_metadata\.ya?ml$/) ||
+      doc.uri.match(/_extension\.ya?ml$/))
+  );
+}
+
+export function filePathForDoc(doc: Document) {
+  return URI.parse(doc.uri).fsPath;
+}
+
+const kRegExYAML =
+  /(^)(---[ \t]*[\r\n]+(?![ \t]*[\r\n]+)[\W\w]*?[\r\n]+(?:---|\.\.\.))([ \t]*)$/gm;
+
+export function isQuartoRevealDoc(doc: Document | string) {
+  if (typeof(doc) !== "string") {
+    if (isQuartoDoc(doc)) {
+      doc = doc.getText();
+    } else {
+      return false;
+    }
+  }
+  if (doc) {
+    const match = doc.match(kRegExYAML);
+    if (match) {
+      const yaml = match[0];
+      return (
+        !!yaml.match(/^format:\s+revealjs\s*$/gm) ||
+        !!yaml.match(/^[ \t]*revealjs:\s*(default)?\s*$/gm)
+      );
+    }
+  }
+}

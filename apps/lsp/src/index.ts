@@ -13,11 +13,6 @@
  *
  */
 
-// TODO: somehow prevent the YAML parse error?
-// TODO: protect the pandoc parse via some sort of throttle (but versions!)
-
-// TODO: improve use of types on Token (data)
-
 // TODO: replace markdown-it within main vscode extension (test)
 
 // TODO: test and tweak all of the features, updating changelog as required
@@ -97,12 +92,12 @@ connection.onInitialize((params: InitializeParams) => {
     return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
   })
 
-  connection.onHover(async (params) : Promise<Hover | null | undefined> => {
+  connection.onHover(async (params, token) : Promise<Hover | null | undefined> => {
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return null;
     }
-    return mdLs?.getHover(document, params.position, config);
+    return mdLs?.getHover(document, params.position, config, token);
   })
 
 

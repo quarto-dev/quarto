@@ -13,8 +13,12 @@
  *
  */
 
+// TODO: somehow prevent the YAML parse error?
+// TODO: protect the pandoc parse via some sort of throttle (but versions!)
 
-// TODO: implement parser (refactor providers)
+// TODO: improve use of types on Token (data)
+
+// TODO: replace markdown-it within main vscode extension (test)
 
 // TODO: test and tweak all of the features, updating changelog as required
 

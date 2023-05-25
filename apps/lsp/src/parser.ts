@@ -31,7 +31,7 @@ export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: st
 
   const mdParser : IMdParser = {
     slugifier: pandocSlugifier,
-    parsePandocTokens(doc: ITextDocument): Token[] {
+    tokenize(doc: ITextDocument): Token[] {
       if (
         !elementCache ||
         doc.uri.toString() !== elementCacheDocUri ||

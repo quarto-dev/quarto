@@ -52,7 +52,7 @@ export type { FileRename } from './providers/file-rename';
 export { RenameNotSupportedAtLocationError } from './providers/rename';
 export type  { ILogger } from './logging';
 export { LogLevel } from './logging';
-export type { IMdParser, Token } from './parser';
+export type { IMdParser } from './parser';
 export type { ISlugifier } from './slugify'
 export { Slug, pandocSlugifier } from './slugify';
 export type { ITextDocument } from './document';

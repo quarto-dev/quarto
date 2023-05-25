@@ -131,7 +131,7 @@ export class TableOfContents {
 		const docUri = getDocUri(document);
 
 		const toc: TocEntry[] = [];
-		const tokens = parser.parsePandocTokens(document);
+		const tokens = parser.tokenize(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}

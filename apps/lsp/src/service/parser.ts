@@ -18,18 +18,6 @@ import { ISlugifier } from './slugify';
 import { ITextDocument } from './document';
 import { Token } from 'quarto-core';
 
-export interface Token {
-	readonly type: string;
-	readonly markup: string;
-	readonly content: string;
-	readonly map: number[] | null;
-	readonly children: readonly Token[] | null;
-}
-
-export interface TokenWithMap extends Token {
-	readonly map: [number, number];
-}
-
 /**
  * Parses Markdown text into a stream of tokens.
  */
@@ -43,5 +31,5 @@ export interface IMdParser {
 	/**
 	 * Parse `document` into a stream of pandoc elements
 	 */
-	parsePandocTokens(document: ITextDocument): Token[];
+	tokenize(document: ITextDocument): Token[];
 }

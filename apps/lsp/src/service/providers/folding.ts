@@ -64,7 +64,7 @@ export class MdFoldingProvider {
 	}
 
 	async #getRegions(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = this.#parser.parsePandocTokens(document);
+		const tokens = this.#parser.tokenize(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -104,7 +104,7 @@ export class MdFoldingProvider {
 	}
 
 	async #getBlockFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = this.#parser.parsePandocTokens(document);
+		const tokens = this.#parser.tokenize(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}

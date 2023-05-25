@@ -23,7 +23,7 @@ import { IMdParser } from "../parser";
 
 export function mathRange(parser: IMdParser, doc: ITextDocument, pos: Position) {
   // see if we are in a math block
-  const tokens = parser.parsePandocTokens(doc);
+  const tokens = parser.tokenize(doc);
   const mathBlock = tokens.find(isMathBlockAtPosition(pos));
   if (mathBlock) {
     return {
@@ -43,7 +43,7 @@ export function mathRange(parser: IMdParser, doc: ITextDocument, pos: Position) 
 }
 
 export function isContentPosition(parser: IMdParser, doc: ITextDocument, pos: Position) {
-  const tokens = parser.parsePandocTokens(doc);
+  const tokens = parser.tokenize(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos))
   return !codeBlock && !mathRange(parser, doc, pos);
 }
@@ -52,7 +52,7 @@ export function documentFrontMatter(
   parser: IMdParser,
   doc: ITextDocument
 ): Record<string, unknown> {
-  const tokens = parser.parsePandocTokens(doc);
+  const tokens = parser.tokenize(doc);
   const yaml = tokens.find(isFrontMatter);
   if (yaml) {
     const frontMatter = parseFrontMatterStr(yaml.data);
@@ -72,7 +72,7 @@ export function isLatexPosition(parser: IMdParser, doc: ITextDocument, pos: Posi
     return true;
   }
   //
-  const tokens = parser.parsePandocTokens(doc);
+  const tokens = parser.tokenize(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos));
   if (codeBlock) {
     // code block is latex only if it's 'tex' or 'latex'

@@ -143,11 +143,11 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
 
 class QuartoDiagramWebview extends QuartoWebview<null> {
   public constructor(
-    extensionUri: Uri,
+    context: ExtensionContext,
     state: null,
     webviewPanel: WebviewPanel
   ) {
-    super(extensionUri, state, webviewPanel);
+    super(context, state, webviewPanel);
 
     this._register(
       this._webviewPanel.webview.onDidReceiveMessage((e) => {

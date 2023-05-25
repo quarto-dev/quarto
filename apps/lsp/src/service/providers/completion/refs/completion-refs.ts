@@ -24,9 +24,11 @@ import { projectDirForDocument } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
 import { ITextDocument } from "../../../document";
+import { IMdParser } from "../../../parser";
 
 export async function refsCompletions(
   quarto: Quarto,
+  parser: IMdParser,
   doc: ITextDocument,
   pos: Position,
   context: EditorContext
@@ -37,7 +39,7 @@ export async function refsCompletions(
     return null;
   }
 
-  if (bypassRefIntelligence(doc, pos, context.line)) {
+  if (bypassRefIntelligence(parser, doc, pos, context.line)) {
     return null;
   }
 
@@ -59,7 +61,7 @@ export async function refsCompletions(
         // construct path
         const path = filePathForDoc(doc);
         const projectDir = projectDirForDocument(path);
-        const biblioItems = await biblioCompletions(quarto, tokenText, doc);
+        const biblioItems = await biblioCompletions(quarto, parser,  tokenText, doc);
         const crossrefItems = await crossrefCompletions(
           quarto,
           tokenText,

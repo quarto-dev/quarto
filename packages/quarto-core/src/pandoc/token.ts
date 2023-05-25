@@ -52,7 +52,7 @@ export interface PandocToken {
     // Header: text
     // Image: caption
     // Link: target
-    // Math: type
+    // Math: { type: string, text: string }
     // CodeBlock: text
     // RawBlock: { format: string, text: string }
 }

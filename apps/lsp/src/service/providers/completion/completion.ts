@@ -79,6 +79,7 @@ export class MdCompletionProvider {
   readonly pathCompletionProvider_: MdPathCompletionProvider;
 
   readonly quarto_: Quarto;
+	readonly parser_: IMdParser;
 
 	constructor(
 		configuration: LsConfiguration,
@@ -89,6 +90,7 @@ export class MdCompletionProvider {
 		tocProvider: MdTableOfContentsProvider,
 	) {
     this.quarto_ = quarto;
+		this.parser_ = parser;
     this.pathCompletionProvider_ = new MdPathCompletionProvider(
       configuration, 
       workspace, 
@@ -109,9 +111,9 @@ export class MdCompletionProvider {
     const trigger = context.triggerCharacter;
     const editorContext = docEditorContext(doc, pos, explicit, trigger);
     return (
-      (await refsCompletions(this.quarto_, doc, pos, editorContext)) ||
+      (await refsCompletions(this.quarto_, this.parser_, doc, pos, editorContext)) ||
       (await attrCompletions(this.quarto_, editorContext)) ||
-      (await latexCompletions(doc, pos, context, config)) ||
+      (await latexCompletions(this.parser_, doc, pos, context, config)) ||
       (await yamlCompletions(this.quarto_, editorContext, true)) ||
       (await this.pathCompletionProvider_.provideCompletionItems(doc, pos, context, token)) ||
       []

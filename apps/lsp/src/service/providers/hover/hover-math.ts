@@ -22,10 +22,11 @@ import { mathjaxTypeset } from "editor-server";
 import { mathRange } from "../../util/markdown";
 import { ITextDocument } from "../../document";
 import { LsConfiguration } from "../../config";
+import { IMdParser } from "../../parser";
 
 
-export function mathHover(doc: ITextDocument, pos: Position, config?: LsConfiguration | undefined): Hover | null {
-  const range = mathRange(doc, pos);
+export function mathHover(parser: IMdParser, doc: ITextDocument, pos: Position, config?: LsConfiguration | undefined): Hover | null {
+  const range = mathRange(parser, doc, pos);
   if (range) {
     const contents = mathjaxTypesetToMarkdown(range.math, doc.getText(), config);
     if (contents) {

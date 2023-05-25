@@ -16,8 +16,10 @@
 import { Position } from "vscode-languageserver-types";
 import { isContentPosition } from "./markdown";
 import { ITextDocument } from "../document";
+import { IMdParser } from "../parser";
 
 export function bypassRefIntelligence(
+  parser: IMdParser,
   doc: ITextDocument,
   pos: Position,
   line: string
@@ -35,7 +37,7 @@ export function bypassRefIntelligence(
   }
 
   // check if we are in markdown
-  if (!isContentPosition(doc, pos)) {
+  if (!isContentPosition(parser, doc, pos)) {
     return true;
   }
 

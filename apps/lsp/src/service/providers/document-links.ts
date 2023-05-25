@@ -417,7 +417,7 @@ export class MdLinkComputer {
 	}
 
 	public async getAllLinks(document: ITextDocument, token: CancellationToken): Promise<MdLink[]> {
-		const tokens = await this.#tokenizer.parsePandocTokens(document);
+		const tokens = this.#tokenizer.parsePandocTokens(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}

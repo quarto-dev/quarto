@@ -62,7 +62,12 @@ export function isFencedCode(token: PandocToken) {
 }
 
 export function isDisplayMath(token: PandocToken) {
-  return token.type === "Math" && token.data === "DisplayMath";
+  if (token.type === "Math") {
+    const math = token.data as { type: string, text: string };
+    return math.type === "DisplayMath";
+  } else {
+    return false;
+  }
 }
 
 export function isDiagram(token: PandocToken) {

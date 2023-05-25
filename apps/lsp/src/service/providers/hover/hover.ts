@@ -23,9 +23,10 @@ import { ITextDocument } from "../../document";
 import { LsConfiguration } from "../../config";
 import { Quarto } from "../../quarto";
 import { docEditorContext } from "../../quarto";
+import { IMdParser } from "../../parser";
 
 export class MdHoverProvider {
-  constructor(private readonly quarto_: Quarto) {}
+  constructor(private readonly quarto_: Quarto, private readonly parser_: IMdParser) {}
 
   public async provideHover(
     doc: ITextDocument,
@@ -33,7 +34,7 @@ export class MdHoverProvider {
     config?: LsConfiguration
   ): Promise<Hover | null> {
     return (
-      (await refHover(this.quarto_, doc, pos)) ||  mathHover(doc, pos, config) || (await yamlHover(this.quarto_, docEditorContext(doc, pos, true)))
+      (await refHover(this.quarto_, this.parser_, doc, pos)) || mathHover(this.parser_, doc, pos, config) || (await yamlHover(this.quarto_, docEditorContext(doc, pos, true)))
     );
   } 
 }

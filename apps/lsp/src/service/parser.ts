@@ -43,5 +43,5 @@ export interface IMdParser {
 	/**
 	 * Parse `document` into a stream of pandoc elements
 	 */
-	parsePandocTokens(document: ITextDocument): Promise<PandocToken[]>;
+	parsePandocTokens(document: ITextDocument): PandocToken[];
 }

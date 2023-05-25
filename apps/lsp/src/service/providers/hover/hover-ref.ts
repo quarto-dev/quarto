@@ -22,19 +22,20 @@ import { filePathForDoc } from "../../util/doc";
 
 import { ITextDocument } from "../../document";
 import { Quarto } from "../../quarto";
+import { IMdParser } from "../../parser";
 
 
 // cache the last ref lookup
 let lastRef: CslRef | undefined;
 
-export async function refHover(quarto: Quarto, doc: ITextDocument, pos: Position): Promise<Hover | null> {
+export async function refHover(quarto: Quarto, parser: IMdParser, doc: ITextDocument, pos: Position): Promise<Hover | null> {
   // compute the line
   const line = doc
     .getText(Range.create(pos.line, 0, pos.line + 1, 0))
     .trimEnd();
 
   // bypass?
-  if (bypassRefIntelligence(doc, pos, line)) {
+  if (bypassRefIntelligence(parser, doc, pos, line)) {
     return null;
   }
 
@@ -55,7 +56,7 @@ export async function refHover(quarto: Quarto, doc: ITextDocument, pos: Position
       if (citeId === lastRef?.id && lastRef.cite) {
         return hoverFromCslRef(lastRef.cite, range);
       } else {
-        const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(doc));
+        const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(parser, doc));
         if (refs) {
           const ref = refs.find((x) => x.id === citeId);
           if (ref?.cite) {

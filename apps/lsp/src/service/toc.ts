@@ -129,7 +129,7 @@ export class TableOfContents {
 		const docUri = getDocUri(document);
 
 		const toc: TocEntry[] = [];
-		const tokens = await parser.parsePandocTokens(document);
+		const tokens = parser.parsePandocTokens(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}

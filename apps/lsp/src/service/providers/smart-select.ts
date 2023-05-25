@@ -63,7 +63,7 @@ export class MdSelectionRangeProvider {
 	}
 
 	async #getBlockSelectionRange(document: ITextDocument, position: Position, parent: lsp.SelectionRange | undefined, token: CancellationToken): Promise<lsp.SelectionRange | undefined> {
-		const tokens = await this.#parser.parsePandocTokens(document);
+		const tokens = this.#parser.parsePandocTokens(document);
 		if (token.isCancellationRequested) {
 			return undefined;
 		}

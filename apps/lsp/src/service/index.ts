@@ -251,7 +251,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 	const foldingProvider = new MdFoldingProvider(init.parser, tocProvider, logger);
 	const linkProvider = new MdLinkProvider(config, init.parser, init.workspace, tocProvider, logger);
 	const completionProvider = new MdCompletionProvider(config, init.quarto, init.workspace, init.parser, linkProvider, tocProvider);
-	const hoverProvider = new MdHoverProvider(init.quarto);
+	const hoverProvider = new MdHoverProvider(init.quarto, init.parser);
 	const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
 	const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);
 	const definitionsProvider = new MdDefinitionProvider(config, init.workspace, tocProvider, linkCache);

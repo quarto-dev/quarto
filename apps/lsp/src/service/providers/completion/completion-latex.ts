@@ -42,6 +42,7 @@ import { mathjaxLoadedExtensions } from "editor-server";
 import { MathjaxSupportedExtension } from "editor-types";
 import { ITextDocument } from "../../document";
 import { LsConfiguration } from "../../config";
+import { IMdParser } from "../../parser";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;
 for (const key of Object.keys(kMathjaxCompletions)) {
   if (key.match(/\{.*?\}/)) {
@@ -55,6 +56,7 @@ for (const key of Object.keys(kMathjaxCompletions)) {
 // for latex we complete the subset of commands supported by mathjax
 // (as those will work universally in pdf and html)
 export async function latexCompletions(
+  parser: IMdParser,
   doc: ITextDocument,
   pos: Position,
   completionContext: CompletionContext,
@@ -67,7 +69,7 @@ export async function latexCompletions(
   }
 
   // check for latex position
-  if (!isLatexPosition(doc, pos)) {
+  if (!isLatexPosition(parser, doc, pos)) {
     return null;
   }
 

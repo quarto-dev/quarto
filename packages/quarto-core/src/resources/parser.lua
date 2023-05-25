@@ -110,7 +110,10 @@ local function extractToken(el)
     elseif type == "Link" then
       token["data"] = el.target
     elseif type == "Math" then
-      token["data"] = el.mathtype
+      token["data"] = {
+        type = el.mathtype,
+        text = el.text
+      }
     elseif type == "RawBlock" then
       token["data"] = {
         format = el.format,

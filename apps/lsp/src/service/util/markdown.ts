@@ -15,61 +15,22 @@
 
 import { Range, Position } from "vscode-languageserver";
 
-import Token from "markdown-it/lib/token";
-
-import MarkdownIt from "markdown-it";
-import { markdownitFrontMatterPlugin, markdownitMathPlugin } from "quarto-core";
+import { PandocToken, isDisplayMath, kAttrClasses } from "quarto-core";
 
 import { parseFrontMatterStr } from "quarto-core";
-import { lines } from "core";
 import { ITextDocument } from "../document";
+import { IMdParser } from "../parser";
 
-export function mathRange(doc: ITextDocument, pos: Position) {
+export function mathRange(parser: IMdParser, doc: ITextDocument, pos: Position) {
   // see if we are in a math block
-  const tokens = markdownTokens.parse(doc);
+  const tokens = parser.parsePandocTokens(doc);
   const mathBlock = tokens.find(isMathBlockAtPosition(pos));
-  if (mathBlock && mathBlock.map) {
+  if (mathBlock) {
     return {
-      math: mathBlock.content,
-      range: Range.create(
-        Position.create(mathBlock.map[0], 0),
-        Position.create(mathBlock.map[1] + 1, 0)
-      ),
+      math: (mathBlock.data as { text: string }).text,
+      range: mathBlock.range,
     };
   }
-
-  // markdown-it can't see math blocks in lists if they are 
-  // indented 4 spaces, so attempt to parse math out of 
-  // non-fenced "code_block"
-  const codeBlock = tokens.find(isBlockTypeAtPosition(["code_block"], pos));
-  if (codeBlock && codeBlock.map) {
-    const codeBlockLines = lines(codeBlock.content.trim());
-    let codeBegin: number | undefined;
-    for (let i=0; i<codeBlockLines.length; i++) {
-      const line = codeBlockLines[i];
-      if (line.startsWith("$$")) {
-        if (codeBegin !== undefined) {
-          // ensure we have at least one "\" to indicate this is math
-          const math = codeBlockLines.slice(1 + codeBegin, i).join("\n");
-          if (math.includes("\\")) {
-            return {
-              math,
-              range: Range.create(
-                Position.create(codeBlock.map[0] + codeBegin, 0),
-                Position.create(codeBlock.map[0] + i + 1, 0)
-              ),
-            };
-          } else {
-            codeBegin = undefined; // not math, reset
-          }
-          
-        } else {
-          codeBegin = i;
-        }
-      }
-    }
-  }
-  
 
   // see if we are in an inline range
   const line = doc
@@ -81,19 +42,20 @@ export function mathRange(doc: ITextDocument, pos: Position) {
   );
 }
 
-export function isContentPosition(doc: ITextDocument, pos: Position) {
-  const tokens = markdownTokens.parse(doc);
-  const codeBlock = tokens.find(isCodeBlockAtPosition(pos));
-  return !codeBlock && !mathRange(doc, pos);
+export function isContentPosition(parser: IMdParser, doc: ITextDocument, pos: Position) {
+  const tokens = parser.parsePandocTokens(doc);
+  const codeBlock = tokens.find(isCodeBlockAtPosition(pos))
+  return !codeBlock && !mathRange(parser, doc, pos);
 }
 
 export function documentFrontMatter(
+  parser: IMdParser,
   doc: ITextDocument
 ): Record<string, unknown> {
-  const tokens = markdownTokens.parse(doc);
-  const yaml = tokens.find((token) => token.type === "front_matter");
+  const tokens = parser.parsePandocTokens(doc);
+  const yaml = tokens.find((token) => token.type === "FrontMatter");
   if (yaml) {
-    const frontMatter = parseFrontMatterStr(yaml.markup);
+    const frontMatter = parseFrontMatterStr(yaml.data as string);
     if (frontMatter && typeof frontMatter === "object") {
       return frontMatter as Record<string, unknown>;
     } else {
@@ -104,13 +66,13 @@ export function documentFrontMatter(
   }
 }
 
-export function isLatexPosition(doc: ITextDocument, pos: Position) {
+export function isLatexPosition(parser: IMdParser, doc: ITextDocument, pos: Position) {
   // math is always latex
-  if (mathRange(doc, pos)) {
+  if (mathRange(parser, doc, pos)) {
     return true;
   }
   //
-  const tokens = markdownTokens.parse(doc);
+  const tokens = parser.parsePandocTokens(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos));
   if (codeBlock) {
     // code block is latex only if it's 'tex' or 'latex'
@@ -122,66 +84,30 @@ export function isLatexPosition(doc: ITextDocument, pos: Position) {
 }
 
 function isMathBlockAtPosition(pos: Position) {
-  return isBlockTypeAtPosition(["math_block"], pos);
-}
-
-export function isCodeBlockAtPosition(pos: Position) {
-  return isBlockTypeAtPosition(kCodeBlockTokens, pos);
-}
-
-export function isLatexCodeBlock(token: Token) {
-  return (
-    !!token.info &&
-    ["tex", "latex"].includes(
-      token.info.replace(/^[^\w]*/, "").replace(/[^\w]$/, "")
-    )
-  );
-}
-
-function isBlockTypeAtPosition(types: string[], pos: Position) {
-  return (token: Token) => {
-    if (types.includes(token.type) && token.map) {
-      const [begin, end] = token.map;
-      return pos.line >= begin && pos.line < end;
-    } else {
-      return false;
-    }
-  };
-}
-
-const kCodeBlockTokens = ["code", "fence", "html_block"];
-
-class MarkdownTokens {
-  public parse(document: ITextDocument): Token[] {
-    // create parser on demand
-    if (!this.md_) {
-      this.md_ = MarkdownIt("zero");
-      this.md_.enable(kCodeBlockTokens);
-      this.md_.use(markdownitMathPlugin, { enableInlines: false });
-      this.md_.use(markdownitFrontMatterPlugin);
-    }
-
-    // (re)-primte cache if required
-    if (
-      !this.cachedTokens_ ||
-      this.cachedUri_ !== document.uri.toString() ||
-      this.cachedVersion_ !== document.version
-    ) {
-      this.cachedUri_ = document.uri.toString();
-      this.cachedVersion_ = document.version;
-      this.cachedTokens_ = this.md_.parse(document.getText(), {});
-    }
-
-    return this.cachedTokens_!;
+  return (token: PandocToken) => {
+    return isDisplayMath(token) && posIsWithinToken(pos, token);
   }
-
-  private md_: MarkdownIt | undefined;
-  private cachedUri_: string | undefined;
-  private cachedVersion_: number | undefined;
-  private cachedTokens_: Token[] | undefined;
 }
 
-const markdownTokens = new MarkdownTokens();
+function isCodeBlockAtPosition(pos: Position) {
+  return (token: PandocToken) => {
+    return ["CodeBlock", "RawBlock"].includes(token.type) && posIsWithinToken(pos, token);
+  } 
+}
+
+function posIsWithinToken(pos: Position, token: PandocToken) {
+  return pos.line >= token.range.start.line && pos.line < token.range.end.line;
+}
+
+function isLatexCodeBlock(token: PandocToken) {
+  const formats = ["tex", "latex"];
+  if (token.type === "RawBlock") {
+    const raw = token.data as { format: string, text: string };
+    return formats.includes(raw.format);
+  } else if (token.type === "CodeBlock") {
+    return formats.includes(token.attr?.[kAttrClasses][0] || "");
+  }
+}
 
 const kInlineMathPattern = /\$([^ ].*?[^ ]?)\$/g;
 const kSingleLineDisplayMathPattern = /\$\$([^\n]+?)\$\$/;

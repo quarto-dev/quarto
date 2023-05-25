@@ -18,7 +18,6 @@ import { Position, TextDocument } from "vscode";
 import { markdownitFrontMatterPlugin, parseFrontMatterStr } from "quarto-core";
 
 import { tokenizeMarkdownString } from "./engine";
-import { getHeaderLevel } from "./toc";
 import MarkdownIt from "markdown-it";
 
 export async function revealSlideIndex(
@@ -96,6 +95,19 @@ async function revealEditorLocation(
 
   return { items, slideLevel: explicitSlideLevel || 2 };
 }
+
+
+function getHeaderLevel(markup: string): number {
+  if (markup === "=") {
+    return 1;
+  } else if (markup === "-") {
+    return 2;
+  } else {
+    // '#', '##', ...
+    return markup.length;
+  }
+}
+
 
 function revealSlidesMarkdownEngine() {
   const engine =  MarkdownIt("zero");

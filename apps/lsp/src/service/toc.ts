@@ -109,7 +109,7 @@ export class TableOfContents {
 
 	public static async create(parser: IMdParser, document: Document, token: CancellationToken): Promise<TableOfContents> {
 		const entries = await this.#buildPandocToc(parser, document, token);
-		return new TableOfContents(entries, parser.slugifier);
+		return new TableOfContents(entries, pandocSlugifier);
 	}
 
 	public static async createForContainingDoc(parser: IMdParser, workspace: IWorkspace, document: Document, token: CancellationToken): Promise<TableOfContents> {
@@ -122,7 +122,7 @@ export class TableOfContents {
 				}
 				return this.#buildPandocToc(parser, doc, token);
 			}))).flat();
-			return new TableOfContents(entries, parser.slugifier);
+			return new TableOfContents(entries, pandocSlugifier);
 		}
 
 		return this.create(parser, document, token);
@@ -145,11 +145,11 @@ export class TableOfContents {
 		const existingSlugEntries = new Map<string, { count: number }>();
 
 		const toSlug = (text: string) => {
-			let slug = parser.slugifier.fromHeading(text);
+			let slug = pandocSlugifier.fromHeading(text);
 			const existingSlugEntry = existingSlugEntries.get(slug.value);
 			if (existingSlugEntry) {
 				++existingSlugEntry.count;
-				slug = parser.slugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
+				slug = pandocSlugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
 			} else {
 				existingSlugEntries.set(slug.value, { count: 0 });
 			}

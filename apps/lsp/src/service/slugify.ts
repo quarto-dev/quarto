@@ -15,7 +15,6 @@
  */
 
 import { pandocAutoIdentifier } from "core";
-
 export class Slug {
 	public constructor(
 		public readonly value: string
@@ -36,21 +35,6 @@ export interface ISlugifier {
 export const pandocSlugifier: ISlugifier = new class implements ISlugifier {
 	fromHeading(heading: string): Slug {
     const slugifiedHeading = pandocAutoIdentifier(heading);
-		return new Slug(slugifiedHeading);
-	}
-};
-
-export const githubSlugifier: ISlugifier = new class implements ISlugifier {
-	fromHeading(heading: string): Slug {
-		const slugifiedHeading = encodeURI(
-			heading.trim()
-				.toLowerCase()
-				.replace(/\s+/g, '-') // Replace whitespace with -
-				// allow-any-unicode-next-line
-				.replace(/[\][!/'"#$%&()*+,./:;<=>?@\\^{|}~`。，、；：？！…—·ˉ¨‘’“”々～‖∶＂＇｀｜〃〔〕〈〉《》「」『』．〖〗【】（）［］｛｝]/g, '') // Remove known punctuators
-				.replace(/^-+/, '') // Remove leading -
-				.replace(/-+$/, '') // Remove trailing -
-		);
 		return new Slug(slugifiedHeading);
 	}
 };

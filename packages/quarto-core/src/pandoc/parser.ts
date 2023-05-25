@@ -22,6 +22,8 @@ import { lines } from "core";
 import { makeRange } from "../range";
 import { isExecutableLanguageBlock, languageNameFromBlock } from "./language";
 
+
+
 export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  
   // remove the yaml front matter by replacing it with blank lines 

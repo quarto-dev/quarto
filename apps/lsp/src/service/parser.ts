@@ -14,7 +14,6 @@
  *
  */
 
-import { ISlugifier } from './slugify';
 import { Token, Document } from 'quarto-core';
 
 /**
@@ -22,11 +21,6 @@ import { Token, Document } from 'quarto-core';
  */
 export interface IMdParser {
 
-	/**
-	 * The {@link ISlugifier slugifier} used for generating unique ids for headers in the Markdown.
-	 */
-	readonly slugifier: ISlugifier;
-	
 	/**
 	 * Parse `document` into a stream of pandoc elements
 	 */

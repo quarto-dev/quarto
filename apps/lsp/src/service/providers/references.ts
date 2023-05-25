@@ -27,6 +27,7 @@ import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { HrefKind, looksLikeLinkToResource, MdLink, MdLinkKind } from './document-links';
+import { pandocSlugifier } from '../slugify';
 
 export enum MdReferenceKind {
 	Link = 1,
@@ -172,7 +173,7 @@ export class MdReferencesProvider extends Disposable {
 		for (const link of links) {
 			if (link.href.kind === HrefKind.Internal
 				&& looksLikeLinkToResource(this.#configuration, link.href, getDocUri(document))
-				&& this.#parser.slugifier.fromHeading(link.href.fragment).value === header.slug.value
+				&& pandocSlugifier.fromHeading(link.href.fragment).value === header.slug.value
 			) {
 				references.push({
 					kind: MdReferenceKind.Link,
@@ -266,7 +267,7 @@ export class MdReferencesProvider extends Disposable {
 					continue;
 				}
 
-				if (this.#parser.slugifier.fromHeading(link.href.fragment).equals(this.#parser.slugifier.fromHeading(sourceLink.href.fragment))) {
+				if (pandocSlugifier.fromHeading(link.href.fragment).equals(pandocSlugifier.fromHeading(sourceLink.href.fragment))) {
 					const isTriggerLocation = sourceLink.source.resource.fsPath === link.source.resource.fsPath && areRangesEqual(sourceLink.source.hrefRange, link.source.hrefRange);
 					references.push({
 						kind: MdReferenceKind.Link,

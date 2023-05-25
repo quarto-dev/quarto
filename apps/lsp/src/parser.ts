@@ -18,7 +18,6 @@
 import { Token, QuartoContext, parsePandocDocument, Document } from "quarto-core";
 
 import { IMdParser } from "./service";
-import { pandocSlugifier } from "./service";
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,7 +29,6 @@ export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: st
   let elementCacheDocVersion: number | undefined;
 
   const mdParser : IMdParser = {
-    slugifier: pandocSlugifier,
     tokenize(doc: Document): Token[] {
       if (
         !elementCache ||

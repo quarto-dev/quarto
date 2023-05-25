@@ -40,6 +40,7 @@ import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
 import { MdCompletionProvider } from './providers/completion/completion';
 import { Quarto } from './quarto';
+import { pandocSlugifier } from './slugify';
 
 export { IncludeWorkspaceHeaderCompletions } from './providers/completion/completion';
 export type { MdCompletionProvider } from './providers/completion/completion';
@@ -255,7 +256,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 	const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
 	const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);
 	const definitionsProvider = new MdDefinitionProvider(config, init.workspace, tocProvider, linkCache);
-	const renameProvider = new MdRenameProvider(config, init.workspace, referencesProvider, init.parser.slugifier, logger);
+	const renameProvider = new MdRenameProvider(config, init.workspace, referencesProvider, pandocSlugifier, logger);
 	const fileRenameProvider = new MdFileRenameProvider(config, init.workspace, linkCache, referencesProvider);
 	const diagnosticOnSaveComputer = new DiagnosticOnSaveComputer(init.quarto);
 	const diagnosticsComputer = new DiagnosticComputer(config, init.workspace, linkProvider, tocProvider, logger);

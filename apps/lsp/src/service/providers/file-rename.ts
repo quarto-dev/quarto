@@ -22,7 +22,7 @@ import { URI, Utils } from 'vscode-uri';
 import { Disposable } from 'core';
 
 import { isExcludedPath, LsConfiguration, PreferredMdPathExtensionStyle } from '../config';
-import { getDocUri, ITextDocument } from '../document';
+import { getDocUri, Document } from '../document';
 import { WorkspaceEditBuilder } from '../util/edit-builder';
 import { looksLikeMarkdownUri } from '../util/file';
 import { isParentDir } from '../util/path';
@@ -196,7 +196,7 @@ export class MdFileRenameProvider extends Disposable {
 		return didParticipate;
 	}
 
-	async #addEditsForLinksInSelf(doc: ITextDocument, link: MdLink, edit: FileRename, allEdits: readonly FileRename[], builder: WorkspaceEditBuilder): Promise<boolean> {
+	async #addEditsForLinksInSelf(doc: Document, link: MdLink, edit: FileRename, allEdits: readonly FileRename[], builder: WorkspaceEditBuilder): Promise<boolean> {
 		if (link.href.kind !== HrefKind.Internal) {
 			return false;
 		}

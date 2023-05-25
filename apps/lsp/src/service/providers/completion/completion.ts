@@ -32,7 +32,7 @@ import { IWorkspace } from "../../workspace";
 import { IMdParser } from "../../parser";
 import { MdLinkProvider } from "../document-links";
 import { MdTableOfContentsProvider } from "../../toc";
-import { ITextDocument } from "../../document";
+import { Document } from "../../document";
 import { MdPathCompletionProvider } from "./completion-path";
 import { docEditorContext } from "../../quarto";
 
@@ -101,13 +101,13 @@ export class MdCompletionProvider {
 	}
 
 	public async provideCompletionItems(
-    doc: ITextDocument, 
+    doc: Document, 
     pos: Position, 
     context: CompletionContext, 
     config: LsConfiguration,
     token: CancellationToken,
   ): Promise<CompletionItem[]> {
-		
+
 		if (token.isCancellationRequested) {
 			return [];
 		}

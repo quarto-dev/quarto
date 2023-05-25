@@ -26,7 +26,7 @@ import { translatePosition, modifyRange } from 'quarto-core';
 
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider } from '../toc';
-import { getDocUri, ITextDocument } from '../document';
+import { getDocUri, Document } from '../document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';
@@ -175,7 +175,7 @@ class FileLinkMap {
 export class DiagnosticOnSaveComputer {
 	constructor(private readonly quarto_: Quarto) {}
 
-	public async compute(doc: ITextDocument) : Promise<lsp.Diagnostic[]> {
+	public async compute(doc: Document) : Promise<lsp.Diagnostic[]> {
 		return provideYamlDiagnostics(this.quarto_, doc);
 	}
 }
@@ -203,7 +203,7 @@ export class DiagnosticComputer {
 	}
 
 	public async compute(
-		doc: ITextDocument,
+		doc: Document,
 		options: DiagnosticOptions,
 		token: CancellationToken,
 	): Promise<{
@@ -245,7 +245,7 @@ export class DiagnosticComputer {
 		};
 	}
 
-	async #validateFragmentLinks(doc: ITextDocument, options: DiagnosticOptions, links: readonly MdLink[], token: CancellationToken): Promise<lsp.Diagnostic[]> {
+	async #validateFragmentLinks(doc: Document, options: DiagnosticOptions, links: readonly MdLink[], token: CancellationToken): Promise<lsp.Diagnostic[]> {
 		const severity = toSeverity(options.validateFragmentLinks);
 		if (typeof severity === 'undefined') {
 			return [];
@@ -493,7 +493,7 @@ export interface IPullDiagnosticsManager {
 	/**
 	 * Compute the current diagnostics for a file.
 	 */
-	computeDiagnostics(doc: ITextDocument, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]>;
+	computeDiagnostics(doc: Document, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]>;
 
 	/**
 	 * Clean up resources that help provide diagnostics for a document. 
@@ -687,7 +687,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
 		}));
 	}
 
-	public async computeDiagnostics(doc: ITextDocument, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]> {
+	public async computeDiagnostics(doc: Document, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]> {
 		
 		if (token.isCancellationRequested) {
 			return [];

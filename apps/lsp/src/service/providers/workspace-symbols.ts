@@ -17,7 +17,7 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Disposable } from 'core';
-import { ITextDocument } from '../document';
+import { Document } from '../document';
 import { IWorkspace } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { MdDocumentSymbolProvider } from './document-symbols';
@@ -52,7 +52,7 @@ export class MdWorkspaceSymbolProvider extends Disposable {
 		return allSymbols.flat().filter(symbolInformation => symbolInformation.name.toLowerCase().includes(normalizedQueryStr));
 	}
 
-	public async provideDocumentSymbolInformation(document: ITextDocument, token: CancellationToken): Promise<lsp.SymbolInformation[]> {
+	public async provideDocumentSymbolInformation(document: Document, token: CancellationToken): Promise<lsp.SymbolInformation[]> {
 		const docSymbols = await this.#symbolProvider.provideDocumentSymbols(document, {}, token);
 		if (token.isCancellationRequested) {
 			return [];

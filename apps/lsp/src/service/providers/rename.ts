@@ -25,7 +25,7 @@ import { arePositionsEqual, translatePosition, modifyRange, rangeContains } from
 import { defaultMarkdownFileExtension, LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { ISlugifier } from '../slugify';
-import { getDocUri, ITextDocument } from '../document';
+import { getDocUri, Document } from '../document';
 import { WorkspaceEditBuilder } from '../util/edit-builder';
 import { computeRelativePath } from '../util/path';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
@@ -78,7 +78,7 @@ export class MdRenameProvider extends Disposable {
 		this.#logger = logger;
 	}
 
-	public async prepareRename(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<undefined | { range: lsp.Range; placeholder: string }> {
+	public async prepareRename(document: Document, position: lsp.Position, token: CancellationToken): Promise<undefined | { range: lsp.Range; placeholder: string }> {
 		this.#logger.log(LogLevel.Debug, 'RenameProvider.prepareRename', { document: document.uri, version: document.version });
 
 		if (token.isCancellationRequested) {
@@ -134,7 +134,7 @@ export class MdRenameProvider extends Disposable {
 		return references.find(ref => ref.isDefinition && ref.kind === MdReferenceKind.Header) as MdHeaderReference | undefined;
 	}
 
-	public async provideRenameEdits(document: ITextDocument, position: lsp.Position, newName: string, token: CancellationToken): Promise<lsp.WorkspaceEdit | undefined> {
+	public async provideRenameEdits(document: Document, position: lsp.Position, newName: string, token: CancellationToken): Promise<lsp.WorkspaceEdit | undefined> {
 		this.#logger.log(LogLevel.Debug, 'RenameProvider.provideRenameEdits', { document: document.uri, version: document.version });
 
 		if (token.isCancellationRequested) {
@@ -249,7 +249,7 @@ export class MdRenameProvider extends Disposable {
 		return builder.getEdit();
 	}
 
-	async #getAllReferences(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<MdReferencesResponse | undefined> {
+	async #getAllReferences(document: Document, position: lsp.Position, token: CancellationToken): Promise<MdReferencesResponse | undefined> {
 		const version = document.version;
 
 		if (this.#cachedRefs

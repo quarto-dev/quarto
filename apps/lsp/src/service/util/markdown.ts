@@ -18,10 +18,10 @@ import { Range, Position } from "vscode-languageserver";
 import { Token, TokenMath, isDisplayMath, isFrontMatter, isRawBlock, kAttrClasses } from "quarto-core";
 
 import { parseFrontMatterStr } from "quarto-core";
-import { ITextDocument } from "../document";
+import { Document } from "../document";
 import { IMdParser } from "../parser";
 
-export function mathRange(parser: IMdParser, doc: ITextDocument, pos: Position) {
+export function mathRange(parser: IMdParser, doc: Document, pos: Position) {
   // see if we are in a math block
   const tokens = parser.tokenize(doc);
   const mathBlock = tokens.find(isMathBlockAtPosition(pos));
@@ -42,7 +42,7 @@ export function mathRange(parser: IMdParser, doc: ITextDocument, pos: Position) 
   );
 }
 
-export function isContentPosition(parser: IMdParser, doc: ITextDocument, pos: Position) {
+export function isContentPosition(parser: IMdParser, doc: Document, pos: Position) {
   const tokens = parser.tokenize(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos))
   return !codeBlock && !mathRange(parser, doc, pos);
@@ -50,7 +50,7 @@ export function isContentPosition(parser: IMdParser, doc: ITextDocument, pos: Po
 
 export function documentFrontMatter(
   parser: IMdParser,
-  doc: ITextDocument
+  doc: Document
 ): Record<string, unknown> {
   const tokens = parser.tokenize(doc);
   const yaml = tokens.find(isFrontMatter);
@@ -66,7 +66,7 @@ export function documentFrontMatter(
   }
 }
 
-export function isLatexPosition(parser: IMdParser, doc: ITextDocument, pos: Position) {
+export function isLatexPosition(parser: IMdParser, doc: Document, pos: Position) {
   // math is always latex
   if (mathRange(parser, doc, pos)) {
     return true;

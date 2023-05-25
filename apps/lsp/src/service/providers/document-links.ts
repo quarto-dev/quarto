@@ -27,7 +27,7 @@ import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
-import { ITextDocument, getDocUri, getLine } from '../document';
+import { Document, getDocUri, getLine } from '../document';
 import { r } from '../util/string';
 import { IWorkspace, getWorkspaceFolder, tryAppendMarkdownFileExtension } from '../workspace';
 import { MdDocumentInfoCache, MdWorkspaceInfoCache } from '../workspace-cache';
@@ -200,7 +200,7 @@ function createHref(
 }
 
 function createMdLink(
-	document: ITextDocument,
+	document: Document,
 	targetText: string,
 	preHrefText: string,
 	rawLink: string,
@@ -254,7 +254,7 @@ function getFragmentRange(text: string, start: lsp.Position, end: lsp.Position):
 	return { start: translatePosition(start, { characterDelta: index + 1 }), end };
 }
 
-function getLinkSourceFragmentInfo(document: ITextDocument, link: string, linkStart: lsp.Position, linkEnd: lsp.Position): { fragmentRange: lsp.Range | undefined; pathText: string } {
+function getLinkSourceFragmentInfo(document: Document, link: string, linkStart: lsp.Position, linkEnd: lsp.Position): { fragmentRange: lsp.Range | undefined; pathText: string } {
 	const fragmentRange = getFragmentRange(link, linkStart, linkEnd);
 	return {
 		pathText: document.getText({ start: linkStart, end: fragmentRange ? translatePosition(fragmentRange.start, { characterDelta: -1 }) : linkEnd }),
@@ -334,7 +334,7 @@ const definitionPattern = /^([\t ]*\[(?!\^)((?:\\\]|[^\]])+)\]:\s*)([^<]\S*|<[^>
 const inlineCodePattern = /(^|[^`])(`+)((?:.+?|.*?(?:(?:\r?\n).+?)*?)(?:\r?\n)?\2)(?:$|[^`])/gm;
 
 class NoLinkRanges {
-	public static compute(tokens: readonly Token[], document: ITextDocument): NoLinkRanges {
+	public static compute(tokens: readonly Token[], document: Document): NoLinkRanges {
 		const multiline = tokens
 			.filter(t => (t.type === 'CodeBlock' || t.type === 'RawBlock' || isDisplayMath(t)))
 			.map(t => ({ type: t.type, range: [t.range.start.line, t.range.end.line]  as [number,number]}));
@@ -416,7 +416,7 @@ export class MdLinkComputer {
 		this.#workspace = workspace;
 	}
 
-	public async getAllLinks(document: ITextDocument, token: CancellationToken): Promise<MdLink[]> {
+	public async getAllLinks(document: Document, token: CancellationToken): Promise<MdLink[]> {
 		const tokens = this.#tokenizer.tokenize(document);
 		if (token.isCancellationRequested) {
 			return [];
@@ -434,7 +434,7 @@ export class MdLinkComputer {
 		];
 	}
 
-	*#getInlineLinks(document: ITextDocument, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
+	*#getInlineLinks(document: Document, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
 		const text = document.getText();
 		for (const match of text.matchAll(linkPattern)) {
 			const linkTextIncludingBrackets = match[1];
@@ -459,7 +459,7 @@ export class MdLinkComputer {
 		}
 	}
 
-	*#getAutoLinks(document: ITextDocument, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
+	*#getAutoLinks(document: Document, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
 		const text = document.getText();
 		const docUri = getDocUri(document);
 		for (const match of text.matchAll(autoLinkPattern)) {
@@ -494,12 +494,12 @@ export class MdLinkComputer {
 		}
 	}
 
-	#getReferenceLinks(document: ITextDocument, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
+	#getReferenceLinks(document: Document, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
 		const text = document.getText();
 		return this.#getReferenceLinksInText(document, text, 0, noLinkRanges);
 	}
 
-	*#getReferenceLinksInText(document: ITextDocument, text: string, startingOffset: number, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
+	*#getReferenceLinksInText(document: Document, text: string, startingOffset: number, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
 		for (const match of text.matchAll(referenceLinkPattern)) {
 			const linkStartOffset = startingOffset + (match.index ?? 0) + match[1].length;
 			const linkStart = document.positionAt(linkStartOffset);
@@ -579,7 +579,7 @@ export class MdLinkComputer {
 		}
 	}
 
-	*#getLinkDefinitions(document: ITextDocument, noLinkRanges: NoLinkRanges): Iterable<MdLinkDefinition> {
+	*#getLinkDefinitions(document: Document, noLinkRanges: NoLinkRanges): Iterable<MdLinkDefinition> {
 		const text = document.getText();
 		const docUri = getDocUri(document);
 		for (const match of text.matchAll(definitionPattern)) {
@@ -624,7 +624,7 @@ export class MdLinkComputer {
 		}
 	}
 
-	#getHtmlLinks(document: ITextDocument, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
+	#getHtmlLinks(document: Document, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
 		const text = document.getText();
 		if (!/<\w/.test(text)) { // Only parse if there may be html
 			return [];
@@ -649,7 +649,7 @@ export class MdLinkComputer {
 		['A', ['href'].map(this.#toAttrEntry)],
 	]);
 
-	*#getHtmlLinksFromNode(document: ITextDocument, node: HTMLElement, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
+	*#getHtmlLinksFromNode(document: Document, node: HTMLElement, noLinkRanges: NoLinkRanges): Iterable<MdLink> {
 		const attrs = MdLinkComputer.#linkAttrsByTag.get(node.tagName);
 		if (attrs) {
 			for (const attr of attrs) {
@@ -791,11 +791,11 @@ export class MdLinkProvider extends Disposable {
 		}));
 	}
 
-	public getLinks(document: ITextDocument): Promise<MdDocumentLinksInfo> {
+	public getLinks(document: Document): Promise<MdDocumentLinksInfo> {
 		return this.#linkCache.getForDocument(document);
 	}
 
-	public async provideDocumentLinks(document: ITextDocument, token: CancellationToken): Promise<lsp.DocumentLink[]> {
+	public async provideDocumentLinks(document: Document, token: CancellationToken): Promise<lsp.DocumentLink[]> {
 		if (token.isCancellationRequested) {
 			return [];
 		}

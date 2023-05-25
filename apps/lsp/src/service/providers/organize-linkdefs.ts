@@ -16,7 +16,7 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { makeRange } from 'quarto-core';
-import { getLine, ITextDocument } from '../document';
+import { getLine, Document } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 import { HrefKind, MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 
@@ -28,7 +28,7 @@ export class MdOrganizeLinkDefinitionProvider {
 		this.#linkProvider = linkProvider;
 	}
 
-	async getOrganizeLinkDefinitionEdits(doc: ITextDocument, options: { readonly removeUnused?: boolean }, token: CancellationToken): Promise<lsp.TextEdit[]> {
+	async getOrganizeLinkDefinitionEdits(doc: Document, options: { readonly removeUnused?: boolean }, token: CancellationToken): Promise<lsp.TextEdit[]> {
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -101,7 +101,7 @@ export class MdOrganizeLinkDefinitionProvider {
 		return edits;
 	}
 
-	*#getDefinitionBlockGroups(doc: ITextDocument, definitions: readonly MdLinkDefinition[]): Iterable<{ readonly startLine: number, readonly endLine: number }> {
+	*#getDefinitionBlockGroups(doc: Document, definitions: readonly MdLinkDefinition[]): Iterable<{ readonly startLine: number, readonly endLine: number }> {
 		if (!definitions.length) {
 			return;
 		}
@@ -122,7 +122,7 @@ export class MdOrganizeLinkDefinitionProvider {
 		yield* this.#getDefinitionBlockGroups(doc, definitions.slice(i + 1));
 	}
 
-	#getLastNonWhitespaceLine(doc: ITextDocument, orderedDefinitions: readonly MdLinkDefinition[]): number {
+	#getLastNonWhitespaceLine(doc: Document, orderedDefinitions: readonly MdLinkDefinition[]): number {
 		const lastDef = orderedDefinitions[orderedDefinitions.length - 1];
 		const textAfter = doc.getText(makeRange(lastDef.source.range.end.line + 1, 0, Infinity, 0));
 		const lines = textAfter.split(/\r\n|\n/g);
@@ -136,7 +136,7 @@ export class MdOrganizeLinkDefinitionProvider {
 	}
 }
 
-export function getExistingDefinitionBlock(doc: ITextDocument, orderedDefinitions: readonly MdLinkDefinition[]): { startLine: number, endLine: number } | undefined {
+export function getExistingDefinitionBlock(doc: Document, orderedDefinitions: readonly MdLinkDefinition[]): { startLine: number, endLine: number } | undefined {
 	if (!orderedDefinitions.length) {
 		return undefined;
 	}

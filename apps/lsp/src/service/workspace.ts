@@ -17,7 +17,7 @@
 import { Event } from 'vscode-languageserver';
 import { URI, Utils } from 'vscode-uri';
 import { defaultMarkdownFileExtension, LsConfiguration } from './config';
-import { ITextDocument } from './document';
+import { Document } from './document';
 import { ResourceMap } from './util/resource-maps';
 
 /**
@@ -60,12 +60,12 @@ export interface IWorkspace {
 	/**
 	 * Fired when the content of a markdown document changes.
 	 */
-	readonly onDidChangeMarkdownDocument: Event<ITextDocument>;
+	readonly onDidChangeMarkdownDocument: Event<Document>;
 
 	/**
 	 * Fired when a markdown document is first created.
 	 */
-	readonly onDidCreateMarkdownDocument: Event<ITextDocument>;
+	readonly onDidCreateMarkdownDocument: Event<Document>;
 
 	/**
 	 * Fired when a markdown document is deleted.
@@ -78,7 +78,7 @@ export interface IWorkspace {
 	 * This may include documents that have not been opened yet (for example, getAllMarkdownDocuments should
 	 * return documents from disk even if they have not been opened yet in the editor)
 	 */
-	getAllMarkdownDocuments(): Promise<Iterable<ITextDocument>>;
+	getAllMarkdownDocuments(): Promise<Iterable<Document>>;
 
 	/**
 	 * Check if a document already exists in the workspace contents.
@@ -92,7 +92,7 @@ export interface IWorkspace {
 	 *
 	 * @returns The document, or `undefined` if the file could not be opened or was not a markdown file.
 	 */
-	openMarkdownDocument(resource: URI): Promise<ITextDocument | undefined>;
+	openMarkdownDocument(resource: URI): Promise<Document | undefined>;
 
 	/**
 	 * Get metadata about a file.
@@ -192,7 +192,7 @@ export function getWorkspaceFolder(workspace: IWorkspace, docUri: URI): URI | un
 	return workspace.workspaceFolders[0];
 }
 
-export async function openLinkToMarkdownFile(config: LsConfiguration, workspace: IWorkspace, resource: URI): Promise<ITextDocument | undefined> {
+export async function openLinkToMarkdownFile(config: LsConfiguration, workspace: IWorkspace, resource: URI): Promise<Document | undefined> {
 	try {
 		const doc = await workspace.openMarkdownDocument(resource);
 		if (doc) {

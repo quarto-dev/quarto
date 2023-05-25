@@ -23,13 +23,13 @@ import { EditorContext, Quarto } from "../../../quarto";
 import { projectDirForDocument } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
-import { ITextDocument } from "../../../document";
+import { Document } from "../../../document";
 import { IMdParser } from "../../../parser";
 
 export async function refsCompletions(
   quarto: Quarto,
   parser: IMdParser,
-  doc: ITextDocument,
+  doc: Document,
   pos: Position,
   context: EditorContext
 ): Promise<CompletionItem[] | null> {

@@ -20,7 +20,7 @@ import * as lsp from 'vscode-languageserver-types';
 
 import { comparePosition, translatePosition, makeRange, rangeIntersects } from 'quarto-core';
 
-import { getDocUri, getLine, ITextDocument } from '../../document';
+import { getDocUri, getLine, Document } from '../../document';
 import { WorkspaceEditBuilder } from '../../util/edit-builder';
 import { ExternalHref, HrefKind, InternalHref, LinkDefinitionSet, MdDocumentLinksInfo, MdInlineLink, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider } from '../document-links';
 import { getExistingDefinitionBlock } from '../organize-linkdefs';
@@ -54,12 +54,12 @@ export class MdExtractLinkDefinitionCodeActionProvider {
 		this.#linkProvider = linkProvider;
 	}
 
-	async getActions(doc: ITextDocument, range: lsp.Range, context: lsp.CodeActionContext, token: CancellationToken): Promise<lsp.CodeAction[]> {
+	async getActions(doc: Document, range: lsp.Range, context: lsp.CodeActionContext, token: CancellationToken): Promise<lsp.CodeAction[]> {
 		
 		if (token.isCancellationRequested) {
 			return [];
 		}
-		
+
 		if (!this.#isEnabled(context)) {
 			return [];
 		}
@@ -95,7 +95,7 @@ export class MdExtractLinkDefinitionCodeActionProvider {
 		return context.only.some(kind => codeActionKindContains(lsp.CodeActionKind.Refactor, kind));
 	}
 
-	#getExtractLinkAction(doc: ITextDocument, linkInfo: MdDocumentLinksInfo, targetLink: MdInlineLink<InternalHref | ExternalHref>): lsp.CodeAction {
+	#getExtractLinkAction(doc: Document, linkInfo: MdDocumentLinksInfo, targetLink: MdInlineLink<InternalHref | ExternalHref>): lsp.CodeAction {
 		const builder = new WorkspaceEditBuilder();
 		const resource = getDocUri(doc);
 		const placeholder = this.#getPlaceholder(linkInfo.definitions);
@@ -131,7 +131,7 @@ export class MdExtractLinkDefinitionCodeActionProvider {
 		};
 	}
 
-	#getLinkTargetText(doc: ITextDocument, link: MdInlineLink) {
+	#getLinkTargetText(doc: Document, link: MdInlineLink) {
 		const afterHrefRange = makeRange(
 			translatePosition(link.source.targetRange.start, { characterDelta: 1 }),
 			translatePosition(link.source.targetRange.end, { characterDelta: -1 }));

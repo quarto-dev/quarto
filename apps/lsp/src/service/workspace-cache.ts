@@ -18,14 +18,14 @@ import { CancellationToken, CancellationTokenSource } from 'vscode-languageserve
 import { URI } from 'vscode-uri';
 import { Disposable, lazy, Lazy } from 'core';
 
-import { getDocUri, ITextDocument } from './document';
+import { getDocUri, Document } from './document';
 
 import { ResourceMap } from './util/resource-maps';
 import { IWorkspace } from './workspace';
 
 
 
-type GetValueFn<T> = (document: ITextDocument, token: CancellationToken) => Promise<T>;
+type GetValueFn<T> = (document: Document, token: CancellationToken) => Promise<T>;
 
 /**
  * Cache of information per-document in the workspace.
@@ -39,7 +39,7 @@ export class MdDocumentInfoCache<T> extends Disposable {
 		readonly cts: CancellationTokenSource;
 	}>();
 
-	readonly #loadingDocuments = new ResourceMap<Promise<ITextDocument | undefined>>();
+	readonly #loadingDocuments = new ResourceMap<Promise<Document | undefined>>();
 
 	readonly #workspace: IWorkspace;
 	readonly #getValue: GetValueFn<T>;
@@ -74,7 +74,7 @@ export class MdDocumentInfoCache<T> extends Disposable {
 		return this.#resetEntry(doc)?.value;
 	}
 
-	public async getForDocument(document: ITextDocument): Promise<T> {
+	public async getForDocument(document: Document): Promise<T> {
 		const existing = this.#cache.get(getDocUri(document));
 		if (existing) {
 			return existing.value.value;
@@ -82,7 +82,7 @@ export class MdDocumentInfoCache<T> extends Disposable {
 		return this.#resetEntry(document).value;
 	}
 
-	#loadDocument(resource: URI): Promise<ITextDocument | undefined> {
+	#loadDocument(resource: URI): Promise<Document | undefined> {
 		const existing = this.#loadingDocuments.get(resource);
 		if (existing) {
 			return existing;
@@ -96,7 +96,7 @@ export class MdDocumentInfoCache<T> extends Disposable {
 		return p;
 	}
 
-	#resetEntry(document: ITextDocument): Lazy<Promise<T>> {
+	#resetEntry(document: Document): Lazy<Promise<T>> {
 		// TODO: cancel old request?
 
 		const cts = new CancellationTokenSource();
@@ -105,7 +105,7 @@ export class MdDocumentInfoCache<T> extends Disposable {
 		return value;
 	}
 
-	#invalidate(document: ITextDocument): void {
+	#invalidate(document: Document): void {
 		if (this.#cache.has(getDocUri(document))) {
 			this.#resetEntry(document);
 		}
@@ -163,7 +163,7 @@ export class MdWorkspaceInfoCache<T> extends Disposable {
 		return Promise.all(Array.from(this.#cache.entries(), x => x[1].value.value));
 	}
 
-	public async getForDocs(docs: readonly ITextDocument[]): Promise<T[]> {
+	public async getForDocs(docs: readonly Document[]): Promise<T[]> {
 		for (const doc of docs) {
 			if (!this.#cache.has(getDocUri(doc))) {
 				this.#update(doc);
@@ -189,7 +189,7 @@ export class MdWorkspaceInfoCache<T> extends Disposable {
 		}
 	}
 
-	#update(document: ITextDocument): void {
+	#update(document: Document): void {
 		// TODO: cancel old request?
 
 		const cts = new CancellationTokenSource();
@@ -199,7 +199,7 @@ export class MdWorkspaceInfoCache<T> extends Disposable {
 		});
 	}
 
-	#onDidChangeDocument(document: ITextDocument) {
+	#onDidChangeDocument(document: Document) {
 		this.#update(document);
 	}
 

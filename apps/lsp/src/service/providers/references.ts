@@ -23,7 +23,7 @@ import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocHeaderEntry, isTocHeaderEntry } from '../toc';
-import { getDocUri, ITextDocument } from '../document';
+import { getDocUri, Document } from '../document';
 import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
@@ -109,7 +109,7 @@ export class MdReferencesProvider extends Disposable {
 		this.#logger = logger;
 	}
 
-	async provideReferences(document: ITextDocument, position: lsp.Position, context: lsp.ReferenceContext, token: CancellationToken): Promise<lsp.Location[]> {
+	async provideReferences(document: Document, position: lsp.Position, context: lsp.ReferenceContext, token: CancellationToken): Promise<lsp.Location[]> {
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -119,7 +119,7 @@ export class MdReferencesProvider extends Disposable {
 			.map(ref => ref.location);
 	}
 
-	public async getReferencesAtPosition(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<MdReference[]> {
+	public async getReferencesAtPosition(document: Document, position: lsp.Position, token: CancellationToken): Promise<MdReference[]> {
 		this.#logger.log(LogLevel.Debug, 'ReferencesProvider.getReferencesAtPosition', { document: document.uri, version: document.version });
 
 		const toc = await this.#tocProvider.getForDocument(document);
@@ -143,7 +143,7 @@ export class MdReferencesProvider extends Disposable {
 		}
 
 		const allLinksInWorkspace = await this.#getAllLinksInWorkspace();
-		
+
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -151,7 +151,7 @@ export class MdReferencesProvider extends Disposable {
 		return Array.from(this.#findLinksToFile(resource, allLinksInWorkspace, undefined));
 	}
 
-	async #getReferencesToHeader(document: ITextDocument, header: TocHeaderEntry, token: CancellationToken): Promise<MdReference[]> {
+	async #getReferencesToHeader(document: Document, header: TocHeaderEntry, token: CancellationToken): Promise<MdReference[]> {
 		
 	
 		const links = await this.#getAllLinksInWorkspace();
@@ -188,7 +188,7 @@ export class MdReferencesProvider extends Disposable {
 		return references;
 	}
 
-	async #getReferencesToLinkAtPosition(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<MdReference[]> {
+	async #getReferencesToLinkAtPosition(document: Document, position: lsp.Position, token: CancellationToken): Promise<MdReference[]> {
 		const docLinks = (await this.#linkCache.getForDocs([document]))[0];
 		if (token.isCancellationRequested) {
 			return [];

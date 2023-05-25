@@ -18,7 +18,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { isBefore, makeRange } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry, TocEntryType } from '../toc';
-import { ITextDocument } from '../document';
+import { Document } from '../document';
 import { MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 
 interface MarkdownSymbol {
@@ -48,7 +48,7 @@ export class MdDocumentSymbolProvider {
 		this.#logger = logger;
 	}
 
-	public async provideDocumentSymbols(document: ITextDocument, options: ProvideDocumentSymbolOptions, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
+	public async provideDocumentSymbols(document: Document, options: ProvideDocumentSymbolOptions, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
 		this.#logger.log(LogLevel.Debug, 'DocumentSymbolProvider.provideDocumentSymbols', { document: document.uri, version: document.version });
 
 		if (token.isCancellationRequested) {
@@ -68,7 +68,7 @@ export class MdDocumentSymbolProvider {
 		return this.#toSymbolTree(document, linkSymbols, toc);
 	}
 
-	#toSymbolTree(document: ITextDocument, linkSymbols: readonly lsp.DocumentSymbol[], toc: TableOfContents): lsp.DocumentSymbol[] {
+	#toSymbolTree(document: Document, linkSymbols: readonly lsp.DocumentSymbol[], toc: TableOfContents): lsp.DocumentSymbol[] {
 		const root: MarkdownSymbol = {
 			level: -Infinity,
 			children: [],
@@ -82,7 +82,7 @@ export class MdDocumentSymbolProvider {
 		return root.children;
 	}
 
-	async #provideLinkDefinitionSymbols(document: ITextDocument, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
+	async #provideLinkDefinitionSymbols(document: Document, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
 		const { links } = await this.#linkProvider.getLinks(document);
 		if (token.isCancellationRequested) {
 			return [];

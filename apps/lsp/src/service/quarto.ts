@@ -16,7 +16,7 @@
 import { QuartoContext } from "quarto-core";
 import { CompletionItem, Position } from "vscode-languageserver-types";
 import { filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml } from "./util/doc";
-import { ITextDocument } from "./document";
+import { Document } from "./document";
 import { lines } from "core";
 
 
@@ -138,7 +138,7 @@ export function codeEditorContext(
 }
 
 export function docEditorContext(
-  doc: ITextDocument,
+  doc: Document,
   pos: Position,
   explicit: boolean,
   trigger?: string

@@ -15,7 +15,7 @@
  */
 
 import { ISlugifier } from './slugify';
-import { ITextDocument } from './document';
+import { Document } from './document';
 import { Token } from 'quarto-core';
 
 /**
@@ -31,5 +31,5 @@ export interface IMdParser {
 	/**
 	 * Parse `document` into a stream of pandoc elements
 	 */
-	tokenize(document: ITextDocument): Token[];
+	tokenize(document: Document): Token[];
 }

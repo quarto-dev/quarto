@@ -28,12 +28,12 @@ import {
   LintItem,
   Quarto,
 } from "../quarto";
-import { ITextDocument } from "../document";
+import { Document } from "../document";
 import { docEditorContext } from "../quarto";
 
 export async function provideYamlDiagnostics(
   quarto: Quarto,
-  doc: ITextDocument
+  doc: Document
 ): Promise<Diagnostic[]> {
 
   const context = docEditorContext(doc, Position.create(0, 0), true);

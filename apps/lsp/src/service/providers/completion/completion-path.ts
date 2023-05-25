@@ -23,7 +23,7 @@ import { isExcludedPath, LsConfiguration } from '../../config';
 import { IMdParser } from '../../parser';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../../toc';
 import { translatePosition, makeRange } from 'quarto-core';
-import { getDocUri, getLine, ITextDocument } from '../../document';
+import { getDocUri, getLine, Document } from '../../document';
 import { looksLikeMarkdownFilePath } from '../../util/file';
 import { computeRelativePath } from '../../util/path';
 import { Schemes } from '../../util/schemes';
@@ -136,7 +136,7 @@ export class MdPathCompletionProvider {
 		this.#workspaceTocCache = new MdWorkspaceInfoCache(workspace, (doc) => tocProvider.getForDocument(doc));
 	}
 
-	public async provideCompletionItems(document: ITextDocument, position: lsp.Position, _context: CompletionContext, token: CancellationToken): Promise<lsp.CompletionItem[] | null> {
+	public async provideCompletionItems(document: Document, position: lsp.Position, _context: CompletionContext, token: CancellationToken): Promise<lsp.CompletionItem[] | null> {
 		const pathContext = this.#getPathCompletionContext(document, position);
 		if (!pathContext) {
 			return [];
@@ -153,7 +153,7 @@ export class MdPathCompletionProvider {
 		return items.length > 0 ? items : null;
 	}
 
-	async *#provideCompletionItems(document: ITextDocument, position: lsp.Position, context: PathCompletionContext, options: PathCompletionOptions, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
+	async *#provideCompletionItems(document: Document, position: lsp.Position, context: PathCompletionContext, options: PathCompletionOptions, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
 		switch (context.kind) {
 			case CompletionContextKind.ReferenceLink: {
 				yield* this.#provideReferenceSuggestions(document, position, context, token);
@@ -226,7 +226,7 @@ export class MdPathCompletionProvider {
 	/// [id]: |
 	readonly #definitionPattern = /^\s*\[[\w-]+\]:\s*([^\s]*)$/m;
 
-	#getPathCompletionContext(document: ITextDocument, position: lsp.Position): PathCompletionContext | undefined {
+	#getPathCompletionContext(document: Document, position: lsp.Position): PathCompletionContext | undefined {
 		const line = getLine(document, position.line);
 
 		const linePrefixText = line.slice(0, position.character);
@@ -303,7 +303,7 @@ export class MdPathCompletionProvider {
 		};
 	}
 
-	async *#provideReferenceSuggestions(document: ITextDocument, position: lsp.Position, context: PathCompletionContext, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
+	async *#provideReferenceSuggestions(document: Document, position: lsp.Position, context: PathCompletionContext, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
 		const insertionRange = makeRange(context.linkTextStartPosition, position);
 		const replacementRange = makeRange(insertionRange.start, translatePosition(position, { characterDelta: context.linkSuffix.length }));
 
@@ -326,7 +326,7 @@ export class MdPathCompletionProvider {
 		}
 	}
 
-	async *#provideHeaderSuggestions(document: ITextDocument, position: lsp.Position, context: PathCompletionContext, insertionRange: lsp.Range, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
+	async *#provideHeaderSuggestions(document: Document, position: lsp.Position, context: PathCompletionContext, insertionRange: lsp.Range, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
 		const toc = await TableOfContents.createForContainingDoc(this.#parser, this.#workspace, document, token);
 		if (token.isCancellationRequested) {
 			return;
@@ -364,7 +364,7 @@ export class MdPathCompletionProvider {
 	/**
 	 * Suggestions for headers across  all md files in the workspace
 	 */
-	async *#provideWorkspaceHeaderSuggestions(document: ITextDocument, position: lsp.Position, context: PathCompletionContext, insertionRange: lsp.Range, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
+	async *#provideWorkspaceHeaderSuggestions(document: Document, position: lsp.Position, context: PathCompletionContext, insertionRange: lsp.Range, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
 		const tocs = await this.#workspaceTocCache.entries();
 		if (token.isCancellationRequested) {
 			return;
@@ -397,7 +397,7 @@ export class MdPathCompletionProvider {
 		}
 	}
 
-	async *#providePathSuggestions(document: ITextDocument, position: lsp.Position, context: PathCompletionContext, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
+	async *#providePathSuggestions(document: Document, position: lsp.Position, context: PathCompletionContext, token: CancellationToken): AsyncIterable<lsp.CompletionItem> {
 		const valueBeforeLastSlash = context.linkPrefix.substring(0, context.linkPrefix.lastIndexOf('/') + 1); // keep the last slash
 
 		const parentDir = this.#resolveReference(document, valueBeforeLastSlash || '.');
@@ -461,7 +461,7 @@ export class MdPathCompletionProvider {
 		return name;
 	}
 
-	#resolveReference(document: ITextDocument, ref: string): URI | undefined {
+	#resolveReference(document: Document, ref: string): URI | undefined {
 		const docUri = this.#getFileUriOfTextDocument(document);
 
 		if (ref.startsWith('/')) {
@@ -490,7 +490,7 @@ export class MdPathCompletionProvider {
 		}
 	}
 
-	#getFileUriOfTextDocument(document: ITextDocument): URI {
+	#getFileUriOfTextDocument(document: Document): URI {
 		return this.#workspace.getContainingDocument?.(getDocUri(document))?.uri ?? getDocUri(document);
 	}
 }

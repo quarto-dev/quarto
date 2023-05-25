@@ -37,7 +37,7 @@ import {
 import { ILogger, LogLevel } from './logging';
 import { IMdParser } from './parser';
 import { pandocSlugifier, ISlugifier, Slug } from './slugify';
-import { getDocUri, getLine, ITextDocument } from './document';
+import { getDocUri, getLine, Document } from './document';
 
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
@@ -105,12 +105,12 @@ export function isTocHeaderEntry(entry?: TocEntry): entry is TocHeaderEntry {
 
 export class TableOfContents {
 
-	public static async create(parser: IMdParser, document: ITextDocument, token: CancellationToken): Promise<TableOfContents> {
+	public static async create(parser: IMdParser, document: Document, token: CancellationToken): Promise<TableOfContents> {
 		const entries = await this.#buildPandocToc(parser, document, token);
 		return new TableOfContents(entries, parser.slugifier);
 	}
 
-	public static async createForContainingDoc(parser: IMdParser, workspace: IWorkspace, document: ITextDocument, token: CancellationToken): Promise<TableOfContents> {
+	public static async createForContainingDoc(parser: IMdParser, workspace: IWorkspace, document: Document, token: CancellationToken): Promise<TableOfContents> {
 		const context = workspace.getContainingDocument?.(getDocUri(document));
 		if (context) {
 			const entries = (await Promise.all(Array.from(context.children, async cell => {
@@ -126,7 +126,7 @@ export class TableOfContents {
 		return this.create(parser, document, token);
 	}
 
-	static async #buildPandocToc(parser: IMdParser, document: ITextDocument, token: CancellationToken): Promise<TocEntry[]> {
+	static async #buildPandocToc(parser: IMdParser, document: Document, token: CancellationToken): Promise<TocEntry[]> {
 
 		const docUri = getDocUri(document);
 
@@ -313,11 +313,11 @@ export class MdTableOfContentsProvider extends Disposable {
 		return await this.#cache.get(resource) ?? TableOfContents.empty;
 	}
 
-	public getForDocument(doc: ITextDocument): Promise<TableOfContents> {
+	public getForDocument(doc: Document): Promise<TableOfContents> {
 		return this.#cache.getForDocument(doc);
 	}
 
-	public getForContainingDoc(doc: ITextDocument, token: CancellationToken): Promise<TableOfContents> {
+	public getForContainingDoc(doc: Document, token: CancellationToken): Promise<TableOfContents> {
 		return TableOfContents.createForContainingDoc(this.#parser, this.#workspace, doc, token);
 	}
 }

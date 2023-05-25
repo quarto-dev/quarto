@@ -17,7 +17,7 @@
 import * as l10n from '@vscode/l10n';
 import * as lsp from 'vscode-languageserver-types';
 import { makeRange, rangeIntersects } from 'quarto-core';
-import { getDocUri, ITextDocument } from '../../document';
+import { getDocUri, Document } from '../../document';
 import { WorkspaceEditBuilder } from '../../util/edit-builder';
 import { DiagnosticCode } from '../diagnostics';
 import { MdLinkDefinition } from '../document-links';
@@ -29,7 +29,7 @@ export class MdRemoveLinkDefinitionCodeActionProvider {
 	static readonly #removeUnusedDefTitle = l10n.t('Remove unused link definition');
 	static readonly #removeDuplicateDefTitle = l10n.t('Remove duplicate link definition');
 
-	*getActions(doc: ITextDocument, range: lsp.Range, context: lsp.CodeActionContext): Iterable<lsp.CodeAction> {
+	*getActions(doc: Document, range: lsp.Range, context: lsp.CodeActionContext): Iterable<lsp.CodeAction> {
 		if (!this.#isEnabled(context)) {
 			return;
 		}
@@ -62,7 +62,7 @@ export class MdRemoveLinkDefinitionCodeActionProvider {
 		return context.only.some(kind => codeActionKindContains(lsp.CodeActionKind.QuickFix, kind));
 	}
 
-	#getRemoveDefinitionAction(doc: ITextDocument, definition: MdLinkDefinition, title: string): lsp.CodeAction {
+	#getRemoveDefinitionAction(doc: Document, definition: MdLinkDefinition, title: string): lsp.CodeAction {
 		const builder = new WorkspaceEditBuilder();
 
 		const range = definition.source.range;

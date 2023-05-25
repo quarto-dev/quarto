@@ -22,7 +22,7 @@ import { cslRefs } from "editor-server";
 
 import { filePathForDoc } from "../../../util/doc";
 import { documentFrontMatter } from "../../../util/markdown";
-import { ITextDocument } from "../../../document";
+import { Document } from "../../../document";
 import { Quarto } from "../../../quarto";
 import { IMdParser } from "../../../parser";
 
@@ -30,7 +30,7 @@ export async function biblioCompletions(
   quarto: Quarto,
   parser: IMdParser,
   token: string,
-  doc: ITextDocument
+  doc: Document
 ): Promise<CompletionItem[] | null> {
   const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(parser, doc));
   if (refs) {

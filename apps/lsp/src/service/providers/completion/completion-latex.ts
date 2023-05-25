@@ -40,7 +40,7 @@ const kMathjaxCommands = mathjaxImport as Record<string, string[]>;
 import mathjaxCompletions from "./mathjax-completions.json";
 import { mathjaxLoadedExtensions } from "editor-server";
 import { MathjaxSupportedExtension } from "editor-types";
-import { ITextDocument } from "../../document";
+import { Document } from "../../document";
 import { LsConfiguration } from "../../config";
 import { IMdParser } from "../../parser";
 const kMathjaxCompletions = mathjaxCompletions as Record<string, LatexCommand>;
@@ -57,7 +57,7 @@ for (const key of Object.keys(kMathjaxCompletions)) {
 // (as those will work universally in pdf and html)
 export async function latexCompletions(
   parser: IMdParser,
-  doc: ITextDocument,
+  doc: Document,
   pos: Position,
   completionContext: CompletionContext,
   config: LsConfiguration

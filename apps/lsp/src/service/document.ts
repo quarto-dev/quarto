@@ -21,7 +21,7 @@ import { makeRange } from 'quarto-core';
 /**
  * A document in the workspace.
  */
-export interface ITextDocument {
+export interface Document {
 	/**
 	 * The uri of the document, as a string.
 	 */
@@ -60,10 +60,10 @@ export interface ITextDocument {
 	positionAt(offset: number): Position;
 }
 
-export function getLine(doc: ITextDocument, line: number): string {
+export function getLine(doc: Document, line: number): string {
 	return doc.getText(makeRange(line, 0, line, Number.MAX_VALUE)).replace(/\r?\n$/, '');
 }
 
-export function getDocUri(doc: ITextDocument): URI {
+export function getDocUri(doc: Document): URI {
 	return doc.$uri ?? URI.parse(doc.uri);
 }

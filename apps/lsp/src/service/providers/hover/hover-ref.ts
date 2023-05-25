@@ -20,7 +20,7 @@ import { bypassRefIntelligence } from "../../util/refs";
 import { documentFrontMatter } from "../../util/markdown";
 import { filePathForDoc } from "../../util/doc";
 
-import { ITextDocument } from "../../document";
+import { Document } from "../../document";
 import { Quarto } from "../../quarto";
 import { IMdParser } from "../../parser";
 
@@ -28,7 +28,7 @@ import { IMdParser } from "../../parser";
 // cache the last ref lookup
 let lastRef: CslRef | undefined;
 
-export async function refHover(quarto: Quarto, parser: IMdParser, doc: ITextDocument, pos: Position): Promise<Hover | null> {
+export async function refHover(quarto: Quarto, parser: IMdParser, doc: Document, pos: Position): Promise<Hover | null> {
   // compute the line
   const line = doc
     .getText(Range.create(pos.line, 0, pos.line + 1, 0))

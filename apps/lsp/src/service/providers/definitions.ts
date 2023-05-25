@@ -19,7 +19,7 @@ import * as lsp from 'vscode-languageserver-types';
 import { rangeContains } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
-import { ITextDocument } from '../document';
+import { Document } from '../document';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { HrefKind, LinkDefinitionSet, MdLink, MdLinkKind } from './document-links';
@@ -43,7 +43,7 @@ export class MdDefinitionProvider {
 		this.#linkCache = linkCache;
 	}
 
-	async provideDefinition(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
+	async provideDefinition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
 		
 		if (token.isCancellationRequested) {
 			return [];
@@ -63,7 +63,7 @@ export class MdDefinitionProvider {
 		return this.#getDefinitionOfLinkAtPosition(document, position, token);
 	}
 
-	async #getDefinitionOfLinkAtPosition(document: ITextDocument, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
+	async #getDefinitionOfLinkAtPosition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
 		const docLinks = (await this.#linkCache.getForDocs([document]))[0];
 
 		for (const link of docLinks) {

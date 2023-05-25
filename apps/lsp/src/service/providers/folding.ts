@@ -20,7 +20,7 @@ import { Token, isDisplayMath, isRawBlock } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
-import { getLine, ITextDocument } from '../document';
+import { getLine, Document } from '../document';
 import { isEmptyOrWhitespace } from '../util/string';
 
 const rangeLimit = 5000;
@@ -46,7 +46,7 @@ export class MdFoldingProvider {
 		this.#logger = logger;
 	}
 
-	public async provideFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+	public async provideFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
 		this.#logger.log(LogLevel.Debug, 'MdFoldingProvider.provideFoldingRanges', { document: document.uri, version: document.version });
 
 		if (token.isCancellationRequested) {
@@ -63,7 +63,7 @@ export class MdFoldingProvider {
 		return result.length > rangeLimit ? result.slice(0, rangeLimit) : result;
 	}
 
-	async #getRegions(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+	async #getRegions(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
 		const tokens = this.#parser.tokenize(document);
 		if (token.isCancellationRequested) {
 			return [];
@@ -88,7 +88,7 @@ export class MdFoldingProvider {
 		}
 	}
 
-	async #getHeaderFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+	async #getHeaderFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
 		const toc = await this.#tocProvider.getForDocument(document);
 		if (token.isCancellationRequested) {
 			return [];
@@ -103,7 +103,7 @@ export class MdFoldingProvider {
 		});
 	}
 
-	async #getBlockFoldingRanges(document: ITextDocument, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+	async #getBlockFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
 		const tokens = this.#parser.tokenize(document);
 		if (token.isCancellationRequested) {
 			return [];
@@ -111,7 +111,7 @@ export class MdFoldingProvider {
 		return Array.from(this.#getBlockFoldingRangesFromTokens(document, tokens));
 	}
 
-	*#getBlockFoldingRangesFromTokens(document: ITextDocument, tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
+	*#getBlockFoldingRangesFromTokens(document: Document, tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
 		for (const token of tokens) {
 			if (isFoldableToken(token)) {
 				const startLine = token.range.start.line;

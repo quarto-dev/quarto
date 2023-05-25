@@ -15,7 +15,7 @@
 
 import { Range, Position } from "vscode-languageserver";
 
-import { PandocToken, isDisplayMath, kAttrClasses } from "quarto-core";
+import { Token, isDisplayMath, kAttrClasses } from "quarto-core";
 
 import { parseFrontMatterStr } from "quarto-core";
 import { ITextDocument } from "../document";
@@ -84,22 +84,22 @@ export function isLatexPosition(parser: IMdParser, doc: ITextDocument, pos: Posi
 }
 
 function isMathBlockAtPosition(pos: Position) {
-  return (token: PandocToken) => {
+  return (token: Token) => {
     return isDisplayMath(token) && posIsWithinToken(pos, token);
   }
 }
 
 function isCodeBlockAtPosition(pos: Position) {
-  return (token: PandocToken) => {
+  return (token: Token) => {
     return ["CodeBlock", "RawBlock"].includes(token.type) && posIsWithinToken(pos, token);
   } 
 }
 
-function posIsWithinToken(pos: Position, token: PandocToken) {
+function posIsWithinToken(pos: Position, token: Token) {
   return pos.line >= token.range.start.line && pos.line < token.range.end.line;
 }
 
-function isLatexCodeBlock(token: PandocToken) {
+function isLatexCodeBlock(token: Token) {
   const formats = ["tex", "latex"];
   if (token.type === "RawBlock") {
     const raw = token.data as { format: string, text: string };

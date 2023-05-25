@@ -15,16 +15,16 @@
 
 import { Position } from "../position";
 
-import { PandocToken, kAttrClasses  } from "./token";
+import { Token, kAttrClasses  } from "./token";
 
-export function isLanguageBlock(token: PandocToken) {
+export function isLanguageBlock(token: Token) {
   return isFencedCode(token) || isDisplayMath(token);
 }
 
 // a language block that will be executed with its results
 // inclued in the document (either by an engine or because
 // it is a raw or display math block)
-export function isExecutableLanguageBlock(token: PandocToken) {
+export function isExecutableLanguageBlock(token: Token) {
   if (isDisplayMath(token)) {
     return true;
   } else if (isFencedCode(token)) {
@@ -39,7 +39,7 @@ export function isExecutableLanguageBlock(token: PandocToken) {
 }
 
 export function languageBlockAtPosition(
-  tokens: PandocToken[],
+  tokens: Token[],
   position: Position,
   includeFence = false
 ) {
@@ -57,11 +57,11 @@ export function languageBlockAtPosition(
   return undefined;
 }
 
-export function isFencedCode(token: PandocToken) {
+export function isFencedCode(token: Token) {
   return token.type === "CodeBlock";
 }
 
-export function isDisplayMath(token: PandocToken) {
+export function isDisplayMath(token: Token) {
   if (token.type === "Math") {
     const math = token.data as { type: string, text: string };
     return math.type === "DisplayMath";
@@ -70,14 +70,14 @@ export function isDisplayMath(token: PandocToken) {
   }
 }
 
-export function isDiagram(token: PandocToken) {
+export function isDiagram(token: Token) {
   return (
     isExecutableLanguageBlockOf("mermaid")(token) ||
     isExecutableLanguageBlockOf("dot")(token)
   );
 }
 
-export function languageNameFromBlock(token: PandocToken) {
+export function languageNameFromBlock(token: Token) {
   if (isDisplayMath(token)) {
     return "tex";
   } else if (isFencedCode(token)) {
@@ -91,7 +91,7 @@ export function languageNameFromBlock(token: PandocToken) {
 }
 
 export function isExecutableLanguageBlockOf(language: string) {
-  return (token: PandocToken) => {
+  return (token: Token) => {
     return (
       isExecutableLanguageBlock(token) &&
       languageNameFromBlock(token) === language

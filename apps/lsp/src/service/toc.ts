@@ -20,7 +20,7 @@ import { URI } from 'vscode-uri';
 
 import { Disposable } from 'core';
 import { 
-	PandocToken, 
+	Token, 
 	isCallout, 
 	isProof, 
 	isTheorem, 
@@ -167,7 +167,7 @@ export class TableOfContents {
 			return range;
 		}
 
-		const maxHeadingLevel = tokens.reduce((max: number, element: PandocToken) => {
+		const maxHeadingLevel = tokens.reduce((max: number, element: Token) => {
 			return element.level && element.level < max ? element.level : max;
 		}, 2);
 

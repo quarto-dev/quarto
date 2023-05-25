@@ -15,7 +15,7 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { PandocToken, isDisplayMath } from 'quarto-core';
+import { Token, isDisplayMath } from 'quarto-core';
 
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
@@ -68,7 +68,7 @@ export class MdFoldingProvider {
 		return Array.from(this.#getRegionsFromTokens(tokens));
 	}
 
-	*#getRegionsFromTokens(tokens: readonly PandocToken[]): Iterable<lsp.FoldingRange> {
+	*#getRegionsFromTokens(tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
 		const nestingStack: RegionMarker[] = [];
 		for (const token of tokens) {
 			const marker = asRegionMarker(token);
@@ -107,7 +107,7 @@ export class MdFoldingProvider {
 		return Array.from(this.#getBlockFoldingRangesFromTokens(document, tokens));
 	}
 
-	*#getBlockFoldingRangesFromTokens(document: ITextDocument, tokens: readonly PandocToken[]): Iterable<lsp.FoldingRange> {
+	*#getBlockFoldingRangesFromTokens(document: ITextDocument, tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
 		for (const token of tokens) {
 			if (isFoldableToken(token)) {
 				const startLine = token.range.start.line;
@@ -123,7 +123,7 @@ export class MdFoldingProvider {
 		}
 	}
 
-	#getFoldingRangeKind(listItem: PandocToken): lsp.FoldingRangeKind | undefined {
+	#getFoldingRangeKind(listItem: Token): lsp.FoldingRangeKind | undefined {
 		const html = asHtmlBlock(listItem);
 		return html && html.startsWith('!--') ? lsp.FoldingRangeKind.Comment : undefined;
 	}
@@ -132,7 +132,7 @@ export class MdFoldingProvider {
 function isStartRegion(t: string) { return /^\s*<!--\s*#?region\b.*-->/.test(t); }
 function isEndRegion(t: string) { return /^\s*<!--\s*#?endregion\b.*-->/.test(t); }
 
-function asRegionMarker(token: PandocToken): RegionMarker | undefined {
+function asRegionMarker(token: Token): RegionMarker | undefined {
 	const html = asHtmlBlock(token);
 	if (html === undefined) {
 		return undefined;
@@ -149,7 +149,7 @@ function asRegionMarker(token: PandocToken): RegionMarker | undefined {
 	return undefined;
 }
 
-function asHtmlBlock(token: PandocToken) : string | undefined {
+function asHtmlBlock(token: Token) : string | undefined {
 	if (token.type !== 'RawBlock') {
 		return undefined;
 	}
@@ -160,7 +160,7 @@ function asHtmlBlock(token: PandocToken) : string | undefined {
 	return text;
 }
 
-function isFoldableToken(token: PandocToken) {
+function isFoldableToken(token: Token) {
 
 	switch (token.type) {
 		case 'CodeBlock':

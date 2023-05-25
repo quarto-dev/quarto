@@ -16,13 +16,13 @@
 import path from "node:path"
 
 import { QuartoContext } from "../context";
-import { PandocToken, kAttrClasses } from "./token";
+import { Token, kAttrClasses } from "./token";
 import { partitionYamlFrontMatter } from "../metadata";
 import { lines } from "core";
 import { makeRange } from "../range";
 import { isExecutableLanguageBlock, isFencedCode, languageNameFromBlock } from "./language";
 
-export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : PandocToken[] {
+export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  
   const output = context.runPandoc(
     { input: markdown },
@@ -32,7 +32,7 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
   );
 
   // parse json (w/ some fixups)
-  const outputJson = JSON.parse(output) as Record<string,PandocToken>;
+  const outputJson = JSON.parse(output) as Record<string,Token>;
   const tokens = (Object.values(outputJson).map(token => {
 
     // fixup lang
@@ -50,7 +50,7 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
   const result = partitionYamlFrontMatter(markdown);
   if (result) {
     const yamlLines = lines(result.yaml);
-    const yamlToken: PandocToken = {
+    const yamlToken: Token = {
       type: "FrontMatter",
       data: result.yaml,
       range: makeRange(0, 0, yamlLines.length - 1, 0)

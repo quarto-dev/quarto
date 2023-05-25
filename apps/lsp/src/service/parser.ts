@@ -16,7 +16,7 @@
 
 import { ISlugifier } from './slugify';
 import { ITextDocument } from './document';
-import { PandocToken } from 'quarto-core';
+import { Token } from 'quarto-core';
 
 export interface Token {
 	readonly type: string;
@@ -43,5 +43,5 @@ export interface IMdParser {
 	/**
 	 * Parse `document` into a stream of pandoc elements
 	 */
-	parsePandocTokens(document: ITextDocument): PandocToken[];
+	parsePandocTokens(document: ITextDocument): Token[];
 }

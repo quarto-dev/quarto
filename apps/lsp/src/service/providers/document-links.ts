@@ -21,7 +21,7 @@ import { URI, Utils } from 'vscode-uri';
 
 import { Disposable, coalesce, tryDecodeUri } from 'core';
 
-import { translatePosition, makeRange, rangeContains, PandocToken, isDisplayMath, PandocTokenType } from 'quarto-core';
+import { translatePosition, makeRange, rangeContains, Token, isDisplayMath, TokenType } from 'quarto-core';
 
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
@@ -334,7 +334,7 @@ const definitionPattern = /^([\t ]*\[(?!\^)((?:\\\]|[^\]])+)\]:\s*)([^<]\S*|<[^>
 const inlineCodePattern = /(^|[^`])(`+)((?:.+?|.*?(?:(?:\r?\n).+?)*?)(?:\r?\n)?\2)(?:$|[^`])/gm;
 
 class NoLinkRanges {
-	public static compute(tokens: readonly PandocToken[], document: ITextDocument): NoLinkRanges {
+	public static compute(tokens: readonly Token[], document: ITextDocument): NoLinkRanges {
 		const multiline = tokens
 			.filter(t => (t.type === 'CodeBlock' || t.type === 'RawBlock' || isDisplayMath(t)))
 			.map(t => ({ type: t.type, range: [t.range.start.line, t.range.end.line]  as [number,number]}));
@@ -363,7 +363,7 @@ class NoLinkRanges {
 		/**
 		 * Block element ranges, such as code blocks. Represented by [line_start, line_end).
 		 */
-		public readonly multiline: ReadonlyArray<{ type: PandocTokenType, range: [number, number] }>,
+		public readonly multiline: ReadonlyArray<{ type: TokenType, range: [number, number] }>,
 
 		/**
 		 * Inline code spans where links should not be detected

@@ -15,7 +15,7 @@
 
 import { Range } from '../range';
 
-export type PandocTokenType =
+export type TokenType =
   | "FrontMatter"
   | "BlockQuote"
   | "BulletList"
@@ -39,14 +39,14 @@ export type PandocTokenType =
 export const kAttrIdentifier = 0;
 export const kAttrClasses = 1;
 export const kAttrAttributes = 2;
-export type PandocTokenAttr = [string, Array<string>, Array<[string,string]>];
+export type TokenAttr = [string, Array<string>, Array<[string,string]>];
 
 
-export interface PandocToken {
-  type: PandocTokenType;
+export interface Token {
+  type: TokenType;
   range: Range;
   level?: number;
-  attr?: PandocTokenAttr; 
+  attr?: TokenAttr; 
   data?: unknown;
     // FrontMatter: yaml
     // Header: text
@@ -58,7 +58,7 @@ export interface PandocToken {
 }
 
 
-export function isCallout(token: PandocToken) {
+export function isCallout(token: Token) {
   if (token.type === "Div") {
     const classes = token.attr![kAttrClasses];
     return !!classes.find(clz => clz.startsWith("callout-"));
@@ -67,11 +67,11 @@ export function isCallout(token: PandocToken) {
   }
 }
 
-export function isList(token: PandocToken) {
+export function isList(token: Token) {
   return ["BulletList", "OrderedList"].includes(token.type);
 }
 
-export function isTabset(token: PandocToken) {
+export function isTabset(token: Token) {
   if (token.type === "Div") {
     const classes = token.attr![kAttrClasses];
     return !!classes.find(clz => clz === "panel-tabset");
@@ -80,7 +80,7 @@ export function isTabset(token: PandocToken) {
   }
 }
 
-export function isTheorem(token: PandocToken) {
+export function isTheorem(token: Token) {
   if (token.type === "Div") {
     const id = token.attr![kAttrIdentifier];
     return ["thm", "lem", "cor", "prp", "cnj", "def", "exm", "exr"]
@@ -90,7 +90,7 @@ export function isTheorem(token: PandocToken) {
   }
 }
 
-export function isProof(token: PandocToken) {
+export function isProof(token: Token) {
   if (token.type === "Div") {
     const classes = token.attr![kAttrClasses];
     return ["proof", "remark", "solution"].some(clz => classes.includes(clz));
@@ -99,14 +99,14 @@ export function isProof(token: PandocToken) {
   }
 }
 
-export function isWithinRange(tokens: PandocToken[], rangePredicate: (token: PandocToken) => boolean) {
+export function isWithinRange(tokens: Token[], rangePredicate: (token: Token) => boolean) {
   const ranges = tokens.reduce((ranges, token) => {
     if (rangePredicate(token)) {
       ranges.push({ begin: token.range.start.line, end: token.range.end.line });
     }
     return ranges;
   }, new Array<{ begin: number, end: number }>())
-  return (token: PandocToken) => {
+  return (token: Token) => {
     return ranges.find(range => {
       return token.range.start.line >= range.begin && token.range.end.line <= range.end;
     })

@@ -15,7 +15,7 @@
  */
 
 
-import { PandocToken, QuartoContext, parsePandocDocument } from "quarto-core";
+import { Token, QuartoContext, parsePandocDocument } from "quarto-core";
 
 import { IMdParser, ITextDocument } from "./service";
 import { pandocSlugifier } from "./service";
@@ -25,13 +25,13 @@ import { pandocSlugifier } from "./service";
 export function langaugeServiceMdParser(context: QuartoContext, resourcesDir: string) : IMdParser {
 
   // pandoc element cache for last document requested
-  let elementCache: PandocToken[] | undefined;
+  let elementCache: Token[] | undefined;
   let elementCacheDocUri: string | undefined;
   let elementCacheDocVersion: number | undefined;
 
   const mdParser : IMdParser = {
     slugifier: pandocSlugifier,
-    parsePandocTokens(doc: ITextDocument): PandocToken[] {
+    parsePandocTokens(doc: ITextDocument): Token[] {
       if (
         !elementCache ||
         doc.uri.toString() !== elementCacheDocUri ||

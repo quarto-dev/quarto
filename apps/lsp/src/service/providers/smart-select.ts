@@ -18,7 +18,7 @@ import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Position, Range } from 'vscode-languageserver-types';
 import { coalesce } from 'core';
-import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains, PandocToken, isList } from 'quarto-core';
+import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains, Token, isList } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
 import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocEntry, isTocHeaderEntry } from '../toc';
@@ -127,7 +127,7 @@ function createHeaderRange(header: TocEntry, isClosestHeaderToPosition: boolean,
 	}
 }
 
-function getBlockTokensForPosition(tokens: readonly PandocToken[], position: Position, parent: lsp.SelectionRange | undefined): PandocToken[] {
+function getBlockTokensForPosition(tokens: readonly Token[], position: Position, parent: lsp.SelectionRange | undefined): Token[] {
 
 	const enclosingTokens = tokens.filter(token => token.range.start.line <= position.line && token.range.end.line > position.line && (!parent || (token.range.start.line >= parent.range.start.line && token.range.end.line <= parent.range.end.line + 1)) && token.range.start.line !== token.range.end.line);
 	if (enclosingTokens.length === 0) {
@@ -137,7 +137,7 @@ function getBlockTokensForPosition(tokens: readonly PandocToken[], position: Pos
 	return sortedTokens;
 }
 
-function createBlockRange(block: PandocToken, document: ITextDocument, cursorLine: number, parent: lsp.SelectionRange | undefined): lsp.SelectionRange {
+function createBlockRange(block: Token, document: ITextDocument, cursorLine: number, parent: lsp.SelectionRange | undefined): lsp.SelectionRange {
 	if (block.type === 'CodeBlock') {
 		return createFencedRange(block, cursorLine, document, parent);
 	}
@@ -176,7 +176,7 @@ function createInlineRange(document: ITextDocument, cursorPosition: Position, pa
 	return inlineCodeBlockSelection ?? linkSelection ?? comboSelection ?? boldSelection ?? italicSelection;
 }
 
-function createFencedRange(token: PandocToken, cursorLine: number, document: ITextDocument, parent?: lsp.SelectionRange): lsp.SelectionRange {
+function createFencedRange(token: Token, cursorLine: number, document: ITextDocument, parent?: lsp.SelectionRange): lsp.SelectionRange {
 	const startLine = token.range.start.line;
 	const endLine = token.range.end.line - 1;
 	const onFenceLine = cursorLine === startLine || cursorLine === endLine;

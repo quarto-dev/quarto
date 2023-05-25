@@ -164,6 +164,7 @@ function asHtmlBlock(token: Token) : string | undefined {
 function isFoldableToken(token: Token) {
 
 	switch (token.type) {
+	  case 'FrontMatter':
 		case 'CodeBlock':
 		case 'Div':
 		case 'BlockQuote':

@@ -22,13 +22,12 @@ import { cslRefs } from "editor-server";
 
 import { filePathForDoc } from "../../../util/doc";
 import { documentFrontMatter } from "../../../util/markdown";
-import { Document } from "quarto-core";
+import { Document, Parser } from "quarto-core";
 import { Quarto } from "../../../quarto";
-import { IMdParser } from "../../../parser";
 
 export async function biblioCompletions(
   quarto: Quarto,
-  parser: IMdParser,
+  parser: Parser,
   token: string,
   doc: Document
 ): Promise<CompletionItem[] | null> {

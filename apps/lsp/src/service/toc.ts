@@ -34,11 +34,11 @@ import {
 	isCodeBlock,
 	getDocUri, 
 	getLine, 
-	Document
+	Document,
+	Parser
 } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
-import { IMdParser } from './parser';
 import { pandocSlugifier, ISlugifier, Slug } from './slugify';
 
 import { IWorkspace } from './workspace';
@@ -107,12 +107,12 @@ export function isTocHeaderEntry(entry?: TocEntry): entry is TocHeaderEntry {
 
 export class TableOfContents {
 
-	public static async create(parser: IMdParser, document: Document, token: CancellationToken): Promise<TableOfContents> {
+	public static async create(parser: Parser, document: Document, token: CancellationToken): Promise<TableOfContents> {
 		const entries = await this.#buildPandocToc(parser, document, token);
 		return new TableOfContents(entries, pandocSlugifier);
 	}
 
-	public static async createForContainingDoc(parser: IMdParser, workspace: IWorkspace, document: Document, token: CancellationToken): Promise<TableOfContents> {
+	public static async createForContainingDoc(parser: Parser, workspace: IWorkspace, document: Document, token: CancellationToken): Promise<TableOfContents> {
 		const context = workspace.getContainingDocument?.(getDocUri(document));
 		if (context) {
 			const entries = (await Promise.all(Array.from(context.children, async cell => {
@@ -128,12 +128,12 @@ export class TableOfContents {
 		return this.create(parser, document, token);
 	}
 
-	static async #buildPandocToc(parser: IMdParser, document: Document, token: CancellationToken): Promise<TocEntry[]> {
+	static async #buildPandocToc(parser: Parser, document: Document, token: CancellationToken): Promise<TocEntry[]> {
 
 		const docUri = getDocUri(document);
 
 		const toc: TocEntry[] = [];
-		const tokens = parser.tokenize(document);
+		const tokens = parser(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -290,12 +290,12 @@ export class MdTableOfContentsProvider extends Disposable {
 
 	readonly #cache: MdDocumentInfoCache<TableOfContents>;
 
-	readonly #parser: IMdParser;
+	readonly #parser: Parser;
 	readonly #workspace: IWorkspace;
 	readonly #logger: ILogger;
 
 	constructor(
-		parser: IMdParser,
+		parser: Parser,
 		workspace: IWorkspace,
 		logger: ILogger,
 	) {

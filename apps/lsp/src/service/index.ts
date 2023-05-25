@@ -17,7 +17,7 @@
 import type { CancellationToken, CompletionContext } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { Document } from "quarto-core"
+import { Document, Parser } from "quarto-core"
 import { LsConfiguration} from './config';
 import { MdExtractLinkDefinitionCodeActionProvider } from './providers/codeactions/extract-linkdef';
 import { MdRemoveLinkDefinitionCodeActionProvider } from './providers/codeactions/remove-linkdef';
@@ -34,7 +34,6 @@ import { MdRenameProvider } from './providers/rename';
 import { MdSelectionRangeProvider } from './providers/smart-select';
 import { MdWorkspaceSymbolProvider } from './providers/workspace-symbols';
 import { ILogger } from './logging';
-import { IMdParser } from './parser';
 import { MdTableOfContentsProvider } from './toc';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
@@ -53,7 +52,6 @@ export type { FileRename } from './providers/file-rename';
 export { RenameNotSupportedAtLocationError } from './providers/rename';
 export type  { ILogger } from './logging';
 export { LogLevel } from './logging';
-export type { IMdParser } from './parser';
 export type { ISlugifier } from './slugify'
 export { Slug, pandocSlugifier } from './slugify';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
@@ -236,7 +234,7 @@ export interface LanguageServiceInitialization {
 	readonly config: LsConfiguration;
 	readonly quarto: Quarto;
 	readonly workspace: IWorkspace;
-	readonly parser: IMdParser;
+	readonly parser: Parser;
 	readonly logger: ILogger;
 }
 

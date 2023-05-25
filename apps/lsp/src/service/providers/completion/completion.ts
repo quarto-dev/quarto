@@ -29,10 +29,9 @@ import { yamlCompletions } from "./completion-yaml";
 import { refsCompletions } from "./refs/completion-refs";
 import { LsConfiguration } from "../../config";
 import { IWorkspace } from "../../workspace";
-import { IMdParser } from "../../parser";
 import { MdLinkProvider } from "../document-links";
 import { MdTableOfContentsProvider } from "../../toc";
-import { Document } from "quarto-core";
+import { Document, Parser } from "quarto-core";
 import { MdPathCompletionProvider } from "./completion-path";
 import { docEditorContext } from "../../quarto";
 
@@ -79,13 +78,13 @@ export class MdCompletionProvider {
   readonly pathCompletionProvider_: MdPathCompletionProvider;
 
   readonly quarto_: Quarto;
-	readonly parser_: IMdParser;
+	readonly parser_: Parser;
 
 	constructor(
 		configuration: LsConfiguration,
     quarto: Quarto,
 		workspace: IWorkspace,
-		parser: IMdParser,
+		parser: Parser,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
 	) {

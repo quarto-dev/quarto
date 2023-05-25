@@ -18,10 +18,9 @@ import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { Disposable } from 'core';
-import { translatePosition, areRangesEqual, modifyRange, rangeContains, getDocUri, Document  } from 'quarto-core';
+import { translatePosition, areRangesEqual, modifyRange, rangeContains, getDocUri, Document, Parser  } from 'quarto-core';
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
-import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocHeaderEntry, isTocHeaderEntry } from '../toc';
 import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
@@ -85,7 +84,7 @@ export type MdReference = MdLinkReference | MdHeaderReference;
 export class MdReferencesProvider extends Disposable {
 
 	readonly #configuration: LsConfiguration;
-	readonly #parser: IMdParser;
+	readonly #parser: Parser;
 	readonly #workspace: IWorkspace;
 	readonly #tocProvider: MdTableOfContentsProvider;
 	readonly #linkCache: MdWorkspaceInfoCache<readonly MdLink[]>;
@@ -93,7 +92,7 @@ export class MdReferencesProvider extends Disposable {
 
 	public constructor(
 		configuration: LsConfiguration,
-		parser: IMdParser,
+		parser: Parser,
 		workspace: IWorkspace,
 		tocProvider: MdTableOfContentsProvider,
 		linkCache: MdWorkspaceInfoCache<readonly MdLink[]>,

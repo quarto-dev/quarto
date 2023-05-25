@@ -20,9 +20,8 @@ import type { CancellationToken, CompletionContext } from 'vscode-languageserver
 import * as lsp from 'vscode-languageserver-types';
 import { URI, Utils } from 'vscode-uri';
 import { isExcludedPath, LsConfiguration } from '../../config';
-import { IMdParser } from '../../parser';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry } from '../../toc';
-import { translatePosition, makeRange, getDocUri, getLine, Document } from 'quarto-core';
+import { translatePosition, makeRange, getDocUri, getLine, Document, Parser } from 'quarto-core';
 import { looksLikeMarkdownFilePath } from '../../util/file';
 import { computeRelativePath } from '../../util/path';
 import { Schemes } from '../../util/schemes';
@@ -115,7 +114,7 @@ export class MdPathCompletionProvider {
 
 	readonly #configuration: LsConfiguration;
 	readonly #workspace: IWorkspace;
-	readonly #parser: IMdParser;
+	readonly #parser: Parser;
 	readonly #linkProvider: MdLinkProvider;
 
 	readonly #workspaceTocCache: MdWorkspaceInfoCache<TableOfContents>;
@@ -123,7 +122,7 @@ export class MdPathCompletionProvider {
 	constructor(
 		configuration: LsConfiguration,
 		workspace: IWorkspace,
-		parser: IMdParser,
+		parser: Parser,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
 	) {

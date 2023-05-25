@@ -21,11 +21,10 @@ import { URI, Utils } from 'vscode-uri';
 
 import { Disposable, coalesce, tryDecodeUri } from 'core';
 
-import { translatePosition, makeRange, rangeContains, Token, isDisplayMath, TokenType, Document, getDocUri, getLine } from 'quarto-core';
+import { translatePosition, makeRange, rangeContains, Token, isDisplayMath, TokenType, Document, getDocUri, getLine, Parser } from 'quarto-core';
 
 import { LsConfiguration } from '../config';
 import { ILogger, LogLevel } from '../logging';
-import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { r } from '../util/string';
 import { IWorkspace, getWorkspaceFolder, tryAppendMarkdownFileExtension } from '../workspace';
@@ -404,19 +403,19 @@ export type ResolvedDocumentLinkTarget =
  */
 export class MdLinkComputer {
 
-	readonly #tokenizer: IMdParser;
+	readonly #parser: Parser;
 	readonly #workspace: IWorkspace;
 
 	constructor(
-		tokenizer: IMdParser,
+		parser: Parser,
 		workspace: IWorkspace,
 	) {
-		this.#tokenizer = tokenizer;
+		this.#parser = parser;
 		this.#workspace = workspace;
 	}
 
 	public async getAllLinks(document: Document, token: CancellationToken): Promise<MdLink[]> {
-		const tokens = this.#tokenizer.tokenize(document);
+		const tokens = this.#parser(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -767,7 +766,7 @@ export class MdLinkProvider extends Disposable {
 
 	constructor(
 		config: LsConfiguration,
-		tokenizer: IMdParser,
+		parser: Parser,
 		workspace: IWorkspace,
 		tocProvider: MdTableOfContentsProvider,
 		logger: ILogger,
@@ -778,7 +777,7 @@ export class MdLinkProvider extends Disposable {
 		this.#workspace = workspace;
 		this.#tocProvider = tocProvider;
 
-		this.#linkComputer = new MdLinkComputer(tokenizer, this.#workspace);
+		this.#linkComputer = new MdLinkComputer(parser, this.#workspace);
 		this.#linkCache = this._register(new MdDocumentInfoCache(this.#workspace, async (doc, token) => {
 			logger.log(LogLevel.Debug, 'LinkProvider.compute', { document: doc.uri, version: doc.version });
 
@@ -1001,7 +1000,7 @@ export function parseLocationInfoFromFragment(fragment: string): lsp.Position | 
 }
 
 export function createWorkspaceLinkCache(
-	parser: IMdParser,
+	parser: Parser,
 	workspace: IWorkspace,
 ) {
 	const linkComputer = new MdLinkComputer(parser, workspace);

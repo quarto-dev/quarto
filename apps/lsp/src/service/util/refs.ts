@@ -15,14 +15,12 @@
 
 import { Position } from "vscode-languageserver-types";
 
-import { Document } from "quarto-core";
+import { Document, Parser } from "quarto-core";
 
 import { isContentPosition } from "./markdown";
 
-import { IMdParser } from "../parser";
-
 export function bypassRefIntelligence(
-  parser: IMdParser,
+  parser: Parser,
   doc: Document,
   pos: Position,
   line: string

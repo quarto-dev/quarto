@@ -15,10 +15,9 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { Token, isDisplayMath, isRawBlock, getLine, Document } from 'quarto-core';
+import { Token, isDisplayMath, isRawBlock, getLine, Document, Parser } from 'quarto-core';
 
 import { ILogger, LogLevel } from '../logging';
-import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
 import { isEmptyOrWhitespace } from '../util/string';
 
@@ -31,12 +30,12 @@ interface RegionMarker {
 
 export class MdFoldingProvider {
 
-	readonly #parser: IMdParser;
+	readonly #parser: Parser;
 	readonly #tocProvider: MdTableOfContentsProvider;
 	readonly #logger: ILogger;
 
 	constructor(
-		parser: IMdParser,
+		parser: Parser,
 		tocProvider: MdTableOfContentsProvider,
 		logger: ILogger,
 	) {
@@ -63,7 +62,7 @@ export class MdFoldingProvider {
 	}
 
 	async #getRegions(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = this.#parser.tokenize(document);
+		const tokens = this.#parser(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}
@@ -103,7 +102,7 @@ export class MdFoldingProvider {
 	}
 
 	async #getBlockFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = this.#parser.tokenize(document);
+		const tokens = this.#parser(document);
 		if (token.isCancellationRequested) {
 			return [];
 		}

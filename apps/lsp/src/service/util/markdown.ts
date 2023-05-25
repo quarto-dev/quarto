@@ -15,14 +15,13 @@
 
 import { Range, Position } from "vscode-languageserver";
 
-import { Token, TokenMath, isDisplayMath, isFrontMatter, isRawBlock, kAttrClasses } from "quarto-core";
+import { Parser, Token, TokenMath, isDisplayMath, isFrontMatter, isRawBlock, kAttrClasses } from "quarto-core";
 
 import { parseFrontMatterStr, Document } from "quarto-core";
-import { IMdParser } from "../parser";
 
-export function mathRange(parser: IMdParser, doc: Document, pos: Position) {
+export function mathRange(parser: Parser, doc: Document, pos: Position) {
   // see if we are in a math block
-  const tokens = parser.tokenize(doc);
+  const tokens = parser(doc);
   const mathBlock = tokens.find(isMathBlockAtPosition(pos));
   if (mathBlock) {
     return {
@@ -41,17 +40,17 @@ export function mathRange(parser: IMdParser, doc: Document, pos: Position) {
   );
 }
 
-export function isContentPosition(parser: IMdParser, doc: Document, pos: Position) {
-  const tokens = parser.tokenize(doc);
+export function isContentPosition(parser: Parser, doc: Document, pos: Position) {
+  const tokens = parser(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos))
   return !codeBlock && !mathRange(parser, doc, pos);
 }
 
 export function documentFrontMatter(
-  parser: IMdParser,
+  parser: Parser,
   doc: Document
 ): Record<string, unknown> {
-  const tokens = parser.tokenize(doc);
+  const tokens = parser(doc);
   const yaml = tokens.find(isFrontMatter);
   if (yaml) {
     const frontMatter = parseFrontMatterStr(yaml.data);
@@ -65,13 +64,13 @@ export function documentFrontMatter(
   }
 }
 
-export function isLatexPosition(parser: IMdParser, doc: Document, pos: Position) {
+export function isLatexPosition(parser: Parser, doc: Document, pos: Position) {
   // math is always latex
   if (mathRange(parser, doc, pos)) {
     return true;
   }
   //
-  const tokens = parser.tokenize(doc);
+  const tokens = parser(doc);
   const codeBlock = tokens.find(isCodeBlockAtPosition(pos));
   if (codeBlock) {
     // code block is latex only if it's 'tex' or 'latex'

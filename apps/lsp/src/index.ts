@@ -48,11 +48,10 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
-import { initQuartoContext, Document } from "quarto-core";
+import { initQuartoContext, Document, pandocParser } from "quarto-core";
 import { ConfigurationManager, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
-import { langaugeServiceMdParser } from "./parser";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService, RenameNotSupportedAtLocationError } from "./service";
 import { initializeQuarto } from "./quarto";
@@ -303,7 +302,7 @@ connection.onInitialized(async () => {
 
   // initialize parser
   const resourcesDir = path.join(__dirname, "resources");
-  const parser = langaugeServiceMdParser(quartoContext, resourcesDir);
+  const parser = pandocParser(quartoContext, resourcesDir);
 
   // create language service
   mdLs = createLanguageService({

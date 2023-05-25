@@ -20,12 +20,11 @@ import { MathjaxTypesetOptions } from "editor-types";
 import { mathjaxTypeset } from "editor-server";
 
 import { mathRange } from "../../util/markdown";
-import { Document } from "quarto-core";
+import { Document, Parser } from "quarto-core";
 import { LsConfiguration } from "../../config";
-import { IMdParser } from "../../parser";
 
 
-export function mathHover(parser: IMdParser, doc: Document, pos: Position, config?: LsConfiguration | undefined): Hover | null {
+export function mathHover(parser: Parser, doc: Document, pos: Position, config?: LsConfiguration | undefined): Hover | null {
   const range = mathRange(parser, doc, pos);
   if (range) {
     const contents = mathjaxTypesetToMarkdown(range.math, doc.getText(), config);

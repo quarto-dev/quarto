@@ -20,19 +20,18 @@ import { Position, Range } from 'vscode-languageserver-types';
 import { coalesce } from 'core';
 import { translatePosition, areRangesEqual, makeRange, modifyRange, rangeContains, Token, isList } from 'quarto-core';
 import { ILogger, LogLevel } from '../logging';
-import { IMdParser } from '../parser';
 import { MdTableOfContentsProvider, TocEntry, isTocHeaderEntry } from '../toc';
-import { getLine, Document } from 'quarto-core';
+import { getLine, Document, Parser } from 'quarto-core';
 import { isEmptyOrWhitespace } from '../util/string';
 
 export class MdSelectionRangeProvider {
 
-	readonly #parser: IMdParser;
+	readonly #parser: Parser;
 	readonly #tocProvider: MdTableOfContentsProvider;
 	readonly #logger: ILogger;
 
 	constructor(
-		parser: IMdParser,
+		parser: Parser,
 		tocProvider: MdTableOfContentsProvider,
 		logger: ILogger,
 	) {
@@ -67,7 +66,7 @@ export class MdSelectionRangeProvider {
 	}
 
 	async #getBlockSelectionRange(document: Document, position: Position, parent: lsp.SelectionRange | undefined, token: CancellationToken): Promise<lsp.SelectionRange | undefined> {
-		const tokens = this.#parser.tokenize(document);
+		const tokens = this.#parser(document);
 		if (token.isCancellationRequested) {
 			return undefined;
 		}

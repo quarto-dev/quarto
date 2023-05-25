@@ -19,14 +19,13 @@ import { CancellationToken, Hover } from "vscode-languageserver";
 import { yamlHover } from "./hover-yaml";
 import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
-import { Document } from "quarto-core";
+import { Document, Parser } from "quarto-core";
 import { LsConfiguration } from "../../config";
 import { Quarto } from "../../quarto";
 import { docEditorContext } from "../../quarto";
-import { IMdParser } from "../../parser";
 
 export class MdHoverProvider {
-  constructor(private readonly quarto_: Quarto, private readonly parser_: IMdParser) {}
+  constructor(private readonly quarto_: Quarto, private readonly parser_: Parser) {}
 
   public async provideHover(
     doc: Document,

@@ -24,41 +24,48 @@ import { isExecutableLanguageBlock, isFencedCode, languageNameFromBlock } from "
 
 export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  
-  const output = context.runPandoc(
-    { input: markdown },
-    "--from", "commonmark_x+sourcepos",
-     "--to", "plain",
-     "--lua-filter", path.join(resourcePath, 'parser.lua')
-  );
-
-  // parse json (w/ some fixups)
-  const outputJson = JSON.parse(output) as Record<string,Token>;
-  const tokens = (Object.values(outputJson).map(token => {
-
-    // fixup lang
-    if (isFencedCode(token) && isExecutableLanguageBlock(token)) {
-      const lang = languageNameFromBlock(token);
-      token.attr![kAttrClasses][0] = `{${lang}}`;
-    } 
-    
-    // return token
-    return token;
-  }));
-
-
-  // add a FrontMatter token if there is front matter
-  const result = partitionYamlFrontMatter(markdown);
-  if (result) {
-    const yamlLines = lines(result.yaml);
-    const yamlToken: Token = {
-      type: "FrontMatter",
-      data: result.yaml,
-      range: makeRange(0, 0, yamlLines.length - 1, 0)
+  try {
+    const output = context.runPandoc(
+      { input: markdown },
+      "--from", "commonmark_x+sourcepos",
+       "--to", "plain",
+       "--lua-filter", path.join(resourcePath, 'parser.lua')
+    );
+  
+    // parse json (w/ some fixups)
+    const outputJson = JSON.parse(output) as Record<string,Token>;
+    const tokens = (Object.values(outputJson).map(token => {
+  
+      // fixup lang
+      if (isFencedCode(token) && isExecutableLanguageBlock(token)) {
+        const lang = languageNameFromBlock(token);
+        token.attr![kAttrClasses][0] = `{${lang}}`;
+      } 
+      
+      // return token
+      return token;
+    }));
+  
+  
+    // add a FrontMatter token if there is front matter
+    const result = partitionYamlFrontMatter(markdown);
+    if (result) {
+      const yamlLines = lines(result.yaml);
+      const yamlToken: Token = {
+        type: "FrontMatter",
+        data: result.yaml,
+        range: makeRange(0, 0, yamlLines.length - 1, 0)
+      }
+      tokens.unshift(yamlToken);
     }
-    tokens.unshift(yamlToken);
-  }
+  
+    return tokens;
 
-  return tokens;
+  } catch(error) {
+    // message has already been written to stderr
+    return [];
+  
+  }
 }
 
 

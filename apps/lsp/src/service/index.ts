@@ -24,11 +24,8 @@ import { DiagnosticComputer, DiagnosticOnSaveComputer, DiagnosticOptions, Diagno
 import { MdDocumentHighlightProvider } from './providers/document-highlights';
 import { createWorkspaceLinkCache, MdLinkProvider, ResolvedDocumentLinkTarget } from './providers/document-links';
 import { MdDocumentSymbolProvider } from './providers/document-symbols';
-import { FileRename, MdFileRenameProvider } from './providers/file-rename';
 import { MdFoldingProvider } from './providers/folding';
-import { MdOrganizeLinkDefinitionProvider } from './providers/organize-linkdefs';
 import { MdReferencesProvider } from './providers/references';
-import { MdRenameProvider } from './providers/rename';
 import { MdSelectionRangeProvider } from './providers/smart-select';
 import { MdWorkspaceSymbolProvider } from './providers/workspace-symbols';
 import { ILogger } from './logging';
@@ -37,7 +34,6 @@ import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
 import { MdCompletionProvider } from './providers/completion/completion';
 import { Quarto } from './quarto';
-import { pandocSlugifier } from './slugify';
 
 export { IncludeWorkspaceHeaderCompletions } from './providers/completion/completion';
 export type { MdCompletionProvider } from './providers/completion/completion';
@@ -46,8 +42,6 @@ export { PreferredMdPathExtensionStyle, defaultLsConfiguration } from './config'
 export type { DiagnosticOptions, IPullDiagnosticsManager } from './providers/diagnostics';
 export { DiagnosticCode, DiagnosticLevel} from './providers/diagnostics';
 export type { ResolvedDocumentLinkTarget } from './providers/document-links';
-export type { FileRename } from './providers/file-rename';
-export { RenameNotSupportedAtLocationError } from './providers/rename';
 export type  { ILogger } from './logging';
 export { LogLevel } from './logging';
 export type { ISlugifier } from './slugify'
@@ -150,40 +144,6 @@ export interface IMdLanguageService {
 	getDefinition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined>;
 
 	/**
-	 * Organizes all link definitions in the file by grouping them to the bottom of the file, sorting them, and optionally
-	 * removing any unused definitions.
-	 *
-	 * @returns A set of text edits. May be empty if no edits are required (e.g. the definitions are already sorted at
-	 * the bottom of the file).
-	 */
-	organizeLinkDefinitions(document: Document, options: { readonly removeUnused?: boolean }, token: CancellationToken): Promise<lsp.TextEdit[]>;
-
-	/**
-	 * Prepare for showing rename UI.
-	 *
-	 * Indicates if rename is supported. If it is, returns the range of symbol being renamed as well as the placeholder to show to the user for the rename.
-	 */
-	prepareRename(document: Document, position: lsp.Position, token: CancellationToken): Promise<{ range: lsp.Range; placeholder: string } | undefined>;
-
-	/**
-	 * Get the edits for a rename operation.
-	 *
-	 * @returns A workspace edit that performs the rename or undefined if the rename cannot be performed.
-	 */
-	getRenameEdit(document: Document, position: lsp.Position, nameName: string, token: CancellationToken): Promise<lsp.WorkspaceEdit | undefined>;
-
-	/**
-	 * Get the edits for a file rename. This update links to the renamed files as well as links within the renamed files.
-	 *
-	 * This should be invoked after the rename has already happened (i.e. the workspace should reflect the file system state post rename).
-	 *
-	 * You can pass in uris to resources or directories. However if you pass in multiple edits, these edits must not overlap/conflict.
-	 *
-	 * @returns An object with a workspace edit that performs the rename and a list of old file uris that effected the edit. Returns undefined if the rename cannot be performed. 
-	 */
-	getRenameFilesInWorkspaceEdit(edits: readonly FileRename[], token: CancellationToken): Promise<{ participatingRenames: readonly FileRename[]; edit: lsp.WorkspaceEdit } | undefined>;
-
-	/**
 	 * Get document highlights for a position in the document.
 	 */
 	getDocumentHighlights(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]>;
@@ -245,13 +205,10 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 	const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
 	const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);
 	const definitionsProvider = new MdDefinitionProvider(config, init.workspace, tocProvider, linkCache);
-	const renameProvider = new MdRenameProvider(config, init.workspace, referencesProvider, pandocSlugifier, logger);
-	const fileRenameProvider = new MdFileRenameProvider(config, init.workspace, linkCache, referencesProvider);
 	const diagnosticOnSaveComputer = new DiagnosticOnSaveComputer(init.quarto);
 	const diagnosticsComputer = new DiagnosticComputer(config, init.workspace, linkProvider, tocProvider, logger);
 	const docSymbolProvider = new MdDocumentSymbolProvider(tocProvider, linkProvider, logger);
 	const workspaceSymbolProvider = new MdWorkspaceSymbolProvider(init.workspace, docSymbolProvider);
-	const organizeLinkDefinitions = new MdOrganizeLinkDefinitionProvider(linkProvider);
 	const documentHighlightProvider = new MdDocumentHighlightProvider(config, tocProvider, linkProvider);
 
 	return Object.freeze<IMdLanguageService>({
@@ -276,10 +233,6 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 			return (await referencesProvider.getReferencesToFileInWorkspace(resource, token)).map(x => x.location);
 		},
 		getDefinition: definitionsProvider.provideDefinition.bind(definitionsProvider),
-		organizeLinkDefinitions: organizeLinkDefinitions.getOrganizeLinkDefinitionEdits.bind(organizeLinkDefinitions),
-		prepareRename: renameProvider.prepareRename.bind(renameProvider),
-		getRenameEdit: renameProvider.provideRenameEdits.bind(renameProvider),
-		getRenameFilesInWorkspaceEdit: fileRenameProvider.getRenameFilesInWorkspaceEdit.bind(fileRenameProvider),
 		getDocumentHighlights: (document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]> => {
 			return documentHighlightProvider.getDocumentHighlights(document, position, token);
 		},

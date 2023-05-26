@@ -27,7 +27,6 @@ import {
   FoldingRange,
   InitializeParams,
   ProposedFeatures,
-  ResponseError,
   SelectionRange,
   TextDocuments,
   TextDocumentSyncKind,
@@ -48,11 +47,10 @@ import { ConfigurationManager, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
-import { createLanguageService, IMdLanguageService, RenameNotSupportedAtLocationError } from "./service";
+import { createLanguageService, IMdLanguageService } from "./service";
 import { initializeQuarto } from "./quarto";
 import { registerDiagnostics } from "./diagnostics";
 
-const kOrganizeLinkDefKind = 'source.organizeLinkDefinitions';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -151,55 +149,6 @@ connection.onInitialize((params: InitializeParams) => {
     return mdLs?.getDefinition(document, params.position, token);
   });
 
-  connection.onPrepareRename(async (params, token) => {
-    const document = documents.get(params.textDocument.uri);
-    if (!document) {
-      return undefined;
-    }
-
-    try {
-      return await mdLs?.prepareRename(document, params.position, token);
-    } catch (e) {
-      if (e instanceof RenameNotSupportedAtLocationError) {
-        throw new ResponseError(0, e.message);
-      } else {
-        throw e;
-      }
-    }
-  });
-
-  connection.onRenameRequest(async (params, token) => {
-    const document = documents.get(params.textDocument.uri);
-    if (!document) {
-      return undefined;
-    }
-    return mdLs?.getRenameEdit(document, params.position, params.newName, token);
-  });
-
-  interface OrganizeLinkActionData {
-    readonly uri: string;
-  }
-
-  connection.onCodeActionResolve(async (codeAction, token) => {
-    if (codeAction.kind === kOrganizeLinkDefKind) {
-      const data = codeAction.data as OrganizeLinkActionData;
-      const document = documents.get(data.uri);
-      if (!document) {
-        return codeAction;
-      }
-
-      const edits = (await mdLs?.organizeLinkDefinitions(document, { removeUnused: true }, token)) || [];
-      codeAction.edit = {
-        changes: {
-          [data.uri]: edits
-        }
-      };
-      return codeAction;
-    }
-
-    return codeAction;
-  });
- 
   // register no-op methods to enable client middleware
   middlewareRegister(connection);
    
@@ -213,20 +162,11 @@ connection.onInitialize((params: InitializeParams) => {
         triggerCharacters: [".", "$", "@", ":", "\\", "=", "/", "#"],
       },
       hoverProvider: true,
-      codeActionProvider: {
-        resolveProvider: true,
-        codeActionKinds: [
-          kOrganizeLinkDefKind,
-          'quickfix',
-          'refactor',
-        ]
-      },
       definitionProvider: true,
       documentLinkProvider: { resolveProvider: true },
       documentSymbolProvider: true,
       foldingRangeProvider: true,
       referencesProvider: true,
-      renameProvider: { prepareProvider: true, },
       selectionRangeProvider: true,
       workspaceSymbolProvider: true,
       workspace: {

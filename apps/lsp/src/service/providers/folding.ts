@@ -15,7 +15,7 @@
  */
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
-import { Token, isDisplayMath, isRawBlock, getLine, Document, Parser } from 'quarto-core';
+import { Token, isDisplayMath, isRawBlock, getLine, Document, Parser, trimRange } from 'quarto-core';
 
 import { ILogger, LogLevel } from '../logging';
 import { MdTableOfContentsProvider, isTocHeaderEntry } from '../toc';
@@ -113,7 +113,7 @@ export class MdFoldingProvider {
 		for (const token of tokens) {
 			if (isFoldableToken(token)) {
 				const startLine = token.range.start.line;
-				let endLine = token.range.end.line - 1;
+				let endLine = trimRange(document, token.range).end.line;
 				if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= startLine + 1) {
 					endLine = endLine - 1;
 				}

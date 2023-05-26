@@ -85,7 +85,7 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
       const yamlToken: TokenFrontMatter = {
         type: "FrontMatter",
         data: yaml,
-        range: makeRange(0, 0, yamlLines.length - 1, 0)
+        range: makeRange(0, 0, yamlLines.length, 0)
       }
       tokens.unshift(yamlToken);
     }

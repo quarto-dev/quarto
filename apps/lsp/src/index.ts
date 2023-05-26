@@ -18,6 +18,7 @@
 
 // TODO: test and tweak all of the features, updating changelog as required
 
+// TODO: see if we can move more stuff into the lsp (highlight, code lens, etc.)
 // TODO: see how _extensions plays in extension projects (check readonly?)
 
 import path from "node:path"

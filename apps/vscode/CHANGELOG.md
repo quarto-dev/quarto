@@ -2,6 +2,10 @@
 
 ## 1.86.0 (Unreleased)
 
+- Parse markdown w/ Pandoc rather than markdown-it (improve symbols, folding, etc.)
+- Go to Definition and Find References for hypyerlinks
+- Markdown diagnostics (disabled by default, set `markdown.validate.enabled` to enable)
+- Handle workspace symbols, link definitions, and hover within the LSP
 - Visual Editor: Use Fluent UI v9 as component library
 - Visual Editor: Allow for \ in completion token (Julia symbol completions)
 - Visual Editor: Don't encode/decode image URLs when round-tripping through editor

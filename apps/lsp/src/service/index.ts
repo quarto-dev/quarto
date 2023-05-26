@@ -19,8 +19,6 @@ import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { Document, Parser } from "quarto-core"
 import { LsConfiguration} from './config';
-import { MdExtractLinkDefinitionCodeActionProvider } from './providers/codeactions/extract-linkdef';
-import { MdRemoveLinkDefinitionCodeActionProvider } from './providers/codeactions/remove-linkdef';
 import { MdDefinitionProvider } from './providers/definitions';
 import { DiagnosticComputer, DiagnosticOnSaveComputer, DiagnosticOptions, DiagnosticsManager, IPullDiagnosticsManager } from './providers/diagnostics';
 import { MdDocumentHighlightProvider } from './providers/document-highlights';
@@ -186,13 +184,6 @@ export interface IMdLanguageService {
 	getRenameFilesInWorkspaceEdit(edits: readonly FileRename[], token: CancellationToken): Promise<{ participatingRenames: readonly FileRename[]; edit: lsp.WorkspaceEdit } | undefined>;
 
 	/**
-	 * Get code actions for a selection in a file.
-	 *
-	 * Returned code actions may be disabled.
-	 */
-	getCodeActions(document: Document, range: lsp.Range, context: lsp.CodeActionContext, token: CancellationToken): Promise<lsp.CodeAction[]>;
-
-	/**
 	 * Get document highlights for a position in the document.
 	 */
 	getDocumentHighlights(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]>;
@@ -263,9 +254,6 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 	const organizeLinkDefinitions = new MdOrganizeLinkDefinitionProvider(linkProvider);
 	const documentHighlightProvider = new MdDocumentHighlightProvider(config, tocProvider, linkProvider);
 
-	const extractCodeActionProvider = new MdExtractLinkDefinitionCodeActionProvider(linkProvider);
-	const removeLinkDefinitionActionProvider = new MdRemoveLinkDefinitionCodeActionProvider();
-
 	return Object.freeze<IMdLanguageService>({
 		dispose: () => {
 			linkCache.dispose();
@@ -292,12 +280,6 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 		prepareRename: renameProvider.prepareRename.bind(renameProvider),
 		getRenameEdit: renameProvider.provideRenameEdits.bind(renameProvider),
 		getRenameFilesInWorkspaceEdit: fileRenameProvider.getRenameFilesInWorkspaceEdit.bind(fileRenameProvider),
-		getCodeActions: async (doc: Document, range: lsp.Range, context: lsp.CodeActionContext, token: CancellationToken): Promise<lsp.CodeAction[]> => {
-			return (await Promise.all([
-				extractCodeActionProvider.getActions(doc, range, context, token),
-				Array.from(removeLinkDefinitionActionProvider.getActions(doc, range, context)),
-			])).flat();
-		},
 		getDocumentHighlights: (document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]> => {
 			return documentHighlightProvider.getDocumentHighlights(document, position, token);
 		},

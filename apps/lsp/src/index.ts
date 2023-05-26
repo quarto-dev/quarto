@@ -13,13 +13,14 @@
  *
  */
 
+// TODO: move image hover into lsp
+// TODO: consider removing 'Organize Reference Links'
 // TODO: test and tweak all of the features, updating changelog as required
 
 import path from "node:path"
 
 import {
   ClientCapabilities,
-  CodeAction,
   Definition,
   DocumentLink,
   DocumentSymbol,
@@ -36,8 +37,6 @@ import {
 import { CompletionItem, Hover, Location } from "vscode-languageserver-types"
 
 import { createConnection } from "vscode-languageserver/node"
-
-import * as l10n from '@vscode/l10n';
 
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -180,24 +179,6 @@ connection.onInitialize((params: InitializeParams) => {
   interface OrganizeLinkActionData {
     readonly uri: string;
   }
-
-  connection.onCodeAction(async (params, token) => {
-    const document = documents.get(params.textDocument.uri);
-    if (!document) {
-      return undefined;
-    }
-
-    if (params.context.only?.some(kind => kind === 'source' || kind.startsWith('source.'))) {
-      const action: CodeAction = {
-        title: l10n.t("Organize link definitions"),
-        kind: kOrganizeLinkDefKind,
-        data: <OrganizeLinkActionData>{ uri: document.uri }
-      };
-      return [action];
-    }
-
-    return mdLs?.getCodeActions(document, params.range, params.context, token);
-  });
 
   connection.onCodeActionResolve(async (codeAction, token) => {
     if (codeAction.kind === kOrganizeLinkDefKind) {

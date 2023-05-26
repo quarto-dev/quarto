@@ -23,9 +23,11 @@ import { Document, Parser } from "quarto-core";
 import { LsConfiguration } from "../../config";
 import { Quarto } from "../../quarto";
 import { docEditorContext } from "../../quarto";
+import { IWorkspace } from "../../workspace";
+import { imageHover } from "./hover-image";
 
 export class MdHoverProvider {
-  constructor(private readonly quarto_: Quarto, private readonly parser_: Parser) {}
+  constructor(private readonly workspace_: IWorkspace, private readonly quarto_: Quarto, private readonly parser_: Parser) {}
 
   public async provideHover(
     doc: Document,
@@ -37,7 +39,10 @@ export class MdHoverProvider {
       return null;
     }
     return (
-      (await refHover(this.quarto_, this.parser_, doc, pos)) || mathHover(this.parser_, doc, pos, config) || (await yamlHover(this.quarto_, docEditorContext(doc, pos, true)))
+      (await refHover(this.quarto_, this.parser_, doc, pos)) || 
+      mathHover(this.parser_, doc, pos, config) || 
+      (await yamlHover(this.quarto_, docEditorContext(doc, pos, true))) ||
+      (await (imageHover(this.workspace_)(doc, pos)))
     );
   } 
 }

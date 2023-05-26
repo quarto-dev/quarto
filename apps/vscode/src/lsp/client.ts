@@ -56,7 +56,6 @@ import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { deactivateVirtualDocTempFiles } from "../vdoc/vdoc-tempfile";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
-import { imageHover } from "../providers/hover-image";
 import {
   embeddedDocumentFormattingProvider,
   embeddedDocumentRangeFormattingProvider,
@@ -201,12 +200,6 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
     token: CancellationToken,
     next: ProvideHoverSignature
   ) => {
-    // see if we have any local hover providers
-    const imgHover = await imageHover(document, position);
-    if (imgHover) {
-      return imgHover;
-    }
-
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
       // get uri for hover

@@ -66,6 +66,7 @@ $buttonOpacity: 0.6;
 .outlineCloseIcon {
   visibility: hidden;
   margin-left: auto !important;
+  padding-right: 20px !important;
   cursor: pointer;
   opacity: $buttonOpacity;
 }

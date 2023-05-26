@@ -40,7 +40,7 @@ export default function emitTable(
 
     for (let i = 0; i < result.RowLines.length; i++)
     {
-        let cells = getCells(result.RowLines[i]);
+        const cells = getCells(result.RowLines[i]);
 
         processRow(md, state, 'td', result.ColumnAlignments, offsets[i], offsets[i + 1], cells);
     }
@@ -59,12 +59,12 @@ function processRow(
     lineEnd: number,
     cells: string[][])
 {
-    let token = state.push('tr_open', 'tr', 1);
+    const token = state.push('tr_open', 'tr', 1);
     token.map = [lineBegin, lineEnd];
 
     for (let i = 0; i < cells.length; i++)
     {
-        let token = state.push(tag + '_open', tag, 1);
+        const token = state.push(tag + '_open', tag, 1);
         token.map = [lineBegin + 1, lineEnd - 1];
 
         if (columnAlignments[i] !== ColumnAlignments.None)
@@ -79,7 +79,7 @@ function processRow(
         else if (cells[i].length === 1)
         {
             // single line cell -> emit as inline markdown
-            let token = state.push('inline', '', 0);
+            const token = state.push('inline', '', 0);
             token.content = cells[i][0].trim();
             token.children = [];
         }
@@ -98,7 +98,7 @@ function processRow(
                 cell = cell.slice(3, cell.length - 4);
             }
 
-            let token = state.push('html_block', '', 0);
+            const token = state.push('html_block', '', 0);
             token.content = cell;
             token.children = [];
         }

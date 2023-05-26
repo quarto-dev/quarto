@@ -36,7 +36,7 @@ export default function parseTable(
 
     // initialize column alignments
     result.ColumnAlignments = result.ColumnWidths
-        .map(_ => ColumnAlignments.None);
+        .map(() => ColumnAlignments.None);
 
     if (rowLine.indexOf(':') >= 0)
     {
@@ -193,7 +193,7 @@ function getColumnAlignments(
     ColumnAlignments[]
 {
 
-    let alignments: ColumnAlignments[] = [];
+    const alignments: ColumnAlignments[] = [];
 
     let left = 1;
     let right = -1;
@@ -233,7 +233,7 @@ function validateColumnWidths(
 {
     const cells: string[] = [];
 
-    for (var i = 0; i < columnWidths.length; i++)
+    for (let i = 0; i < columnWidths.length; i++)
     {
         const cell = matches[i + 1];
 

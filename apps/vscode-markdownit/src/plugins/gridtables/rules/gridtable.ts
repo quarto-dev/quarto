@@ -27,7 +27,7 @@ export default function gridTableRule(
             return false;
         }
 
-        let parseResult = parseTable(
+        const parseResult = parseTable(
             state,
             startLine,
             endLine);

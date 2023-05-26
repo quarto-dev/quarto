@@ -7,7 +7,7 @@ import ColumnAlignments from "./ColumnAlignments";
 
 export default class ParseTableResult
 {
-    Success: boolean = false;
+    Success = false;
 
     ColumnWidths: number[] = [];
 
@@ -15,7 +15,7 @@ export default class ParseTableResult
 
     ColumnAlignments: ColumnAlignments[] = [];
 
-    HeaderLess: boolean = false;
+    HeaderLess = false;
 
     HeaderLines: string[][] = [];
 
@@ -23,5 +23,5 @@ export default class ParseTableResult
 
     SeparatorLineOffsets: number[] = [];
 
-    CurrentLine: number = 0;
+    CurrentLine = 0;
 }

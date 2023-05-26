@@ -24,7 +24,7 @@ export const figureDivsPlugin = (md: MarkdownIt) => {
     kFigureDivRuleName,
     (state) => {
 
-      let isFigureDiv: boolean[] = [];
+      const isFigureDiv: boolean[] = [];
 
       for (let i = 0; i < state.tokens.length; i++) {
         const token = state.tokens[i];

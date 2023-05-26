@@ -1,4 +1,6 @@
 {
+  "name": "quarto",
+  "version": "1.86.0",
   "private": true,
   "workspaces": [
     "apps/*",

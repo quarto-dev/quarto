@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.86.0 (Unreleased)
+## 1.86.0 (Release on 26 May 2023)
 
 - Parse markdown w/ Pandoc rather than markdown-it (improve symbols, folding, etc.)
 - Go to Definition and Find References for hypyerlinks

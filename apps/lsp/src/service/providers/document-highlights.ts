@@ -22,7 +22,6 @@ import { LsConfiguration } from '../config';
 import { MdTableOfContentsProvider, TableOfContents, TocHeaderEntry, isTocHeaderEntry } from '../toc';
 import { tryAppendMarkdownFileExtension } from '../workspace';
 import { HrefKind, InternalHref, looksLikeLinkToResource, MdLink, MdLinkKind, MdLinkProvider } from './document-links';
-import { getFilePathRange } from './rename';
 
 export class MdDocumentHighlightProvider {
 
@@ -176,4 +175,11 @@ export class MdDocumentHighlightProvider {
 			}
 		}
 	}
+}
+
+function getFilePathRange(link: MdLink): lsp.Range {
+	if (link.source.fragmentRange) {
+		return modifyRange(link.source.hrefRange, undefined, translatePosition(link.source.fragmentRange.start, { characterDelta: -1 }));
+	}
+	return link.source.hrefRange;
 }

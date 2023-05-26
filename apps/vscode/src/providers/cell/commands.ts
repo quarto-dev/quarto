@@ -15,7 +15,6 @@
 
 import { lines } from "core";
 import { CodeViewActiveBlockContext, CodeViewSelectionAction } from "editor-types";
-import Token from "markdown-it/lib/token";
 import {
   Position,
   Range,
@@ -24,14 +23,10 @@ import {
   TextEditorRevealType,
   window,
 } from "vscode";
+import { Token, TokenCodeBlock, TokenMath, isExecutableLanguageBlock, isExecutableLanguageBlockOf, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 import { Command } from "../../core/command";
 import { isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
-import {
-  isExecutableLanguageBlockOf,
-  languageNameFromBlock,
-  languageBlockAtPosition,
-} from "../../markdown/language";
 import { QuartoVisualEditor, VisualEditorProvider } from "../editor/editor";
 import {
   blockHasExecutor,
@@ -81,7 +76,7 @@ abstract class RunCommand {
       const editor = window.activeTextEditor;
       const doc = editor?.document;
       if (doc && isQuartoDoc(doc)) {
-        const tokens = await this.engine_.parse(doc);
+        const tokens = this.engine_.parse(doc);
         line = line || editor.selection.start.line;
         if (this.blockRequired()) {
           const block = languageBlockAtPosition(
@@ -146,7 +141,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
     _line: number,
     block?: Token
   ) {
-    if (block) {
+    if (block && isExecutableLanguageBlock(block)) {
       const language = languageNameFromBlock(block);
       const code = codeFromBlock(block);
       await executeInteractive(language, [code], editor.document);
@@ -327,7 +322,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     const blocks: Token[] = [];
     for (const blk of tokens.filter(blockIsExecutable)) {
       // if the end of this block is past the line then bail
-      if (!blk.map || blk.map[1] > line) {
+      if (blk.range.end.line > line) {
         break;
       }
       blocks.push(blk);
@@ -398,7 +393,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     const blocks: string[] = [];
     for (const blk of tokens.filter(blockIsExecutable)) {
       // skip if the cell is above or at the cursor
-      if (blk.map && line < blk.map[0]) {
+      if (line < blk.range.start.line) {
         // set langauge if needed
         const blockLanguage = languageNameFromBlock(blk);
         if (!language) {
@@ -513,7 +508,7 @@ class GoToCellCommand {
       const editor = window.activeTextEditor;
       const doc = editor?.document;
       if (doc && isQuartoDoc(doc)) {
-        const tokens = await this.engine_.parse(doc);
+        const tokens = this.engine_.parse(doc);
         const line = editor.selection.start.line;
         const selector = this.dir_ === "next" ? nextBlock : previousBlock;
         const cell = selector(line, tokens);
@@ -545,30 +540,26 @@ class GoToPreviousCellCommand extends GoToCellCommand implements Command {
   public readonly id = GoToPreviousCellCommand.id;
 }
 
-async function runAdjacentBlock(editor: TextEditor, block: Token) {
-  if (block.map) {
-    navigateToBlock(editor, block);
-    const language = languageNameFromBlock(block);
-    await executeInteractive(language, [codeFromBlock(block)], editor.document);
-  }
+async function runAdjacentBlock(editor: TextEditor, block: TokenMath | TokenCodeBlock) {
+  navigateToBlock(editor, block);
+  const language = languageNameFromBlock(block);
+  await executeInteractive(language, [codeFromBlock(block)], editor.document);
 }
 
 function navigateToBlock(editor: TextEditor, block: Token) {
-  if (block.map) {
-    const blockPos = new Position(block.map[0] + 1, 0);
-    editor.selection = new Selection(blockPos, blockPos);
-    editor.revealRange(
-      new Range(new Position(block.map[0], 0), new Position(block.map[0], 0)),
-      TextEditorRevealType.InCenterIfOutsideViewport
-    );
-  }
+  const blockPos = new Position(block.range.start.line + 1, 0);
+  editor.selection = new Selection(blockPos, blockPos);
+  editor.revealRange(
+    new Range(new Position(block.range.start.line, 0), new Position(block.range.start.line, 0)),
+    TextEditorRevealType.InCenterIfOutsideViewport
+  );
 }
 
 function nextBlock(line: number, tokens: Token[], requireExecutable = false) {
   for (const block of tokens.filter(
     requireExecutable ? blockIsExecutable : blockHasExecutor
   )) {
-    if (block.map && block.map[0] > line) {
+    if (block.range.start.line > line) {
       return block;
     }
   }
@@ -583,7 +574,7 @@ function previousBlock(
   for (const block of tokens
     .filter(requireExecutable ? blockIsExecutable : blockHasExecutor)
     .reverse()) {
-    if (block.map && block.map[1] < line) {
+    if (block.range.end.line < line) {
       return block;
     }
   }

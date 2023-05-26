@@ -109,6 +109,7 @@ export function activatePreview(
   // render on save
   const onSave = async (docUri: Uri) => {
     const editor = findQuartoEditor(
+      engine,
       (editorDoc) => editorDoc.uri.fsPath === docUri.fsPath
     );
     if (editor) {
@@ -117,7 +118,7 @@ export function activatePreview(
         (await renderOnSave(engine, editor.document)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
-        await previewDoc(editor, undefined, true);
+        await previewDoc(editor, undefined, true, engine);
       }
     }
   };
@@ -158,6 +159,7 @@ export async function previewDoc(
   editor: QuartoEditor,
   format: string | null | undefined,
   renderOnSave: boolean,
+  engine: MarkdownEngine,
   onShow?: () => void
 ) { 
   // set the slide index from the source editor so we can
@@ -187,6 +189,7 @@ export async function previewDoc(
 
   // execute the preview (rerefresh the reference after save)
   const previewEditor = findQuartoEditor(
+    engine,
     (editorDoc) => editorDoc.uri.fsPath === editor.document.uri.fsPath
   );
   if (previewEditor) {
@@ -603,7 +606,7 @@ class PreviewManager {
 
       // find existing visible instance
       const fileUri = Uri.file(errorLoc.file);
-      const editor = findQuartoEditor((doc) => doc.uri.fsPath === fileUri.fsPath);
+      const editor = findQuartoEditor(this.engine_, (doc) => doc.uri.fsPath === fileUri.fsPath);
       if (editor) {
         if (editor.textEditor) {
           // if the current selection is outside of the error region then

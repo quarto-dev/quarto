@@ -20,15 +20,12 @@ import {
   Position,
   TextEditor,
   Range,
-  TextDocumentContentChangeEvent,
 } from "vscode";
 import { isQuartoDoc } from "../core/doc";
 
 import { MarkdownEngine } from "../markdown/engine";
-import {
-  languageBlockAtPosition,
-  languageNameFromBlock,
-} from "../markdown/language";
+import { languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+
 
 export function activateOptionEnterProvider(
   context: ExtensionContext,
@@ -47,7 +44,7 @@ export function activateOptionEnterProvider(
           // check for enter key within a language block
           for (const change of event.contentChanges) {
             if (change.text === "\n" || change.text === "\r\n") {
-              const tokens = await engine.parse(doc);
+              const tokens = engine.parse(doc);
               const line = window.activeTextEditor.selection.start.line;
               const block = languageBlockAtPosition(
                 tokens,

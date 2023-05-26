@@ -28,13 +28,9 @@ import { languageDiagramEngine } from "editor-core";
 
 import { isGraphvizDoc, isMermaidDoc, isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
-import {
-  isDiagram,
-  languageBlockAtPosition,
-  languageNameFromBlock,
-} from "../../markdown/language";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
 import { visualEditorDiagramState } from "./diagram";
+import { isDiagram, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 const kDiagramViewId = "quarto.diagramView";
 
@@ -103,14 +99,14 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
         const doc = window.activeTextEditor.document;
         if (isQuartoDoc(doc) && window.activeTextEditor.selection) {
           // if we are in a diagram block then send its contents
-          const tokens = await this.engine_.parse(doc);
+          const tokens = this.engine_.parse(doc);
           const line = window.activeTextEditor.selection.start.line;
           const block = languageBlockAtPosition(tokens, new Position(line, 0));
           if (block && isDiagram(block)) {
             const language = languageNameFromBlock(block);
             const engine = languageDiagramEngine(language);
             if (engine) {
-              this.updateViewState({ engine, src: block.content });
+              this.updateViewState({ engine, src: block.data });
             }
           }
         } else if (isMermaidDoc(doc)) {

@@ -22,7 +22,7 @@ import {
   CancellationToken,
 } from "vscode";
 import { MarkdownEngine } from "../../markdown/engine";
-import { isDisplayMath } from "../../markdown/language";
+import { isDisplayMath } from "quarto-core";
 
 export function quartoLensCodeLensProvider(
   engine: MarkdownEngine
@@ -33,7 +33,7 @@ export function quartoLensCodeLensProvider(
       token: CancellationToken
     ): ProviderResult<CodeLens[]> {
       const lenses: CodeLens[] = [];
-      const tokens = engine.parseSync(document);
+      const tokens = engine.parse(document);
       const mathBlocks = tokens.filter(isDisplayMath);
       for (let i = 0; i < mathBlocks.length; i++) {
         // respect cancellation request
@@ -42,20 +42,20 @@ export function quartoLensCodeLensProvider(
         }
 
         const block = mathBlocks[i];
-        if (block.map) {
-          // push code lens
-          const range = new Range(block.map[0], 0, block.map[0], 0);
-          lenses.push(
-            ...[
-              new CodeLens(range, {
-                title: "$(zoom-in) Preview",
-                tooltip: "Preview the rendered LaTeX math",
-                command: "quarto.previewMath",
-                arguments: [block.map[0] + 1],
-              }),
-            ]
-          );
-        }
+       
+        // push code lens
+        const range = new Range(block.range.start.line, 0, block.range.start.line, 0);
+        lenses.push(
+          ...[
+            new CodeLens(range, {
+              title: "$(zoom-in) Preview",
+              tooltip: "Preview the rendered LaTeX math",
+              command: "quarto.previewMath",
+              arguments: [block.range.start.line + 1],
+            }),
+          ]
+        );
+        
       }
       return lenses;
     },

@@ -19,13 +19,9 @@ import { DiagramState } from "editor-types";
 import { Command } from "../../core/command";
 import { isGraphvizDoc, isMermaidDoc, isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
-import {
-  isDiagram,
-  isDisplayMath,
-  languageBlockAtPosition,
-} from "../../markdown/language";
 import { QuartoDiagramWebviewManager } from "./diagram-webview";
 import { visualEditorDiagramState } from "./diagram";
+import { isDiagram, isDisplayMath, languageBlockAtPosition } from "quarto-core";
 
 export interface PreviewDiagramOptions {
   textEditorLine?: number;
@@ -69,7 +65,7 @@ class PreviewShortcutCommand implements Command {
       const doc = window.activeTextEditor.document;
       if (isQuartoDoc(doc)) {
         // are we in a language block?
-        const tokens = await this.engine_.parse(doc);
+        const tokens = this.engine_.parse(doc);
         const line = window.activeTextEditor.selection.start.line;
         const block = languageBlockAtPosition(tokens, new Position(line, 0));
         if (block) {

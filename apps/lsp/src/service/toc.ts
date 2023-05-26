@@ -36,7 +36,7 @@ import {
 	getLine, 
 	Document,
 	Parser,
-	trimRange
+
 } from 'quarto-core';
 
 import { ILogger, LogLevel } from './logging';
@@ -164,8 +164,8 @@ export class TableOfContents {
 			}
 		}
 
-		const maxHeadingLevel = tokens.reduce((max: number, element: Token) => {
-			return element.level && element.level < max ? element.level : max;
+		const maxHeadingLevel = tokens.reduce((max: number, token: Token) => {
+			return (isHeader(token) && token.data.level < max) ? token.data.level : max;
 		}, 2);
 
 		let lastLevel = 2;
@@ -191,7 +191,7 @@ export class TableOfContents {
 				const type = TocEntryType.Header;
 
 				// text
-				const text = token.data;
+				const text = token.data.text;
 
 				// slug 
 				const slug = toSlug(text);
@@ -200,13 +200,13 @@ export class TableOfContents {
 				const line = token.range.start.line;
 
 				// level
-				const level = isWithinTabset(token) ? lastLevel+1 : token.level!;
-				lastLevel = token.level! + 1;
+				const level = isWithinTabset(token) ? lastLevel+1 : token.data.level;
+				lastLevel = token.data.level + 1;
 
 				// sectionLocation
 				const sectionStart = token.range.start;
 				const containingDivElement = tokens.slice(0, i).reverse().find(el => el.type === "Div" && el.range.end.line > sectionStart.line);
-				const nextPeerElement = tokens.slice(i+1).find(el => !isWithinTabset(el) && el.level && (el.level <= level));
+				const nextPeerElement = tokens.slice(i+1).find(el => !isWithinTabset(el) && isHeader(el) && (el.data.level <= level));
 				const sectionEndLine = (nextPeerElement && containingDivElement)
 					?  Math.min(nextPeerElement.range.start.line-1, containingDivElement.range.end.line-2)
 					: nextPeerElement
@@ -218,7 +218,7 @@ export class TableOfContents {
 				const sectionLocation = makeRange(sectionStart, lsp.Position.create(sectionEndLine, sectionEndCharacter));
 
 				// headerLocation
-				const headerLocation = trimRange(document, token.range);
+				const headerLocation = token.range;
 
 				// headerTextLocation
 				let headerTextLocation = token.range;
@@ -252,7 +252,7 @@ export class TableOfContents {
 					text: text,
 					level: lastLevel,
 					line: token.range.start.line,
-					sectionLocation: asLocation(trimRange(document, token.range)),
+					sectionLocation: asLocation(token.range),
 				})
 			}
 		}

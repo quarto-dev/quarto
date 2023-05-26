@@ -13,15 +13,11 @@
  *
  */
 
-import Token from "markdown-it/lib/token";
 import { Position, TextDocument, Uri, Range } from "vscode";
+import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import {
-  isExecutableLanguageBlock,
-  languageBlockAtPosition,
-  languageNameFromBlock,
-} from "../markdown/language";
 import { embeddedLanguage, EmbeddedLanguage } from "./languages";
 import { virtualDocUriFromEmbeddedContent } from "./vdoc-content";
 import { virtualDocUriFromTempFile } from "./vdoc-tempfile";
@@ -43,7 +39,7 @@ export async function virtualDoc(
   }
 
   // check if the cursor is in a fenced code block
-  const tokens = await engine.parse(document);
+  const tokens = engine.parse(document);
   const language = languageAtPosition(tokens, position);
 
   if (language) {
@@ -86,14 +82,12 @@ function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
 }
 
 function fillLinesFromBlock(lines: string[], document: TextDocument, block: Token) {
-  if (block.map) {
-    for (
-      let line = block.map[0] + 1;
-      line < block.map[1] - 1 && line < document.lineCount;
-      line++
-    ) {
-      lines[line] = document.lineAt(line).text;
-    }
+  for (
+    let line = block.range.start.line + 1;
+    line < block.range.end.line && line < document.lineCount;
+    line++
+  ) {
+    lines[line] = document.lineAt(line).text;
   }
 }
 

@@ -17,10 +17,10 @@ import { Position, Selection, window, commands } from "vscode";
 import { Command } from "../../core/command";
 import { isQuartoDoc, preserveEditorFocus } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
-import { languageBlockAtPosition } from "../../markdown/language";
 import { QuartoAssistViewProvider } from "./webview";
 import { CodeViewCellContext } from "editor-types";
 import { JsonRpcRequestTransport } from "core";
+import { languageBlockAtPosition } from "quarto-core";
 
 export class PreviewMathCommand implements Command {
   private static readonly id = "quarto.previewMath";
@@ -34,7 +34,7 @@ export class PreviewMathCommand implements Command {
       const doc = window.activeTextEditor.document;
       if (isQuartoDoc(doc)) {
         // if selection isn't currently in the block then move it there
-        const tokens = await this.engine_.parse(doc);
+        const tokens = this.engine_.parse(doc);
         const block = languageBlockAtPosition(
           tokens,
           new Position(line, 0),
@@ -43,9 +43,8 @@ export class PreviewMathCommand implements Command {
         const selection = window.activeTextEditor.selection;
         if (
           block &&
-          block.map &&
-          (selection.active.line < block.map[0] ||
-            selection.active.line >= block.map[1])
+          (selection.active.line < block.range.start.line ||
+            selection.active.line >= block?.range.end.line)
         ) {
           const selPos = new Position(line, 0);
           window.activeTextEditor.selection = new Selection(selPos, selPos);

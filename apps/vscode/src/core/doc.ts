@@ -18,6 +18,9 @@ import { Uri } from "vscode";
 import { revealSlideIndex } from "../markdown/reveal";
 import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
+import { MarkdownEngine } from "../markdown/engine";
+
+
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
 const kMermaidLanguageId = "mermaid";
@@ -137,6 +140,7 @@ export interface QuartoEditor {
 }
 
 export function findQuartoEditor(
+  engine: MarkdownEngine,
   filter: (doc: vscode.TextDocument) => boolean,
   includeVisible = true
 ) : QuartoEditor | undefined {
@@ -150,7 +154,7 @@ export function findQuartoEditor(
   // active text editor
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {
-    return quartoEditor(textEditor);
+    return quartoEditor(textEditor, engine);
   // check visible text editors
   } else if (includeVisible) {
     // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
@@ -164,7 +168,7 @@ export function findQuartoEditor(
       filter(editor.document)
     );
     if (visibleEditor) {
-      return quartoEditor(visibleEditor);
+      return quartoEditor(visibleEditor, engine);
     } else {
       return undefined;
     }
@@ -174,17 +178,22 @@ export function findQuartoEditor(
 }
 
 
-export function quartoEditor(editor: vscode.TextEditor) {
+export function quartoEditor(editor: vscode.TextEditor, engine?: MarkdownEngine) {
   return { 
     document: editor.document, 
     activate: async () => {
       await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
     },
     slideIndex: async () => {
-      return await revealSlideIndex(
-        editor.selection.active, 
-        editor.document)
-      ;
+      if (engine) {
+        return await revealSlideIndex(
+          editor.selection.active, 
+          editor.document,
+          engine)
+        ;
+      } else {
+        return 0;
+      }
     },
     viewColumn: editor.viewColumn, 
     textEditor: editor 

@@ -20,7 +20,8 @@ import debounce from "lodash.debounce";
 
 import { isQuartoDoc, kQuartoDocSelector } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { isExecutableLanguageBlock } from "../markdown/language";
+import { isExecutableLanguageBlock } from "quarto-core";
+import { vscRange } from "../core/range";
 
 export function activateBackgroundHighlighter(
   context: vscode.ExtensionContext,
@@ -153,13 +154,9 @@ async function setEditorHighlightDecorations(
   const highlightedRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
-    const tokens = await engine.parse(editor.document);
+    const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      if (block.map) {
-        highlightedRanges.push(
-          new vscode.Range(block.map[0], 0, block.map[1] - 1, 0)
-        );
-      }
+      highlightedRanges.push(vscRange(block.range));
     }
   }
 

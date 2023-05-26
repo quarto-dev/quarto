@@ -24,6 +24,7 @@ import { createServer } from './server';
 const development = process.env.NODE_ENV !== 'production';
 
 // resource dirs
+// TODO: we currnetly don't copy resources from quarto-core
 const cwd = process.cwd();
 const editorDevResourcesDir = path.normalize(path.join(cwd, "../../packages/editor-server/src/resources"));
 const editorResourcesDir = development ? editorDevResourcesDir : editorDevResourcesDir;

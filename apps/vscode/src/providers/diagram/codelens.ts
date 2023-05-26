@@ -22,7 +22,7 @@ import {
   CancellationToken,
 } from "vscode";
 import { MarkdownEngine } from "../../markdown/engine";
-import { isDiagram } from "../../markdown/language";
+import { isDiagram } from "quarto-core";
 
 export function diagramCodeLensProvider(
   engine: MarkdownEngine
@@ -33,7 +33,7 @@ export function diagramCodeLensProvider(
       token: CancellationToken
     ): ProviderResult<CodeLens[]> {
       const lenses: CodeLens[] = [];
-      const tokens = engine.parseSync(document);
+      const tokens = engine.parse(document);
       const diagramBlocks = tokens.filter(isDiagram);
       for (let i = 0; i < diagramBlocks.length; i++) {
         // respect cancellation request
@@ -42,20 +42,20 @@ export function diagramCodeLensProvider(
         }
 
         const block = diagramBlocks[i];
-        if (block.map) {
-          // push code lens
-          const range = new Range(block.map[0], 0, block.map[0], 0);
-          lenses.push(
-            ...[
-              new CodeLens(range, {
-                title: "$(zoom-in) Preview",
-                tooltip: "Preview the diagram",
-                command: "quarto.previewDiagram",
-                arguments: [{ textEditorLine: block.map[0] + 1 }],
-              }),
-            ]
-          );
-        }
+       
+        // push code lens
+        const range = new Range(block.range.start.line, 0, block.range.start.line, 0);
+        lenses.push(
+          ...[
+            new CodeLens(range, {
+              title: "$(zoom-in) Preview",
+              tooltip: "Preview the diagram",
+              command: "quarto.previewDiagram",
+              arguments: [{ textEditorLine: block.range.start.line + 1 }],
+            }),
+          ]
+        );
+        
       }
       return lenses;
     },

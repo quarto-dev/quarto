@@ -15,7 +15,7 @@
 
 import { Position } from "../position";
 
-import { Token, TokenMath, isCodeBlock, isMath, kAttrClasses  } from "./token";
+import { Token, TokenCodeBlock, TokenMath, isCodeBlock, isMath, kAttrClasses  } from "./token";
 
 export function isLanguageBlock(token: Token) {
   return isCodeBlock(token) || isDisplayMath(token);
@@ -24,7 +24,7 @@ export function isLanguageBlock(token: Token) {
 // a language block that will be executed with its results
 // inclued in the document (either by an engine or because
 // it is a raw or display math block)
-export function isExecutableLanguageBlock(token: Token) {
+export function isExecutableLanguageBlock(token: Token) : token is TokenMath | TokenCodeBlock {
   if (isDisplayMath(token)) {
     return true;
   } else if (isCodeBlock(token)) {
@@ -32,11 +32,22 @@ export function isExecutableLanguageBlock(token: Token) {
     if (!clz) {
       return false;
     }
-    return clz.match(/^\{=?([a-zA-Z0-9_-]+)(?: *[ ,].*?)?/);
+    return !!clz.match(/^\{=?([a-zA-Z0-9_-]+)(?: *[ ,].*?)?/);
   } else {
     return false;
   }
 }
+
+export function codeForExecutableLanguageBlock(token: TokenMath | TokenCodeBlock) {
+  if (isMath(token)) {
+    return token.data.text;
+  } else if (isCodeBlock(token)) {
+    return token.data;
+  } else {
+    return "";
+  }
+}
+
 
 export function languageBlockAtPosition(
   tokens: Token[],
@@ -50,7 +61,7 @@ export function languageBlockAtPosition(
       start++;
       end--;
     }
-    if (position.line > start && position.line < end - 1) {
+    if (position.line >= start && position.line <= end) {
       return languageBlock;
     }
   }
@@ -67,7 +78,7 @@ export function isDisplayMath(token: Token): token is TokenMath {
   }
 }
 
-export function isDiagram(token: Token) {
+export function isDiagram(token: Token) : token is TokenCodeBlock {
   return (
     isExecutableLanguageBlockOf("mermaid")(token) ||
     isExecutableLanguageBlockOf("dot")(token)
@@ -84,11 +95,13 @@ export function languageNameFromBlock(token: Token) {
     } else {
       return "";
     }
+  } else {
+    return "";
   }
 }
 
 export function isExecutableLanguageBlockOf(language: string) {
-  return (token: Token) => {
+  return (token: Token) : token is TokenMath | TokenCodeBlock => {
     return (
       isExecutableLanguageBlock(token) &&
       languageNameFromBlock(token) === language

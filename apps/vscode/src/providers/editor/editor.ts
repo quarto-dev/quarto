@@ -64,7 +64,6 @@ import {
   reopenEditorInSourceMode 
 } from "./toggle";
 import { executableLanguages } from "../cell/executors";
-import { zoteroLspProxy } from "../zotero/zotero";
 
 
 export interface QuartoVisualEditor extends QuartoEditor {

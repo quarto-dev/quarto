@@ -67,7 +67,7 @@ export function documentImageResolver(
     uri = path.normalize(uri);
     const relative = (dir: string, file: string) => {
       return ensureForwardSlashes(path.relative(dir, file));
-    }
+    };
     // doc dir relative
     if (uri.startsWith(docDir)) {
       return relative(docDir, uri);

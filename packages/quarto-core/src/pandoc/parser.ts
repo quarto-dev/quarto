@@ -65,9 +65,21 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
     );
   
     // parse json (w/ some fixups)
+    const inputLines = lines(input);
     const outputJson = JSON.parse(output) as Record<string,Token>;
     const tokens = (Object.values(outputJson).map(token => {
   
+      // trim blocks
+      if ((token.range.end.line > token.range.start.line) && 
+          token.range.end.character === 0) {
+        token.range = makeRange(
+          token.range.start.line,
+          token.range.start.character,
+          token.range.end.line - 1,
+          inputLines[token.range.end.line -1].length
+        )
+      }
+      
       // fixup lang
       if (isCodeBlock(token) && isExecutableLanguageBlock(token)) {
         const lang = languageNameFromBlock(token);

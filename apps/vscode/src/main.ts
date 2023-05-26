@@ -33,12 +33,7 @@ import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 
 export async function activate(context: vscode.ExtensionContext) {
-  // create markdown engine
-  const engine = new MarkdownEngine();
-
-  // commands
-  const commands = cellCommands(engine);
-
+ 
   // get quarto context (some features conditional on it)
   const config = vscode.workspace.getConfiguration("quarto");
   const quartoPath = config.get("path") as string | undefined;
@@ -65,6 +60,13 @@ export async function activate(context: vscode.ExtensionContext) {
       path.delimiter + quartoContext.binPath + path.delimiter
     );
 
+    // create markdown engine
+    const resouresDir = context.asAbsolutePath(path.join("out", "lsp", "resources"));
+    const engine = new MarkdownEngine(quartoContext, resouresDir);
+
+    // commands
+    const commands = cellCommands(engine);
+
     // status bar
     activateStatusBar(quartoContext);
 
@@ -88,27 +90,27 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // walkthough
     commands.push(...walkthroughCommands(quartoContext));
+
+    // provide preview
+    const previewCommands = activatePreview(context, quartoContext, engine);
+    commands.push(...previewCommands);
+
+    // provide create
+    const createCommands = await activateCreate(context, quartoContext);
+    commands.push(...createCommands);
+
+    // provide code lens
+    vscode.languages.registerCodeLensProvider(
+      kQuartoDocSelector,
+      quartoCellExecuteCodeLensProvider(engine)
+    );
+
+    // provide file copy/drop handling
+    activateCopyFiles(context);
+
+    // activate providers common to browser/node
+    activateCommon(context, engine, commands);
   }
-
-  // provide preview
-  const previewCommands = activatePreview(context, quartoContext, engine);
-  commands.push(...previewCommands);
-
-  // provide create
-  const createCommands = await activateCreate(context, quartoContext);
-  commands.push(...createCommands);
-
-  // provide code lens
-  vscode.languages.registerCodeLensProvider(
-    kQuartoDocSelector,
-    quartoCellExecuteCodeLensProvider(engine)
-  );
-
-  // provide file copy/drop handling
-  activateCopyFiles(context);
-
-  // activate providers common to browser/node
-  activateCommon(context, engine, commands);
 }
 
 export async function deactivate() {

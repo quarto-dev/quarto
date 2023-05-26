@@ -92,19 +92,19 @@ local function extractToken(el)
       }
     }
 
-    -- level if this is a header
-    if type == "Header" then
-      token["level"] = el.level
-    end
-
     -- attributes if we have any
     if not attrEmpty(attr) then
       token["attr"] = attr
     end
 
     -- special 'data' for some types
-    if type == "Header" or type == "Image" then
+    if type == "Image" then
       token["data"] = pandoc.utils.stringify(el)
+    elseif type == "Header" then
+      token["data"] = {
+        level = el.level,
+        text = pandoc.utils.stringify(el)
+      }
     elseif type == "CodeBlock" then
       token["data"] = el.text
     elseif type == "Link" then

@@ -13,20 +13,23 @@
  *
  */
 
-import Token from "markdown-it/lib/token";
 
 import * as yaml from "js-yaml";
 
 import { lines } from "core";
+import { Token, isCodeBlock, languageNameFromBlock } from "quarto-core";
 
-import { languageNameFromBlock } from "../../markdown/language";
 
 export const kExecuteEval = "eval";
 
 export function cellOptionsForToken(token: Token): Record<string, unknown> {
-  const language = languageNameFromBlock(token);
-  const source = lines(token.content);
-  return cellOptions(language, source);
+  if (isCodeBlock(token)) {
+    const language = languageNameFromBlock(token);
+    const source = lines(token.data);
+    return cellOptions(language, source);
+  } else {
+    return {};
+  }
 }
 
 export function cellOptions(language: string, source: string[]): Record<string, unknown> {

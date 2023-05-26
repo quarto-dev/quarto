@@ -101,8 +101,7 @@ const defaultConfig: LsConfiguration = {
 		"**/packrat/**", 
 		"**/rsconnect/**",
 		"**/venv/**",
-		"**/env/**",
-		"**/_extensions/**"
+		"**/env/**"
 	],
 	includeWorkspaceHeaderCompletions: 'never',
 	colorTheme: "light",

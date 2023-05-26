@@ -22,11 +22,8 @@ import {
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import {
-  isExecutableLanguageBlock,
-  languageNameFromBlock,
-  languageBlockAtPosition,
-} from "../markdown/language";
+import { isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+
 
 export function insertCommands(engine: MarkdownEngine): Command[] {
   return [new InsertCodeCellCommand(engine)];
@@ -43,18 +40,18 @@ class InsertCodeCellCommand implements Command {
       if (doc && isQuartoDoc(doc)) {
 
         // determine most recently used language engien above the cursor
-        const tokens = await this.engine_.parse(doc);
+        const tokens = this.engine_.parse(doc);
         const cursorLine = window.activeTextEditor?.selection.active.line;
         let language = "";
         let insertTopPaddingLine = false;
 
         const pos = new Position(cursorLine, 0);
         const block = languageBlockAtPosition(tokens, pos, true);
-        if (block?.map) {
+        if (block) {
           // cursor is in an executable block
           language = languageNameFromBlock(block);
           insertTopPaddingLine = true;
-          const moveDown = block.map[1] - cursorLine;
+          const moveDown = block.range.end.line - cursorLine + 1;
           await commands.executeCommand("cursorMove", {
             to: "down",
             value: moveDown,
@@ -65,7 +62,7 @@ class InsertCodeCellCommand implements Command {
             isExecutableLanguageBlock
           )) {
             // if this is past the cursor then terminate
-            if (executableBlock.map && executableBlock.map[0] > cursorLine) {
+            if (executableBlock.range.start.line > cursorLine) {
               if (!language) {
                 language = languageNameFromBlock(executableBlock);
               }

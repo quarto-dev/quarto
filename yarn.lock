@@ -3762,13 +3762,6 @@
   dependencies:
     "@types/markdown-it" "*"
 
-"@types/markdown-it-container@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@types/markdown-it-container/-/markdown-it-container-2.0.5.tgz#abd793b64c5adc7b2d1e8963eddb388198248152"
-  integrity sha512-8v5jIC5gcCUv+JcD0DExwNBkoKC0kLB4acensF0NoNlTIcXmQxF3RDjzAdIW82sXSoR+n772ePguxIWlq2ELvA==
-  dependencies:
-    "@types/markdown-it" "*"
-
 "@types/markdown-it-highlightjs@^3.3.1":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/markdown-it-highlightjs/-/markdown-it-highlightjs-3.3.1.tgz#1e051211e7754ba478449fea7faeab3d177ca892"
@@ -9701,11 +9694,6 @@ markdown-it-attrs@^4.1.6:
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/markdown-it-attrs/-/markdown-it-attrs-4.1.6.tgz#2bc331c7649d8c6396a0613c2bba1093f3e64da9"
   integrity sha512-O7PDKZlN8RFMyDX13JnctQompwrrILuz2y43pW2GagcwpIIElkAdfeek+erHfxUOlXWPsjFeWmZ8ch1xtRLWpA==
-
-markdown-it-container@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/markdown-it-container/-/markdown-it-container-3.0.0.tgz#1d19b06040a020f9a827577bb7dbf67aa5de9a5b"
-  integrity sha512-y6oKTq4BB9OQuY/KLfk/O3ysFhB3IMYoIWhGJEidXt1NQFocFK2sA2t0NYZAMyMShAGL6x5OPIbrmXPIqaN9rw==
 
 markdown-it-deflist@^2.0.3:
   version "2.1.0"

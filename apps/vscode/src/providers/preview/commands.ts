@@ -42,9 +42,9 @@ export function previewCommands(
     new RenderDocumentHTMLCommand(quartoContext, engine),
     new RenderDocumentPDFCommand(quartoContext, engine),
     new RenderDocumentDOCXCommand(quartoContext, engine),
-    new RenderProjectCommand(quartoContext),
+    new RenderProjectCommand(quartoContext, engine),
     new WalkthroughRenderCommand(quartoContext, engine),
-    new ClearCacheCommand(),
+    new ClearCacheCommand(engine),
   ];
 }
 
@@ -79,13 +79,13 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
     super(quartoContext);
   }
   protected async renderFormat(format?: string | null, onShow?: () => void) {
-    const targetEditor = findQuartoEditor(canPreviewDoc);
+    const targetEditor = findQuartoEditor(this.engine_, canPreviewDoc);
     if (targetEditor) {
       const render =
         !(await renderOnSave(this.engine_, targetEditor.document)) ||
         !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
-        await previewDoc(targetEditor, format, false, onShow);
+        await previewDoc(targetEditor, format, false, this.engine_, onShow);
       } else {
         // show the editor
         if (!isNotebook(targetEditor.document)) {
@@ -180,14 +180,15 @@ class RenderProjectCommand extends RenderCommand implements Command {
   private static readonly id = "quarto.renderProject";
   public readonly id = RenderProjectCommand.id;
 
-  constructor(private readonly quartoContext: QuartoContext) {
+  constructor(private readonly quartoContext: QuartoContext,
+              private readonly engine_: MarkdownEngine) {
     super(quartoContext);
   }
 
   async doExecute() {
     await workspace.saveAll(false);
     // start by using the currently active or visible source files
-    const targetEditor = findQuartoEditor(canPreviewDoc);
+    const targetEditor = findQuartoEditor(this.engine_, canPreviewDoc);
     if (targetEditor) {
       const projectDir = projectDirForDocument(targetEditor.document.uri.fsPath);
       if (projectDir) {
@@ -216,9 +217,11 @@ class ClearCacheCommand implements Command {
   private static readonly id = "quarto.clearCache";
   public readonly id = ClearCacheCommand.id;
 
+  constructor(private readonly engine_: MarkdownEngine) {}
+
   async execute(): Promise<void> {
     // see if there is a cache to clear
-    const doc = findQuartoEditor(canPreviewDoc)?.document;
+    const doc = findQuartoEditor(this.engine_, canPreviewDoc)?.document;
     if (doc) {
       const cacheDir = cacheDirForDocument(doc);
       if (cacheDir) {

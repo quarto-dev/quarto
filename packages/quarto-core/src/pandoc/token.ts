@@ -45,11 +45,10 @@ export type TokenAttr = [string, Array<string>, Array<[string,string]>];
 export interface Token<T = unknown> {
   type: TokenType;
   range: Range;
-  level?: number;
   attr?: TokenAttr; 
   data: T;
     // FrontMatter: yaml
-    // Header: text
+    // Header: { level: number, text: string }
     // Image: caption
     // Link: target
     // Math: { type: string, text: string }
@@ -63,7 +62,7 @@ export function isFrontMatter(token: Token) : token is TokenFrontMatter {
   return token.type === "FrontMatter";
 }
 
-export type TokenHeader = Token<string>;
+export type TokenHeader = Token<{ level: number, text: string }>;
 export function isHeader(token: Token) : token is TokenHeader {
   return token.type === "Header";
 }

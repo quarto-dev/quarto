@@ -15,16 +15,16 @@
 
 import { Position, TextDocument } from "vscode";
 
-import { markdownitFrontMatterPlugin, parseFrontMatterStr } from "quarto-core";
+import { isFrontMatter, isHeader, parseFrontMatterStr } from "quarto-core";
+import { MarkdownEngine } from "./engine";
 
-import { tokenizeMarkdownString } from "./engine";
-import MarkdownIt from "markdown-it";
 
 export async function revealSlideIndex(
   cursorPos: Position,
-  doc: TextDocument
+  doc: TextDocument,
+  engine: MarkdownEngine
 ) {
-  const location = await revealEditorLocation(cursorPos, doc);
+  const location = await revealEditorLocation(cursorPos, doc, engine);
   let slideIndex = -1;
   for (const item of location.items) {
     if (item.type === kCursor) {
@@ -62,30 +62,29 @@ interface RevealEditorLocationItem {
 
 async function revealEditorLocation(
   cursorPos: Position,
-  doc: TextDocument
+  doc: TextDocument,
+  engine: MarkdownEngine
 ): Promise<RevealEditorLocation> {
   const items: RevealEditorLocationItem[] = [];
   let explicitSlideLevel: number | null = null;
   let foundCursor = false;
-  const tokens = tokenizeMarkdownString(doc.getText(), revealSlidesMarkdownEngine());
+  const tokens = engine.parse(doc);
   for (const token of tokens) {
-    if (token.map) {
-      // if the cursor is before this token then add the cursor item
-      const row = token.map[0];
-      if (!foundCursor && cursorPos.line < row) {
-        foundCursor = true;
-        items.push(cursorItem(cursorPos.line));
-      }
-      if (token.type === "front_matter") {
-        explicitSlideLevel = slideLevelFromYaml(token.markup);
-        items.push(titleItem(0));
-      } else if (token.type === "hr") {
-        items.push(hrItem(row));
-      } else if (token.type === "heading_open") {
-        const level = getHeaderLevel(token.markup);
-        items.push(headingItem(row, level));
-      }
+    // if the cursor is before this token then add the cursor item
+    const row = token.range.start.line;
+    if (!foundCursor && cursorPos.line < row) {
+      foundCursor = true;
+      items.push(cursorItem(cursorPos.line));
     }
+    if (isFrontMatter(token)) {
+      explicitSlideLevel = slideLevelFromYaml(token.data);
+      items.push(titleItem(0));
+    } else if (token.type === "HorizontalRule") {
+      items.push(hrItem(row));
+    } else if (isHeader(token)) {
+      const level = token.data.level;
+      items.push(headingItem(row, level));
+    } 
   }
 
   // put cursor at end if its not found
@@ -106,22 +105,6 @@ function getHeaderLevel(markup: string): number {
     // '#', '##', ...
     return markup.length;
   }
-}
-
-
-function revealSlidesMarkdownEngine() {
-  const engine =  MarkdownIt("zero");
-  engine.enable([
-    "heading",
-    "lheading",
-    "hr",
-    // needs code block tokens so it can ignore headings, etc. inside code
-    "code", 
-    "fence",
-    "html_block"
-  ]);
-  engine.use(markdownitFrontMatterPlugin);
-  return engine;
 }
 
 function slideLevelFromYaml(str: string) {

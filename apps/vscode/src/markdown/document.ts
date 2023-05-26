@@ -15,7 +15,7 @@
 
 import * as vscode from "vscode";
 
-import { parseFrontMatterStr } from "quarto-core";
+import { isFrontMatter, parseFrontMatterStr } from "quarto-core";
 import { MarkdownEngine } from "./engine";
 
 export interface MarkdownTextLine {
@@ -35,10 +35,10 @@ export async function documentFrontMatterYaml(
   engine: MarkdownEngine,
   doc: vscode.TextDocument
 ) {
-  const tokens = await engine.parse(doc);
-  const yaml = tokens.find((token) => token.type === "front_matter");
+  const tokens = engine.parse(doc);
+  const yaml = tokens.find(isFrontMatter);
   if (yaml) {
-    return yaml.markup;
+    return yaml.data;
   } else {
     return '';
   }

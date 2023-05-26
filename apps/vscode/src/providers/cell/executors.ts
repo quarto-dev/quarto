@@ -18,17 +18,13 @@
 
 import semver from "semver";
 
-import Token from "markdown-it/lib/token";
 import { commands, extensions, Position, TextDocument, Uri, window } from "vscode";
+
+import { codeForExecutableLanguageBlock, isExecutableLanguageBlock, isExecutableLanguageBlockOf, languageNameFromBlock, Token, TokenCodeBlock, TokenMath } from "quarto-core";
 
 import { lines } from "core";
 
 import { MarkdownEngine } from "../../markdown/engine";
-import {
-  isExecutableLanguageBlock,
-  isExecutableLanguageBlockOf,
-  languageNameFromBlock,
-} from "../../markdown/language";
 import { virtualDoc, virtualDocUri } from "../../vdoc/vdoc";
 
 import { cellOptionsForToken, kExecuteEval } from "./options";
@@ -41,7 +37,7 @@ export function hasExecutor(language: string) {
   return !!kCellExecutors.find((x) => x.language === language);
 }
 
-export function blockHasExecutor(token?: Token) {
+export function blockHasExecutor(token?: Token) : token is TokenMath | TokenCodeBlock {
   if (token) {
     const language = languageNameFromBlock(token);
     return isExecutableLanguageBlock(token) && hasExecutor(language);
@@ -50,7 +46,7 @@ export function blockHasExecutor(token?: Token) {
   }
 }
 
-export function blockIsExecutable(token?: Token) {
+export function blockIsExecutable(token?: Token) : token is TokenMath | TokenCodeBlock {
   if (token) {
     return (
       blockHasExecutor(token) && cellOptionsForToken(token)[kExecuteEval] !== false
@@ -61,22 +57,27 @@ export function blockIsExecutable(token?: Token) {
 }
 
 // skip yaml options for execution
-export function codeFromBlock(token: Token) {
-  const language = languageNameFromBlock(token);
-  const executor = kCellExecutors.find((x) => x.language === language);
-  if (executor) {
-    const blockLines = lines(token.content);
-    const startCodePos = blockLines.findIndex(
-      (line) => !executor.isYamlOption(line)
-    );
-    if (startCodePos !== -1) {
-      return blockLines.slice(startCodePos).join("\n");
-    } else {
-      return "";
-    }
+export function codeFromBlock(token: TokenMath | TokenCodeBlock) {
+  if (isExecutableLanguageBlock(token)) {
+    const language = languageNameFromBlock(token);
+    const executor = kCellExecutors.find((x) => x.language === language);
+    if (executor) {
+      const blockLines = lines(codeForExecutableLanguageBlock(token));
+      const startCodePos = blockLines.findIndex(
+        (line) => !executor.isYamlOption(line)
+      );
+      if (startCodePos !== -1) {
+        return blockLines.slice(startCodePos).join("\n");
+      } else {
+        return "";
+      }
   } else {
-    return token.content;
+    return codeForExecutableLanguageBlock(token);
   }
+  } else {
+    return "";
+  }
+  
 }
 
 export async function executeInteractive(
@@ -138,12 +139,12 @@ export async function ensureRequiredExtension(
     }
 
     // load a virtual doc for this file (forces extension to load)
-    const tokens = await engine.parse(document);
+    const tokens = engine.parse(document);
     const languageBlock = tokens.find(isExecutableLanguageBlockOf(language));
-    if (languageBlock?.map) {
+    if (languageBlock) {
       const vdoc = await virtualDoc(
         document,
-        new Position(languageBlock.map[0] + 1, 0),
+        new Position(languageBlock.range.start.line + 1, 0),
         engine
       );
       if (vdoc) {

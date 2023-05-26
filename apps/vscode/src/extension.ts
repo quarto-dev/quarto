@@ -16,7 +16,6 @@
 import * as vscode from "vscode";
 import { MarkdownEngine } from "./markdown/engine";
 import { activateBackgroundHighlighter } from "./providers/background";
-import { kQuartoDocSelector } from "./core/doc";
 import { Command, CommandManager } from "./core/command";
 import { newDocumentCommands } from "./providers/newdoc";
 import { insertCommands } from "./providers/insert";

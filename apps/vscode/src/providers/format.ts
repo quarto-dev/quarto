@@ -30,10 +30,11 @@ import {
   ProvideDocumentFormattingEditsSignature,
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
+import { languageBlockAtPosition } from "quarto-core";
+
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { languageBlockAtPosition } from "../markdown/language";
 import { EmbeddedLanguage, langaugeCanFormatSelection } from "../vdoc/languages";
 import {
   adjustedPosition,
@@ -68,7 +69,7 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
       ) {
         const line = editor.selection.active.line;
         const position = new Position(line, 0);
-        const tokens = await engine.parse(document);
+        const tokens = engine.parse(document);
         let language = languageAtPosition(tokens, position);
         if (!language || !language.canFormat) {
           language = mainLanguage(tokens, (lang) => !!lang.canFormat);
@@ -105,10 +106,10 @@ export function embeddedDocumentRangeFormattingProvider(
     next: ProvideDocumentRangeFormattingEditsSignature
   ): Promise<TextEdit[] | null | undefined> => {
     if (isQuartoDoc(document, true)) {
-      const tokens = await engine.parse(document);
+      const tokens = engine.parse(document);
       const beginBlock = languageBlockAtPosition(tokens, range.start, false);
       const endBlock = languageBlockAtPosition(tokens, range.end, false);
-      if (beginBlock && beginBlock?.map?.[0] === endBlock?.map?.[0]) {
+      if (beginBlock && (beginBlock.range.start.line === endBlock?.range.start.line)) {
         const vdoc = await virtualDoc(document, range.start, engine);
         if (vdoc) {
           const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
@@ -211,14 +212,14 @@ async function virtualDocForActiveCell(
   editor: TextEditor,
   engine: MarkdownEngine
 ) {
-  const tokens = await engine.parse(editor.document);
+  const tokens = engine.parse(editor.document);
   const line = editor.selection.start.line;
   const position = new Position(line, 0);
   const block = languageBlockAtPosition(tokens, position, false);
-  if (block?.map) {
+  if (block) {
     const vdoc = await virtualDoc(editor.document, position, engine, block);
     if (vdoc) {
-      return { vdoc, startLine: block.map[0], endLine: block.map[1] };
+      return { vdoc, startLine: block.range.start.line + 1, endLine: block.range.end.line - 1 };
     }
   }
   // no virtual doc

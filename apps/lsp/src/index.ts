@@ -13,10 +13,6 @@
  *
  */
 
-// TODO: move image hover into lsp
-// TODO: consider removing 'Organize Reference Links'
-// TODO: test and tweak all of the features, updating changelog as required
-
 import path from "node:path"
 
 import {

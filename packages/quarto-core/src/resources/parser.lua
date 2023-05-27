@@ -1,6 +1,123 @@
 ---@diagnostic disable: undefined-global
 -- parser.lua
 
+-------------------------------------------------------------------------------
+-- JSON Encode
+-------------------------------------------------------------------------------
+
+local encode
+
+local escape_char_map = {
+  [ "\\" ] = "\\",
+  [ "\"" ] = "\"",
+  [ "\b" ] = "b",
+  [ "\f" ] = "f",
+  [ "\n" ] = "n",
+  [ "\r" ] = "r",
+  [ "\t" ] = "t",
+}
+
+local escape_char_map_inv = { [ "/" ] = "/" }
+for k, v in pairs(escape_char_map) do
+  escape_char_map_inv[v] = k
+end
+
+
+local function escape_char(c)
+  return "\\" .. (escape_char_map[c] or string.format("u%04x", c:byte()))
+end
+
+
+local function encode_nil(val)
+  return "null"
+end
+
+local function encode_string(val)
+  return '"' .. val:gsub('[%z\1-\31\\"]', escape_char) .. '"'
+end
+
+local function encode_table(val, stack)
+  local res = {}
+  stack = stack or {}
+
+  -- Circular reference?
+  if stack[val] then error("circular reference") end
+
+  stack[val] = true
+
+  local n = 0
+  local types = {}
+
+  for k in pairs(val) do
+    types[type(k)] = true
+  end
+
+  if #types > 1 then
+    error("invalid table: mixed or invalid key types")
+  elseif types["number"] then
+    -- Treat as array
+    local max_key = 0
+    for k in pairs(val) do
+      if k > max_key then
+        max_key = k
+      end
+    end
+    for i = 1, max_key do
+      if val[i] == nil then
+        table.insert(res, "null")
+      else
+        local v = encode(val[i], stack)
+        table.insert(res, v)
+      end
+    end
+    stack[val] = nil
+    return "[" .. table.concat(res, ",") .. "]"
+  elseif types["string"] then
+    -- Treat as object
+    for k, v in pairs(val) do
+      table.insert(res, encode_string(k) .. ":" .. encode(v, stack))
+    end
+    stack[val] = nil
+    return "{" .. table.concat(res, ",") .. "}"
+  else
+    return "[]"
+  end
+end
+
+local function encode_number(val)
+  -- Check for NaN, -inf and inf
+  if val ~= val or val <= -math.huge or val >= math.huge then
+    error("unexpected number value '" .. tostring(val) .. "'")
+  end
+  return string.format("%.14g", val)
+end
+
+
+local type_func_map = {
+  [ "nil"     ] = encode_nil,
+  [ "table"   ] = encode_table,
+  [ "string"  ] = encode_string,
+  [ "number"  ] = encode_number,
+  [ "boolean" ] = tostring,
+}
+
+
+encode = function(val, stack)
+  local t = type(val)
+  local f = type_func_map[t]
+  if f then
+    return f(val, stack)
+  end
+  error("unexpected type '" .. t .. "'")
+end
+
+
+local function jsonEncode(val)
+  return ( encode(val) )
+end
+
+
+
 local tokens = pandoc.List()
 
 local supportedTokens = pandoc.List{
@@ -28,7 +145,7 @@ local function isSupportedToken(type)
 end
 
 local function attrEmpty(attr)
-  return #attr.identifier == 0 and #attr.classes == 0 and #attr.attributes == 0
+  return #attr[1] == 0 and #attr[2] == 0 and #attr[3] == 0
 end
 
 local function extractAttrAndPos(el)
@@ -46,7 +163,7 @@ local function extractAttrAndPos(el)
   attributes["data-pos"] = nil
 
   -- return attr and pos
-  return pandoc.Attr(attr.identifier, attr.classes, attributes), pos
+  return { attr.identifier, attr.classes, attributes }, pos
 end
 
 local function extractToken(el)
@@ -165,7 +282,7 @@ return {
       end)
     
       -- return doc
-      doc.blocks = pandoc.List({ pandoc.RawBlock("plain", pandoc.json.encode(tokens)) })
+      doc.blocks = pandoc.List({ pandoc.RawBlock("plain", jsonEncode(tokens)) })
       return doc
     end
   }

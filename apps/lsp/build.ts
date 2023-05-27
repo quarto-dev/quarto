@@ -26,6 +26,7 @@ runBuild({
   outfile: './dist/lsp.js',
   assets: [
     { from: [nodeSqlLiteWasm], to: './dist/' },
+    { from: ['./src/package/package.json'], to: './dist' },
     { from: ['../../packages/editor-server/src/resources/**'], to: './dist/resources/' },
     { from: ['../../packages/quarto-core/src/resources/**'], to: './dist/resources/' },
     { from: ['./dist/**'], to: ['../vscode/out/lsp/'] }],

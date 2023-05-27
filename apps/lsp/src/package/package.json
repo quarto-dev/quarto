@@ -1,0 +1,6 @@
+{
+  "name": "quarto-lsp",
+  "scripts": {
+    "run": "node lsp.js"
+  }
+}

@@ -56,6 +56,12 @@ const languages = [
     source: "source.julia",
   },
   {
+    name: "matlab",
+    language: "matlab",
+    identifiers: ["matlab"],
+    source: "source.matlab",
+  },
+  {
     name: "dot",
     language: "dot",
     identifiers: ["dot"],

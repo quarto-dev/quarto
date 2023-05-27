@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.87.0 (Unreleased)
+
+- Language support (highlighting, completion, etc.) for embedded Matlab code cells
+
 ## 1.86.2 (Release on 26 May 2023)
 
 - Fix incompatibility with older Quarto/Pandoc versions introduced in v1.86.0

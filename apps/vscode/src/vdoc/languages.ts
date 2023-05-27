@@ -58,6 +58,11 @@ const kEmbededLanguages = [
     emptyLine: "#",
     canFormat: true,
   }),
+  defineLanguage("matlab", {
+    emptyLine: "%",
+    canFormat: true,
+    canFormatSelection: () => false
+  }),
   defineLanguage("sql"),
   defineLanguage("bash"),
   defineLanguage("sh"),

@@ -40,6 +40,12 @@ const kEditorLanguages = [
     trigger: ["."]
   },
   {
+    ids: ["matlab"],
+    ext: "m",
+    comment: "%",
+    trigger: ["."]
+  },
+  {
     ids: ["sql"],
     comment: "--",
     trigger: ["."]

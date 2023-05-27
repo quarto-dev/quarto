@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.86.1 (Release on 26 May 2023)
+
+- Warn at extension load time if Quarto can't be found on the system
+- Add 'Quarto: Verify Installation' command to explicitly check for Quarto.
+
 ## 1.86.0 (Release on 26 May 2023)
 
 - Parse markdown w/ Pandoc rather than markdown-it (improve symbols, folding, etc.)

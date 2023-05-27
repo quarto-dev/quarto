@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.86.2 (Release on 26 May 2023)
+
+- Fix incompatibility with older Quarto/Pandoc versions introduced in v1.86.0
+
 ## 1.86.1 (Release on 26 May 2023)
 
 - Warn at extension load time if Quarto can't be found on the system

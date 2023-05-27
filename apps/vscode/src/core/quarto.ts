@@ -38,13 +38,14 @@ export async function withMinimumQuartoVersion(
   }
 }
 
-export async function promptForQuartoInstallation(context: string) {
+export async function promptForQuartoInstallation(context: string, modal = false) {
   const installQuarto = { title: "Install Quarto" };
+  const detail = `Please install the Quarto CLI ${context}.`;
   const result = await window.showWarningMessage(
-    "Quarto Installation Not Found",
+    "Quarto installation not found" + (!modal ? `. ${detail}` : ""),
     {
-      modal: true,
-      detail: `Please install the Quarto CLI before ${context.toLowerCase()}.`,
+      modal,
+      detail,
     },
     installQuarto
   );

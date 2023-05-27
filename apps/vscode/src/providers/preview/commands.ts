@@ -64,7 +64,7 @@ abstract class RenderCommand {
         );
       }
     } else {
-      await promptForQuartoInstallation("rendering documents");
+      await promptForQuartoInstallation("before rendering documents", true);
     }
   }
   protected abstract doExecute(): Promise<void>;

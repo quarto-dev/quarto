@@ -31,6 +31,8 @@ import { activateCreate } from "./providers/create/create";
 import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
+import { promptForQuartoInstallation } from "./core/quarto";
+import { CommandManager } from "./core/command";
 
 export async function activate(context: vscode.ExtensionContext) {
  
@@ -110,6 +112,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // activate providers common to browser/node
     activateCommon(context, engine, commands);
+  } else {
+    const commandManager = new CommandManager();
+    for (const command of walkthroughCommands(quartoContext)) {
+      commandManager.register(command);
+    }
+    context.subscriptions.push(commandManager);
+    await promptForQuartoInstallation("in order to use the VS Code extension");
   }
 }
 

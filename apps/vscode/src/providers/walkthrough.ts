@@ -44,7 +44,7 @@ class VerifyInstallationCommand implements Command {
         detail: `Quarto version ${this.quartoContext_.version} installed at ${this.quartoContext_.binPath}`,
       });
     } else {
-      await promptForQuartoInstallation("using the VS Code extension");
+      await promptForQuartoInstallation("before using the VS Code extension", true);
     }
   }
 }

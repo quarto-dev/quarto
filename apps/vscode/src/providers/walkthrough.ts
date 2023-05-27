@@ -32,7 +32,7 @@ export function walkthroughCommands(quartoContext: QuartoContext): Command[] {
 }
 
 class VerifyInstallationCommand implements Command {
-  private static readonly id = "quarto.walkthrough.verifyInstallation";
+  private static readonly id = "quarto.verifyInstallation";
   public readonly id = VerifyInstallationCommand.id;
 
   constructor(private readonly quartoContext_: QuartoContext) {}

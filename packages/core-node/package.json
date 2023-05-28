@@ -11,6 +11,6 @@
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "vscode-languageclient": "^8.1.0",
-    "vscode-languageserver": "^7.0.0"
+    "vscode-languageserver": "^8.1.0"
   }
 }

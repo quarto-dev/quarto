@@ -1283,7 +1283,6 @@
     "build-lang": "node syntaxes/build-lang"
   },
   "dependencies": {
-    "@quarto/quarto-lsp": "*",
     "axios": "^1.2.1",
     "core": "*",
     "core-node": "*",
@@ -1299,6 +1298,7 @@
     "nanoid": "^4.0.0",
     "picomatch": "^2.3.1",
     "quarto-core": "*",
+    "quarto-lsp": "*",
     "quarto-vscode-editor": "*",
     "quarto-vscode-markdownit": "*",
     "semver": "^7.3.8",

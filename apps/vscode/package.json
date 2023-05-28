@@ -40,6 +40,7 @@
     "onCommand:quarto.renderHTML",
     "onCommand:quarto.renderPDF",
     "onCommand:quarto.renderDOCX",
+    "onCommand:quarto.renderAll",
     "onCommand:quarto.renderShortcut",
     "onCommand.quarto.editInSourceMode",
     "onCommand.quarto.editInVisualMode",
@@ -288,6 +289,11 @@
       {
         "command": "quarto.renderDOCX",
         "title": "Render DOCX",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.renderAll",
+        "title": "Render All Formats",
         "category": "Quarto"
       },
       {
@@ -626,6 +632,10 @@
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
+          "command": "quarto.renderAll",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+        },
+        {
           "command": "quarto.previewShortcut",
           "when": "editorLangId == mermaid || editorLangId == dot"
         }
@@ -642,6 +652,9 @@
         },
         {
           "command": "quarto.renderDOCX"
+        },
+        {
+          "command": "quarto.renderAll"
         }
       ],
       "file/newFile": [
@@ -731,6 +744,10 @@
         },
         {
           "command": "quarto.renderDOCX",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+        },
+        {
+          "command": "quarto.renderAll",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {

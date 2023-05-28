@@ -29,7 +29,7 @@ import {
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
 import { findQuartoEditor, isNotebook } from "../../core/doc";
-import { promptForQuartoInstallation } from "../../core/quarto";
+import { promptForQuartoInstallation, withMinimumQuartoVersion } from "../../core/quarto";
 import { renderOnSave } from "./preview-util";
 
 export function previewCommands(
@@ -42,6 +42,7 @@ export function previewCommands(
     new RenderDocumentHTMLCommand(quartoContext, engine),
     new RenderDocumentPDFCommand(quartoContext, engine),
     new RenderDocumentDOCXCommand(quartoContext, engine),
+    new RenderAllCommand(quartoContext, engine),
     new RenderProjectCommand(quartoContext, engine),
     new WalkthroughRenderCommand(quartoContext, engine),
     new ClearCacheCommand(engine),
@@ -68,6 +69,7 @@ abstract class RenderCommand {
     }
   }
   protected abstract doExecute(): Promise<void>;
+  protected quartoContext() { return this.quartoContext_; }
   private readonly quartoContext_: QuartoContext;
 }
 
@@ -176,11 +178,34 @@ class RenderDocumentDOCXCommand
   }
 }
 
+class RenderAllCommand
+  extends RenderDocumentCommandBase
+  implements Command
+{
+  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
+    super(quartoContext, engine);
+  }
+  private static readonly id = "quarto.renderAll";
+  public readonly id = RenderAllCommand.id;
+
+  protected async doExecute() {
+    await withMinimumQuartoVersion(
+      this.quartoContext(),
+      "1.4.104",
+      "Rendering all formats",
+      async () => {
+        return super.renderFormat("all");
+      }
+    );
+  }
+}
+
+
 class RenderProjectCommand extends RenderCommand implements Command {
   private static readonly id = "quarto.renderProject";
   public readonly id = RenderProjectCommand.id;
 
-  constructor(private readonly quartoContext: QuartoContext,
+  constructor(quartoContext: QuartoContext,
               private readonly engine_: MarkdownEngine) {
     super(quartoContext);
   }
@@ -200,7 +225,7 @@ class RenderProjectCommand extends RenderCommand implements Command {
     // next check any open workspaces for a project file
     if (workspace.workspaceFolders) {
       for (const folder of workspace.workspaceFolders) {
-        const config = await quartoProjectConfig(this.quartoContext.runQuarto, folder.uri.fsPath);
+        const config = await quartoProjectConfig(this.quartoContext().runQuarto, folder.uri.fsPath);
         if (config) {
           previewProject(folder.uri);
           return;

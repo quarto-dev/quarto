@@ -3,6 +3,7 @@
 ## 1.87.0 (Unreleased)
 
 - Language support (highlighting, completion, etc.) for embedded Matlab code cells
+- Render All Formats commands to render and preview all specified formats 
 
 ## 1.86.2 (Release on 26 May 2023)
 

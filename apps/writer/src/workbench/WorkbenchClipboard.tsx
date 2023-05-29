@@ -52,7 +52,7 @@ const WorkbenchClipboard: React.FC = () => {
                 })}
               </p>
             </div>;
-          alert(t('clipboard_dialog_caption'), message, kAlertTypeWarning);
+          alert(t('clipboard_dialog_caption'), message, kAlertTypeWarning).then(focusEditor);
         }
       },
     };

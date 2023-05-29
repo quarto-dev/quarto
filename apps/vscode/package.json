@@ -293,7 +293,7 @@
       },
       {
         "command": "quarto.renderAll",
-        "title": "Render All Formats",
+        "title": "Render All",
         "category": "Quarto"
       },
       {

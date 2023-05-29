@@ -2,6 +2,8 @@
 
 ## 1.87.0 (Unreleased)
 
+- Visual Editor: Support Cmd+Shift+V shortcut for pasting without formatting
+- Visual Editor: Render pasted markdown text rather than treating it literally
 - Language support (highlighting, completion, etc.) for embedded Matlab code cells
 - Render All Formats commands to render and preview all specified formats 
 

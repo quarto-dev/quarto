@@ -30,6 +30,7 @@ export * from './api/extension-types'
 export * from './api/pandoc-types';
 export * from './api/options';
 export * from './api/presentation'
+export * from './api/markdown-types'
 
 // some api helpers
 export * from './api/cursor';

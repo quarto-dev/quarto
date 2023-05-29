@@ -6,6 +6,7 @@
   "paste_menu_text": "Paste",
   "select_all_menu_text": "Select All",
   "clear_formatting_menu_text": "Clear Formatting",
+  "paste_raw_menu_text": "Paste without Formatting",
   "strong_menu_text": "Bold",
   "em_menu_text": "Italic",
   "code_menu_text": "Code",

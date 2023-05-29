@@ -148,6 +148,9 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.ClearFormatting]: {
         icon: <ClearFormattingIcon />,
         menuText: t('commands:clear_formatting_menu_text'),
+      },
+      [EditorCommandId.PasteRaw]: {
+        menuText: t('commands:paste_raw_menu_text'),
       }
     },
     [t('commands:group_formatting')]: {

@@ -23,7 +23,7 @@ import { PandocTokenType, PandocToken, PandocOutput } from '../../api/pandoc';
 import { BaseKey, BaseKeyBinding } from '../../api/basekeys';
 import { domAttrNoSpelling, markIsActive } from '../../api/mark';
 import { kCodeText } from '../../api/code';
-import { kPasteTransaction } from '../../api/transaction';
+import { pasteTransaction } from '../../api/clipboard';
 import { kQuartoDocType } from '../../api/format';
 import { kMathContent, kMathType, delimiterForType, MathType, kMathId } from '../../api/math';
 import { MarkInputRuleFilter } from '../../api/input_rule';
@@ -357,9 +357,7 @@ function handlePasteIntoMath() {
   return (view: EditorView, _event: Event, slice: Slice) => {
     const schema = view.state.schema;
     if (markIsActive(view.state, schema.marks.math)) {
-      const tr = view.state.tr;
-      tr.setMeta(kPasteTransaction, true);
-      tr.setMeta('uiEvent', 'paste');
+      const tr = pasteTransaction(view.state);
       let math = '';
       slice.content.forEach((node: ProsemirrorNode) => (math = math + node.textContent));
       tr.replaceSelectionWith(schema.text(math));

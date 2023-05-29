@@ -15,27 +15,89 @@
 
 import { isWindows } from 'core-browser';
 import { ResolvedPos, Schema, Fragment, Slice, Node as ProsemirrorNode } from 'prosemirror-model';
-import { Plugin, PluginKey } from 'prosemirror-state';
+import { EditorState, Plugin, PluginKey, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
-import { Extension } from '../api/extension';
+import { ExtensionContext } from '../api/extension';
 import { mapFragment } from '../api/fragment';
+import { EditorMarkdown } from '../api/markdown-types';
+import { clearFormatting } from '../api/formatting';
+import { EditorCommandId, ProsemirrorCommand } from '../api/command';
+import { pasteTransaction } from '../api/clipboard';
 
-const extension: Extension = {
-  plugins: (schema: Schema) => [
-    pasteTextPlugin(schema),
-    pasteWordPlugin(schema)
-  ],
-};
+const kTextPlain = "text/plain";
+const kTextHtml = "text/html";
 
-function pasteTextPlugin(schema: Schema) {
+const extension = (context: ExtensionContext) => {
+
+  let pasteRaw = false;
+  const collectPasteRaw = () => {
+    const raw = pasteRaw;
+    pasteRaw = false;
+    return raw;
+  }
+
+  return {
+
+    plugins: (schema: Schema) => [
+      pastePlugin(
+        schema, 
+        context.markdown, 
+        collectPasteRaw,
+        [pasteMarkdownHandler, pasteHtmlHandler]
+      )
+    ],
+    commands: () => {
+      const havePaste = document.queryCommandSupported("paste");
+      if (havePaste) {
+        return [new ProsemirrorCommand(EditorCommandId.PasteRaw, ['Mod-Shift-v'], 
+                  (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+          if (!document.queryCommandEnabled("paste")) {
+            return false;
+          }
+          if (dispatch) {
+            pasteRaw = true;
+            document.execCommand("paste");
+          }
+          return true;
+        })];
+      } else {
+        return [];
+      }
+
+    }
+  };
+}
+
+type PasteHandler = (
+  schema: Schema, 
+  editorMarkdown: EditorMarkdown,
+  view: EditorView, 
+  event: ClipboardEvent, 
+  pasteRaw: boolean,
+  slice: Slice) => boolean;
+
+function pastePlugin(
+  schema: Schema, 
+  editorMarkdown: EditorMarkdown,
+  pasteRaw: () => boolean,
+  handlers: PasteHandler[]) {
+
+  let shiftPaste = false;
+
   return new Plugin({
-    key: new PluginKey('paste-text'),
+    key: new PluginKey('paste-handler'),
 
     props: {
+
+      // detect shift paste (required for chrome which handles Cmd+Shift+v natively)
+      handleKeyDown: (_, event) => {           
+        shiftPaste = event.key === 'v' && (event.metaKey || event.ctrlKey) && event.shiftKey;          
+      },
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       clipboardTextParser: (text: string, $context: ResolvedPos) : any => {
-        // if it's a single line then create a slice w/ marks from the context active
+        // if it's a single line then create a slice w/ marks from the active context
         if (text.indexOf('\n') === -1) {
           const marks = $context.marks();
           const textNode = schema.text(text, marks);
@@ -44,17 +106,6 @@ function pasteTextPlugin(schema: Schema) {
           return null;
         }
       },
-    },
-  });
-}
-
-function pasteWordPlugin(schema: Schema) {
-
-  return new Plugin({
-
-    key: new PluginKey('paste-word'),
-
-    props: {
 
       // NOTE: this issue is fixed in later versions of prosemirror so we can 
       // remove once we've upgraded. see https://github.com/ProseMirror/prosemirror-view/pull/144
@@ -68,48 +119,138 @@ function pasteWordPlugin(schema: Schema) {
         return html;
       },
 
-      handlePaste: (view: EditorView, event: ClipboardEvent, slice: Slice) : boolean | void => {
-
-        if (event.clipboardData) {
-          
-          // if this contains office content or we are on windows then handle it
-          // (office content has excessive internal vertical space, windows has
-          // issues w/ prosemirror freezing in its paste implementation when handling
-          // multiple paragraphs)
-          const kTextHtml = "text/html";
-          const kWordSchema = "urn:schemas-microsoft-com:office:word";
-          if (event.clipboardData.types.includes(kTextHtml)) {
-            const html = event.clipboardData.getData(kTextHtml);
-            if (html.includes(kWordSchema) || isWindows()) {
-              // filter out nodes with empty paragraphs
-              const nodes: ProsemirrorNode[] = [];
-              for (let i = 0; i < slice.content.childCount; i++) {
-                const node = slice.content.child(i)
-                if (node.textContent.trim() !== "") {
-                  const newNode = node.type.createAndFill(node.attrs, mapFragment(node.content, nd => {
-                    if (nd.isText) {
-                      return schema.text(nd.text!.replace(/\n/g, ' '), nd.marks);
-                    } else {
-                      return nd;
-                    }
-                  }), node.marks);
-                  nodes.push(newNode || node);
-                }
-              }
-              
-              const fragment = Fragment.fromArray(nodes);
-              const newSlice = new Slice(fragment, slice.openStart, slice.openEnd);
-              view.dispatch(view.state.tr.replaceSelection(newSlice));
-              return true;
-            }
+      // call all of the paste handlers
+      handlePaste(view, event, slice) {
+        const raw = pasteRaw() || shiftPaste;
+        for (const handler of handlers) {
+          const handled = handler(schema, editorMarkdown, view, event, raw, slice);
+          if (handled) {
+            return true;
           }
         }
-
         return false;
-      }  
-    },
+      }
+    }
   });
+
 }
 
+
+function pasteMarkdownHandler(
+  _schema: Schema, 
+  editorMarkdown: EditorMarkdown,
+  view: EditorView, 
+  event: ClipboardEvent, 
+  pasteRaw: boolean,
+  slice: Slice) {
+
+  // must be in a location valid for a markdown paste
+  if (!editorMarkdown.allowMarkdownPaste(view.state)) {
+    return false;
+  }
+
+  // inspect clipboard and selection state
+  const { clipboardData } = event;
+  const text = clipboardData?.getData(kTextPlain);
+  const html = clipboardData?.getData(kTextHtml);
+  const isVscode = isVscodePaste(clipboardData, html);
+
+  // must have text/plain
+  if (!text) {
+    return false;
+  }
+
+  // text/html is a disqualifier, save for pastes from vscode
+  // (where we need to steer around using the html version of the code)
+  if (html && !isVscode) {
+    return false;
+  }
+
+  editorMarkdown.markdownToSlice(text, slice.openStart, slice.openEnd).then(slice => {
+    const tr = pasteTransaction(view.state);
+    const prevSel = tr.selection;
+    tr.replaceSelection(slice);
+    if (pasteRaw) {
+      clearFormatting(tr, prevSel.from, prevSel.from + slice.size);
+    } 
+    view.dispatch(tr);
+  });
+
+  return true; 
+
+}
+
+function pasteHtmlHandler(
+  schema: Schema, 
+  _editorMarkdown: EditorMarkdown,
+  view: EditorView, 
+  event: ClipboardEvent, 
+  pasteRaw: boolean,
+  slice: Slice) {
+
+  if (!event.clipboardData) {
+    return false;
+  }
+
+  // helper to paste slice
+  const pasteSlice = (s: Slice) => {
+    const tr = view.state.tr;
+    const prevSel = tr.selection;
+    tr.replaceSelection(s);
+    if (pasteRaw) {;
+      clearFormatting(tr, prevSel.from, prevSel.from + slice.size)
+    } 
+    view.dispatch(tr);
+  }
+
+  // if this contains office content or we are on windows then handle it
+  // (office content has excessive internal vertical space, windows has
+  // issues w/ prosemirror freezing in its paste implementation when handling
+  // multiple paragraphs)
+  const kTextHtml = "text/html";
+  const kWordSchema = "urn:schemas-microsoft-com:office:word";
+  if (event.clipboardData.types.includes(kTextHtml)) {
+    const html = event.clipboardData.getData(kTextHtml);
+    if (html.includes(kWordSchema) || isWindows()) {
+      // filter out nodes with empty paragraphs
+      const nodes: ProsemirrorNode[] = [];
+      for (let i = 0; i < slice.content.childCount; i++) {
+        const node = slice.content.child(i)
+        if (node.textContent.trim() !== "") {
+          const newNode = node.type.createAndFill(node.attrs, mapFragment(node.content, nd => {
+            if (nd.isText) {
+              return schema.text(nd.text!.replace(/\n/g, ' '), nd.marks);
+            } else {
+              return nd;
+            }
+          }), node.marks);
+          nodes.push(newNode || node);
+        }
+      }
+      const fragment = Fragment.fromArray(nodes);
+      const newSlice = new Slice(fragment, slice.openStart, slice.openEnd);
+      pasteSlice(newSlice); 
+      return true;
+    } else if (pasteRaw) {
+      pasteSlice(slice);
+      return true;
+    }
+  }
+    
+  return false;
+}
+
+// detect vscode paste
+const kVscodeEditorData = "vscode-editor-data";
+const kVscodeRegex = /^<div.*?orphans: auto;.*?widows: auto.*?white-space: pre;/;
+function isVscodePaste(clipboardData: DataTransfer | null, html: string | undefined) {
+  if (clipboardData?.types.some((type) => type === kVscodeEditorData)) {
+    return true;
+  } else if (html && html.match(kVscodeRegex)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 export default extension;

@@ -14,6 +14,16 @@
  */
 
 import { Slice, Fragment, MarkType, Node as ProsemirrorNode } from 'prosemirror-model';
+import { EditorState } from 'prosemirror-state';
+
+import { kPasteTransaction } from './transaction';
+
+export function pasteTransaction(state: EditorState) {
+  const tr = state.tr;
+  tr.setMeta(kPasteTransaction, true);
+  tr.setMeta('uiEvent', 'paste');
+  return tr;
+}
 
 // add marks to plain text pasted into the editor (e.g. urls become links)
 // https://github.com/ProseMirror/prosemirror/issues/90

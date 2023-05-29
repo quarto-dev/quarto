@@ -24,7 +24,7 @@ import { FocusEvent } from '../../api/event-types';
 import { PandocTokenType, PandocToken, PandocOutput, ProsemirrorWriter, PandocServer, kPreventBracketEscape } from '../../api/pandoc';
 import { fragmentText } from '../../api/fragment';
 import { markIsActive, splitInvalidatedMarks, getMarkRange, detectAndApplyMarks, domAttrNoSpelling } from '../../api/mark';
-import { MarkTransaction, kPasteTransaction } from '../../api/transaction';
+import { MarkTransaction } from '../../api/transaction';
 import { BibliographyManager, BibliographyFile, BibliographySource } from '../../api/bibliography/bibliography';
 import { EditorUI } from '../../api/ui-types';
 import { joinPaths, getExtension } from '../../api/path';
@@ -34,6 +34,7 @@ import { CSL, sanitizeForCiteproc } from '../../api/csl';
 import { suggestCiteId, formatForPreview } from '../../api/cite';
 import { performCompletionReplacement } from '../../api/completion';
 import { FixupContext } from '../../api/fixup';
+import { pasteTransaction } from '../../api/clipboard';
 import { ensureBibliographyFileForDoc } from '../../api/bibliography/bibliography-provider_local';
 
 import { citationCompletionHandler } from './cite-completion';
@@ -392,10 +393,7 @@ function handlePaste(ui: EditorUI, bibManager: BibliographyManager, server: Pand
       const parsedDOI = doiFromSlice(view.state, slice);
       if (parsedDOI) {
         // Insert the DOI text as a placeholder
-        const tr = view.state.tr;
-        tr.setMeta(kPasteTransaction, true);
-        tr.setMeta('uiEvent', 'paste');
-
+        const tr = pasteTransaction(view.state);
         const doiText = schema.text(parsedDOI.token);
         tr.replaceSelectionWith(doiText, true);
         view.dispatch(tr);
@@ -412,9 +410,7 @@ function handlePaste(ui: EditorUI, bibManager: BibliographyManager, server: Pand
         let text = '';
         slice.content.forEach((node: ProsemirrorNode) => (text = text + node.textContent));
         if (text.length > 0) {
-          const tr = view.state.tr;
-          tr.setMeta(kPasteTransaction, true);
-          tr.setMeta('uiEvent', 'paste');
+          const tr = pasteTransaction(view.state);
           tr.replaceSelectionWith(schema.text(text));
           view.dispatch(tr);
           return true;

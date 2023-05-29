@@ -15,7 +15,7 @@
 
 import { inputRules } from 'prosemirror-inputrules';
 import { keydownHandler } from 'prosemirror-keymap';
-import { Node as ProsemirrorNode, Schema, DOMParser, ParseOptions, Slice } from 'prosemirror-model';
+import { Node as ProsemirrorNode, Schema, DOMParser, ParseOptions, Slice, Fragment } from 'prosemirror-model';
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import 'prosemirror-view/style/prosemirror.css';
@@ -100,6 +100,7 @@ import { diffChars, EditorChange } from '../api/change';
 import { markInputRuleFilter } from '../api/input_rule';
 import { editorMath } from '../api/math';
 import { EditorEvents } from '../api/event-types';
+import { EditorMarkdown } from '../api/markdown-types';
 import { insertRmdChunk } from '../api/rmd';
 import { pandocAutoIdentifier } from '../api/pandoc_id';
 import { wrapSentences } from '../api/wrap';
@@ -338,6 +339,9 @@ export class Editor  {
   // pandoc capabilities
   private pandocCapabilities: PandocCapabilities;
 
+  // markdown services
+  private editorMarkdown: EditorMarkdown;
+
   // core prosemirror state/behaviors
   private readonly extensions: ExtensionManager;
   private readonly schema: Schema;
@@ -469,6 +473,9 @@ export class Editor  {
 
     // create schema
     this.schema = editorSchema(this.options, this.extensions, !options.outerScrollContainer);
+
+    // create editor markdown services
+    this.editorMarkdown = this.createEditorMarkdown();
 
     // register completion handlers (done in a separate step b/c omni insert
     // completion handlers require access to the initializezd commands that
@@ -1058,6 +1065,7 @@ export class Editor  {
         },
         pandocExtensions: this.pandocFormat.extensions,
         pandocCapabilities: this.pandocCapabilities,
+        markdown: this.editorMarkdownProxy(),
         server: this.context.server,
         navigation: {
           navigate: this.navigate.bind(this),
@@ -1071,6 +1079,43 @@ export class Editor  {
       this.context.extensions,
       this.context.codeViewExtension
     );
+  }
+
+  private createEditorMarkdown() : EditorMarkdown {
+    const markdownFilter = markInputRuleFilter(this.schema, this.extensions.pandocMarks());
+    return {
+      allowMarkdownPaste(state) {
+        return markdownFilter(state);
+      },
+      markdownToSlice: async (markdown) : Promise<Slice> => {
+        // convert markdown to prosemirror
+        const result = await this.pandocConverter.toProsemirror(markdown, this.pandocFormat);
+
+        // extract slice
+        const slice = new Slice(Fragment.from(result.doc.child(0).content), 0, 0);
+
+        // if the slice has a single paragraph node, then take its contents
+        if (slice.content.childCount === 1 &&
+          slice.content.child(0)?.type === this.schema.nodes.paragraph) {
+          return new Slice(slice.content.child(0).content, slice.openStart, slice.openEnd);
+        } else {
+          return slice;
+        }
+      },
+    }
+  }
+
+  // this.editorMarkdown is not yet created when we call this so we setup a
+  // proxy (chicken/egg: EditorMarkdown needs the initialized extensions)
+  private editorMarkdownProxy() : EditorMarkdown {
+    return {
+      allowMarkdownPaste: (state) => {
+        return this.editorMarkdown.allowMarkdownPaste(state);
+      },
+      markdownToSlice: (markdown, openStart, openEnd) => {
+        return this.editorMarkdown.markdownToSlice(markdown, openStart, openEnd);
+      },
+    };
   }
 
   private registerCompletionExtension() {

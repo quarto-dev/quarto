@@ -37,6 +37,7 @@ import { EditorServer } from 'editor-types';
 import { ContextMenuHandlerFn } from './menu';
 import { EditorFind } from './find-types';
 import { EditorTheme } from '../editor/editor-theme';
+import { EditorMarkdown } from './markdown-types';
 
 export interface Extension {
   view?: (view: EditorView) => void;
@@ -62,6 +63,7 @@ export interface ExtensionContext {
   math?: EditorMath;
   format: EditorFormat;
   options: EditorOptions;
+  markdown: EditorMarkdown;
   events: EditorEvents;
   navigation: EditorNavigation;
   find: EditorFind;

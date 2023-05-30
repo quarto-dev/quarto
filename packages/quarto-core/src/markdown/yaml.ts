@@ -15,11 +15,12 @@
 
 import * as yaml from "js-yaml";
 
+import { lines } from "core";
+
 import { Document } from "../document";
 
 import { Parser } from "./parser";
 import { isFrontMatter } from "./token";
-import { lines } from "core";
 
 
 export function parseFrontMatterStr(str: string) {

@@ -15,35 +15,20 @@
 
 import path from "node:path"
 
-import { QuartoContext } from "../context";
-import { Token, TokenFrontMatter, isCodeBlock, kAttrClasses } from "./token";
-import { partitionYamlFrontMatter } from "./yaml";
+import { QuartoContext } from "../../context";
+import { Token, TokenFrontMatter, isCodeBlock, kAttrClasses } from "../token";
+import { partitionYamlFrontMatter } from "../yaml";
+import { Parser, cachingParser } from "../parser";
 import { lines } from "core";
-import { makeRange } from "../range";
-import { Document } from "../document";
-import { isExecutableLanguageBlock, languageNameFromBlock } from "./language";
+import { makeRange } from "../../range";
+import { Document } from "../../document";
+import { isExecutableLanguageBlock, languageNameFromBlock } from "../language";
 
-export type Parser = (document: Document) => Token[];
 
 export function pandocParser(context: QuartoContext, resourcesDir: string) : Parser {
-
-  // pandoc element cache for last document requested
-  let elementCache: Token[] | undefined;
-  let elementCacheDocUri: string | undefined;
-  let elementCacheDocVersion: number | undefined;
-
-  return (doc: Document): Token[] => {
-    if (
-      !elementCache ||
-      doc.uri.toString() !== elementCacheDocUri ||
-      doc.version !== elementCacheDocVersion
-    ) {
-      elementCache = parsePandocDocument(context, resourcesDir, doc.getText());
-      elementCacheDocUri = doc.uri.toString();
-      elementCacheDocVersion = doc.version;
-    }
-    return elementCache;
-  }
+  return cachingParser((doc: Document) => {
+    return parsePandocDocument(context, resourcesDir, doc.getText());
+  })
 }
 
 export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {

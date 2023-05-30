@@ -131,13 +131,7 @@ local supportedTokens = pandoc.List{
   "Para",
   "RawBlock",
   "Table",
-  "Code",
-  "Image",
-  "Link",
-  "Math",
-  "Note",
-  "RawInline",
-  "Span"
+  "Math"
 }
 
 local function isSupportedToken(type)
@@ -215,17 +209,14 @@ local function extractToken(el)
     end
 
     -- special 'data' for some types
-    if type == "Image" then
-      token["data"] = pandoc.utils.stringify(el)
-    elseif type == "Header" then
+    if type == "Header" then
       token["data"] = {
         level = el.level,
         text = pandoc.utils.stringify(el)
       }
     elseif type == "CodeBlock" then
       token["data"] = el.text
-    elseif type == "Link" then
-      token["data"] = el.target
+
     elseif type == "Math" then
       token["data"] = {
         type = el.mathtype,
@@ -257,10 +248,7 @@ return {
     Header = extractToken,
 
     -- inlines
-    Span = extractToken,
-    Code = extractToken,
-    Image = extractToken,
-    Link = extractToken,
+    Span = extractToken
   },
   {
     Pandoc = function(doc)

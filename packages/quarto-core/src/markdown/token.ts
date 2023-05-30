@@ -27,13 +27,7 @@ export type TokenType =
   | "Para"
   | "RawBlock"
   | "Table"
-  | "Code"
-  | "Image"
-  | "Link"
-  | "Math"
-  | "Note"
-  | "RawInline"
-  | "Span";
+  | "Math";
 
 
 export const kAttrIdentifier = 0;
@@ -65,16 +59,6 @@ export function isFrontMatter(token: Token) : token is TokenFrontMatter {
 export type TokenHeader = Token<{ level: number, text: string }>;
 export function isHeader(token: Token) : token is TokenHeader {
   return token.type === "Header";
-}
-
-export type TokenImage = Token<string>;
-export function isImage(token: Token): token is TokenImage {
-  return token.type === "Image";
-}
-
-export type TokenLink = Token<string>;
-export function isLink(token: Token): token is TokenLink {
-  return token.type === "Link";
 }
 
 export type TokenMath = Token<{ type: string, text: string }>;

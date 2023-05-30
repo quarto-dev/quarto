@@ -28,13 +28,16 @@ import {
   Spinner,
   makeStyles,
   webLightTheme,
-  tokens
+  tokens,
+  DialogTrigger,
+  Button
 } from "@fluentui/react-components";
 
 import { Alert } from '@fluentui/react-components/unstable';
 
 import { EditorHTMLDialogCreateFn, EditorHTMLDialogValidateFn } from "editor-types";
 import { fluentTheme, isSolarizedThemeActive } from "../theme";
+import { Dismiss24Regular } from "@fluentui/react-icons";
 
 export async function htmlDialog(
   title: string, 
@@ -135,7 +138,16 @@ const HtmlDialog: React.FC<HtmlDialogProps> = (props) => {
       > 
         <DialogSurface className={classes.dialogSurface} style={{width, height}}>
           <DialogBody>
-            <DialogTitle>
+            <DialogTitle
+              action={
+                <DialogTrigger action="close">
+                  <Button
+                    appearance="subtle"
+                    aria-label="close"
+                    icon={<Dismiss24Regular />}
+                  />
+                </DialogTrigger>
+              }>
               {props.title}
             </DialogTitle>
             <DialogContent className={classes.dialogContent}>

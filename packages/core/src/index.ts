@@ -31,4 +31,5 @@ export * from './yaml';
 export * from './dispose';
 export * from './arrays';
 export * from './limiter';
+export * from './markdownit';
 

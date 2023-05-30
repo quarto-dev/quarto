@@ -130,4 +130,5 @@ export function isQuartoRevealDoc(doc: Document | string) {
       );
     }
   }
+  return false;
 }

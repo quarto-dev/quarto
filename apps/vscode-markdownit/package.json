@@ -16,9 +16,11 @@
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "dev": "tsc --noEmit && vite build --mode=development",
-    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+    "lint": "TIMING=1 eslint \"src/**/*.ts\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
+    "core": "*",
     "js-yaml": "^4.1.0",
     "markdown-it": "^12.2.3",
     "markdown-it-attrs": "^4.1.6",

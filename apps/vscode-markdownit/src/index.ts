@@ -24,18 +24,18 @@ import subPlugin from "markdown-it-sub";
 import supPlugin from 'markdown-it-sup';
 import taskListPlugin from 'markdown-it-task-lists';
 
-import { figuresPlugin } from './plugins/figures';
-import { figureDivsPlugin } from './plugins/figure-divs';
-import { tableCaptionPlugin } from './plugins/table-captions';
-import { spansPlugin } from './plugins/spans';
-import { citationPlugin } from './plugins/cites';
-import { divPlugin } from './plugins/divs';
-import { calloutPlugin } from './plugins/callouts';
-import { decoratorPlugin } from './plugins/decorator';
-import gridTableRulePlugin from './plugins/gridtables';
-import { shortcodePlugin } from './plugins/shortcodes';
-import { yamlPlugin } from './plugins/yaml';
-import mermaidPlugin from "./plugins/mermaid";
+import { figuresPlugin } from 'core';
+import { figureDivsPlugin } from 'core';
+import { tableCaptionPlugin } from 'core';
+import { spansPlugin } from 'core';
+import { citationPlugin } from 'core';
+import { divPlugin } from 'core';
+import { calloutPlugin } from 'core';
+import { decoratorPlugin } from 'core';
+import { gridTableRulePlugin } from 'core';
+import { shortcodePlugin } from 'core';
+import { yamlPlugin } from 'core';
+import { mermaidPlugin } from "core";
 
 const styleHref = import.meta.url.replace(/index\.[\d\S]*\.?js$/, 'styles.css');
 

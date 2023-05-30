@@ -51,7 +51,7 @@ const extension = (context: ExtensionContext) => {
       const havePaste = document.queryCommandSupported("paste");
       if (havePaste) {
         return [new ProsemirrorCommand(EditorCommandId.PasteRaw, ['Mod-Shift-v'], 
-                  (state: EditorState, dispatch?: (tr: Transaction) => void) => {
+                  (_state: EditorState, dispatch?: (tr: Transaction) => void) => {
           if (!document.queryCommandEnabled("paste")) {
             return false;
           }

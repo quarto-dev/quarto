@@ -1,1 +1,1 @@
-../../vscode-markdownit/src/plugins
+../../../packages/core/src/markdownit

@@ -90,6 +90,8 @@ function isLatexCodeBlock(token: Token) {
     return formats.includes(raw.format);
   } else if (token.type === "CodeBlock") {
     return formats.includes(token.attr?.[kAttrClasses][0] || "");
+  } else {
+    return false;
   }
 }
 

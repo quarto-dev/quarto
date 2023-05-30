@@ -17,6 +17,7 @@ export * from './context';
 export * from './metadata';
 export * from './appdirs';
 export * from './pandoc';
+export * from 'core/src/markdownit';
 export * from './storage';
 export * from './dictionaries';
 export * from './position';

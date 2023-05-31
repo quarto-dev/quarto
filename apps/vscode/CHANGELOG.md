@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.87.1 (Release on 31 May 2023)
+
+- Fix issue with failure to parse executable blocks from markdown
+- Fix issues w/ mathjax hover (theme propagation and extra '+')
+
 ## 1.87.0 (Release on 31 May 2023)
 
 - Switch back to markdown-it parser (performance on Windows & w/ multi-byte text)

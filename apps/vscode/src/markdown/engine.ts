@@ -34,7 +34,13 @@ export class MarkdownEngine {
       get version() { return document.version; },
       get lineCount() { return document.lineCount; },
       getText(range?: Range | undefined): string {
-        return document.getText();
+        const r = range ? new vscode.Range(
+          range.start.line, 
+          range.start.character, 
+          range.end.line, 
+          range.end.character
+        ) : undefined;
+        return document.getText(r);
       },
       positionAt(offset: number): Position {
         return document.positionAt(offset);

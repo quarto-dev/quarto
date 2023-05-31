@@ -114,7 +114,6 @@ function parseDocument(
         const startLine = token.meta.line as number;
         let endLine = -1;
         for (let j=(i+1); j<mdItTokens.length; j++) {
-          console.log(j);
           const t = mdItTokens[j];
           if (t.type === "pandoc_div_close" && t.meta.level === token.meta.level) {
             endLine = t.meta.line;

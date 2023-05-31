@@ -23,18 +23,12 @@ import { lines } from "core";
 import { makeRange } from "../../range";
 import { Document } from "../../document";
 import { isExecutableLanguageBlock, languageNameFromBlock } from "../language";
-import { markdownitParser } from "./markdownit";
 
 
 export function pandocParser(context: QuartoContext, resourcesDir: string) : Parser {
-  
-  const mditParser =  markdownitParser();
-  
+    
   return cachingParser((doc: Document) => {
     const tokens = parseDocument(context, resourcesDir, doc.getText());
-
-    console.log(JSON.stringify(tokens));
-    console.log(JSON.stringify(mditParser(doc)));
 
     return tokens;
   })
@@ -61,7 +55,7 @@ function parseDocument(context: QuartoContext, resourcePath: string, markdown: s
     // parse json (w/ some fixups)
     const inputLines = lines(input);
     const outputJson = JSON.parse(output) as Record<string,Token>;
-    const tokens = (Object.values(outputJson).map(token => {
+    const tokens = (Object.values(outputJson).map((token) : Token => {
   
       // trim blocks
       if ((token.range.end.line > token.range.start.line) && 
@@ -85,8 +79,13 @@ function parseDocument(context: QuartoContext, resourcePath: string, markdown: s
         token.data = null;
       }
       
-      // return token
-      return token;
+      // return token (order fields)
+      return {
+        type: token.type,
+        range: token.range,
+        attr: token.attr,
+        data: token.data
+      };
     }));
   
   
@@ -95,8 +94,9 @@ function parseDocument(context: QuartoContext, resourcePath: string, markdown: s
       const yamlLines = lines(yaml);
       const yamlToken: TokenFrontMatter = {
         type: "FrontMatter",
-        data: yaml,
-        range: makeRange(0, 0, yamlLines.length, 0)
+        range: makeRange(0, 0, yamlLines.length, 0),
+        attr: undefined,
+        data: yaml, 
       }
       tokens.unshift(yamlToken);
     }

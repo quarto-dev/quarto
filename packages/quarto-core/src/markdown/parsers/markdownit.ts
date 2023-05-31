@@ -22,7 +22,7 @@ import attrPlugin from 'markdown-it-attrs';
 import { Document } from "../../document";
 
 import { Parser, cachingParser } from "../parser";
-import { Token as QToken, TokenAttr, kAttrAttributes, kAttrClasses, kAttrIdentifier } from "../token";
+import { Token as QToken, TokenAttr, TokenType, kAttrAttributes, kAttrClasses, kAttrIdentifier } from "../token";
 import { divPlugin, lines, mathjaxPlugin, yamlPlugin } from "core";
 
 import { makeRange } from "../../range";
@@ -81,12 +81,12 @@ function parseDocument(
   const mdItTokens = md.parse(markdown, {});
 
   const tokenRange = (map: [number, number]) => {
-    // TODO: trim only if required
+    const endLine = map[1] > map[0] && !inputLines[map[1]]?.length ? map[1] - 1 : map[1];
     return makeRange(
       map[0], 
       0, 
-      map[1] - 1, 
-      inputLines[map[1]-1].length
+      endLine, 
+      inputLines[endLine].length
     );
   };
 
@@ -96,11 +96,88 @@ function parseDocument(
 
     // look for our tokens
     switch(token.type) {
-      case "paragraph_open": {
+      case "front_matter": {
         if (token.map) {
-          tokens.push({ type: "Para", range: tokenRange(token.map), data: null });
+          const endLine = lines(token.markup).length;
+          tokens.push({
+            type: "FrontMatter",
+            range: makeRange(0,0,endLine,0),
+            attr: undefined,
+            data: token.markup
+          })
+        } else {
+          console.log("front_matter did not have map")
+        }
+        break;
+      }
+      case "pandoc_div_open": {
+        const startLine = token.meta.line as number;
+        let endLine = -1;
+        for (let j=(i+1); j<mdItTokens.length; j++) {
+          console.log(j);
+          const t = mdItTokens[j];
+          if (t.type === "pandoc_div_close" && t.meta.level === token.meta.level) {
+            endLine = t.meta.line;
+            break;
+          } 
+        }
+        if (endLine !== -1) {
+          tokens.push({
+            type: "Div",
+            range: makeRange(startLine, 0, endLine, inputLines[endLine].length),
+            attr: asTokenAttr(token.attrs),
+            data: null
+          })
+        }
+        break;
+      }
+      case "paragraph_open":
+      case "blockquote_open":
+      case "table_open": 
+      case "bullet_list_open":
+      case "ordered_list_open":
+      case "hr": {
+        if (token.map) {
+          tokens.push({ type: asQuartoTokenType(token.type), range: tokenRange(token.map), data: null });
         } else {
           console.log("paragraph did not have map");
+        }
+        break;
+      }
+      case "fence":
+      case "code_block": {
+        if (token.map) {
+          const rawMatch = inputLines[token.map[0]].match(/\{=(\w+)\}\s*$/);
+          if (rawMatch) {
+            tokens.push({
+              type: "RawBlock",
+              range: tokenRange(token.map),
+              attr: undefined,
+              data: { format: rawMatch[1], text: token.content }
+            })
+          } else {
+            tokens.push({ 
+              type: "CodeBlock", 
+              range: tokenRange(token.map), 
+              attr: asTokenAttr(token.attrs),
+              data: token.content.replace(/\n$/, "")
+            });
+          }
+        } else {
+          console.log("fence did not have map");
+        }
+        break;
+      }
+      case "math_block": {
+        if (token.map) {
+          tokens.push({
+            type: "Math",
+            range: tokenRange(token.map),
+            attr: undefined,
+            data: { type: "DisplayMath", text: `\n+${token.content}`} 
+          })
+        } else {
+          console.log("math_block did not have a map");
         }
         break;
       }
@@ -152,10 +229,10 @@ const tokensToText = (tokens: Token[]) : string => {
 }
 
 const asTokenAttr = (attribs: Array<[string,string]> | null) => {
-  const tokenAttr: TokenAttr = ['', [], []];
-  if (attribs === null) {
-    return tokenAttr;
+  if (attribs === null || attribs.length === 0) {
+    return undefined;
   }
+  const tokenAttr: TokenAttr = ['', [], []];
   for (const attrib of attribs) {
     const key = attrib[0];
     const value = attrib[1];
@@ -171,4 +248,23 @@ const asTokenAttr = (attribs: Array<[string,string]> | null) => {
     }
   }
   return tokenAttr;
+}
+
+const asQuartoTokenType = (type: string) : TokenType => {
+  switch(type) {
+    case "heading_open":
+      return "Header";
+    case "blockquote_open":
+      return "BlockQuote";
+    case "hr":
+      return "HorizontalRule";
+    case "table_open":
+      return "Table";
+    case "bullet_list_open":
+      return "BulletList";
+    case "ordered_list_open":
+      return "OrderedList";
+    default:
+      return "Para";
+  }
 }

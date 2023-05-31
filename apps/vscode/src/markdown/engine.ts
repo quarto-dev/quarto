@@ -15,18 +15,15 @@
 
 import * as vscode from "vscode";
 
-import { Parser, Document, QuartoContext, Token, pandocParser } from "quarto-core";
+import { Parser, Document, QuartoContext, Token, markdownitParser } from "quarto-core";
 import { Range, Position } from "vscode-languageserver-types";
 
 export class MarkdownEngine {
   
   private readonly parser_: Parser;
 
-  public constructor(
-    context: QuartoContext,
-    resourcesDir: string
-  ) {
-      this.parser_ = pandocParser(context, resourcesDir);
+  public constructor(_context: QuartoContext, _resourcesDir: string) {
+    this.parser_ = markdownitParser();
   }
 
   public parse(document: vscode.TextDocument): Token[] {
@@ -37,7 +34,13 @@ export class MarkdownEngine {
       get version() { return document.version; },
       get lineCount() { return document.lineCount; },
       getText(range?: Range | undefined): string {
-        return document.getText();
+        const r = range ? new vscode.Range(
+          range.start.line, 
+          range.start.character, 
+          range.end.line, 
+          range.end.character
+        ) : undefined;
+        return document.getText(r);
       },
       positionAt(offset: number): Position {
         return document.positionAt(offset);

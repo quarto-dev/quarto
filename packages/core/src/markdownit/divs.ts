@@ -52,13 +52,17 @@ export const divPlugin = (md: MarkdownIt) => {
       // div. Data structure holds key that is the number of colons
       const divState = state.env.quartoOpenDivs || {};
 
+
+
       const incrementDivCount = (fence: string) => {
+        state.env.quartoDivLevel = (state.env.quartoDivLevel ?? 0) + 1;
         state.env.quartoOpenDivs = state.env.quartoOpenDivs || {};
         const current = state.env.quartoOpenDivs[fence] || 0;
         state.env.quartoOpenDivs[fence] = Math.max(0, current + 1);
       }
 
       const decrementDivCount = (fence: string) => {
+        state.env.quartoDivLevel--;
         state.env.quartoOpenDivs = state.env.quartoOpenDivs || {};
         const current = state.env.quartoOpenDivs[fence] || 0;
         state.env.quartoOpenDivs[fence] = Math.max(0, current - 1);
@@ -111,13 +115,22 @@ export const divPlugin = (md: MarkdownIt) => {
             token.info = `{.${attr}}`;
           }
           token.block = true;
+          token.meta = {
+            line: state.line,
+            level: state.env.quartoDivLevel 
+          }
         } else {
           // Subtract from the open count (min zero)
+          const level = state.env.quartoDivLevel;
           decrementDivCount(divFence);
 
           // Make a close token
           const token = state.push(kTokDivClose, "div", -1)
           token.markup = line; 
+          token.meta = {
+            line: state.line,
+            level 
+          }
         }
 
         state.line = start + 1

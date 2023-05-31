@@ -38,7 +38,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 
 import { registerCustomMethods } from "./custom";
 import { LspConnection } from "core-node";
-import { initQuartoContext, Document, pandocParser } from "quarto-core";
+import { initQuartoContext, Document, markdownitParser } from "quarto-core";
 import { ConfigurationManager, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
@@ -214,8 +214,7 @@ connection.onInitialized(async () => {
   )
 
   // initialize parser
-  const resourcesDir = path.join(__dirname, "resources");
-  const parser = pandocParser(quartoContext, resourcesDir);
+  const parser = markdownitParser();
 
   // create language service
   mdLs = createLanguageService({

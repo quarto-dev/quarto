@@ -14,3 +14,4 @@
  */
 
 export * from './pandoc'
+export * from './markdownit'

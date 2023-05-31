@@ -1,5 +1,5 @@
 /*
- * parser.ts
+ * pandoc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -26,12 +26,15 @@ import { isExecutableLanguageBlock, languageNameFromBlock } from "../language";
 
 
 export function pandocParser(context: QuartoContext, resourcesDir: string) : Parser {
+    
   return cachingParser((doc: Document) => {
-    return parsePandocDocument(context, resourcesDir, doc.getText());
+    const tokens = parseDocument(context, resourcesDir, doc.getText());
+
+    return tokens;
   })
 }
 
-export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
+function parseDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  
   // remove the yaml front matter by replacing it with blank lines 
   // (if its invalid it will prevent parsing of the document)
@@ -52,7 +55,7 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
     // parse json (w/ some fixups)
     const inputLines = lines(input);
     const outputJson = JSON.parse(output) as Record<string,Token>;
-    const tokens = (Object.values(outputJson).map(token => {
+    const tokens = (Object.values(outputJson).map((token) : Token => {
   
       // trim blocks
       if ((token.range.end.line > token.range.start.line) && 
@@ -70,9 +73,19 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
         const lang = languageNameFromBlock(token);
         token.attr![kAttrClasses][0] = `{${lang}}`;
       } 
+
+      // add null if no data
+      if (token.data === undefined) {
+        token.data = null;
+      }
       
-      // return token
-      return token;
+      // return token (order fields)
+      return {
+        type: token.type,
+        range: token.range,
+        attr: token.attr,
+        data: token.data
+      };
     }));
   
   
@@ -81,8 +94,9 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
       const yamlLines = lines(yaml);
       const yamlToken: TokenFrontMatter = {
         type: "FrontMatter",
-        data: yaml,
-        range: makeRange(0, 0, yamlLines.length, 0)
+        range: makeRange(0, 0, yamlLines.length, 0),
+        attr: undefined,
+        data: yaml, 
       }
       tokens.unshift(yamlToken);
     }

@@ -2,6 +2,7 @@
 
 ## 1.87.0 (Unreleased)
 
+- Switch back to markdown-it parser (performance on Windows & w/ multi-byte text)
 - Visual Editor: Support Cmd+Shift+V shortcut for pasting without formatting
 - Visual Editor: Render pasted markdown text rather than treating it literally
 - Language support (highlighting, completion, etc.) for embedded Matlab code cells

@@ -15,18 +15,15 @@
 
 import * as vscode from "vscode";
 
-import { Parser, Document, QuartoContext, Token, pandocParser } from "quarto-core";
+import { Parser, Document, QuartoContext, Token, markdownitParser } from "quarto-core";
 import { Range, Position } from "vscode-languageserver-types";
 
 export class MarkdownEngine {
   
   private readonly parser_: Parser;
 
-  public constructor(
-    context: QuartoContext,
-    resourcesDir: string
-  ) {
-      this.parser_ = pandocParser(context, resourcesDir);
+  public constructor(_context: QuartoContext, _resourcesDir: string) {
+    this.parser_ = markdownitParser();
   }
 
   public parse(document: vscode.TextDocument): Token[] {

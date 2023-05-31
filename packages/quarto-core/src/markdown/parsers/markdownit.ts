@@ -133,13 +133,22 @@ function parseDocument(
       case "paragraph_open":
       case "blockquote_open":
       case "table_open": 
-      case "bullet_list_open":
-      case "ordered_list_open":
       case "hr": {
         if (token.map) {
           tokens.push({ type: asQuartoTokenType(token.type), range: tokenRange(token.map), data: null });
         } else {
-          console.log("paragraph did not have map");
+          console.log(`${token.type} did not have map`);
+        }
+        break;
+      }
+      case "bullet_list_open":
+      case "ordered_list_open": {
+        if (token.map) {
+          const map = token.map;
+          map[1]--;
+          tokens.push({ type: asQuartoTokenType(token.type), range: tokenRange(map), data: null });
+        } else {
+          console.log(`${token.type} did not have map`);
         }
         break;
       }

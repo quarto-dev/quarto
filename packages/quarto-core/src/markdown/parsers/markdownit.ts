@@ -155,8 +155,18 @@ function parseDocument(
       case "fence":
       case "code_block": {
         if (token.map) {
-          const rawMatch = inputLines[token.map[0]].match(/\{=(\w+)\}\s*$/);
-          if (rawMatch) {
+          const line = inputLines[token.map[0]];
+          const execMatch = line.match(/^([\t >]*)(```+)\s*\{([a-zA-Z0-9_-]+)/);
+          const rawMatch = line.match(/\{=(\w+)\}\s*$/);
+          if (execMatch) {
+            tokens.push({
+              type: "CodeBlock",
+              range: tokenRange(token.map),
+              attr: ["", [`{${execMatch[3]}`], []],
+              data: token.content.replace(/\n$/, "")
+            })
+          }
+          else if (rawMatch) {
             tokens.push({
               type: "RawBlock",
               range: tokenRange(token.map),

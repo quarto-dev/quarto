@@ -138,9 +138,12 @@ export class ConfigurationManager extends Disposable {
 	}
 
 	public async update() {
+		const settings = await this.connection_.workspace.getConfiguration();
+
 		this._settings = {
 			...defaultSettings(),
-			...(await this.connection_.workspace.getConfiguration())
+			...settings.workbench,
+			...settings.quarto,
 		};
 		this._onDidChangeConfiguration.fire(this._settings);
 	}

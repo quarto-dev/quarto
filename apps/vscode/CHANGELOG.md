@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.87.0 (Unreleased)
+## 1.87.0 (Release on 31 May 2023)
 
 - Switch back to markdown-it parser (performance on Windows & w/ multi-byte text)
 - Visual Editor: Support Cmd+Shift+V shortcut for pasting without formatting

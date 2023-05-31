@@ -8,6 +8,7 @@
 - Language support (highlighting, completion, etc.) for embedded Matlab code cells
 - Render All command to render and preview all specified formats 
 - Fix crash caused by improper initialization of LSP configuration 
+- Fail gracefully when we are unable to read zotero key
 
 ## 1.86.2 (Release on 26 May 2023)
 

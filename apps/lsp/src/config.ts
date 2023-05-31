@@ -142,8 +142,16 @@ export class ConfigurationManager extends Disposable {
 
 		this._settings = {
 			...defaultSettings(),
-			...settings.workbench,
-			...settings.quarto,
+			workbench: {
+				colorTheme: settings.workbench.colorTheme
+			},
+			quarto: {
+				path: settings.quarto.path,
+				mathjax: {
+					scale: settings.quarto.mathjax.scale,
+					extensions: settings.quarto.mathjax.extensions
+				}
+			}
 		};
 		this._onDidChangeConfiguration.fire(this._settings);
 	}

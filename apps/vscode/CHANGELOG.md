@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.87.2 (Unreleased)
+
+- Fix issue w/ parsing math blocks at the end of documents
+
 ## 1.87.1 (Release on 31 May 2023)
 
 - Fix issue with failure to parse executable blocks from markdown

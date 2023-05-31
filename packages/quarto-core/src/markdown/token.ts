@@ -43,8 +43,6 @@ export interface Token<T = unknown> {
   data: T;
     // FrontMatter: yaml
     // Header: { level: number, text: string }
-    // Image: caption
-    // Link: target
     // Math: { type: string, text: string }
     // CodeBlock: text
     // RawBlock: { format: string, text: string }

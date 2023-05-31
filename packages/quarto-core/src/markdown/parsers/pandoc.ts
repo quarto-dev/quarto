@@ -1,5 +1,5 @@
 /*
- * parser.ts
+ * pandoc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -23,15 +23,24 @@ import { lines } from "core";
 import { makeRange } from "../../range";
 import { Document } from "../../document";
 import { isExecutableLanguageBlock, languageNameFromBlock } from "../language";
+import { markdownitParser } from "./markdownit";
 
 
 export function pandocParser(context: QuartoContext, resourcesDir: string) : Parser {
+  
+  const mditParser =  markdownitParser();
+  
   return cachingParser((doc: Document) => {
-    return parsePandocDocument(context, resourcesDir, doc.getText());
+    const tokens = parseDocument(context, resourcesDir, doc.getText());
+
+    console.log(JSON.stringify(tokens));
+    console.log(JSON.stringify(mditParser(doc)));
+
+    return tokens;
   })
 }
 
-export function parsePandocDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
+function parseDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
  
   // remove the yaml front matter by replacing it with blank lines 
   // (if its invalid it will prevent parsing of the document)
@@ -70,6 +79,11 @@ export function parsePandocDocument(context: QuartoContext, resourcePath: string
         const lang = languageNameFromBlock(token);
         token.attr![kAttrClasses][0] = `{${lang}}`;
       } 
+
+      // add null if no data
+      if (token.data === undefined) {
+        token.data = null;
+      }
       
       // return token
       return token;

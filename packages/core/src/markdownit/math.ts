@@ -211,8 +211,10 @@ function math_block(
   return true;
 }
 
-export function mathjaxPlugin(md: MarkdownIt) {
+export function mathjaxPlugin(md: MarkdownIt, options?: { enableInlines?: boolean }) {
   // Default options
+  options = options || {};
+  const enableInlines = (options.enableInlines !== undefined) ? options.enableInlines : true; 
 
   const convertOptions = {
     display: false
@@ -223,10 +225,12 @@ export function mathjaxPlugin(md: MarkdownIt) {
   md.block.ruler.after("blockquote", kTokMathBlock, math_block, {
     alt: ["paragraph", "reference", "blockquote", "list"],
   });
-  md.renderer.rules.math_inline = function (tokens: Token[], idx: number) {
-    convertOptions.display = false;
-    return renderMath(tokens[idx].content, convertOptions)
-  };
+  if (enableInlines) {
+    md.renderer.rules.math_inline = function (tokens: Token[], idx: number) {
+      convertOptions.display = false;
+      return renderMath(tokens[idx].content, convertOptions)
+    };
+  }
   md.renderer.rules.math_block = function (tokens: Token[], idx: number) {
     convertOptions.display = true;
     return renderMath(tokens[idx].content, convertOptions)

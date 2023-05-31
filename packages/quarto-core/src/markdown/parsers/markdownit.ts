@@ -15,16 +15,21 @@
 
 
 import MarkdownIt from "markdown-it";
+import Token from "markdown-it/lib/token";
+
+import attrPlugin from 'markdown-it-attrs';
+
 import { Document } from "../../document";
 
 import { Parser, cachingParser } from "../parser";
-import { Token } from "../token";
+import { Token as QToken, TokenAttr, kAttrAttributes, kAttrClasses, kAttrIdentifier } from "../token";
 import { divPlugin, lines, mathjaxPlugin, yamlPlugin } from "core";
-import { makeRange } from "../../range";
 
+import { makeRange } from "../../range";
 
 export function markdownitParser() : Parser {
 
+  // block parser
   const md = MarkdownIt("zero");
   md.enable([
     "blockquote",
@@ -38,53 +43,132 @@ export function markdownitParser() : Parser {
     "hr",
     "table"
   ]);
+  md.use(attrPlugin);
   md.use(mathjaxPlugin, { enableInlines: false } );
   md.use(yamlPlugin);
   md.use(divPlugin);
 
+  // inline parser
+  const mdInline = MarkdownIt("commonmark");
+  const mdToText = (markdown: string ) => {
+    const tokens = mdInline.parseInline(markdown, {});
+    return tokensToText(tokens);
+  }
+
   return cachingParser((doc: Document) => {
-    return parseDocument(md, doc.getText());
+    return parseDocument(md, mdToText, doc.getText());
   })
 }
 
-const UNICODE_NEWLINE_REGEX = /\u2028|\u2029/g;
+type MarkdownToPlainText = (markdown: string) => string;
 
-function parseDocument(md: MarkdownIt, markdown: string) : Token[] {
-  // parse markdown and generate tokens
+function parseDocument(
+  md: MarkdownIt, 
+  mdToText: MarkdownToPlainText, 
+  markdown: string
+) : QToken[] {
+  
+  // remove unicode newlines
+  const UNICODE_NEWLINE_REGEX = /\u2028|\u2029/g;
   markdown = markdown.replace(UNICODE_NEWLINE_REGEX, "");
+
+  type HeaderInfo = { open: Token; body: Token[] };
+  let currentHeader: HeaderInfo | undefined;
+
+  // parse markdown and generate tokens
+  const tokens: QToken[] = [];
   const inputLines = lines(markdown);
-  const tokens = md.parse(markdown, {}).reduce((tokens, token) => {
+  const mdItTokens = md.parse(markdown, {});
 
-    console.log(token);
-
-    // only process blocks w/ a range
-    if (!token.block || !token.map) {
-      return tokens;
-    }
-
-    // compute range
-    const range = makeRange(
-      token.map[0], 
+  const tokenRange = (map: [number, number]) => {
+    // TODO: trim only if required
+    return makeRange(
+      map[0], 
       0, 
-      token.map[1] - 1, 
-      inputLines[token.map[1]-1].length
-    )
-    
+      map[1] - 1, 
+      inputLines[map[1]-1].length
+    );
+  };
+
+  for (let i=0; i<mdItTokens.length; i++)  {
+
+    const token = mdItTokens[i];
+
     // look for our tokens
     switch(token.type) {
       case "paragraph_open": {
-        tokens.push({ type: "Para", range, data: null });
+        if (token.map) {
+          tokens.push({ type: "Para", range: tokenRange(token.map), data: null });
+        } else {
+          console.log("paragraph did not have map");
+        }
         break;
       }
-      case "heading":
-      case "lheading": {
-        tokens.push({ type: "Header", range, data: null })
+      case "heading_open": {
+        currentHeader = { open: token, body: [] };
         break;
       }
+      case "heading_close": {
+        if (currentHeader) {
+          const level = currentHeader.open.tag.match(/h(\d+)/)?.[1];
+          if (level && currentHeader.open.map) {
+            const text = tokensToText(currentHeader.body).trim();
+            tokens.push({ 
+              type: "Header", 
+              range: tokenRange(currentHeader.open.map), 
+              attr: asTokenAttr(currentHeader.open.attrs),
+              data: { level: parseInt(level), text: mdToText(text)} 
+            });
+          } else {
+            console.log("heading_open did not have level or map")
+          }
+          currentHeader = undefined;
+        }
+        break;
+      }
+      default: {
+        if (currentHeader) {
+          currentHeader.body.push(token);
+        }
+        break;
+      }
+        
     }
-   
-    return tokens;
-  }, new Array<Token>());
+  
+  }
   
   return tokens;
+}
+
+
+const tokensToText = (tokens: Token[]) : string => {
+  return tokens.map(token => {
+    if (token.children) {
+      return tokensToText(token.children);
+    } else {
+      return token.content;
+    }
+  }).join("");
+}
+
+const asTokenAttr = (attribs: Array<[string,string]> | null) => {
+  const tokenAttr: TokenAttr = ['', [], []];
+  if (attribs === null) {
+    return tokenAttr;
+  }
+  for (const attrib of attribs) {
+    const key = attrib[0];
+    const value = attrib[1];
+    switch(key) {
+      case 'id':
+        tokenAttr[kAttrIdentifier] = value;
+        break;
+      case 'class':
+        tokenAttr[kAttrClasses].push(...value.split(' '));
+        break;
+      default:
+        tokenAttr[kAttrAttributes].push([key,value]);
+    }
+  }
+  return tokenAttr;
 }

@@ -62,7 +62,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
 	}
 
 	private static readLogLevel(config: ConfigurationManager): LogLevel {
-		switch (config.getSettings()?.markdown.server.log) {
+		switch (config.getSettings().markdown.server.log) {
 			case 'trace': return LogLevel.Trace;
 			case 'debug': return LogLevel.Debug;
 			case 'off':

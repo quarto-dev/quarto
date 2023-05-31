@@ -181,7 +181,7 @@ connection.onInitialized(async () => {
 
   // sync config if possible
   if (capabilities?.workspace?.configuration) {
-    configManager.subscribe();
+    await configManager.subscribe();
   }
 
   // initialize connection to quarto
@@ -192,7 +192,7 @@ connection.onInitialized(async () => {
    
   // initialize quarto
   const quartoContext = initQuartoContext(
-    configManager.getSettings()?.quarto.path, 
+    configManager.getSettings().quarto.path, 
     workspaceDir
   );
   const quarto = await initializeQuarto(quartoContext);

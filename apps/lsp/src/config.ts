@@ -47,10 +47,6 @@ export interface Settings {
 
 		readonly preferredMdPathExtensionStyle: 'auto' | 'includeExtension' | 'removeExtension';
 
-		readonly occurrencesHighlight: {
-			readonly enabled: boolean;
-		};
-
 		readonly suggest: {
 			readonly paths: {
 				readonly enabled: boolean;
@@ -59,7 +55,7 @@ export interface Settings {
 		};
 
 		readonly validate: {
-			readonly enabled: true;
+			readonly enabled: boolean;
 			readonly referenceLinks: {
 				readonly enabled: ValidateEnabled;
 			};
@@ -81,26 +77,77 @@ export interface Settings {
 	};
 }
 
+function defaultSettings() : Settings {
+	return {
+		workbench: {
+			colorTheme: 'Dark+'
+		},
+		quarto: {
+			path: "",
+			mathjax: {
+				scale: 1,
+				extensions: []
+			}
+		},
+		markdown: {
+			server: {
+				log: 'off'
+			},
+			preferredMdPathExtensionStyle: 'auto',
+			suggest: {
+				paths: {
+					enabled: true,
+					includeWorkspaceHeaderCompletions: 'never'
+				}
+			},
+			validate: {
+				enabled: kDefaultDiagnosticOptions.enabled,
+				referenceLinks: {
+					enabled: kDefaultDiagnosticOptions.validateReferences!,
+				},
+				fragmentLinks: {
+					enabled: kDefaultDiagnosticOptions.validateFragmentLinks!,
+				},
+				fileLinks: {
+					enabled: kDefaultDiagnosticOptions.validateFileLinks!,
+					markdownFragmentLinks: 'inherit',
+				},
+				ignoredLinks: [],
+				unusedLinkDefinitions: {
+					enabled: kDefaultDiagnosticOptions.validateUnusedLinkDefinitions!,
+				},
+				duplicateLinkDefinitions: {
+					enabled: kDefaultDiagnosticOptions.validateDuplicateLinkDefinitions!
+				}
+			}
+		}
+	}
+}
+
 
 export class ConfigurationManager extends Disposable {
 
 	private readonly _onDidChangeConfiguration = this._register(new Emitter<Settings>());
 	public readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
-	private _settings?: Settings;
+	private _settings: Settings;
 
 	constructor(private readonly connection_: Connection) {
 		super();
+		this._settings = defaultSettings();
 	}
 
 	public async update() {
-		this._settings = await this.connection_.workspace.getConfiguration();
-		this._onDidChangeConfiguration.fire(this._settings!);
+		this._settings = {
+			...defaultSettings(),
+			...(await this.connection_.workspace.getConfiguration())
+		};
+		this._onDidChangeConfiguration.fire(this._settings);
 	}
 
-	public subscribe() {
-		this.update();
-		this.connection_.client.register(
+	public async subscribe() {
+		await this.update();
+		await this.connection_.client.register(
 			DidChangeConfigurationNotification.type,
 			undefined
 		);
@@ -109,7 +156,7 @@ export class ConfigurationManager extends Disposable {
 		});
 	}
 
-	public getSettings(): Settings | undefined {
+	public getSettings(): Settings {
 		return this._settings;
 	}
 }
@@ -119,7 +166,7 @@ export function lsConfiguration(configManager: ConfigurationManager) : LsConfigu
 	return {
 		...config,
 		get preferredMdPathExtensionStyle() {
-			switch (configManager.getSettings()?.markdown.preferredMdPathExtensionStyle) {
+			switch (configManager.getSettings().markdown.preferredMdPathExtensionStyle) {
 				case 'includeExtension': return PreferredMdPathExtensionStyle.includeExtension;
 				case 'removeExtension': return PreferredMdPathExtensionStyle.removeExtension;
 				case 'auto':
@@ -128,7 +175,7 @@ export function lsConfiguration(configManager: ConfigurationManager) : LsConfigu
 			}
 		},
 		get includeWorkspaceHeaderCompletions() : IncludeWorkspaceHeaderCompletions {
-			switch (configManager.getSettings()?.markdown.suggest.paths.includeWorkspaceHeaderCompletions || config.includeWorkspaceHeaderCompletions) {
+			switch (configManager.getSettings().markdown.suggest.paths.includeWorkspaceHeaderCompletions || config.includeWorkspaceHeaderCompletions) {
 				case 'onSingleOrDoubleHash': return IncludeWorkspaceHeaderCompletions.onSingleOrDoubleHash;
 				case 'onDoubleHash': return IncludeWorkspaceHeaderCompletions.onDoubleHash;
 				case 'never':
@@ -137,17 +184,13 @@ export function lsConfiguration(configManager: ConfigurationManager) : LsConfigu
 		},
 		get colorTheme(): "light" | "dark" {
 			const settings = configManager.getSettings();
-			if (settings) {
-				return settings?.workbench.colorTheme.includes("Light") ? "light" : "dark";
-			} else {
-				return config.colorTheme;
-			}
+			return settings.workbench.colorTheme.includes("Light") ? "light" : "dark";
 		},
 		get mathjaxScale(): number {
-			return configManager.getSettings()?.quarto.mathjax.scale || config.mathjaxScale;
+			return configManager.getSettings().quarto.mathjax.scale;
 		},
 		get mathjaxExtensions(): readonly MathjaxSupportedExtension[] {
-			return configManager.getSettings()?.quarto.mathjax.extensions || [];
+			return configManager.getSettings().quarto.mathjax.extensions;
 		}
 	}
 }

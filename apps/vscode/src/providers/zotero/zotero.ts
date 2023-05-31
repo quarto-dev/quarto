@@ -72,7 +72,7 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
     const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
     const type = zoteroConfig.get<"none"|"local"|"web">(kLibrary, "local");
     const dataDir = zoteroConfig.get<string>(kDataDir, "");
-    const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
+    const apiKey = await safeReadZoteroApiKey(context);
     try {
       await zotero.setLibraryConfig({
         type,
@@ -108,7 +108,7 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
       // if we are switching to web then prompt for an api key if we don't have one
       const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
       if (zoteroConfig.get(kLibrary) === "web" && 
-          !(await context.secrets.get(kQuartoZoteroWebApiKey))) {
+          !(await safeReadZoteroApiKey(context))) {
         await commands.executeCommand(kZoteroConfigureLibrary);
       } else {
         await setLspLibraryConfig();
@@ -124,7 +124,7 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
       // sync if we are in web mode and there are new libraries added
       if (zoteroConfig.get(kLibrary) === "web" && 
           updatedGroupLibraries.length > groupLibraries.length) {
-        const apiKey = await context.secrets.get(kQuartoZoteroWebApiKey);
+        const apiKey = await safeReadZoteroApiKey(context);
         if (apiKey) {
           await syncWebLibraries(apiKey);
         }
@@ -263,7 +263,7 @@ class ZoteroSyncWebLibraryCommand implements Command {
   ) {}
 
   async execute() {
-    const apiKey = await this.context.secrets.get(kQuartoZoteroWebApiKey);
+    const apiKey = await safeReadZoteroApiKey(this.context);
     if (apiKey) {
       await syncWebLibraries(apiKey);
     } else {
@@ -354,5 +354,14 @@ async function syncWebLibraries(apiKey: string) {
 class SyncCancelledError extends Error {
   constructor() {
     super("Sync Cancelled");
+  }
+}
+
+async function safeReadZoteroApiKey(context: ExtensionContext) {
+  try {
+    return await context.secrets.get(kQuartoZoteroWebApiKey);
+  } catch(error) {
+    console.log("Error reading zotero api key");
+    return undefined;
   }
 }

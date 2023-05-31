@@ -192,7 +192,7 @@ function parseDocument(
             type: "Math",
             range: tokenRange(token.map),
             attr: undefined,
-            data: { type: "DisplayMath", text: `\n+${token.content}`} 
+            data: { type: "DisplayMath", text: `\n${token.content}`} 
           })
         } else {
           console.log("math_block did not have a map");

@@ -187,16 +187,14 @@ function parseDocument(
         break;
       }
       case "math_block": {
-        if (token.map) {
+        if (token.map && token.map[1] < inputLines.length) {
           tokens.push({
             type: "Math",
             range: tokenRange(token.map),
             attr: undefined,
             data: { type: "DisplayMath", text: `\n${token.content}`} 
           })
-        } else {
-          console.log("math_block did not have a map");
-        }
+        } 
         break;
       }
       case "heading_open": {

@@ -203,18 +203,18 @@ export function languageServiceWorkspace(
       for (const workspaceFolder of this.workspaceFolders) {
         const mdFileGlob = `**/*.{${config.markdownFileExtensions.join(',')}}`;
         const ignore = [...config.excludePaths]; 
-        const resources = await glob(mdFileGlob, { ignore, cwd: workspaceFolder.toString() } );
+        const resources = (await glob(mdFileGlob, { ignore, cwd: workspaceFolder.toString() } ))
+          .map(resource => URI.file(path.join(workspaceFolder.fsPath, resource)))
+        
 
         // (read max 20 at a time)
         const maxConcurrent = 20;
         const limiter = new Limiter<Document | undefined>(maxConcurrent);
-        await Promise.all(resources.map(strResource => {
+        await Promise.all(resources.map(resource => {
           return limiter.queue(async () => {
-            const resource = URI.parse(strResource);
             if (allDocs.has(resource)) {
               return;
             }
-  
             const doc = await this.openMarkdownDocument(resource);
             if (doc) {
               allDocs.set(resource, doc);
@@ -327,6 +327,7 @@ export function languageServiceWorkspace(
 						break;
 					}
 					case FileChangeType.Created: {
+            console.log("FileChangeType.Created");
 						const entry = documentCache.get(resource);
 						if (entry) {
 							// Create or update the on-disk state

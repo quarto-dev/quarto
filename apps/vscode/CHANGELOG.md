@@ -4,6 +4,7 @@
 
 - Fix issue w/ parsing math blocks at the end of documents
 - Disable styler in R intellisense background document
+- Ensure that all files in the workspace are indexed when required
 
 ## 1.87.1 (Release on 31 May 2023)
 

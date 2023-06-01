@@ -3,6 +3,7 @@
 ## 1.87.2 (Unreleased)
 
 - Fix issue w/ parsing math blocks at the end of documents
+- Disable styler in R intellisense background document
 
 ## 1.87.1 (Release on 31 May 2023)
 

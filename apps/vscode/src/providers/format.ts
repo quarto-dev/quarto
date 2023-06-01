@@ -35,9 +35,10 @@ import { languageBlockAtPosition } from "quarto-core";
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { EmbeddedLanguage, langaugeCanFormatSelection } from "../vdoc/languages";
+import { EmbeddedLanguage, langageCanFormatDocument, langaugeCanFormatSelection } from "../vdoc/languages";
 import {
   adjustedPosition,
+  isBlockOfLanguage,
   languageAtPosition,
   mainLanguage,
   unadjustedRange,
@@ -77,11 +78,30 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
         if (language) {
           const vdoc = virtualDocForLanguage(document, tokens, language);
           if (vdoc) {
-            return executeFormatDocumentProvider(
-              vdoc,
-              document,
-              formattingOptions(document.uri, vdoc.language, options)
-            );
+            if (langageCanFormatDocument(language)) {
+              return executeFormatDocumentProvider(
+                vdoc,
+                document,
+                formattingOptions(document.uri, vdoc.language, options)
+              );
+            } else if (langaugeCanFormatSelection(language, document.uri)) {
+              const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
+              const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+                const edits: TextEdit[] = [];
+                for (const token of tokens.filter(isBlockOfLanguage(language!)).reverse()) {
+                  const rangeEdits = await executeFormatRangeProvider(
+                    uri,
+                    adjustedCellRange(vdoc.language, document, token.range.start.line + 1, token.range.end.line - 1),
+                    formattingOptions(document.uri, vdoc.language)
+                  );
+                  if (rangeEdits) {
+                    edits.push(...rangeEdits);
+                  }
+                }
+                return edits;
+              });
+              return unadjustedEdits(edits, vdoc.language);;
+            }
           }
         }
       }
@@ -164,7 +184,7 @@ class FormatCellCommand implements Command {
               });
             });
           }
-        } else {
+        } else if (langageCanFormatDocument(vdoc.language)) {
           const edits = await executeFormatDocumentProvider(
             vdoc,
             doc,

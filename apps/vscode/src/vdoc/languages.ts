@@ -26,6 +26,7 @@ export interface EmbeddedLanguage {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
+  canFormatDocument?: boolean;
   canFormatSelection?: (uri: Uri) => boolean;
 }
 
@@ -36,6 +37,10 @@ export function embeddedLanguage(langauge: string) {
 
 export function langaugeCanFormatSelection(language: EmbeddedLanguage, uri: Uri) {
   return !language.canFormatSelection || language.canFormatSelection(uri);
+}
+
+export function langageCanFormatDocument(language: EmbeddedLanguage) {
+  return language.canFormatDocument === undefined || language.canFormatDocument;
 }
 
 const kEmbededLanguages = [
@@ -50,9 +55,11 @@ const kEmbededLanguages = [
     }
   }),
   defineLanguage("r", {
+    inject: ["# styler: off"],
     emptyLine: "#",
     reuseVdoc: true,
     canFormat: true,
+    canFormatDocument: false,
   }),
   defineLanguage("julia", {
     emptyLine: "#",
@@ -86,6 +93,7 @@ interface LanguageOptions {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
+  canFormatDocument?: boolean;
   canFormatSelection?: (uri: Uri) => boolean;
 }
 
@@ -116,6 +124,7 @@ function defineLanguage(
     inject: options?.inject,
     reuseVdoc: options?.reuseVdoc,
     canFormat: options?.canFormat,
+    canFormatDocument: options?.canFormatDocument,
     canFormatSelection: options?.canFormatSelection
   };
 }

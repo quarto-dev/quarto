@@ -3,6 +3,7 @@
 ## 1.87.3 (Unreleased)
 
 - Ensure that Go to next/previous cell traverses all executable blocks
+- Attempt to restore focus to visual editor when switching back to the window
 
 ## 1.87.2 (Release on 2 June 2023)
 

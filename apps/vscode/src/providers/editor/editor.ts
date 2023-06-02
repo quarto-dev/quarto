@@ -629,15 +629,37 @@ function visualEditorTracker() : VisualEditorTracker {
 
 function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : Disposable {
 
+  let hasFocus = false;
   let cancelled = false;
 
+  const focusEditor = async () => {
+    await commands.executeCommand('workbench.action.focusNextGroup');
+    webviewPanel.reveal(webviewPanel.viewColumn, false);
+    editor.focus();
+  };
+
+   // if we are focused when the window loses focus then restore on re-focus
+   let reFocus = false;
+   const evWindow = window.onDidChangeWindowState(async (event) => {
+     if (!event.focused && hasFocus) {
+       reFocus = true;
+     } else if (event.focused && reFocus) {
+       setTimeout(async () => {
+        await focusEditor();
+        reFocus = false;
+       }, 200);
+     } 
+   });
+
+  // periodically check for focus 
   const timer = setInterval(async () => {
+    // update focus state
+    hasFocus = await editor.isFocused();
+
+    // if focus state between the panel and editor gets out of state, do a reset
     if (webviewPanel.visible && !webviewPanel.active && !cancelled) {
-      const hasFocus = await editor.isFocused();
-      if (hasFocus) {
-        await commands.executeCommand('workbench.action.focusNextGroup');
-        webviewPanel.reveal(webviewPanel.viewColumn, false);
-        editor.focus();
+      if (hasFocus && !reFocus) {
+        focusEditor();
       }
     }
   }, 1000);
@@ -646,6 +668,7 @@ function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : 
     dispose: () => {
       cancelled = true;
       clearInterval(timer);
+      evWindow.dispose();
     }
   };
 

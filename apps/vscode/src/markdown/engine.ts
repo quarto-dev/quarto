@@ -22,7 +22,7 @@ export class MarkdownEngine {
   
   private readonly parser_: Parser;
 
-  public constructor(_context: QuartoContext, _resourcesDir: string) {
+  public constructor() {
     this.parser_ = markdownitParser();
   }
 

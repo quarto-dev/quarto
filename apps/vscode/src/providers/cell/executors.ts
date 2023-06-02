@@ -16,40 +16,42 @@
 // TODO: implement some terminal based executors
 // (e.g. see https://github.com/JeepShen/vscode-markdown-code-runner)
 
-import semver from "semver";
 
-import { commands, extensions, Position, TextDocument, Uri, window } from "vscode";
+import { TextDocument } from "vscode";
 
-import { codeForExecutableLanguageBlock, isExecutableLanguageBlock, isExecutableLanguageBlockOf, languageNameFromBlock, Token, TokenCodeBlock, TokenMath } from "quarto-core";
+import { 
+  codeForExecutableLanguageBlock, 
+  isExecutableLanguageBlock, 
+  languageNameFromBlock, 
+  Token, 
+  TokenCodeBlock, 
+  TokenMath 
+} from "quarto-core";
 
 import { lines } from "core";
 
-import { MarkdownEngine } from "../../markdown/engine";
-import { virtualDoc, virtualDocUri } from "../../vdoc/vdoc";
-
 import { cellOptionsForToken, kExecuteEval } from "./options";
 
-export function executableLanguages() {
-  return kCellExecutors.map(x => x.language);
+import { CellExecutor, ExtensionHost } from "../../host";
+
+
+export function hasExecutor(host: ExtensionHost, language: string) {
+  return host.executableLanguages().includes(language);
 }
 
-export function hasExecutor(language: string) {
-  return !!kCellExecutors.find((x) => x.language === language);
-}
-
-export function blockHasExecutor(token?: Token) : token is TokenMath | TokenCodeBlock {
+export function blockHasExecutor(host: ExtensionHost, token?: Token) : token is TokenMath | TokenCodeBlock {
   if (token) {
     const language = languageNameFromBlock(token);
-    return isExecutableLanguageBlock(token) && hasExecutor(language);
+    return isExecutableLanguageBlock(token) && hasExecutor(host, language);
   } else {
     return false;
   }
 }
 
-export function blockIsExecutable(token?: Token) : token is TokenMath | TokenCodeBlock {
+export function blockIsExecutable(host: ExtensionHost, token?: Token) : token is TokenMath | TokenCodeBlock {
   if (token) {
     return (
-      blockHasExecutor(token) && cellOptionsForToken(token)[kExecuteEval] !== false
+      blockHasExecutor(host, token) && cellOptionsForToken(token)[kExecuteEval] !== false
     );
   } else {
     return false;
@@ -60,11 +62,10 @@ export function blockIsExecutable(token?: Token) : token is TokenMath | TokenCod
 export function codeFromBlock(token: TokenMath | TokenCodeBlock) {
   if (isExecutableLanguageBlock(token)) {
     const language = languageNameFromBlock(token);
-    const executor = kCellExecutors.find((x) => x.language === language);
-    if (executor) {
+    if (hasYamlHashOptions(language)) {
       const blockLines = lines(codeForExecutableLanguageBlock(token));
       const startCodePos = blockLines.findIndex(
-        (line) => !executor.isYamlOption(line)
+        (line) => !isYamlHashOption(line)
       );
       if (startCodePos !== -1) {
         return blockLines.slice(startCodePos).join("\n");
@@ -81,21 +82,17 @@ export function codeFromBlock(token: TokenMath | TokenCodeBlock) {
 }
 
 export async function executeInteractive(
-  language: string,
+  executor: CellExecutor,
   blocks: string[],
   document: TextDocument
 ): Promise<void> {
-  const executor = kCellExecutors.find((x) => x.language === language);
-  if (executor) {
-    return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
-  }
+  return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
 }
 
 // attempt language aware execution of current selection (returns false
 // if the executor doesn't support this, in which case generic
 // executeInteractive will be called)
-export async function executeSelectionInteractive(language: string) {
-  const executor = kCellExecutors.find((x) => x.language === language);
+export async function executeSelectionInteractive(executor: CellExecutor) {
   if (executor?.executeSelection) {
     await executor.executeSelection();
     return true;
@@ -104,180 +101,10 @@ export async function executeSelectionInteractive(language: string) {
   }
 }
 
-export function hasCellExecutor(language: string) {
-  return !!kCellExecutors.find((x) => x.language === language);
+function hasYamlHashOptions(language: string) {
+  return ["python", "r", "julia", "bash", "sh", "shell"];
 }
-
-export function hasRequiredExtension(language: string) {
-  const executor = kCellExecutors.find((x) => x.language === language);
-  if (executor) {
-    return validateRequiredExtension(executor, true);
-  } else {
-    return false;
-  }
-}
-
-// ensure language extension is loaded (if required) by creating a
-// virtual doc for the language (under the hood this triggers extension
-// loading by sending a dummy hover-provider request)
-const kLoadedLanguageExtensions: string[] = [];
-export async function ensureRequiredExtension(
-  language: string,
-  document: TextDocument,
-  engine: MarkdownEngine
-): Promise<boolean> {
-  // only do this once per language
-  if (kLoadedLanguageExtensions.includes(language)) {
-    return true;
-  }
-
-  const executor = kCellExecutors.find((x) => x.language === language);
-  if (executor) {
-    // validate the extension
-    if (!validateRequiredExtension(executor)) {
-      return false;
-    }
-
-    // load a virtual doc for this file (forces extension to load)
-    const tokens = engine.parse(document);
-    const languageBlock = tokens.find(isExecutableLanguageBlockOf(language));
-    if (languageBlock) {
-      const vdoc = await virtualDoc(
-        document,
-        new Position(languageBlock.range.start.line + 1, 0),
-        engine
-      );
-      if (vdoc) {
-        // get the virtual doc
-        await virtualDocUri(vdoc, document.uri, "hover");
-
-        // mark language as being loaded
-        kLoadedLanguageExtensions.push(executor.language);
-
-        // success!!
-        return true;
-      }
-    }
-  }
-
-  //  unable to validate
-  return false;
-}
-
-function validateRequiredExtension(executor: CellExecutor, silent = false) {
-  if (executor.requiredExtension) {
-    const extensionName = executor.requiredExtensionName;
-    let extension: any;
-    for (const reqExtension of executor.requiredExtension) {
-      extension = extensions.getExtension(reqExtension);
-      if (extension) {
-        break;
-      }
-    }
-    if (extension) {
-      if (executor?.requiredVersion) {
-        const version = (extension.packageJSON.version || "0.0.0") as string;
-        if (semver.gte(version, executor.requiredVersion)) {
-          return true;
-        } else {
-          if (!silent) {
-            window.showWarningMessage(
-              `Executing ${executor.language} cells requires v${executor.requiredVersion} of the ${extensionName} extension.`
-            );
-          }
-          return false;
-        }
-      } else {
-        return true;
-      }
-    } else {
-      if (!silent) {
-        window.showWarningMessage(
-          `Executing ${executor.language} cells requires the ${extensionName} extension.`
-        );
-      }
-      return false;
-    }
-  } else {
-    return true;
-  }
-}
-
-interface CellExecutor {
-  language: string;
-  requiredExtensionName?: string;
-  requiredExtension?: string[];
-  requiredVersion?: string;
-  isYamlOption: (line: string) => boolean;
-  execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
-  executeSelection?: () => Promise<void>;
-}
-
-const pythonCellExecutor: CellExecutor = {
-  language: "python",
-  requiredExtension: ["ms-python.python"],
-  requiredExtensionName: "Python",
-  requiredVersion: "2021.8.0",
-  isYamlOption: isYamlHashOption,
-  execute: async (blocks: string[]) => {
-    for (const block of blocks) {
-      await commands.executeCommand("jupyter.execSelectionInteractive", block);
-    }
-  },
-};
-
-const rCellExecutor: CellExecutor = {
-  language: "r",
-  requiredExtension: ["REditorSupport.r", "Ikuyadeu.r"],
-  requiredExtensionName: "R",
-  requiredVersion: "2.4.0",
-  isYamlOption: isYamlHashOption,
-  execute: async (blocks: string[]) => {
-    await commands.executeCommand("r.runSelection", blocks.join("\n").trim());
-  },
-  executeSelection: async () => {
-    await commands.executeCommand("r.runSelection");
-  },
-};
-
-const juliaCellExecutor: CellExecutor = {
-  language: "julia",
-  requiredExtension: ["julialang.language-julia"],
-  requiredExtensionName: "Julia",
-  requiredVersion: "1.4.0",
-  isYamlOption: isYamlHashOption,
-  execute: async (blocks: string[], editorUri?: Uri) => {
-    const extension = extensions.getExtension("julialang.language-julia");
-    if (extension) {
-      if (!extension.isActive) {
-        await extension.activate();
-      }
-      extension.exports.executeInREPL(blocks.join("\n"), {
-        filename: editorUri ? editorUri.fsPath : 'code'
-      });
-    } else {
-      window.showErrorMessage("Unable to execute code in Julia REPL");
-    }
-  },
-};
-
-
-const bashCellExecutor: CellExecutor = {
-  language: "bash",
-  isYamlOption: isYamlHashOption,
-  execute: async (blocks: string[]) => {
-    const terminal = window.activeTerminal || window.createTerminal();
-    terminal.show();
-    terminal.sendText(blocks.join("\n"));
-  }
-};
-
-const shCellExecutor = { ...bashCellExecutor, language: "sh" };
-
-const shellCellExecutor = { ...bashCellExecutor, language: "shell" };
 
 function isYamlHashOption(line: string) {
   return !!line.match(/^#\s*\| ?/);
 }
-
-const kCellExecutors = [pythonCellExecutor, rCellExecutor, juliaCellExecutor, bashCellExecutor, shCellExecutor, shellCellExecutor];

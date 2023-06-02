@@ -23,7 +23,15 @@ import {
   TextEditorRevealType,
   window,
 } from "vscode";
-import { Token, TokenCodeBlock, TokenMath, isExecutableLanguageBlock, isExecutableLanguageBlockOf, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+import { 
+  Token, 
+  TokenCodeBlock, 
+  TokenMath, 
+  isExecutableLanguageBlock, 
+  isExecutableLanguageBlockOf, 
+  languageBlockAtPosition, 
+  languageNameFromBlock 
+} from "quarto-core";
 import { Command } from "../../core/command";
 import { isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
@@ -32,30 +40,30 @@ import {
   blockHasExecutor,
   blockIsExecutable,
   codeFromBlock,
-  ensureRequiredExtension,
   executeInteractive,
   executeSelectionInteractive,
-  hasExecutor,
 } from "./executors";
+import { ExtensionHost } from "../../host";
 
-export function cellCommands(engine: MarkdownEngine): Command[] {
+export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
-    new RunSelectionCommand(engine),
-    new RunCurrentCellCommand(engine),
-    new RunNextCellCommand(engine),
-    new RunPreviousCellCommand(engine),
-    new RunCellsAboveCommand(engine),
-    new RunCellsBelowCommand(engine),
-    new RunAllCellsCommand(engine),
-    new GoToNextCellCommand(engine),
-    new GoToPreviousCellCommand(engine),
+    new RunSelectionCommand(host, engine),
+    new RunCurrentCellCommand(host, engine),
+    new RunNextCellCommand(host, engine),
+    new RunPreviousCellCommand(host, engine),
+    new RunCellsAboveCommand(host, engine),
+    new RunCellsBelowCommand(host, engine),
+    new RunAllCellsCommand(host, engine),
+    new GoToNextCellCommand(host, engine),
+    new GoToPreviousCellCommand(host, engine),
   ];
 }
 
 abstract class RunCommand {
-  constructor(engine: MarkdownEngine) {
-    this.engine_ = engine;
-  }
+  constructor(
+    protected readonly host_: ExtensionHost,
+    protected readonly engine_: MarkdownEngine
+  ) {}
 
   public async execute(line?: number): Promise<void> {
 
@@ -64,7 +72,7 @@ abstract class RunCommand {
     if (visualEditor) {
       const blockContext = await visualEditor.getActiveBlockContext();
       if (blockContext) {
-        if (hasExecutor(blockContext.activeLanguage)) {
+        if (await this.hasExecutorForLanguage(blockContext.activeLanguage)) {
           await this.doExecuteVisualMode(visualEditor, blockContext);
         } else {
           window.showWarningMessage(`Execution of ${blockContext.activeLanguage} cells is not supported`);
@@ -86,7 +94,7 @@ abstract class RunCommand {
           );
           if (block) {
             const language = languageNameFromBlock(block);
-            if (await ensureRequiredExtension(language, doc, this.engine_)) {
+            if (await this.hasExecutorForLanguage(language)) {
               await this.doExecute(editor, tokens, line, block);
             }
           } else {
@@ -125,12 +133,19 @@ abstract class RunCommand {
     block?: Token
   ): Promise<void>;
 
-  private engine_: MarkdownEngine;
+  protected async cellExecutorForLanguage(language: string) {
+    return await this.host_.cellExecutorForLanguage(language);
+  }
+
+  private async hasExecutorForLanguage(language: string) {
+    return !!this.cellExecutorForLanguage(language);
+  }
+
 }
 
 class RunCurrentCellCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runCurrentCell";
   public readonly id = RunCurrentCellCommand.id;
@@ -143,8 +158,11 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ) {
     if (block && isExecutableLanguageBlock(block)) {
       const language = languageNameFromBlock(block);
-      const code = codeFromBlock(block);
-      await executeInteractive(language, [code], editor.document);
+      const executor = await this.cellExecutorForLanguage(language);
+      if (executor) {
+        const code = codeFromBlock(block);
+        await executeInteractive(executor, [code], editor.document);
+      }
     }
   }
 
@@ -154,24 +172,26 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ) : Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
-      await executeInteractive(context.activeLanguage, [activeBlock.code], editor.document);
-      await activateIfRequired(editor);
+      const executor = await this.cellExecutorForLanguage(activeBlock.language);
+      if (executor) {
+        await executeInteractive(executor, [activeBlock.code], editor.document);
+        await activateIfRequired(editor);
+      }
     }
   }
-
 }
 
 class RunNextCellCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runNextCell";
   public readonly id = RunNextCellCommand.id;
 
   override async doExecute(editor: TextEditor, tokens: Token[], line: number) {
-    const block = nextBlock(line, tokens, true);
+    const block = nextBlock(this.host_, line, tokens, true);
     if (block) {
-      await runAdjacentBlock(editor, block);
+      await runAdjacentBlock(this.host_, editor, block);
     }
   }
 
@@ -183,8 +203,9 @@ class RunNextCellCommand extends RunCommand implements Command {
     const nextBlock = context.blocks[activeBlockIndex + 1];
     if (nextBlock) {
       await editor.setBlockSelection(context, "nextblock");
-      if (hasExecutor(nextBlock.language)) {
-        await executeInteractive(nextBlock.language, [nextBlock.code], editor.document);
+      const executor = await this.cellExecutorForLanguage(nextBlock.language);
+      if (executor) {
+        await executeInteractive(executor, [nextBlock.code], editor.document);
         await activateIfRequired(editor);
       }
     } else {
@@ -194,17 +215,17 @@ class RunNextCellCommand extends RunCommand implements Command {
 }
 
 class RunPreviousCellCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runPreviousCell";
   public readonly id = RunPreviousCellCommand.id;
 
   override async doExecute(editor: TextEditor, tokens: Token[], line: number) {
-    const block = previousBlock(line, tokens, true);
+    const block = previousBlock(this.host_, line, tokens, true);
     if (block) {
       if (block) {
-        await runAdjacentBlock(editor, block);
+        await runAdjacentBlock(this.host_, editor, block);
       }
     }
   }
@@ -217,8 +238,9 @@ class RunPreviousCellCommand extends RunCommand implements Command {
     const prevBlock = context.blocks[activeBlockIndex - 1];
     if (prevBlock) {
       await editor.setBlockSelection(context, "prevblock");
-      if (hasExecutor(prevBlock.language)) {
-        await executeInteractive(prevBlock.language, [prevBlock.code], editor.document);
+      const executor = await this.cellExecutorForLanguage(prevBlock.language);
+      if (executor) {
+        await executeInteractive(executor, [prevBlock.code], editor.document);
         await activateIfRequired(editor);
       }
     } else {
@@ -228,8 +250,8 @@ class RunPreviousCellCommand extends RunCommand implements Command {
 }
 
 class RunSelectionCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runSelection";
   public readonly id = RunSelectionCommand.id;
@@ -246,33 +268,36 @@ class RunSelectionCommand extends RunCommand implements Command {
   ) {
     // get language and attempt language aware runSelection
     const language = languageNameFromBlock(block);
-    const executed = await executeSelectionInteractive(language);
+    const executor = await this.cellExecutorForLanguage(language);
+    if (executor) {
+      const executed = await executeSelectionInteractive(executor);
 
-    // if the executor isn't capable of lenguage aware runSelection
-    // then determine the selection manually
-    if (!executed) {
-      // if the selection is empty take the whole line, otherwise
-      // take the selected text exactly
-      const selection = editor.selection.isEmpty
-        ? editor.document.getText(
-            new Range(
-              new Position(editor.selection.start.line, 0),
-              new Position(
-                editor.selection.end.line,
-                editor.document.lineAt(editor.selection.end).text.length
+      // if the executor isn't capable of lenguage aware runSelection
+      // then determine the selection manually
+      if (!executed) {
+        // if the selection is empty take the whole line, otherwise
+        // take the selected text exactly
+        const selection = editor.selection.isEmpty
+          ? editor.document.getText(
+              new Range(
+                new Position(editor.selection.start.line, 0),
+                new Position(
+                  editor.selection.end.line,
+                  editor.document.lineAt(editor.selection.end).text.length
+                )
               )
             )
-          )
-        : editor.document.getText(editor.selection);
+          : editor.document.getText(editor.selection);
 
-      // for empty selections we advance to the next line
-      if (editor.selection.isEmpty) {
-        const selPos = new Position(editor.selection.start.line + 1, 0);
-        editor.selection = new Selection(selPos, selPos);
+        // for empty selections we advance to the next line
+        if (editor.selection.isEmpty) {
+          const selPos = new Position(editor.selection.start.line + 1, 0);
+          editor.selection = new Selection(selPos, selPos);
+        }
+
+        // run code
+        await executeInteractive(executor, [selection], editor.document);
       }
-
-      // run code
-      await executeInteractive(language, [selection], editor.document);
     }
   }
 
@@ -292,18 +317,21 @@ class RunSelectionCommand extends RunCommand implements Command {
     }
 
     // run code
-    await executeInteractive(context.activeLanguage, [selection], editor.document);
+    const executor = await this.cellExecutorForLanguage(context.activeLanguage);
+    if (executor) {
+      await executeInteractive(executor, [selection], editor.document);
     
-    // advance cursor if necessary
-    if (action) {
-      editor.setBlockSelection(context, "nextline");
+      // advance cursor if necessary
+      if (action) {
+        editor.setBlockSelection(context, "nextline");
+      }
     }
   }
 }
 
 class RunCellsAboveCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runCellsAbove";
   public readonly id = RunCellsAboveCommand.id;
@@ -320,7 +348,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
   ) {
     // collect up blocks prior to the active one
     const blocks: Token[] = [];
-    for (const blk of tokens.filter(blockIsExecutable)) {
+    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token))) {
       // if the end of this block is past the line then bail
       if (blk.range.end.line > line) {
         break;
@@ -336,16 +364,19 @@ class RunCellsAboveCommand extends RunCommand implements Command {
         block || blocks[blocks.length - 1]
       );
 
-      // accumulate code
-      const code: string[] = [];
-      for (const block of blocks.filter(
-        isExecutableLanguageBlockOf(language)
-      )) {
-        code.push(codeFromBlock(block));
-      }
+      const executor = await this.cellExecutorForLanguage(language);
+      if (executor) {
+        // accumulate code
+        const code: string[] = [];
+        for (const block of blocks.filter(
+          isExecutableLanguageBlockOf(language)
+        )) {
+          code.push(codeFromBlock(block));
+        }
 
-      // execute
-      await executeInteractive(language, code, editor.document);
+        // execute
+        await executeInteractive(executor, code, editor.document);
+      }
     }
   }
   
@@ -353,24 +384,27 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ) : Promise<void> {
-    const code: string[] = [];
-    for (const block of context.blocks) {
-      if (block.active) {
-        break;
-      } else if (block.language === context.activeLanguage) {
-        code.push(block.code);
+    const executor = await this.cellExecutorForLanguage(context.activeLanguage);
+    if (executor) {
+      const code: string[] = [];
+      for (const block of context.blocks) {
+        if (block.active) {
+          break;
+        } else if (block.language === context.activeLanguage) {
+          code.push(block.code);
+        }
       }
-    }
-    if (code.length > 0) {
-      await executeInteractive(context.activeLanguage, code, editor.document);
-      await activateIfRequired(editor);
+      if (code.length > 0) {
+        await executeInteractive(executor, code, editor.document);
+        await activateIfRequired(editor);
+      }
     }
   }
 }
 
 class RunCellsBelowCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runCellsBelow";
   public readonly id = RunCellsBelowCommand.id;
@@ -386,12 +420,12 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     block?: Token
   ) {
     // see if we can get the language from the current block
-    let language = blockHasExecutor(block)
+    let language = blockHasExecutor(this.host_, block)
       ? languageNameFromBlock(block!)
       : undefined;
 
     const blocks: string[] = [];
-    for (const blk of tokens.filter(blockIsExecutable)) {
+    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
       // skip if the cell is above or at the cursor
       if (line < blk.range.start.line) {
         // set langauge if needed
@@ -407,7 +441,10 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     }
     // execute
     if (language && blocks.length > 0) {
-      await executeInteractive(language, blocks, editor.document);
+      const executor = await this.cellExecutorForLanguage(language);
+      if (executor) {
+        await executeInteractive(executor, blocks, editor.document);
+      }
     }
   }
 
@@ -415,25 +452,27 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ) : Promise<void> {
-
-    let code: string[] | undefined;
-    for (const block of context.blocks) {
-      if (block.active) {
-        code = [];
-      } else if (code && (block.language === context.activeLanguage)) {
-        code.push(block.code);
+    const executor = await this.cellExecutorForLanguage(context.activeLanguage);
+    if (executor) {
+      let code: string[] | undefined;
+      for (const block of context.blocks) {
+        if (block.active) {
+          code = [];
+        } else if (code && (block.language === context.activeLanguage)) {
+          code.push(block.code);
+        }
       }
-    }
-    if (code && code.length > 0) {
-      await executeInteractive(context.activeLanguage, code, editor.document);
-      await activateIfRequired(editor);
+      if (code && code.length > 0) {
+        await executeInteractive(executor, code, editor.document);
+        await activateIfRequired(editor);
+      }
     }
   }
 }
 
 class RunAllCellsCommand extends RunCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine);
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
   }
   private static readonly id = "quarto.runAllCells";
   public readonly id = RunAllCellsCommand.id;
@@ -450,7 +489,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
   ) {
     let language: string | undefined;
     const blocks: string[] = [];
-    for (const block of tokens.filter(blockIsExecutable)) {
+    for (const block of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
       const blockLanguage = languageNameFromBlock(block);
       if (!language) {
         language = blockLanguage;
@@ -460,7 +499,10 @@ class RunAllCellsCommand extends RunCommand implements Command {
       }
     }
     if (language && blocks.length > 0) {
-      await executeInteractive(language, blocks, editor.document);
+      const executor = await this.cellExecutorForLanguage(language);
+      if (executor) {
+        await executeInteractive(executor, blocks, editor.document);
+      }
     }
   }
 
@@ -475,17 +517,22 @@ class RunAllCellsCommand extends RunCommand implements Command {
       }
     }
     if (code.length > 0) {
-      await executeInteractive(context.activeLanguage, code, editor.document);
-      await activateIfRequired(editor);
+      const executor = await this.cellExecutorForLanguage(context.activeLanguage);
+      if (executor) {
+        await executeInteractive(executor, code, editor.document);
+        await activateIfRequired(editor);
+      }
     }
   }
 }
 
 class GoToCellCommand {
   constructor(
+    host: ExtensionHost, 
     engine: MarkdownEngine,
     dir: "next" | "previous"
   ) {
+    this.host_ = host;
     this.engine_ = engine;
     this.dir_ = dir;
   }
@@ -511,7 +558,7 @@ class GoToCellCommand {
         const tokens = this.engine_.parse(doc);
         const line = editor.selection.start.line;
         const selector = this.dir_ === "next" ? nextBlock : previousBlock;
-        const cell = selector(line, tokens);
+        const cell = selector(this.host_, line, tokens);
         if (cell) {
           navigateToBlock(editor, cell);
         }
@@ -520,30 +567,35 @@ class GoToCellCommand {
     
   }
 
+
+  private host_: ExtensionHost;
   private engine_: MarkdownEngine;
   private dir_: "next" | "previous";
 }
 
 class GoToNextCellCommand extends GoToCellCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine, "next");
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine, "next");
   }
   private static readonly id = "quarto.goToNextCell";
   public readonly id = GoToNextCellCommand.id;
 }
 
 class GoToPreviousCellCommand extends GoToCellCommand implements Command {
-  constructor(engine: MarkdownEngine) {
-    super(engine, "previous");
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine, "previous");
   }
   private static readonly id = "quarto.goToPreviousCell";
   public readonly id = GoToPreviousCellCommand.id;
 }
 
-async function runAdjacentBlock(editor: TextEditor, block: TokenMath | TokenCodeBlock) {
+async function runAdjacentBlock(host: ExtensionHost, editor: TextEditor, block: TokenMath | TokenCodeBlock) {
   navigateToBlock(editor, block);
   const language = languageNameFromBlock(block);
-  await executeInteractive(language, [codeFromBlock(block)], editor.document);
+  const executor = await host.cellExecutorForLanguage(language);
+  if (executor) {
+    await executeInteractive(executor, [codeFromBlock(block)], editor.document);
+  }
 }
 
 function navigateToBlock(editor: TextEditor, block: Token) {
@@ -555,27 +607,32 @@ function navigateToBlock(editor: TextEditor, block: Token) {
   );
 }
 
-function nextBlock(line: number, tokens: Token[], requireExecutable = false) {
+function nextBlock(host: ExtensionHost, line: number, tokens: Token[], requireExecutable = false) : TokenMath | TokenCodeBlock | undefined {
   for (const block of tokens.filter(
-    requireExecutable ? blockIsExecutable : blockHasExecutor
+    requireExecutable 
+      ? (token?: Token) => blockIsExecutable(host, token) 
+      : (token?: Token) => blockHasExecutor(host, token)
   )) {
     if (block.range.start.line > line) {
-      return block;
+      return block as TokenMath | TokenCodeBlock;
     }
   }
   return undefined;
 }
 
 function previousBlock(
+  host: ExtensionHost,
   line: number,
   tokens: Token[],
   requireExecutable = false
-) {
+) : TokenMath | TokenCodeBlock | undefined {
   for (const block of tokens
-    .filter(requireExecutable ? blockIsExecutable : blockHasExecutor)
+    .filter(requireExecutable 
+      ? (token?: Token) => blockIsExecutable(host, token) 
+      : (token?: Token) => blockHasExecutor(host, token))
     .reverse()) {
     if (block.range.end.line < line) {
-      return block;
+      return block as TokenMath | TokenCodeBlock;
     }
   }
   return undefined;

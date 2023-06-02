@@ -21,13 +21,13 @@ import * as path from "path";
 
 import { Command } from "../core/command";
 import { QuartoContext } from "quarto-core";
-import { hasRequiredExtension } from "./cell/executors";
 import { promptForQuartoInstallation } from "../core/quarto";
+import { ExtensionHost } from "../host";
 
-export function walkthroughCommands(quartoContext: QuartoContext): Command[] {
+export function walkthroughCommands(host: ExtensionHost, quartoContext: QuartoContext): Command[] {
   return [
     new VerifyInstallationCommand(quartoContext),
-    new WalkthroughNewDocumentCommand(),
+    new WalkthroughNewDocumentCommand(host),
   ];
 }
 
@@ -53,6 +53,8 @@ class WalkthroughNewDocumentCommand implements Command {
   private static readonly id = "quarto.walkthrough.newDocument";
   public readonly id = WalkthroughNewDocumentCommand.id;
 
+  constructor(private readonly host_: ExtensionHost) {}
+
   async execute(): Promise<void> {
     const saveDir = defaultSaveDir();
     const saveOptions = {
@@ -64,7 +66,7 @@ class WalkthroughNewDocumentCommand implements Command {
     };
     const target = await window.showSaveDialog(saveOptions);
     if (target) {
-      fs.writeFileSync(target.fsPath, this.scaffold(), {
+      fs.writeFileSync(target.fsPath, await this.scaffold(), {
         encoding: "utf8",
       });
       const doc = await workspace.openTextDocument(target);
@@ -72,7 +74,7 @@ class WalkthroughNewDocumentCommand implements Command {
     }
   }
 
-  private scaffold(): string {
+  private async scaffold(): Promise<string> {
     // determine which code block to use (default to python)
     const kPython = {
       lang: "python",
@@ -92,13 +94,18 @@ class WalkthroughNewDocumentCommand implements Command {
       code: "A = [1 2 3; 4 1 6; 7 8 1]\ninv(A)",
       suffix: ":",
     };
-    const langBlock = [kPython, kR, kJulia].find((lang) => {
-      return hasRequiredExtension(lang.lang);
-    }) || {
-      ...kPython,
-      suffix:
-        ".\n\nInstall the VS Code Python Extension to enable\nrunning this cell interactively.",
+
+    // default langBlock if no executors are found
+    let langBlock = { 
+      ...kPython, 
+      suffix: ".\n\nInstall the VS Code Python Extension to enable\nrunning this cell interactively."
     };
+    for (const lang of [kPython, kR, kJulia]) {
+      if (await this.host_.cellExecutorForLanguage(lang.lang)) {
+        langBlock = lang;
+        break;
+      }
+    }
 
     return `---
 title: "Hello, Quarto"

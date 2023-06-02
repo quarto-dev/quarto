@@ -30,17 +30,19 @@ import { activateLuaTypes } from "./providers/lua-types";
 import { activateCreate } from "./providers/create/create";
 import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
-import { activateZotero } from "./providers/zotero/zotero";
-import { promptForQuartoInstallation } from "./core/quarto";
-import { CommandManager } from "./core/command";
+import { activateZotero } from "./providers/zotero/zotero";;
+import { extensionHost } from "./host";
 
 export async function activate(context: vscode.ExtensionContext) {
  
+  // create extension host
+  const host = extensionHost();
+
   // create markdown engine
   const engine = new MarkdownEngine();
 
   // commands
-  const commands = cellCommands(engine);
+  const commands = cellCommands(host, engine);
 
   // get quarto context (some features conditional on it)
   const config = vscode.workspace.getConfiguration("quarto");
@@ -78,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const lspClient = await activateLsp(context, engine);
 
     // provide visual editor
-    const editorCommands = activateEditor(context, quartoContext, lspClient, engine);
+    const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
     commands.push(...editorCommands);
 
     // zotero 
@@ -90,7 +92,7 @@ export async function activate(context: vscode.ExtensionContext) {
     commands.push(...assistCommands);
 
     // walkthough
-    commands.push(...walkthroughCommands(quartoContext));
+    commands.push(...walkthroughCommands(host, quartoContext));
   }
 
   // provide preview
@@ -104,7 +106,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // provide code lens
   vscode.languages.registerCodeLensProvider(
     kQuartoDocSelector,
-    quartoCellExecuteCodeLensProvider(engine)
+    quartoCellExecuteCodeLensProvider(host, engine)
   );
 
   // provide file copy/drop handling

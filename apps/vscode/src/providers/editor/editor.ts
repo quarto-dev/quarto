@@ -63,7 +63,7 @@ import {
   editInVisualModeCommand, 
   reopenEditorInSourceMode 
 } from "./toggle";
-import { executableLanguages } from "../cell/executors";
+import { ExtensionHost } from "../../host";
 
 
 export interface QuartoVisualEditor extends QuartoEditor {
@@ -74,12 +74,13 @@ export interface QuartoVisualEditor extends QuartoEditor {
 
 export function activateEditor(
   context: ExtensionContext,
+  host: ExtensionHost,
   quartoContext: QuartoContext,
   lspClient: LanguageClient,
   engine: MarkdownEngine
 ) : Command[] {
   // register the provider
-  context.subscriptions.push(VisualEditorProvider.register(context, quartoContext, lspClient, engine));
+  context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
 
   // return commands
   return [editInVisualModeCommand(), editInSourceModeCommand()];
@@ -106,6 +107,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static register(
     context: ExtensionContext, 
+    host: ExtensionHost,
     quartoContext: QuartoContext,
     lspClient: LanguageClient,
     engine: MarkdownEngine
@@ -174,7 +176,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
     }, 100)));
 
-    const provider = new VisualEditorProvider(context, quartoContext, lspRequest, engine);
+    const provider = new VisualEditorProvider(context, host, quartoContext, lspRequest, engine);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -225,6 +227,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   }
 
   constructor(private readonly context: ExtensionContext,
+              private readonly extensionHost: ExtensionHost,
               private readonly quartoContext: QuartoContext,
               private readonly lspRequest: JsonRpcRequestTransport,
               private readonly engine: MarkdownEngine) {}
@@ -318,7 +321,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows(),
           // python doesn't work b/c jupyter.execSelectionInteractive wants a text editor to be active
-          executableLanguages: executableLanguages().filter(language => language !== "python")
+          executableLanguages: this.extensionHost.executableLanguages().filter(language => language !== "python")
         };
       },
 

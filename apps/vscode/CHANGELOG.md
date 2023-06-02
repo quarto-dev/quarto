@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.87.3 (Unreleased)
+
+- Ensure that Go to next/previous cell traverses all executable blocks
+
 ## 1.87.2 (Release on 2 June 2023)
 
 - Fix issue w/ parsing math blocks at the end of documents

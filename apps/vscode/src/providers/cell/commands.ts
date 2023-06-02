@@ -27,6 +27,7 @@ import {
   Token, 
   TokenCodeBlock, 
   TokenMath, 
+  isDisplayMath, 
   isExecutableLanguageBlock, 
   isExecutableLanguageBlockOf, 
   languageBlockAtPosition, 
@@ -558,7 +559,7 @@ class GoToCellCommand {
         const tokens = this.engine_.parse(doc);
         const line = editor.selection.start.line;
         const selector = this.dir_ === "next" ? nextBlock : previousBlock;
-        const cell = selector(this.host_, line, tokens);
+        const cell = selector(this.host_, line, tokens, false, false);
         if (cell) {
           navigateToBlock(editor, cell);
         }
@@ -607,11 +608,19 @@ function navigateToBlock(editor: TextEditor, block: Token) {
   );
 }
 
-function nextBlock(host: ExtensionHost, line: number, tokens: Token[], requireExecutable = false) : TokenMath | TokenCodeBlock | undefined {
+function nextBlock(
+  host: ExtensionHost, 
+  line: number, 
+  tokens: Token[], 
+  requireEvaluated = false,
+  requireExecutor = true
+) : TokenMath | TokenCodeBlock | undefined {
   for (const block of tokens.filter(
-    requireExecutable 
+    requireExecutor 
+      ? requireEvaluated 
       ? (token?: Token) => blockIsExecutable(host, token) 
       : (token?: Token) => blockHasExecutor(host, token)
+      : (token?: Token) => token && isExecutableLanguageBlock(token) && !isDisplayMath(token)
   )) {
     if (block.range.start.line > line) {
       return block as TokenMath | TokenCodeBlock;
@@ -624,12 +633,16 @@ function previousBlock(
   host: ExtensionHost,
   line: number,
   tokens: Token[],
-  requireExecutable = false
+  requireEvaluated = false,
+  requireExecutor = true
 ) : TokenMath | TokenCodeBlock | undefined {
   for (const block of tokens
-    .filter(requireExecutable 
-      ? (token?: Token) => blockIsExecutable(host, token) 
-      : (token?: Token) => blockHasExecutor(host, token))
+    .filter(
+      requireExecutor 
+        ? requireEvaluated 
+        ? (token?: Token) => blockIsExecutable(host, token) 
+        : (token?: Token) => blockHasExecutor(host, token)
+        : (token?: Token) => token && isExecutableLanguageBlock(token) && !isDisplayMath(token))
     .reverse()) {
     if (block.range.end.line < line) {
       return block as TokenMath | TokenCodeBlock;

@@ -113,7 +113,7 @@ export async function activate(context: vscode.ExtensionContext) {
   activateCopyFiles(context);
 
   // activate providers common to browser/node
-  activateCommon(context, engine, commands);
+  activateCommon(context, host, engine, commands);
 }
 
 export async function deactivate() {

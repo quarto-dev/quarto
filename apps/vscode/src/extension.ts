@@ -23,9 +23,11 @@ import { activateDiagram } from "./providers/diagram/diagram";
 import { activateOptionEnterProvider } from "./providers/option";
 import { textFormattingCommands } from "./providers/text-format";
 import { activateCodeFormatting } from "./providers/format";
+import { ExtensionHost } from "./host";
 
 export function activateCommon(
   context: vscode.ExtensionContext,
+  host: ExtensionHost,
   engine: MarkdownEngine,
   commands?: Command[]
 ) {
@@ -36,7 +38,7 @@ export function activateCommon(
   activateBackgroundHighlighter(context, engine);
 
   // diagramming
-  const diagramCommands = activateDiagram(context, engine);
+  const diagramCommands = activateDiagram(context, host, engine);
 
   // code formatting
   const codeFormattingCommands = activateCodeFormatting(engine);

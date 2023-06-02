@@ -25,13 +25,15 @@ import { VisualEditorProvider } from "../editor/editor";
 import { diagramCodeLensProvider } from "./codelens";
 import { diagramCommands } from "./commands";
 import { QuartoDiagramWebviewManager } from "./diagram-webview";
+import { ExtensionHost } from "../../host";
 
 export function activateDiagram(
   context: ExtensionContext,
+  host: ExtensionHost,
   engine: MarkdownEngine
 ): Command[] {
   // initiaize manager
-  const diagramManager = new QuartoDiagramWebviewManager(context, engine);
+  const diagramManager = new QuartoDiagramWebviewManager(context, host, engine);
 
   // code lens
   context.subscriptions.push(

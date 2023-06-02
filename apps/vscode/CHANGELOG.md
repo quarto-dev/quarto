@@ -5,6 +5,7 @@
 - Fix issue w/ parsing math blocks at the end of documents
 - Disable styler in R intellisense background document
 - Ensure that all files in the workspace are indexed when required
+- Provide whatever features we can even if Quarto isn't installed 
 
 ## 1.87.1 (Release on 31 May 2023)
 

@@ -26,6 +26,7 @@ import {
 import { Disposable } from "../core/dispose";
 import { preserveEditorFocus } from "../core/doc";
 import { getNonce } from "../core/nonce";
+import { ExtensionHost } from "../host";
 
 export interface ShowOptions {
   readonly preserveFocus?: boolean;
@@ -35,6 +36,7 @@ export interface ShowOptions {
 export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
   constructor(
     protected readonly context: ExtensionContext,
+    private readonly host_: ExtensionHost,
     private readonly viewType_: string,
     private readonly title_: string,
     private webviewType_: new (
@@ -112,13 +114,10 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     state: S,
     showOptions?: ShowOptions
   ): T {
-    const webview = window.createWebviewPanel(
+    const webview = this.host_.createPreviewPanel(
       this.viewType_,
       this.title_,
-      {
-        viewColumn: showOptions?.viewColumn ?? ViewColumn.Active,
-        preserveFocus: showOptions?.preserveFocus,
-      },
+      showOptions?.preserveFocus,
       {
         enableScripts: true,
         enableForms: true,

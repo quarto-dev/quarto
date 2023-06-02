@@ -85,6 +85,7 @@ import {
   luaErrorLocation,
   yamlErrorLocation,
 } from "./preview-errors";
+import { ExtensionHost } from "../../host";
 
 tmp.setGracefulCleanup();
 
@@ -97,12 +98,13 @@ let previewManager: PreviewManager;
 
 export function activatePreview(
   context: ExtensionContext,
+  host: ExtensionHost,
   quartoContext: QuartoContext,
   engine: MarkdownEngine
 ): Command[] {
   // create preview manager
   if (quartoContext.available) {
-    previewManager = new PreviewManager(context, quartoContext, engine);
+    previewManager = new PreviewManager(context, host, quartoContext, engine);
     context.subscriptions.push(previewManager);
   }
 
@@ -221,12 +223,14 @@ export async function previewProject(target: Uri, format?: string) {
 class PreviewManager {
   constructor(
     context: ExtensionContext,
+    host: ExtensionHost,
     private readonly quartoContext_: QuartoContext,
     private readonly engine_: MarkdownEngine
   ) {
     this.renderToken_ = uuid.v4();
     this.webviewManager_ = new QuartoPreviewWebviewManager(
       context,
+      host,
       "quarto.previewView",
       "Quarto Preview",
       QuartoPreviewWebview

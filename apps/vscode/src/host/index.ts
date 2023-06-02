@@ -17,6 +17,10 @@ import { DocumentSelector, Disposable } from "vscode";
 
 import { CellExecutor, cellExecutorForLanguage, executableLanguages } from "./executors";
 import { EditorToolbarProvider } from "./toolbar";
+import { WebviewPanelOptions } from "vscode";
+import { WebviewOptions } from "vscode";
+import { WebviewPanel } from "vscode";
+import { createPreviewPanel } from "./preview";
 
 export type { CellExecutor };
 export type { EditorToolbarProvider,  ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
@@ -27,16 +31,26 @@ export interface ExtensionHost {
   executableLanguages() : string[];
   cellExecutorForLanguage(language: string, silent?: boolean) : Promise<CellExecutor | undefined>;
 
+  // preview
+  createPreviewPanel(
+    viewType: string, 
+    title: string,
+    preserveFocus?: boolean, 
+    options?: WebviewPanelOptions & WebviewOptions
+  ): WebviewPanel;
+
   // editor toolbar
-  registerEditorToolbarProvider?(selector: DocumentSelector, provider: EditorToolbarProvider): Disposable;
+  registerEditorToolbarProvider?(
+    selector: DocumentSelector, 
+    provider: EditorToolbarProvider
+  ): Disposable;
 
 }
 
 export function extensionHost() {
-
   return {
     executableLanguages,
     cellExecutorForLanguage,
+    createPreviewPanel,
   };
-
 }

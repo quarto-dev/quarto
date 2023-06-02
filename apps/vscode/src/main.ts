@@ -96,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   // provide preview
-  const previewCommands = activatePreview(context, quartoContext, engine);
+  const previewCommands = activatePreview(context, host, quartoContext, engine);
   commands.push(...previewCommands);
 
   // provide create

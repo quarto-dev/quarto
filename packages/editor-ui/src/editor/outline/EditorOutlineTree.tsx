@@ -56,7 +56,8 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   const asTreeItem = (outlineNode: EditorOutlineItem) => {
     return (
       <TreeItem 
-        content={{ className: outlineNode.children.length ? classes.parentItem : classes.item }} 
+        itemType={outlineNode.children.length ? "branch" : "leaf" }
+        className={outlineNode.children.length ? classes.parentItem : classes.item }
         key={outlineNode.navigation_id} 
         value={outlineNode.navigation_id}
       >

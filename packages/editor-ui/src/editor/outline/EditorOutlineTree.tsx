@@ -22,7 +22,7 @@ import {
   TreeNavigationData_unstable,
 } from "@fluentui/react-components/unstable";
 
-import { makeStyles, mergeClasses } from '@fluentui/react-components';
+import { makeStyles } from '@fluentui/react-components';
 
 import { EditorOutline, EditorOutlineItem, NavigationType } from 'editor';
 
@@ -54,16 +54,13 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   // get tree nodes from outline
   const classes = useStyles();
   const asTreeItem = (outlineNode: EditorOutlineItem) => {
-    const layoutItemClass = mergeClasses(classes.itemLayout, outlineNode.children.length 
-      ? classes.parentItem
-      : classes.item);
     return (
       <TreeItem 
-        itemType={outlineNode.children.length ? "branch" : "leaf" }
+        content={{ className: outlineNode.children.length ? classes.parentItem : classes.item }} 
         key={outlineNode.navigation_id} 
         value={outlineNode.navigation_id}
       >
-        <TreeItemLayout className={layoutItemClass}>{label(outlineNode)}</TreeItemLayout>
+        <TreeItemLayout className={classes.itemLayout}>{label(outlineNode)}</TreeItemLayout>
         {outlineNode.children.length > 0 
           ? <Tree>
               {outlineNode.children.map(asTreeItem)}
@@ -109,7 +106,7 @@ const useStyles = makeStyles({
     paddingLeft: 'calc((var(--fluent-TreeItem--level, 1) - 1) * var(--spacingHorizontalS))'
   },
   item: {
-    paddingLeft: 'calc((20px) + (var(--fluent-TreeItem--level, 1)) * var(--spacingHorizontalS))'
+    paddingLeft: 'calc((16px) + (var(--fluent-TreeItem--level, 1)) * var(--spacingHorizontalS))'
   },
   itemLayout: {
     minHeight: '22px'

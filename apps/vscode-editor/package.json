@@ -19,7 +19,7 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@fluentui/react-components": "^9.21.0",
+    "@fluentui/react-components": "^9.19.1",
     "core": "*",
     "core-browser": "*",
     "editor": "*",

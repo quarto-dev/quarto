@@ -6,8 +6,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "@fluentui/react-components": "^9.21.0",
-    "@fluentui/react-icons": "^2.0.203",
+    "@fluentui/react-components": "^9.20.0",
+    "@fluentui/react-icons": "^2.0.201",
     "flat": "^5.0.2",
     "formik": "^2.2.9",
     "react": "^18.2.0",

@@ -61,6 +61,7 @@ import {
   embeddedDocumentRangeFormattingProvider,
 } from "../providers/format";
 import { getHover, getSignatureHelpHover } from "../core/hover";
+import { imageHover } from "../providers/hover-image";
 
 let client: LanguageClient;
 
@@ -200,6 +201,13 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
     token: CancellationToken,
     next: ProvideHoverSignature
   ) => {
+
+    // see if we have any local hover providers
+    const imgHover = await imageHover(document, position);
+    if (imgHover) {
+      return imgHover;
+    }
+
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
       // get uri for hover

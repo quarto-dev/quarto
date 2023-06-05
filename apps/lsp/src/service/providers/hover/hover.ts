@@ -24,7 +24,6 @@ import { LsConfiguration } from "../../config";
 import { Quarto } from "../../quarto";
 import { docEditorContext } from "../../quarto";
 import { IWorkspace } from "../../workspace";
-import { imageHover } from "./hover-image";
 
 export class MdHoverProvider {
   constructor(private readonly workspace_: IWorkspace, private readonly quarto_: Quarto, private readonly parser_: Parser) {}
@@ -41,8 +40,13 @@ export class MdHoverProvider {
     return (
       (await refHover(this.quarto_, this.parser_, doc, pos)) || 
       mathHover(this.parser_, doc, pos, config) || 
-      (await yamlHover(this.quarto_, docEditorContext(doc, pos, true))) ||
-      (await (imageHover(this.workspace_)(doc, pos)))
+      (await yamlHover(this.quarto_, docEditorContext(doc, pos, true))) 
+
+      // there appears to be a size cap on markdown images (somewhere around 75k)
+      // so we have switched this back to the client-side. note also that if we
+      // bring this back we need to make it work for more than just png files
+      // || (await (imageHover(this.workspace_)(doc, pos))
+  
     );
   } 
 }

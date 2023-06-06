@@ -1,0 +1,28 @@
+{
+  "name": "fluent-dialogs",
+  "private": true,
+  "version": "0.0.0",
+  "license": "agpl-3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --noEmit && vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@fluentui/react-components": "^9.21.0",
+    "formik": "^2.2.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "redux": "^4.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "sass": "^1.56.1",
+    "tsconfig": "*",
+    "typescript": "^4.5.2",
+    "vite": "^3.0.0"
+  }
+}

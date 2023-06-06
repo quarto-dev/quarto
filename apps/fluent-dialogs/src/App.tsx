@@ -40,6 +40,9 @@ const useStyles = makeStyles({
 });
 
 const App: React.FC = () => {
+
+  const [open, setOpen] = React.useState(false);
+
   const styles = useStyles();
   const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault();
@@ -47,10 +50,8 @@ const App: React.FC = () => {
   };
   return (
     <FluentProvider theme={webLightTheme}>
-      <Dialog modalType="modal">
-        <DialogTrigger disableButtonEnhancement>
-          <Button>Open formulary dialog</Button>
-        </DialogTrigger>
+      <Button onClick={() => setOpen(true)}>Open Dialog</Button>
+      <Dialog open={open} onOpenChange={(_event, data) => setOpen(data.open)} modalType="modal">
         <DialogSurface aria-describedby={undefined}>
           <form onSubmit={handleSubmit}>
             <DialogBody>

@@ -26,7 +26,7 @@ export function editMath(attrUITools: UIToolsAttr) {
   return async (id: string) : Promise<string | null> => {
     const values: MathValues = { id: attrUITools.asHtmlId(id) || "" };
     const result = await showValueEditorDialog(EditMathDialog, values, undefined);
-    return attrUITools.asPandocId(result?.id || "") || null;
+    return result ? attrUITools.asPandocId(result.id) : null;
   };
 }
 

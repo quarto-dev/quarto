@@ -52,7 +52,9 @@ const App: React.FC = () => {
     root.render(<Form onClosed={onClosed} />);
   };
   return (
-    <button onClick={onOpen}>Open Dialog</button>
+    <FluentProvider theme={webLightTheme}>
+      <Button onClick={onOpen}>Open Dialog</Button>
+    </FluentProvider>
   );
   
 }

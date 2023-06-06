@@ -35,10 +35,12 @@ const FormikTextArea: React.FC<FormikFormGroupProps & TextareaProps> = (props) =
         {({ onFocus, onBlur }) => {
           return (
             <Textarea
-              autoComplete={"off"}
+              autoComplete='off'
+              autoCorrect='off'
+              spellCheck="false"
               {...field}
               {...fluentTextAreaProps}
-              textarea={{ rows, cols, wrap }}
+              textarea={{ rows, cols, wrap, spellCheck: false, autoCorrect: 'off' }}
               onFocus={onFocus}
               onBlur={onBlur}
             /> 

@@ -52,9 +52,11 @@ const FormikTextInput: React.FC<FormikTextInputProps & InputProps> = (props) => 
         return (
           <div className={styles.root}>
             <Input
-              input={{ ref: autoFocusRef, autoComplete: 'off' }}
+              input={{ ref: autoFocusRef, autoComplete: 'off', autoCorrect: 'off', spellCheck: false }}
               type="text"
               autoComplete='off'
+              autoCorrect='off'
+              spellCheck='false'
               {...field}
               {...inputProps}
               onFocus={onFocus}

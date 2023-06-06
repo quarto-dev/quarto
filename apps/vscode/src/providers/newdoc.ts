@@ -31,9 +31,7 @@ export function newDocumentCommands(): Command[] {
     new NewDocumentCommand("quarto.newDocument"),
     new NewDocumentCommand("quarto.fileNewDocument"),
     new NewPresentationCommand("quarto.newPresentation"),
-    new NewPresentationCommand("quarto.fileNewPresentation"),
     new NewNotebookCommand("quarto.newNotebook"),
-    new NewNotebookCommand("quarto.fileNewNotebook"),
   ];
 }
 

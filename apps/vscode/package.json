@@ -49,7 +49,6 @@
     "onCommand:quarto.newPresentation",
     "onCommand:quarto.newNotebook",
     "onCommand:quarto.showAssist",
-    "onCommand:quarto.fileNewPresentation",
     "onCommand:quarto.verifyInstallation",
     "onCommand:quarto.walkthrough.newDocument",
     "onCommand:quarto.createProject",
@@ -223,12 +222,12 @@
     "commands": [
       {
         "command": "quarto.newDocument",
-        "title": "New Document (qmd)",
+        "title": "New Document",
         "category": "Quarto"
       },
       {
         "command": "quarto.fileNewDocument",
-        "title": "Quarto Document (qmd)",
+        "title": "Quarto Document",
         "category": "Quarto"
       },
       {
@@ -237,18 +236,8 @@
         "category": "Quarto"
       },
       {
-        "command": "quarto.fileNewPresentation",
-        "title": "Quarto Presentation",
-        "category": "Quarto"
-      },
-      {
         "command": "quarto.newNotebook",
         "title": "New Notebook (ipynb)",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.fileNewNotebook",
-        "title": "Quarto Notebook (ipynb)",
         "category": "Quarto"
       },
       {
@@ -659,16 +648,12 @@
       ],
       "file/newFile": [
         {
-          "command": "quarto.fileNewDocument"
+          "command": "quarto.fileNewDocument",
+          "group": "Quarto"
         },
         {
-          "command": "quarto.fileNewNotebook"
-        },
-        {
-          "command": "quarto.fileNewPresentation"
-        },
-        {
-          "command": "quarto.fileCreateProject"
+          "command": "quarto.fileCreateProject",
+          "group": "Quarto"
         }
       ],
       "commandPalette": [
@@ -691,14 +676,6 @@
         },
         {
           "command": "quarto.fileNewDocument",
-          "when": "false"
-        },
-        {
-          "command": "quarto.fileNewNotebook",
-          "when": "false"
-        },
-        {
-          "command": "quarto.fileNewPresentation",
           "when": "false"
         },
         {

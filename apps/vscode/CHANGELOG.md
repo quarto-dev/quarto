@@ -5,6 +5,7 @@
 - Ensure that Go to next/previous cell traverses all executable blocks
 - Attempt to restore focus to visual editor when switching back to the window
 - Fix for regression of image hover preview (for images > ~75k)
+- Reduce the number of registered 'file new' commands
 
 ## 1.87.2 (Release on 2 June 2023)
 

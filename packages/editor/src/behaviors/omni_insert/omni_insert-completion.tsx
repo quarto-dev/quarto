@@ -39,6 +39,8 @@ export function omniInsertCompletionHandler(
 
     completions: omniInsertCompletions(omniInserters, ui),
 
+    noFocus: true,
+
     filter: (completions: OmniInserter[], state: EditorState, token: string) => {
       // match contents of name or keywords (and verify the command is enabled)
       return completions

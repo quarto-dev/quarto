@@ -414,7 +414,9 @@ class CompletionPlugin extends Plugin<CompletionState> {
         }
       }
       // set focus
-      view.focus();
+      if (!state.handler.noFocus) {
+        view.focus()
+      }
     }
     this.clearCompletions();
   }

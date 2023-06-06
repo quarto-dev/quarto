@@ -78,6 +78,9 @@ export interface CompletionHandler<T = any> {
   // lower level replacement handler (can be passed null if the popup was dismissed)
   replace?(view: EditorView, pos: number, completion: T | null): Promise<unknown>;
 
+  // prevent focus after insertion (good for e.g. omni-insert)
+  noFocus?: boolean;
+
   // completion view
   view: {
     // optional header component (will go inside a <th>)

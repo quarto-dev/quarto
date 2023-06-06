@@ -34,7 +34,20 @@ export function attrInputToProps(attr: AttrEditInput): AttrProps {
   };
 }
 
-function asPandocId(id: string) {
+export function asHtmlId(id: string | undefined) {
+  if (id) {
+    if (id.startsWith('#')) {
+      return id;
+    } else {
+      return '#' + id;
+    }
+  } else {
+    return id;
+  }
+}
+
+
+export function asPandocId(id: string) {
   return id.replace(/^#/, '');
 }
 
@@ -63,18 +76,6 @@ export function attrPropsToInput(attr: AttrProps): AttrEditInput {
 
 function attrTextFromKeyvalue(keyvalue: Array<[string, string]>) {
   return keyvalue.map(kv => `${kv[0]}=${kv[1]}`).join('\n');
-}
-
-function asHtmlId(id: string | undefined) {
-  if (id) {
-    if (id.startsWith('#')) {
-      return id;
-    } else {
-      return '#' + id;
-    }
-  } else {
-    return id;
-  }
 }
 
 function asHtmlClass(clz: string | undefined) {

@@ -73,7 +73,7 @@ export function editorDialogs(
     editCallout: editCallout(uiTools.attr),
     editRawInline,
     editRawBlock,
-    editMath,
+    editMath: editMath(uiTools.attr),
     insertTable,
     insertTabset: insertTabset(uiTools.attr),
     insertCite: insertCite(prefs, server.doi, uiTools.citation),

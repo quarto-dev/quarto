@@ -126,6 +126,8 @@ export interface UIToolsAttr {
   propsToInput(attr: AttrProps): AttrEditInput;
   inputToProps(input: AttrEditInput): AttrProps;
   pandocAutoIdentifier(text: string): string;
+  asPandocId(id: string): string;
+  asHtmlId(id: string | undefined) : string | undefined; 
 }
 
 export interface UIToolsImage {

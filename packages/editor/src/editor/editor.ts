@@ -48,6 +48,8 @@ import {
 import {
   attrPropsToInput,
   attrInputToProps,
+  asPandocId,
+  asHtmlId,
 } from '../api/ui';
 
 import { Extension, ExtensionFn } from '../api/extension';
@@ -246,6 +248,8 @@ export class UITools {
       propsToInput: attrPropsToInput,
       inputToProps: attrInputToProps,
       pandocAutoIdentifier: (text: string) => pandocAutoIdentifier(text, false),
+      asPandocId,
+      asHtmlId
     };
 
     this.image = {

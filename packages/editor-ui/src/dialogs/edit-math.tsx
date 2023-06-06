@@ -19,13 +19,17 @@ import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets
 
 import { t } from './translate';
 import { fluentTheme } from "../theme";
+import { UIToolsAttr } from "editor-types";
 
 
-export async function editMath(id: string) : Promise<string | null> {
-  const values: MathValues = { id };
-  const result = await showValueEditorDialog(EditMathDialog, values, undefined);
-  return result?.id || null;
+export function editMath(attrUITools: UIToolsAttr) {
+  return async (id: string) : Promise<string | null> => {
+    const values: MathValues = { id: attrUITools.asHtmlId(id) || "" };
+    const result = await showValueEditorDialog(EditMathDialog, values, undefined);
+    return attrUITools.asPandocId(result?.id || "") || null;
+  };
 }
+
 
 interface MathValues {
   id: string;

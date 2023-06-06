@@ -17,11 +17,13 @@
 import { Uri, commands, window, extensions } from "vscode";
 
 import semver from "semver";
+import { TextDocument } from "vscode";
+import { parseFrontMatterStr, partitionYamlFrontMatter } from "quarto-core";
 
 
 export interface CellExecutor {
-  execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
-  executeSelection?: () => Promise<void>;
+  execute: (document: TextDocument, blocks: string[]) => Promise<void>;
+  executeSelection?: (document: TextDocument) => Promise<void>;
 }
 
 export function executableLanguages() {
@@ -42,8 +44,8 @@ interface VSCodeCellExecutor extends CellExecutor {
   requiredExtensionName?: string;
   requiredExtension?: string[];
   requiredVersion?: string;
-  execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
-  executeSelection?: () => Promise<void>;
+  execute: (document: TextDocument, blocks: string[]) => Promise<void>;
+  executeSelection?: (document: TextDocument) => Promise<void>;
 }
 
 const pythonCellExecutor: VSCodeCellExecutor = {
@@ -51,24 +53,59 @@ const pythonCellExecutor: VSCodeCellExecutor = {
   requiredExtension: ["ms-python.python"],
   requiredExtensionName: "Python",
   requiredVersion: "2021.8.0",
-  execute: async (blocks: string[]) => {
+  execute: async (_document: TextDocument, blocks: string[]) => {
     for (const block of blocks) {
       await commands.executeCommand("jupyter.execSelectionInteractive", block);
     }
   },
 };
 
-const rCellExecutor: VSCodeCellExecutor = {
-  language: "r",
-  requiredExtension: ["REditorSupport.r", "Ikuyadeu.r"],
-  requiredExtensionName: "R",
-  requiredVersion: "2.4.0",
-  execute: async (blocks: string[]) => {
-    await commands.executeCommand("r.runSelection", blocks.join("\n").trim());
-  },
-  executeSelection: async () => {
-    await commands.executeCommand("r.runSelection");
-  },
+const rCellExecutor = () : VSCodeCellExecutor => {
+
+  // re-read params if they have changed
+  const executedParams = new Map<string, string>();
+  const paramsBlock = (document: TextDocument) => {
+    const partitioned = partitionYamlFrontMatter(document.getText());
+    if (partitioned?.yaml && !document.isUntitled) {
+      const yaml = parseFrontMatterStr(partitioned.yaml) as Record<string,unknown>;
+      if (yaml && typeof yaml === "object") {
+        if (yaml.params && typeof yaml.params === "object") {
+          const params = JSON.stringify(yaml.params);
+          const executed = executedParams.get(document.uri.toString());
+          if (params !== executed) {
+            executedParams.set(document.uri.toString(), params);
+            return `params <- rmarkdown::yaml_front_matter("${document.uri.fsPath}")$params`;
+          }
+        }
+      }
+    }
+    return undefined;
+  };
+  
+
+
+  return {
+    language: "r",
+    requiredExtension: ["REditorSupport.r", "Ikuyadeu.r"],
+    requiredExtensionName: "R",
+    requiredVersion: "2.4.0",
+    execute: async (document: TextDocument, blocks: string[]) => {
+      // check for params
+      const params = paramsBlock(document);
+      if (params) {
+        blocks = [params, ...blocks];
+      }
+      await commands.executeCommand("r.runSelection", blocks.join("\n").trim());
+    },
+    executeSelection: async (document: TextDocument) => {
+      // check for params
+      const params = paramsBlock(document);
+      if (params) {
+        await commands.executeCommand("r.runSelection", params);
+      }
+      await commands.executeCommand("r.runSelection");
+    },
+};
 };
 
 const juliaCellExecutor: VSCodeCellExecutor = {
@@ -76,7 +113,8 @@ const juliaCellExecutor: VSCodeCellExecutor = {
   requiredExtension: ["julialang.language-julia"],
   requiredExtensionName: "Julia",
   requiredVersion: "1.4.0",
-  execute: async (blocks: string[], editorUri?: Uri) => {
+  execute: async (document: TextDocument, blocks: string[]) => {
+    const editorUri = !document.isUntitled ? document.uri : undefined;
     const extension = extensions.getExtension("julialang.language-julia");
     if (extension) {
       if (!extension.isActive) {
@@ -94,7 +132,7 @@ const juliaCellExecutor: VSCodeCellExecutor = {
 
 const bashCellExecutor: VSCodeCellExecutor = {
   language: "bash",
-  execute: async (blocks: string[]) => {
+  execute: async (_document: TextDocument, blocks: string[]) => {
     const terminal = window.activeTerminal || window.createTerminal();
     terminal.show();
     terminal.sendText(blocks.join("\n"));
@@ -107,7 +145,7 @@ const shellCellExecutor = { ...bashCellExecutor, language: "shell" };
 
 const kCellExecutors = [
   pythonCellExecutor, 
-  rCellExecutor, 
+  rCellExecutor(), 
   juliaCellExecutor, 
   bashCellExecutor, 
   shCellExecutor, 

@@ -86,15 +86,15 @@ export async function executeInteractive(
   blocks: string[],
   document: TextDocument
 ): Promise<void> {
-  return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
+  return await executor.execute(document, blocks);
 }
 
 // attempt language aware execution of current selection (returns false
 // if the executor doesn't support this, in which case generic
 // executeInteractive will be called)
-export async function executeSelectionInteractive(executor: CellExecutor) {
+export async function executeSelectionInteractive(executor: CellExecutor, document: TextDocument) {
   if (executor?.executeSelection) {
-    await executor.executeSelection();
+    await executor.executeSelection(document);
     return true;
   } else {
     return false;

@@ -271,7 +271,7 @@ class RunSelectionCommand extends RunCommand implements Command {
     const language = languageNameFromBlock(block);
     const executor = await this.cellExecutorForLanguage(language);
     if (executor) {
-      const executed = await executeSelectionInteractive(executor);
+      const executed = await executeSelectionInteractive(executor, editor.document);
 
       // if the executor isn't capable of lenguage aware runSelection
       // then determine the selection manually

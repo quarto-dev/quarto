@@ -6,6 +6,9 @@
 - Attempt to restore focus to visual editor when switching back to the window
 - Fix for regression of image hover preview (for images > ~75k)
 - Reduce the number of registered 'file new' commands
+- Visual Editor: Disable spellcheck in attribute dialogs
+- Visual Editor: More flexible data entry for math ids
+- Visual Editor: Enable removal of ids from 
 
 ## 1.87.2 (Release on 2 June 2023)
 

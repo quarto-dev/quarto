@@ -8,7 +8,7 @@
 - Reduce the number of registered 'file new' commands
 - Visual Editor: Disable spellcheck in attribute dialogs
 - Visual Editor: More flexible data entry for math ids
-- Visual Editor: Enable removal of ids from 
+- Visual Editor: Enable removal of ids from math blocks
 
 ## 1.87.2 (Release on 2 June 2023)
 

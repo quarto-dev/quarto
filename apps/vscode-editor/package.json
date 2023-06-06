@@ -28,7 +28,6 @@
     "editor-ui": "*",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
-    "normalize.css": "^8.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",

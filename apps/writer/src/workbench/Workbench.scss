@@ -30,7 +30,7 @@
 
  .workbench .workspace {
    position: fixed;
-   top: calc(#{$navbarHeight} + #{$toolbarHeight} + 1px);
+   top: calc(#{$navbarHeight} + #{$toolbarHeight} - 3px);
    left: 0;
    right: 0;
    bottom: 0;

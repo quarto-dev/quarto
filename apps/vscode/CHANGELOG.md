@@ -9,6 +9,7 @@
 - Visual Editor: Disable spellcheck in attribute dialogs
 - Visual Editor: More flexible data entry for math ids
 - Visual Editor: Enable removal of ids from math blocks
+- Visual Editor: Don't focus view after omni-insert that displays a dialog
 
 ## 1.87.2 (Release on 2 June 2023)
 

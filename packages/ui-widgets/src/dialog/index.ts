@@ -1,5 +1,5 @@
 /*
- * dialog.ts
+ * index.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -32,3 +32,6 @@ export function showValueEditorDialog<T,O = undefined>(
     root.render(React.createElement(dialog, { values, options, onClosed }));
   });
 }
+
+export { FluentDialog } from './FluentDialog';
+

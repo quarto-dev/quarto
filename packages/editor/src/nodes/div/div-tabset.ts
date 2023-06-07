@@ -31,6 +31,7 @@ export function insertTabsetCommand(ui: EditorUI) {
     description: ui.context.translateText('Content divided into tabs'),
     group: OmniInsertGroup.Content,
     priority: 2,
+    noFocus: true,
     image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.tabset_dark : ui.images.omni_insert.tabset),
   });
 }

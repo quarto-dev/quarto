@@ -23,6 +23,7 @@ export interface OmniInsert {
   group: OmniInsertGroup;
   priority?: number;
   selectionOffset?: number;
+  noFocus?: boolean;
   image: () => string;
 }
 

@@ -246,6 +246,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               description: ui.context.translateText('Reference to related content'),
               group: OmniInsertGroup.References,
               priority: 0,
+              noFocus: true,
               image: () =>
                 ui.prefs.darkMode()
                   ? ui.images.omni_insert!.cross_reference_dark!

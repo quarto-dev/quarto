@@ -79,7 +79,7 @@ export interface CompletionHandler<T = any> {
   replace?(view: EditorView, pos: number, completion: T | null): Promise<unknown>;
 
   // prevent focus after insertion (good for e.g. omni-insert)
-  noFocus?: boolean;
+  noFocus?: (completion: T) => boolean ;
 
   // completion view
   view: {

@@ -182,6 +182,7 @@ class CodeBlockFormatCommand extends ProsemirrorCommand {
         description: ui.context.translateText('Source code display'),
         group: OmniInsertGroup.Blocks,
         priority: 7,
+        noFocus: true,
         image: () =>
           ui.prefs.darkMode() ? ui.images.omni_insert.code_block_dark : ui.images.omni_insert.code_block,
       },

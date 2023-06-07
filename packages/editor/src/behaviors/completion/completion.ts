@@ -392,6 +392,7 @@ class CompletionPlugin extends Plugin<CompletionState> {
   private async insertCompletion(view: EditorView, index: number) {
     // default index if not specified
     index = index || this.selectedIndex;
+    const completion = this.completions[index];
 
     const state = key.getState(view.state);
     if (state && state.handler) {
@@ -414,7 +415,7 @@ class CompletionPlugin extends Plugin<CompletionState> {
         }
       }
       // set focus
-      if (!state.handler.noFocus) {
+      if (!state.handler.noFocus || !state.handler.noFocus(completion)) {
         view.focus()
       }
     }

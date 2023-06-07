@@ -33,6 +33,7 @@ export function insertCalloutCommand(ui: EditorUI) {
     description: ui.context.translateText('Content framed for special emphasis'),
     group: OmniInsertGroup.Content,
     priority: 2,
+    noFocus: true,
     image: () => ui.images.omni_insert.generic,
   });
 }

@@ -373,6 +373,7 @@ class RawBlockCommand extends ProsemirrorCommand {
       description: ui.context.translateText('Raw content block'),
       group: OmniInsertGroup.Blocks,
       priority: 4,
+      noFocus: true,
       image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.raw_block_dark : ui.images.omni_insert.raw_block),
     });
   }

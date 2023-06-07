@@ -139,6 +139,7 @@ const extension = (context: ExtensionContext) : Extension | null => {
           description: ui.context.translateText('Block containing other content'),
           group: OmniInsertGroup.Common,
           priority: 6,
+          noFocus: true,
           image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.div_dark : ui.images.omni_insert.div),
         }),
       ];

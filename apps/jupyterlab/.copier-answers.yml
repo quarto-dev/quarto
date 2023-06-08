@@ -1,0 +1,20 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.0.5
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: charles@posit.co
+author_name: Charles Teague
+data_format: string
+file_extension: ''
+has_binder: false
+has_settings: true
+kind: frontend
+labextension_name: '@quarto/jupyterlab-quarto'
+mimetype: ''
+mimetype_name: ''
+project_short_description: Jupyter extension to enable authoring of Quarto documents
+    within Jupyterlab Notebooks.
+python_name: jupyterlab-quarto
+repository: https://github.com/quarto-dev/quarto/quarto.git
+test: true
+viewer_name: ''
+

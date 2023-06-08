@@ -225,7 +225,7 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
                 : [])
             ].map(option => {
               return (
-                <option value={option.value}>
+                <option value={option.value} key={option.value}>
                   {option.label || option.value}
                 </option>);
             })}
@@ -246,7 +246,7 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
             >
               {suggestionsForType(type).map(option => {
                 return (
-                  <option value={option.value}>
+                  <option value={option.value} key={option.value}>
                     {option.value}
                   </option>);
               })}

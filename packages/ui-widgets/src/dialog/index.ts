@@ -33,5 +33,5 @@ export function showValueEditorDialog<T,O = undefined>(
   });
 }
 
-export { FluentDialog } from './FluentDialog';
+export { ModalDialog } from './ModalDialog';
 

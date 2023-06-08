@@ -15,14 +15,15 @@
  */
 
 import React, { useState } from "react"
-import { Button } from "@fluentui/react-components";
+import { Button, Field, Input, Label, Textarea } from "@fluentui/react-components";
 
 import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
 
-import { FormikDialog, FormikTextArea, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import {  FormikTextArea, FormikTextInput, ModalDialog, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';
 import { fluentTheme } from "../theme";
+import { useEffect } from "react";
 
 export interface EditAttrOptions {
   caption?: string;
@@ -67,6 +68,42 @@ export function editAttrFields(autoFocus?: boolean) {
   );
 }
 
+export interface EditAttrProps {
+  value: AttrEditInput;
+  onChange: (data: AttrEditInput) => void;
+}
+
+export const EditAttr : React.FC<EditAttrProps> = props => {
+
+  const [id, setId] = useState(props.value.id);
+  const [classes, setClasses] = useState(props.value.classes);
+  const [style, setStyle] = useState(props.value.style);
+  const [keyvalue, setKeyvalue] = useState(props.value.keyvalue);
+
+  useEffect(() => {
+    props.onChange({ id, classes, style, keyvalue })
+  }, [id, classes, style, keyvalue])
+
+  return (
+    <>
+      <Field label={t("ID (e.g. #overview)")}>
+        <Input value={id} onChange={(_ev, data) => setId(data.value)}/>
+      </Field>
+      <Field label={t("Classes (e.g. .illustration)")}>
+        <Input value={classes} onChange={(_ev, data) => setClasses(data.value)} />
+      </Field>
+      <Field label={t("Style (e.g. color: gray;)")}>
+        <Input value={style} onChange={(_ev, data) => setStyle(data.value)} />
+      </Field>
+      <Field label={t("Attributes (key=value, one per line)")}>
+        <Textarea rows={3} value={keyvalue} onChange={(_ev, data) => setKeyvalue(data.value)} />
+      </Field>
+    </>
+  )
+
+}
+
+
 async function showEditAttrDialog(attrUITools: UIToolsAttr, attr: AttrProps, options: EditAttrDialogOptions) {
   const inputAttr = attrUITools.propsToInput(attr);
   const result = await showValueEditorDialog(EditAttrDialog, { attr: inputAttr, action: 'edit' }, options);
@@ -99,6 +136,8 @@ const EditAttrDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const [attr, setAttr] = useState(props.values.attr);
+
   const close = (attr?: AttrEditInput, action?: "edit" | "remove") => {
     action = action || "edit";
     setIsOpen(false);
@@ -111,16 +150,15 @@ const EditAttrDialog: React.FC<{
     </Button> : undefined;
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={props.options.caption || t("Edit Attributes")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values.attr} 
       leftButtons={removeButton}
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      onOK={() => close(attr, 'edit') }
+      onCancel={() => close() }
     >
-      {editAttrFields(true)}
-    </FormikDialog>
+      <EditAttr value={attr} onChange={setAttr} />
+    </ModalDialog>
   )
 }

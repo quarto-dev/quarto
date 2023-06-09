@@ -15,7 +15,7 @@
 
 import React, { useRef, useState } from "react"
 
-import { Button, Checkbox, Field, Input, Select, SelectTabData, SelectTabEvent, Tab, TabList, TabValue, makeStyles } from "@fluentui/react-components"
+import { Button, Checkbox, Field, Input, Select, SelectTabData, SelectTabEvent, Tab, TabValue, makeStyles } from "@fluentui/react-components"
 
 import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr, UIToolsAttr } from "editor-types";
 
@@ -27,7 +27,6 @@ import { EditAttr, EditAttrPanel } from "./edit-attr";
 
 import { t } from './translate';
 
-import styles from "./styles.module.scss";
 import { useEffect } from "react";
 
 

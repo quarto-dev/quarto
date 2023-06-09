@@ -16,11 +16,12 @@
 import React, { useState } from "react"
 
 import { AttrEditInput, CodeBlockProps, UIToolsAttr } from "editor-types";
-import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';
-import { editAttrFields } from "./edit-attr";
+import { EditAttr } from "./edit-attr";
 import { fluentTheme } from "../theme";
+import { Field, Input } from "@fluentui/react-components";
 
 export function editCodeBlock(attrUITools: UIToolsAttr) {
   return async (codeBlock: CodeBlockProps, attributes: boolean, languages: string[]): Promise<CodeBlockProps | null>  => {
@@ -52,22 +53,28 @@ const EditCodeBlockDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const { lang: codeBlockLang, ...codeBlockAttrs } = props.values;
+
+  const [lang, setLang] = useState(codeBlockLang);
+  const [attr, setAttr] = useState(codeBlockAttrs);
+
   const close = (values?: EditCodeBlockValues) => {
     setIsOpen(false);
     props.onClosed(values);
   }
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={t("Code Block")}
       theme={fluentTheme()}
-      isOpen={isOpen} 
-      initialValues={props.values} 
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      isOpen={isOpen}
+      onOK={() => close({ ...attr, lang }) }
+      onCancel={() => close() }
     >
-      <FormikTextInput name="lang" label={t("Language")} autoFocus={true} />
-      {editAttrFields()}
-    </FormikDialog>
+      <Field label={t("Language")}>
+        <Input value={lang} onChange={(_ev, data) => setLang(data.value)}/>
+      </Field>
+      <EditAttr value={attr} onChange={setAttr} />
+    </ModalDialog>
   )
 }

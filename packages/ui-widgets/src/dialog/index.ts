@@ -34,4 +34,6 @@ export function showValueEditorDialog<T,O = undefined>(
 }
 
 export { ModalDialog } from './ModalDialog';
+export { ModalDialogTabList } from './ModalDialogTabList';
+
 

@@ -19,7 +19,7 @@ import { Button, Checkbox, Field, Input, Select, SelectTabData, SelectTabEvent, 
 
 import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr, UIToolsAttr } from "editor-types";
 
-import { ModalDialog, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, ModalDialogTabList, showValueEditorDialog } from "ui-widgets";
 
 import { fluentTheme } from "../theme";
 
@@ -150,14 +150,14 @@ const EditCalloutDialog: React.FC<{
       onOK={() => close({ values: { ...attr, type, appearance, caption, icon}, action: 'edit'})}
       onCancel={() => close() }
     >
-      <TabList
+      <ModalDialogTabList
         id="edit-callout" 
         selectedValue={selectedTab} 
         onTabSelect={onTabSelect}
       >
         <Tab id="callout" value="callout">{t("Callout")}</Tab>
         <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
-      </TabList>
+      </ModalDialogTabList>
       <div>
         {selectedTab === "callout" && calloutPanel}
         {selectedTab === "attributes" && attributesPanel}

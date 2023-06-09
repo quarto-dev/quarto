@@ -13,22 +13,22 @@
  *
  */
 
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 
-
-import { Button, SelectTabData, SelectTabEvent, Tab, TabList, TabValue, makeStyles } from "@fluentui/react-components"
+import { Button, Checkbox, Field, Input, Select, SelectTabData, SelectTabEvent, Tab, TabList, TabValue, makeStyles } from "@fluentui/react-components"
 
 import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr, UIToolsAttr } from "editor-types";
 
-import { FormikCheckbox, FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, showValueEditorDialog } from "ui-widgets";
 
 import { fluentTheme } from "../theme";
 
-import { editAttrFields } from "./edit-attr";
+import { EditAttr, EditAttrPanel } from "./edit-attr";
 
 import { t } from './translate';
 
 import styles from "./styles.module.scss";
+import { useEffect } from "react";
 
 
 export function editCallout(attrUITools: UIToolsAttr) {
@@ -74,6 +74,21 @@ const EditCalloutDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const focusRef = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    if (isOpen && focusRef.current) {
+      focusRef.current.focus();
+    }
+  }, [isOpen])
+
+  
+
+  const [attr, setAttr] = useState<AttrEditInput>(props.values.values);
+  const [type, setType] = useState(props.values.values.type);
+  const [appearance, setApperance] = useState(props.values.values.appearance);
+  const [caption, setCaption] = useState(props.values.values.caption);
+  const [icon, setIcon] = useState(props.values.values.icon);
+
   const close = (values?: EditCalloutDialogValues) => {
     setIsOpen(false);
     if (values) {
@@ -92,37 +107,48 @@ const EditCalloutDialog: React.FC<{
   };
   const classes = useStyles();
 
+  const selectOptions = (options: string[]) => {
+    return options.map(option => {
+      return (
+        <option value={option} key={option}>
+          {option}
+        </option>);
+    });
+  };
+
   const calloutPanel =
-    <div className={styles.editAttributesPanel}>
+    <EditAttrPanel>
       <div className={classes.attribs}>
-        <FormikHTMLSelect 
-          name="type" label={t("Type")} 
-          options={["note", "tip", "important", "caution", "warning"]}
-          autoFocus={true}
-        />
-        <FormikHTMLSelect 
-          name="appearance" label={t("Appearance")} 
-          options={["default", "simple", "minimal"]} 
-        />
+        <Field label={t("Type")}>
+          <Select ref={focusRef} value={type} onChange={(_ev, data) => setType(data.value)} multiple={false}>
+            {selectOptions(["note", "tip", "important", "caution", "warning"])}
+          </Select>
+        </Field>
+        <Field label={t("Apperance")}>
+          <Select value={appearance} onChange={(_ev, data) => setApperance(data.value)} multiple={false}>
+            {selectOptions(["default", "simple", "minimal"])}
+          </Select>
+        </Field>
       </div>
-      <FormikTextInput name="caption" label="Caption" labelInfo="(Optional)" />
-      <FormikCheckbox name="icon" label={t("Display icon alongside callout")}/>
-    </div>;
+      <Field label={t("Caption")} placeholder={t("(Optional)")}>
+        <Input value={caption} onChange={(_ev, data) => setCaption(data.value)}/>
+      </Field>
+      <Checkbox label={t("Display icon alongside callout")} checked={icon} onChange={(_ev, data) => setIcon(!!data.checked)}/> 
+    </EditAttrPanel>;
 
   const attributesPanel = 
-    <div className={styles.editAttributesPanel}>
-      {editAttrFields()}
-    </div>;
+    <EditAttrPanel>
+      <EditAttr value={attr} onChange={setAttr} />
+    </EditAttrPanel>;
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={t("Callout")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values.values} 
       leftButtons={props.options.removeEnabled ? removeButton : undefined}
-      onSubmit={(values) => close({ values, action: "edit" }) }
-      onReset={() => close() }
+      onOK={() => close({ values: { ...attr, type, appearance, caption, icon}, action: 'edit'})}
+      onCancel={() => close() }
     >
       <TabList
         id="edit-callout" 
@@ -137,7 +163,7 @@ const EditCalloutDialog: React.FC<{
         {selectedTab === "attributes" && attributesPanel}
       </div>
 
-    </FormikDialog>
+    </ModalDialog>
   )
 }
 

@@ -14,8 +14,8 @@
  *
  */
 
-import React, { useState } from "react"
-import { Button, Field, Input, Label, Textarea } from "@fluentui/react-components";
+import React, { PropsWithChildren, useState } from "react"
+import { Button, Field, Input, Textarea, makeStyles } from "@fluentui/react-components";
 
 import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
 
@@ -103,6 +103,15 @@ export const EditAttr : React.FC<EditAttrProps> = props => {
 
 }
 
+export const EditAttrPanel : React.FC<PropsWithChildren> = props => {
+  const styles = useStyles();
+  return (
+    <div className={styles.attribsPanel}>
+      {props.children}
+    </div>
+  )
+}
+
 
 async function showEditAttrDialog(attrUITools: UIToolsAttr, attr: AttrProps, options: EditAttrDialogOptions) {
   const inputAttr = attrUITools.propsToInput(attr);
@@ -162,3 +171,12 @@ const EditAttrDialog: React.FC<{
     </ModalDialog>
   )
 }
+
+const useStyles = makeStyles({
+  attribsPanel: {
+    minHeight: "290px",
+    display: "flex",
+    flexDirection: "column",
+    rowGap: "8px",
+  },
+})

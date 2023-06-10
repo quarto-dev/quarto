@@ -248,7 +248,7 @@ const ImageField: React.FC<ImageFieldProps> = props => {
         if (focusRef.current) {
           focusRef.current.focus();
         }
-      }, 100);
+      }, 0);
     }, []);
   }
 

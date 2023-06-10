@@ -13,25 +13,33 @@
  *
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-import { useFormikContext } from "formik";
+import { 
+  Button, 
+  Tab, 
+  TabValue, 
+  SelectTabEvent, 
+  SelectTabData, 
+  makeStyles, 
+  Field, 
+  Input, 
+  tokens, 
+  useId, 
+  RadioGroup, 
+  Label, 
+  Radio 
+} from "@fluentui/react-components";
 
-import { TabList, Tab, TabValue, SelectTabEvent, SelectTabData } from "@fluentui/react-components";
-
-import { Button } from "@fluentui/react-components"
-
-
-import { capitalizeWord } from "core"
-import { FormikDialog, FormikRadioGroup, FormikTextInput, showValueEditorDialog} from "ui-widgets";
+import { ModalDialog, ModalDialogTabList, showValueEditorDialog} from "ui-widgets";
 import { AttrEditInput, EditorUIImageResolver, ImageDimensions, ImageProps, UIToolsAttr } from "editor-types";
 
-import { editAttrFields } from "./edit-attr";
+import { EditAttr, EditAttrPanel } from "./edit-attr";
 
 import { t } from './translate';
 
-import styles from "./styles.module.scss";
 import { fluentTheme } from "../theme";
+import { capitalizeWord } from "core";
 
 export function editImage(attrUITools: UIToolsAttr, imageResolver?: EditorUIImageResolver) {
   return async (image: ImageProps, dims: ImageDimensions | null, figure: boolean, editAttributes: boolean): Promise<ImageProps | null> => {
@@ -94,7 +102,6 @@ interface EditImageDialogOptions {
   imageResolver?: EditorUIImageResolver
 }
 
-
 const EditImageDialog: React.FC<{ 
   values: EditImageDialogValues,
   options: EditImageDialogOptions,
@@ -102,6 +109,15 @@ const EditImageDialog: React.FC<{
 > = props => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  const [src, setSrc] = useState(props.values.src);
+  const [title, setTitle] = useState(props.values.title);
+  const [caption, setCaption] = useState(props.values.caption);
+  const [alt, setAlt] = useState(props.values.alt);
+  const [align, setAlign] = useState(props.values.align);
+  const [env, setEnv] = useState(props.values.env);
+  const [linkTo, setLinkTo] = useState(props.values.linkTo);
+  const [attr, setAttr] = useState<AttrEditInput>(props.values);
 
   const [selectedTab, setSelectedTab] = useState<TabValue>("image");
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
@@ -112,32 +128,87 @@ const EditImageDialog: React.FC<{
     setIsOpen(false);
     props.onClosed(values);
   }
+  
+const classes = useStyles();
+const alignId = useId("align");
 
-  const attributesPanel = 
-    <div className={styles.editAttributesPanel}>
-      {editAttrFields()}
-    </div>;
+const imagePanel = 
+  <EditAttrPanel>
+    <ImageField value={src} onChange={setSrc} autoFocus={true} imageResolver={props.options.imageResolver}/>
+  
+    {align !== undefined
+      ? <div className={classes.alignmentField}>
+          <Label id={alignId}>{t('Alignment: ')}</Label>
+          <RadioGroup 
+            value={align}
+            onChange={(_ev, data) => setAlign(data.value)}
+            layout="horizontal" 
+            aria-labelledby={alignId}
+          >
+            {["default", "left", "center", "right"].map(option => {
+              return <Radio key={option} value={option} label={capitalizeWord(option)}></Radio>
+            })}
+          </RadioGroup>
+        </div>    
+      : null
+    }
+    <Field label={t("Caption")}>
+      <Input 
+        value={caption} 
+        onChange={(_ev, data) => setCaption(data.value)}
+        placeholder={t("(Optional)")}
+      />
+    </Field>
+  
+    {alt !== undefined
+      ?  <Field label={t("Alternative text")}>
+          <Input 
+            value={alt} 
+            onChange={(_ev, data) => setAlt(data.value)}
+            placeholder={t("(Optional)")}
+          />
+        </Field>
+      : null
+    }
+  </EditAttrPanel>;
 
+  const attributesPanel =  
+    <EditAttrPanel>
+       <EditAttr value={attr} onChange={setAttr} />
+    </EditAttrPanel>;
+   
   const advancedPanel = 
-    <div className={styles.editAttributesPanel}>
-      <FormikTextInput name="linkTo" label={t("Link to")} placeholder={t("(Optional)")}/>
-      {props.values.env 
-        ? <FormikTextInput name="env" label={t("LaTeX environment")} />
+    <EditAttrPanel>
+      <Field label={t("Link to")}>
+        <Input 
+          value={linkTo} 
+          onChange={(_ev,data) => setLinkTo(data.value)}
+        />
+      </Field>
+      {env 
+        ? <Field label={t("LaTeX environment")}>
+            <Input value={env} onChange={(_ev,data) => setEnv(data.value)} />
+          </Field>
         : null
       }
-      <FormikTextInput name="title" label={t("Title attribute")} />
-    </div>;
+      <Field label={t("Title attribute")}>
+        <Input value={title} onChange={(_ev, data) => setTitle(data.value)} />
+      </Field>
+    </EditAttrPanel>;
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={props.options.figure ? t("Figure") : t("Image")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values} 
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      onOK={() => close({
+        ...props.values,
+        ...attr,
+        src, title, caption, alt, align, env, linkTo
+      })}
+      onCancel={() => close() }
     >
-      <TabList
+      <ModalDialogTabList
         id="edit-callout" 
         selectedValue={selectedTab} 
         onTabSelect={onTabSelect}
@@ -148,56 +219,45 @@ const EditImageDialog: React.FC<{
           : null
         }
         <Tab id="advanced" value="advanced">{t("Advanced")}</Tab>
-      </TabList>
+      </ModalDialogTabList>
       <div>
-        {selectedTab === "image" && <ImagePanel options={props.options}/>}
+        {selectedTab === "image" && imagePanel}
         {selectedTab === "attributes" && attributesPanel}
         {selectedTab === "advanced" && advancedPanel}
 
       </div>
-    </FormikDialog>
+    </ModalDialog>
   )
 }
 
-const ImagePanel: React.FC<{options: EditImageDialogOptions }> = props => {
-
-  const formik = useFormikContext<EditImageDialogValues>();
- 
-  return (
-    <div className={styles.editAttributesPanel}>
-      <ImageField {...props} />
-     
-      {formik.values.align !== undefined
-        ? <FormikRadioGroup 
-            name={"align"} label={"Alignment:"} layout="horizontal" 
-            options={["default", "left", "center", "right"].map(value => { 
-              return {
-                value,
-                label: capitalizeWord(value)
-              }
-            })} 
-          />
-        : null
-      }
-      <FormikTextInput name="caption" label={t("Caption")} placeholder={t("(Optional)")}/>
-      {formik.values.alt !== undefined
-        ? <FormikTextInput name="alt" label={t("Alternative text")} placeholder={t("(Optional)")}/>
-        : null
-      }
-    </div>
-  );
+interface ImageFieldProps {
+  value: string;
+  onChange?: (data: string) => void;
+  autoFocus?: boolean;
+  imageResolver?: EditorUIImageResolver;
 }
 
-const ImageField: React.FC<{options: EditImageDialogOptions }> = props => {
+const ImageField: React.FC<ImageFieldProps> = props => {
 
-  const formik = useFormikContext();
+  const styles = useStyles();
+
+  const focusRef = useRef<HTMLInputElement>(null);
+  if (props.autoFocus) {
+    useEffect(() => {
+      setTimeout(() => {
+        if (focusRef.current) {
+          focusRef.current.focus();
+        }
+      }, 100);
+    }, []);
+  }
 
   // button
   const button = 
     <Button onClick={async () => {
-      const image = await props.options.imageResolver?.selectImage?.();
+      const image = await props.imageResolver?.selectImage?.();
         if (image) {
-          formik.setFieldValue("src", image);
+          props.onChange?.(image);
         }
       }}> 
       {t("Browse...")}
@@ -205,15 +265,29 @@ const ImageField: React.FC<{options: EditImageDialogOptions }> = props => {
 
   // image input 
   const imageInput = 
-    <FormikTextInput 
-      name="src" 
-      label={t("Image")} 
-      labelInfo={t("(File or URL)")} 
-      autoFocus={true}
-      button={props.options.imageResolver?.selectImage ? button : undefined}
-    />;
-
+    <Field label={t("Image (File or URL)")} className={styles.imageField}>
+      <Input ref={focusRef} value={props.value} onChange={(_ev, data) => props.onChange?.(data.value)}/>
+      {button}
+    </Field>;
+    
   // pair with browse button if we have a selectImage function
   return imageInput;
 };
+
+const useStyles = makeStyles({
+  imageField: {
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '8px',
+    "& .fui-Input": {
+      flexGrow: 1
+    }
+  },
+  alignmentField: {
+    display: "grid",
+    gridRowGap: tokens.spacingVerticalS,
+  }
+})
+
+
 

@@ -14,7 +14,7 @@
  */
 
 import React, { useState } from "react";
-import { Button, Field, Input, Select, Textarea } from "@fluentui/react-components";
+import { Button, Field, Input, Select } from "@fluentui/react-components";
 
 import { RawFormatProps, RawFormatResult } from "editor-types";
 

@@ -14,11 +14,11 @@
  */
 
 import React, { useState } from "react";
-import { Button } from "@fluentui/react-components";
+import { Button, Field, Input, Select, Textarea } from "@fluentui/react-components";
 
 import { RawFormatProps, RawFormatResult } from "editor-types";
 
-import { FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, showValueEditorDialog } from "ui-widgets";
 
 
 import { t } from './translate';
@@ -45,6 +45,9 @@ const EditRawDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const [format, setFormat] = useState(props.values.raw.format);
+  const [content, setContent] = useState(props.values.raw.content);
+
   const close = (raw?: RawFormatProps, action?: "edit" | "remove") => {
     action = action || "edit";
     setIsOpen(false);
@@ -62,27 +65,43 @@ const EditRawDialog: React.FC<{
   }
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={t("Raw Format")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values.raw} 
       leftButtons={props.values.raw.format ? removeButton : undefined}
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      onOK={() => close({ format, content }, 'edit') }
+      onCancel={() => close() }
     >
-      <FormikHTMLSelect 
-        name="format" 
-        label="Format" 
-        options={formats}
-      />
-      {props.options.editContent ? 
-        <FormikTextInput 
-          name="content" 
-          label="Content" 
-          style={{fontFamily: 'monospace, monospace'}} 
-        /> : null}
-    </FormikDialog>
+      <Field label={t("Format")}>
+        <Select 
+          value={format} 
+          onChange={(_ev, data) => setFormat(data.value)} 
+          multiple={false}
+        >
+          {formats.map(format => {
+            return (
+              <option 
+                value={format.value} 
+                key={format.value}
+              >
+                {format.label || format.value}
+              </option>
+            );
+          })}
+        </Select>
+      </Field>
+
+      {props.options.editContent 
+        ? <Field label={t("Content")}>
+            <Input 
+              style={{fontFamily: 'monospace'}} 
+              value={content} 
+              onChange={(_ev, data) => setContent(data.value)} 
+            />
+          </Field> 
+        : null}
+    </ModalDialog>
   )
 }
 

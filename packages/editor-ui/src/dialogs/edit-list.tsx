@@ -52,7 +52,7 @@ const EditListDialog: React.FC<{
       title={t("Ordered List")}
       theme={fluentTheme()}
       isOpen={isOpen} 
-      onOK={() => close({ type, tight, order, number_style, number_delim, incremental}) }
+      onOK={() => close({ type, tight, order: order || 1, number_style, number_delim, incremental}) }
       onCancel={() => close() }
     >
       <Field label={t("List type")}>
@@ -76,7 +76,7 @@ const EditListDialog: React.FC<{
       {type === ListType.Ordered 
         ? <>
           <Field label={t("Starting number")}>
-            <Input type="number" value={String(order) || ""} onChange={(_ev, data) => {
+            <Input value={order ? String(order) : ""} onChange={(_ev, data) => {
               setOrder(Number.parseFloat(data.value) || 0);
              }} />
           </Field>

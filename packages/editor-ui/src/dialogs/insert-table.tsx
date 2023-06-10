@@ -15,13 +15,8 @@
 
 import React, { useState } from "react";
 
-import * as yup from "yup"
-
 import { 
-  FormikCheckbox, 
-  FormikDialog, 
-  FormikNumericInput, 
-  FormikTextInput,
+  ModalDialog,
   showValueEditorDialog 
 } from "ui-widgets";
 
@@ -30,7 +25,7 @@ import { InsertTableResult, TableCapabilities } from "editor-types";
 
 import { t } from './translate';
 import { fluentTheme } from "../theme";
-import { makeStyles } from "@fluentui/react-components";
+import { Checkbox, Field, Input, makeStyles } from "@fluentui/react-components";
 
 export async function insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
   const values: InsertTableResult = {
@@ -49,6 +44,12 @@ const InsertTableDialog: React.FC<{
 > = props => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  const [rows, setRows] = useState(props.values.rows);
+  const [cols, setCols] = useState(props.values.cols);
+  const [header, setHeader] = useState(props.values.header);
+  const [caption, setCaption] = useState(props.values.caption);
+
   const close = (values?: InsertTableResult) => {
     setIsOpen(false);
     props.onClosed(values);
@@ -57,49 +58,46 @@ const InsertTableDialog: React.FC<{
   const styles = useStyles();
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={t("Insert Table")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values} 
-      validationSchema={yup.object().shape({
-        rows: yup.number().positive(t('Please enter a number')),
-        cols: yup.number().positive(t('Please enter a number')),
-      })}
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      onOK={() => close( { rows: rows || 1, cols: cols || 1, header, caption }) }
+      onCancel={() => close() }
     >
       <div className={styles.dims}>
-        <FormikNumericInput
-          name="rows"
-          label={t("Rows")}
-          min={1}
-          max={1000}
-          autoFocus={true}
-        />
-        <FormikNumericInput
-          name="cols"
-          label={t("Columns")}
-          min={1}
-          max={1000}
-        />
+
+        <Field label={t("Rows")}>
+          <Input 
+            value={rows ? String(rows) : ""} 
+            onChange={(_ev, data) => {
+              setRows(Number.parseFloat(data.value) || 0);
+            }} 
+          />
+        </Field>
+
+        <Field label={t("Columns")}>
+          <Input 
+            type="number" 
+            value={cols ? String(cols) : ""} 
+            onChange={(_ev, data) => {
+              setCols(Number.parseFloat(data.value) || 0);
+            }} 
+          />
+        </Field>
+
       </div>
 
       {props.options.captions ? (
-        <FormikTextInput
-          name="caption"
-          label={t("Caption")}
-          labelInfo={t("(Optional)")}
-        />
+        <Field label={t("Caption")}>
+          <Input value={caption} onChange={(_ev, data) => setCaption(data.value)} placeholder={t("(Optional)")}/>
+        </Field>
       ) : null}
 
       {props.options.headerOptional ? (
-        <FormikCheckbox 
-          name="header"
-          label={t("Include table header")}
-        />
+        <Checkbox label={t("Include table header")} checked={header} onChange={(_ev, data) => setHeader(!!data.checked)}/> 
       ) : null}
-    </FormikDialog>
+    </ModalDialog>
   )
 }
 

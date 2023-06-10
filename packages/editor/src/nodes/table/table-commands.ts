@@ -106,6 +106,7 @@ export function insertTableOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Content in rows and columns'),
     group: OmniInsertGroup.Lists,
     priority: 1,
+    noFocus: true,
     image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.table_dark : ui.images.omni_insert.table),
   };
 }

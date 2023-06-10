@@ -15,21 +15,18 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-import { Button, Select, TabList, Tab, TabValue, SelectTabEvent, SelectTabData, Field, Input, makeStyles } from "@fluentui/react-components"
+import { Button, Select, Tab, TabValue, SelectTabEvent, SelectTabData, Field, Input, makeStyles } from "@fluentui/react-components"
 
 import { AttrEditInput, LinkCapabilities, LinkEditResult, LinkProps, LinkTargets, LinkType, UIToolsAttr } from "editor-types";
 
-import {  FormikProps, useField, useFormikContext } from "formik";
 
-import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import {  ModalDialog, ModalDialogTabList, showValueEditorDialog } from "ui-widgets";
 
-import { editAttrFields } from "./edit-attr";
+import { EditAttr, EditAttrPanel } from "./edit-attr";
 
-import { t } from './translate';
-
-import styles from "./styles.module.scss";
 import { fluentTheme } from "../theme";
 
+import { t } from './translate';
 
 export function editLink(attrUITools: UIToolsAttr) {
   return async (link: LinkProps, targets: LinkTargets,  capabilities: LinkCapabilities)
@@ -79,6 +76,26 @@ const EditLinkDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const focusRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (isOpen && focusRef.current) {
+      focusRef.current.focus();
+    }
+  }, [isOpen])
+
+
+  const [type, setType] = useState(props.values.value.type);
+  const [text, setText] = useState(props.values.value.text);
+  const [href, setHref] = useState(props.values.value.href);
+  const [heading] = useState(props.values.value.heading);
+  const [title, setTitle] = useState(props.values.value.title);
+  const [attr, setAttr] = useState<AttrEditInput>({
+    id: props.values.value.id,
+    classes: props.values.value.classes,
+    style: props.values.value.style,
+    keyvalue: props.values.value.keyvalue
+  });
+
   const [selectedTab, setSelectedTab] = useState<TabValue>("link");
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
     setSelectedTab(data.value);
@@ -93,9 +110,9 @@ const EditLinkDialog: React.FC<{
           value: { 
             ...values.value,
             type,
-            href: values.value.href,
-            text: values.value.href,
-            heading: values.value.href
+            href,
+            text: href,
+            heading: href
           },
           action: values.action
         })
@@ -116,56 +133,9 @@ const EditLinkDialog: React.FC<{
       {t("Remove Link")}
     </Button> : undefined;
  
-   
-  const attributesPanel = 
-    <div className={styles.editAttributesPanel}>
-      {editAttrFields()}
-    </div>;
+  const linkType = asLinkType(type);
+  const classes = useStyles();
 
-  return (
-    <FormikDialog
-      title={t("Link")} 
-      theme={fluentTheme()}
-      isOpen={isOpen} 
-      initialValues={props.values.value} 
-      leftButtons={removeButton}
-      onSubmit={(value) => close({ value, action: "edit" })}
-      onReset={() => close()}
-    >
-       {(formikProps: FormikProps<EditLinkDialogFields>) => {
-          const type = asLinkType(formikProps.values.type);
-          if (props.options.capabilities.attributes) {
-            return (
-              <>
-              <TabList
-              selectedValue={selectedTab} 
-              onTabSelect={onTabSelect}
-              >
-                <Tab id="link" value="link">{t("Link")}</Tab>
-                {type !== LinkType.Heading 
-                  ? <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
-                  : null
-                }
-              </TabList>
-              <div>
-              {selectedTab === "link" && <LinkPanel options={props.options}/>}
-              {selectedTab === "attributes" && attributesPanel}
-            </div>
-              </>
-            )
-          } else {
-            return  <LinkPanel options={props.options}/>;
-          }
-        }
-      }
-      
-    </FormikDialog>
-  )
-}
-
-
-const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
-    
   const suggestionsForType = (linkType: LinkType) => {
     switch (asLinkType(linkType)) {
       case LinkType.URL:
@@ -184,34 +154,18 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
     const suggestions = suggestionsForType(linkType);
     return suggestions.length ? suggestions[0].value : '';
   };
+    
 
-  const formik = useFormikContext();
-
-  const [ typeField ] = useField("type");
-  const [ hrefField ] = useField("href");
-
-  const type = asLinkType(typeField.value);
-
-  const autoFocusRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    setTimeout(() => {
-      autoFocusRef.current?.focus();
-    }, 0);
-  }, []);
-  
-
-  const classes = useStyles();
-
-  return (
-    <div className={styles.editAttributesPanel}>
+  const linkPanel =
+    <EditAttrPanel>
       <Field label={t("Link to")}>
         <div className={classes.linkTo}>
           <Select 
-            {...typeField}
-            onChange={ev => {
-              typeField.onChange(ev);
-              const type = parseInt(ev.currentTarget.value, 10);
-              formik.setFieldValue("href", defaultHRefForType(type));
+            value={type}
+            onChange={(_ev,data) => {
+              const linkType = asLinkType(data.value);
+              setType(linkType);
+              setHref(defaultHRefForType(linkType));
             }}
             multiple={undefined} 
           >
@@ -230,21 +184,21 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
                 </option>);
             })}
           </Select>
-          {type === LinkType.URL ? (
+          {linkType === LinkType.URL ? (
             <Input 
+              ref={focusRef}
               type="text"
-              input={{ ref: autoFocusRef }} 
-              {...hrefField} 
-              autoFocus={true} 
-              autoComplete="off"
+              value={href}
+              onChange={(_ev, data) => setHref(data.value)}
             />
           ) : (
             <Select 
               className={classes.linkToSelect}
-              {...hrefField} 
+              value={href}
+              onChange={(_ev, data) => setHref(data.value)}
               multiple={undefined}
             >
-              {suggestionsForType(type).map(option => {
+              {suggestionsForType(linkType).map(option => {
                 return (
                   <option value={option.value} key={option.value}>
                     {option.value}
@@ -254,21 +208,62 @@ const LinkPanel: React.FC<{options: EditLinkDialogOptions }> = props => {
           )}
         </div>
       </Field>
-      {type !== LinkType.Heading ? <>
-         <FormikTextInput name="text" label={t("Text")} />
-         <FormikTextInput name="title" label={t("Title/Tooltip")} /> </>
-         : undefined
+      {linkType !== LinkType.Heading ? <>
+        <Field label={t("Text")}>
+          <Input value={text} onChange={(_ev,data) => setText(data.value)} />
+        </Field>
+        <Field label={t("Title/Tooltip")}>
+          <Input value={title} onChange={(_ev,data) => setTitle(data.value)} />
+        </Field>
+        </>
+          : undefined
       }
-     
-    </div>
-  );
+      
+    </EditAttrPanel>
+  ;
+  
+
+  const attributesPanel = 
+    <EditAttrPanel>
+      <EditAttr value={attr} onChange={setAttr} />
+    </EditAttrPanel>;
+
+ 
+
+  return (
+    <ModalDialog
+      title={t("Link")} 
+      theme={fluentTheme()}
+      isOpen={isOpen} 
+      leftButtons={removeButton}
+      onOK={() => close({ value: {...attr, type, text, href, heading, title}, action: "edit" })}
+      onCancel={() => close()}
+    >
+      {props.options.capabilities.attributes 
+        ? <>
+            <ModalDialogTabList
+              selectedValue={selectedTab} 
+              onTabSelect={onTabSelect}
+              >
+                <Tab id="link" value="link">{t("Link")}</Tab>
+                {linkType !== LinkType.Heading 
+                  ? <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
+                  : null
+                }
+            </ModalDialogTabList>
+            <div>
+              {selectedTab === "link" && linkPanel}
+              {selectedTab === "attributes" && attributesPanel}
+            </div>
+          </>
+        : linkPanel}
+    </ModalDialog>
+  )
 }
 
-const asLinkType = (linkType: LinkType) : LinkType  => {
+const asLinkType = (linkType: LinkType | string) : LinkType  => {
   return typeof(linkType) === "string" ? parseInt(linkType, 10) : linkType;
 }
-
-
 
 const useStyles = makeStyles({
   linkTo: {

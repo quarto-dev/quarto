@@ -15,12 +15,15 @@
 
 import React, { useState } from "react";
 
-import { FormikDialog, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import { Field, Input } from "@fluentui/react-components";
 
-import { t } from './translate';
-import { fluentTheme } from "../theme";
 import { UIToolsAttr } from "editor-types";
 
+import { ModalDialog, showValueEditorDialog } from "ui-widgets";
+
+import { fluentTheme } from "../theme";
+
+import { t } from './translate';
 
 export function editMath(attrUITools: UIToolsAttr) {
   return async (id: string) : Promise<string | null> => {
@@ -42,21 +45,24 @@ const EditMathDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const [id, setId] = useState(props.values.id);
+
   const close = (values?: MathValues) => {
     setIsOpen(false);
     props.onClosed(values);
   }
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={t("Edit Math")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values} 
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      onOK={() => close({id })}
+      onCancel={() => close() }
     >
-      <FormikTextInput name="id" label={t("Identifier")} autoFocus={true} />
-    </FormikDialog>
+      <Field label={t("Identifier")}>
+        <Input value={id} onChange={(_ev, data) => setId(data.value) } />
+      </Field>
+    </ModalDialog>
   )
 }

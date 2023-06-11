@@ -15,8 +15,6 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { FormikDialog, FormikHTMLSelect } from 'ui-widgets';
-
 import { 
   CommandManagerContext, 
   useGetPrefsQuery, 
@@ -29,6 +27,8 @@ import {
 import { defaultPrefs, Prefs } from 'editor-types';
 
 import { WorkbenchCommandId } from './commands';
+import { ModalDialog } from 'ui-widgets';
+import { Field, Select } from '@fluentui/react-components';
 
 export const WorkbenchPrefsDialog: React.FC = () => {
   // command to show dialog
@@ -55,6 +55,8 @@ export const WorkbenchPrefsDialog: React.FC = () => {
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
   const [ setPrefs ] = useSetPrefsMutation();
   const { data: dictionaries } = useGetAvailableDictionariesQuery();
+
+  const [dictionaryLocale, setDictionaryLocale] = useState(prefs.dictionaryLocale);
  
   const close = (prefs?: Prefs) => {
     setIsOpen(false);
@@ -65,25 +67,27 @@ export const WorkbenchPrefsDialog: React.FC = () => {
   }
 
   return (
-    <FormikDialog
+    <ModalDialog
       isOpen={isOpen}
       title={t('prefs_dialog_caption') as string}
-      initialValues={prefs}
-      onSubmit={close}
-      onReset={() => close()}
+      onOK={() => close({ ...prefs, dictionaryLocale })}
+      onCancel={() => close()}
     >
-      <FormikHTMLSelect 
-        name={'dictionaryLocale'} 
-        label={t('prefs_dialog_dictionary_locale')} 
-        options={dictionaries 
-          ? dictionaries.map(dictionary => ({
-              value: dictionary.locale,
-              label: dictionary.name
-            }))
-          : [ { value: prefs.dictionaryLocale } ]
-        } 
-      />
-    </FormikDialog>
+      <Field label={t('prefs_dialog_dictionary_locale')} >
+        <Select
+          value={dictionaryLocale}
+          onChange={(_ev, data) => setDictionaryLocale(data.value)}
+        >
+          {dictionaries
+            ? dictionaries.map(dictionary => {
+              return <option value={dictionary.locale} key={dictionary.locale}>{dictionary.name}</option>
+            })
+            : <option value={dictionaryLocale}>{dictionaryLocale}</option>
+
+          }
+        </Select>
+      </Field>
+    </ModalDialog>
   );
 };
 

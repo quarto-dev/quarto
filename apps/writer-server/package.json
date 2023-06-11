@@ -25,7 +25,7 @@
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.12",
     "@types/morgan": "^1.9.2",
-    "@types/node": "^15.12.2",
+    "@types/node": "^16.11.20",
     "@types/tmp": "^0.2.3",
     "editor-server": "*",
     "editor-types": "*",

@@ -13,27 +13,22 @@
  *
  */
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
-import { Card, makeStyles, Select, shorthands, tokens } from "@fluentui/react-components"
+import { Card, Input, makeStyles, Select, shorthands, tokens } from "@fluentui/react-components"
 
 import { Field, ProgressBar } from "@fluentui/react-components"
 
-import { FormikProps, useField, useFormikContext } from "formik";
-
-import * as yup from "yup"
-
 import { ensureExtension, equalsIgnoreCase } from "core";
 
-import { FormikDialog, FormikHTMLSelect, FormikTextInput, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, showValueEditorDialog } from "ui-widgets";
 
-import { CiteField, DOIServer, InsertCiteProps, InsertCiteResult, kAlertTypeError, kStatusNoHost, kStatusNotFound, kStatusOK, PrefsProvider } from "editor-types";
+import { CiteField, CSL, DOIServer, InsertCiteProps, InsertCiteResult, kAlertTypeError, kStatusNoHost, kStatusNotFound, kStatusOK, PrefsProvider } from "editor-types";
 import { UIToolsCitation } from "editor";
 
 import { t } from './translate';
 import { alert } from "./alert";
 
-import styles from './styles.module.scss';
 import { fluentTheme } from "../theme";
 
 const kIdNone = "71896BB2-16CD-4AB5-B523-6372EEB84D5D";
@@ -89,6 +84,33 @@ const InsertCiteDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const [idFocused, setIdFocused] = useState(false);
+  const idEl = useRef<HTMLInputElement>();
+  const focusId = () => idEl?.current?.focus();
+  const idFocusRef = (el: HTMLInputElement | null) => {
+    if (!idFocused && el) {
+      setIdFocused(true);
+      idEl.current = el;
+      focusId();
+    }
+  }
+
+  const [id, setId] = useState(props.values.id);
+  const [bibliographyFile, setBibliographyFile] = useState(props.values.bibliographyFile);
+  const [csl, setCsl] = useState(props.values.csl);
+  const [previewFields, setPreviewFields] = useState(props.values.previewFields);
+  const [bibliographyType, setBibliographyType] = useState(props.values.bibliographyType);
+
+  const idValidationMessage = useMemo(() => {
+    if (/.*[@;[\]\s!,].*/.test(id || "")) {
+      return kInvalidCiteIdChars;
+    } else if (props.options.citeProps.existingIds.find(existingId => equalsIgnoreCase(existingId, id || ""))) {
+      return kNonUniqueCiteId;
+    } else {
+      return "";
+    }
+  }, [id])
+
   const close = (values?: InsertCiteDialogValues) => {
     setIsOpen(false);
     props.onClosed(values);
@@ -98,93 +120,123 @@ const InsertCiteDialog: React.FC<{
   const citeProps = props.options.citeProps;
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={props.options.citeProps.provider 
               ? `${t('Citation from')} ${props.options.citeProps.provider}` 
               : `${t("Citation from DOI: ")} ${citeProps.doi}`}
       isOpen={isOpen}
-      initialValues={props.values}
-      onSubmit={(values) => close(values.id !== kIdNone ? values : undefined)}
-      onReset={() => close()}
-      theme={fluentTheme()}
-      validationSchema={
-        yup.object().shape({
-          id: yup.string()
-            .required(t('Please specify a citation id'))
-            .test(kInvalidCiteIdChars, kInvalidCiteIdChars, 
-                  value => !/.*[@;[\]\s!,].*/.test(value || ""))
-            .test(kNonUniqueCiteId, kNonUniqueCiteId, 
-                  value => !props.options.citeProps.existingIds.find(id => equalsIgnoreCase(id, value || "")) ),
-          bibliographyFile: yup.string()
-            .required(t('You must provide a bibliography file name.'))
-        })
+      onOK={() => { 
+        if (idValidationMessage === "") {
+          close(id !== kIdNone ? { id, bibliographyFile, csl, previewFields, bibliographyType } : undefined)}
+        }
       }
+      onCancel={() => close()}
+      theme={fluentTheme()}
     >
-        {(formikProps: FormikProps<InsertCiteDialogValues>) => {
-          if (formikProps.values.id !== kIdNone) {
-            return (
-              <div className={styles.insertCitePanel}>
-                <FormikTextInput name={"id"} label={t('Citation Id')} autoFocus={true} />
-                <Field label={t('Citation')}>
-                  <Card className={classes.insertCitePreview}>
-                    <table>
-                      <tbody>
-                        {formikProps.values.previewFields.map(field => {
-                          return (
-                            <tr key={field.name}>
-                              <td>{field.name}</td>
-                              <td>{field.value}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </Card>
-                </Field>
-                <SelectBibliography {...props.options} />
-              </div>
-            )
-          } else {
-            return <FetchDOI {...props.options} />
-          }
-        }}
-     
-    </FormikDialog>
+      {id !== kIdNone 
+        ? <>
+            <Field 
+              label={t('Citation Id')}
+              validationState={idValidationMessage ? "error" : "none"}
+              validationMessage={idValidationMessage}
+            >
+              <Input 
+                ref={idFocusRef} 
+                required={true}
+                value={id} 
+                onChange={(_ev,data) => setId(data.value)} 
+              />
+            </Field>
+            <Field label={t('Citation')}>
+              <Card className={classes.insertCitePreview}>
+                <table>
+                  <tbody>
+                    {previewFields.map(field => {
+                      return (
+                        <tr key={field.name}>
+                          <td>{field.name}</td>
+                          <td>{field.value}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </Card>
+            </Field>
+            <SelectBibliography 
+              value={{bibliographyType, bibliographyFile}} 
+              onChange={value => {
+                setBibliographyType(value.bibliographyType);
+                setBibliographyFile(value.bibliographyFile)
+              }}
+              options={props.options}
+            />
+          </>
+        
+        : <FetchDOI 
+            onFetched={value => {
+              setId(value.id);
+              setCsl(value.csl);
+              setPreviewFields(value.previewFields)
+            }}
+            onError={() => close()}
+            options={props.options}
+        />
+      }
+    </ModalDialog>
   );
 
 };
 
 
-const SelectBibliography: React.FC<InsertCiteDialogOptions> = (props) => {
+interface BibliographyInfo {
+  bibliographyType: string;
+  bibliographyFile: string;
+}
 
-  const formik = useFormikContext<InsertCiteResult>();
+interface SelectBibliographyProps {
+  value: BibliographyInfo;
+  onChange: (value: BibliographyInfo) => void;
+  options: InsertCiteDialogOptions;
+}
 
-  if (props.citeProps.bibliographyFiles.length > 0) {
+const SelectBibliography: React.FC<SelectBibliographyProps> = (props) => {
+
+  const styles = useStyles();
+
+  if (props.options.citeProps.bibliographyFiles.length > 0) {
     return (
-      <FormikHTMLSelect 
-         name={"bibliographyFile"} 
-         label={t('Add to bibliography')} 
-         options={props.citeProps.bibliographyFiles}
-      />
+      <Field label={t('Add to bibliography')} >
+        <Select 
+          value={props.value.bibliographyFile} 
+          onChange={(_ev, data) => props.onChange({...props.value, bibliographyFile: data.value})} 
+          multiple={false}
+        >
+          {props.options.citeProps.bibliographyFiles.map(file => {
+            return <option value={file} key={file}>{file}</option>
+          })}
+        </Select>
+      </Field>
     );
   } else {
 
-    const [ typeField ] = useField("bibliographyType");
-
     return (
-      <div>
-        <FormikTextInput name="bibliographyFile" label={t('Create bibliography file')} />
+      <div className={styles.biblioFields}>
+        <Field label={t('Create bibliography file')} className={styles.biblioFileField}>
+          <Input 
+            required={true}
+            value={props.value.bibliographyFile} 
+            onChange={(_ev,data) => props.onChange({...props.value, bibliographyFile: data.value})} />
+        </Field>
         <Field label={t('Format')}>
-          <Select {...typeField} multiple={undefined}
-            onChange={event => {
-              typeField.onChange(event);
-              const extension = event.currentTarget.value;
-              formik.setFieldValue(
-                "bibliographyFile", 
-                ensureExtension(formik.values.bibliographyFile, extension)
-              );
-              props.prefs.setPrefs({
-                bibliographyDefaultType: extension
+          <Select value={props.value.bibliographyType} multiple={undefined}
+            onChange={(_ev,data) => {
+              props.onChange({
+                bibliographyType: data.value,
+                bibliographyFile: ensureExtension(props.value.bibliographyFile, data.value)
+              })
+              props.options.prefs.setPrefs({
+                bibliographyDefaultType: data.value
               });
             }}
           >
@@ -199,31 +251,42 @@ const SelectBibliography: React.FC<InsertCiteDialogOptions> = (props) => {
   
 };
 
+interface FetchDOIValue {
+  id: string;
+  csl: CSL;
+  previewFields: CiteField[];
+}
 
-const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
+interface FetchDOIProps {
+  onFetched: (value: FetchDOIValue) => void;
+  onError: VoidFunction;
+  options: InsertCiteDialogOptions;
+}
 
-  const formik = useFormikContext<InsertCiteResult>();
+const FetchDOI: React.FC<FetchDOIProps> = (props) => {
 
   // show error and dismiss dialog
   const displayError = (title: string, message: string) => {
-    formik.resetForm();
     alert(title, message, kAlertTypeError);
+    props.onError();
   };
 
   // initialize query after the first render
   useEffect(() => {
     try {
-      props.server.fetchCSL(props.citeProps.doi).then(result => {
+      props.options.server.fetchCSL(props.options.citeProps.doi).then(async (result) => {
         if (result.status === kStatusOK) {
-          const citeProps = { ...props.citeProps, csl: result.message! };
-          const citeUI = props.citationTools.citeUI(citeProps);
-          formik.setFieldValue("id", citeUI.suggestedId);
-          formik.setFieldValue("csl", citeProps.csl);
-          formik.setFieldValue("previewFields", citeUI.previewFields);
+          const citeProps = { ...props.options.citeProps, csl: result.message! };
+          const citeUI = props.options.citationTools.citeUI(citeProps);
+          props.onFetched({
+            id: citeUI.suggestedId,
+            csl: citeProps.csl, 
+            previewFields: citeUI.previewFields
+          })
         } else if (result.status === kStatusNotFound) {
           displayError(
             t('DOI Not Found'), 
-            `${t('The specified DOI')} (${props.citeProps.doi}) ${t('was not found. Are you sure this is a valid DOI?')}`
+            `${t('The specified DOI')} (${props.options.citeProps.doi}) ${t('was not found. Are you sure this is a valid DOI?')}`
           );
         } else if (result.status === kStatusNoHost) {
           displayError(
@@ -249,7 +312,7 @@ const FetchDOI: React.FC<InsertCiteDialogOptions> = (props) => {
   return (
     <Field 
       style={{backgroundColor: 'transparent'}}
-      validationMessage={`${t('Looking up DOI ' + props.citeProps.doi)}...`} 
+      validationMessage={`${t('Looking up DOI ' + props.options.citeProps.doi)}...`} 
       validationState="none"
     >
       <ProgressBar 
@@ -266,7 +329,7 @@ const useStyles = makeStyles({
     width: '100%',
     height: '200px',
     ...shorthands.padding('4px'),
-    marginBottom: '15px',
+    marginBottom: '5px',
     "& td": {
       ...shorthands.padding(0,0,'4px'),
     },
@@ -274,5 +337,19 @@ const useStyles = makeStyles({
       fontWeight: tokens.fontWeightSemibold,
       paddingRight: '8px'
     }
+  },
+  biblioFields: {
+    width: "100%",
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '8px',
+    "& .fui-Input": {
+      flexGrow: 1
+    }
+  },
+  biblioFileField: {
+    flexGrow: 1
   }
 });
+
+

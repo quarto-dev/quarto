@@ -15,8 +15,7 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2019",
-    "typeRoots": ["node_modules/yup/es"]
+    "target": "ES2019"
   },
   "exclude": ["node_modules"]
 }

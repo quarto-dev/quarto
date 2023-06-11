@@ -8,12 +8,10 @@
   "dependencies": {
     "@fluentui/react-components": "^9.21.0",
     "@fluentui/react-icons": "^2.0.203",
-    "@types/yup": "^0.32.0",
     "core": "*",
     "core-browser": "*",
     "editor-core": "*",
     "editor-types": "*",
-    "formik": "^2.2.9",
     "i18next": "^22.4.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -21,14 +19,12 @@
     "redux": "^4.2.0",
     "typo-js": "^1.2.2",
     "ui-widgets": "*",
-    "use-debounce": "^9.0.2",
-    "yup": "^0.32.11"
+    "use-debounce": "^9.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
     "@types/typo-js": "^1.2.0",
-    "@types/yup": "^0.32.0",
     "tsconfig": "*",
     "typescript": "^4.5.2"
   }

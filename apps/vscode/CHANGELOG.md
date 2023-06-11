@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.88.0 (Unreleased)
+
+- Visual Editor: Remove formik validation (fixes various dialog focus issues)
+
 ## 1.87.3 (Release on 7 June 2023)
 
 - Ensure that Go to next/previous cell traverses all executable blocks

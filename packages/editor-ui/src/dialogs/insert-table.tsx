@@ -15,6 +15,8 @@
 
 import React, { useState } from "react";
 
+import { Checkbox, Field, Input, makeStyles } from "@fluentui/react-components";
+
 import { 
   ModalDialog,
   showValueEditorDialog 
@@ -25,7 +27,6 @@ import { InsertTableResult, TableCapabilities } from "editor-types";
 
 import { t } from './translate';
 import { fluentTheme } from "../theme";
-import { Checkbox, Field, Input, makeStyles } from "@fluentui/react-components";
 
 export async function insertTable(capabilities: TableCapabilities): Promise<InsertTableResult | null> {
   const values: InsertTableResult = {

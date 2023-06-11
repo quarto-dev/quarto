@@ -16,21 +16,17 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-import { TabList, Tab, SelectTabEvent, SelectTabData, TabValue, Input, Field, makeStyles } from "@fluentui/react-components"
-
-import { useField } from "formik";
+import { Tab, SelectTabEvent, SelectTabData, TabValue, Input, Field, makeStyles } from "@fluentui/react-components"
 
 import { AttrEditInput, InsertTabsetResult, PandocAttr, UIToolsAttr } from "editor-types";
 
-import { FormikDialog, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, ModalDialogTabList, showValueEditorDialog } from "ui-widgets";
 
 import { fluentTheme } from "../theme";
 
-import { editAttrFields } from "./edit-attr";
+import { EditAttr, EditAttrPanel } from "./edit-attr";
 
 import { t } from "./translate";
-
-import styles from "./styles.module.scss";
 
 export function insertTabset(attrUITools: UIToolsAttr) {
   return async (): Promise<InsertTabsetResult | null> => {
@@ -60,7 +56,6 @@ type InsertTabsetDialogValues = {
   tab6: string;
 } & AttrEditInput;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const InsertTabsetDialog: React.FC<{ 
   values: InsertTabsetDialogValues,
   options: null | undefined,
@@ -70,6 +65,22 @@ const InsertTabsetDialog: React.FC<{
   const classes = useStyles();
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
+
+  const focusRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (isOpen && focusRef.current) {
+      focusRef.current.focus();
+    }
+  }, [isOpen])
+
+
+  const [tab1, setTab1] = useState(props.values.tab1);
+  const [tab2, setTab2] = useState(props.values.tab2);
+  const [tab3, setTab3] = useState(props.values.tab3);
+  const [tab4, setTab4] = useState(props.values.tab4);
+  const [tab5, setTab5] = useState(props.values.tab5);
+  const [tab6, setTab6] = useState(props.values.tab6);
+  const [attr, setAttr] = useState<AttrEditInput>(props.values);
 
   const [selectedTab, setSelectedTab] = useState<TabValue>("tabs");
   const onTabSelect = (_event: SelectTabEvent, data: SelectTabData) => {
@@ -81,68 +92,44 @@ const InsertTabsetDialog: React.FC<{
     props.onClosed(values);  
   }
 
-  const TabNameInput: React.FC<{tab: string, optional?: boolean, autoFocus?: boolean}> = props => {
-    const [field] = useField(props.tab);
-
-    const autoFocusRef = useRef<HTMLInputElement>(null);
-    if (props.autoFocus) {
-      useEffect(() => {
-        setTimeout(() => {
-          autoFocusRef.current?.focus();
-        }, 0);
-      }, []);
-    }
-
-    return (
-      <Input
-        type="text"
-        className={classes.tabName}
-        input={{ ref: autoFocusRef, autoComplete: 'off', autoFocus: props.autoFocus }}
-        placeholder={props.optional ? t("(Optional)") : undefined} 
-        {...field}
-      />
-    );
-  };
-
   const tabsPanel = 
-    <div className={styles.editAttributesPanel}>
+    <EditAttrPanel>
       <Field label={t("Tab names:")}>
-        <TabNameInput tab="tab1" autoFocus={true} />
-        <TabNameInput tab="tab2" />
-        <TabNameInput tab="tab3" optional={true} />
-        <TabNameInput tab="tab4" optional={true} />
-        <TabNameInput tab="tab5" optional={true} />
-        <TabNameInput tab="tab6" optional={true} />
+        <Input className={classes.tabName} value={tab1} onChange={(_ev, data) => setTab1(data.value)} ref={focusRef} required={true} />
+        <Input className={classes.tabName} value={tab2} onChange={(_ev, data) => setTab2(data.value)} required={true} />
+        <Input className={classes.tabName} value={tab3} onChange={(_ev, data) => setTab3(data.value)} placeholder={t("(Optional)")} />
+        <Input className={classes.tabName} value={tab4} onChange={(_ev, data) => setTab4(data.value)} placeholder={t("(Optional)")} />
+        <Input className={classes.tabName} value={tab5} onChange={(_ev, data) => setTab5(data.value)} placeholder={t("(Optional)")} />
+        <Input className={classes.tabName} value={tab6} onChange={(_ev, data) => setTab6(data.value)} placeholder={t("(Optional)")} />
       </Field>
-    </div>;
+    </EditAttrPanel>;
 
   const attributesPanel = 
-    <div className={styles.editAttributesPanel}>
-      {editAttrFields()}
-    </div>;
+    <EditAttrPanel>
+      <EditAttr value={attr} onChange={setAttr} />
+    </EditAttrPanel>;
 
   return (
-    <FormikDialog
+    <ModalDialog
       title={t("Insert Tabset")} 
       theme={fluentTheme()}
       isOpen={isOpen} 
-      initialValues={props.values} 
-      onSubmit={(values) => close(values) }
-      onReset={() => close() }
+      onOK={() => close({...attr, tab1, tab2, tab3, tab4, tab5, tab6}) }
+      onCancel={() => close() }
     >
-      <TabList
+      <ModalDialogTabList
         id="insert-tabset" 
         selectedValue={selectedTab} 
         onTabSelect={onTabSelect}
       >
         <Tab id="tabs" value="tabs">{t("Tabs")}</Tab>
         <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
-      </TabList>
+      </ModalDialogTabList>
       <div>
         {selectedTab === "tabs" && tabsPanel}
         {selectedTab === "attributes" && attributesPanel}
       </div>
-    </FormikDialog>
+    </ModalDialog>
   )
 }
 

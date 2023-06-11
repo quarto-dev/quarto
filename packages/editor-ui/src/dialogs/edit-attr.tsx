@@ -19,7 +19,7 @@ import { Button, Field, Input, Textarea, makeStyles } from "@fluentui/react-comp
 
 import { AttrEditInput, AttrEditResult, AttrProps, UIToolsAttr } from "editor-types";
 
-import {  FormikTextArea, FormikTextInput, ModalDialog, showValueEditorDialog } from "ui-widgets";
+import { ModalDialog, showValueEditorDialog } from "ui-widgets";
 
 import { t } from './translate';
 import { fluentTheme } from "../theme";
@@ -55,17 +55,6 @@ export function editSpan(attrUITools: UIToolsAttr) {
       removeCaption: t('Unwrap Span')
     });
   }
-}
-
-export function editAttrFields(autoFocus?: boolean) {
-  return (
-    <>
-    <FormikTextInput name="id" label={t("ID")} labelInfo={t("(e.g. #overview)")} autoFocus={autoFocus} />
-    <FormikTextInput name="classes" label={t("Classes")} labelInfo={t("(e.g. .illustration)")} />
-    <FormikTextInput name="style" label={t("CSS styles")} labelInfo={t("(e.g. color: gray;)")} />
-    <FormikTextArea name="keyvalue" label={t("Attributes")} labelInfo={t("(key=value, one per line)")} rows={3} resize="none" />
-    </>
-  );
 }
 
 export interface EditAttrProps {

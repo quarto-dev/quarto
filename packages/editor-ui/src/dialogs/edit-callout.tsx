@@ -80,8 +80,6 @@ const EditCalloutDialog: React.FC<{
     }
   }, [isOpen])
 
-  
-
   const [attr, setAttr] = useState<AttrEditInput>(props.values.values);
   const [type, setType] = useState(props.values.values.type);
   const [appearance, setApperance] = useState(props.values.values.appearance);

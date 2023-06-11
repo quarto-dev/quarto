@@ -29,15 +29,11 @@ import {
   tokens
 } from "@fluentui/react-components"
 
-
 import {
   InfoRegular,
   ErrorCircleRegular,
   WarningRegular
 } from "@fluentui/react-icons"
-
-
-import { FormikValues } from 'formik';
 
 
 import { kAlertTypeError, kAlertTypeInfo, kAlertTypeWarning } from 'editor-types';
@@ -60,8 +56,8 @@ export async function yesNoMessage(title: string, message: string | JSX.Element,
 }
 
 async function alertDialog(title: string, message: string | JSX.Element, type: number, noCancelButton?: boolean, okLabel?: string, cancelLabel?: string) {
-  const result = await showValueEditorDialog(AlertDialog, {}, { title, message, type, noCancelButton, okLabel, cancelLabel });
-  return !!result;
+  const result = await showValueEditorDialog(AlertDialog, { ok: false }, { title, message, type, noCancelButton, okLabel, cancelLabel });
+  return !!result?.ok;
 }
 
 interface AlertDialogOptions {
@@ -74,16 +70,16 @@ interface AlertDialogOptions {
 }
 
 const AlertDialog: React.FC<{ 
-  values: FormikValues,
+  values: { ok: boolean },
   options: AlertDialogOptions,
-  onClosed: (values?: FormikValues) => void }
+  onClosed: (values?: { ok: boolean }) => void }
 > = props => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const close = (values?: FormikValues) => {
+  const close = (ok: boolean) => {
     setIsOpen(false);
-    props.onClosed(values);
+    props.onClosed({ ok });
   }
 
   const classes = useStyles();
@@ -113,7 +109,7 @@ const AlertDialog: React.FC<{
         open={isOpen} 
         onOpenChange={(_event,data) => {
           if (!data.open) {
-            close();
+            close(false);
           }
         }} 
       >
@@ -129,11 +125,11 @@ const AlertDialog: React.FC<{
             <DialogActions>
               {!props.options.noCancelButton 
                 ? <DialogTrigger disableButtonEnhancement>
-                    <Button onClick={() => close()} appearance="secondary">{props.options.cancelLabel || t("Cancel")}</Button>
+                    <Button onClick={() => close(false)} appearance="secondary">{props.options.cancelLabel || t("Cancel")}</Button>
                   </DialogTrigger>
                 : null
               }
-              <Button onClick={() => close({})} appearance="primary">{props.options.okLabel || t("OK")}</Button>
+              <Button onClick={() => close(true)} appearance="primary">{props.options.okLabel || t("OK")}</Button>
             </DialogActions>
           </DialogBody>
         </DialogSurface>

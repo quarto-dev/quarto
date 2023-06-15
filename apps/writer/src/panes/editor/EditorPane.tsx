@@ -19,7 +19,9 @@ import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
 import { Editor } from 'editor-ui';
 
-import { EditorOperations } from 'editor';
+import { EditorOperations, ExtensionFn } from 'editor';
+
+import { collabExtension } from 'editor-collab';
 
 import { editorDisplay } from './context/display';
 import { editorUIContext } from './context/ui-context';
@@ -38,7 +40,8 @@ export const EditorPane : React.FC<EditorPaneProps> = props => {
   // one time init of editor frame props
   const [request] = useState(() => jsonRpcBrowserRequestTransport(kWriterJsonRpcPath));
   const [uiContext] = useState(() => editorUIContext());
-  
+  const [extensions] = useState<Array<ExtensionFn>>(() => props.collab ? [collabExtension()] : [])
+
   // editor init handler
   const onEditorInit = async (editor: EditorOperations) => {
     const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
@@ -55,6 +58,7 @@ export const EditorPane : React.FC<EditorPaneProps> = props => {
         request={request}
         uiContext={uiContext}
         display={editorDisplay}
+        extensions={extensions}
         onEditorInit={onEditorInit}
       />
     </div>

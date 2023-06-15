@@ -19,6 +19,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
+    "editor-collab": "*",
     "editor-core": "*",
     "editor-types": "*",
     "editor-ui": "*",
@@ -42,6 +43,8 @@
     "sass": "^1.56.1",
     "tsconfig": "*",
     "typescript": "^4.5.2",
-    "vite": "^3.0.0"
+    "vite": "^3.0.0",
+    "vite-plugin-top-level-await": "^1.3.1",
+    "vite-plugin-wasm": "^3.2.2"
   }
 }

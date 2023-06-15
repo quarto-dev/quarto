@@ -1,0 +1,19 @@
+{
+  "name": "editor-collab",
+  "version": "0.1.0",
+  "private": true,
+  "license": "agpl-3.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@automerge/automerge": "^2.0.3",
+    "core": "*",
+    "editor": "*",
+    "editor-core": "*",
+    "editor-types": "*",
+    "prosemirror-model": "^1.18.2",
+    "prosemirror-state": "^1.4.2",
+    "tsconfig": "*",
+    "typescript": "^4.5.2"
+  }
+}

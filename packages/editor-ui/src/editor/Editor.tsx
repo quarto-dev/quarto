@@ -16,7 +16,7 @@
 
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { JsonRpcRequestTransport } from 'core';
 
@@ -73,6 +73,7 @@ import {
   setEditorOutline, 
   setEditorSelection, 
   setEditorTitle, 
+  useEditorSelector, 
   useGetPrefsQuery, 
   useSetPrefsMutation 
 } from '../store';
@@ -95,12 +96,13 @@ import { t } from '../i18n';
 import styles from './Editor.module.scss';
 import { editorJsonRpcServer, editorJsonRpcServices } from 'editor-core';
 import { EditorFind } from './EditorFind';
-import EditorOutlineSidebar from './outline/EditorOutlineSidebar';
+import { EditorOutlineSidebar } from './outline/EditorOutlineSidebar';
 import { EditorLoadFailed } from './EditorLoadFailed';
 import { Spinner } from '@fluentui/react-components';
 
 
 export interface EditorProps {
+  id: string;
   className: string;
   display: (commands: () => Commands) => EditorDisplay;
   uiContext: EditorUIContext;
@@ -133,9 +135,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
   const dialogs = useRef(editorDialogs(editorPrefs, uiToolsRef.current, server.current, props.uiContext));
 
   // redux state
-  const title = useSelector(editorTitle);
-  const loading = useSelector(editorLoading);
-  const loadError = useSelector(editorLoadError);
+  const title = useEditorSelector(editorTitle, props.id);
+  const loading = useEditorSelector(editorLoading, props.id);
+  const loadError = useEditorSelector(editorLoadError, props.id);
   const dispatch = useDispatch();
 
   // refs we get from rendering
@@ -158,12 +160,12 @@ export const Editor : React.FC<EditorProps> = (props) => {
 
   // general helper functions
   const editorLoadFailed = (error: EditorError | unknown) => {
-    dispatch(setEditorLoading(false));
+    dispatch(setEditorLoading(props.id, false));
     if (isEditorError(error)) {
-      dispatch(setEditorLoadError(error));
+      dispatch(setEditorLoadError(props.id, error));
     } else {
       const message = (error as Error).message || String(error);
-      dispatch(setEditorLoadError({
+      dispatch(setEditorLoadError(props.id, {
         icon: "error",
         title: t('Unexpected Error Loading Editor'),
         description: [message]
@@ -227,7 +229,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
       } 
   
       // set title and outline
-      dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
+      dispatch(setEditorTitle(props.id, editorRef.current?.getTitle() || ''));
       onEditorOutlineChanged();
     } catch (error) {
       editorLoadFailed(error);
@@ -295,8 +297,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
         });
         return null;
       } else {
-        dispatch(setEditorLoading(false));
-        dispatch(setEditorOutline(editor.getOutline()));
+        dispatch(setEditorLoading(props.id, false));
+        dispatch(setEditorOutline(props.id, editor.getOutline()));
         return result;
       }
     },
@@ -370,14 +372,14 @@ export const Editor : React.FC<EditorProps> = (props) => {
 
   // when doc changes propagate title
   const onEditorDocChanged = () => {
-    dispatch(setEditorTitle(editorRef.current?.getTitle() || ''));
+    dispatch(setEditorTitle(props.id, editorRef.current?.getTitle() || ''));
   };
 
   // dispatch outline changes
   const onEditorOutlineChanged = () => {
      const outline = editorRef.current?.getOutline();
      if (outline) {
-       dispatch(setEditorOutline(outline));
+       dispatch(setEditorOutline(props.id, outline));
      }
   }
 
@@ -385,7 +387,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
   const onEditorStateChanged = () => {
     const selection = editorRef.current!.getSelection();
     cmDispatch( { type: "SET_SELECTION", payload: selection } );
-    dispatch(setEditorSelection(selection));
+    dispatch(setEditorSelection(props.id, selection));
   }
 
   
@@ -439,7 +441,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
       {editorLoadingUI(props.uiContext, loading, loadError)}
       <div id="editor" className={classes.join(' ')} ref={parentRef}>
         <EditorFind />
-        <EditorOutlineSidebar /> 
+        <EditorOutlineSidebar editorId={props.id}/> 
       </div>
     </EditorOperationsContext.Provider>
   );

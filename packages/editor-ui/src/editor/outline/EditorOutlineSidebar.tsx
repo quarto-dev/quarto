@@ -15,12 +15,10 @@
 
 import React, { useContext, useEffect } from 'react';
 
-import { useSelector } from 'react-redux';
-
 
 import { defaultPrefs } from 'editor-types';
 
-import { editorLoaded, editorOutline, EditorUICommandId } from 'editor-ui';
+import { editorLoaded, editorOutline, EditorUICommandId, useEditorSelector } from 'editor-ui';
 import { useGetPrefsQuery, useSetPrefsMutation } from 'editor-ui';
 
 import { CommandManagerContext, t } from 'editor-ui';
@@ -32,12 +30,16 @@ import { EditorOutlineEmpty } from './EditorOutlineEmpty';
 
 import styles from './EditorOutlineSidebar.module.scss';
 
-const EditorOutlineSidebar: React.FC = () => {
+export interface EditorOutlineSidebarProps {
+  editorId: string;
+}
+
+export const EditorOutlineSidebar: React.FC<EditorOutlineSidebarProps> = props => {
 
   const [, cmDispatch] = useContext(CommandManagerContext);
 
-  const outline = useSelector(editorOutline);
-  const loaded = useSelector(editorLoaded);
+  const outline = useEditorSelector(editorOutline, props.editorId);
+  const loaded = useEditorSelector(editorLoaded, props.editorId);
 
   const { data: prefs = defaultPrefs() } = useGetPrefsQuery();
   const [setPrefs] = useSetPrefsMutation();
@@ -80,5 +82,3 @@ const EditorOutlineSidebar: React.FC = () => {
     </>
   );
 }
-
-export default EditorOutlineSidebar;

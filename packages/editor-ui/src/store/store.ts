@@ -17,14 +17,14 @@ import { configureStore } from '@reduxjs/toolkit'
 import { JsonRpcRequestTransport } from 'core';
 
 import { editorJsonRpcServices } from 'editor-core';
-import { dictionaryApi, initDictionaryApi, editorSlice, initPrefsApi, prefsApi } from 'editor-ui';
+import { dictionaryApi, initDictionaryApi, editorsSlice, initPrefsApi, prefsApi } from 'editor-ui';
 
 
 export async function initializeStore(request: JsonRpcRequestTransport) {
 
   const store = configureStore({
     reducer: {
-      editor: editorSlice.reducer,
+      editors: editorsSlice.reducer,
       [prefsApi.reducerPath]: prefsApi.reducer,
       [dictionaryApi.reducerPath]: dictionaryApi.reducer
     },

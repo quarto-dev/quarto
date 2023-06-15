@@ -15,8 +15,6 @@
 
 import React, { useContext } from 'react';
 
-import { useSelector } from 'react-redux';
-
 import { EditorCommandId } from 'editor';
 
 import {
@@ -29,17 +27,22 @@ import {
   WithCommand,
   t,
   editorLoaded,
-  Menu
+  Menu,
+  useEditorSelector
 } from 'editor-ui';
 
 import styles from './Editor.module.scss';
 
 const CommandId = { ...EditorCommandId };
 
-const EditorToolbar: React.FC = () => {
+export interface EditorToolbarProps {
+  editorId: string;
+}
+
+export const EditorToolbar: React.FC<EditorToolbarProps> = props => {
 
   const [cmState] = useContext(CommandManagerContext);
-  const loaded = useSelector(editorLoaded);
+  const loaded = useEditorSelector(editorLoaded, props.editorId);
 
   if (loaded) {
     return (
@@ -90,5 +93,3 @@ const EditorToolbar: React.FC = () => {
     return null;
   }
 };
-
-export default EditorToolbar;

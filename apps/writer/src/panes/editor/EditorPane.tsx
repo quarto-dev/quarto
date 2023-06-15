@@ -44,6 +44,7 @@ const EditorPane : React.FC = () => {
   return (
     <div className={'editor-pane'}>
       <Editor
+        id="editor"
         className={styles.editorParent}
         request={request}
         uiContext={uiContext}

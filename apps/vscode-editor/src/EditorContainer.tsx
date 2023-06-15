@@ -37,7 +37,7 @@ import {
 import { EditorMenuItem, EditorOperations, EditorTheme, EditorUIContext, HostContext, XRef } from 'editor';
 
 import { editorHostCommands, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
-import EditorToolbar from './EditorToolbar';
+import { EditorToolbar } from './EditorToolbar';
 import { editorThemeFromVSCode } from './theme';
 
 
@@ -98,6 +98,8 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       }
     };
   }
+
+  const editorId = "editor";
   
   return (
     <FluentProvider theme={activeFluentTheme}>
@@ -106,8 +108,9 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         onKeyDown={keyboardEventHandler(handleKeyDown)} 
         onKeyUp={keyboardEventHandler(handleKeyUp)}
       >
-        <EditorToolbar/>
+        <EditorToolbar editorId={editorId}/>
         <Editor
+          id={editorId}
           className={styles.editorFrame} 
           request={props.request}
           uiContext={uiContext}

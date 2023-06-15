@@ -48,6 +48,7 @@ export interface EditorContainerProps {
   host: VisualEditorHostClient;
   request: JsonRpcRequestTransport;  
   store: EditorUIStore;
+  editorId: string;
 }
 
 const EditorContainer: React.FC<EditorContainerProps> = (props) => {
@@ -98,8 +99,6 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       }
     };
   }
-
-  const editorId = "editor";
   
   return (
     <FluentProvider theme={activeFluentTheme}>
@@ -108,9 +107,9 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
         onKeyDown={keyboardEventHandler(handleKeyDown)} 
         onKeyUp={keyboardEventHandler(handleKeyUp)}
       >
-        <EditorToolbar editorId={editorId}/>
+        <EditorToolbar editorId={props.editorId}/>
         <Editor
-          id={editorId}
+          id={props.editorId}
           className={styles.editorFrame} 
           request={props.request}
           uiContext={uiContext}

@@ -18,11 +18,12 @@ import React from 'react';
 import { Store } from 'redux';
 import { Provider as StoreProvider } from 'react-redux';
 
-import Workbench from './workbench/Workbench';
+import { Workbench } from './workbench/Workbench';
 import { CommandManagerProvider } from 'editor-ui';
 import { HotkeysProvider } from 'ui-widgets';
 
 interface AppProps {
+  editorId: string;
   store: Store;
 }
 
@@ -33,7 +34,7 @@ const App: React.FC<AppProps> = props => {
     <StoreProvider store={props.store}>
       <CommandManagerProvider>
         <HotkeysProvider>
-          <Workbench/>
+          <Workbench editorId={props.editorId}/>
         </HotkeysProvider>
       </CommandManagerProvider>
     </StoreProvider>

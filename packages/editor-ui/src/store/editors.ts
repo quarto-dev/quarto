@@ -75,8 +75,17 @@ const initialEditorState: EditorState = {
 
 export const editorsSlice = createSlice({
   name: 'editors',
-  initialState: new Array<EditorState>(initialEditorState),
+  initialState: new Array<EditorState>(),
   reducers: {
+    addEditor: (state, action: PayloadAction<string>) => {
+      state.push({ ...initialEditorState, id: action.payload });
+    },
+    removeEditor: (state, action: PayloadAction<string>) => {
+      const index = state.findIndex(editor => editor.id === action.payload);
+      if (index !== -1) {
+        state.splice(index, 1);
+      }
+    },
     setEditorLoading: {
       reducer: (state, action: PayloadAction<{ id: string, loading: boolean }>) => {
         updateEditor(state, action.payload.id, editor => ({...editor, loading: action.payload.loading }));
@@ -125,6 +134,7 @@ export function useEditorSelector<P,R>(selector: (state: { editors: EditorsState
 }
 
 export const { 
+  addEditor,
   setEditorLoading, 
   setEditorLoadError,
   setEditorTitle, 

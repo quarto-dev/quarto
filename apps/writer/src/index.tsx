@@ -16,9 +16,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import * as uuid from "uuid";
+
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { initEditorTranslations, initializeStore } from 'editor-ui';
+import { addEditor, initEditorTranslations, initializeStore } from 'editor-ui';
 
 import App from './App';
 
@@ -29,17 +31,21 @@ import "editor-ui/src/styles";
 
 async function runApp() {
   try {
-    // initialize store
-    const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
-    const store = await initializeStore(request);
-    
     // init localization
     await initEditorTranslations();
 
+    // initialize store
+    const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
+    const store = await initializeStore(request);
+
+    // create and add editor
+    const editorId = uuid.v4();
+    store.dispatch(addEditor(editorId))
+    
     // create root element and render
     const root = createRoot(document.getElementById('root')!);
     root.render(
-      <App store={store} />
+      <App editorId={editorId} store={store} />
     );
   } catch (error) {
     console.error(error);

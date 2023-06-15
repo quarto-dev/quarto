@@ -27,6 +27,7 @@ import EditorContainer, { EditorContainerProps } from "./EditorContainer";
 
 interface AppProps extends EditorContainerProps {
   store: Store;
+  editorId: string;
 }
 
 export const App : React.FC<AppProps> = (props) => {

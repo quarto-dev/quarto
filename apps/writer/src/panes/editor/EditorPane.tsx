@@ -28,7 +28,11 @@ import { kWriterJsonRpcPath } from '../../constants';
 
 import styles from './EditorPane.module.scss';
 
-const EditorPane : React.FC = () => {
+export interface EditorPaneProps {
+  editorId: string;
+}
+
+export const EditorPane : React.FC<EditorPaneProps> = props => {
 
   // one time init of editor frame props
   const [request] = useState(() => jsonRpcBrowserRequestTransport(kWriterJsonRpcPath));
@@ -44,7 +48,7 @@ const EditorPane : React.FC = () => {
   return (
     <div className={'editor-pane'}>
       <Editor
-        id="editor"
+        id={props.editorId}
         className={styles.editorParent}
         request={request}
         uiContext={uiContext}
@@ -55,4 +59,3 @@ const EditorPane : React.FC = () => {
   );
 }
 
-export default EditorPane;

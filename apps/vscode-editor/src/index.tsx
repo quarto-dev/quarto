@@ -16,9 +16,11 @@
 import React from "react";
 import { createRoot } from 'react-dom/client';
 
+import * as uuid from "uuid";
+
 import 'vscode-webview';
 
-import { initEditorTranslations, initializeStore, setEditorTheme } from 'editor-ui';
+import { addEditor, initEditorTranslations, initializeStore, setEditorTheme } from 'editor-ui';
 
 import { App } from "./App";
 import { visualEditorHostClient, visualEditorJsonRpcRequestTransport } from './sync';
@@ -29,6 +31,9 @@ import "./styles.scss"
 
 async function runEditor() {
   try {
+    // init localization
+    await initEditorTranslations();
+
     // connection to host
     const vscode = acquireVsCodeApi<unknown>();
     const request = visualEditorJsonRpcRequestTransport(vscode)
@@ -40,13 +45,14 @@ async function runEditor() {
     // initialize store and read initial prefs
     const store = await initializeStore(request);
 
-    // init localization
-    await initEditorTranslations();
+    // create editor id
+    const editorId = uuid.v4();
+    store.dispatch(addEditor(editorId));
 
     // render
     const root = createRoot(document.getElementById('root')!);
     setEditorTheme(editorThemeFromStore(store));
-    root.render(<App store={store} host={host} context={context} request={request}/>);
+    root.render(<App store={store} editorId={editorId} host={host} context={context} request={request}/>);
   } catch (error) {
     console.error(error);
   }

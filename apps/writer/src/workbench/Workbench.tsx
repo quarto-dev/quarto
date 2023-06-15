@@ -22,7 +22,7 @@ import { useHotkeys } from "ui-widgets";
 
 import { commandHotkeys, CommandManagerContext, fluentTheme } from 'editor-ui';
 
-import EditorPane from '../panes/editor/EditorPane';
+import { EditorPane } from '../panes/editor/EditorPane';
 
 import WorkbenchClipboard from './WorkbenchClipboard';
 import { WorkbenchPrefsDialog } from './WorkbenchPrefsDialog';
@@ -31,7 +31,11 @@ import WorkbenchToolbar from './WorkbenchToolbar';
 
 import './Workbench.scss';
 
-const Workbench: React.FC = () => {
+export interface WorkbenchProps {
+  editorId: string;
+}
+
+export const Workbench: React.FC<WorkbenchProps> = props => {
  
   // register keyboard shortcuts and get handlers
   const [cmState] = useContext(CommandManagerContext);
@@ -45,7 +49,7 @@ const Workbench: React.FC = () => {
         <WorkbenchMenubar />
         <WorkbenchToolbar />
         <div className={'workspace'}>
-          <EditorPane />
+          <EditorPane {...props} />
         </div>
         <WorkbenchClipboard />
         <WorkbenchPrefsDialog />
@@ -54,4 +58,3 @@ const Workbench: React.FC = () => {
   );
 };
 
-export default Workbench;

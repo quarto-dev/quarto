@@ -30,6 +30,7 @@ import styles from './EditorPane.module.scss';
 
 export interface EditorPaneProps {
   editorId: string;
+  collab?: boolean;
 }
 
 export const EditorPane : React.FC<EditorPaneProps> = props => {
@@ -42,7 +43,8 @@ export const EditorPane : React.FC<EditorPaneProps> = props => {
   const onEditorInit = async (editor: EditorOperations) => {
     const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
     const markdown = await (await fetch(contentUrl)).text();
-    await editor.setMarkdown(markdown, {}, false);
+    await editor.setMarkdown(props.collab ? "" : markdown, {}, false);
+    await editor.focus();
   };
 
   return (

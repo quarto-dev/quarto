@@ -38,14 +38,16 @@ async function runApp() {
     const request = jsonRpcBrowserRequestTransport(kWriterJsonRpcPath);
     const store = await initializeStore(request);
 
-    // create and add editor
+    // create and add editors
     const editorId = uuid.v4();
-    store.dispatch(addEditor(editorId))
+    store.dispatch(addEditor(editorId));
+    const editor2Id = uuid.v4();
+    store.dispatch(addEditor(editor2Id))
     
     // create root element and render
     const root = createRoot(document.getElementById('root')!);
     root.render(
-      <App editorId={editorId} store={store} />
+      <App editorId={editorId} editor2Id={editor2Id} store={store} />
     );
   } catch (error) {
     console.error(error);

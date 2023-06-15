@@ -16,7 +16,7 @@
  @import 'editor-ui/src/variables.scss';
  
 .toolbar {
-  position: fixed;
+  position: absolute;
   top: calc(#{$navbarHeight} + 1px);
   height: $toolbarHeight;
   left: 0;

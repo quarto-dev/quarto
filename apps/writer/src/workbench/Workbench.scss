@@ -16,7 +16,7 @@
 @import 'editor-ui/src/variables.scss';
  
  .workbench {
-   position: fixed;
+   position: absolute;
    top: 0;
    left: 0;
    right: 0;
@@ -29,7 +29,7 @@
  }
 
  .workbench .workspace {
-   position: fixed;
+   position: absolute;
    top: calc(#{$navbarHeight} + #{$toolbarHeight} - 3px);
    left: 0;
    right: 0;

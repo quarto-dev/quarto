@@ -16,11 +16,10 @@
 import React, { useContext, useMemo } from 'react';
 
 
-import { FluentProvider } from '@fluentui/react-components';
 
 import { useHotkeys } from "ui-widgets";
 
-import { commandHotkeys, CommandManagerContext, fluentTheme } from 'editor-ui';
+import { commandHotkeys, CommandManagerContext } from 'editor-ui';
 
 import { EditorPane } from '../panes/editor/EditorPane';
 
@@ -33,6 +32,9 @@ import './Workbench.scss';
 
 export interface WorkbenchProps {
   editorId: string;
+  collab?: boolean;
+  style?: React.CSSProperties;
+  
 }
 
 export const Workbench: React.FC<WorkbenchProps> = props => {
@@ -44,17 +46,15 @@ export const Workbench: React.FC<WorkbenchProps> = props => {
  
   // render workbench
   return (
-    <FluentProvider theme={fluentTheme()}>
-      <div className={'workbench'} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-        <WorkbenchMenubar />
-        <WorkbenchToolbar />
-        <div className={'workspace'}>
-          <EditorPane {...props} />
-        </div>
-        <WorkbenchClipboard />
-        <WorkbenchPrefsDialog />
+    <div className={'workbench'} style={props.style} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
+      <WorkbenchMenubar />
+      <WorkbenchToolbar />
+      <div className={'workspace'}>
+        <EditorPane {...props} />
       </div>
-    </FluentProvider>
+      <WorkbenchClipboard />
+      <WorkbenchPrefsDialog />
+    </div>
   );
 };
 

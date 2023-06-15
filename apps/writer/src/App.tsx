@@ -18,12 +18,14 @@ import React from 'react';
 import { Store } from 'redux';
 import { Provider as StoreProvider } from 'react-redux';
 
-import { Workbench } from './workbench/Workbench';
-import { CommandManagerProvider } from 'editor-ui';
+import { Workbench, WorkbenchProps } from './workbench/Workbench';
+import { CommandManagerProvider, fluentTheme } from 'editor-ui';
 import { HotkeysProvider } from 'ui-widgets';
+import { FluentProvider } from '@fluentui/react-components';
 
 interface AppProps {
   editorId: string;
+  editor2Id?: string;
   store: Store;
 }
 
@@ -32,16 +34,40 @@ const App: React.FC<AppProps> = props => {
   // render
   return (
     <StoreProvider store={props.store}>
-      <CommandManagerProvider>
-        <HotkeysProvider>
-          <Workbench editorId={props.editorId}/>
-        </HotkeysProvider>
-      </CommandManagerProvider>
+      <FluentProvider theme={fluentTheme()}> 
+        {props.editor2Id 
+          ? <>
+              <Document 
+                editorId={props.editorId} 
+                collab={true} 
+                style={{ bottom: "50%" }} 
+              />
+              <Document 
+                editorId={props.editor2Id} 
+                collab={true} 
+                style={{ top: "50%", borderTop: "1px solid var(--colorNeutralStroke2)" }} 
+              />
+            </>
+          : <Document editorId={props.editorId} />
+        }
+       
+      </FluentProvider> 
     </StoreProvider>
   );
-
-
 }
+
+
+
+const Document: React.FC<WorkbenchProps> = props => {
+  return (
+    <CommandManagerProvider>
+      <HotkeysProvider>
+        <Workbench {...props}/>
+      </HotkeysProvider>
+    </CommandManagerProvider>
+  )
+}
+
 
 export default App;
 

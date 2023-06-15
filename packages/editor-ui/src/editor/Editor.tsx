@@ -52,7 +52,9 @@ import {
   EditorContext,
   defaultTheme,
   EditorTheme,
-  slideIndexForPresentationEditorLocation
+  slideIndexForPresentationEditorLocation,
+  Extension,
+  ExtensionFn
 } from 'editor';
 
 import { 
@@ -108,6 +110,7 @@ export interface EditorProps {
   uiContext: EditorUIContext;
   request: JsonRpcRequestTransport;
   options?: EditorOptions;
+  extensions?: Array<Extension | ExtensionFn>;
   onEditorInit?: (editor: EditorOperations) => Promise<void>;
 }
 
@@ -196,7 +199,8 @@ export const Editor : React.FC<EditorProps> = (props) => {
         uiContext: props.uiContext,
         display: () => props.display(() => commandsRef.current!), 
         dialogs: () => dialogs.current,
-        spelling: () => spellingRef.current!
+        spelling: () => spellingRef.current!,
+        extensions: props.extensions
       })
   
       editorRef.current = await createEditor(

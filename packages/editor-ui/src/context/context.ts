@@ -36,7 +36,9 @@ import {
   ListSpacing,
   SkinTone,
   UITools,
-  EditorDisplay
+  EditorDisplay,
+  Extension,
+  ExtensionFn
 } from "editor";
 
 
@@ -53,7 +55,8 @@ export interface EditorProviders {
   prefs: () => EditorPrefs,
   dialogs: () => EditorDialogs,
   display: () => EditorDisplay,
-  spelling: () => EditorUISpelling
+  spelling: () => EditorUISpelling,
+  extensions?: Array<Extension | ExtensionFn>
 }
 
 export function editorContext(providers: EditorProviders) : EditorContext {
@@ -75,6 +78,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
   const context : EditorContext = { 
     server: providers.server, 
     ui, 
+    extensions: providers.extensions,
     codeViewExtension: codeMirrorExtension 
   };
 

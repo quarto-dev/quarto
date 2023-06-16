@@ -44,10 +44,12 @@ export const EditorPane : React.FC<EditorPaneProps> = props => {
 
   // editor init handler
   const onEditorInit = async (editor: EditorOperations) => {
-    const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
-    const markdown = await (await fetch(contentUrl)).text();
-    await editor.setMarkdown(props.collab ? "" : markdown, {}, false);
-    await editor.focus();
+    if (!props.collab) {
+      const contentUrl = `content/${window.location.search.slice(1) || 'MANUAL.md'}`;
+      const markdown = await (await fetch(contentUrl)).text();
+      await editor.setMarkdown(markdown, {}, false);
+    }
+    editor.focus();
   };
 
   return (

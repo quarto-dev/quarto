@@ -1027,7 +1027,10 @@ export class Editor  {
     this.lastTrSelectionOnly = tr.selectionSet && !tr.docChanged;
 
     // apply the transaction
-    this.state = this.state.apply(tr);
+    const apply = this.extensions.applyTransaction();
+    this.state = apply ? apply(this.state, tr) : this.state.apply(tr);
+
+    // udpate state
     this.view.updateState(this.state);
 
     // notify listeners of state change

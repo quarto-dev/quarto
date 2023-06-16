@@ -15,7 +15,7 @@
 
 import { InputRule } from 'prosemirror-inputrules';
 import { Schema } from 'prosemirror-model';
-import { Plugin } from 'prosemirror-state';
+import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { ProsemirrorCommand } from '../api/command';
 import { PandocMark } from '../api/mark';
@@ -238,6 +238,7 @@ export function initExtensions(
 export class ExtensionManager {
   private context: ExtensionContext;
   private extensions: Extension[];
+  private applyTransaction_?: (state: EditorState, tr: Transaction) => EditorState;
 
   public constructor(context: ExtensionContext) {
     this.context = context;
@@ -246,20 +247,18 @@ export class ExtensionManager {
 
   public register(extensions: ReadonlyArray<Extension | ExtensionFn>, priority = false): void {
     extensions.forEach(extension => {
-      if (typeof extension === 'function') {
-        const ext = extension(this.context);
-        if (ext) {
-          if (priority) {
-            this.extensions.unshift(ext);
-          } else {
-            this.extensions.push(ext);
-          }
-        }
-      } else {
+      const ext = typeof extension === 'function' ? extension(this.context) : extension;
+      if (ext) {
         if (priority) {
-          this.extensions.unshift(extension);
+          this.extensions.unshift(ext);
         } else {
-          this.extensions.push(extension);
+          this.extensions.push(ext);
+        }
+        if (ext?.applyTransaction) {
+          if (this.applyTransaction_) {
+            throw new Error("Only one applyTransaction handler can be registered")
+          }
+          this.applyTransaction_ = ext.applyTransaction;
         }
       }
     });
@@ -386,6 +385,10 @@ export class ExtensionManager {
 
   public baseKeys(schema: Schema): readonly BaseKeyBinding[] {
     return this.collect(extension => extension.baseKeys?.(schema));
+  }
+
+  public applyTransaction() {
+    return this.applyTransaction_;
   }
 
   public appendTransactions(schema: Schema): readonly AppendTransactionHandler[] {

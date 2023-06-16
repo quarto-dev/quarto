@@ -15,7 +15,7 @@
 
 import { InputRule } from 'prosemirror-inputrules';
 import { Schema } from 'prosemirror-model';
-import { Plugin } from 'prosemirror-state';
+import { EditorState, Plugin, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
 import { ProsemirrorCommand } from './command';
@@ -47,6 +47,7 @@ export interface Extension {
   inputRules?: (schema: Schema, markFilter: MarkInputRuleFilter) => readonly InputRule[];
   commands?: (schema: Schema) => readonly ProsemirrorCommand[];
   plugins?: (schema: Schema) => readonly Plugin[];
+  applyTransaction?: (state: EditorState, tr: Transaction) => EditorState;
   appendTransaction?: (schema: Schema) => readonly AppendTransactionHandler[];
   appendMarkTransaction?: (schema: Schema) => readonly AppendMarkTransactionHandler[];
   fixups?: (schema: Schema, view: EditorView) => Readonly<FixupFn[]>;

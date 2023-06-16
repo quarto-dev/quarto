@@ -14,6 +14,7 @@
     "prosemirror-model": "^1.18.2",
     "prosemirror-state": "^1.4.2",
     "prosemirror-view": "^1.29.0",
+    "prosemirror-transform": "^1.7.0",
     "tsconfig": "*",
     "typescript": "^4.5.2"
   }

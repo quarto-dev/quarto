@@ -1,0 +1,134 @@
+/*
+ * automerge.ts
+ *
+ * Copyright (C) 2023 by Posit Software, PBC
+ *
+ * Unless you have received this program directly from Posit Software pursuant
+ * to the terms of a commercial license agreement with Posit Software, then
+ * this program is licensed to you under the terms of version 3 of the
+ * GNU Affero General Public License. This program is distributed WITHOUT
+ * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
+ * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
+ *
+ */
+
+import { unstable as Automerge } from "@automerge/automerge";
+
+import { EditorState, TextSelection, Transaction } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
+
+import { ChangeQueue } from "./changequeue";
+
+import { DocType, initDoc, kDocContentKey } from "./automerge-doc";
+
+import { 
+  applyProsemirrorTransactionToAutomergeDoc, 
+  extendProsemirrorTransactionWithAutomergePatch 
+} from "./automerge-pm";
+
+const kRemoteChangesTransaction = "remoteChanges";
+
+export type Change = Uint8Array;
+
+export interface AutomergeController {
+  applyTransaction: (state: EditorState, tr: Transaction) => EditorState;
+}
+
+export function automergeController(view: EditorView) : AutomergeController {
+  
+  // document we will be editing/merging
+  let doc = initDoc();
+
+  // initialize view with initial doc contents
+  const schema = view.state.schema;
+  const tr = view.state.tr;
+  tr.replaceSelectionWith(schema.text(doc[kDocContentKey].toString()));
+  view.dispatch(tr);
+
+  // channel used to sync clients
+  const channel = new BroadcastChannel("editor-collab");
+
+  // queue for throttling channel broadcast (called below in applyTransaction)
+  const syncQueue = new ChangeQueue({
+    interval: 50,
+    handleFlush: (changes: Array<Change>) => {
+      channel.postMessage(changes);
+    },
+  });
+  syncQueue.start();
+
+
+  // subscribe to changes from channel
+  channel.onmessage = ev => {
+
+    // get changes
+    const incomingChanges = ev.data as Array<Uint8Array>;
+   
+    // apply changes (record patches for subsequent application to prosemirror)
+    const patches : Automerge.Patch[] = [];
+    doc = Automerge.applyChanges<DocType>(doc, incomingChanges, {
+      patchCallback: (p) => {
+          patches.push(...p)
+      }
+    })[0];
+
+    // apply patches to prosemirror
+    let tr = view.state.tr;
+    tr.setMeta(kRemoteChangesTransaction, true);
+    for (const patch of patches) {
+       const result = extendProsemirrorTransactionWithAutomergePatch(doc, tr, patch)
+       const { tr: newTransaction } = result
+       tr = newTransaction;
+    }
+    if (tr.docChanged) {
+      view.dispatch(tr);
+    }
+  }
+
+  return {
+
+    applyTransaction: (state: EditorState, tr: Transaction): EditorState => {
+
+      // do default if this was a remote changes transaction or if there
+      // we no mutations of the core documents
+      if (tr.getMeta(kRemoteChangesTransaction) === true ||
+          (!tr.storedMarksSet && !tr.docChanged)) {
+        state = state.apply(tr);
+        return state;
+      }
+
+      // round trip the transaction through micromerge
+      const result = applyProsemirrorTransactionToAutomergeDoc({ doc, tr });
+      const { change, patches } = result
+      doc = result.doc;
+      if (change) {
+        let transaction = state.tr
+        for (const patch of patches) {
+          const { tr: newTxn } = extendProsemirrorTransactionWithAutomergePatch(doc, transaction, patch)
+          transaction = newTxn
+        }
+        state = state.apply(transaction);
+        syncQueue.enqueue(change);
+      }
+
+      // If this transaction updated the local selection, we need to make sure that's reflected in the editor state.
+      // (Roundtripping through Micromerge won't do that for us, since selection state is not part of the document state.
+      if (tr.selectionSet) {
+        state = state.apply(
+          state.tr.setSelection(
+            new TextSelection(
+              state.doc.resolve(tr.selection.anchor),
+              state.doc.resolve(tr.selection.head)
+            )
+          )
+        );
+      }
+
+      // return mutated state
+      return state;
+    },
+  };
+}
+
+

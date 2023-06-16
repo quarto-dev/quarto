@@ -162,7 +162,8 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
           if (step.slice) {
             // handle insertion
-            // This step coalesces the multiple paragraphs back into one paragraph. Because step.slice.content is a Fragment and step.slice.content.content is 2 Paragraph nodes
+            // This step coalesces the multiple paragraphs back into one paragraph. Because step.slice.content is a 
+            // Fragment and step.slice.content.content is 2 Paragraph nodes
             const insertedContent = step.slice.content.textBetween(
               0,
               step.slice.content.size
@@ -179,70 +180,31 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
             Automerge.splice(doc, kDocContentKey, from, to - from);
           }
         } else if (step instanceof AddMarkStep) {
-          if (!isMarkType(step.mark.type.name)) {
-            throw new Error(`Invalid mark type: ${step.mark.type.name}`);
-          }
-
+          
           const from = contentPosFromProsemirrorPos(step.from, txn.before);
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
           const markName = step.mark.type.name;
-          if (markName === "comment") {
-            if (!step.mark.attrs || typeof step.mark.attrs.id !== "string") {
-              throw new Error("Expected comment mark to have id attrs");
-            }
-            Automerge.mark(
-              doc,
-              kDocContentKey,
-              { expand: 'none', start: from, end: to },
-              `${markName}:${step.mark.attrs.id}`,
-              true
-            );
-          } else if (markName === "link") {
-            if (!step.mark.attrs || typeof step.mark.attrs.url !== "string") {
-              throw new Error("Expected link mark to have url attrs");
-            }
-            Automerge.mark(
-              doc,
-              kDocContentKey,
-              { expand: 'none', start: from, end: to },
-              `${markName}`,
-              step.mark.attrs.url
-            );
-          } else {
-            Automerge.mark(
-              doc,
-              kDocContentKey,
-              { expand: 'after', start: from, end: to },
-              `${markName}`,
-              true
-            );
-          }
+          const markAttrs = JSON.stringify(step.mark.attrs);
+          const markExpand = step.mark.type.spec.inclusive ? 'after' : 'none';
+          Automerge.mark(
+            doc,
+            kDocContentKey,
+            { expand: markExpand, start: from, end: to },
+            `${markName}`,
+            markAttrs
+          );
+          
         } else if (step instanceof RemoveMarkStep) {
-          if (!isMarkType(step.mark.type.name)) {
-            throw new Error(`Invalid mark type: ${step.mark.type.name}`);
-          }
-
+          
           const from = contentPosFromProsemirrorPos(step.from, txn.before);
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
-
-          if (step.mark.type.name === "comment") {
-            if (!step.mark.attrs || typeof step.mark.attrs.id !== "string") {
-              throw new Error("Expected comment mark to have id attrs");
-            }
-            Automerge.unmark(
-              doc,
-              kDocContentKey,
-              { start: from, end: to },
-              `${step.mark.type.name}:${step.mark.attrs.id}`
-            );
-          } else {
-            Automerge.unmark(
-              doc,
-              kDocContentKey,
-              { start: from, end: to },
-              step.mark.type.name
-            );
-          }
+          Automerge.unmark(
+            doc,
+            kDocContentKey,
+            { start: from, end: to },
+            step.mark.type.name
+          );
+          
         }
       }
     }
@@ -277,15 +239,8 @@ function getProsemirrorMarksForMarkMap(
 // currently we only support boolean style marks (e.g. bold/italic)
 function getMarkInfo(mark: Automerge.Mark) {
   const name = mark.name;
-  const attr: Attrs | undefined = undefined;
+  const attr = JSON.parse(mark.value as string) as Attrs;
   return { name, attr };
-}
-
-function isMarkType(s: string) {
-  if (s === "strong" || s === "em") {
-    return true;
-  }
-  return false;
 }
 
 

@@ -14,9 +14,13 @@
  */
 
 
-import * as automerge from "@automerge/automerge"
+import { unstable as automerge } from "@automerge/automerge"
+
+//import { Mark as AutomergeMark, Patch, Prop } from '@automerge/automerge-wasm'
 
 import { ExtensionFn} from "editor";
+import { EditorState, Transaction } from "prosemirror-state";
+import { EditorView } from "prosemirror-view";
 
 
 export function collabExtension()
@@ -56,16 +60,33 @@ export function collabExtension()
     doc2 = automerge.merge(doc2, doc1)
 
 
+   
+
+    
+
+
     // return extension
     return {
-      plugins: () => [
-        
-      ],
-      baseKeys: () => {
-        return [
-          
-        ];
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      view(_view: EditorView) {
+      
+        // TODO: initialize state from Micromerge doc
+
+        // TODO: subscribe to Automerge changes, convert them to transactions, and apply them
+
       },
+
+      applyTransaction(state: EditorState, tr: Transaction) : EditorState {
+        
+        // TODO: round trip the transaction through Automerge then apply it and queue it
+        // for other editors we are syncing with
+
+        console.log("applying transaction");
+
+        return state.apply(tr);
+      }
+
     };
   };
 }

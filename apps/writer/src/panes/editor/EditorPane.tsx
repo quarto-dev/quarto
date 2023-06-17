@@ -42,7 +42,7 @@ export interface EditorPaneProps {
 export const EditorPane : React.FC<EditorPaneProps> = props => {
 
   // manage connection command
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(true);
   const [, cmDispatch] = useContext(CommandManagerContext);
   const collabListners = useRef(new Array<(connected: boolean) => void>());
   const collabConnection = useRef<CollabConnection>({

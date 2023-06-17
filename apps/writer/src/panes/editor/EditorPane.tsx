@@ -13,15 +13,17 @@
  *
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+
+import { PlugConnectedRegular, PlugDisconnectedRegular } from "@fluentui/react-icons";
 
 import { jsonRpcBrowserRequestTransport } from 'core-browser';
 
-import { Editor } from 'editor-ui';
+import { CommandManagerContext, Editor, EditorUICommandId, t } from 'editor-ui';
 
 import { EditorOperations, ExtensionFn } from 'editor';
 
-import { collabExtension } from 'editor-collab';
+import { CollabConnection, collabExtension } from 'editor-collab';
 
 import { editorDisplay } from './context/display';
 import { editorUIContext } from './context/ui-context';
@@ -29,6 +31,8 @@ import { editorUIContext } from './context/ui-context';
 import { kWriterJsonRpcPath } from '../../constants';
 
 import styles from './EditorPane.module.scss';
+import { WorkbenchCommandId } from '../../workbench/commands';
+
 
 export interface EditorPaneProps {
   editorId: string;
@@ -37,10 +41,44 @@ export interface EditorPaneProps {
 
 export const EditorPane : React.FC<EditorPaneProps> = props => {
 
+  // manage connection command
+  const [connected, setConnected] = useState(false);
+  const [, cmDispatch] = useContext(CommandManagerContext);
+  const collabListners = useRef(new Array<(connected: boolean) => void>());
+  const collabConnection = useRef<CollabConnection>({
+    onChanged(fn) {
+      collabListners.current.push(fn);
+    },
+  });
+  if (props.collab) {
+    useEffect(() => {
+      cmDispatch({ type: "ADD_COMMANDS", payload: [
+        {
+          id: WorkbenchCommandId.Connect,
+          menuText: connected ? "Disconnect" : "Connect",
+          icon: connected ? <PlugDisconnectedRegular/> : <PlugConnectedRegular />,
+          group: t('commands:group_utilities'),
+          keymap: [],
+          isEnabled: () => true,
+          isActive: () => connected,
+          execute: () => {
+            const isConnected = !connected;
+            setConnected(isConnected);
+            collabListners.current.forEach(listener => listener(isConnected));
+            cmDispatch({ type: "EXEC_COMMAND", payload: EditorUICommandId.ActivateEditor });
+          },
+        },
+      ]})
+    }, [connected]);
+  }
+
   // one time init of editor frame props
   const [request] = useState(() => jsonRpcBrowserRequestTransport(kWriterJsonRpcPath));
   const [uiContext] = useState(() => editorUIContext());
-  const [extensions] = useState<Array<ExtensionFn>>(() => props.collab ? [collabExtension()] : [])
+  const [extensions] = useState<Array<ExtensionFn>>(() => props.collab 
+    ? [collabExtension(collabConnection.current)] 
+    : []
+  )
 
   // editor init handler
   const onEditorInit = async (editor: EditorOperations) => {

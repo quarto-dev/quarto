@@ -21,8 +21,19 @@ import { ExtensionFn} from "editor";
 
 import { AutomergeController, automergeController } from "./automerge";
 
-export function collabExtension()
+
+export interface CollabConnection {
+  onChanged(fn: (connected: boolean) => void) : void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function collabExtension(connection: CollabConnection)
 : ExtensionFn {
+
+  connection.onChanged((connected: boolean) => {
+    console.log(connected ? "connected" : "disconnected");
+  })
+
 
   return () => {
    

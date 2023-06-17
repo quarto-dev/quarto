@@ -83,6 +83,8 @@ const EditorToolbar: React.FC = () => {
         </WithCommand>
         <CommandToolbarButton command={CommandId.Link} />
         <CommandToolbarButton command={CommandId.Image} />
+        <ToolbarDivider />
+        <CommandToolbarButton command={CommandId.Connect} />
       </Toolbar>
     </div>
    

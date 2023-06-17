@@ -11,6 +11,7 @@
     "editor": "*",
     "editor-core": "*",
     "editor-types": "*",
+    "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "prosemirror-model": "^1.18.2",
     "prosemirror-state": "^1.4.2",

@@ -30,11 +30,6 @@ export interface CollabConnection {
 export function collabExtension(connection: CollabConnection)
 : ExtensionFn {
 
-  connection.onChanged((connected: boolean) => {
-    console.log(connected ? "connected" : "disconnected");
-  })
-
-
   return () => {
    
     let automerge: AutomergeController | undefined;
@@ -42,7 +37,9 @@ export function collabExtension(connection: CollabConnection)
     return {
 
       view(view: EditorView) {
-        automerge = automergeController(view);
+        automergeController(view, connection).then(result => {
+          automerge = result
+        })
       },
 
       applyTransaction(state: EditorState, tr: Transaction) : EditorState {

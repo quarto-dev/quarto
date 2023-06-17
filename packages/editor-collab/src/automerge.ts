@@ -20,12 +20,13 @@ import { EditorView } from "prosemirror-view";
 
 import { ChangeQueue } from "./changequeue";
 
-import { DocType, initDoc, kDocContentKey } from "./automerge-doc";
+import { DocType, kDocContentKey, saveDoc, initDoc, loadDoc } from "./automerge-doc";
 
 import { 
   applyProsemirrorTransactionToAutomergeDoc, 
   extendProsemirrorTransactionWithAutomergePatch 
 } from "./automerge-pm";
+import { CollabConnection } from ".";
 
 const kRemoteChangesTransaction = "remoteChanges";
 
@@ -35,7 +36,10 @@ export interface AutomergeController {
   applyTransaction: (state: EditorState, tr: Transaction) => EditorState;
 }
 
-export function automergeController(view: EditorView) : AutomergeController {
+export async function automergeController(
+  view: EditorView, 
+  connection: CollabConnection
+) : Promise<AutomergeController> {
   
   // document we will be editing/merging
   let doc = initDoc();
@@ -58,16 +62,12 @@ export function automergeController(view: EditorView) : AutomergeController {
   });
   syncQueue.start();
 
-
-  // subscribe to changes from channel
-  channel.onmessage = ev => {
-
-    // get changes
-    const incomingChanges = ev.data as Array<Uint8Array>;
-   
+  // function to handle applying changes from a remote source
+  const applyRemoteChanges = (changes: Array<Uint8Array>) => {
+    
     // apply changes (record patches for subsequent application to prosemirror)
     const patches : Automerge.Patch[] = [];
-    doc = Automerge.applyChanges<DocType>(doc, incomingChanges, {
+    doc = Automerge.applyChanges<DocType>(doc, changes, {
       patchCallback: (p) => {
           patches.push(...p)
       }
@@ -84,6 +84,48 @@ export function automergeController(view: EditorView) : AutomergeController {
     if (tr.docChanged) {
       view.dispatch(tr);
     }
+
+  }
+
+  // handle disconnect/reconnect
+  let connected = true;
+  connection.onChanged(async (value) => {
+    // update value
+    connected = value;
+
+    // on reconnect, get the current doc and apply our local changes to it,
+    // then save the doc back to storage
+    if (connected) {
+      // do a diff both ways
+      const remoteDoc = await loadDoc();
+      const remoteChanges = Automerge.getChanges(doc, remoteDoc);
+      const localChanges = Automerge.getChanges(remoteDoc, doc);
+
+      // apply remote changes to our doc
+      applyRemoteChanges(remoteChanges);
+
+      // broadcast local changes to other docs
+      syncQueue.enqueue(...localChanges);
+
+      // save resulting doc
+      saveDoc(doc);
+    }
+  });
+
+  // subscribe to changes from channel
+  channel.onmessage = ev => {
+
+    // ignore changes when disconnected
+    if (!connected) {
+      return;
+    }
+
+    // get changes
+    const remoteChanges = ev.data as Array<Uint8Array>;
+   
+    // apply changes
+    applyRemoteChanges(remoteChanges);
+
   }
 
   return {
@@ -125,6 +167,11 @@ export function automergeController(view: EditorView) : AutomergeController {
         );
       }
 
+      // save the doc if we are connected
+      if (connected) {
+        saveDoc(doc);
+      }
+     
       // return mutated state
       return state;
     },

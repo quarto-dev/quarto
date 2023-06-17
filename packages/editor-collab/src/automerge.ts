@@ -42,7 +42,7 @@ export async function automergeController(
 ) : Promise<AutomergeController> {
   
   // document we will be editing/merging
-  let doc = initDoc();
+  let doc = await loadDoc();
 
   // initialize view with initial doc contents
   const schema = view.state.schema;
@@ -151,7 +151,10 @@ export async function automergeController(
           transaction = newTxn
         }
         state = state.apply(transaction);
-        syncQueue.enqueue(change);
+
+        if (connected) {
+          syncQueue.enqueue(change);
+        }
       }
 
       // If this transaction updated the local selection, we need to make sure that's reflected in the editor state.

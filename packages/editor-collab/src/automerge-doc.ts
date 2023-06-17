@@ -17,7 +17,7 @@ import { unstable as Automerge } from "@automerge/automerge";
 
 import localforage from "localforage";
 
-const kLocalStorageId = "editor-collab-doc-2";
+const kLocalStorageId = "editor-collab-doc";
 
 export const kDocContentKey = "content";
 
@@ -29,8 +29,12 @@ export function initDoc() : Automerge.Doc<DocType> {
 }
 
 export async function loadDoc() : Promise<Automerge.Doc<DocType>> {
-  const docData = await localforage.getItem<Uint8Array>(kLocalStorageId) || kInitialDoc;
-  return Automerge.load(docData);
+  const docData = await localforage.getItem<Uint8Array>(kLocalStorageId);
+  if (docData) {
+    return Automerge.load(docData);
+  } else {
+    return initDoc();
+  }
 }
 
 export async function saveDoc(doc: Automerge.Doc<DocType>) {

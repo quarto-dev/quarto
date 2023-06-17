@@ -20,7 +20,7 @@ import { EditorView } from "prosemirror-view";
 
 import { ChangeQueue } from "./changequeue";
 
-import { DocType, kDocContentKey, saveDoc, initDoc, loadDoc } from "./automerge-doc";
+import { DocType, kDocContentKey, saveDoc, loadDoc } from "./automerge-doc";
 
 import { 
   applyProsemirrorTransactionToAutomergeDoc, 

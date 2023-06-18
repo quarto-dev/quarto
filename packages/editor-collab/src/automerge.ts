@@ -14,7 +14,6 @@
  */
 
 // TODO: 'after' affinity for marks doesn't seem to work
-// TODO: spellchecking shows up while typing words
 
 import { unstable as Automerge } from "@automerge/automerge";
 
@@ -142,42 +141,47 @@ export async function automergeController(
         state = state.apply(tr);
         return state;
       }
-
+    
       // round trip the transaction through micromerge
       const result = applyProsemirrorTransactionToAutomergeDoc({ doc, tr });
       const { change, patches } = result
       doc = result.doc;
       if (change) {
+        // new transaction
         let transaction = state.tr
+
+        // apply patches
         for (const patch of patches) {
           const { tr: newTxn } = extendProsemirrorTransactionWithAutomergePatch(doc, transaction, patch)
           transaction = newTxn
         }
+
+        // If this transaction updated the local selection, we need to make sure that's 
+        // reflected in the editor state (Roundtripping through Automerge won't do that 
+        // for us, since selection state is not part of the document state.
+        if (tr.selectionSet) {
+          transaction.setSelection(
+            new TextSelection(
+              transaction.doc.resolve(tr.selection.anchor),
+              transaction.doc.resolve(tr.selection.head)
+            )
+          );
+        }
+
+        // apply transaction
         state = state.apply(transaction);
 
+        // push changes to other editors
         if (connected) {
           syncQueue.enqueue(change);
+          saveDoc(doc);
         }
-      }
 
-      // If this transaction updated the local selection, we need to make sure that's reflected in the editor state.
-      // (Roundtripping through Micromerge won't do that for us, since selection state is not part of the document state.
-      if (tr.selectionSet) {
-        state = state.apply(
-          state.tr.setSelection(
-            new TextSelection(
-              state.doc.resolve(tr.selection.anchor),
-              state.doc.resolve(tr.selection.head)
-            )
-          )
-        );
+      } else {
+        // no automerge changes to so just preform default handling
+        state = state.apply(tr);
       }
-
-      // save the doc if we are connected
-      if (connected) {
-        saveDoc(doc);
-      }
-     
+ 
       // return mutated state
       return state;
     },

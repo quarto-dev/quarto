@@ -69,7 +69,7 @@ export async function automergeController(
     const patches : Automerge.Patch[] = [];
     doc = Automerge.applyChanges<DocType>(doc, changes, {
       patchCallback: (p) => {
-          patches.push(...p)
+        patches.push(...p)
       }
     })[0];
 

@@ -74,6 +74,10 @@ export function linkCommand(markType: MarkType, onEditLink: LinkEditorFn, capabi
           link.type = LinkType.URL;
         }
 
+        // ensure text and url are not undefined
+        link.text = link.text || "";
+        link.href = link.href || "";
+
         // show edit ui
         const result = await onEditLink({ ...link } as LinkProps, targets, capabilities);
         if (result) {

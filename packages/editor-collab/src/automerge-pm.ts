@@ -52,28 +52,29 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
   const schema = tr.doc.type.schema;
   let startPos = Number.POSITIVE_INFINITY;
   let endPos = Number.NEGATIVE_INFINITY;
+
   switch (patch.action) {
+    
     case "splice": {
       const startIndex = patch.path[1];
       const index = prosemirrorPosFromContentPos(startIndex as number);
-      return {
-        tr: tr.replace(
+      const startPos = index;
+      const endPos = index + 1;
+      const marks = getProsemirrorMarksForMarkMap(doc, index, schema);
+      if (patch.value) {
+        tr = tr.replace(
+          index, 
           index,
-          index,
-          new Slice(
-            Fragment.from(
-              schema.text(
-                patch.value,
-                getProsemirrorMarksForMarkMap(doc, index, schema)
-              )
-            ),
-            0,
-            0
-          )
-        ),
-        startPos: index,
-        endPos: index + 1,
-      };
+          new Slice(Fragment.from(schema.text(patch.value, marks)), 0, 0)
+        );
+      } else {
+        // we've actually seen an error state where patch.value was an empty string
+        // for this case just set the marks at the specified index
+        for (const mark of marks) {
+          tr = tr.addMark(startPos, endPos, mark);
+        }
+      }
+      return { tr, startPos, endPos };
     }
     case "del": {
       const startIndex = patch.path[1];

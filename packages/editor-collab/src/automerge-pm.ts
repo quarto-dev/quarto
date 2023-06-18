@@ -114,16 +114,12 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
   }
 
   if (patch.action === "unmark") {
-    const { start, end, key } = patch as unknown as {
-      start: number;
-      end: number;
-      key: string;
-    };
+    const { start, end, name } = patch;
     return {
       tr: tr.removeMark(
         prosemirrorPosFromContentPos(start),
         prosemirrorPosFromContentPos(end),
-        schema.marks[key]
+        schema.marks[name]
       ),
       startPos: prosemirrorPosFromContentPos(start),
       endPos: prosemirrorPosFromContentPos(end),

@@ -13,6 +13,9 @@
  *
  */
 
+// TODO: 'after' affinity for marks doesn't seem to work
+// TODO: spellchecking shows up while typing words
+
 import { unstable as Automerge } from "@automerge/automerge";
 
 import { EditorState, TextSelection, Transaction } from "prosemirror-state";

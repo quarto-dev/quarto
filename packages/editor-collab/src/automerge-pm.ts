@@ -77,11 +77,11 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
   switch (patch.action) {
     
     case "splice": {
-      const startIndex = patch.path[1];
-      const index = prosemirrorPosFromContentPos(startIndex as number);
+      const startIndex = patch.path[1] as number;
+      const marks = getProsemirrorMarksForMarkMap(doc, startIndex, schema);
+      const index = prosemirrorPosFromContentPos(startIndex);
       const startPos = index;
-      const endPos = index + 1;
-      const marks = getProsemirrorMarksForMarkMap(doc, index, schema);
+      const endPos = index + patch.value.length;
       if (patch.value) {
         tr = tr.replace(
           index, 
@@ -95,8 +95,8 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
       return { tr, startPos, endPos };
     }
     case "del": {
-      const startIndex = patch.path[1];
-      const index = prosemirrorPosFromContentPos(startIndex as number);
+      const startIndex = patch.path[1] as number;
+      const index = prosemirrorPosFromContentPos(startIndex);
       const length = patch.length || 1;
       return {
         tr: tr.replace(index, index + length, Slice.empty),

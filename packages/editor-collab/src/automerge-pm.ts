@@ -25,7 +25,7 @@ import {
 } from "prosemirror-model";
 
 import { clamp } from "lodash";
-import { Transaction } from "prosemirror-state";
+import { Transaction, TextSelection } from "prosemirror-state";
 import { DocType, kDocContentKey } from "./automerge-doc";
 import { Change } from "./automerge";
 import {
@@ -259,6 +259,27 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
   const changes = Automerge.getChanges(initialDoc, doc);
   return { doc, change: changes[0], patches };
 }
+
+
+// based on: https://github.com/alexjg/amg-prosemirror/blob/main/src/mapSelection.ts
+export function mapProsemirrorSelection(intercepted: Transaction, propagated: Transaction): Transaction {
+  if (intercepted.steps.length == 0) {
+    // There are no steps so we can just set the selection on the propagated
+    // transaction to the selection on the intercepted transaction
+    return propagated.setSelection(intercepted.selection)
+  }
+  // get the selection at the start of the intercepted transasction by inverting the steps in it
+  const anchor = intercepted.mapping.invert().map(intercepted.selection.anchor)
+  const head = intercepted.mapping.invert().map(intercepted.selection.head)
+  const $anchor = intercepted.docs[0].resolve(anchor)
+  const $head = intercepted.docs[0].resolve(head)
+  const initialSelection = new TextSelection($anchor, $head)
+
+  // now map the initial selection through the propagated transaction
+  const mapped = initialSelection.map(propagated.doc, propagated.mapping)
+  return propagated.setSelection(mapped)
+}
+
 
 function getProsemirrorMarksForMarkMap(
   doc: Automerge.Doc<DocType>,

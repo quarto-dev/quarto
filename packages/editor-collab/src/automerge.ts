@@ -15,7 +15,7 @@
 
 import { unstable as Automerge } from "@automerge/automerge";
 
-import { EditorState, TextSelection, Transaction } from "prosemirror-state";
+import { EditorState, Transaction } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
 import { ChangeQueue } from "./changequeue";
@@ -25,7 +25,8 @@ import { DocType, saveDoc, loadDoc } from "./automerge-doc";
 import { 
   applyProsemirrorTransactionToAutomergeDoc, 
   extendProsemirrorTransactionWithAutomergePatch, 
-  initProsemirrorDocFromAutomergeDoc
+  initProsemirrorDocFromAutomergeDoc,
+  mapProsemirrorSelection
 } from "./automerge-pm";
 import { CollabConnection } from ".";
 
@@ -160,12 +161,7 @@ export async function automergeController(
         // reflected in the editor state (Roundtripping through Automerge won't do that 
         // for us, since selection state is not part of the document state.
         if (tr.selectionSet) {
-          transaction.setSelection(
-            new TextSelection(
-              transaction.doc.resolve(tr.selection.anchor),
-              transaction.doc.resolve(tr.selection.head)
-            )
-          );
+          transaction = mapProsemirrorSelection(tr, transaction);
         }
 
         // apply transaction

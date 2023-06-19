@@ -19,6 +19,7 @@ import {
   Attrs,
   Fragment,
   Mark,
+  MarkType,
   Node as ProsemirrorNode,
   Schema,
   Slice,
@@ -171,6 +172,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
       },
     },
     (doc) => {
+      const schema = txn.doc.type.schema;
       for (const step of txn.steps) {
         if (step instanceof ReplaceStep) {
           const from = contentPosFromProsemirrorPos(step.from, txn.before);
@@ -199,10 +201,11 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
             );
             for (const mark of insertedMarks) {
               if (!storedMarks.find(storedMark => storedMark.type.name === mark.name)) {
+                const expand = markExpand(schema.marks[mark.name]);
                 Automerge.unmark(
                   doc,
                   [kDocContentKey],
-                  { start: from, end: from + insertedContent.length },
+                  { expand, start: from, end: from + insertedContent.length },
                   mark.name
                 )
               }
@@ -230,8 +233,8 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
           const markName = step.mark.type.name;
           const markAttrs = JSON.stringify(step.mark.attrs);
-          const markExpand = step.mark.type.spec.inclusive === false ? 'none' : 'after';
-          const range : Automerge.MarkRange = { expand: markExpand, start: from, end: to };
+          const expand = markExpand(step.mark.type);
+          const range : Automerge.MarkRange = { expand, start: from, end: to };
           Automerge.mark(
             doc,
             [kDocContentKey],
@@ -241,13 +244,13 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           );
           
         } else if (step instanceof RemoveMarkStep) {
-          
+          const expand = markExpand(step.mark.type);
           const from = contentPosFromProsemirrorPos(step.from, txn.before);
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
           Automerge.unmark(
             doc,
             [kDocContentKey],
-            { start: from, end: to },
+            { expand, start: from, end: to },
             step.mark.type.name
           );
           
@@ -339,4 +342,8 @@ function contentPosFromProsemirrorPos(
  */
 function prosemirrorPosFromContentPos(position: number) {
   return position + 2;
+}
+
+function markExpand(markType: MarkType) {
+  return markType.spec.inclusive === false ? 'none' : 'after';
 }

@@ -23,11 +23,6 @@ export const kDocContentKey = "content";
 
 export type DocType = { [kDocContentKey]: string };
 
-export function initDoc() : Automerge.Doc<DocType> {
-  const [doc] = Automerge.applyChanges(Automerge.init<DocType>(), [kInitialDoc]);
-  return doc;
-}
-
 export async function loadDoc() : Promise<Automerge.Doc<DocType>> {
   const docData = await localforage.getItem<Uint8Array>(kLocalStorageId);
   if (docData) {
@@ -42,6 +37,10 @@ export async function saveDoc(doc: Automerge.Doc<DocType>) {
   await localforage.setItem(kLocalStorageId, docData);
 }
 
+function initDoc() : Automerge.Doc<DocType> {
+  const [doc] = Automerge.applyChanges(Automerge.init<DocType>(), [kInitialDoc]);
+  return doc;
+}
 
 // "The quick brown fox jumped over the lazy dog."
 const kInitialDoc = new Uint8Array([

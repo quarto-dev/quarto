@@ -79,7 +79,7 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
     
     case "splice": {
       const startIndex = patch.path[1] as number;
-      const marks = getProsemirrorMarksForMarkMap(doc, startIndex, schema);
+      const marks = getProsemirrorMarksAtIndex(doc, startIndex, schema);
       const index = prosemirrorPosFromContentPos(startIndex);
       const startPos = index;
       const endPos = index + patch.value.length;
@@ -131,21 +131,23 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
         endPos: prosemirrorPosFromContentPos(endPos),
       };
     }
-  }
 
-  if (patch.action === "unmark") {
-    const { start, end, name } = patch;
-    return {
-      tr: tr.removeMark(
-        prosemirrorPosFromContentPos(start),
-        prosemirrorPosFromContentPos(end),
-        schema.marks[name]
-      ),
-      startPos: prosemirrorPosFromContentPos(start),
-      endPos: prosemirrorPosFromContentPos(end),
-    };
-  }
-  throw new Error(`BUG: Unsupported patch type '${patch.action}'`);
+    case "unmark": {
+      const { start, end, name } = patch;
+      return {
+        tr: tr.removeMark(
+          prosemirrorPosFromContentPos(start),
+          prosemirrorPosFromContentPos(end),
+          schema.marks[name]
+        ),
+        startPos: prosemirrorPosFromContentPos(start),
+        endPos: prosemirrorPosFromContentPos(end),
+      };
+    }
+
+    default:
+      throw new Error(`BUG: Unsupported patch type '${patch.action}'`);
+  } 
 };
 
 // Given a CRDT Doc and a Prosemirror Transaction, update the micromerge doc.
@@ -284,7 +286,7 @@ export function mapProsemirrorSelection(intercepted: Transaction, propagated: Tr
 }
 
 
-function getProsemirrorMarksForMarkMap(
+function getProsemirrorMarksAtIndex(
   doc: Automerge.Doc<DocType>,
   index: number,
   schema: Schema
@@ -322,7 +324,6 @@ function prosemirrorMarkFromAutomergeMark(mark: Automerge.Mark) {
  * @param position : an unresolved Prosemirror position in the doc;
  * @param doc : the Prosemirror document containing the position
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function contentPosFromProsemirrorPos(
   position: number,
   doc: ProsemirrorNode

@@ -13,6 +13,11 @@
  *
  */
 
+// TODO: use the 2.1 alpha 'marks' attribute of splice once it works
+// TODO: more effecient application of stored marks
+// TODO: store the latest doc and computed mark map using a plugin
+// TODO: review other apsects of pm repo
+
 import { unstable as Automerge } from "@automerge/automerge";
 
 import { EditorState, Transaction } from "prosemirror-state";

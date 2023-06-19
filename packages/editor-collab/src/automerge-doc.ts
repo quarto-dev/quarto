@@ -17,7 +17,7 @@ import { unstable as Automerge } from "@automerge/automerge";
 
 import localforage from "localforage";
 
-const kLocalStorageId = "editor-collab-doc-version-4";
+const kLocalStorageId = "editor-collab-doc-storage-10";
 
 export const kDocContentKey = "content";
 

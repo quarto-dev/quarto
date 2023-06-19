@@ -208,6 +208,8 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
               }
             }
             // apply any stored marks
+            // TODO: only apply these if they need to be applied (we've observed that this
+            // is required in order to switch into 'bold' using a PM stored mark)
             for (const mark of storedMarks) {
               Automerge.mark(
                 doc,

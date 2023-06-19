@@ -190,6 +190,34 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
               to - from,
               insertedContent
             );
+
+            // check the marks at the inserted position (remove any of them that are 
+            // not in the current set of stored marks)
+            const storedMarks = txn.selection.$head.marks();
+            const insertedMarks = Automerge.marks(doc, kDocContentKey).filter(
+              (m) => m.value !== null &&  m.start <= from && m.end >= from
+            );
+            for (const mark of insertedMarks) {
+              if (!storedMarks.find(storedMark => storedMark.type.name === mark.name)) {
+                Automerge.unmark(
+                  doc,
+                  kDocContentKey,
+                  { start: from, end: from + insertedContent.length },
+                  mark.name
+                )
+              }
+            }
+            // apply any stored marks
+            for (const mark of storedMarks) {
+              Automerge.mark(
+                doc,
+                kDocContentKey,
+                { start: from, end: from + insertedContent.length },
+                mark.type.name,
+                JSON.stringify(mark.attrs)
+              )
+            }
+
           } else {
             // handle deletion
             Automerge.splice(doc, kDocContentKey, from, to - from);

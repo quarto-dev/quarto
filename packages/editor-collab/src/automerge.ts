@@ -13,8 +13,6 @@
  *
  */
 
-// TODO: 'after' affinity for marks doesn't seem to work
-
 import { unstable as Automerge } from "@automerge/automerge";
 
 import { EditorState, TextSelection, Transaction } from "prosemirror-state";

@@ -22,11 +22,12 @@ import { EditorView } from "prosemirror-view";
 
 import { ChangeQueue } from "./changequeue";
 
-import { DocType, kDocContentKey, saveDoc, loadDoc } from "./automerge-doc";
+import { DocType, saveDoc, loadDoc } from "./automerge-doc";
 
 import { 
   applyProsemirrorTransactionToAutomergeDoc, 
-  extendProsemirrorTransactionWithAutomergePatch 
+  extendProsemirrorTransactionWithAutomergePatch, 
+  initProsemirrorDocFromAutomergeDoc
 } from "./automerge-pm";
 import { CollabConnection } from ".";
 
@@ -47,10 +48,11 @@ export async function automergeController(
   let doc = await loadDoc();
 
   // initialize view with initial doc contents
-  const schema = view.state.schema;
-  const tr = view.state.tr;
-  tr.replaceSelectionWith(schema.text(doc[kDocContentKey].toString()));
-  view.dispatch(tr);
+  let tr = view.state.tr;
+  tr = initProsemirrorDocFromAutomergeDoc(doc, tr);
+  if (tr.docChanged) {
+    view.dispatch(tr);
+  }
 
   // channel used to sync clients
   const channel = new BroadcastChannel("editor-collab");

@@ -34,6 +34,27 @@ import {
   ReplaceStep,
 } from "prosemirror-transform";
 
+export const initProsemirrorDocFromAutomergeDoc = (
+  doc: Automerge.Doc<DocType>,
+  tr: Transaction
+) => {
+  const schema = tr.doc.type.schema;
+  const content = doc[kDocContentKey];
+  if (content) {
+    tr.replaceSelectionWith(schema.text(content));
+    const marks = Automerge.marks(doc, kDocContentKey);
+    for (const mark of marks) {
+      const { name, attr } = prosemirrorMarkFromAutomergeMark(mark);
+      tr.addMark(
+        prosemirrorPosFromContentPos(mark.start),
+        prosemirrorPosFromContentPos(mark.end),
+        schema.marks[name].create(attr)
+      )
+    }
+  }  
+  return tr;
+}
+
 /** Extends a Prosemirror Transaction with new steps incorporating
  *  the effects of a Micromerge Patch.
  *
@@ -69,10 +90,7 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
         );
       } else {
         // we've actually seen an error state where patch.value was an empty string
-        // for this case just set the marks at the specified index
-        for (const mark of marks) {
-          tr = tr.addMark(startPos, endPos, mark);
-        }
+        // for this case just return the original tr
       }
       return { tr, startPos, endPos };
     }
@@ -89,7 +107,7 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
 
     case "mark": {
       for (const mark of patch.marks) {
-        const { name, attr } = getMarkInfo(mark);
+        const { name, attr } = prosemirrorMarkFromAutomergeMark(mark);
         if (mark.value === null || mark.value === false) {
           tr = tr.removeMark(
             prosemirrorPosFromContentPos(mark.start),
@@ -182,11 +200,12 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
           const markName = step.mark.type.name;
           const markAttrs = JSON.stringify(step.mark.attrs);
-          const markExpand = step.mark.type.spec.inclusive ? 'after' : 'none';
+          const markExpand = step.mark.type.spec.inclusive === false ? 'none' : 'after';
+          const range : Automerge.MarkRange = { expand: markExpand, start: from, end: to };
           Automerge.mark(
             doc,
             kDocContentKey,
-            { expand: markExpand, start: from, end: to },
+            range,
             `${markName}`,
             markAttrs
           );
@@ -228,13 +247,12 @@ function getProsemirrorMarksForMarkMap(
     }
   }
   return Array.from(notUnmarked.values()).map((mark) => {
-    const { name, attr } = getMarkInfo(mark);
+    const { name, attr } = prosemirrorMarkFromAutomergeMark(mark);
     return schema.marks[name].create(attr);
   });
 }
 
-// currently we only support boolean style marks (e.g. bold/italic)
-function getMarkInfo(mark: Automerge.Mark) {
+function prosemirrorMarkFromAutomergeMark(mark: Automerge.Mark) {
   const name = mark.name;
   const attr = JSON.parse(mark.value as string) as Attrs;
   return { name, attr };

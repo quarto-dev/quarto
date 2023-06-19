@@ -185,7 +185,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
             );
             Automerge.splice(
               doc,
-              kDocContentKey,
+              [kDocContentKey],
               from,
               to - from,
               insertedContent
@@ -201,7 +201,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
               if (!storedMarks.find(storedMark => storedMark.type.name === mark.name)) {
                 Automerge.unmark(
                   doc,
-                  kDocContentKey,
+                  [kDocContentKey],
                   { start: from, end: from + insertedContent.length },
                   mark.name
                 )
@@ -213,7 +213,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
             for (const mark of storedMarks) {
               Automerge.mark(
                 doc,
-                kDocContentKey,
+                [kDocContentKey],
                 { start: from, end: from + insertedContent.length },
                 mark.type.name,
                 JSON.stringify(mark.attrs)
@@ -222,7 +222,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
 
           } else {
             // handle deletion
-            Automerge.splice(doc, kDocContentKey, from, to - from);
+            Automerge.splice(doc, [kDocContentKey], from, to - from);
           }
         } else if (step instanceof AddMarkStep) {
           
@@ -234,7 +234,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           const range : Automerge.MarkRange = { expand: markExpand, start: from, end: to };
           Automerge.mark(
             doc,
-            kDocContentKey,
+            [kDocContentKey],
             range,
             `${markName}`,
             markAttrs
@@ -246,7 +246,7 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           const to = contentPosFromProsemirrorPos(step.to, txn.before);
           Automerge.unmark(
             doc,
-            kDocContentKey,
+            [kDocContentKey],
             { start: from, end: to },
             step.mark.type.name
           );

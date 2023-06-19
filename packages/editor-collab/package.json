@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "@automerge/automerge": "^2.0.3",
+    "@automerge/automerge": "^2.1.0-alpha.5",
     "assert": "^2.0.0",
     "core": "*",
     "editor": "*",

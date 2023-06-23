@@ -1,6 +1,0 @@
-/lib
-/jupyterlab-quarto/labextension
-/jupyterlab-quarto/_version.py
-/node_modules
-/tsconfig.tsbuildinfo
-.python-version

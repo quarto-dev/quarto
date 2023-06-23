@@ -147,7 +147,7 @@ export async function automergeController(
       }
     
       // round trip the transaction through micromerge
-      const result = applyProsemirrorTransactionToAutomergeDoc({ doc, tr });
+      const result = applyProsemirrorTransactionToAutomergeDoc(doc, tr);
       const { change, patches } = result
       doc = result.doc;
       if (change) {

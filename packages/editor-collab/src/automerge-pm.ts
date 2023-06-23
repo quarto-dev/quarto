@@ -151,18 +151,16 @@ export const extendProsemirrorTransactionWithAutomergePatch = (
 };
 
 // Given a CRDT Doc and a Prosemirror Transaction, update the micromerge doc.
-export function applyProsemirrorTransactionToAutomergeDoc(args: {
-  doc: Automerge.Doc<DocType>;
-  tr: Transaction;
-}): {
+export function applyProsemirrorTransactionToAutomergeDoc(
+  initialDoc: Automerge.Doc<DocType>,
+  tr: Transaction
+): {
   change: Change | null;
   patches: Patch[];
   doc: Automerge.Doc<DocType>;
 } {
-  const initialDoc = args.doc;
-  const { tr: txn } = args;
-
-  if (txn.steps.length === 0) {
+ 
+  if (tr.steps.length === 0) {
     return { doc: initialDoc, change: null, patches: [] };
   }
   const patches: Patch[] = [];
@@ -174,11 +172,11 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
       },
     },
     (doc) => {
-      const schema = txn.doc.type.schema;
-      for (const step of txn.steps) {
+      const schema = tr.doc.type.schema;
+      for (const step of tr.steps) {
         if (step instanceof ReplaceStep) {
-          const from = contentPosFromProsemirrorPos(step.from, txn.before);
-          const to = contentPosFromProsemirrorPos(step.to, txn.before);
+          const from = contentPosFromProsemirrorPos(step.from, tr.before);
+          const to = contentPosFromProsemirrorPos(step.to, tr.before);
           if (step.slice) {
             // handle insertion
             // This step coalesces the multiple paragraphs back into one paragraph. Because step.slice.content is a 
@@ -195,15 +193,16 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
               insertedContent
             );
 
-            // check the marks at the inserted position (remove any of them that are 
-            // not in the current set of stored marks)
-            const storedMarks = txn.selection.$head.marks();
+            // collect the stored marks at the selection and the inserted marks
+            const storedMarks = tr.selection.$head.marks();
             const insertedMarks = Automerge.marks(doc, kDocContentKey).filter(
               (m) => m.value !== null &&  m.start <= from && m.end >= from
             );
+
+            // remove any inserted marks that are not in set of stored marks at the selection
             for (const mark of insertedMarks) {
               if (!storedMarks.find(storedMark => storedMark.type.name === mark.name)) {
-                const expand = markExpand(schema.marks[mark.name]);
+                const expand = schema.marks[mark.name].spec.inclusive === false ? 'none' : 'after';
                 Automerge.unmark(
                   doc,
                   [kDocContentKey],
@@ -212,17 +211,18 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
                 )
               }
             }
-            // apply any stored marks
-            // TODO: only apply these if they need to be applied (we've observed that this
-            // is required in order to switch into 'bold' using a PM stored mark)
+
+            // apply any stored marks that were not included in the inserted marks
             for (const mark of storedMarks) {
-              Automerge.mark(
-                doc,
-                [kDocContentKey],
-                { start: from, end: from + insertedContent.length },
-                mark.type.name,
-                JSON.stringify(mark.attrs)
-              )
+              if (!insertedMarks.find(insertedMark => insertedMark.name === mark.type.name)) {
+                Automerge.mark(
+                  doc,
+                  [kDocContentKey],
+                  { start: from, end: from + insertedContent.length },
+                  mark.type.name,
+                  JSON.stringify(mark.attrs)
+                )
+              }
             }
 
           } else {
@@ -231,8 +231,8 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           }
         } else if (step instanceof AddMarkStep) {
           
-          const from = contentPosFromProsemirrorPos(step.from, txn.before);
-          const to = contentPosFromProsemirrorPos(step.to, txn.before);
+          const from = contentPosFromProsemirrorPos(step.from, tr.before);
+          const to = contentPosFromProsemirrorPos(step.to, tr.before);
           const markName = step.mark.type.name;
           const markAttrs = JSON.stringify(step.mark.attrs);
           const expand = markExpand(step.mark.type);
@@ -247,8 +247,8 @@ export function applyProsemirrorTransactionToAutomergeDoc(args: {
           
         } else if (step instanceof RemoveMarkStep) {
           const expand = markExpand(step.mark.type);
-          const from = contentPosFromProsemirrorPos(step.from, txn.before);
-          const to = contentPosFromProsemirrorPos(step.to, txn.before);
+          const from = contentPosFromProsemirrorPos(step.from, tr.before);
+          const to = contentPosFromProsemirrorPos(step.to, tr.before);
           Automerge.unmark(
             doc,
             [kDocContentKey],

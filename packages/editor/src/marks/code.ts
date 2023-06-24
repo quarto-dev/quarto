@@ -14,8 +14,11 @@
  */
 
 import { Fragment, Mark, Node as ProsemirrorNode, Schema } from 'prosemirror-model';
+import { EditorState, Transaction } from 'prosemirror-state';
 
-import { MarkCommand, EditorCommandId } from '../api/command';
+import { MarkCommand, EditorCommandId, ProsemirrorCommand, toggleMarkType } from '../api/command';
+import { setTextSelection } from 'prosemirror-utils';
+
 import { Extension, ExtensionContext } from '../api/extension';
 import { pandocAttrSpec, pandocAttrParseDom, pandocAttrToDomAttr, pandocAttrReadAST } from '../api/pandoc_attr';
 import { PandocToken, PandocOutput, PandocTokenType } from '../api/pandoc';
@@ -23,9 +26,13 @@ import { PandocToken, PandocOutput, PandocTokenType } from '../api/pandoc';
 import { kCodeText, kCodeAttr } from '../api/code';
 import { delimiterMarkInputRule, MarkInputRuleFilter } from '../api/input_rule';
 import { domAttrNoSpelling } from '../api/mark';
+import { EditorUI } from '../api/ui-types';
+import { OmniInsert, OmniInsertGroup } from '../api/omni_insert';
+
+import { canInsertNode } from '../api/node';
 
 const extension = (context: ExtensionContext): Extension => {
-  const { pandocExtensions } = context;
+  const { pandocExtensions, ui, options } = context;
 
   const codeAttrs = pandocExtensions.inline_code_attributes;
 
@@ -104,7 +111,10 @@ const extension = (context: ExtensionContext): Extension => {
     ],
 
     commands: (schema: Schema) => {
-      return [new MarkCommand(EditorCommandId.Code, ['Mod-d'], schema.marks.code)];
+      return [
+        new MarkCommand(EditorCommandId.Code, ['Mod-d'], schema.marks.code),
+        ...(!options.defaultCellTypePython ? [new InsertInlinCodeCommand(ui)] : [])
+      ];
     },
 
     inputRules: (schema: Schema, filter: MarkInputRuleFilter) => {
@@ -112,5 +122,43 @@ const extension = (context: ExtensionContext): Extension => {
     },
   };
 };
+
+
+export class InsertInlinCodeCommand extends ProsemirrorCommand {
+  constructor(ui: EditorUI) {
+    super(EditorCommandId.InlineRCode, [], insertInlineRCode, inlineRCodeOmniInsert(ui));
+  }
+}
+
+
+function insertInlineRCode(state: EditorState, dispatch?: (tr: Transaction) => void) {
+  // enable/disable command
+  const schema = state.schema;
+  if (!canInsertNode(state, schema.nodes.text) || !toggleMarkType(schema.marks.code)(state)) {
+    return false;
+  }
+
+  if (dispatch) {
+    const tr = state.tr;
+    const prevSel = tr.selection;
+    const mark = schema.marks.code.create();
+    const node = schema.text("r ", [mark]);
+    tr.insert(tr.selection.from, node);
+    setTextSelection(tr.mapping.map(prevSel.from) , -1)(tr);
+    dispatch(tr);
+  }
+  return true;
+}
+
+function inlineRCodeOmniInsert(ui: EditorUI): OmniInsert {
+  return {
+    name: ui.context.translateText('Inline R Code'),
+    keywords: ["r"],
+    description: ui.context.translateText('R code within a line or paragraph'),
+    group: OmniInsertGroup.Content,
+    priority: 2,
+    image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.r_chunk_dark : ui.images.omni_insert.r_chunk),
+  };
+}
 
 export default extension;

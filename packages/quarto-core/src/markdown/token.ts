@@ -75,8 +75,8 @@ export function isRawBlock(token: Token): token is TokenRawBlock {
 }
 
 export function isCallout(token: Token) {
-  if (token.type === "Div") {
-    const classes = token.attr![kAttrClasses];
+  if (token.type === "Div" && token.attr) {
+    const classes = token.attr[kAttrClasses];
     return !!classes.find(clz => clz.startsWith("callout-"));
   } else {
     return false;
@@ -88,7 +88,7 @@ export function isList(token: Token) {
 }
 
 export function isTabset(token: Token) {
-  if (token.type === "Div") {
+  if (token.type === "Div" && token.attr) {
     const classes = token.attr![kAttrClasses];
     return !!classes.find(clz => clz === "panel-tabset");
   } else {
@@ -97,8 +97,8 @@ export function isTabset(token: Token) {
 }
 
 export function isTheorem(token: Token) {
-  if (token.type === "Div") {
-    const id = token.attr![kAttrIdentifier];
+  if (token.type === "Div" && token.attr) {
+    const id = token.attr[kAttrIdentifier];
     return ["thm", "lem", "cor", "prp", "cnj", "def", "exm", "exr"]
       .some(prefix => id.startsWith(`${prefix}-`));
   } else {
@@ -107,8 +107,8 @@ export function isTheorem(token: Token) {
 }
 
 export function isProof(token: Token) {
-  if (token.type === "Div") {
-    const classes = token.attr![kAttrClasses];
+  if (token.type === "Div" && token.attr) {
+    const classes = token.attr[kAttrClasses];
     return ["proof", "remark", "solution"].some(clz => classes.includes(clz));
   } else {
     return false;

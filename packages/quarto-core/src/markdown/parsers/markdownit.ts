@@ -245,10 +245,10 @@ const tokensToText = (tokens: Token[]) : string => {
 }
 
 const asTokenAttr = (attribs: Array<[string,string]> | null) => {
-  if (attribs === null || attribs.length === 0) {
-    return undefined;
-  }
   const tokenAttr: TokenAttr = ['', [], []];
+  if (attribs === null || attribs.length === 0) {
+    return tokenAttr;
+  }
   for (const attrib of attribs) {
     const key = attrib[0];
     const value = attrib[1];

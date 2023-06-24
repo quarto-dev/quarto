@@ -210,15 +210,16 @@ export function applyProsemirrorTransactionToAutomergeDoc(
                   mark.name
                 )
               }
-            }
+            }   
 
             // apply any stored marks that were not included in the inserted marks
             for (const mark of storedMarks) {
               if (!insertedMarks.find(insertedMark => insertedMark.name === mark.type.name)) {
+                const expand = mark.type.spec.inclusive === false ? 'none' : 'after';
                 Automerge.mark(
                   doc,
                   [kDocContentKey],
-                  { start: from, end: from + insertedContent.length },
+                  { expand, start: from, end: from + insertedContent.length },
                   mark.type.name,
                   JSON.stringify(mark.attrs)
                 )

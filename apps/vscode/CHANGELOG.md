@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.88.0 (Unreleased)
+## 1.88.0 (Release on 25 June 2023)
 
 - Visual Editor: Remove formik validation (fixes various dialog focus issues)
 - Prevent display of error messages for div attributes that we fail to parse

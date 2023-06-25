@@ -222,6 +222,7 @@ export class RawInlineCommand extends ProsemirrorCommand {
         description: ui.context.translateText('Raw inline content'),
         group: OmniInsertGroup.Content,
         priority: 0,
+        noFocus: true,
         image: () =>
           ui.prefs.darkMode() ? ui.images.omni_insert.raw_inline_dark : ui.images.omni_insert.raw_inline,
       },

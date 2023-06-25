@@ -13,7 +13,7 @@
  *
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Field, Input, Select } from "@fluentui/react-components";
 
 import { RawFormatProps, RawFormatResult } from "editor-types";
@@ -45,6 +45,13 @@ const EditRawDialog: React.FC<{
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const focusRef = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    if (isOpen && focusRef.current) {
+      focusRef.current.focus();
+    }
+  }, [isOpen])
+
   const [format, setFormat] = useState(props.values.raw.format);
   const [content, setContent] = useState(props.values.raw.content);
 
@@ -75,6 +82,7 @@ const EditRawDialog: React.FC<{
     >
       <Field label={t("Format")}>
         <Select 
+          ref={focusRef}
           value={format} 
           onChange={(_ev, data) => setFormat(data.value)} 
           multiple={false}

@@ -50,13 +50,23 @@ export function registerCustomMethods(
       quarto.pandocPath
     ),
     documents: {
-      getCode(filePath: string) {
+      getDocument(filePath: string) {
         const uri = URI.file(filePath).toString();
+        const lastModified = fs.statSync(filePath).mtime;
         const doc = documents.get(uri);
         if (doc) {
-          return doc.getText();
+          return { 
+            filePath,
+            code: doc.getText(),
+            lastModified,
+            version: doc.version
+          }
         } else {
-          return fs.readFileSync(filePath, { encoding: "utf-8" });
+          return {
+            filePath,
+            code: fs.readFileSync(filePath, { encoding: "utf-8" }),
+            lastModified
+          }
         }
       }
     }

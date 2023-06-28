@@ -35,8 +35,7 @@ export function xrefServer(options: EditorServerOptions) : XRefServer {
       const projectDir = projectDirForDocument(file);
       const refs = await xrefsForFile(
         options.quartoContext, 
-        file, 
-        options.documents.getCode(file), 
+        options.documents.getDocument(file), 
         projectDir
       );
       return {

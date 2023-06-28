@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * documents.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,12 +13,14 @@
  *
  */
 
+export interface EditorServerDocument {
+  filePath: string;
+  code: string;
+  lastModified: Date;
+  version?: number;
+}
 
-export * from './mathjax';
-export * from './biblio';
-export * from './xref';
-export * from './pandoc';
-export * from './zotero';
-export * from './documents';
-
+export interface EditorServerDocuments {
+  getDocument(filePath: string) : EditorServerDocument;
+}
 

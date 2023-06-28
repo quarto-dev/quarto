@@ -17,12 +17,12 @@ import { JsonRpcServerMethod } from "core";
 import { kMathMathjaxTypesetSvg, MathjaxTypesetOptions, MathServer } from "editor-types";
 
 import { mathjaxTypeset } from "../core/mathjax";
-import { EditorServerDocuments } from "../server/server";
+import { EditorServerDocuments } from "../core";
 
 export function mathServer(documents: EditorServerDocuments) : MathServer {
   return {
     async mathjaxTypeset(tex: string, options: MathjaxTypesetOptions, docPath: string | null) {
-      const docText = docPath ? documents.getCode(docPath) : undefined;
+      const docText = docPath ? documents.getDocument(docPath).code : undefined;
       return mathjaxTypeset(tex, options, docText);
     },
   };

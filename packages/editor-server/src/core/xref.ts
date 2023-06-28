@@ -22,22 +22,22 @@ tmp.setGracefulCleanup();
 import { pathWithForwardSlashes } from "core";
 
 import { QuartoContext, fileCrossrefIndexStorage, quartoProjectConfig } from "quarto-core";
+import { EditorServerDocument } from "./documents";
 
 
 export async function xrefsForFile(
   quartoContext: QuartoContext,
-  filePath: string,
-  code: string,
+  doc: EditorServerDocument,
   projectDir?: string
 ): Promise<XRef[]> {
 
   // first get the index for the source code
   const srcXRefs = indexSourceFile(
     quartoContext,
-    code,
+    doc.code,
     projectDir
-      ? projectRelativeInput(projectDir, filePath)
-      : path.basename(filePath)
+      ? projectRelativeInput(projectDir, doc.filePath)
+      : path.basename(doc.filePath)
   );
 
   // now get the paths to project xref indexes (if any)
@@ -48,12 +48,12 @@ export async function xrefsForFile(
   // now get the rendered index for this file and ammend w/ computations
   const renderedXrefs = projectDir
     ? readXRefIndex(
-        projectXRefIndexPath(projectXRefIndex, projectDir, filePath),
-        path.relative(projectDir, filePath)
+        projectXRefIndexPath(projectXRefIndex, projectDir, doc.filePath),
+        path.relative(projectDir, doc.filePath)
       )
     : readXRefIndex(
-        fileCrossrefIndexStorage(filePath),
-        path.basename(filePath)
+        fileCrossrefIndexStorage(doc.filePath),
+        path.basename(doc.filePath)
       );
   const xrefs: XRef[] = [...srcXRefs];
   for (const renderedXref of renderedXrefs) {
@@ -82,7 +82,7 @@ export async function xrefsForFile(
     const config = projectDir ? await quartoProjectConfig(quartoContext.runQuarto, projectDir) : undefined;
     const book = config?.config.project.type === "book";
     if (book) {
-      const input = projectRelativeInput(projectDir, filePath);
+      const input = projectRelativeInput(projectDir, doc.filePath);
       for (const projInput of projectXRefIndex.keys()) {
         if (projInput !== input) {
           xrefs.push(

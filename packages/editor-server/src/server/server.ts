@@ -26,11 +26,8 @@ import { xrefServer, xrefServerMethods } from "./xref";
 import { zoteroServer, zoteroServerMethods } from "./zotero";
 import { JsonRpcServerMethod } from 'core';
 import { QuartoContext } from "quarto-core";
-import { PandocServerOptions } from "../core";
+import { EditorServerDocuments, PandocServerOptions } from "../core";
 
-export interface EditorServerDocuments {
-  getCode(filePath: string) : string;
-}
 
 export interface EditorServerOptions {
   quartoContext: QuartoContext;
@@ -67,8 +64,13 @@ export function defaultEditorServerOptions(
 
 export function fsEditorServerDocuments() {
   return {
-    getCode(filePath: string) {
-      return fs.readFileSync(filePath, { encoding: "utf-8" });
+    getDocument(filePath: string) {
+      const lastModified = fs.statSync(filePath).mtime;
+      return {
+        filePath,
+        code: fs.readFileSync(filePath, { encoding: "utf-8" }),
+        lastModified
+      }
     }
   }
 }

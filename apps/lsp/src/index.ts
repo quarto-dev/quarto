@@ -220,6 +220,7 @@ connection.onInitialized(async () => {
     config,
     quarto,
     workspace,
+    documents,
     parser, 
     logger
   });

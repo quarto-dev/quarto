@@ -12,8 +12,6 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-
-import * as fs from "fs";
 import path from "path";
 
 import { 
@@ -23,13 +21,13 @@ import {
   mathServerMethods,
   EditorServerOptions,
   sourceServerMethods,
+  editorServerDocuments,
 } from "editor-server"
 
 import { LspConnection, registerLspServerMethods } from "core-node";
 import { userDictionaryDir, Document } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
 import { Hover, Position, TextDocuments } from "vscode-languageserver";
-import { URI } from "vscode-uri";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
 import { yamlCompletions } from "./service/providers/completion/completion-yaml";
 import { yamlHover } from "./service/providers/hover/hover-yaml";
@@ -49,27 +47,7 @@ export function registerCustomMethods(
       resourcesDir,
       quarto.pandocPath
     ),
-    documents: {
-      getDocument(filePath: string) {
-        const uri = URI.file(filePath).toString();
-        const lastModified = fs.statSync(filePath).mtime;
-        const doc = documents.get(uri);
-        if (doc) {
-          return { 
-            filePath,
-            code: doc.getText(),
-            lastModified,
-            version: doc.version
-          }
-        } else {
-          return {
-            filePath,
-            code: fs.readFileSync(filePath, { encoding: "utf-8" }),
-            lastModified
-          }
-        }
-      }
-    }
+    documents: editorServerDocuments(documents)
   };
 
   const dictionary = {

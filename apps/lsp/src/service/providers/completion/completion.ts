@@ -20,7 +20,8 @@ import {
   CancellationToken,
   CompletionContext,
   CompletionItem,
-  CompletionTriggerKind
+  CompletionTriggerKind,
+	TextDocuments
 } from "vscode-languageserver";
 import { Quarto } from "../../quarto";
 import { attrCompletions } from "./completion-attrs";
@@ -79,17 +80,20 @@ export class MdCompletionProvider {
 
   readonly quarto_: Quarto;
 	readonly parser_: Parser;
+	readonly documents_: TextDocuments<Document>;
 
 	constructor(
 		configuration: LsConfiguration,
     quarto: Quarto,
 		workspace: IWorkspace,
+		documents: TextDocuments<Document>,
 		parser: Parser,
 		linkProvider: MdLinkProvider,
 		tocProvider: MdTableOfContentsProvider,
 	) {
     this.quarto_ = quarto;
 		this.parser_ = parser;
+		this.documents_ = documents;
     this.pathCompletionProvider_ = new MdPathCompletionProvider(
       configuration, 
       workspace, 
@@ -115,7 +119,7 @@ export class MdCompletionProvider {
     const trigger = context.triggerCharacter;
     const editorContext = docEditorContext(doc, pos, explicit, trigger);
     return (
-      (await refsCompletions(this.quarto_, this.parser_, doc, pos, editorContext)) ||
+      (await refsCompletions(this.quarto_, this.parser_, doc, pos, editorContext, this.documents_)) ||
       (await attrCompletions(this.quarto_, editorContext)) ||
       (await latexCompletions(this.parser_, doc, pos, context, config)) ||
       (await yamlCompletions(this.quarto_, editorContext, true)) ||

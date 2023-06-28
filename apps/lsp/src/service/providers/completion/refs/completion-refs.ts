@@ -15,20 +15,22 @@
 
 import { Range, Position } from "vscode-languageserver-types";
 
-import { CompletionItem } from "vscode-languageserver";
+import { CompletionItem, TextDocuments } from "vscode-languageserver";
 import { bypassRefIntelligence } from "../../../util/refs";
 
 import { EditorContext, Quarto } from "../../../quarto";
 import { projectDirForDocument, filePathForDoc, Document, Parser } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";
+import { editorServerDocuments } from "editor-server";
 
 export async function refsCompletions(
   quarto: Quarto,
   parser: Parser,
   doc: Document,
   pos: Position,
-  context: EditorContext
+  context: EditorContext,
+  documents: TextDocuments<Document>,
 ): Promise<CompletionItem[] | null> {
  
   // validate trigger
@@ -62,8 +64,8 @@ export async function refsCompletions(
         const crossrefItems = await crossrefCompletions(
           quarto,
           tokenText,
-          doc.getText(),
           path,
+          editorServerDocuments(documents),
           projectDir
         );
         if (biblioItems || crossrefItems) {

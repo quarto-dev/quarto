@@ -22,22 +22,24 @@ tmp.setGracefulCleanup();
 import { pathWithForwardSlashes } from "core";
 
 import { QuartoContext, fileCrossrefIndexStorage, quartoProjectConfig } from "quarto-core";
-import { EditorServerDocument } from "./documents";
+import { EditorServerDocuments } from "./documents";
 
 
 export async function xrefsForFile(
   quartoContext: QuartoContext,
-  doc: EditorServerDocument,
+  filePath: string,
+  documents: EditorServerDocuments,
   projectDir?: string
 ): Promise<XRef[]> {
 
   // first get the index for the source code
+  const doc = documents.getDocument(filePath);
   const srcXRefs = indexSourceFile(
     quartoContext,
     doc.code,
     projectDir
-      ? projectRelativeInput(projectDir, doc.filePath)
-      : path.basename(doc.filePath)
+      ? projectRelativeInput(projectDir, filePath)
+      : path.basename(filePath)
   );
 
   // now get the paths to project xref indexes (if any)
@@ -48,12 +50,12 @@ export async function xrefsForFile(
   // now get the rendered index for this file and ammend w/ computations
   const renderedXrefs = projectDir
     ? readXRefIndex(
-        projectXRefIndexPath(projectXRefIndex, projectDir, doc.filePath),
-        path.relative(projectDir, doc.filePath)
+        projectXRefIndexPath(projectXRefIndex, projectDir, filePath),
+        path.relative(projectDir, filePath)
       )
     : readXRefIndex(
-        fileCrossrefIndexStorage(doc.filePath),
-        path.basename(doc.filePath)
+        fileCrossrefIndexStorage(filePath),
+        path.basename(filePath)
       );
   const xrefs: XRef[] = [...srcXRefs];
   for (const renderedXref of renderedXrefs) {
@@ -82,7 +84,7 @@ export async function xrefsForFile(
     const config = projectDir ? await quartoProjectConfig(quartoContext.runQuarto, projectDir) : undefined;
     const book = config?.config.project.type === "book";
     if (book) {
-      const input = projectRelativeInput(projectDir, doc.filePath);
+      const input = projectRelativeInput(projectDir, filePath);
       for (const projInput of projectXRefIndex.keys()) {
         if (projInput !== input) {
           xrefs.push(

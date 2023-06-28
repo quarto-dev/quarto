@@ -22,17 +22,17 @@ import {
 
 import { XRef } from "editor-types";
 
-import { xrefsForFile } from "editor-server";
+import { EditorServerDocuments, xrefsForFile } from "editor-server";
 import { Quarto } from "../../../quarto";
 
 export async function crossrefCompletions(
   quarto: Quarto,
   token: string,
-  code: string,
   filePath: string,
+  documents: EditorServerDocuments,
   projectDir?: string
 ): Promise<CompletionItem[] | null> {
-  const xrefs = await xrefsForFile(quarto, filePath, code, projectDir);
+  const xrefs = await xrefsForFile(quarto, filePath, documents, projectDir);
   return xrefs
     .map(xrefCompletion(!!projectDir))
     .filter((ref) => ref.label.startsWith(token));

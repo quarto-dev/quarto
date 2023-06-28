@@ -14,7 +14,7 @@
  *
  */
 
-import type { CancellationToken, CompletionContext } from 'vscode-languageserver';
+import type { CancellationToken, CompletionContext, TextDocuments } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { Document, Parser } from "quarto-core"
@@ -185,6 +185,7 @@ export interface LanguageServiceInitialization {
 	readonly config: LsConfiguration;
 	readonly quarto: Quarto;
 	readonly workspace: IWorkspace;
+	readonly documents: TextDocuments<Document>,
 	readonly parser: Parser;
 	readonly logger: ILogger;
 }
@@ -200,7 +201,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
 	const smartSelectProvider = new MdSelectionRangeProvider(init.parser, tocProvider, logger);
 	const foldingProvider = new MdFoldingProvider(init.parser, tocProvider, logger);
 	const linkProvider = new MdLinkProvider(config, init.parser, init.workspace, tocProvider, logger);
-	const completionProvider = new MdCompletionProvider(config, init.quarto, init.workspace, init.parser, linkProvider, tocProvider);
+	const completionProvider = new MdCompletionProvider(config, init.quarto, init.workspace, init.documents, init.parser, linkProvider, tocProvider);
 	const hoverProvider = new MdHoverProvider(init.workspace, init.quarto, init.parser);
 	const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
 	const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);

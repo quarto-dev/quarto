@@ -105,6 +105,7 @@ export type QuartoProjectConfig = {
     };
   };
   files: {
+    input: string[];
     config: string[];
   };
 };

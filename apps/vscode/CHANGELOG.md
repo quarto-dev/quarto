@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.89.0 (Unreleased)
+
+- More reliable indexing for Book cross-references
+
 ## 1.88.0 (Release on 25 June 2023)
 
 - Visual Editor: Remove formik validation (fixes various dialog focus issues)

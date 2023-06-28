@@ -53,3 +53,11 @@ export function editorServerDocuments(documents: TextDocuments<Document>) {
     }
   }
 }
+
+export function editorDocumentsEqual(a: EditorServerDocument, b: EditorServerDocument) {
+  return a.filePath === b.filePath &&
+         a.code === b.code &&
+         a.lastModified.getTime() === b.lastModified.getTime() &&
+         a.version === b.version;
+}
+

@@ -23,6 +23,8 @@ import { pathWithForwardSlashes } from "core";
 
 import { QuartoContext, fileCrossrefIndexStorage, quartoProjectConfig } from "quarto-core";
 import { EditorServerDocuments } from "./documents";
+import { xrefsForBook } from "./xref-book";
+import { XRef } from "editor-types";
 
 
 export async function xrefsForFile(
@@ -32,9 +34,46 @@ export async function xrefsForFile(
   projectDir?: string
 ): Promise<XRef[]> {
 
+  // if this is a book then get xrefs for all chapters/appendices (early return)
+  if (projectDir) {
+    const config = projectDir ? await quartoProjectConfig(quartoContext.runQuarto, projectDir) : undefined;
+    const book = config?.config.project.type === "book";
+    if (book) {
+      return await xrefsForBook(quartoContext, config, documents);
+    }
+  }
+
   // first get the index for the source code
+  const srcXRefs = sourceXRefs(quartoContext, filePath, documents, projectDir);
+
+  // get project xref index (rendered)
+  const projectXRefIndex = projectDir
+    ? projectXrefIndex(projectDir)
+    : new Map<string, string>();
+ 
+  // add computational xrefs (if any)
+  const xrefs = [
+    ...srcXRefs, 
+    ...computationalXRefs(
+      srcXRefs, 
+      projectXRefIndex, 
+      filePath, 
+      projectDir
+  )];
+  
+  // return
+  return xrefs;
+}
+
+export function sourceXRefs(
+  quartoContext: QuartoContext,
+  filePath: string,
+  documents: EditorServerDocuments,
+  projectDir?: string
+): XRef[] {
+
   const doc = documents.getDocument(filePath);
-  const srcXRefs = indexSourceFile(
+  return indexSourceFile(
     quartoContext,
     doc.code,
     projectDir
@@ -42,10 +81,62 @@ export async function xrefsForFile(
       : path.basename(filePath)
   );
 
-  // now get the paths to project xref indexes (if any)
-  const projectXRefIndex = projectDir
-    ? projectXrefIndex(projectDir)
-    : new Map<string, string>();
+}
+
+export type ProjectXRefIndex = Record<string, Record<string, string>>;
+
+
+export function projectXrefIndex(projectDir: string, filePath?: string): Map<string, string> {
+  const mainIndex = new Map<string, string>();
+  const projectXRefDir = path.join(projectDir, ".quarto", "xref");
+  const projectXRefIndex = path.join(projectXRefDir, "INDEX");
+  if (fs.existsSync(projectXRefIndex)) {
+    // read index
+    const index = JSON.parse(
+      fs.readFileSync(projectXRefIndex, { encoding: "utf-8" })
+    ) as ProjectXRefIndex;
+
+    for (const input of Object.keys(index)) {
+
+      const inputPath = path.join(projectDir, input);
+
+      // pass if the file doesn't exixt
+      if (!fs.existsSync(inputPath)) {
+        continue;
+      }
+
+      // pass if a filePath filter was provided and it doesn't match
+      if (filePath && (path.normalize(inputPath) !== path.normalize(filePath))) {
+        continue;
+      }
+
+      // pick the most recently written output
+      for (const output of Object.values(index[input])) {
+        const outputXref = path.join(projectXRefDir, output);
+        if (fs.existsSync(outputXref)) {
+          if (mainIndex.has(input)) {
+            if (
+              fs.statSync(outputXref).mtimeMs >
+              fs.statSync(mainIndex.get(input)!).mtimeMs
+            ) {
+              mainIndex.set(input, outputXref);
+            }
+          } else {
+            mainIndex.set(input, outputXref);
+          }
+        }
+      }
+      
+    }
+  }
+  return mainIndex;
+}
+
+export function computationalXRefs(
+  srcXRefs: XRef[],
+  projectXRefIndex: Map<string,string>,
+  filePath: string, 
+  projectDir?: string) {
 
   // now get the rendered index for this file and ammend w/ computations
   const renderedXrefs = projectDir
@@ -57,48 +148,29 @@ export async function xrefsForFile(
         fileCrossrefIndexStorage(filePath),
         path.basename(filePath)
       );
-  const xrefs: XRef[] = [...srcXRefs];
+  const computationalXRefs: XRef[] = [];
   for (const renderedXref of renderedXrefs) {
     // computational ref
     if (
-      (renderedXref[kType] === kFigType || renderedXref[kType] === kTblType) &&
-      renderedXref[kSuffix]
+      (renderedXref.type === kFigType || renderedXref.type === kTblType) &&
+      renderedXref.suffix
     ) {
       // copy if we have a match in src
       if (
         srcXRefs.find(
           (srcXref) =>
-            srcXref[kType] === renderedXref[kType] &&
-            srcXref[kId] === renderedXref[kId] &&
-            !srcXref[kSuffix]
+            srcXref.type === renderedXref.type &&
+            srcXref.id === renderedXref.id &&
+            !srcXref.suffix
         )
       ) {
-        xrefs.push(renderedXref);
+        computationalXRefs.push(renderedXref);
       }
     }
   }
-
-  // if this is a book then ammend with the full index (save for this file
-  // which we've already indexed
-  if (projectDir) {
-    const config = projectDir ? await quartoProjectConfig(quartoContext.runQuarto, projectDir) : undefined;
-    const book = config?.config.project.type === "book";
-    if (book) {
-      const input = projectRelativeInput(projectDir, filePath);
-      for (const projInput of projectXRefIndex.keys()) {
-        if (projInput !== input) {
-          xrefs.push(
-            ...readXRefIndex(projectXRefIndex.get(projInput)!, projInput)
-          );
-        }
-      } 
-    }
-  }
-
-  return xrefs;
+  return computationalXRefs;
 }
 
-type ProjectXRefIndex = Record<string, Record<string, string>>;
 
 function projectRelativeInput(projectDir: string, filePath: string) {
   return pathWithForwardSlashes(path.relative(projectDir, filePath));
@@ -116,56 +188,9 @@ function projectXRefIndexPath(
   return xrefIndex.get(input);
 }
 
-function projectXrefIndex(projectDir: string): Map<string, string> {
-  const mainIndex = new Map<string, string>();
-  const projectXRefDir = path.join(projectDir, ".quarto", "xref");
-  const projectXRefIndex = path.join(projectXRefDir, "INDEX");
-  if (fs.existsSync(projectXRefIndex)) {
-    // read index
-    const index = JSON.parse(
-      fs.readFileSync(projectXRefIndex, { encoding: "utf-8" })
-    ) as ProjectXRefIndex;
 
-    for (const input of Object.keys(index)) {
-      // ensure the input actually exists
-      if (fs.existsSync(path.join(projectDir, input))) {
-        // pick the most recently written output
-        for (const output of Object.values(index[input])) {
-          const outputXref = path.join(projectXRefDir, output);
-          if (fs.existsSync(outputXref)) {
-            if (mainIndex.has(input)) {
-              if (
-                fs.statSync(outputXref).mtimeMs >
-                fs.statSync(mainIndex.get(input)!).mtimeMs
-              ) {
-                mainIndex.set(input, outputXref);
-              }
-            } else {
-              mainIndex.set(input, outputXref);
-            }
-          }
-        }
-      }
-    }
-  }
-  return mainIndex;
-}
-
-const kFile = "file";
-const kType = "type";
-const kId = "id";
-const kSuffix = "suffix";
-const kTitle = "title";
 const kFigType = "fig";
 const kTblType = "tbl";
-
-type XRef = {
-  [kFile]: string;
-  [kType]: string;
-  [kId]: string;
-  [kSuffix]: string;
-  [kTitle]: string;
-};
 
 let xrefIndexingDir: string | undefined;
 
@@ -239,11 +264,11 @@ function readXRefIndex(indexPath: string | undefined, filename: string) {
       const match = entry.key.match(/^(\w+)-(.*?)(-\d+)?$/);
       if (match) {
         xrefs.push({
-          [kFile]: filename,
-          [kType]: match[1],
-          [kId]: match[2],
-          [kSuffix]: match[3] || "",
-          [kTitle]: entry.caption || "",
+          file: filename,
+          type: match[1],
+          id: match[2],
+          suffix: match[3] || "",
+          title: entry.caption || "",
         });
       }
     }

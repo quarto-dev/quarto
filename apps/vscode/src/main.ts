@@ -36,7 +36,7 @@ import { extensionHost } from "./host";
 export async function activate(context: vscode.ExtensionContext) {
  
   // create extension host
-  const host = extensionHost();
+  const host = await extensionHost();
 
   // create markdown engine
   const engine = new MarkdownEngine();

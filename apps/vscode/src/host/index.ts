@@ -13,7 +13,9 @@
  *
  */
 
-import { DocumentSelector, Disposable } from "vscode";
+import { Uri, DocumentSelector, Disposable } from "vscode";
+
+import * as hooks from 'positron';
 
 import { CellExecutor, cellExecutorForLanguage, executableLanguages } from "./executors";
 import { EditorToolbarProvider } from "./toolbar";
@@ -47,10 +49,43 @@ export interface ExtensionHost {
 
 }
 
-export function extensionHost() {
-  return {
-    executableLanguages,
-    cellExecutorForLanguage,
-    createPreviewPanel,
-  };
+export async function extensionHost() : Promise<ExtensionHost> {
+  if (await hasHooks()) {
+    return {
+      executableLanguages,
+      cellExecutorForLanguage: async (language: string, silent?: boolean) 
+        : Promise<CellExecutor | undefined> => {
+        switch(language) {
+          case "python":
+          case "r":
+            return {
+              execute: async (blocks: string[], _editorUri?: Uri) : Promise<void> => {
+                for (const block of blocks) {
+                  await hooks.runtime.executeCode(language, block, true);
+                } 
+              }
+            };
+          default:
+            return cellExecutorForLanguage(language, silent);
+        }
+      },
+      createPreviewPanel
+    };
+  } else {
+    return {
+      executableLanguages,
+      cellExecutorForLanguage,
+      createPreviewPanel,
+    };
+  }
+}
+
+
+async function hasHooks() {
+  try {
+    hooks.version.toLowerCase();
+    return true;
+  } catch {
+    return false;
+  }
 }

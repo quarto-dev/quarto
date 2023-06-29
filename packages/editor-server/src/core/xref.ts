@@ -48,7 +48,7 @@ export async function xrefsForFile(
 
   // get project xref index (rendered)
   const projectXRefIndex = projectDir
-    ? projectXrefIndex(projectDir)
+    ? projectXrefIndex(projectDir, filePath)
     : new Map<string, string>();
  
   // add computational xrefs (if any)

@@ -320,8 +320,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             ? (workspaceDir || process.cwd()) 
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows(),
-          // python doesn't work b/c jupyter.execSelectionInteractive wants a text editor to be active
-          executableLanguages: this.extensionHost.executableLanguages().filter(language => language !== "python")
+          executableLanguages: this.extensionHost.executableLanguages(true)
         };
       },
 

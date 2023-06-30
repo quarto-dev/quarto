@@ -30,8 +30,11 @@ export type { EditorToolbarProvider,  ToolbarItem, ToolbarCommand, ToolbarButton
 export interface ExtensionHost {
 
   // code execution
-  executableLanguages() : string[];
-  cellExecutorForLanguage(language: string, silent?: boolean) : Promise<CellExecutor | undefined>;
+  executableLanguages(visualMode: boolean) : string[];
+  cellExecutorForLanguage(
+    language: string, 
+    silent?: boolean
+  ) : Promise<CellExecutor | undefined>;
 
   // preview
   createPreviewPanel(
@@ -52,7 +55,7 @@ export interface ExtensionHost {
 export async function extensionHost() : Promise<ExtensionHost> {
   if (await hasHooks()) {
     return {
-      executableLanguages,
+      executableLanguages: (_visualMode: boolean) => executableLanguages(),
       cellExecutorForLanguage: async (language: string, silent?: boolean) 
         : Promise<CellExecutor | undefined> => {
         switch(language) {
@@ -73,7 +76,11 @@ export async function extensionHost() : Promise<ExtensionHost> {
     };
   } else {
     return {
-      executableLanguages,
+      executableLanguages: (visualMode: boolean) => {
+         // python doesn't work in visual mode b/c jupyter.execSelectionInteractive 
+         // wants a text editor to be active
+         return executableLanguages().filter(language => !visualMode || (language !== "python"))
+      },
       cellExecutorForLanguage,
       createPreviewPanel,
     };

@@ -36,7 +36,7 @@ import { CellExecutor, ExtensionHost } from "../../host";
 
 
 export function hasExecutor(host: ExtensionHost, language: string) {
-  return host.executableLanguages().includes(language);
+  return host.executableLanguages(false).includes(language);
 }
 
 export function blockHasExecutor(host: ExtensionHost, token?: Token) : token is TokenMath | TokenCodeBlock {

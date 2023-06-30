@@ -17,6 +17,7 @@
 // TODO: improved base filtering (.., # at end, etc.)
 // TODO: complete ids within ipynb
 // TODO: visual editor completions
+// TODO: completion on demand when there is no token at all
 
 import path from 'path';
 

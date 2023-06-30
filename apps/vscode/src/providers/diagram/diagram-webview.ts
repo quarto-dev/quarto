@@ -31,7 +31,7 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
 import { visualEditorDiagramState } from "./diagram";
 import { isDiagram, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
-import { ExtensionHost } from "../../host";
+import { ExtensionHost, HostWebviewPanel } from "../../host";
 
 const kDiagramViewId = "quarto.diagramView";
 
@@ -143,7 +143,7 @@ class QuartoDiagramWebview extends QuartoWebview<null> {
   public constructor(
     context: ExtensionContext,
     state: null,
-    webviewPanel: WebviewPanel
+    webviewPanel: HostWebviewPanel
   ) {
     super(context, state, webviewPanel);
 

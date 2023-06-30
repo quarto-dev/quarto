@@ -13,7 +13,7 @@
  *
  */
 
-import {
+import vscode, {
   Uri,
   WebviewPanel,
   window,
@@ -26,7 +26,7 @@ import {
 import { Disposable } from "../core/dispose";
 import { preserveEditorFocus } from "../core/doc";
 import { getNonce } from "../core/nonce";
-import { ExtensionHost } from "../host";
+import { ExtensionHost, HostWebviewPanel } from "../host";
 
 export interface ShowOptions {
   readonly preserveFocus?: boolean;
@@ -42,7 +42,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     private webviewType_: new (
       context: ExtensionContext,
       state: S,
-      webviewPanel: WebviewPanel
+      webviewPanel: HostWebviewPanel
     ) => T
   ) {
     this.extensionUri_ = context.extensionUri;
@@ -91,7 +91,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     return !!this.activeView_ && this.activeView_.webviewPanel().visible;
   }
 
-  protected onViewStateChanged(_event: WebviewPanelOnDidChangeViewStateEvent) {}
+  protected onViewStateChanged() {}
 
   private resolveOnShow() {
     if (this.onShow_) {
@@ -137,8 +137,8 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
         this.activeView_ = undefined;
       }
     });
-    view.webviewPanel().onDidChangeViewState((event) => {
-      this.onViewStateChanged(event);
+    view.webviewPanel().onDidChangeViewState(() => {
+      this.onViewStateChanged();
     });
   }
 
@@ -160,7 +160,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
 }
 
 export abstract class QuartoWebview<T> extends Disposable {
-  protected readonly _webviewPanel: WebviewPanel;
+  protected readonly _webviewPanel: HostWebviewPanel;
 
   private readonly _onDidDispose = this._register(new EventEmitter<void>());
   public readonly onDispose = this._onDidDispose.event;
@@ -168,7 +168,7 @@ export abstract class QuartoWebview<T> extends Disposable {
   public constructor(
     private readonly context: ExtensionContext,
     state: T,
-    webviewPanel: WebviewPanel
+    webviewPanel: HostWebviewPanel
   ) {
     super();
 

@@ -13,7 +13,7 @@
  *
  */
 
-import { Uri, DocumentSelector, Disposable } from "vscode";
+import vscode, { Uri, DocumentSelector, Disposable } from "vscode";
 
 import * as hooks from 'positron';
 
@@ -26,6 +26,14 @@ import { createPreviewPanel } from "./preview";
 
 export type { CellExecutor };
 export type { EditorToolbarProvider,  ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
+
+export interface HostWebviewPanel extends vscode.Disposable {
+  readonly webview: vscode.Webview;
+  readonly visible: boolean;
+  reveal(viewColumn?: vscode.ViewColumn, preserveFocus?: boolean): void;
+  readonly onDidChangeViewState: vscode.Event<any>;
+  readonly onDidDispose: vscode.Event<void>;
+}
 
 export interface ExtensionHost {
 
@@ -42,7 +50,7 @@ export interface ExtensionHost {
     title: string,
     preserveFocus?: boolean, 
     options?: WebviewPanelOptions & WebviewOptions
-  ): WebviewPanel;
+  ): HostWebviewPanel;
 
   // editor toolbar
   registerEditorToolbarProvider?(
@@ -72,7 +80,30 @@ export async function extensionHost() : Promise<ExtensionHost> {
             return cellExecutorForLanguage(language, silent);
         }
       },
-      createPreviewPanel
+      createPreviewPanel: (
+        viewType: string, 
+        title: string,
+        preserveFocus?: boolean, 
+        options?: WebviewPanelOptions & WebviewOptions
+      ): HostWebviewPanel => {
+        const panel = hooks.window.createPreviewPanel(
+          viewType,
+          title,
+          preserveFocus,
+          {
+            enableScripts: options?.enableScripts,
+            enableForms: options?.enableForms,
+            localResourceRoots: options?.localResourceRoots,
+            portMapping: options?.portMapping
+          }
+        );
+        return {
+          ...panel,
+          reveal: (viewColumn?: vscode.ViewColumn, preserveFocus?: boolean) => {
+            panel.reveal(preserveFocus);
+          }
+        }
+      }
     };
   } else {
     return {

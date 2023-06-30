@@ -17,13 +17,12 @@
 import {
   env,
   Uri,
-  WebviewPanel,
-  workspace,
   window,
   ColorThemeKind,
   ExtensionContext,
 } from "vscode";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
+import { HostWebviewPanel } from "../../host";
 
 const kQuarotPreviewZoomLevel = "quartoPreviewZoomLevel";
 
@@ -61,7 +60,7 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
   public constructor(
     context: ExtensionContext,
     state: QuartoPreviewState,
-    webviewPanel: WebviewPanel
+    webviewPanel: HostWebviewPanel
   ) {
     super(context, state, webviewPanel);
 

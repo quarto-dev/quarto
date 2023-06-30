@@ -13,16 +13,13 @@
  *
  */
 
-import vscode, { Uri, DocumentSelector, Disposable } from "vscode";
+import vscode, { DocumentSelector, Disposable, WebviewPanelOptions, WebviewOptions } from "vscode";
 
-import * as hooks from 'positron';
 
 import { CellExecutor, cellExecutorForLanguage, executableLanguages } from "./executors";
 import { EditorToolbarProvider } from "./toolbar";
-import { WebviewPanelOptions } from "vscode";
-import { WebviewOptions } from "vscode";
-import { WebviewPanel } from "vscode";
 import { createPreviewPanel } from "./preview";
+import { hasHooks, hooksExtensionHost } from "./hooks";
 
 export type { CellExecutor };
 export type { EditorToolbarProvider,  ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
@@ -60,70 +57,22 @@ export interface ExtensionHost {
 
 }
 
-export async function extensionHost() : Promise<ExtensionHost> {
-  if (await hasHooks()) {
-    return {
-      executableLanguages: (_visualMode: boolean) => executableLanguages(),
-      cellExecutorForLanguage: async (language: string, silent?: boolean) 
-        : Promise<CellExecutor | undefined> => {
-        switch(language) {
-          case "python":
-          case "r":
-            return {
-              execute: async (blocks: string[], _editorUri?: Uri) : Promise<void> => {
-                for (const block of blocks) {
-                  await hooks.runtime.executeCode(language, block, true);
-                } 
-              }
-            };
-          default:
-            return cellExecutorForLanguage(language, silent);
-        }
-      },
-      createPreviewPanel: (
-        viewType: string, 
-        title: string,
-        preserveFocus?: boolean, 
-        options?: WebviewPanelOptions & WebviewOptions
-      ): HostWebviewPanel => {
-        const panel = hooks.window.createPreviewPanel(
-          viewType,
-          title,
-          preserveFocus,
-          {
-            enableScripts: options?.enableScripts,
-            enableForms: options?.enableForms,
-            localResourceRoots: options?.localResourceRoots,
-            portMapping: options?.portMapping
-          }
-        );
-        return {
-          ...panel,
-          reveal: (viewColumn?: vscode.ViewColumn, preserveFocus?: boolean) => {
-            panel.reveal(preserveFocus);
-          }
-        }
-      }
-    };
+export function extensionHost() : ExtensionHost {
+  if (hasHooks()) {
+    return hooksExtensionHost();
   } else {
-    return {
-      executableLanguages: (visualMode: boolean) => {
-         // python doesn't work in visual mode b/c jupyter.execSelectionInteractive 
-         // wants a text editor to be active
-         return executableLanguages().filter(language => !visualMode || (language !== "python"))
-      },
-      cellExecutorForLanguage,
-      createPreviewPanel,
-    };
+    return defaultExtensionHost();
   }
 }
 
-
-async function hasHooks() {
-  try {
-    hooks.version.toLowerCase();
-    return true;
-  } catch {
-    return false;
-  }
+function defaultExtensionHost() : ExtensionHost {
+  return {
+    executableLanguages: (visualMode: boolean) => {
+       // python doesn't work in visual mode b/c jupyter.execSelectionInteractive 
+       // wants a text editor to be active
+       return executableLanguages().filter(language => !visualMode || (language !== "python"))
+    },
+    cellExecutorForLanguage,
+    createPreviewPanel,
+  };
 }

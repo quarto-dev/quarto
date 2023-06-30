@@ -2,6 +2,7 @@
 
 ## 1.89.0 (Unreleased)
 
+- Path completions for include and embed shortcodes
 - More reliable indexing for Book cross-references
 
 ## 1.88.0 (Release on 25 June 2023)

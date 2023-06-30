@@ -76,12 +76,21 @@ export function hooksExtensionHost() : ExtensionHost {
       );
       
       // adapt to host interface
-      return {
-        ...panel,
-        reveal: (_viewColumn?: ViewColumn, preserveFocus?: boolean) => {
-          panel.reveal(preserveFocus);
-        }
-      }
+      return new HookWebviewPanel(panel);
     }
   };
+}
+
+
+class HookWebviewPanel implements HostWebviewPanel {
+  constructor(private readonly panel_: hooks.PreviewPanel) {}
+
+  get webview() { return this.panel_.webview };
+  get visible() { return this.panel_.visible };
+  reveal(_viewColumn?: ViewColumn, preserveFocus?: boolean) {
+    this.panel_.reveal(preserveFocus);
+  }
+  onDidChangeViewState = this.panel_.onDidChangeViewState;
+  onDidDispose = this.panel_.onDidDispose;
+  dispose() { this.panel_.dispose( )};
 }

@@ -5,6 +5,7 @@
 - Path completions for include and embed shortcodes
 - More reliable indexing for Book cross-references
 - Syntax highlight code blocks where attributes include an id
+- Visual Editor: Omni insert command for shortcodes
 
 ## 1.88.0 (Release on 25 June 2023)
 

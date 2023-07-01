@@ -35,9 +35,10 @@ import {
   blockCapsuleTextHandler,
   blockCapsuleSourceWithoutPrefix,
 } from '../api/pandoc_capsule';
+import { OmniInsertGroup } from '../api/omni_insert';
 
 const extension = (context: ExtensionContext): Extension | null => {
-  const { format } = context;
+  const { format, ui } = context;
 
   // return null if no shortcodes
   if (!format.hugoExtensions.shortcodes) {
@@ -124,6 +125,15 @@ const extension = (context: ExtensionContext): Extension | null => {
             }
             return true;
           },
+          {
+            name: ui.context.translateText('Shortcode'),
+            description: ui.context.translateText('Shortcode command'),
+            group: OmniInsertGroup.Blocks,
+            priority: 5,
+            image: () => ui.prefs.darkMode() ? ui.images.omni_insert.generic : ui.images.omni_insert.generic,
+            selectionOffset: 4
+          },
+            
         ),
       ];
     },

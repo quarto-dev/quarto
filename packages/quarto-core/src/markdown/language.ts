@@ -27,7 +27,7 @@ export function isLanguageBlock(token: Token) {
 export function isExecutableLanguageBlock(token: Token) : token is TokenMath | TokenCodeBlock {
   if (isDisplayMath(token)) {
     return true;
-  } else if (isCodeBlock(token)) {
+  } else if (isCodeBlock(token) && token.attr?.[kAttrClasses].length) {
     const clz = token.attr?.[kAttrClasses][0];
     if (!clz) {
       return false;
@@ -88,7 +88,7 @@ export function isDiagram(token: Token) : token is TokenCodeBlock {
 export function languageNameFromBlock(token: Token) {
   if (isDisplayMath(token)) {
     return "tex";
-  } else if (isCodeBlock(token)) {
+  } else if (isCodeBlock(token) && token.attr?.[kAttrClasses].length) {
     const match = token.attr?.[kAttrClasses][0].match(/^\{?=?([a-zA-Z0-9_-]+)/);
     if (match) {
       return match[1].split("-").pop() || "";

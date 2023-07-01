@@ -158,6 +158,7 @@ function parseDocument(
           const line = inputLines[token.map[0]];
           const execMatch = line.match(/^([\t >]*)(```+)\s*\{([a-zA-Z0-9_-]+)/);
           const rawMatch = line.match(/\{=(\w+)\}\s*$/);
+          const fenceMatch = line.match(/^([\t >]*)(```+)\s*([a-zA-Z0-9_-]+)/);
           if (execMatch) {
             tokens.push({
               type: "CodeBlock",
@@ -173,6 +174,13 @@ function parseDocument(
               attr: undefined,
               data: { format: rawMatch[1], text: token.content }
             })
+          } else if (fenceMatch) {
+            tokens.push({
+              type: "CodeBlock",
+              range: tokenRange(token.map),
+              attr: ["", [fenceMatch[3]], []],
+              data: token.content.replace(/\n$/, "")
+            });
           } else {
             tokens.push({ 
               type: "CodeBlock", 

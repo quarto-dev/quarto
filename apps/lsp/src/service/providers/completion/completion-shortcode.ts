@@ -14,10 +14,8 @@
  *
  */
 
-// TODO: improved base filtering (.., # at end, etc.)
-// TODO: complete ids within ipynb
 // TODO: visual editor completions
-// TODO: completion on demand when there is no token at all
+// TODO: complete ids within ipynb
 
 import path from 'path';
 
@@ -28,7 +26,7 @@ import { EditorContext } from "../../quarto";
 import { FileStat, IWorkspace, getWorkspaceFolder } from "../../workspace";
 import { Schemes } from '../../util/schemes';
 
-const kShortcodeRegex = /(^\s*{{< )(embed|include)(\s+)([^\s]+).*? >}}\s*$/;
+const kShortcodeRegex = /(^\s*{{< )(embed|include)(\s+)([^\s]+)?.*? >}}\s*$/;
 
 export async function shortcodeCompletions(context: EditorContext, workspace: IWorkspace) : Promise<CompletionItem[] | null> {
   
@@ -43,15 +41,15 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
     // is the cursor in the file region (group 4) and is the 
     // next character a space?
     const beginFile = match[1].length + match[2].length + match[3].length;
-    const endFile = beginFile + match[4].length;
+    const endFile = beginFile + (match[4]?.length || 0);
     const col = context.position.column;
     if (col >= beginFile && col <= endFile && context.line[col] === " ") {
       // completion token and shortcode
       const shortcode = match[2];
-      const token = match[4];
+      const token = (match[4] || "");
 
       // if the token is a directory reference then stand down
-      if (token === "." || token === "..") {
+      if (token.match(/\/?\.\.?$/)) {
         return null;
       }
 

@@ -71,7 +71,7 @@ export function isTextContent(path?: string) {
 }
 
 export function isIpynbContent(path?: string) {
-  return !!path && path.endsWith(".ipynb");
+  return !!path && path.toLowerCase().endsWith(".ipynb");
 }
 
 const MEDIA_TYPES: Record<string, string> = {

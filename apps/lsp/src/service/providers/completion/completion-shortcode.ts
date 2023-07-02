@@ -14,13 +14,14 @@
  *
  */
 
-// TODO: visual editor completions
 // TODO: complete ids within ipynb
 
 import path from 'path';
 
 import { URI, Utils } from 'vscode-uri';
 import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
+
+import { isIpynbContent } from 'core-node';
 
 import { EditorContext } from "../../quarto";
 import { FileStat, IWorkspace, getWorkspaceFolder } from "../../workspace";
@@ -47,15 +48,26 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
       // completion token and shortcode
       const shortcode = match[2];
       const token = (match[4] || "");
+      const docUri = URI.file(context.path);
 
       // if the token is a directory reference then stand down
       if (token.match(/\/?\.\.?$/)) {
         return null;
       }
 
+      // for embed, split on '#' and lookup ids
+      if (shortcode === "embed") {
+        const parts = token.split("#");
+        if (parts.length === 2 && isIpynbContent(parts[0])) {
+          const ipynbURI = resolveReference(docUri, workspace, parts[0]);
+          if (ipynbURI) {
+            return ipynbCompletions(ipynbURI);
+          }
+        }
+      }
+
       // find parent dir
       const valueBeforeLastSlash = token.substring(0, token.lastIndexOf('/') + 1); // keep the last slash
-      const docUri = URI.file(context.path);
       const parentDir = resolveReference(docUri, workspace, valueBeforeLastSlash || '.');
       if (!parentDir) {
         return null;
@@ -98,11 +110,8 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
         });
       }
       return completions;
-    }
-    
+    }    
   }
-
-
 
   return null;
 
@@ -137,4 +146,9 @@ function resolvePath(root: URI, ref: string): URI | undefined {
   } catch {
     return undefined;
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ipynbCompletions(_uri: URI) : CompletionItem[] | null {
+  return null;
 }

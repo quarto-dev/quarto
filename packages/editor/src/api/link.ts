@@ -13,10 +13,11 @@
  *
  */
 
-import { Node as ProsemirrorNode } from 'prosemirror-model';
+import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import { findChildren, findChildrenByType } from 'prosemirror-utils';
 
 import { LinkType, LinkCapabilities, LinkTargets, LinkHeadingTarget } from 'editor-types'
+import { markPasteHandler } from './clipboard';
 
 export const kLinkTargetUrl = 0;
 export const kLinkTargetTitle = 1;
@@ -28,6 +29,12 @@ export const kLinkTarget = 2;
 export { LinkType };
 
 export type { LinkCapabilities, LinkTargets, LinkHeadingTarget  };
+
+export const kLinkRegex = /(?:<)?([a-z]+:\/\/[^\s>]+)(?:>)?/;
+
+export function isLink(text: string) {
+  return kLinkRegex.test(text);
+}
 
 export async function linkTargets(doc: ProsemirrorNode) {
   const ids = findChildren(doc, node => !!node.attrs.id).map(value => value.node.attrs.id);
@@ -42,3 +49,13 @@ export async function linkTargets(doc: ProsemirrorNode) {
     headings,
   };
 }
+
+export function linkPasteHandler(schema: Schema) {
+  return markPasteHandler(
+    new RegExp(kLinkRegex.source, 'g'),
+    schema.marks.link, 
+    url => ({ href: url })
+  )
+}
+
+

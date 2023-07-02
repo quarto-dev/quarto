@@ -24,6 +24,7 @@ import { EditorMarkdown } from '../api/markdown-types';
 import { clearFormatting } from '../api/formatting';
 import { EditorCommandId, ProsemirrorCommand } from '../api/command';
 import { pasteTransaction } from '../api/clipboard';
+import { isLink, linkPasteHandler } from '../api/link';
 
 const kTextPlain = "text/plain";
 const kTextHtml = "text/html";
@@ -44,7 +45,7 @@ const extension = (context: ExtensionContext) => {
         schema, 
         context.markdown, 
         collectPasteRaw,
-        [pasteMarkdownHandler, pasteHtmlHandler]
+        [pasteMarkdownHandler(schema), pasteHtmlHandler(schema)]
       )
     ],
     commands: () => {
@@ -70,7 +71,6 @@ const extension = (context: ExtensionContext) => {
 }
 
 type PasteHandler = (
-  schema: Schema, 
   editorMarkdown: EditorMarkdown,
   view: EditorView, 
   event: ClipboardEvent, 
@@ -123,7 +123,7 @@ function pastePlugin(
       handlePaste(view, event, slice) {
         const raw = pasteRaw() || shiftPaste;
         for (const handler of handlers) {
-          const handled = handler(schema, editorMarkdown, view, event, raw, slice);
+          const handled = handler(editorMarkdown, view, event, raw, slice);
           if (handled) {
             return true;
           }
@@ -136,109 +136,138 @@ function pastePlugin(
 }
 
 
+
 function pasteMarkdownHandler(
-  _schema: Schema, 
-  editorMarkdown: EditorMarkdown,
-  view: EditorView, 
-  event: ClipboardEvent, 
-  pasteRaw: boolean,
-  slice: Slice) {
+  schema: Schema
+) {
 
-  // must be in a location valid for a markdown paste
-  if (!editorMarkdown.allowMarkdownPaste(view.state)) {
-    return false;
+  const linkHandler = linkPasteHandler(schema);
+
+  return (editorMarkdown: EditorMarkdown,
+          view: EditorView, 
+          event: ClipboardEvent, 
+          pasteRaw: boolean,
+          slice: Slice) => {
+  
+    // must be in a location valid for a markdown paste
+    if (!editorMarkdown.allowMarkdownPaste(view.state)) {
+      return false;
+    }
+  
+    // inspect clipboard and selection state
+    const { clipboardData } = event;
+    const text = clipboardData?.getData(kTextPlain);
+    const html = clipboardData?.getData(kTextHtml);
+    const isVscode = isVscodePaste(clipboardData, html);
+  
+    // must have text/plain
+    if (!text) {
+      return false;
+    }
+  
+    // text/html is a disqualifier, save for pastes from vscode
+    // (where we need to steer around using the html version of the code)
+    if (html && !isVscode) {
+      return false;
+    }
+  
+    editorMarkdown.markdownToSlice(text, slice.openStart, slice.openEnd).then(slice => {
+  
+      // convert bare links into markdown links
+      slice = linkHandler(slice);
+
+      // prepare paste transaction
+      const tr = pasteTransaction(view.state);
+      
+      // if there is a selection and the slice is a single link then apply the mark
+      const sliceText = slice.content.textBetween(0, slice.content.size);
+      if (!tr.selection.empty && isLink(sliceText)) {
+        tr.addMark(
+          tr.selection.from, 
+          tr.selection.to, 
+          schema.marks.link.create({ href: sliceText })
+        );
+      } else {
+        const prevSel = tr.selection;
+        tr.replaceSelection(slice);
+        if (pasteRaw) {
+          clearFormatting(tr, prevSel.from, prevSel.from + slice.size);
+        } 
+      }
+      view.dispatch(tr);
+    });
+  
+    return true; 
+  
   }
-
-  // inspect clipboard and selection state
-  const { clipboardData } = event;
-  const text = clipboardData?.getData(kTextPlain);
-  const html = clipboardData?.getData(kTextHtml);
-  const isVscode = isVscodePaste(clipboardData, html);
-
-  // must have text/plain
-  if (!text) {
-    return false;
-  }
-
-  // text/html is a disqualifier, save for pastes from vscode
-  // (where we need to steer around using the html version of the code)
-  if (html && !isVscode) {
-    return false;
-  }
-
-  editorMarkdown.markdownToSlice(text, slice.openStart, slice.openEnd).then(slice => {
-    const tr = pasteTransaction(view.state);
-    const prevSel = tr.selection;
-    tr.replaceSelection(slice);
-    if (pasteRaw) {
-      clearFormatting(tr, prevSel.from, prevSel.from + slice.size);
-    } 
-    view.dispatch(tr);
-  });
-
-  return true; 
 
 }
+  
+
+
 
 function pasteHtmlHandler(
-  schema: Schema, 
-  _editorMarkdown: EditorMarkdown,
-  view: EditorView, 
-  event: ClipboardEvent, 
-  pasteRaw: boolean,
-  slice: Slice) {
-
-  if (!event.clipboardData) {
+  schema: Schema
+) {
+  return (_editorMarkdown: EditorMarkdown,
+    view: EditorView, 
+    event: ClipboardEvent, 
+    pasteRaw: boolean,
+    slice: Slice) => {
+  
+    if (!event.clipboardData) {
+      return false;
+    }
+  
+    // helper to paste slice
+    const pasteSlice = (s: Slice) => {
+      const tr = view.state.tr;
+      const prevSel = tr.selection;
+      tr.replaceSelection(s);
+      if (pasteRaw) {;
+        clearFormatting(tr, prevSel.from, prevSel.from + slice.size)
+      } 
+      view.dispatch(tr);
+    }
+  
+    // if this contains office content or we are on windows then handle it
+    // (office content has excessive internal vertical space, windows has
+    // issues w/ prosemirror freezing in its paste implementation when handling
+    // multiple paragraphs)
+    const kTextHtml = "text/html";
+    const kWordSchema = "urn:schemas-microsoft-com:office:word";
+    if (event.clipboardData.types.includes(kTextHtml)) {
+      const html = event.clipboardData.getData(kTextHtml);
+      if (html.includes(kWordSchema) || isWindows()) {
+        // filter out nodes with empty paragraphs
+        const nodes: ProsemirrorNode[] = [];
+        for (let i = 0; i < slice.content.childCount; i++) {
+          const node = slice.content.child(i)
+          if (node.textContent.trim() !== "") {
+            const newNode = node.type.createAndFill(node.attrs, mapFragment(node.content, nd => {
+              if (nd.isText) {
+                return schema.text(nd.text!.replace(/\n/g, ' '), nd.marks);
+              } else {
+                return nd;
+              }
+            }), node.marks);
+            nodes.push(newNode || node);
+          }
+        }
+        const fragment = Fragment.fromArray(nodes);
+        const newSlice = new Slice(fragment, slice.openStart, slice.openEnd);
+        pasteSlice(newSlice); 
+        return true;
+      } else if (pasteRaw) {
+        pasteSlice(slice);
+        return true;
+      }
+    }
+      
     return false;
   }
-
-  // helper to paste slice
-  const pasteSlice = (s: Slice) => {
-    const tr = view.state.tr;
-    const prevSel = tr.selection;
-    tr.replaceSelection(s);
-    if (pasteRaw) {;
-      clearFormatting(tr, prevSel.from, prevSel.from + slice.size)
-    } 
-    view.dispatch(tr);
-  }
-
-  // if this contains office content or we are on windows then handle it
-  // (office content has excessive internal vertical space, windows has
-  // issues w/ prosemirror freezing in its paste implementation when handling
-  // multiple paragraphs)
-  const kTextHtml = "text/html";
-  const kWordSchema = "urn:schemas-microsoft-com:office:word";
-  if (event.clipboardData.types.includes(kTextHtml)) {
-    const html = event.clipboardData.getData(kTextHtml);
-    if (html.includes(kWordSchema) || isWindows()) {
-      // filter out nodes with empty paragraphs
-      const nodes: ProsemirrorNode[] = [];
-      for (let i = 0; i < slice.content.childCount; i++) {
-        const node = slice.content.child(i)
-        if (node.textContent.trim() !== "") {
-          const newNode = node.type.createAndFill(node.attrs, mapFragment(node.content, nd => {
-            if (nd.isText) {
-              return schema.text(nd.text!.replace(/\n/g, ' '), nd.marks);
-            } else {
-              return nd;
-            }
-          }), node.marks);
-          nodes.push(newNode || node);
-        }
-      }
-      const fragment = Fragment.fromArray(nodes);
-      const newSlice = new Slice(fragment, slice.openStart, slice.openEnd);
-      pasteSlice(newSlice); 
-      return true;
-    } else if (pasteRaw) {
-      pasteSlice(slice);
-      return true;
-    }
-  }
-    
-  return false;
 }
+  
 
 // detect vscode paste
 const kVscodeEditorData = "vscode-editor-data";

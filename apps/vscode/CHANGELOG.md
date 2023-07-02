@@ -7,6 +7,8 @@
 - Syntax highlight code blocks where attributes include an id
 - Fix issue with tokenizing language only fenced code
 - Visual Editor: Omni insert command for shortcodes
+- Visual Editor: Restore link paste handling (regression from markdown paste)
+- Visual Editor: Apply link to text when pasting links over selections
 
 ## 1.88.0 (Release on 25 June 2023)
 

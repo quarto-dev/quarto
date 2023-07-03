@@ -14,9 +14,9 @@
  *
  */
 
-// TODO: complete ids within ipynb
-
+import fs from 'fs';
 import path from 'path';
+
 
 import { URI, Utils } from 'vscode-uri';
 import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
@@ -26,6 +26,7 @@ import { isIpynbContent } from 'core-node';
 import { EditorContext } from "../../quarto";
 import { FileStat, IWorkspace, getWorkspaceFolder } from "../../workspace";
 import { Schemes } from '../../util/schemes';
+import { jupyterFromJSON, kCellId, kCellLabel, kCellTags, partitionCellOptions } from 'core';
 
 const kShortcodeRegex = /(^\s*{{< )(embed|include)(\s+)([^\s]+)?.*? >}}\s*$/;
 
@@ -101,12 +102,13 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
         // create completion
         const uri = Utils.joinPath(parentDir, name);
         const isDir = type.isDirectory;
-        const label = isDir ? name + '/' : name;
+        const isIpynb = isIpynbContent(name);
+        const label = isDir ? name + '/' : isIpynb ? name + '#' : name;
         completions.push({
           label,
           kind: isDir ? CompletionItemKind.Folder : CompletionItemKind.File,
           documentation: isDir ? uri.path + '/' : uri.path,
-          command: isDir ? { command: 'editor.action.triggerSuggest', title: '' } : undefined,
+          command: isDir || isIpynb ? { command: 'editor.action.triggerSuggest', title: '' } : undefined,
         });
       }
       return completions;
@@ -148,7 +150,51 @@ function resolvePath(root: URI, ref: string): URI | undefined {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ipynbCompletions(_uri: URI) : CompletionItem[] | null {
-  return null;
+function ipynbCompletions(uri: URI) : CompletionItem[] | null {
+  const ipynbPath = uri.fsPath;
+  if (fs.existsSync(ipynbPath)) {
+    const modified = fs.statSync(ipynbPath).mtime.getTime();
+    const cached = ipynbEmbedIds.get(ipynbPath);
+    if (cached && modified <= cached.modified) {
+      return cached.ids.map(idToCompletion);
+    } else {
+      const ids = readIpynbEmbedIds(ipynbPath);
+      if (ids) {
+        ipynbEmbedIds.set(ipynbPath, { modified, ids })
+        return ids.map(idToCompletion);
+      } else {
+        return null;
+      }
+    }
+  } else {
+    return null;
+  }
+}
+
+const ipynbEmbedIds = new Map<string,{ modified: number, ids: string[]}>();
+
+function readIpynbEmbedIds(ipynbPath: string) : string[] | null {
+  const embedIds: string[] = [];
+  const nbContents = fs.readFileSync(ipynbPath, { encoding: "utf-8" });
+  const nb = jupyterFromJSON(nbContents);
+  for (const cell of nb.cells) {
+    if (cell.cell_type === "code") {
+      const { yaml } = partitionCellOptions(nb.metadata.kernelspec.language, cell.source);
+      if (typeof(yaml?.[kCellLabel]) === "string") {
+        embedIds.push(yaml[kCellLabel])
+      } else if (typeof(yaml?.[kCellId]) === "string") {
+        embedIds.push(yaml[kCellId])
+      } else if (Array.isArray(cell.metadata[kCellTags]) && cell.metadata[kCellTags].length) {
+        embedIds.push(String(cell.metadata[kCellTags][0]))
+      }
+    }
+  }
+  return embedIds.length ? embedIds : null;
+}
+
+function idToCompletion(id: string) : CompletionItem {
+  return {
+    label: id,
+    kind: CompletionItemKind.Field
+  };
 }

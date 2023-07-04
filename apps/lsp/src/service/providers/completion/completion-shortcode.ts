@@ -103,9 +103,10 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
         const uri = Utils.joinPath(parentDir, name);
         const isDir = type.isDirectory;
         const isIpynb = isIpynbContent(name);
-        const label = isDir ? name + '/' : isIpynb ? name + '#' : name;
+        const insertText = isDir ? name + '/' : isIpynb ? name + '#' : name;
         completions.push({
-          label,
+          label: name,
+          insertText,
           kind: isDir ? CompletionItemKind.Folder : CompletionItemKind.File,
           documentation: isDir ? uri.path + '/' : uri.path,
           command: isDir || isIpynb ? { command: 'editor.action.triggerSuggest', title: '' } : undefined,

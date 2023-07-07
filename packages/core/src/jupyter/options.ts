@@ -54,7 +54,7 @@ export function partitionCellOptions(
     break;
   }
 
-  const yaml = yamlLines.length > 0 ? jsYaml.load(yamlLines.join()) : undefined;
+  const yaml = yamlLines.length > 0 ? jsYaml.load(yamlLines.join("\n")) : undefined;
   return {
     yaml: yaml as Record<string, unknown> | undefined,
     optionsSource,

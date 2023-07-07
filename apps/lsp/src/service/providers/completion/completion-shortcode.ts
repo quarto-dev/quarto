@@ -19,7 +19,7 @@ import path from 'path';
 
 
 import { URI, Utils } from 'vscode-uri';
-import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
+import { CompletionItem, CompletionItemKind, TextEdit, Range } from "vscode-languageserver";
 
 import { isIpynbContent } from 'core-node';
 
@@ -104,9 +104,19 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
         const isDir = type.isDirectory;
         const isIpynb = isIpynbContent(name);
         const insertText = isDir ? name + '/' : isIpynb ? name + '#' : name;
+        const edit = TextEdit.replace(
+          Range.create(
+            context.position.row,
+            context.position.column - token.length,
+            context.position.row,
+            context.position.column
+          ),
+          insertText
+        );
+
         completions.push({
           label: name,
-          insertText,
+          textEdit: edit,
           kind: isDir ? CompletionItemKind.Folder : CompletionItemKind.File,
           documentation: isDir ? uri.path + '/' : uri.path,
           command: isDir || isIpynb ? { command: 'editor.action.triggerSuggest', title: '' } : undefined,

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.89.0 (Unreleased)
+## 1.89.0 (Release on 7 July 2023)
 
 - Path and content completions for include and embed shortcodes
 - More reliable indexing for Book cross-references

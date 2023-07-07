@@ -111,12 +111,14 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
             context.position.row,
             context.position.column
           ),
-          insertText
+          valueBeforeLastSlash + insertText
         );
+        const useEdit = !valueBeforeLastSlash.startsWith(".");
 
         completions.push({
           label: name,
-          textEdit: edit,
+          insertText: useEdit ? undefined : insertText,
+          textEdit: useEdit ? edit : undefined,
           kind: isDir ? CompletionItemKind.Folder : CompletionItemKind.File,
           documentation: isDir ? uri.path + '/' : uri.path,
           command: isDir || isIpynb ? { command: 'editor.action.triggerSuggest', title: '' } : undefined,

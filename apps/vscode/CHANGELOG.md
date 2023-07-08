@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.90.0 (Unreleased)
+
+- Jupyter embed completions for markdown figures
+
 ## 1.89.0 (Release on 7 July 2023)
 
 - Path and content completions for include and embed shortcodes

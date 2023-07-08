@@ -200,6 +200,12 @@ function readIpynbEmbedIds(ipynbPath: string) : string[] | null {
       } else if (Array.isArray(cell.metadata[kCellTags]) && cell.metadata[kCellTags].length) {
         embedIds.push(String(cell.metadata[kCellTags][0]))
       }
+    } else if (cell.cell_type === "markdown") {
+      const source = cell.source.join("");
+      const match = source.match(/\)\{#(fig-\S+)\}/);
+      if (match) {
+        embedIds.push(match[1]);
+      }
     }
   }
   return embedIds.length ? embedIds : null;

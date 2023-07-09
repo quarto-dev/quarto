@@ -3,6 +3,7 @@
 ## 1.90.0 (Unreleased)
 
 - Jupyter embed completions for markdown figures
+- Only move source cursor when switching from visual
 
 ## 1.89.0 (Release on 7 July 2023)
 

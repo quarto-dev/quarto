@@ -73,6 +73,9 @@ export async function reopenEditorInSourceMode(
     await commands.executeCommand("workbench.action.files.save");
   }
 
+  // note pending switch to source
+  VisualEditorProvider.recordPendingSwitchToSource(document);
+
   // close editor (return immediately as if we don't then any 
   // rpc method that calls this wil result in an error b/c the webview
   // has been torn down by the time we return)

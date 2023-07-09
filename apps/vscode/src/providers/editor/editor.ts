@@ -99,6 +99,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   // track the list source location in visual editors (used for syncing position)
   private static visualEditorLastSourcePos = new Map<string,SourcePos>();
 
+  // track pending switch to source
+  private static visualEditorPendingSwitchToSource = new Set<string>();
+
   // track pending xref navigations
   private static visualEditorPendingXRefNavigations = new Map<string,XRef>();
 
@@ -145,10 +148,21 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
       const document = editor.document;
       if (document && isQuartoDoc(document)) {
-        const pos = this.visualEditorLastSourcePos.get(document.uri.toString());
+        const uri = document.uri.toString();
+        
+        // check for switch (one shot)
+        const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
+        this.visualEditorPendingSwitchToSource.delete(uri);
+
+        // check for pos (one shot)
+        const pos = this.visualEditorLastSourcePos.get(uri);
+        this.visualEditorLastSourcePos.delete(uri);
+
+        if (!isSwitch) {
+          return;
+        }
+
         if (pos) {
-          // one shot
-          this.visualEditorLastSourcePos.delete(document.uri.toString());
 
           // find the index
           let cursorIndex = -1;
@@ -190,6 +204,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   }
 
   public static readonly viewType = "quarto.visualEditor";
+
+  public static recordPendingSwitchToSource(document: TextDocument) {
+    this.visualEditorPendingSwitchToSource.add(document.uri.toString());
+  }
 
   public static activeEditor(includeVisible?: boolean) : QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);

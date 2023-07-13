@@ -59,7 +59,9 @@
     "onWebviewPanel:quarto.previewView",
     "onWebviewPanel:quarto.diagramView",
     "onCustomEditor:quarto.visualEditor",
-    "onView:quarto-assist"
+    "onNotebook:jupyter-notebook",
+    "onView:quarto-assist",
+    "onRenderer:quarto.markdown-it.qmd-extension"
   ],
   "capabilities": {
     "virtualWorkspaces": true
@@ -1262,10 +1264,14 @@
       {
         "id": "quarto.markdown-it.qmd-extension",
         "displayName": "Markdown It Quarto Renderer",
+        "requiresMessaging": "always",
         "entrypoint": {
           "extends": "vscode.markdown-it-renderer",
           "path": "./out/markdownit/index.js"
-        }
+        },
+        "mimeTypes": [
+          "text/markdown"
+        ]
       }
     ]
   },

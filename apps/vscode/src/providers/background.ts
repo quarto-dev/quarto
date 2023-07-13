@@ -154,10 +154,13 @@ async function setEditorHighlightDecorations(
   const highlightedRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
+    // executable language blocks
     const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
       highlightedRanges.push(vscRange(block.range));
     }
+    // inline code 
+    
   }
 
   // set highlights (could be none if we highlighting isn't enabled)

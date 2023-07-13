@@ -24,6 +24,7 @@ import { activateOptionEnterProvider } from "./providers/option";
 import { textFormattingCommands } from "./providers/text-format";
 import { activateCodeFormatting } from "./providers/format";
 import { ExtensionHost } from "./host";
+import { activateExecuteInline } from "./providers/notebook/execute-inline";
 
 export function activateCommon(
   context: vscode.ExtensionContext,
@@ -42,6 +43,9 @@ export function activateCommon(
 
   // code formatting
   const codeFormattingCommands = activateCodeFormatting(engine);
+
+  // inline exeution
+  activateExecuteInline();
 
   // commands (common + passed)
   const commandManager = new CommandManager();

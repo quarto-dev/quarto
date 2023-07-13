@@ -15,7 +15,7 @@
  */
 
 import type * as MarkdownIt from 'markdown-it';
-import type { RendererContext } from 'vscode-notebook-renderer';
+import type { ActivationFunction, OutputItem, RendererContext } from 'vscode-notebook-renderer';
 
 import attrPlugin from "markdown-it-attrs";
 import footnotes from "markdown-it-footnote";
@@ -44,12 +44,17 @@ interface MarkdownItRenderer {
   renderOutputItem: (x: unknown, y: unknown) => unknown;
 }
 
-export async function activate(ctx: RendererContext<void>) {
+export const activate: ActivationFunction = async (ctx: RendererContext<void>) => {
 	const markdownItRenderer = await ctx.getRenderer('vscode.markdown-it-renderer') as MarkdownItRenderer | undefined;
-	
   if (!markdownItRenderer) {
 		throw new Error(`Could not load 'quarto.markdown-it.qmd-extension'`);
 	}
+
+  const renderOutputItem = markdownItRenderer.renderOutputItem.bind(markdownItRenderer);
+  markdownItRenderer.renderOutputItem = (data: unknown, element: unknown) => {
+    console.log("rendering output item");
+    return renderOutputItem(data, element);
+  }
 
   // Check whether this is a dark theme
   const isDark = document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast');
@@ -80,6 +85,9 @@ export async function activate(ctx: RendererContext<void>) {
 
       // Do any text based transformations before the markdown is rendered
 
+      ctx.postMessage?.("here is the message message");
+
+
       // Ensure that there are new lines at end divs
       src = src.replace(kCloseDivNoBlock, `$1\n\n$2`);
       return render(src, env);
@@ -104,6 +112,8 @@ export async function activate(ctx: RendererContext<void>) {
              .use(yamlPlugin)
              .use(shortcodePlugin, {})
 	});
+
+  return undefined;
 }
 
 const kCloseDivNoBlock = /([^\s])\n(:::+(?:\{.*\})?)/gm;

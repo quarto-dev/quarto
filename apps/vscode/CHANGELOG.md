@@ -3,6 +3,7 @@
 ## 1.90.0 (Unreleased)
 
 - Jupyter embed completions for markdown figures
+- Background highlighting for inline code expressions
 - Only move source cursor when switching from visual
 - Improved cursor location when switching from source to visual
 

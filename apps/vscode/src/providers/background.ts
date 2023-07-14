@@ -151,19 +151,40 @@ async function setEditorHighlightDecorations(
   }
 
   // ranges to highlight
-  const highlightedRanges: vscode.Range[] = [];
+  const blockRanges: vscode.Range[] = [];
+  const inlineRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
+    
+    // find code blocks
     const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      highlightedRanges.push(vscRange(block.range));
+      blockRanges.push(vscRange(block.range));
+    }
+
+    // find inline executable code
+    for (let i=0; i<editor.document.lineCount; i++) {
+      const line = editor.document.lineAt(i);
+      const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
+      for (const match of matches) {
+        if (match.index !== undefined) {
+          const begin = new vscode.Position(i, match.index + match[1].length);
+          const end = new vscode.Position(i, begin.character + match[0].length - match[1].length);
+          inlineRanges.push(new vscode.Range(begin, end));
+        }
+      }
     }
   }
+
 
   // set highlights (could be none if we highlighting isn't enabled)
   editor.setDecorations(
     highlightingConfig.backgroundDecoration(),
-    highlightedRanges
+    blockRanges
+  );
+  editor.setDecorations(
+    highlightingConfig.inlineBackgroundDecoration(),
+    inlineRanges
   );
 }
 
@@ -182,15 +203,22 @@ class HiglightingConfig {
     return this.backgroundDecoration_!;
   }
 
+  public inlineBackgroundDecoration() {
+    return this.inlineBackgroundDecoration_!;
+  }
+
   public delayMs() {
     return this.delayMs_;
   }
 
   public sync() {
     const config = vscode.workspace.getConfiguration("quarto");
+    const light = config.get("cells.background.light", "#E1E1E166");
+    const dark = config.get("cells.background.dark", "#40404066");
 
     this.enabled_ = config.get("cells.background.enabled", true);
     this.delayMs_ = config.get("cells.background.delay", 250);
+
 
     if (this.backgroundDecoration_) {
       this.backgroundDecoration_.dispose();
@@ -198,16 +226,30 @@ class HiglightingConfig {
     this.backgroundDecoration_ = vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
       light: {
-        backgroundColor: config.get("cells.background.light", "#E1E1E166"),
+        backgroundColor: light,
       },
       dark: {
-        backgroundColor: config.get("cells.background.dark", "#40404066"),
+        backgroundColor: dark,
       },
+    });
+
+    if (this.inlineBackgroundDecoration_) {
+      this.inlineBackgroundDecoration_.dispose();
+    }
+    this.inlineBackgroundDecoration_ = vscode.window.createTextEditorDecorationType({
+      isWholeLine: false,
+      light: {
+        backgroundColor: light,
+      },
+      dark: {
+        backgroundColor: dark,
+      }
     });
   }
 
   private enabled_ = true;
   private backgroundDecoration_: vscode.TextEditorDecorationType | undefined;
+  private inlineBackgroundDecoration_: vscode.TextEditorDecorationType | undefined;
   private delayMs_ = 250;
 }
 

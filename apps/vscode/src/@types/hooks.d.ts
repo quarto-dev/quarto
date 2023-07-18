@@ -1,15 +1,31 @@
+
+
+
 declare module 'positron' {
+
 	import * as vscode from 'vscode';
 
-	export const version: string;
-	
-	namespace runtime {
+	export interface PositronApi {
+		version: string;
+		runtime: PositronRuntime;
+		window: PositronWindow;
+	}
 
-		export function executeCode(
-      languageId: string,
+	export interface PositronRuntime {
+		executeCode(
+			languageId: string,
 			code: string,
 			focus: boolean
-    ): Thenable<boolean>;
+		): Thenable<boolean>;
+	}
+
+	export interface PositronWindow {
+		createPreviewPanel(
+			viewType: string, 
+			title: string, 
+			preserveFocus?: boolean, 
+			options?: PreviewOptions
+		): PreviewPanel;
 	}
 
 	export interface PreviewOptions {
@@ -34,10 +50,7 @@ declare module 'positron' {
 	export interface PreviewPanelOnDidChangeViewStateEvent {
 		readonly previewPanel: PreviewPanel;
 	}
-
-	namespace window {
-		export function createPreviewPanel(viewType: string, title: string, preserveFocus?: boolean, options?: PreviewOptions): PreviewPanel;
-	}
 }
+
 
 

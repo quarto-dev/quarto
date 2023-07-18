@@ -20,13 +20,25 @@ import * as hooks from 'positron';
 import { ExtensionHost, HostWebviewPanel } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages } from './executors';
 
-export function hasHooks() {
-  try {
-    hooks.version.toLowerCase();
-    return true;
-  } catch {
-    return false;
+declare global {
+	function acquirePositronApi() : hooks.PositronApi;
+}
+
+let api : hooks.PositronApi | null | undefined;
+
+export function hooksApi() : hooks.PositronApi | null {
+  if (api === undefined) {
+    try {
+      api = acquirePositronApi();
+    } catch {
+      api = null;
+    }
   }
+  return api;
+}
+
+export function hasHooks() {
+  return !!hooksApi();
 }
 
 export function hooksExtensionHost() : ExtensionHost {
@@ -44,7 +56,7 @@ export function hooksExtensionHost() : ExtensionHost {
           return {
             execute: async (blocks: string[], _editorUri?: Uri) : Promise<void> => {
               for (const block of blocks) {
-                await hooks.runtime.executeCode(language, block, true);
+                await hooksApi()?.runtime.executeCode(language, block, true);
               } 
             }
           };
@@ -63,7 +75,7 @@ export function hooksExtensionHost() : ExtensionHost {
     ): HostWebviewPanel => {
 
       // create preview panel
-      const panel = hooks.window.createPreviewPanel(
+      const panel = hooksApi()?.window.createPreviewPanel(
         viewType,
         title,
         preserveFocus,
@@ -73,7 +85,7 @@ export function hooksExtensionHost() : ExtensionHost {
           localResourceRoots: options?.localResourceRoots,
           portMapping: options?.portMapping
         }
-      );
+      )!;
       
       // adapt to host interface
       return new HookWebviewPanel(panel);
@@ -85,12 +97,12 @@ export function hooksExtensionHost() : ExtensionHost {
 class HookWebviewPanel implements HostWebviewPanel {
   constructor(private readonly panel_: hooks.PreviewPanel) {}
 
-  get webview() { return this.panel_.webview };
-  get visible() { return this.panel_.visible };
+  get webview() { return this.panel_.webview; };
+  get visible() { return this.panel_.visible; };
   reveal(_viewColumn?: ViewColumn, preserveFocus?: boolean) {
     this.panel_.reveal(preserveFocus);
   }
   onDidChangeViewState = this.panel_.onDidChangeViewState;
   onDidDispose = this.panel_.onDidDispose;
-  dispose() { this.panel_.dispose( )};
+  dispose() { this.panel_.dispose(); };
 }

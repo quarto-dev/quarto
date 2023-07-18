@@ -21,7 +21,7 @@ const dev = args[2] === "dev";
 runBuild({
   entryPoints: ['./src/main.ts'],
   outfile: './out/main.js',
-  external: ['vscode', 'positron'],
+  external: ['vscode'],
   minify: dev,
   dev
 });

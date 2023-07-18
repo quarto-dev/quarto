@@ -151,6 +151,20 @@ export function findQuartoEditor(
     return activeVisualEditor;
   }
 
+  // then check for active notebook editor
+  const notebookEditor = (vscode.window as any).activeNotebookEditor as vscode.NotebookEditor | undefined;
+  if (notebookEditor) {
+    const notebookDocument = (notebookEditor as any).notebook as vscode.NotebookDocument | undefined;
+    if (notebookDocument) {
+      const textEditor = vscode.window.visibleTextEditors.find(editor => {
+        return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
+      });
+      if (textEditor && filter(textEditor.document)) {
+        return quartoEditor(textEditor, engine);
+      }
+    }
+  }
+
   // active text editor
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {

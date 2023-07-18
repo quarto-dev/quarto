@@ -197,7 +197,7 @@ function renderFrontMatter(tokens: Token[], idx: number): string {
     titleBlock.date = readStr("date");
     titleBlock.modified = readStr("date-modified");
     titleBlock.doi = readStr("doi");
-    
+    const eatKeys = ['title', 'subtitle', 'abstract', 'date', 'date-modified', 'doi', 'author', 'authors'];
     // Read Authors
     titleBlock.authors = parseAuthor(frontMatter.author || frontMatter.authors);
     delete frontMatter.author;
@@ -217,9 +217,28 @@ function renderFrontMatter(tokens: Token[], idx: number): string {
       const decor = decorator(["Options"]);
       titleLines.push(decor);
 
-      // yaml
-      const yamlDump = yaml.dump(frontMatter);
-      const otherYamlRendered = `<pre class="quarto-frontmatter-container"><code class="cm-s-jupyter language-yaml quarto-frontmatter">${yamlDump}</code></pre>`;
+      // Left over YAML
+      // Use the raw YAML string so we don't end up mutating / round tripping the YAML
+      let eating = false;
+      const outputYaml: string[] = [];
+      const yamlNoDelimiters = token.markup.replace(/---\s*$/, '').replace(/^---\s*/, '');
+
+      for (const line of yamlNoDelimiters.split("\n")) {
+        const eatKey = eatKeys.some((k) => {
+          const match = line.match(RegExp(`^${k}\\s*:`));
+          return match !== null;
+        })
+        if (eatKey) {
+          eating = true;
+        } else {
+          if (!eating || line.match(/^\S/)) {
+            eating = false;
+            outputYaml.push(line);  
+          }
+        }
+      }
+
+      const otherYamlRendered = `<pre class="quarto-frontmatter-container"><code class="cm-s-jupyter language-yaml quarto-frontmatter">${outputYaml.join("\n")}</code></pre>`;
 
       titleLines.push(otherYamlRendered);
     }

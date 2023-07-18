@@ -1,8 +1,22 @@
 # Changelog
 
-## 1.89.0 (Unreleased)
+## 1.90.0 (Unreleased)
 
+- Jupyter embed completions for markdown figures
+- Background highlighting for inline code expressions
+- Only move source cursor when switching from visual
+- Improved cursor location when switching from source to visual
+
+## 1.89.0 (Release on 7 July 2023)
+
+- Path and content completions for include and embed shortcodes
 - More reliable indexing for Book cross-references
+- Syntax highlight code blocks where attributes include an id
+- Fix issue with tokenizing language-only fenced code
+- Render: Improved detection of active notebooks
+- Visual Editor: Omni insert command for shortcodes
+- Visual Editor: Restore link paste handling (regression from markdown paste)
+- Visual Editor: Apply link to text when pasting links over selections
 
 ## 1.88.0 (Release on 25 June 2023)
 

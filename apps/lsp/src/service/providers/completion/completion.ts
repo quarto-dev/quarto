@@ -27,6 +27,7 @@ import { Quarto } from "../../quarto";
 import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";
+import { shortcodeCompletions } from "./completion-shortcode";
 import { refsCompletions } from "./refs/completion-refs";
 import { LsConfiguration } from "../../config";
 import { IWorkspace } from "../../workspace";
@@ -80,6 +81,7 @@ export class MdCompletionProvider {
 
   readonly quarto_: Quarto;
 	readonly parser_: Parser;
+	readonly workspace_: IWorkspace;
 	readonly documents_: TextDocuments<Document>;
 
 	constructor(
@@ -93,6 +95,7 @@ export class MdCompletionProvider {
 	) {
     this.quarto_ = quarto;
 		this.parser_ = parser;
+		this.workspace_ = workspace;
 		this.documents_ = documents;
     this.pathCompletionProvider_ = new MdPathCompletionProvider(
       configuration, 
@@ -121,6 +124,7 @@ export class MdCompletionProvider {
     return (
       (await refsCompletions(this.quarto_, this.parser_, doc, pos, editorContext, this.documents_)) ||
       (await attrCompletions(this.quarto_, editorContext)) ||
+			(await shortcodeCompletions(editorContext, this.workspace_)) ||
       (await latexCompletions(this.parser_, doc, pos, context, config)) ||
       (await yamlCompletions(this.quarto_, editorContext, true)) ||
       (await this.pathCompletionProvider_.provideCompletionItems(doc, pos, context, token)) ||

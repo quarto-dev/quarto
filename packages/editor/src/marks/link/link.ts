@@ -26,9 +26,8 @@ import {
   PandocAttr,
 } from '../../api/pandoc_attr';
 import { Extension, ExtensionContext } from '../../api/extension';
-import { kLinkTarget, kLinkTargetUrl, kLinkTargetTitle, kLinkAttr, kLinkChildren } from '../../api/link';
+import { kLinkTarget, kLinkTargetUrl, kLinkTargetTitle, kLinkAttr, kLinkChildren, linkPasteHandler } from '../../api/link';
 import { hasShortcutHeadingLinks } from '../../api/pandoc_format';
-import { markPasteHandler } from '../../api/clipboard';
 
 import { linkCommand, removeLinkCommand, linkOmniInsert } from './link-command';
 import { linkInputRules } from './link-input';
@@ -189,12 +188,8 @@ const extension = (context: ExtensionContext): Extension => {
           new Plugin({
             key: new PluginKey('link-auto'),
             props: {
-              transformPasted: markPasteHandler(
-                /(?:<)?([a-z]+:\/\/[^\s>]+)(?:>)?/g, 
-                schema.marks.link, 
-                url => ({ href: url })
-              )
-            },
+              transformPasted: linkPasteHandler(schema),
+            }
           }),
         );
       }

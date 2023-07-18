@@ -334,8 +334,7 @@ export const Editor : React.FC<EditorProps> = (props) => {
     blur() {
       editorRef.current?.blur();
     },
-    focus(navigation?: NavLocation) {
-      editorRef.current?.focus();
+    focus(navigation?: NavLocation) {  
       if (navigation) {
         if (isSourcePos(navigation)) {
           editorRef.current?.navigateToSourcePos(navigation);
@@ -347,6 +346,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
           );
         } 
       }
+      // focus after navigation so that we don't get 
+      // trapped focusing inside a code view
+      editorRef.current?.focus();
     },
     hasFocus() {
       return editorRef.current?.hasFocus() || false;

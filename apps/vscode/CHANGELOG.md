@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.90.0 (Unreleased)
+## 1.90.0 (Release on 18 July 2023)
 
 - Jupyter embed completions for markdown figures
 - Background highlighting for inline code expressions

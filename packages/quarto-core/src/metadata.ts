@@ -103,6 +103,7 @@ export type QuartoProjectConfig = {
         serve: { /* */ };
       };
     };
+    [key: string]: unknown;
   };
   files: {
     input: string[];

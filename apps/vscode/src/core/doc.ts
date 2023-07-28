@@ -19,6 +19,7 @@ import { revealSlideIndex } from "../markdown/reveal";
 import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
 import { MarkdownEngine } from "../markdown/engine";
+import { QuartoContext } from "quarto-core";
 
 
 export const kQuartoLanguageId = "quarto";
@@ -141,6 +142,7 @@ export interface QuartoEditor {
 
 export function findQuartoEditor(
   engine: MarkdownEngine,
+  context: QuartoContext,
   filter: (doc: vscode.TextDocument) => boolean,
   includeVisible = true
 ) : QuartoEditor | undefined {
@@ -160,7 +162,7 @@ export function findQuartoEditor(
         return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
       });
       if (textEditor && filter(textEditor.document)) {
-        return quartoEditor(textEditor, engine);
+        return quartoEditor(textEditor, engine, context);
       }
     }
   }
@@ -168,7 +170,7 @@ export function findQuartoEditor(
   // active text editor
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {
-    return quartoEditor(textEditor, engine);
+    return quartoEditor(textEditor, engine, context);
   // check visible text editors
   } else if (includeVisible) {
     // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
@@ -182,7 +184,7 @@ export function findQuartoEditor(
       filter(editor.document)
     );
     if (visibleEditor) {
-      return quartoEditor(visibleEditor, engine);
+      return quartoEditor(visibleEditor, engine, context);
     } else {
       return undefined;
     }
@@ -192,18 +194,19 @@ export function findQuartoEditor(
 }
 
 
-export function quartoEditor(editor: vscode.TextEditor, engine?: MarkdownEngine) {
+export function quartoEditor(editor: vscode.TextEditor, engine?: MarkdownEngine, context?: QuartoContext) {
   return { 
     document: editor.document, 
     activate: async () => {
       await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
     },
     slideIndex: async () => {
-      if (engine) {
+      if (engine && context) {
         return await revealSlideIndex(
           editor.selection.active, 
           editor.document,
-          engine)
+          engine,
+          context)
         ;
       } else {
         return 0;

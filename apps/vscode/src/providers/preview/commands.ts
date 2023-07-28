@@ -45,7 +45,7 @@ export function previewCommands(
     new RenderAllCommand(quartoContext, engine),
     new RenderProjectCommand(quartoContext, engine),
     new WalkthroughRenderCommand(quartoContext, engine),
-    new ClearCacheCommand(engine),
+    new ClearCacheCommand(quartoContext, engine),
   ];
 }
 
@@ -81,13 +81,13 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
     super(quartoContext);
   }
   protected async renderFormat(format?: string | null, onShow?: () => void) {
-    const targetEditor = findQuartoEditor(this.engine_, canPreviewDoc);
+    const targetEditor = findQuartoEditor(this.engine_, this.quartoContext(), canPreviewDoc);
     if (targetEditor) {
       const render =
         !(await renderOnSave(this.engine_, targetEditor.document)) ||
         !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
-        await previewDoc(targetEditor, format, false, this.engine_, onShow);
+        await previewDoc(targetEditor, format, false, this.engine_, this.quartoContext(), onShow);
       } else {
         // show the editor
         if (!isNotebook(targetEditor.document)) {
@@ -213,7 +213,7 @@ class RenderProjectCommand extends RenderCommand implements Command {
   async doExecute() {
     await workspace.saveAll(false);
     // start by using the currently active or visible source files
-    const targetEditor = findQuartoEditor(this.engine_, canPreviewDoc);
+    const targetEditor = findQuartoEditor(this.engine_, this.quartoContext(), canPreviewDoc);
     if (targetEditor) {
       const projectDir = projectDirForDocument(targetEditor.document.uri.fsPath);
       if (projectDir) {
@@ -242,11 +242,14 @@ class ClearCacheCommand implements Command {
   private static readonly id = "quarto.clearCache";
   public readonly id = ClearCacheCommand.id;
 
-  constructor(private readonly engine_: MarkdownEngine) {}
+  constructor(
+    private readonly quartoContext_: QuartoContext,
+    private readonly engine_: MarkdownEngine
+  ) {}
 
   async execute(): Promise<void> {
     // see if there is a cache to clear
-    const doc = findQuartoEditor(this.engine_, canPreviewDoc)?.document;
+    const doc = findQuartoEditor(this.engine_, this.quartoContext_, canPreviewDoc)?.document;
     if (doc) {
       const cacheDir = cacheDirForDocument(doc);
       if (cacheDir) {

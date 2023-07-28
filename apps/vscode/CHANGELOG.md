@@ -3,6 +3,7 @@
 ## 1.91.0 (Unreleased)
 
 - Preview: inherit body background color from editor background color
+- Reveal: correct slide syncing even when title is specified in _quarto.yml
 
 ## 1.90.1 (Release on 22 July 2023)
 

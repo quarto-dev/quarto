@@ -15,16 +15,17 @@
 
 import { Position, TextDocument } from "vscode";
 
-import { isFrontMatter, isHeader, parseFrontMatterStr } from "quarto-core";
+import { QuartoContext, isFrontMatter, isHeader, parseFrontMatterStr, quartoProjectConfig } from "quarto-core";
 import { MarkdownEngine } from "./engine";
 
 
 export async function revealSlideIndex(
   cursorPos: Position,
   doc: TextDocument,
-  engine: MarkdownEngine
+  engine: MarkdownEngine,
+  context: QuartoContext
 ) {
-  const location = await revealEditorLocation(cursorPos, doc, engine);
+  const location = await revealEditorLocation(cursorPos, doc, engine, context);
   let slideIndex = -1;
   for (const item of location.items) {
     if (item.type === kCursor) {
@@ -63,9 +64,11 @@ interface RevealEditorLocationItem {
 async function revealEditorLocation(
   cursorPos: Position,
   doc: TextDocument,
-  engine: MarkdownEngine
+  engine: MarkdownEngine,
+  context: QuartoContext
 ): Promise<RevealEditorLocation> {
   const items: RevealEditorLocationItem[] = [];
+
   let explicitSlideLevel: number | null = null;
   let foundCursor = false;
   const tokens = engine.parse(doc);
@@ -90,6 +93,14 @@ async function revealEditorLocation(
   // put cursor at end if its not found
   if (!foundCursor) {
     items.push(cursorItem(doc.lineCount - 1));
+  }
+
+  // if there is no title then insert a title token if there is a title in the project yaml
+  if (!items.find(item => item.type === kTitle)) {
+    const config = await quartoProjectConfig(context.runQuarto, doc.uri.fsPath);
+    if (config?.config.title) {
+      items.unshift(titleItem(0));
+    }
   }
 
   return { items, slideLevel: explicitSlideLevel || 2 };

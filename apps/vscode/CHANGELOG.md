@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.90.1 (Release on 22 July 2023)
+
+- No changes (bumped version to force repulish on Open VSX)
+
 ## 1.90.0 (Release on 18 July 2023)
 
 - Jupyter embed completions for markdown figures

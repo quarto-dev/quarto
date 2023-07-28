@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.91.0 (Unreleased)
+
+- Preview: inherit body background color from editor background color
+
 ## 1.90.1 (Release on 22 July 2023)
 
 - No changes (bumped version to force repulish on Open VSX)

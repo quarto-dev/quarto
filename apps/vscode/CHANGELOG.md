@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.92.0 (Unreleased)
+
+- Start new preview server for format-specific render w/ render-on-save
+
 ## 1.91.0 (Release on 2 August 2023)
 
 - Preview: inherit body background color from editor background color

@@ -13,6 +13,8 @@
  *
  */
 
+import * as semver from "semver";
+
 import { commands, ExtensionContext, QuickPickItem, Uri, window } from "vscode";
 import { Command } from "../../core/command";
 import { withMinimumQuartoVersion } from "../../core/quarto";
@@ -34,7 +36,7 @@ export class CreateProjectCommand implements Command {
       "Creating projects",
       async () => {
         // select project type
-        const typePick = await selectProjectType(1, 2);
+        const typePick = await selectProjectType(this.quartoContext_, 1, 2);
         if (!typePick) {
           return;
         }
@@ -85,6 +87,7 @@ interface CreateProjectQuickPickItem extends QuickPickItem {
 }
 
 function selectProjectType(
+  context: QuartoContext,
   step?: number,
   totalSteps?: number
 ): Promise<CreateProjectQuickPickItem | undefined> {
@@ -121,12 +124,24 @@ function selectProjectType(
       detail: "Book with chapters and bibliography.",
       alwaysShow: true,
     };
+    const manuscriptType: CreateProjectQuickPickItem = {
+      type: "manuscript",
+      name: "Manuscript",
+      firstRun: ["index.qmd"],
+      label: "$(circuit-board) Manuscript Project",
+      detail: "Scientific manuscript with multiple formats.",
+      alwaysShow: true,
+    };
     const quickPick = window.createQuickPick<CreateProjectQuickPickItem>();
     quickPick.title = "Create Quarto Project";
     quickPick.placeholder = "Select project type";
     quickPick.step = step;
     quickPick.totalSteps = totalSteps;
-    quickPick.items = [defaultType, websiteType, blogType, bookType];
+    const items = [defaultType, websiteType, blogType, bookType];
+    if (haveManuscripts(context)) {
+      items.push(manuscriptType);
+    }
+    quickPick.items = items;
     let accepted = false;
     quickPick.onDidAccept(() => {
       accepted = true;
@@ -140,4 +155,8 @@ function selectProjectType(
     });
     quickPick.show();
   });
+}
+
+function haveManuscripts(context: QuartoContext) {
+  return semver.gte(context.version, "1.4.283");
 }

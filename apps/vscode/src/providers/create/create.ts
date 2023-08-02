@@ -13,7 +13,7 @@
  *
  */
 
-import { ExtensionContext, workspace, window, ViewColumn } from "vscode";
+import vscode, { ExtensionContext, workspace, window, ViewColumn } from "vscode";
 import { QuartoContext } from "quarto-core";
 import { collectFirstRun } from "./firstrun";
 import { CreateProjectCommand } from "./create-project";
@@ -30,7 +30,7 @@ export async function activateCreate(
       await window.showTextDocument(doc, ViewColumn.Active, false);
     }
   }
-
+ 
   // commands
   return [
     new CreateProjectCommand("quarto.createProject", context, quartoContext),
@@ -41,3 +41,4 @@ export async function activateCreate(
     ),
   ];
 }
+

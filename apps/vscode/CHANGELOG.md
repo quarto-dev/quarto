@@ -4,6 +4,7 @@
 
 - Preview: inherit body background color from editor background color
 - Reveal: correct slide syncing even when title is specified in _quarto.yml
+- Add `manuscript` project type to Create Project command
 
 ## 1.90.1 (Release on 22 July 2023)
 

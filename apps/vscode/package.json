@@ -555,6 +555,24 @@
         "when": "activeCustomEditorId == 'quarto.visualEditor'"
       },
       {
+        "key": "ctrl+pagedown",
+        "mac": "cmd+pagedown",
+        "command": "quarto.goToNextCell",
+        "when": "editorTextFocus && editorLangId == 'quarto'"
+      },
+      {
+        "key": "ctrl+pageup",
+        "mac": "cmd+pageup",
+        "command": "quarto.goToPreviousCell",
+        "when": "editorTextFocus && editorLangId == 'quarto'"
+      },
+      {
+        "key": "ctrl+f1",
+        "mac": "cmd+f1",
+        "command": "quarto-assist.focus",
+        "when": "editorTextFocus && editorLangId == quarto"
+      },
+      {
         "command": "quarto.formatCell",
         "key": "ctrl+k ctrl+f",
         "mac": "cmd+k cmd+f",

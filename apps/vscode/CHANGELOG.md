@@ -3,6 +3,7 @@
 ## 1.92.0 (Unreleased)
 
 - Start new preview server for format-specific render w/ render-on-save
+- Add keyboard shortcodes for cell navigation and focus assist
 
 ## 1.91.0 (Release on 2 August 2023)
 

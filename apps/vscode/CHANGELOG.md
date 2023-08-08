@@ -4,6 +4,7 @@
 
 - Start new preview server for format-specific render w/ render-on-save
 - Add keyboard shortcodes for cell navigation and focus assist
+- Declare dependency on core Jupyter extensions for Python cell execution
 
 ## 1.91.0 (Release on 2 August 2023)
 

@@ -1345,9 +1345,5 @@
     "plist": "^3.0.6",
     "tsx": "^3.12.1",
     "typescript": "^4.9.3"
-  },
-  "extensionDependencies": [
-    "ms-toolsai.jupyter",
-    "ms-toolsai.jupyter-renderers"
-  ]
+  }
 }

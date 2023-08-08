@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.92.0 (Unreleased)
+## 1.92.0 (Release on 8 August 2023)
 
 - Support for executing Python code within Knitr documents using reticulate
 - Start new preview server for format-specific render w/ render-on-save

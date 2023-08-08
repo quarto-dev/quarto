@@ -39,8 +39,11 @@ export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) 
         .style.getPropertyValue(rv)
     }
   );
-
-  theme.darkMode = document.body.classList.contains('vscode-dark');
+  
+  const bodyCls = document.body.classList;
+  theme.darkMode = 
+    bodyCls.contains('vscode-dark') ||
+    (bodyCls.contains('vscode-high-contrast') && !bodyCls.contains('vscode-high-contrast-light'));
   theme.solarizedMode = isSolarizedThemeActive();
   theme.cursorColor = colors["--vscode-editorCursor-foreground"];
   theme.selectionColor = colors["--vscode-editor-selectionBackground"];

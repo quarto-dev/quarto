@@ -5,6 +5,7 @@
 - Start new preview server for format-specific render w/ render-on-save
 - Add keyboard shortcodes for cell navigation and focus assist
 - Declare dependency on core Jupyter extensions for Python cell execution
+- Improve detection of dark mode for dark high contrast theme
 
 ## 1.91.0 (Release on 2 August 2023)
 

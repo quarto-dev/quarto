@@ -31,7 +31,7 @@ export interface MarkdownTextDocument {
   getText(): string;
 }
 
-export async function documentFrontMatterYaml(
+export function documentFrontMatterYaml(
   engine: MarkdownEngine,
   doc: vscode.TextDocument
 ) {
@@ -44,11 +44,11 @@ export async function documentFrontMatterYaml(
   }
 }
 
-export async function documentFrontMatter(
+export function documentFrontMatter(
   engine: MarkdownEngine,
   doc: vscode.TextDocument
-): Promise<Record<string, unknown>> {
-  const yaml = await documentFrontMatterYaml(engine, doc);
+): Record<string, unknown> {
+  const yaml = documentFrontMatterYaml(engine, doc);
   if (yaml) {
     const frontMatter = parseFrontMatterStr(yaml);
     if (frontMatter && typeof frontMatter === "object") {

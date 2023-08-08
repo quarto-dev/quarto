@@ -16,10 +16,12 @@
 import vscode, { DocumentSelector, Disposable, WebviewPanelOptions, WebviewOptions } from "vscode";
 
 
-import { CellExecutor, cellExecutorForLanguage, executableLanguages } from "./executors";
+import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument } from "./executors";
 import { EditorToolbarProvider } from "./toolbar";
 import { createPreviewPanel } from "./preview";
 import { hasHooks, hooksExtensionHost } from "./hooks";
+import { TextDocument } from "vscode";
+import { MarkdownEngine } from "../markdown/engine";
 
 export type { CellExecutor };
 export type { EditorToolbarProvider,  ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
@@ -35,9 +37,11 @@ export interface HostWebviewPanel extends vscode.Disposable {
 export interface ExtensionHost {
 
   // code execution
-  executableLanguages(visualMode: boolean) : string[];
+  executableLanguages(visualMode: boolean, document: TextDocument, engine: MarkdownEngine) : string[];
   cellExecutorForLanguage(
     language: string, 
+    document: TextDocument,
+    engine: MarkdownEngine,
     silent?: boolean
   ) : Promise<CellExecutor | undefined>;
 
@@ -67,10 +71,14 @@ export function extensionHost() : ExtensionHost {
 
 function defaultExtensionHost() : ExtensionHost {
   return {
-    executableLanguages: (visualMode: boolean) => {
-       // python doesn't work in visual mode b/c jupyter.execSelectionInteractive 
-       // wants a text editor to be active
-       return executableLanguages().filter(language => !visualMode || (language !== "python"))
+    executableLanguages: (visualMode: boolean, document: TextDocument, engine: MarkdownEngine) => {
+      
+       const languages = executableLanguages();
+       const knitr = isKnitrDocument(document, engine);
+
+       // jupyter python (as distinct from knitr python) doesn't work in visual mode b/c
+       // jupyter.execSelectionInteractive  wants a text editor to be active
+       return languages.filter(language => knitr || !visualMode || (language !== "python"));
     },
     cellExecutorForLanguage,
     createPreviewPanel,

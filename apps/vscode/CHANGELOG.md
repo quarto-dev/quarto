@@ -2,6 +2,7 @@
 
 ## 1.92.0 (Unreleased)
 
+- Support for executing Python code within Knitr documents using reticulate
 - Start new preview server for format-specific render w/ render-on-save
 - Add keyboard shortcodes for cell navigation and focus assist
 - Declare dependency on core Jupyter extensions for Python cell execution

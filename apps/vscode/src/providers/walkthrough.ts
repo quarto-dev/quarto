@@ -23,6 +23,7 @@ import { Command } from "../core/command";
 import { QuartoContext } from "quarto-core";
 import { promptForQuartoInstallation } from "../core/quarto";
 import { ExtensionHost } from "../host";
+import { TextEditor } from "vscode";
 
 export function walkthroughCommands(host: ExtensionHost, quartoContext: QuartoContext): Command[] {
   return [
@@ -75,38 +76,14 @@ class WalkthroughNewDocumentCommand implements Command {
   }
 
   private async scaffold(): Promise<string> {
-    // determine which code block to use (default to python)
+    // use python by default
     const kPython = {
       lang: "python",
       desc: "a Python",
       code: "import os\nos.cpu_count()",
       suffix: ":",
     };
-    const kR = {
-      lang: "r",
-      desc: "an R",
-      code: "summary(cars)",
-      suffix: ":",
-    };
-    const kJulia = {
-      lang: "julia",
-      desc: "a Julia",
-      code: "A = [1 2 3; 4 1 6; 7 8 1]\ninv(A)",
-      suffix: ":",
-    };
-
-    // default langBlock if no executors are found
-    let langBlock = { 
-      ...kPython, 
-      suffix: ".\n\nInstall the VS Code Python Extension to enable\nrunning this cell interactively."
-    };
-    for (const lang of [kPython, kR, kJulia]) {
-      if (await this.host_.cellExecutorForLanguage(lang.lang)) {
-        langBlock = lang;
-        break;
-      }
-    }
-
+    const langBlock = kPython;
     return `---
 title: "Hello, Quarto"
 format: html

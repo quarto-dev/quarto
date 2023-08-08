@@ -49,7 +49,7 @@ export async function isQuartoShinyDoc(
   doc?: TextDocument
 ) {
   if (doc) {
-    const frontMatter = await documentFrontMatter(engine, doc);
+    const frontMatter = documentFrontMatter(engine, doc);
     if (frontMatter["server"] === "shiny") {
       return true;
     } else {
@@ -79,7 +79,7 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
   }
 
   // first look for document level editor setting
-  const docYaml = await documentFrontMatter(engine, document);
+  const docYaml = documentFrontMatter(engine, document);
   const docSetting = readRenderOnSave(docYaml);
   if (docSetting !== undefined) {
     return docSetting;

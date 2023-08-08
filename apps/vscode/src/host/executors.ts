@@ -17,6 +17,10 @@
 import { Uri, commands, window, extensions } from "vscode";
 
 import semver from "semver";
+import { TextDocument } from "vscode";
+import { MarkdownEngine } from "../markdown/engine";
+import { documentFrontMatter } from "../markdown/document";
+import { isExecutableLanguageBlockOf } from "quarto-core";
 
 
 export interface CellExecutor {
@@ -28,10 +32,10 @@ export function executableLanguages() {
   return kCellExecutors.map(executor => executor.language);
 }
 
-export async function cellExecutorForLanguage(language: string, silent?: boolean) : Promise<CellExecutor | undefined> {
-  const executor = findExecutor(language);
+export async function cellExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine, silent?: boolean) : Promise<CellExecutor | undefined> {
+  const executor = findExecutor(language, document, engine);
   if (executor) {
-    if (await ensureRequiredExtension(language, silent)) {
+    if (await ensureRequiredExtension(language, document, engine, silent)) {
       return executor;
     } 
   }
@@ -68,6 +72,18 @@ const rCellExecutor: VSCodeCellExecutor = {
   },
   executeSelection: async () => {
     await commands.executeCommand("r.runSelection");
+  },
+};
+
+const reticulateCellExecutor: VSCodeCellExecutor = {
+  language: "python",
+  requiredExtension: ["REditorSupport.r", "Ikuyadeu.r"],
+  requiredExtensionName: "R",
+  requiredVersion: "2.4.0",
+  execute: async (blocks: string[]) => {
+    const code = blocks.join("\n").trim();
+    const pythonCode = pythonWithReticulate(code);
+    await commands.executeCommand("r.runSelection", pythonCode);
   },
 };
 
@@ -114,21 +130,50 @@ const kCellExecutors = [
   shellCellExecutor
 ];
 
-function findExecutor(language: string) : VSCodeCellExecutor | undefined {
-  return kCellExecutors.find((x) => x.language === language);
+function findExecutor(language: string, document: TextDocument, engine: MarkdownEngine) : VSCodeCellExecutor | undefined {
+
+  // if its a knitr document then we return reticulate for python
+  if (language === reticulateCellExecutor.language && isKnitrDocument(document, engine)) {
+    return reticulateCellExecutor;
+  } else {
+    return kCellExecutors.find((x) => x.language === language);
+  }
 }
 
-// ensure language extension is loaded (if required) by creating a
-// virtual doc for the language (under the hood this triggers extension
-// loading by sending a dummy hover-provider request)
-const kLoadedLanguageExtensions: string[] = [];
-export async function ensureRequiredExtension(language: string, silent?: boolean): Promise<boolean> {
-  // only do this once per language
-  if (kLoadedLanguageExtensions.includes(language)) {
+export function isKnitrDocument(document: TextDocument, engine: MarkdownEngine) {
+  // check for explicit declarations of various kinds
+  const frontMatter = documentFrontMatter(engine, document);
+  
+  // engine option
+  const engineOption = frontMatter["engine"];
+  if (engineOption === "knitr") {
+    return true;
+  } else if (engineOption !== undefined) {
+    return false;
+  }
+
+  // knitr options
+  if (frontMatter["knitr"] !== undefined) {
     return true;
   }
 
-  const executor = findExecutor(language);
+  // jupyter options
+  if (frontMatter["jupyter"] !== undefined) {
+    return false;
+  }
+
+  // if there are R language blocks then this is knitr
+  const tokens = engine.parse(document);
+  return !!tokens.find(isExecutableLanguageBlockOf("r"));
+}
+
+export function pythonWithReticulate(code: string) {
+  return `reticulate::repl_python(quiet = TRUE, input = r"--(${code})--")`;
+}
+
+// ensure language extension is loaded (if required) 
+export async function ensureRequiredExtension(language: string, document: TextDocument, engine: MarkdownEngine, silent?: boolean): Promise<boolean> {
+  const executor = findExecutor(language, document, engine);
   if (executor?.requiredExtension) {
     // validate the extension
     if (!validateRequiredExtension(executor, silent)) {

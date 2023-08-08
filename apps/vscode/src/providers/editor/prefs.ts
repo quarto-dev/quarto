@@ -151,10 +151,10 @@ export async function vscodePrefsServer(
   }));
 
   // front matter changes (only on save)
-  let lastDocYamlFrontMatter = await documentFrontMatterYaml(engine, document);
+  let lastDocYamlFrontMatter = documentFrontMatterYaml(engine, document);
   disposables.push(workspace.onDidSaveTextDocument(async (savedDoc) => {
     if (savedDoc.uri.toString() === document.uri.toString()) {
-      const yamlFrontMatter = await documentFrontMatterYaml(engine, document);
+      const yamlFrontMatter = documentFrontMatterYaml(engine, document);
       if (yamlFrontMatter !== lastDocYamlFrontMatter) {
         lastDocYamlFrontMatter = yamlFrontMatter;
         firePrefsChanged();

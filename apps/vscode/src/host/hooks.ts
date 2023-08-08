@@ -18,7 +18,9 @@ import { Uri, WebviewPanelOptions, WebviewOptions, ViewColumn } from 'vscode';
 import * as hooks from 'positron';
 
 import { ExtensionHost, HostWebviewPanel } from '.';
-import { CellExecutor, cellExecutorForLanguage, executableLanguages } from './executors';
+import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
+import { TextDocument } from 'vscode';
+import { MarkdownEngine } from '../markdown/engine';
 
 declare global {
 	function acquirePositronApi() : hooks.PositronApi;
@@ -47,7 +49,7 @@ export function hooksExtensionHost() : ExtensionHost {
     // w/o runtimes so we support all languages)
     executableLanguages,
 
-    cellExecutorForLanguage: async (language: string, silent?: boolean) 
+    cellExecutorForLanguage: async (language: string, document: TextDocument, engine: MarkdownEngine, silent?: boolean) 
       : Promise<CellExecutor | undefined> => {
       switch(language) {
         // use hooks for known runtimes
@@ -56,14 +58,19 @@ export function hooksExtensionHost() : ExtensionHost {
           return {
             execute: async (blocks: string[], _editorUri?: Uri) : Promise<void> => {
               for (const block of blocks) {
-                await hooksApi()?.runtime.executeCode(language, block, true);
+                let code = block;
+                if (language === "python" && isKnitrDocument(document, engine)) {
+                  language = "r";
+                  code = pythonWithReticulate(block);
+                }
+                await hooksApi()?.runtime.executeCode(language, code, true);
               } 
             }
           };
 
         // delegate for other languages
         default:
-          return cellExecutorForLanguage(language, silent);
+          return cellExecutorForLanguage(language, document, engine, silent);
       }
     },
 

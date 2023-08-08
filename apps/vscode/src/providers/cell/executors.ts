@@ -33,10 +33,11 @@ import { lines } from "core";
 import { cellOptionsForToken, kExecuteEval } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
+import { executableLanguages } from "../../host/executors";
 
 
-export function hasExecutor(host: ExtensionHost, language: string) {
-  return host.executableLanguages(false).includes(language);
+export function hasExecutor(_host: ExtensionHost, language: string) {
+  return executableLanguages().includes(language);
 }
 
 export function blockHasExecutor(host: ExtensionHost, token?: Token) : token is TokenMath | TokenCodeBlock {

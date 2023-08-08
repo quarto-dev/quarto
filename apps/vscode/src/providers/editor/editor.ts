@@ -338,7 +338,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             ? (workspaceDir || process.cwd()) 
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows(),
-          executableLanguages: this.extensionHost.executableLanguages(true)
+          executableLanguages: this.extensionHost.executableLanguages(true, document, this.engine)
         };
       },
 

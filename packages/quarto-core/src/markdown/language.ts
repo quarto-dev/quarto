@@ -100,6 +100,15 @@ export function languageNameFromBlock(token: Token) {
   }
 }
 
+export function isKnitrExecutableLanguageBlock() {
+  return (token: Token) : token is TokenCodeBlock => {
+    return (
+      isExecutableLanguageBlock(token) &&
+      ["r", "python"].includes(languageNameFromBlock(token))
+    );
+  };
+}
+
 export function isExecutableLanguageBlockOf(language: string) {
   return (token: Token) : token is TokenMath | TokenCodeBlock => {
     return (

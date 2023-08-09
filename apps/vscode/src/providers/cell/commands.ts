@@ -31,6 +31,7 @@ import {
   isDisplayMath, 
   isExecutableLanguageBlock, 
   isExecutableLanguageBlockOf, 
+  isKnitrExecutableLanguageBlock, 
   languageBlockAtPosition, 
   languageNameFromBlock 
 } from "quarto-core";
@@ -46,6 +47,7 @@ import {
   executeSelectionInteractive,
 } from "./executors";
 import { ExtensionHost } from "../../host";
+import { isKnitrDocument } from "../../host/executors";
 
 export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
@@ -74,7 +76,7 @@ abstract class RunCommand {
     if (visualEditor) {
       const blockContext = await visualEditor.getActiveBlockContext();
       if (blockContext) {
-        if (await this.hasExecutorForLanguage(blockContext.activeLanguage, visualEditor.document, this.engine_)) {
+        if (await this.hasExecutorForLanguage(blockContext.activeLanguage, visualEditor.document)) {
           await this.doExecuteVisualMode(visualEditor, blockContext);
         } else {
           window.showWarningMessage(`Execution of ${blockContext.activeLanguage} cells is not supported`);
@@ -96,7 +98,7 @@ abstract class RunCommand {
           );
           if (block) {
             const language = languageNameFromBlock(block);
-            if (await this.hasExecutorForLanguage(language, doc, this.engine_)) {
+            if (await this.hasExecutorForLanguage(language, doc)) {
               await this.doExecute(editor, tokens, line, block);
             }
           } else {
@@ -135,12 +137,22 @@ abstract class RunCommand {
     block?: Token
   ): Promise<void>;
 
-  protected async cellExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
-    return await this.host_.cellExecutorForLanguage(language, document, engine);
+  protected async cellExecutorForLanguage(language: string, document: TextDocument) {
+    return await this.host_.cellExecutorForLanguage(language, document, this.engine_);
   }
 
-  private async hasExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
-    return !!this.cellExecutorForLanguage(language, document, engine);
+  protected async executeKnitrBlocks(blocks: Token[], document: TextDocument) {
+    for (const block of blocks.filter(isKnitrExecutableLanguageBlock) as TokenCodeBlock[]) {
+      const language = languageNameFromBlock(block);
+      const executor = await this.cellExecutorForLanguage(language, document);
+      if (executor) {
+        await executeInteractive(executor, [codeFromBlock(block)], document);
+      }
+    }
+  }
+
+  private async hasExecutorForLanguage(language: string, document: TextDocument) {
+    return !!this.cellExecutorForLanguage(language, document);
   }
 
 }
@@ -160,7 +172,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ) {
     if (block && isExecutableLanguageBlock(block)) {
       const language = languageNameFromBlock(block);
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
+      const executor = await this.cellExecutorForLanguage(language, editor.document);
       if (executor) {
         const code = codeFromBlock(block);
         await executeInteractive(executor, [code], editor.document);
@@ -174,7 +186,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ) : Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
-      const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
+      const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document);
       if (executor) {
         await executeInteractive(executor, [activeBlock.code], editor.document);
         await activateIfRequired(editor);
@@ -205,7 +217,7 @@ class RunNextCellCommand extends RunCommand implements Command {
     const nextBlock = context.blocks[activeBlockIndex + 1];
     if (nextBlock) {
       await editor.setBlockSelection(context, "nextblock");
-      const executor = await this.cellExecutorForLanguage(nextBlock.language, editor.document, this.engine_);
+      const executor = await this.cellExecutorForLanguage(nextBlock.language, editor.document);
       if (executor) {
         await executeInteractive(executor, [nextBlock.code], editor.document);
         await activateIfRequired(editor);
@@ -240,7 +252,7 @@ class RunPreviousCellCommand extends RunCommand implements Command {
     const prevBlock = context.blocks[activeBlockIndex - 1];
     if (prevBlock) {
       await editor.setBlockSelection(context, "prevblock");
-      const executor = await this.cellExecutorForLanguage(prevBlock.language, editor.document, this.engine_);
+      const executor = await this.cellExecutorForLanguage(prevBlock.language, editor.document);
       if (executor) {
         await executeInteractive(executor, [prevBlock.code], editor.document);
         await activateIfRequired(editor);
@@ -270,7 +282,7 @@ class RunSelectionCommand extends RunCommand implements Command {
   ) {
     // get language and attempt language aware runSelection
     const language = languageNameFromBlock(block);
-    const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
+    const executor = await this.cellExecutorForLanguage(language, editor.document);
     if (executor) {
       const executed = await executeSelectionInteractive(executor);
 
@@ -319,7 +331,7 @@ class RunSelectionCommand extends RunCommand implements Command {
     }
 
     // run code
-    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document);
     if (executor) {
       await executeInteractive(executor, [selection], editor.document);
     
@@ -359,25 +371,29 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     }
 
     if (blocks.length > 0) {
-      // we need to figure out which language to execute. this is either the language
-      // of the passed block (if any) or the language of the block immediately preceding
-      // the line this is executed from
-      const language = languageNameFromBlock(
-        block || blocks[blocks.length - 1]
-      );
+      if (isKnitrDocument(editor.document, this.engine_)) {
+        await this.executeKnitrBlocks(blocks, editor.document);
+      } else {
+        // we need to figure out which language to execute. this is either the language
+        // of the passed block (if any) or the language of the block immediately preceding
+        // the line this is executed from
+        const language = languageNameFromBlock(
+          block || blocks[blocks.length - 1]
+        );
 
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-      if (executor) {
-        // accumulate code
-        const code: string[] = [];
-        for (const block of blocks.filter(
-          isExecutableLanguageBlockOf(language)
-        )) {
-          code.push(codeFromBlock(block));
+        const executor = await this.cellExecutorForLanguage(language, editor.document);
+        if (executor) {
+          // accumulate code
+          const code: string[] = [];
+          for (const block of blocks.filter(
+            isExecutableLanguageBlockOf(language)
+          )) {
+            code.push(codeFromBlock(block));
+          }
+
+          // execute
+          await executeInteractive(executor, code, editor.document);
         }
-
-        // execute
-        await executeInteractive(executor, code, editor.document);
       }
     }
   }
@@ -386,7 +402,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ) : Promise<void> {
-    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document);
     if (executor) {
       const code: string[] = [];
       for (const block of context.blocks) {
@@ -421,15 +437,26 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     line: number,
     block?: Token
   ) {
-    // see if we can get the language from the current block
-    let language = blockHasExecutor(this.host_, block)
+
+     // collect up blocks after the active one
+     const afterBlocks: Array<TokenMath | TokenCodeBlock> = [];
+     for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) ) {
+       if (line < blk.range.start.line) {
+         afterBlocks.push(blk as TokenMath | TokenCodeBlock);
+       }
+     }
+ 
+
+    if (isKnitrDocument(editor.document, this.engine_)) {
+      await this.executeKnitrBlocks(afterBlocks, editor.document);
+    } else {
+      // see if we can get the language from the current block
+      let language = blockHasExecutor(this.host_, block)
       ? languageNameFromBlock(block!)
       : undefined;
 
-    const blocks: string[] = [];
-    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
-      // skip if the cell is above or at the cursor
-      if (line < blk.range.start.line) {
+      const blocks: string[] = [];
+      for (const blk of afterBlocks) {
         // set langauge if needed
         const blockLanguage = languageNameFromBlock(blk);
         if (!language) {
@@ -438,14 +465,14 @@ class RunCellsBelowCommand extends RunCommand implements Command {
         // include blocks of this language
         if (blockLanguage === language) {
           blocks.push(codeFromBlock(blk));
-        }
+        }  
       }
-    }
-    // execute
-    if (language && blocks.length > 0) {
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, blocks, editor.document);
+      // execute
+      if (language && blocks.length > 0) {
+        const executor = await this.cellExecutorForLanguage(language, editor.document);
+        if (executor) {
+          await executeInteractive(executor, blocks, editor.document);
+        }
       }
     }
   }
@@ -454,7 +481,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ) : Promise<void> {
-    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document);
     if (executor) {
       let code: string[] | undefined;
       for (const block of context.blocks) {
@@ -489,23 +516,27 @@ class RunAllCellsCommand extends RunCommand implements Command {
     _line: number,
     _block?: Token
   ) {
-    let language: string | undefined;
-    const blocks: string[] = [];
-    for (const block of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
-      const blockLanguage = languageNameFromBlock(block);
-      if (!language) {
-        language = blockLanguage;
+    if (isKnitrDocument(editor.document, this.engine_)) {
+      await this.executeKnitrBlocks(tokens, editor.document);
+    } else {
+      let language: string | undefined;
+      const blocks: string[] = [];
+      for (const block of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
+        const blockLanguage = languageNameFromBlock(block);
+        if (!language) {
+          language = blockLanguage;
+        }
+        if (blockLanguage === language) {
+          blocks.push(codeFromBlock(block));
+        }
       }
-      if (blockLanguage === language) {
-        blocks.push(codeFromBlock(block));
+      if (language && blocks.length > 0) {
+        const executor = await this.cellExecutorForLanguage(language, editor.document);
+        if (executor) {
+          await executeInteractive(executor, blocks, editor.document);
+        }
       }
-    }
-    if (language && blocks.length > 0) {
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, blocks, editor.document);
-      }
-    }
+    } 
   }
 
   override async doExecuteVisualMode(
@@ -519,7 +550,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
       }
     }
     if (code.length > 0) {
-      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document);
       if (executor) {
         await executeInteractive(executor, code, editor.document);
         await activateIfRequired(editor);
@@ -657,3 +688,4 @@ async function activateIfRequired(editor: QuartoVisualEditor) {
     await editor.activate();
   }
 }
+

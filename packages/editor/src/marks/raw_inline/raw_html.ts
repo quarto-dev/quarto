@@ -27,6 +27,7 @@ import { MarkInputRuleFilter } from '../../api/input_rule';
 import { kRawInlineFormat, kRawInlineContent } from './raw_inline';
 import { toggleMarkType } from '../../api/command';
 import { domAttrNoSpelling } from '../../api/mark';
+import { fragmentText } from '../../api/fragment';
 
 const extension = (context: ExtensionContext): Extension | null => {
   const { pandocExtensions } = context;
@@ -85,8 +86,17 @@ const extension = (context: ExtensionContext): Extension | null => {
           },
           writer: {
             priority: 1,
-            write: (output: PandocOutput, _mark: Mark, parent: Fragment) => {
-              output.writeRawMarkdown(parent);
+            write: (output: PandocOutput, mark: Mark, parent: Fragment) => {
+              const raw = fragmentText(parent);
+              if (raw.startsWith("<") && raw.endsWith(">")) {
+                output.writeRawMarkdown(parent);
+              } else {
+                output.writeToken(PandocTokenType.RawInline, () => {
+                  output.write("html");
+                  output.write(raw);
+                });
+              }
+          
             },
           },
         },

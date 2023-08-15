@@ -53,7 +53,7 @@
     "onCommand:quarto.walkthrough.newDocument",
     "onCommand:quarto.createProject",
     "onCommand:quarto.fileCreateProject",
-    "workspaceContains:**/*.qmd",
+    "workspaceContains:**/*.{qmd,rmd}",
     "workspaceContains:**/_quarto.{yml,yaml}",
     "workspaceContains:**/_extension.{yml,yaml}",
     "onWebviewPanel:quarto.previewView",
@@ -73,7 +73,7 @@
           "quarto"
         ],
         "extensions": [
-          ".qmd"
+          ".qmd", ".rmd"
         ],
         "icon": {
           "light": "./assets/icon/qmd.svg",

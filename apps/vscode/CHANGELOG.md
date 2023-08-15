@@ -3,6 +3,7 @@
 ## 1.93.0 (Unreleased)
 
 - Visual editor: Ensure that raw inline html without tags uses explicit inline syntax
+- Enable cell tools and render/preview for .Rmd files
 
 ## 1.92.0 (Release on 8 August 2023)
 

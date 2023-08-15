@@ -516,7 +516,7 @@ class PreviewManager {
         // capture preview command url and preview url
         this.previewCommandUrl_ = match[1];
         const browseMatch = this.previewOutput_.match(
-          /(Browse at|Listening on) (https?:\/\/[^\s]*)/
+          /(Browse at|Listening on) (https?:\/\/[^\n]*)/
         );
         if (browseMatch) {
           // shiny document

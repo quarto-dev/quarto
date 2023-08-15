@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.94.0 (Unreleased)
+
+- Correctly handle preview URLs with spaces within website/book projects
+
 ## 1.93.0 (Release on 14 August 2023)
 
 - Visual editor: Ensure that raw inline html without tags uses explicit inline syntax

@@ -3,6 +3,7 @@
 ## 1.94.0 (Unreleased)
 
 - Correctly handle preview URLs with spaces within website/book projects
+- Ensure that executed cells include a trailing newline
 
 ## 1.93.0 (Release on 14 August 2023)
 

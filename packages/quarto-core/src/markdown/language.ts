@@ -42,7 +42,7 @@ export function codeForExecutableLanguageBlock(token: TokenMath | TokenCodeBlock
   if (isMath(token)) {
     return token.data.text;
   } else if (isCodeBlock(token)) {
-    return token.data;
+    return token.data + "\n";
   } else {
     return "";
   }

@@ -24,7 +24,7 @@ export async function activateCreate(
 ) {
   // open documents if there is a first-run file
   if (quartoContext.workspaceDir) {
-    const firstRun = await collectFirstRun(context, quartoContext.workspaceDir);
+    const firstRun = await collectFirstRun(context, quartoContext, quartoContext.workspaceDir);
     for (const file of firstRun) {
       const doc = await workspace.openTextDocument(file);
       await window.showTextDocument(doc, ViewColumn.Active, false);

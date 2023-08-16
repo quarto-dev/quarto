@@ -15,6 +15,7 @@
 
 import fs from "fs";
 import path from "path";
+import { QuartoContext, quartoProjectConfig } from "quarto-core";
 import { ExtensionContext } from "vscode";
 
 const kQuartoCreateFirstRun = "quarto.create.firstRun";
@@ -32,8 +33,13 @@ export function createFirstRun(
 
 export async function collectFirstRun(
   context: ExtensionContext,
-  projectDir: string
+  quartoContext: QuartoContext,
+  projectDir: string,
 ): Promise<string[]> {
+
+  // NOTE: defer doing this unless we absolutely neeed to
+  const projConfig = await quartoProjectConfig(quartoContext.runQuarto, projectDir);
+  
   const firstRun = context.globalState
     .get<string>(kQuartoCreateFirstRun, "")
     .split("\n")

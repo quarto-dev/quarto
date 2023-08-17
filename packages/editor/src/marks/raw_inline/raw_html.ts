@@ -86,7 +86,7 @@ const extension = (context: ExtensionContext): Extension | null => {
           },
           writer: {
             priority: 1,
-            write: (output: PandocOutput, mark: Mark, parent: Fragment) => {
+            write: (output: PandocOutput, _mark: Mark, parent: Fragment) => {
               const raw = fragmentText(parent);
               if (raw.startsWith("<") && raw.endsWith(">")) {
                 output.writeRawMarkdown(parent);

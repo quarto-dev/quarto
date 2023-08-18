@@ -210,7 +210,7 @@ function getCreators(db: Database, spec: ZoteroCollectionSpec) : Map<string,Zote
   
   const creators = new Map<string,ZoteroCreator[]>(); 
 
-  for (const row of db.all(creatorsSQL(spec)) as Array<Record<string,string>>) {
+  for (const row of db.all(...creatorsSQL(spec)) as Array<Record<string,string>>) {
     // get key and ensure it exists
     const key = row["key"];
     if (!creators.has(key)) {
@@ -552,7 +552,7 @@ function getCollections(db: Database, librariesOnly = false) : ZoteroCollectionS
   });  
 }
 
-function creatorsSQL(spec: ZoteroCollectionSpec)
+function creatorsSQL(spec: ZoteroCollectionSpec): [string, Record<string, string>]
 {
   const itemsJoin = spec.parentKey.length > 0 
     ? `join collectionItems on items.itemID = collectionItems.itemID
@@ -560,8 +560,8 @@ function creatorsSQL(spec: ZoteroCollectionSpec)
     : "";
 
   const keyWhere = spec.parentKey.length > 0
-    ? `AND collections.key = '${spec.key}'`
-    : `AND libraries.libraryID = ${spec.key}`;
+    ? `AND collections.key = :k`
+    : `AND libraries.libraryID = :k`;
 
   const sql = `
     SELECT
@@ -590,7 +590,7 @@ function creatorsSQL(spec: ZoteroCollectionSpec)
       itemCreators.orderIndex
   `;
 
-  return sql;
+  return [sql, { ":k": spec.key }];
 }
 
 function collectionSQL(spec: ZoteroCollectionSpec) {

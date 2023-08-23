@@ -878,11 +878,14 @@
         "editor.unicodeHighlight.ambiguousCharacters": false,
         "editor.unicodeHighlight.invisibleCharacters": false
       },
+      "files.associations": {
+        ".intellisense.r": "plaintext",
+        ".intellisense.py": "plaintext",
+        ".intellisense.jl": "plaintext",
+        ".intellisense.m": "plaintext"
+      },
       "github.copilot.enable": {
         "quarto": false
-      },
-      "files.associations": {
-          ".intellisense.r": "plaintext"
       }
     },
     "configuration": {

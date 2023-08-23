@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.95,9 (Unreleased)
+
+- Mark temporary .intellisense. files as plaintext so they are not auto-formatted
+
 ## 1.94.0 (Release on 17 August 2023)
 
 - Correctly handle preview URLs with spaces within website/book projects

@@ -880,6 +880,9 @@
       },
       "github.copilot.enable": {
         "quarto": false
+      },
+      "files.associations": {
+          ".intellisense.r": "plaintext"
       }
     },
     "configuration": {

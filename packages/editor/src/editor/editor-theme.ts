@@ -18,6 +18,7 @@ export interface EditorTheme {
   solarizedMode: boolean;
   cursorColor: string;
   selectionColor: string;
+  selectionForegroundColor?: string; // defaults to textColor if not specified
   nodeSelectionColor: string;
   backgroundColor: string;
   metadataBackgroundColor: string;
@@ -98,6 +99,7 @@ export function defaultTheme(): EditorTheme {
     solarizedMode: false,
     cursorColor: 'black',
     selectionColor: '#8cf',
+    selectionForegroundColor: 'black',
     nodeSelectionColor: 'rgb(102,155,243)',
     backgroundColor: 'white',
     metadataBackgroundColor: 'rgb(255, 255, 255)',
@@ -228,6 +230,9 @@ export function applyTheme(theme: EditorTheme) {
     .pm-default-theme .pm-background-color *::selection {
       background-color: ${defaults.selectionColor} !important;
     }
+    .pm-default-theme .pm-text-color *::selection {
+      color: ${defaults.selectionForegroundColor || defaults.textColor} !important;
+    }
     .pm-default-theme .pm-find-text,
     .pm-default-theme .pm-list-item-selected,
     .pm-default-theme .pm-grid-item-selected {
@@ -268,6 +273,9 @@ export function applyTheme(theme: EditorTheme) {
     .pm-text-color {
       color: ${theme.textColor} !important;
     }
+    .pm-text-color *::selection  {
+      color: ${theme.selectionForegroundColor || theme.textColor} !important;
+    }
     .pm-surface-widget-text-color {
       color: ${theme.surfaceWidgetTextColor} !important;
     }
@@ -300,6 +308,7 @@ export function applyTheme(theme: EditorTheme) {
       border-radius: 3px;
     }
     .pm-selected-text {
+      color: ${theme.selectionForegroundColor || theme.textColor} !important;
       background-color: ${theme.selectionColor} !important;
     }
     .pm-selected-list-item {

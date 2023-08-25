@@ -6,6 +6,7 @@
 - Jupyter: Verify that the ms-toolsai.jupyter extension is installed 
 - Mark temporary .intellisense. files as plaintext so they are not auto-formatted
 - Use triple-dash for block and line comments
+- Visual Editor: Use correct selection text color in high contrast mode
 - Visual Editor: Workaround Pandoc 3.1.4 change in `--id-prefix` behavior
 - Visual Editor: Remove it_IT spelling dictionary 
 

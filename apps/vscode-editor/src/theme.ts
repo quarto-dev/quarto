@@ -47,6 +47,7 @@ export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) 
   theme.solarizedMode = isSolarizedThemeActive();
   theme.cursorColor = colors["--vscode-editorCursor-foreground"];
   theme.selectionColor = colors["--vscode-editor-selectionBackground"];
+  theme.selectionForegroundColor = colors["--vscode-editor-selectionForeground"]
   theme.nodeSelectionColor = colors["--vscode-notebook-focusedCellBorder"];
   theme.backgroundColor = colors["--vscode-editor-background"];
   theme.metadataBackgroundColor =  theme.backgroundColor;

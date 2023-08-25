@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.95.1 (Unreleased)
+## 1.95.1 (Release on 25 August 2023)
 
 - Revert .intellisense.* change (caused completion to break!)
 

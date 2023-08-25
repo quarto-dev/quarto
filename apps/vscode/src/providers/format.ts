@@ -84,7 +84,7 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
                 document,
                 formattingOptions(document.uri, vdoc.language, options)
               );
-            } else if (langaugeCanFormatSelection(language, document.uri)) {
+            } else if (language.canFormatOnSave !== false &&  langaugeCanFormatSelection(language, document.uri)) {
               const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
               const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
                 const edits: TextEdit[] = [];

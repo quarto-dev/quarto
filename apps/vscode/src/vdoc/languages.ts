@@ -27,6 +27,7 @@ export interface EmbeddedLanguage {
   reuseVdoc?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
+  canFormatOnSave?: boolean;
   canFormatSelection?: (uri: Uri) => boolean;
 }
 
@@ -59,6 +60,7 @@ const kEmbededLanguages = [
     emptyLine: "#",
     reuseVdoc: true,
     canFormat: true,
+    canFormatOnSave: false,
     canFormatDocument: false,
   }),
   defineLanguage("julia", {
@@ -93,6 +95,7 @@ interface LanguageOptions {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
+  canFormatOnSave?: boolean;
   canFormatDocument?: boolean;
   canFormatSelection?: (uri: Uri) => boolean;
 }
@@ -124,6 +127,7 @@ function defineLanguage(
     inject: options?.inject,
     reuseVdoc: options?.reuseVdoc,
     canFormat: options?.canFormat,
+    canFormatOnSave: options?.canFormatOnSave,
     canFormatDocument: options?.canFormatDocument,
     canFormatSelection: options?.canFormatSelection
   };

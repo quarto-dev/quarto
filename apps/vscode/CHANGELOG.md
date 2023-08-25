@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.96.0 (Unreleased)
+
+- Disable format document / format on save for R (conflicts w/ R extension)
+
 ## 1.95.1 (Release on 25 August 2023)
 
 - Revert .intellisense.* change (caused completion to break!)

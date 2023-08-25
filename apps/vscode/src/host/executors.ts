@@ -52,8 +52,8 @@ interface VSCodeCellExecutor extends CellExecutor {
 
 const pythonCellExecutor: VSCodeCellExecutor = {
   language: "python",
-  requiredExtension: ["ms-python.python"],
-  requiredExtensionName: "Python",
+  requiredExtension: ["ms-toolsai.jupyter"],
+  requiredExtensionName: "Jupyter",
   requiredVersion: "2021.8.0",
   execute: async (blocks: string[]) => {
     // if there is a cell magic then we need to execute cell-by-cell

@@ -1,10 +1,10 @@
 # Changelog
 
-## 1.95,9 (Unreleased)
+## 1.95.0 (Unreleased)
 
 - Jupyter: Run cell-by-cell only when there are cell magics (%%) present
+- Jupyter: Verify that the ms-toolsai.jupyter extension is installed 
 - Mark temporary .intellisense. files as plaintext so they are not auto-formatted
-
 
 ## 1.94.0 (Release on 17 August 2023)
 

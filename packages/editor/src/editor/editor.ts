@@ -1441,7 +1441,7 @@ export class Editor  {
     }
 
     // get code
-    return this.pandocConverter.fromProsemirror(tr.doc, this.pandocFormat, options);
+    return this.pandocConverter.fromProsemirror(tr.doc, this.pandocFormat, this.pandocCapabilities, options);
   }
 }
 

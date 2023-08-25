@@ -13,6 +13,8 @@
  *
  */
 
+import * as semver from "semver";
+
 import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';
 import { findChildren } from 'prosemirror-utils';
 
@@ -41,7 +43,7 @@ import { pandocToProsemirror } from './pandoc_to_prosemirror';
 import { pandocFromProsemirror } from './pandoc_from_prosemirror';
 import { isParagraphNode } from '../api/paragraph';
 import { PandocFormat, PandocWriterOptions } from '../api/pandoc-types';
-import { normalizeNewlines } from 'core';
+import { lines, normalizeNewlines } from 'core';
 
 export type PandocLineWrapping = 'none' | 'column' | 'sentence';
 
@@ -159,6 +161,7 @@ export class PandocConverter {
   public async fromProsemirror(
     doc: ProsemirrorNode,
     pandocFormat: PandocFormat,
+    pandocCapabilities: PandocCapabilities,
     options: PandocWriterOptions,
   ): Promise<string> {
     // generate pandoc ast
@@ -220,6 +223,15 @@ export class PandocConverter {
     // normalize newlines (don't know if pandoc uses \r\n on windows)
     markdown = markdown.replace(/\r\n|\n\r|\r/g, '\n');
 
+    // if the pandoc version is >= 3.1.4 then fix IDs that were broken by
+    // the change in --id-prefix behavior
+    if (options.references?.prefix) {
+      const pandocVersion = pandocSemver(pandocCapabilities);
+      if (pandocVersion && semver.gte(pandocVersion, "3.1.4")) {
+        markdown = markdown.replace(`{#${options.references.prefix}`, "{#");
+      }
+    }
+
     // run post-processors
     this.markdownPostProcessors.forEach(postprocessor => {
       markdown = postprocessor(markdown);
@@ -228,6 +240,13 @@ export class PandocConverter {
     // return
     return markdown;
   }
+}
+
+// extract semver from pandoc version output
+function pandocSemver(capabilities: PandocCapabilities) {
+  const versionLines = lines(capabilities.version);
+  const version = versionLines[0].replace("pandoc ", "").trim();
+  return semver.coerce(version);
 }
 
 // adjust the specified format

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.95.1 (Unreleased)
+
+- Revert .intellisense.* change (caused completion to break!)
+
 ## 1.95.0 (Release on 25 August 2023)
 
 - Jupyter: Run cell-by-cell only when there are cell magics (%%) present

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.95.0 (Unreleased)
+## 1.95.0 (Release on 25 August 2023)
 
 - Jupyter: Run cell-by-cell only when there are cell magics (%%) present
 - Jupyter: Verify that the ms-toolsai.jupyter extension is installed 

@@ -7,6 +7,7 @@
 - Mark temporary .intellisense. files as plaintext so they are not auto-formatted
 - Use triple-dash for block and line comments
 - Visual Editor: Workaround Pandoc 3.1.4 change in `--id-prefix` behavior
+- Visual Editor: Remove it_IT spelling dictionary 
 
 ## 1.94.0 (Release on 17 August 2023)
 

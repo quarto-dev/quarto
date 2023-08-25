@@ -1096,7 +1096,6 @@
             "es_ES",
             "fr_FR",
             "de_DE",
-            "it_IT",
             "ru_RU"
           ],
           "markdownEnumDescriptions": [
@@ -1107,7 +1106,6 @@
             "Spanish",
             "French",
             "German",
-            "Italian",
             "Russian"
           ]
         },

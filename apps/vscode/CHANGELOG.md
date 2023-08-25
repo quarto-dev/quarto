@@ -2,7 +2,9 @@
 
 ## 1.95,9 (Unreleased)
 
+- Jupyter: Run cell-by-cell only when there are cell magics (%%) present
 - Mark temporary .intellisense. files as plaintext so they are not auto-formatted
+
 
 ## 1.94.0 (Release on 17 August 2023)
 

@@ -56,8 +56,15 @@ const pythonCellExecutor: VSCodeCellExecutor = {
   requiredExtensionName: "Python",
   requiredVersion: "2021.8.0",
   execute: async (blocks: string[]) => {
-    for (const block of blocks) {
-      await commands.executeCommand("jupyter.execSelectionInteractive", block);
+    // if there is a cell magic then we need to execute cell-by-cell
+    const hasMagic = blocks.find(block => !!block.match(/^\s*%%\w+\s/));
+    if (hasMagic) {
+      for (const block of blocks) {
+        await commands.executeCommand("jupyter.execSelectionInteractive", block);
+      }
+    } else {
+      const code = blocks.join("\n");
+      await commands.executeCommand("jupyter.execSelectionInteractive", code);
     }
   },
 };

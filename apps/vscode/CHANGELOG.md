@@ -5,6 +5,7 @@
 - Jupyter: Run cell-by-cell only when there are cell magics (%%) present
 - Jupyter: Verify that the ms-toolsai.jupyter extension is installed 
 - Mark temporary .intellisense. files as plaintext so they are not auto-formatted
+- Use triple-dash for block and line comments
 
 ## 1.94.0 (Release on 17 August 2023)
 

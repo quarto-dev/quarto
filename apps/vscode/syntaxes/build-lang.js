@@ -380,7 +380,7 @@ const languages = [
   {
     name: "typst",
     language: "typst",
-    identifiers: ["typst"],
+    identifiers: ["typ", "typst"],
     source: "source.typst",
   },
   {

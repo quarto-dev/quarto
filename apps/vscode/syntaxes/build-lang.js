@@ -378,6 +378,12 @@ const languages = [
     source: "source.tsx",
   },
   {
+    name: "typst",
+    language: "typst",
+    identifiers: ["typst"],
+    source: "source.typst",
+  },
+  {
     name: "csharp",
     language: "csharp",
     identifiers: ["cs", "csharp", "c#"],

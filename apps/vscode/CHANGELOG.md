@@ -4,6 +4,7 @@
 
 - Disable format document / format on save for R (conflicts w/ R extension)
 - Syntax highlighting for embedded `typst` raw blocks
+- Revert to previous toggle comment behavior (single line)
 
 ## 1.95.1 (Release on 25 August 2023)
 

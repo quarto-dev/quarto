@@ -152,6 +152,7 @@
           "meta.embedded.block.rust": "rust",
           "meta.embedded.block.scala": "scala",
           "meta.embedded.block.shellscript": "shellscript",
+          "meta.embedded.block.typst": "typst",
           "meta.embedded.block.typescript": "typescript",
           "meta.embedded.block.typescriptreact": "typescriptreact",
           "meta.embedded.block.csharp": "csharp",
@@ -166,6 +167,11 @@
         "language": "dot",
         "scopeName": "source.dot",
         "path": "./languages/dot/syntaxes/dot.tmLanguage"
+      },
+      {
+        "language": "typst",
+        "scopeName": "source.typst",
+        "path": "./languages/typst/typst.tmLanguage.json"
       },
       {
         "language": "mermaid",

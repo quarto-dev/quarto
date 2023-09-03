@@ -2,7 +2,7 @@
 
 ## 1.96.0 (Unreleased)
 
-- Disable format document / format on save for R (conflicts w/ R extension)
+- Formatting: format only currently active cell 
 - Syntax highlighting for embedded `typst` raw blocks
 - Revert to previous toggle comment behavior (single line)
 

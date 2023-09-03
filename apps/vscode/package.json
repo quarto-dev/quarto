@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.95.1",
+  "version": "1.96.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -73,7 +73,8 @@
           "quarto"
         ],
         "extensions": [
-          ".qmd", ".rmd"
+          ".qmd",
+          ".rmd"
         ],
         "icon": {
           "light": "./assets/icon/qmd.svg",

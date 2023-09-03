@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.96.0 (Unreleased)
+## 1.96.0 (Release on 3 September 2023)
 
 - Formatting: format only currently active cell 
 - Syntax highlighting for embedded `typst` raw blocks

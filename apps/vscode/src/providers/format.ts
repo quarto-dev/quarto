@@ -30,24 +30,24 @@ import {
   ProvideDocumentFormattingEditsSignature,
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
-import { languageBlockAtPosition } from "quarto-core";
+import { lines } from "core";
+import { TokenCodeBlock, TokenMath, languageBlockAtPosition } from "quarto-core";
 
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { EmbeddedLanguage, langageCanFormatDocument, langaugeCanFormatSelection } from "../vdoc/languages";
+import { EmbeddedLanguage } from "../vdoc/languages";
 import {
   adjustedPosition,
-  isBlockOfLanguage,
   languageAtPosition,
-  mainLanguage,
   unadjustedRange,
   VirtualDoc,
-  virtualDoc,
-  virtualDocForLanguage,
+  virtualDocForCode,
   virtualDocUri,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
+import { codeFromBlock } from "./cell/executors";
+
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
@@ -68,91 +68,15 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
         editor &&
         activeDocument?.uri.toString() === document.uri.toString()
       ) {
-        const line = editor.selection.active.line;
-        const position = new Position(line, 0);
-        const tokens = engine.parse(document);
-        let language = languageAtPosition(tokens, position);
-        if (!language || !language.canFormat) {
-          language = mainLanguage(tokens, (lang) => !!lang.canFormat);
-        }
-        if (language) {
-          const vdoc = virtualDocForLanguage(document, tokens, language);
-          if (vdoc) {
-            if (langageCanFormatDocument(language)) {
-              return executeFormatDocumentProvider(
-                vdoc,
-                document,
-                formattingOptions(document.uri, vdoc.language, options)
-              );
-            } else if (language.canFormatOnSave !== false &&  langaugeCanFormatSelection(language, document.uri)) {
-              const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
-              const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
-                const edits: TextEdit[] = [];
-                for (const token of tokens.filter(isBlockOfLanguage(language!)).reverse()) {
-                  const rangeEdits = await executeFormatRangeProvider(
-                    uri,
-                    adjustedCellRange(vdoc.language, document, token.range.start.line + 1, token.range.end.line - 1),
-                    formattingOptions(document.uri, vdoc.language)
-                  );
-                  if (rangeEdits) {
-                    edits.push(...rangeEdits);
-                  }
-                }
-                return edits;
-              });
-              return unadjustedEdits(edits, vdoc.language);;
-            }
-          }
-        }
+        // format active cell
+        const edits = await formatActiveCell(editor, engine);
+        return edits || [];
+      } else {
+        return [];
       }
-      // ensure that other formatters don't ever run over qmd files
-      return [];
     } else {
       // delegate if we didn't handle it
       return next(document, options, token);
-    }
-
-  };
-}
-
-export function embeddedDocumentRangeFormattingProvider(
-  engine: MarkdownEngine
-) {
-  return async (
-    document: TextDocument,
-    range: Range,
-    options: FormattingOptions,
-    token: CancellationToken,
-    next: ProvideDocumentRangeFormattingEditsSignature
-  ): Promise<TextEdit[] | null | undefined> => {
-    if (isQuartoDoc(document, true)) {
-      const tokens = engine.parse(document);
-      const beginBlock = languageBlockAtPosition(tokens, range.start, false);
-      const endBlock = languageBlockAtPosition(tokens, range.end, false);
-      if (beginBlock && (beginBlock.range.start.line === endBlock?.range.start.line)) {
-        const vdoc = await virtualDoc(document, range.start, engine);
-        if (vdoc) {
-          const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
-          const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
-            return await executeFormatRangeProvider(
-              uri,
-              new Range(
-                adjustedPosition(vdoc.language, range.start),
-                adjustedPosition(vdoc.language, range.end)
-              ),
-              formattingOptions(document.uri, vdoc.language, options)
-            );
-          });
-          if (edits) {
-            return unadjustedEdits(edits, vdoc.language);
-          }
-        }
-      }
-      // ensure that other formatters don't ever run over qmd files
-      return [];
-    } else {
-      // if we don't perform any formatting, then call the next handler
-      return next(document, range, options, token);
     }
   };
 }
@@ -160,55 +84,62 @@ export function embeddedDocumentRangeFormattingProvider(
 class FormatCellCommand implements Command {
   public readonly id = "quarto.formatCell";
   constructor(private readonly engine_: MarkdownEngine) {}
-
   public async execute(): Promise<void> {
     const editor = window.activeTextEditor;
-    const doc = editor?.document;
-    if (doc && isQuartoDoc(doc)) {
-      const result = await virtualDocForActiveCell(editor, this.engine_);
-      if (result) {
-        const { vdoc, startLine, endLine } = result;
-        if (langaugeCanFormatSelection(vdoc.language, doc.uri)) {
-          const vdocUri = await virtualDocUri(vdoc, doc.uri, "format");
-          const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
-            return await executeFormatRangeProvider(
-              uri,
-              adjustedCellRange(vdoc.language, doc, startLine, endLine),
-              formattingOptions(doc.uri, vdoc.language)
-            );
+    if (editor && isQuartoDoc(editor?.document)) {
+      const edits = await formatActiveCell(editor, this.engine_);
+      if (edits) {
+        editor.edit((editBuilder) => {
+          edits.forEach((edit) => {
+            editBuilder.replace(edit.range, edit.newText);
           });
-          if (edits) {
-            editor.edit((editBuilder) => {
-              unadjustedEdits(edits, vdoc.language).forEach((edit) => {
-                editBuilder.replace(edit.range, edit.newText);
-              });
-            });
-          }
-        } else if (langageCanFormatDocument(vdoc.language)) {
-          const edits = await executeFormatDocumentProvider(
-            vdoc,
-            doc,
-            formattingOptions(doc.uri, vdoc.language)
-          );
-          if (edits) {
-            editor.edit((editBuilder) => {
-              edits.forEach((edit) => {
-                editBuilder.replace(edit.range, edit.newText);
-              });
-            });
-          }
-       
-        }
-      } else {
-        window.showInformationMessage(
-          "Editor selection is not within a code cell"
-        );
-      }
+        });
+      } 
     } else {
       window.showInformationMessage("Active editor is not a Quarto document");
     }
   }
 }
+
+async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine,) {
+  const doc = editor?.document;
+  const tokens = engine.parse(doc);
+  const line = editor.selection.start.line;
+  const position = new Position(line, 0);
+  const language = languageAtPosition(tokens, position);
+  const block = languageBlockAtPosition(tokens, position, false);
+  if (language?.canFormat && block) {
+    return formatBlock(doc, block, language);
+  }
+}
+
+async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
+  const blockLines = lines(codeFromBlock(block));
+  blockLines.push("");
+  const vdoc = virtualDocForCode(blockLines, language);
+  const edits = await executeFormatDocumentProvider(
+    vdoc,
+    doc,
+    formattingOptions(doc.uri, vdoc.language)
+  );
+  if (edits) {
+    const blockRange = new Range(
+      new Position(block.range.start.line, block.range.start.character),
+      new Position(block.range.end.line, block.range.end.character)
+    );
+    const adjustedEdits = edits
+      .map(edit => {
+        const range = new Range(
+          new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
+          new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
+        );
+        return new TextEdit(range, edit.newText);
+      })
+      .filter(edit => blockRange.contains(edit.range));
+    return adjustedEdits;
+  }
+}
+
 
 function formattingOptions(
   uri: Uri,
@@ -226,37 +157,6 @@ function formattingOptions(
       defaultOptions?.insertSpaces ?? true
     ),
   };
-}
-
-async function virtualDocForActiveCell(
-  editor: TextEditor,
-  engine: MarkdownEngine
-) {
-  const tokens = engine.parse(editor.document);
-  const line = editor.selection.start.line;
-  const position = new Position(line, 0);
-  const block = languageBlockAtPosition(tokens, position, false);
-  if (block) {
-    const vdoc = await virtualDoc(editor.document, position, engine, block);
-    if (vdoc) {
-      return { vdoc, startLine: block.range.start.line + 1, endLine: block.range.end.line - 1 };
-    }
-  }
-  // no virtual doc
-  return undefined;
-}
-
-async function executeFormatRangeProvider(
-  uri: Uri,
-  range: Range,
-  options: FormattingOptions
-): Promise<TextEdit[] | undefined> {
-  return commands.executeCommand<TextEdit[]>(
-    "vscode.executeFormatRangeProvider",
-    uri,
-    range,
-    options
-  );
 }
 
 async function executeFormatDocumentProvider(
@@ -279,23 +179,6 @@ async function executeFormatDocumentProvider(
   }
 }
 
-function adjustedCellRange(
-  language: EmbeddedLanguage,
-  document: TextDocument,
-  startLine: number,
-  endLine: number
-): Range {
-  return new Range(
-    adjustedPosition(language, new Position(startLine, 0)),
-    adjustedPosition(
-      language,
-      new Position(
-        endLine,
-        Math.max(document.lineAt(endLine).text.length - 1, 0)
-      )
-    )
-  );
-}
 
 function unadjustedEdits(
   edits: TextEdit[],

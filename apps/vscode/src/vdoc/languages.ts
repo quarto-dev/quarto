@@ -14,7 +14,6 @@
  */
 
 import { editorLanguage } from "editor-core";
-import { Uri, workspace } from "vscode";
 
 export interface EmbeddedLanguage {
   ids: string[];
@@ -26,9 +25,6 @@ export interface EmbeddedLanguage {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
-  canFormatDocument?: boolean;
-  canFormatOnSave?: boolean;
-  canFormatSelection?: (uri: Uri) => boolean;
 }
 
 export function embeddedLanguage(langauge: string) {
@@ -36,32 +32,18 @@ export function embeddedLanguage(langauge: string) {
   return kEmbededLanguages.find((lang) => lang.ids.includes(langauge));
 }
 
-export function langaugeCanFormatSelection(language: EmbeddedLanguage, uri: Uri) {
-  return !language.canFormatSelection || language.canFormatSelection(uri);
-}
-
-export function langageCanFormatDocument(language: EmbeddedLanguage) {
-  return language.canFormatDocument === undefined || language.canFormatDocument;
-}
 
 const kEmbededLanguages = [
   // these langauges required creating a temp file
   defineLanguage("python", {
     inject: ["# type: ignore", "# flake8: noqa"],
     emptyLine: "#",
-    canFormat: true,
-    canFormatSelection: (uri: Uri) => {
-      const settings = workspace.getConfiguration("python", uri);
-      return settings.get<string>("formatting.provider") !== "black";
-    }
+    canFormat: true
   }),
   defineLanguage("r", {
-    inject: ["# styler: off"],
+    inject: ["# nolint start"],
     emptyLine: "#",
-    reuseVdoc: true,
     canFormat: true,
-    canFormatOnSave: false,
-    canFormatDocument: false,
   }),
   defineLanguage("julia", {
     emptyLine: "#",
@@ -69,8 +51,7 @@ const kEmbededLanguages = [
   }),
   defineLanguage("matlab", {
     emptyLine: "%",
-    canFormat: true,
-    canFormatSelection: () => false
+    canFormat: true
   }),
   defineLanguage("sql"),
   defineLanguage("bash"),
@@ -95,9 +76,6 @@ interface LanguageOptions {
   inject?: string[];
   reuseVdoc?: boolean;
   canFormat?: boolean;
-  canFormatOnSave?: boolean;
-  canFormatDocument?: boolean;
-  canFormatSelection?: (uri: Uri) => boolean;
 }
 
 function defineLanguage(
@@ -127,8 +105,5 @@ function defineLanguage(
     inject: options?.inject,
     reuseVdoc: options?.reuseVdoc,
     canFormat: options?.canFormat,
-    canFormatOnSave: options?.canFormatOnSave,
-    canFormatDocument: options?.canFormatDocument,
-    canFormatSelection: options?.canFormatSelection
   };
 }

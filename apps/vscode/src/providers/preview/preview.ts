@@ -38,7 +38,13 @@ import vscode, {
   CancellationToken,
 } from "vscode";
 
-import { normalizeNewlines, shQuote, winShEscape, pathWithForwardSlashes, sleep } from "core";
+import {
+  normalizeNewlines,
+  shQuote,
+  winShEscape,
+  pathWithForwardSlashes,
+  sleep,
+} from "core";
 import { fileCrossrefIndexStorage, QuartoContext } from "quarto-core";
 
 import { previewCommands } from "./commands";
@@ -49,7 +55,7 @@ import {
   isQuartoDoc,
   preserveEditorFocus,
   QuartoEditor,
-  validatateQuartoExtension,
+  validatateQuartoCanRender,
 } from "../../core/doc";
 import { PreviewOutputSink } from "./preview-output";
 import { isHtmlContent, isTextContent, isPdfContent } from "core-node";
@@ -63,8 +69,6 @@ import {
 } from "./preview-env";
 import { MarkdownEngine } from "../../markdown/engine";
 
-
-
 import {
   QuartoPreviewWebview,
   QuartoPreviewWebviewManager,
@@ -75,7 +79,6 @@ import {
   previewDirForDocument,
   renderOnSave,
 } from "./preview-util";
-
 
 import { vsCodeWebUrl } from "../../core/platform";
 
@@ -147,7 +150,14 @@ export function activatePreview(
 }
 
 export function canPreviewDoc(doc?: TextDocument) {
-  return !!doc && !!(isQuartoDoc(doc) || isNotebook(doc));
+  if (doc) {
+    if (isQuartoDoc(doc) || isNotebook(doc)) {
+      return true;
+    } else if (validatateQuartoCanRender(doc)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function isPreviewRunning() {
@@ -165,14 +175,14 @@ export async function previewDoc(
   engine: MarkdownEngine,
   quartoContext: QuartoContext,
   onShow?: () => void
-) { 
+) {
   // set the slide index from the source editor so we can
   // navigate to it in the preview frame
   const slideIndex = !isNotebook(editor.document)
     ? await editor.slideIndex()
     : undefined;
   previewManager.setSlideIndex(slideIndex);
-  
+
   //  set onShow if provided
   if (onShow !== undefined) {
     previewManager.setOnShow(onShow);
@@ -199,7 +209,10 @@ export async function previewDoc(
   );
   if (previewEditor) {
     // error if we didn't save using a valid quarto extension
-    if (!isNotebook(previewEditor.document) && !validatateQuartoExtension(previewEditor.document)) {
+    if (
+      !isNotebook(previewEditor.document) &&
+      !validatateQuartoCanRender(previewEditor.document)
+    ) {
       window.showErrorMessage("Unsupported File Extension", {
         modal: true,
         detail:
@@ -210,7 +223,12 @@ export async function previewDoc(
     }
 
     // run the preview
-    await previewManager.preview(previewEditor.document.uri, previewEditor.document, format, slideIndex);
+    await previewManager.preview(
+      previewEditor.document.uri,
+      previewEditor.document,
+      format,
+      slideIndex
+    );
 
     // focus the editor (sometimes the terminal steals focus)
     if (!isNotebook(previewEditor.document)) {
@@ -321,7 +339,10 @@ class PreviewManager {
   }
 
   public async isPreviewRunningForDoc(doc: TextDocument) {
-    return await this.isPreviewRunning() && (this.previewTarget_?.fsPath === doc.uri.fsPath);
+    return (
+      (await this.isPreviewRunning()) &&
+      this.previewTarget_?.fsPath === doc.uri.fsPath
+    );
   }
 
   private async canReuseRunningPreview(
@@ -466,7 +487,7 @@ class PreviewManager {
 
     const cmdText = this.quartoContext_.useCmd
       ? `cmd /C"${cmd.join(" ")}"`
-      : cmd.join(" "); 
+      : cmd.join(" ");
     this.terminal_.show(true);
     // delay if required (e.g. to allow conda to initialized)
     // wait for up to 5 seconds (note that we can do this without
@@ -613,7 +634,11 @@ class PreviewManager {
 
       // find existing visible instance
       const fileUri = Uri.file(errorLoc.file);
-      const editor = findQuartoEditor(this.engine_, this.quartoContext_, (doc) => doc.uri.fsPath === fileUri.fsPath);
+      const editor = findQuartoEditor(
+        this.engine_,
+        this.quartoContext_,
+        (doc) => doc.uri.fsPath === fileUri.fsPath
+      );
       if (editor) {
         if (editor.textEditor) {
           // if the current selection is outside of the error region then
@@ -643,15 +668,20 @@ class PreviewManager {
       this.isBrowserPreviewable(this.previewOutputFile_)
     ) {
       // https://code.visualstudio.com/api/advanced-topics/remote-extensions
-      const previewUrl = (await vscode.env.asExternalUri(Uri.parse(this.previewUrl_!))).toString();
-      this.webviewManager_.showWebview({ 
-        url: previewUrl, 
-        zoomLevel: this.zoomLevel(this.previewOutputFile_),
-        slideIndex: this.previewSlideIndex_ 
-      }, {
-        preserveFocus: true,
-        viewColumn: ViewColumn.Beside,
-      });
+      const previewUrl = (
+        await vscode.env.asExternalUri(Uri.parse(this.previewUrl_!))
+      ).toString();
+      this.webviewManager_.showWebview(
+        {
+          url: previewUrl,
+          zoomLevel: this.zoomLevel(this.previewOutputFile_),
+          slideIndex: this.previewSlideIndex_,
+        },
+        {
+          preserveFocus: true,
+          viewColumn: ViewColumn.Beside,
+        }
+      );
       this.webviewManager_.setOnError(this.progressDismiss.bind(this));
     } else {
       this.showOuputFile();
@@ -690,7 +720,6 @@ class PreviewManager {
       return undefined;
     }
   }
-
 
   private isBrowserPreviewable(uri?: Uri) {
     return (

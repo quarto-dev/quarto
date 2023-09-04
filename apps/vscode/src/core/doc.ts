@@ -21,7 +21,6 @@ import { extname } from "./path";
 import { MarkdownEngine } from "../markdown/engine";
 import { QuartoContext } from "quarto-core";
 
-
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
 const kMermaidLanguageId = "mermaid";
@@ -32,7 +31,6 @@ export const kQuartoDocSelector: vscode.DocumentSelector = {
   language: kQuartoLanguageId,
   scheme: "*",
 };
-
 
 export function isQuartoDoc(doc?: vscode.TextDocument, strict = false) {
   return (
@@ -75,9 +73,16 @@ export function isMarkdownDoc(document?: vscode.TextDocument) {
   );
 }
 
-export function validatateQuartoExtension(document: vscode.TextDocument) {
+export function validatateQuartoCanRender(document: vscode.TextDocument) {
   const ext = extname(document.uri.toString()).toLowerCase();
-  return [".qmd", ".rmd", ".md"].includes(ext);
+  if ([".qmd", ".rmd", ".md"].includes(ext)) {
+    return true;
+  } else if ([".py", ".r", ".jl"].includes(ext)) {
+    return !!document
+      .getText()
+      .trim()
+      .match(/^\s*#\s*%%+\s+\[markdown|raw\]/);
+  }
 }
 
 export async function resolveQuartoDocUri(
@@ -110,7 +115,11 @@ export function getWholeRange(doc: vscode.TextDocument) {
 
 export function preserveEditorFocus(editor?: QuartoEditor) {
   // focus the editor (sometimes the terminal steals focus)
-  editor = editor || (vscode.window.activeTextEditor ? quartoEditor(vscode.window.activeTextEditor) : undefined);
+  editor =
+    editor ||
+    (vscode.window.activeTextEditor
+      ? quartoEditor(vscode.window.activeTextEditor)
+      : undefined);
   if (editor) {
     if (!isNotebook(editor?.document)) {
       setTimeout(() => {
@@ -145,8 +154,7 @@ export function findQuartoEditor(
   context: QuartoContext,
   filter: (doc: vscode.TextDocument) => boolean,
   includeVisible = true
-) : QuartoEditor | undefined {
-
+): QuartoEditor | undefined {
   // first check for an active visual editor
   const activeVisualEditor = VisualEditorProvider.activeEditor();
   if (activeVisualEditor && filter(activeVisualEditor.document)) {
@@ -154,11 +162,15 @@ export function findQuartoEditor(
   }
 
   // then check for active notebook editor
-  const notebookEditor = (vscode.window as any).activeNotebookEditor as vscode.NotebookEditor | undefined;
+  const notebookEditor = (vscode.window as any).activeNotebookEditor as
+    | vscode.NotebookEditor
+    | undefined;
   if (notebookEditor) {
-    const notebookDocument = (notebookEditor as any).notebook as vscode.NotebookDocument | undefined;
+    const notebookDocument = (notebookEditor as any).notebook as
+      | vscode.NotebookDocument
+      | undefined;
     if (notebookDocument) {
-      const textEditor = vscode.window.visibleTextEditors.find(editor => {
+      const textEditor = vscode.window.visibleTextEditors.find((editor) => {
         return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
       });
       if (textEditor && filter(textEditor.document)) {
@@ -171,7 +183,7 @@ export function findQuartoEditor(
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {
     return quartoEditor(textEditor, engine, context);
-  // check visible text editors
+    // check visible text editors
   } else if (includeVisible) {
     // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
     const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
@@ -193,27 +205,34 @@ export function findQuartoEditor(
   }
 }
 
-
-export function quartoEditor(editor: vscode.TextEditor, engine?: MarkdownEngine, context?: QuartoContext) {
-  return { 
-    document: editor.document, 
+export function quartoEditor(
+  editor: vscode.TextEditor,
+  engine?: MarkdownEngine,
+  context?: QuartoContext
+) {
+  return {
+    document: editor.document,
     activate: async () => {
-      await vscode.window.showTextDocument(editor.document, editor.viewColumn, false);
+      await vscode.window.showTextDocument(
+        editor.document,
+        editor.viewColumn,
+        false
+      );
     },
     slideIndex: async () => {
       if (engine && context) {
         return await revealSlideIndex(
-          editor.selection.active, 
+          editor.selection.active,
           editor.document,
           engine,
-          context)
-        ;
+          context
+        );
       } else {
         return 0;
       }
     },
-    viewColumn: editor.viewColumn, 
-    textEditor: editor 
+    viewColumn: editor.viewColumn,
+    textEditor: editor,
   };
 }
 

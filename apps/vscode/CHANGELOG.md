@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.97.0 (Unreleased)
+
+- Support for rendering Jupyter percent scripts
+
 ## 1.96.0 (Release on 3 September 2023)
 
 - Formatting: format only currently active cell 

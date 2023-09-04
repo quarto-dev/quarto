@@ -715,7 +715,7 @@
         },
         {
           "command": "quarto.render",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewDiagram",
@@ -738,19 +738,19 @@
         },
         {
           "command": "quarto.renderHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.renderPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.renderDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.renderAll",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.clearCache",

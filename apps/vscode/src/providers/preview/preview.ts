@@ -145,6 +145,28 @@ export function activatePreview(
     );
   }
 
+  // monitor active document to see whether it can be rendered by quarto
+  const updateRenderDocActive = (editor?: vscode.TextEditor) => {
+    const renderDocActive =
+      editor && validatateQuartoCanRender(editor.document);
+    vscode.commands.executeCommand(
+      "setContext",
+      "quartoRenderDocActive",
+      renderDocActive
+    );
+  };
+  updateRenderDocActive(window.activeTextEditor);
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(updateRenderDocActive)
+  );
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument((doc: TextDocument) => {
+      if (doc.uri.fsPath === window.activeTextEditor?.document.uri.fsPath) {
+        updateRenderDocActive(window.activeTextEditor);
+      }
+    })
+  );
+
   // preview commands
   return previewCommands(quartoContext, engine);
 }

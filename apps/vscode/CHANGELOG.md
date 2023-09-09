@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.97.0 (Unreleased)
+## 1.97.0 (Release on 4 September 2023)
 
 - Support for rendering Jupyter percent scripts
 

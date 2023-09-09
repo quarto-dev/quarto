@@ -1830,7 +1830,7 @@
       <key>fenced_code_block_js</key>
       <dict>
         <key>begin</key>
-        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(js|jsx|mdx|javascript|es6|mjs|cjs|ojs|\{\.js.+?\})(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(js|jsx|mdx|javascript|es6|mjs|cjs|ojs)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
         <key>name</key>
         <string>markup.fenced_code.block.markdown</string>
         <key>end</key>
@@ -2413,7 +2413,7 @@
       <key>fenced_code_block_python</key>
       <dict>
         <key>begin</key>
-        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(python|py|py3|rpy|pyw|cpy|SConstruct|Sconstruct|sconstruct|SConscript|gyp|gypi|\{\.python.+?\}|.+\-python)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(python|py|py3|rpy|pyw|cpy|SConstruct|Sconstruct|sconstruct|SConscript|gyp|gypi|.+\-python)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
         <key>name</key>
         <string>markup.fenced_code.block.markdown</string>
         <key>end</key>
@@ -2625,7 +2625,7 @@
       <key>fenced_code_block_shell</key>
       <dict>
         <key>begin</key>
-        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(shell|sh|bash|zsh|bashrc|bash_profile|bash_login|profile|bash_logout|.textmate_init|\{\.bash.+?\})(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(shell|sh|bash|zsh|bashrc|bash_profile|bash_login|profile|bash_logout|.textmate_init)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
         <key>name</key>
         <string>markup.fenced_code.block.markdown</string>
         <key>end</key>
@@ -2784,7 +2784,7 @@
       <key>fenced_code_block_typst</key>
       <dict>
         <key>begin</key>
-        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(typst)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(typ|typst)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
         <key>name</key>
         <string>markup.fenced_code.block.markdown</string>
         <key>end</key>

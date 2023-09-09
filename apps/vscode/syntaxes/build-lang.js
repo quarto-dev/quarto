@@ -237,8 +237,7 @@ const languages = [
       "es6",
       "mjs",
       "cjs",
-      "ojs",
-      "\\{\\.js.+?\\}",
+      "ojs"
     ],
     source: "source.js",
   },
@@ -325,7 +324,6 @@ const languages = [
       "SConscript",
       "gyp",
       "gypi",
-      "\\{\\.python.+?\\}",
       ".+\\-python",
     ],
     source: "source.python",
@@ -360,8 +358,7 @@ const languages = [
       "bash_login",
       "profile",
       "bash_logout",
-      ".textmate_init",
-      "\\{\\.bash.+?\\}",
+      ".textmate_init"
     ],
     source: "source.shell",
   },
@@ -465,8 +462,8 @@ const fencedCodeBlockDefinition = (
   return `fenced_code_block_${name}:
   begin:
     (^|\\G)(\\s*)(\`{3,}|~{3,})\\s*(?:\\{(?:#[\\w-]+\\s+)?[\\{\\.=]?)?(?i:(${identifiers.join(
-      "|"
-    )})(?:\\}{1,2})?((\\s+|:|,|\\{|\\?)[^\`~]*)?$)
+    "|"
+  )})(?:\\}{1,2})?((\\s+|:|,|\\{|\\?)[^\`~]*)?$)
   name:
     markup.fenced_code.block.markdown
   end:

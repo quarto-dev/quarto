@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.98.0 (Unreleased)
+
+- Fix for JSON being highlighted as JS when in `{.json}` form
+
 ## 1.97.0 (Release on 4 September 2023)
 
 - Support for rendering Jupyter percent scripts

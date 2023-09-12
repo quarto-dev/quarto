@@ -31,7 +31,12 @@ import {
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
 import { lines } from "core";
-import { TokenCodeBlock, TokenMath, languageBlockAtPosition } from "quarto-core";
+import {
+  TokenCodeBlock,
+  TokenMath,
+  codeForExecutableLanguageBlock,
+  languageBlockAtPosition,
+} from "quarto-core";
 
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
@@ -47,7 +52,6 @@ import {
   withVirtualDocUri,
 } from "../vdoc/vdoc";
 import { codeFromBlock } from "./cell/executors";
-
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
@@ -94,14 +98,14 @@ class FormatCellCommand implements Command {
             editBuilder.replace(edit.range, edit.newText);
           });
         });
-      } 
+      }
     } else {
       window.showInformationMessage("Active editor is not a Quarto document");
     }
   }
 }
 
-async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine,) {
+async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
   const doc = editor?.document;
   const tokens = engine.parse(doc);
   const line = editor.selection.start.line;
@@ -113,8 +117,12 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine,) {
   }
 }
 
-async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
-  const blockLines = lines(codeFromBlock(block));
+async function formatBlock(
+  doc: TextDocument,
+  block: TokenMath | TokenCodeBlock,
+  language: EmbeddedLanguage
+) {
+  const blockLines = lines(codeForExecutableLanguageBlock(block));
   blockLines.push("");
   const vdoc = virtualDocForCode(blockLines, language);
   const edits = await executeFormatDocumentProvider(
@@ -128,18 +136,23 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
       new Position(block.range.end.line, block.range.end.character)
     );
     const adjustedEdits = edits
-      .map(edit => {
+      .map((edit) => {
         const range = new Range(
-          new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
-          new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
+          new Position(
+            edit.range.start.line + block.range.start.line + 1,
+            edit.range.start.character
+          ),
+          new Position(
+            edit.range.end.line + block.range.start.line + 1,
+            edit.range.end.character
+          )
         );
         return new TextEdit(range, edit.newText);
       })
-      .filter(edit => blockRange.contains(edit.range));
+      .filter((edit) => blockRange.contains(edit.range));
     return adjustedEdits;
   }
 }
-
 
 function formattingOptions(
   uri: Uri,
@@ -178,7 +191,6 @@ async function executeFormatDocumentProvider(
     return undefined;
   }
 }
-
 
 function unadjustedEdits(
   edits: TextEdit[],

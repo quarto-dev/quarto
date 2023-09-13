@@ -13,7 +13,6 @@
  *
  */
 
-
 import { Uri, commands, window, extensions } from "vscode";
 
 import semver from "semver";
@@ -21,7 +20,7 @@ import { TextDocument } from "vscode";
 import { MarkdownEngine } from "../markdown/engine";
 import { documentFrontMatter } from "../markdown/document";
 import { isExecutableLanguageBlockOf } from "quarto-core";
-
+import { workspace } from "vscode";
 
 export interface CellExecutor {
   execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
@@ -29,15 +28,20 @@ export interface CellExecutor {
 }
 
 export function executableLanguages() {
-  return kCellExecutors.map(executor => executor.language);
+  return kCellExecutors.map((executor) => executor.language);
 }
 
-export async function cellExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine, silent?: boolean) : Promise<CellExecutor | undefined> {
+export async function cellExecutorForLanguage(
+  language: string,
+  document: TextDocument,
+  engine: MarkdownEngine,
+  silent?: boolean
+): Promise<CellExecutor | undefined> {
   const executor = findExecutor(language, document, engine);
   if (executor) {
     if (await ensureRequiredExtension(language, document, engine, silent)) {
       return executor;
-    } 
+    }
   }
 }
 
@@ -57,10 +61,13 @@ const pythonCellExecutor: VSCodeCellExecutor = {
   requiredVersion: "2021.8.0",
   execute: async (blocks: string[]) => {
     // if there is a cell magic then we need to execute cell-by-cell
-    const hasMagic = blocks.find(block => !!block.match(/^\s*%%\w+\s/));
+    const hasMagic = blocks.find((block) => !!block.match(/^\s*%%\w+\s/));
     if (hasMagic) {
       for (const block of blocks) {
-        await commands.executeCommand("jupyter.execSelectionInteractive", block);
+        await commands.executeCommand(
+          "jupyter.execSelectionInteractive",
+          block
+        );
       }
     } else {
       const code = blocks.join("\n");
@@ -106,7 +113,7 @@ const juliaCellExecutor: VSCodeCellExecutor = {
         await extension.activate();
       }
       extension.exports.executeInREPL(blocks.join("\n"), {
-        filename: editorUri ? editorUri.fsPath : 'code'
+        filename: editorUri ? editorUri.fsPath : "code",
       });
     } else {
       window.showErrorMessage("Unable to execute code in Julia REPL");
@@ -114,14 +121,13 @@ const juliaCellExecutor: VSCodeCellExecutor = {
   },
 };
 
-
 const bashCellExecutor: VSCodeCellExecutor = {
   language: "bash",
   execute: async (blocks: string[]) => {
     const terminal = window.activeTerminal || window.createTerminal();
     terminal.show();
     terminal.sendText(blocks.join("\n"));
-  }
+  },
 };
 
 const shCellExecutor = { ...bashCellExecutor, language: "sh" };
@@ -129,28 +135,38 @@ const shCellExecutor = { ...bashCellExecutor, language: "sh" };
 const shellCellExecutor = { ...bashCellExecutor, language: "shell" };
 
 const kCellExecutors = [
-  pythonCellExecutor, 
-  rCellExecutor, 
-  juliaCellExecutor, 
-  bashCellExecutor, 
-  shCellExecutor, 
-  shellCellExecutor
+  pythonCellExecutor,
+  rCellExecutor,
+  juliaCellExecutor,
+  bashCellExecutor,
+  shCellExecutor,
+  shellCellExecutor,
 ];
 
-function findExecutor(language: string, document: TextDocument, engine: MarkdownEngine) : VSCodeCellExecutor | undefined {
-
+function findExecutor(
+  language: string,
+  document: TextDocument,
+  engine: MarkdownEngine
+): VSCodeCellExecutor | undefined {
   // if its a knitr document then we return reticulate for python
-  if (language === reticulateCellExecutor.language && isKnitrDocument(document, engine)) {
+  if (
+    language === reticulateCellExecutor.language &&
+    isKnitrDocument(document, engine) &&
+    workspace.getConfiguration("quarto").get("cells.useReticulate", true)
+  ) {
     return reticulateCellExecutor;
   } else {
     return kCellExecutors.find((x) => x.language === language);
   }
 }
 
-export function isKnitrDocument(document: TextDocument, engine: MarkdownEngine) {
+export function isKnitrDocument(
+  document: TextDocument,
+  engine: MarkdownEngine
+) {
   // check for explicit declarations of various kinds
   const frontMatter = documentFrontMatter(engine, document);
-  
+
   // engine option
   const engineOption = frontMatter["engine"];
   if (engineOption === "knitr") {
@@ -178,8 +194,13 @@ export function pythonWithReticulate(code: string) {
   return `reticulate::repl_python(quiet = TRUE, input = r"--(${code})--")`;
 }
 
-// ensure language extension is loaded (if required) 
-export async function ensureRequiredExtension(language: string, document: TextDocument, engine: MarkdownEngine, silent?: boolean): Promise<boolean> {
+// ensure language extension is loaded (if required)
+export async function ensureRequiredExtension(
+  language: string,
+  document: TextDocument,
+  engine: MarkdownEngine,
+  silent?: boolean
+): Promise<boolean> {
   const executor = findExecutor(language, document, engine);
   if (executor?.requiredExtension) {
     // validate the extension
@@ -202,7 +223,10 @@ export async function ensureRequiredExtension(language: string, document: TextDo
   }
 }
 
-function validateRequiredExtension(executor: VSCodeCellExecutor, silent = false) {
+function validateRequiredExtension(
+  executor: VSCodeCellExecutor,
+  silent = false
+) {
   if (executor.requiredExtension) {
     const extensionName = executor.requiredExtensionName;
     let extension: any;

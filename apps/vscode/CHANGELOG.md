@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.99.0 (Unreleased)
+
+- Add option controlling whether reticulate is used for Python in Knitr documents.
+
 ## 1.98.0 (Release on 12 September 2023)
 
 - Fix for JSON being highlighted as JS when in `{.json}` form

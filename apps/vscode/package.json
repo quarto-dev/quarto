@@ -951,6 +951,13 @@
           "default": 250,
           "markdownDescription": "Millisecond delay between background color updates."
         },
+        "quarto.cells.useReticulate": {
+          "order": 25,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Use reticulate to execute Python cells within Knitr engine documents."
+        },
         "quarto.mathjax.scale": {
           "order": 15,
           "scope": "window",

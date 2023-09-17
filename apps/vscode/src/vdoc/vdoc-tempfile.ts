@@ -28,6 +28,7 @@ import {
 } from "vscode";
 import { getWholeRange } from "../core/doc";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
+import { EmbeddedLanguage } from "./languages";
 
 // one virtual doc per language file extension
 const languageVirtualDocs = new Map<String, TextDocument>();
@@ -102,6 +103,10 @@ export async function deactivateVirtualDocTempFiles() {
   languageVirtualDocs.forEach(async (doc) => {
     await deleteDocument(doc);
   });
+}
+
+export function isLanguageVirtualDoc(langauge: EmbeddedLanguage, uri: Uri) {
+  return languageVirtualDocs.get(langauge.extension)?.uri.toString() === uri.toString();
 }
 
 // delete a document

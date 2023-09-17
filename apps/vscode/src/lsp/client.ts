@@ -53,7 +53,7 @@ import {
   virtualDocUri,
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
-import { deactivateVirtualDocTempFiles } from "../vdoc/vdoc-tempfile";
+import { deactivateVirtualDocTempFiles, isLanguageVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
 import { embeddedDocumentFormattingProvider } from "../providers/format";
@@ -269,7 +269,8 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           adjustedPosition(vdoc.language, position)
         );
         const resolveLocation = (location: Location) => {
-          if (location.uri.toString() === vdocUri.uri.toString()) {
+          if (isLanguageVirtualDoc(vdoc.language, location.uri) ||
+              location.uri.toString() === vdocUri.uri.toString()) {
             return new Location(
               document.uri,
               unadjustedRange(vdoc.language, location.range)
@@ -279,7 +280,8 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           }
         };
         const resolveLocationLink = (location: LocationLink) => {
-          if (location.targetUri.toString() === vdocUri.uri.toString()) {
+          if (isLanguageVirtualDoc(vdoc.language, location.targetUri) ||
+              location.targetUri.toString() === vdocUri.uri.toString()) {
             const locationLink: LocationLink = {
               targetRange: unadjustedRange(vdoc.language, location.targetRange),
               originSelectionRange: location.originSelectionRange

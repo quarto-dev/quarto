@@ -129,5 +129,39 @@
       ":::"
     ],
     "description": "Insert callout block"
+  },
+  "Insert two columns": {
+    "prefix": "columns2",
+    "body": [
+      "::: {.columns}",
+
+      "::: {.column}",
+      ":::",
+
+      "::: {.column}",
+      ":::",
+
+      "::: <!-- end columns -->"
+
+    ],
+    "description": "Insert two columns"
+  },
+  "Insert three columns": {
+    "prefix": "columns3",
+    "body": [
+      "::: {.columns}",
+
+      "::: {.column}",
+      ":::",
+
+      "::: {.column}",
+      ":::",
+
+      "::: {.column}",
+      ":::",
+
+      "::: <!-- end columns -->"
+    ],
+    "description": "Insert three columns"
   }
 }

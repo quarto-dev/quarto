@@ -56,7 +56,10 @@ import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { deactivateVirtualDocTempFiles, isLanguageVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
-import { embeddedDocumentFormattingProvider } from "../providers/format";
+import {
+  embeddedDocumentFormattingProvider,
+  embeddedDocumentRangeFormattingProvider,
+} from "../providers/format";
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 
@@ -93,6 +96,9 @@ export async function activateLsp(
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
     provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
+    provideDocumentRangeFormattingEdits: embeddedDocumentRangeFormattingProvider(
+      engine
+    ),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);

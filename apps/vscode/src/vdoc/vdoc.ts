@@ -91,7 +91,7 @@ function fillLinesFromBlock(lines: string[], document: TextDocument, block: Toke
   }
 }
 
-export function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
+function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
   for (let i=0; i<2; i++) {
     lines.push(language.emptyLine || ""); 
   }

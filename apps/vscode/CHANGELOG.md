@@ -4,6 +4,7 @@
 
 - Add option controlling whether reticulate is used for Python in Knitr documents.
 - Fix issue w/ resolving go to definition for R extension
+- Restore previous document formatting behavior (resolved underlying issue)
 
 ## 1.98.0 (Release on 12 September 2023)
 

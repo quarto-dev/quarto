@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.99.0 (Unreleased)
+## 1.99.0 (Release on 22 September 2023)
 
 - Add option controlling whether reticulate is used for Python in Knitr documents.
 - Fix issue w/ resolving go to definition for R extension

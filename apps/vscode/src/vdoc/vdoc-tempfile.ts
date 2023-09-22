@@ -56,17 +56,7 @@ export async function virtualDocUriFromTempFile(
   // do we have an existing document?
   const langVdoc = languageVirtualDocs.get(virtualDoc.language.extension);
   if (langVdoc && !langVdoc.isClosed) {
-    // some lsps require re-use of the vdoc (or else they exit)
-    if (virtualDoc.language.reuseVdoc) {
-      if (langVdoc.getText() !== virtualDoc.content) {
-        const wholeDocRange = getWholeRange(langVdoc);
-        const edit = new WorkspaceEdit();
-        edit.replace(langVdoc.uri, wholeDocRange, virtualDoc.content);
-        await workspace.applyEdit(edit);
-        await langVdoc.save();
-      }
-      return { uri: langVdoc.uri };
-    } else if (langVdoc.getText() === virtualDoc.content) {
+    if (langVdoc.getText() === virtualDoc.content) {
       // if its content is identical to what's passed in then just return it
       return { uri: langVdoc.uri };
     } else {

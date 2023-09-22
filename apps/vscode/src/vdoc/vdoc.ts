@@ -138,10 +138,7 @@ export async function virtualDocUri(
 
   // format and definition actions use a transient local vdoc
   // (so they can get project-specific paths and formatting config)
-  // note that we don't do this if the language requires vdoc re-use
-  // (as the closing of the document will cause the extension to exit)
-  const local = ["format", "definition"].includes(action) &&
-                !virtualDoc.language.reuseVdoc;
+  const local = ["format", "definition"].includes(action);
 
   return virtualDoc.language.type === "content"
     ? { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) }

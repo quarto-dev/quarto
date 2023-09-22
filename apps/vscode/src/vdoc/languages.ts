@@ -24,7 +24,6 @@ export interface EmbeddedLanguage {
   comment?: string;
   trigger?: string[];
   inject?: string[];
-  reuseVdoc?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
   canFormatSelection?: (uri: Uri) => boolean;
@@ -57,7 +56,6 @@ const kEmbededLanguages = [
   defineLanguage("r", {
     inject: ["# styler: off"],
     emptyLine: "#",
-    reuseVdoc: true,
     canFormat: true,
     canFormatDocument: false,
   }),
@@ -91,7 +89,6 @@ interface LanguageOptions {
   type?: "content" | "tempfile";
   emptyLine?: string;
   inject?: string[];
-  reuseVdoc?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
   canFormatSelection?: (uri: Uri) => boolean;
@@ -122,7 +119,6 @@ function defineLanguage(
     emptyLine: options?.emptyLine,
     trigger: language.trigger,
     inject: options?.inject,
-    reuseVdoc: options?.reuseVdoc,
     canFormat: options?.canFormat,
     canFormatDocument: options?.canFormatDocument,
     canFormatSelection: options?.canFormatSelection

@@ -35,7 +35,7 @@ export function diagramCommands(
 ): Command[] {
   return [
     new PreviewDiagramCommand(manager),
-    new PreviewShortcutCommand(engine),
+    new PreviewContentShortcutCommand(engine),
   ];
 }
 
@@ -57,7 +57,7 @@ class PreviewDiagramCommand implements Command {
   public readonly id = PreviewDiagramCommand.id;
 }
 
-class PreviewShortcutCommand implements Command {
+class PreviewContentShortcutCommand implements Command {
   constructor(private readonly engine_: MarkdownEngine) {}
   async execute(): Promise<void> {
     // first determine whether this is an alias for preview math or preview diagram
@@ -93,12 +93,12 @@ class PreviewShortcutCommand implements Command {
       } else {
          // info message
         window.showInformationMessage(
-          "No preview available (selection not within an equation or diagram)"
+          "No content preview available (selection not within an equation or diagram)"
         );
       }     
     }
   }
 
-  private static readonly id = "quarto.previewShortcut";
-  public readonly id = PreviewShortcutCommand.id;
+  private static readonly id = "quarto.previewContentShortcut";
+  public readonly id = PreviewContentShortcutCommand.id;
 }

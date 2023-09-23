@@ -257,6 +257,7 @@
         "title": "Quarto Project",
         "category": "Quarto"
       },
+
       {
         "command": "quarto.renderProject",
         "title": "Render Project",
@@ -373,8 +374,8 @@
         "title": "Preview Diagram"
       },
       {
-        "command": "quarto.previewShortcut",
-        "title": "Preview",
+        "command": "quarto.previewContentShortcut",
+        "title": "Preview Content",
         "category": "Quarto"
       },
       {
@@ -455,7 +456,7 @@
         "mac": "cmd+shift+k"
       },
       {
-        "command": "quarto.previewShortcut",
+        "command": "quarto.previewContentShortcut",
         "key": "ctrl+shift+l",
         "mac": "cmd+shift+l",
         "when": "activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
@@ -650,7 +651,7 @@
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
-          "command": "quarto.previewShortcut",
+          "command": "quarto.previewContentShortcut",
           "when": "editorLangId == mermaid || editorLangId == dot"
         }
       ],
@@ -733,7 +734,7 @@
           "when": "false"
         },
         {
-          "command": "quarto.previewShortcut",
+          "command": "quarto.previewContentShortcut",
           "when": "false"
         },
         {

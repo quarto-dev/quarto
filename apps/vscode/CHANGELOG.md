@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.100.0 (Unreleased)
+
+- Correct preview slide navigation when toc: true
+
+
 ## 1.99.0 (Release on 22 September 2023)
 
 - Add option controlling whether reticulate is used for Python in Knitr documents.

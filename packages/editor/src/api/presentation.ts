@@ -16,11 +16,12 @@
 import { EditorState } from 'prosemirror-state';
 
 import { findTopLevelBodyNodes } from './node';
-import { titleFromState } from './yaml';
+import { parseYaml, titleFromState, valueFromYamlText, yamlFrontMatter } from './yaml';
 
 export interface PresentationEditorLocation {
   items: PresentationEditorLocationItem[];
   auto_slide_level: number;
+  toc: boolean;
 }
 
 export const kPresentationEditorLocationTitle = "title";
@@ -50,7 +51,7 @@ export function getPresentationEditorLocation(state: EditorState) : Presentation
 
   // bail if empty
   if (bodyNodes.length === 0) {
-    return { items, auto_slide_level: 0 };
+    return { items, auto_slide_level: 0, toc: false };
   }
 
   // start with title if we have one. note that pandoc will make the title slide
@@ -64,8 +65,10 @@ export function getPresentationEditorLocation(state: EditorState) : Presentation
     });
   }
 
+  // toc
+  const toc = !!valueFromYamlText('toc', yamlFrontMatter(state.doc));
+
   // get top level headings and horizontal rules
-  
   let pendingAutoSlideLevel = 0;
   let foundCursor = false;
   for (const nodeWithPos of bodyNodes) {
@@ -126,7 +129,7 @@ export function getPresentationEditorLocation(state: EditorState) : Presentation
   }
   
   // return the items
-  return { items, auto_slide_level: autoSlideLevel };
+  return { items, auto_slide_level: autoSlideLevel, toc };
 }
 
 export function positionForPresentationEditorLocation(
@@ -156,6 +159,7 @@ export function slideIndexForPresentationEditorLocation(location: PresentationEd
   let slideIndex = -1;
   for (const item of location.items) {
     if (item.type === kPresentationEditorLocationCursor) {
+      slideIndex = (slideIndex > 0 && location.toc) ? slideIndex + 1 : slideIndex;
       return Math.max(slideIndex, 0);
     } else if (item.type === kPresentationEditorLocationTitle || 
                 item.type === kPresentationEditorLocationHr) {

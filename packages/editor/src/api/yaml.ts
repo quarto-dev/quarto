@@ -86,7 +86,7 @@ export function titleFromYamlMetadataNode(node: ProsemirrorNode) {
 
 export function valueFromYamlText(name: string, yamlText: string) {
   // Must start and end with either a new line or the start/end of line
-  const yamlMetadataNameValueRegex = new RegExp(`(?:\\n|^)${name}:(.*)(?:\\n|$)`);
+  const yamlMetadataNameValueRegex = new RegExp(`(?:\\n|^)\\s*${name}:(.*)(?:\\n|$)`);
 
   // Find the name and value
   const valueMatch = yamlText.match(yamlMetadataNameValueRegex);

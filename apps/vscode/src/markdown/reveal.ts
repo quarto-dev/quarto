@@ -15,9 +15,14 @@
 
 import { Position, TextDocument } from "vscode";
 
-import { QuartoContext, isFrontMatter, isHeader, parseFrontMatterStr, quartoProjectConfig } from "quarto-core";
+import {
+  QuartoContext,
+  isFrontMatter,
+  isHeader,
+  parseFrontMatterStr,
+  quartoProjectConfig,
+} from "quarto-core";
 import { MarkdownEngine } from "./engine";
-
 
 export async function revealSlideIndex(
   cursorPos: Position,
@@ -29,8 +34,12 @@ export async function revealSlideIndex(
   let slideIndex = -1;
   for (const item of location.items) {
     if (item.type === kCursor) {
+      slideIndex = (slideIndex > 0 && location.toc) ? slideIndex + 1 : slideIndex;
       return Math.max(slideIndex, 0);
-    } else if (item.type === kTitle || item.type === kHr) {
+    } else if (
+      item.type === kTitle ||
+      item.type === kHr
+    ) {
       slideIndex++;
     } else if (item.type === kHeading && item.level <= location.slideLevel) {
       slideIndex++;
@@ -44,9 +53,13 @@ const kHeading = "heading";
 const kHr = "hr";
 const kCursor = "cursor";
 
+const kToc = "toc";
+const kSlideLevel = "slide-level";
+
 interface RevealEditorLocation {
   items: RevealEditorLocationItem[];
   slideLevel: number;
+  toc: boolean;
 }
 
 type RevealEditorLocationItemType =
@@ -69,6 +82,7 @@ async function revealEditorLocation(
 ): Promise<RevealEditorLocation> {
   const items: RevealEditorLocationItem[] = [];
 
+  let toc = false;
   let explicitSlideLevel: number | null = null;
   let foundCursor = false;
   const tokens = engine.parse(doc);
@@ -80,14 +94,16 @@ async function revealEditorLocation(
       items.push(cursorItem(cursorPos.line));
     }
     if (isFrontMatter(token)) {
-      explicitSlideLevel = slideLevelFromYaml(token.data);
       items.push(titleItem(0));
+      const config = revealConfigFromYaml(token.data);
+      explicitSlideLevel = config?.[kSlideLevel] || null;
+      toc = !!config?.[kToc];
     } else if (token.type === "HorizontalRule") {
       items.push(hrItem(row));
     } else if (isHeader(token)) {
       const level = token.data.level;
       items.push(headingItem(row, level));
-    } 
+    }
   }
 
   // put cursor at end if its not found
@@ -96,36 +112,28 @@ async function revealEditorLocation(
   }
 
   // if there is no title then insert a title token if there is a title in the project yaml
-  if (!items.find(item => item.type === kTitle)) {
+  if (!items.find((item) => item.type === kTitle)) {
     const config = await quartoProjectConfig(context.runQuarto, doc.uri.fsPath);
     if (config?.config.title) {
       items.unshift(titleItem(0));
     }
   }
 
-  return { items, slideLevel: explicitSlideLevel || 2 };
+  return { items, slideLevel: explicitSlideLevel || 2, toc };
 }
 
 
-function getHeaderLevel(markup: string): number {
-  if (markup === "=") {
-    return 1;
-  } else if (markup === "-") {
-    return 2;
-  } else {
-    // '#', '##', ...
-    return markup.length;
-  }
-}
-
-function slideLevelFromYaml(str: string) {
+function revealConfigFromYaml(str: string) {
   try {
     const meta = parseFrontMatterStr(str) as any;
     if (meta) {
-      const kSlideLevel = "slide-level";
-      return (
-        meta[kSlideLevel] || meta["format"]?.["revealjs"]?.[kSlideLevel] || null
-      );
+      return {
+        [kSlideLevel]:
+          meta[kSlideLevel] ||
+          meta["format"]?.["revealjs"]?.[kSlideLevel] ||
+          null,
+        [kToc]: meta[kToc] || meta["format"]?.["revealjs"]?.[kToc] || null,
+      };
     } else {
       return null;
     }

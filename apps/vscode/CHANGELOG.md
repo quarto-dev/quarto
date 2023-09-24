@@ -1,9 +1,9 @@
 # Changelog
 
-## 1.100.0 (Unreleased)
+## 1.100.0 (Release on 24 September 2023)
 
+- Revamp Preview and Render commands to be more consistent with CLI
 - Correct preview slide navigation when toc: true
-
 
 ## 1.99.0 (Release on 22 September 2023)
 

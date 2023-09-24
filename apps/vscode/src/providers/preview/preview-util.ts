@@ -29,21 +29,6 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
 
 
-export function previewDirForDocument(uri: Uri) {
-  // first check for a quarto project
-  const projectDir = projectDirForDocument(uri.fsPath);
-  if (projectDir) {
-    return projectDir;
-  } else {
-    // now check if we are within a workspace root
-    const workspaceDir = workspace.getWorkspaceFolder(uri);
-    if (workspaceDir) {
-      return workspaceDir.uri.fsPath;
-    }
-  }
-  return undefined;
-}
-
 export async function isQuartoShinyDoc(
   engine: MarkdownEngine,
   doc?: TextDocument

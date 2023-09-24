@@ -19,6 +19,7 @@ import fs from "node:fs";
      
 import * as yaml from "js-yaml";
 import { ExecFileSyncOptions } from "child_process";
+import { md5Hash } from "core-node";
 
 export function projectDirForDocument(doc: string) {
   let dir = path.dirname(doc);
@@ -103,6 +104,7 @@ export type QuartoProjectConfig = {
         serve: { /* */ };
       };
     };
+    format: Record<string,unknown> | string;
     [key: string]: unknown;
   };
   files: {
@@ -110,6 +112,59 @@ export type QuartoProjectConfig = {
     config: string[];
   };
 };
+
+export interface QuartoFormatInfo {
+  name: string;
+  format: string;
+}
+
+export type QuartoDocumentFormats = Record<string,QuartoFormatInfo>;
+
+export function quartoDocumentFormats(
+  runQuarto: (options: ExecFileSyncOptions, ...args: string[]) => string,
+  file: string,
+  frontMatter: string
+) : Array<QuartoFormatInfo> | undefined {
+  
+   // disqualifying conditions
+   if (!fs.existsSync(file)) {
+    return undefined;
+  }
+  // lookup in cache
+  if (formatsCache.has(file)) {
+    // get the value
+    const cache = formatsCache.get(file);
+
+    // if its undefined that means there is no project config
+    if (cache === undefined) {
+      return undefined;
+      // otherwise check the hash (i.e. has the project file or the config
+      // files it includes changed)
+    } else if (cache.hash === formatsHash(file, frontMatter)) {
+      return cache.formats;
+    }
+  }
+
+  // run inspect (expensive)
+  const config = JSON.parse(runQuarto({ cwd: path.dirname(file) }, "inspect", path.basename(file))) as Record<string,unknown>;
+  if (config["formats"]) {
+    const formatsRaw = config["formats"] as Record<string, { identifier: { ["display-name"]: string }}>;
+    const formats = Object.keys(formatsRaw).map(format => {
+      const formatInfo: QuartoFormatInfo = {
+        name: formatsRaw[format].identifier["display-name"],
+        format,
+      };
+      return formatInfo;
+    });
+    formatsCache.set(file, {
+      hash: formatsHash(file, frontMatter),
+      formats
+    });
+    return formats;
+  } else {
+    return undefined;
+  }
+}
 
 export async function quartoProjectConfig(
   runQuarto: (options: ExecFileSyncOptions, ...args: string[]) => string,
@@ -186,4 +241,19 @@ function configHash(config: QuartoProjectConfig) {
   return config.files.config.reduce((hash, file) => {
     return hash + fs.statSync(file).mtimeMs.toLocaleString();
   }, "");
+}
+
+
+// cache previously read format lists
+const formatsCache = new Map<
+  string,
+  { hash: string, formats: Array<QuartoFormatInfo> } | undefined
+>();
+
+function formatsHash(file: string, frontMatter: string) {
+  const metadataFiles = metadataFilesForDocument(file) || [];
+  const filesHash = metadataFiles.reduce((hash, file) => {
+    return hash + fs.statSync(file).mtimeMs.toLocaleString();
+  }, "");
+  return filesHash + md5Hash(frontMatter);
 }

@@ -13,13 +13,19 @@
  *
  */
 
+import path from "node:path";
+import fs from "node:fs";
+
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { revealSlideIndex } from "../markdown/reveal";
 import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
 import { MarkdownEngine } from "../markdown/engine";
-import { QuartoContext } from "quarto-core";
+import { QuartoContext, projectDirForDocument } from "quarto-core";
+import { TextDocument } from "vscode";
+import { workspace } from "vscode";
+import { NotebookDocument } from "vscode";
 
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
@@ -57,6 +63,42 @@ export function isNotebook(doc?: vscode.TextDocument) {
 
 export function isNotebookUri(uri: Uri) {
   return extname(uri.fsPath).toLowerCase() === ".ipynb";
+}
+
+
+export function canPreviewDoc(doc?: TextDocument) {
+  if (doc) {
+    if (isQuartoDoc(doc) || isNotebook(doc)) {
+      return true;
+    } else if (validatateQuartoCanRender(doc)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function previewDirForDocument(uri: Uri) {
+  // first check for a quarto project
+  const projectDir = projectDirForDocument(uri.fsPath);
+  if (projectDir) {
+    return projectDir;
+  } else {
+    // now check if we are within a workspace root
+    const workspaceDir = workspace.getWorkspaceFolder(uri);
+    if (workspaceDir) {
+      return workspaceDir.uri.fsPath;
+    }
+  }
+  return undefined;
+}
+
+export function previewTargetDir(uri: Uri) {
+  const targetPath = uri.fsPath;
+  if (fs.statSync(targetPath).isDirectory()) {
+    return targetPath;
+  } else {
+    return path.dirname(targetPath);
+  }
 }
 
 export function isQuartoYaml(doc?: vscode.TextDocument) {
@@ -147,6 +189,7 @@ export interface QuartoEditor {
   slideIndex: () => Promise<number>;
   viewColumn?: vscode.ViewColumn;
   textEditor?: vscode.TextEditor;
+  notebook?: vscode.NotebookDocument;
 }
 
 export function findQuartoEditor(
@@ -174,7 +217,7 @@ export function findQuartoEditor(
         return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
       });
       if (textEditor && filter(textEditor.document)) {
-        return quartoEditor(textEditor, engine, context);
+        return quartoEditor(textEditor, engine, context, notebookDocument);
       }
     }
   }
@@ -208,7 +251,8 @@ export function findQuartoEditor(
 export function quartoEditor(
   editor: vscode.TextEditor,
   engine?: MarkdownEngine,
-  context?: QuartoContext
+  context?: QuartoContext,
+  notebook?: NotebookDocument
 ) {
   return {
     document: editor.document,
@@ -233,6 +277,7 @@ export function quartoEditor(
     },
     viewColumn: editor.viewColumn,
     textEditor: editor,
+    notebook,
   };
 }
 

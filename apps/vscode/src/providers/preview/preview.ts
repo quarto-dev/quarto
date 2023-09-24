@@ -24,7 +24,6 @@ import vscode, {
   ExtensionContext,
   MessageItem,
   Terminal,
-  TerminalOptions,
   TextDocument,
   Selection,
   Range,
@@ -40,20 +39,17 @@ import vscode, {
 
 import {
   normalizeNewlines,
-  shQuote,
-  winShEscape,
-  pathWithForwardSlashes,
-  sleep,
 } from "core";
-import { fileCrossrefIndexStorage, QuartoContext } from "quarto-core";
+import { QuartoContext } from "quarto-core";
 
 import { previewCommands } from "./commands";
 import { Command } from "../../core/command";
 import {
+  canPreviewDoc,
   findQuartoEditor,
   isNotebook,
-  isQuartoDoc,
   preserveEditorFocus,
+  previewDirForDocument,
   QuartoEditor,
   validatateQuartoCanRender,
 } from "../../core/doc";
@@ -64,8 +60,7 @@ import * as tmp from "tmp";
 import {
   PreviewEnv,
   PreviewEnvManager,
-  previewEnvsEqual,
-  requiresTerminalDelay,
+  previewEnvsEqual
 } from "./preview-env";
 import { MarkdownEngine } from "../../markdown/engine";
 
@@ -76,11 +71,11 @@ import {
 import {
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
-  previewDirForDocument,
   renderOnSave,
 } from "./preview-util";
 
 import { vsCodeWebUrl } from "../../core/platform";
+import { killTerminal, sendTerminalCommand, terminalCommand, terminalOptions } from "../../core/terminal";
 
 import {
   jupyterErrorLocation,
@@ -171,16 +166,6 @@ export function activatePreview(
   return previewCommands(quartoContext, engine);
 }
 
-export function canPreviewDoc(doc?: TextDocument) {
-  if (doc) {
-    if (isQuartoDoc(doc) || isNotebook(doc)) {
-      return true;
-    } else if (validatateQuartoCanRender(doc)) {
-      return true;
-    }
-  }
-  return false;
-}
 
 export function isPreviewRunning() {
   return previewManager.isPreviewRunning();
@@ -415,14 +400,7 @@ class PreviewManager {
   }
 
   private async killPreview() {
-    // dispose any existing preview terminals
-    const terminal = window.terminals.find((terminal) => {
-      return terminal.name === kPreviewWindowTitle;
-    });
-    if (terminal) {
-      await this.previewTerminateRequest();
-      terminal.dispose();
-    }
+    await killTerminal(kPreviewWindowTitle, async () =>  await this.previewTerminateRequest());
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;
   }
@@ -454,24 +432,8 @@ class PreviewManager {
     const isFile = fs.statSync(target.fsPath).isFile();
     this.previewDir_ = isFile ? previewDirForDocument(target) : undefined;
 
-    // calculate cwd
-    const cwd = this.previewDir_ || this.targetDir();
-
-    // create and show the terminal
-    const options: TerminalOptions = {
-      name: kPreviewWindowTitle,
-      cwd,
-      env: this.previewEnv_ as unknown as {
-        [key: string]: string | null | undefined;
-      },
-    };
-
-    // add crossref index path to env (will be ignored if we are in a project)
-    if (isFile) {
-      options.env!["QUARTO_CROSSREF_INDEX_PATH"] = fileCrossrefIndexStorage(
-        target.fsPath
-      );
-    }
+    // terminal options
+    const options = terminalOptions(kPreviewWindowTitle, target, this.previewEnv_);
 
     // is this is a shiny doc?
     const isShiny = await isQuartoShinyDoc(this.engine_, doc);
@@ -481,18 +443,12 @@ class PreviewManager {
       this.webviewManager_.clear();
     }
 
+    // creat terminal
     this.terminal_ = window.createTerminal(options);
-    const quarto = "quarto"; // binPath prepended to PATH so we don't need the full form
-    const cmd: string[] = [
-      this.quartoContext_.useCmd ? winShEscape(quarto) : shQuote(quarto),
-      isShiny ? "serve" : "preview",
-      shQuote(
-        this.quartoContext_.useCmd
-          ? target.fsPath
-          : pathWithForwardSlashes(target.fsPath)
-      ),
-    ];
 
+    // create base terminal command
+    const cmd = terminalCommand(isShiny ? "serve" : "preview", this.quartoContext_, target);
+    
     // extra args for normal docs
     if (!isShiny) {
       if (!doc) {
@@ -507,27 +463,8 @@ class PreviewManager {
       cmd.push("--no-watch-inputs");
     }
 
-    const cmdText = this.quartoContext_.useCmd
-      ? `cmd /C"${cmd.join(" ")}"`
-      : cmd.join(" ");
-    this.terminal_.show(true);
-    // delay if required (e.g. to allow conda to initialized)
-    // wait for up to 5 seconds (note that we can do this without
-    // risk of undue delay b/c the state.isInteractedWith bit will
-    // flip as soon as the environment has been activated)
-    if (requiresTerminalDelay(this.previewEnv_)) {
-      const kMaxSleep = 5000;
-      const kInterval = 100;
-      let totalSleep = 0;
-      while (!this.terminal_.state.isInteractedWith && totalSleep < kMaxSleep) {
-        await sleep(kInterval);
-        totalSleep += kInterval;
-      }
-    }
-
-    // send the command
-    console.info("[quarto]: " + cmdText + "\n");
-    this.terminal_!.sendText(cmdText, true);
+    // send terminal command
+    await sendTerminalCommand(this.terminal_, this.previewEnv_, this.quartoContext_, cmd);
 
     // show progress
     this.progressShow(target);

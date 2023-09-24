@@ -23,6 +23,7 @@ import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activateCommon } from "./extension";
 import { activatePreview } from "./providers/preview/preview";
+import { activateRender } from "./providers/render";
 import { initQuartoContext } from "quarto-core";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
@@ -94,6 +95,10 @@ export async function activate(context: vscode.ExtensionContext) {
     // walkthough
     commands.push(...walkthroughCommands(host, quartoContext));
   }
+
+  // provide render
+  const renderCommands = activateRender(quartoContext, engine);
+  commands.push(...renderCommands);
 
   // provide preview
   const previewCommands = activatePreview(context, host, quartoContext, engine);

@@ -13,59 +13,16 @@
  *
  */
 
-import * as os from "os";
-import * as path from "path";
-import * as fs from "fs";
-import * as child_process from "child_process";
-import which from "which";
-
-import { extensions, Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 
 import { PreviewOutputSink } from "./preview-output";
-import { shQuote } from "core";
-import { dirname } from "../../core/path";
+import { TerminalEnv, terminalEnv } from "../../core/terminal";
 
-export interface PreviewEnv {
+export interface PreviewEnv extends TerminalEnv {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   QUARTO_LOG: string;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   QUARTO_RENDER_TOKEN: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  QUARTO_PYTHON?: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  QUARTO_R?: string;
-}
-
-export function requiresTerminalDelay(env?: PreviewEnv) {
-  try {
-    if (env?.QUARTO_PYTHON) {
-      // look for virtualenv
-      const binDir = dirname(env.QUARTO_PYTHON);
-      const venvFiles = ["activate", "pyvenv.cfg", "../pyvenv.cfg"];
-      if (
-        venvFiles.map((file) => path.join(binDir, file)).some(fs.existsSync)
-      ) {
-        return true;
-      }
-
-      // look for conda env
-      const args = [
-        "-c",
-        "import sys, os; print(os.path.exists(os.path.join(sys.prefix, 'conda-meta')))",
-      ];
-      const output = (
-        child_process.execFileSync(shQuote(env.QUARTO_PYTHON), args, {
-          encoding: "utf-8",
-        }) as unknown as string
-      ).trim();
-      return output === "True";
-    } else {
-      return false;
-    }
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
 }
 
 export function previewEnvsEqual(a?: PreviewEnv, b?: PreviewEnv) {
@@ -88,62 +45,19 @@ export class PreviewEnvManager {
   }
 
   public async previewEnv(uri: Uri) {
-    // get workspace for uri (if any)
-    const workspaceFolder = workspace.getWorkspaceFolder(uri);
-
-    // base env
+    
     const env: PreviewEnv = {
+
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      QUARTO_LOG: this.outputFile_, QUARTO_RENDER_TOKEN: this.renderToken_,
+      QUARTO_LOG: this.outputFile_, 
+      
+      // eslint-disable-next-line @typescript-eslint/naming-convention 
+      QUARTO_RENDER_TOKEN: this.renderToken_,
+
+      ...(await terminalEnv(uri))
+    
     };
-    // QUARTO_PYTHON
-    const pyExtension = extensions.getExtension("ms-python.python");
-    if (pyExtension) {
-      if (!pyExtension.isActive) {
-        await pyExtension.activate();
-      }
-
-      const execDetails = pyExtension.exports.settings.getExecutionDetails(
-        workspaceFolder?.uri
-      );
-      if (Array.isArray(execDetails?.execCommand)) {
-        let quartoPython = execDetails.execCommand[0] as string;
-        if (!path.isAbsolute(quartoPython)) {
-          const path = which.sync(quartoPython, { nothrow: true });
-          if (path) {
-            quartoPython = path;
-          }
-        }
-        env.QUARTO_PYTHON = quartoPython;
-      }
-    }
-
-    // QUARTO_R
-    const rExtension =
-      extensions.getExtension("REditorSupport.r") ||
-      extensions.getExtension("Ikuyadeu.r");
-    if (rExtension) {
-      const rPath = workspace.getConfiguration("r.rpath", workspaceFolder?.uri);
-      let quartoR: string | undefined;
-      switch (os.platform()) {
-        case "win32": {
-          quartoR = rPath.get("windows");
-          break;
-        }
-        case "darwin": {
-          quartoR = rPath.get("mac");
-          break;
-        }
-        case "linux": {
-          quartoR = rPath.get("linux");
-          break;
-        }
-      }
-      if (quartoR) {
-        env.QUARTO_R = quartoR;
-      }
-    }
-
+   
     return env;
   }
   private readonly outputFile_: string;

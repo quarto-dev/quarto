@@ -13,67 +13,38 @@
  *
  */
 
-import semver from "semver";
 import * as path from "path";
 import * as fs from "fs";
 
-import { TextDocument, window, Uri, workspace, commands } from "vscode";
-import { projectDirForDocument, QuartoContext, quartoProjectConfig } from "quarto-core";
+import { TextDocument, window, Uri, workspace, commands, QuickPickItem } from "vscode";
+import { QuartoContext, quartoDocumentFormats } from "quarto-core";
 
 import { Command } from "../../core/command";
 import {
-  canPreviewDoc,
   isPreviewRunningForDoc,
   previewDoc,
-  previewProject,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { findQuartoEditor, isNotebook } from "../../core/doc";
-import { promptForQuartoInstallation, withMinimumQuartoVersion } from "../../core/quarto";
+import { canPreviewDoc, findQuartoEditor, isNotebook } from "../../core/doc";
 import { renderOnSave } from "./preview-util";
+import { documentFrontMatterYaml } from "../../markdown/document";
+import { FormatQuickPickItem, RenderCommand } from "../render";
 
 export function previewCommands(
   quartoContext: QuartoContext,
   engine: MarkdownEngine
 ): Command[] {
   return [
-    new RenderDocumentCommand(quartoContext, engine),
-    new RenderShortcutCommand(quartoContext, engine),
-    new RenderDocumentHTMLCommand(quartoContext, engine),
-    new RenderDocumentPDFCommand(quartoContext, engine),
-    new RenderDocumentDOCXCommand(quartoContext, engine),
-    new RenderAllCommand(quartoContext, engine),
-    new RenderProjectCommand(quartoContext, engine),
-    new WalkthroughRenderCommand(quartoContext, engine),
+    new PreviewCommand(quartoContext, engine),
+    new PreviewFormatCommand(quartoContext, engine),
+    new WalkthroughPreviewCommand(quartoContext, engine),
     new ClearCacheCommand(quartoContext, engine),
   ];
 }
+const kChooseFormat = "EB451697-D09E-48F5-AA40-4DAE7E1D31B8";
 
-abstract class RenderCommand {
-  constructor(quartoContext: QuartoContext) {
-    this.quartoContext_ = quartoContext;
-  }
-  async execute() {
-    if (this.quartoContext_.available) {
-      const kRequiredVersion = "0.9.149";
-      if (semver.gte(this.quartoContext_.version, kRequiredVersion)) {
-        await this.doExecute();
-      } else {
-        window.showWarningMessage(
-          `Rendering requires Quarto version ${kRequiredVersion} or greater`,
-          { modal: true }
-        );
-      }
-    } else {
-      await promptForQuartoInstallation("before rendering documents", true);
-    }
-  }
-  protected abstract doExecute(): Promise<void>;
-  protected quartoContext() { return this.quartoContext_; }
-  private readonly quartoContext_: QuartoContext;
-}
 
-abstract class RenderDocumentCommandBase extends RenderCommand {
+abstract class PreviewDocumentCommandBase extends RenderCommand {
   constructor(
     quartoContext: QuartoContext,
     private readonly engine_: MarkdownEngine
@@ -89,7 +60,32 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
         (hasRenderOnSave && format) ||
         !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
-        await previewDoc(targetEditor, format, false, this.engine_, this.quartoContext(), onShow);
+        if (format === kChooseFormat) {
+          
+          const frontMatter = targetEditor.notebook 
+            ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
+            : documentFrontMatterYaml(this.engine_, targetEditor.document);
+  
+          const formats = quartoDocumentFormats(this.quartoContext().runQuarto, targetEditor.document.uri.fsPath, frontMatter);
+          if (formats) {
+            const quickPick = window.createQuickPick<FormatQuickPickItem>();
+            quickPick.canSelectMany = false;
+            quickPick.items = formats.map(format => ({
+              format: format.format,
+              label: `$(preview) Preview ${format.name}`,
+              detail: `format: ${format.format}`,
+              alwaysShow: true
+            }));
+            quickPick.onDidAccept(async () => {
+              quickPick.hide();
+              const chosenFormat = quickPick.selectedItems[0].format;
+              await previewDoc(targetEditor, chosenFormat, false, this.engine_, this.quartoContext(), onShow);
+            });
+            quickPick.show();
+          }
+        } else {
+          await previewDoc(targetEditor, format, false, this.engine_, this.quartoContext(), onShow);
+        }
       } else {
         // show the editor
         if (!isNotebook(targetEditor.document)) {
@@ -103,140 +99,47 @@ abstract class RenderDocumentCommandBase extends RenderCommand {
       window.showInformationMessage("No Quarto document available to render");
     }
   }
+  protected engine() { return this.engine_; }
 }
 
-class RenderShortcutCommand
-  extends RenderDocumentCommandBase
+class PreviewCommand
+  extends PreviewDocumentCommandBase
   implements Command
 {
   constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
     super(quartoContext, engine);
   }
-  private static readonly id = "quarto.renderShortcut";
-  public readonly id = RenderShortcutCommand.id;
+  private static readonly id = "quarto.preview";
+  public readonly id = PreviewCommand.id;
 
   protected async doExecute() {
     return super.renderFormat();
   }
 }
 
-class RenderDocumentCommand
-  extends RenderDocumentCommandBase
+class PreviewFormatCommand
+  extends PreviewDocumentCommandBase
   implements Command
 {
   constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
     super(quartoContext, engine);
   }
-  private static readonly id = "quarto.render";
-  public readonly id = RenderDocumentCommand.id;
+  private static readonly id = "quarto.previewFormat";
+  public readonly id = PreviewFormatCommand.id;
 
   protected async doExecute() {
-    return super.renderFormat(null);
+    return super.renderFormat(kChooseFormat);
   }
 }
 
-class RenderDocumentHTMLCommand
-  extends RenderDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.renderHTML";
-  public readonly id = RenderDocumentHTMLCommand.id;
+class WalkthroughPreviewCommand extends PreviewDocumentCommandBase {
+  private static readonly id = "quarto.walkthrough.preview";
+  public readonly id = WalkthroughPreviewCommand.id;
 
   protected async doExecute() {
-    return super.renderFormat("html");
-  }
-}
-
-class RenderDocumentPDFCommand
-  extends RenderDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.renderPDF";
-  public readonly id = RenderDocumentPDFCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat("pdf");
-  }
-}
-
-class RenderDocumentDOCXCommand
-  extends RenderDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.renderDOCX";
-  public readonly id = RenderDocumentDOCXCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat("docx");
-  }
-}
-
-class RenderAllCommand
-  extends RenderDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.renderAll";
-  public readonly id = RenderAllCommand.id;
-
-  protected async doExecute() {
-    await withMinimumQuartoVersion(
-      this.quartoContext(),
-      "1.4.104",
-      "Rendering all formats",
-      async () => {
-        return super.renderFormat("all");
-      }
-    );
-  }
-}
-
-
-class RenderProjectCommand extends RenderCommand implements Command {
-  private static readonly id = "quarto.renderProject";
-  public readonly id = RenderProjectCommand.id;
-
-  constructor(quartoContext: QuartoContext,
-              private readonly engine_: MarkdownEngine) {
-    super(quartoContext);
-  }
-
-  async doExecute() {
-    await workspace.saveAll(false);
-    // start by using the currently active or visible source files
-    const targetEditor = findQuartoEditor(this.engine_, this.quartoContext(), canPreviewDoc);
-    if (targetEditor) {
-      const projectDir = projectDirForDocument(targetEditor.document.uri.fsPath);
-      if (projectDir) {
-        previewProject(Uri.file(projectDir));
-        return;
-      }
-    }
-
-    // next check any open workspaces for a project file
-    if (workspace.workspaceFolders) {
-      for (const folder of workspace.workspaceFolders) {
-        const config = await quartoProjectConfig(this.quartoContext().runQuarto, folder.uri.fsPath);
-        if (config) {
-          previewProject(folder.uri);
-          return;
-        }
-      }
-    }
-
-    // no project found!
-    window.showInformationMessage("No project available to render.");
+    return super.renderFormat(null, () => {
+      commands.executeCommand("workbench.action.closeSidebar");
+    });
   }
 }
 
@@ -279,17 +182,6 @@ class ClearCacheCommand implements Command {
         detail: "The current document is not a Quarto document.",
       });
     }
-  }
-}
-
-class WalkthroughRenderCommand extends RenderDocumentCommandBase {
-  private static readonly id = "quarto.walkthrough.render";
-  public readonly id = WalkthroughRenderCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat(null, () => {
-      commands.executeCommand("workbench.action.closeSidebar");
-    });
   }
 }
 

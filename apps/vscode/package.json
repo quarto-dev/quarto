@@ -36,12 +36,10 @@
     "onLanguage:quarto",
     "onLanguage:mermaid",
     "onLanguage:dot",
-    "onCommand:quarto.render",
-    "onCommand:quarto.renderHTML",
-    "onCommand:quarto.renderPDF",
-    "onCommand:quarto.renderDOCX",
-    "onCommand:quarto.renderAll",
-    "onCommand:quarto.renderShortcut",
+    "onCommand:quarto.preview",
+    "onCommand:quarto.previewFormat",
+    "onCommand:quarto.renderDocument",
+    "onCommand:quarto.renderProject",
     "onCommand.quarto.editInSourceMode",
     "onCommand.quarto.editInVisualMode",
     "onCommand:quarto.newDocument",
@@ -257,40 +255,24 @@
         "title": "Quarto Project",
         "category": "Quarto"
       },
-
+      {
+        "command": "quarto.preview",
+        "title": "Preview",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.previewFormat",
+        "title": "Preview Format...",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.renderDocument",
+        "title": "Render",
+        "category": "Quarto"
+      },
       {
         "command": "quarto.renderProject",
         "title": "Render Project",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.render",
-        "title": "Render",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.renderShortcut",
-        "title": "Render",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.renderHTML",
-        "title": "Render HTML",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.renderPDF",
-        "title": "Render PDF",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.renderDOCX",
-        "title": "Render DOCX",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.renderAll",
-        "title": "Render All",
         "category": "Quarto"
       },
       {
@@ -411,8 +393,8 @@
         "category": "Quarto"
       },
       {
-        "command": "quarto.walkthrough.render",
-        "title": "Render",
+        "command": "quarto.walkthrough.preview",
+        "title": "Preview",
         "category": "Quarto"
       },
       {
@@ -451,7 +433,7 @@
     ],
     "keybindings": [
       {
-        "command": "quarto.renderShortcut",
+        "command": "quarto.preview",
         "key": "ctrl+shift+k",
         "mac": "cmd+shift+k"
       },
@@ -627,27 +609,21 @@
           "command": "quarto.editInSourceMode",
           "when": "activeCustomEditorId == 'quarto.visualEditor'",
           "group": "q_switch"
+        },
+        {
+          "command": "quarto.preview",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "q_zPreview"
+        },
+        {
+          "command": "quarto.previewFormat",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "q_zPreview"
         }
       ],
       "editor/title/run": [
         {
-          "command": "quarto.render",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.renderHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.renderPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.renderDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.renderAll",
+          "command": "quarto.preview",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
@@ -657,19 +633,10 @@
       ],
       "notebook/toolbar": [
         {
-          "command": "quarto.render"
+          "command": "quarto.preview"
         },
         {
-          "command": "quarto.renderHTML"
-        },
-        {
-          "command": "quarto.renderPDF"
-        },
-        {
-          "command": "quarto.renderDOCX"
-        },
-        {
-          "command": "quarto.renderAll"
+          "command": "quarto.previewFormat"
         }
       ],
       "file/newFile": [
@@ -715,8 +682,16 @@
           "command": "quarto.renderProject"
         },
         {
-          "command": "quarto.render",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "command": "quarto.renderDocument",
+          "when": "editorLangId == quarto ||  editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+        },
+        {
+          "command": "quarto.preview",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+        },
+        {
+          "command": "quarto.previewFormat",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewDiagram",
@@ -730,28 +705,8 @@
           "when": "false"
         },
         {
-          "command": "quarto.renderShortcut",
-          "when": "false"
-        },
-        {
           "command": "quarto.previewContentShortcut",
           "when": "false"
-        },
-        {
-          "command": "quarto.renderHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.renderPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.renderDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.renderAll",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.clearCache",
@@ -814,7 +769,7 @@
           "when": "false"
         },
         {
-          "command": "quarto.walkthrough.render",
+          "command": "quarto.walkthrough.preview",
           "when": "false"
         },
         {
@@ -1244,8 +1199,8 @@
           },
           {
             "id": "render",
-            "title": "Render a document",
-            "description": "You can render documents to HTML, PDF, or other formats using the **Render** button on the editor toolbar, the **Cmd+Shift+K** keyboard shortcut, or the **Quarto: Render** command.\n\n[Render Document](command:quarto.walkthrough.render)",
+            "title": "Render and preview a document",
+            "description": "You can render documents to HTML, PDF, or other formats using the **Preview** button on the editor toolbar, the **Cmd+Shift+K** keyboard shortcut, or the **Quarto: Preview** command.\n\n[Preview Document](command:quarto.walkthrough.preview)",
             "media": {
               "markdown": "assets/walkthrough/empty.md"
             },

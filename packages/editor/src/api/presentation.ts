@@ -16,7 +16,7 @@
 import { EditorState } from 'prosemirror-state';
 
 import { findTopLevelBodyNodes } from './node';
-import { parseYaml, titleFromState, valueFromYamlText, yamlFrontMatter } from './yaml';
+import { titleFromState, valueFromYamlText, yamlFrontMatter } from './yaml';
 
 export interface PresentationEditorLocation {
   items: PresentationEditorLocationItem[];

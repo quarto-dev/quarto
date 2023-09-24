@@ -405,7 +405,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       },
 
       renderDocument: async () => {
-        await commands.executeCommand("quarto.renderShortcut");
+        await commands.executeCommand("quarto.preview");
       },
 
       // map resources to uris valid in the editor

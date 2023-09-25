@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.101.0 (Unreleased)
+
+- Improve Render Project format handling when there is only one format
+
 ## 1.100.0 (Release on 24 September 2023)
 
 - Revamp Preview and Render commands to be more consistent with CLI

@@ -164,6 +164,8 @@ class RenderDocumentCommand extends RenderCommand
           }
         });
         quickPick.show();
+      } else if (formats && formats.length === 1) {
+        resolve(formats[0].format);
       } else {
         resolve("default");
       }
@@ -242,38 +244,42 @@ class RenderProjectCommand extends RenderCommand implements Command {
       const config = await quartoProjectConfig(this.quartoContext().runQuarto, projectDir.fsPath);
       if (config?.config.project.type === "book" && typeof(config?.config.format) === "object") {
         const formats = Object.keys(config?.config.format);
-        const quickPick = window.createQuickPick<FormatQuickPickItem>();
-        quickPick.canSelectMany = false;
-        quickPick.items = [
-          {
-            format: "all",
-            label: `$(run-all) Render All Formats`,
-            alwaysShow: true,
-          },
-          {
-            format: "default",
-            label: "",
-            kind: QuickPickItemKind.Separator,
-          },
-          ...formats.map(format => ({
-            format: format,
-            label: `$(play) Render ${format} book`,
-            alwaysShow: true
-          }))
-        ];
-        let accepted = false;
-        quickPick.onDidAccept(async () => {
-          accepted = true;
-          quickPick.hide();
-          const chosenFormat = quickPick.selectedItems[0].format;
-          resolve(chosenFormat);
-        });
-        quickPick.onDidHide(() => {
-          if (!accepted) {
-            resolve(undefined);
-          }
-        });
-        quickPick.show();
+        if (formats.length > 1) {
+          const quickPick = window.createQuickPick<FormatQuickPickItem>();
+          quickPick.canSelectMany = false;
+          quickPick.items = [
+            {
+              format: "all",
+              label: `$(run-all) Render All Formats`,
+              alwaysShow: true,
+            },
+            {
+              format: "default",
+              label: "",
+              kind: QuickPickItemKind.Separator,
+            },
+            ...formats.map(format => ({
+              format: format,
+              label: `$(play) Render ${format} book`,
+              alwaysShow: true
+            }))
+          ];
+          let accepted = false;
+          quickPick.onDidAccept(async () => {
+            accepted = true;
+            quickPick.hide();
+            const chosenFormat = quickPick.selectedItems[0].format;
+            resolve(chosenFormat);
+          });
+          quickPick.onDidHide(() => {
+            if (!accepted) {
+              resolve(undefined);
+            }
+          });
+          quickPick.show();
+        } else {
+          resolve("default");
+        }
       } else {
         resolve("default");
       }

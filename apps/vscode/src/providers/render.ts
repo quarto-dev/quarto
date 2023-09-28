@@ -32,6 +32,17 @@ import { QuickPickItemKind } from "vscode";
 import { Uri } from "vscode";
 
 export function activateRender(quartoContext: QuartoContext, engine: MarkdownEngine) : Command[] {
+
+  // establish if we should include the typst command
+   // indicate that its okay to show
+  if (semver.gte(quartoContext.version, "1.4.388")) {
+    commands.executeCommand(
+      "setContext",
+      "quartoCanRenderTypst",
+      true
+    );
+  }
+
   return [
     new RenderDocumentCommand(quartoContext, engine),
     new RenderProjectCommand(quartoContext, engine),

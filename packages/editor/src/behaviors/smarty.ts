@@ -14,12 +14,10 @@
  */
 
 import { ellipsis, InputRule } from 'prosemirror-inputrules';
-import { Plugin, PluginKey, EditorState } from 'prosemirror-state';
+import { EditorState } from 'prosemirror-state';
 
 import { Extension, extensionIfEnabled } from '../api/extension';
-import { fancyQuotesToSimple } from '../api/quote';
 
-const plugin = new PluginKey('smartypaste');
 
 // match enDash but only for lines that aren't an html comment
 const enDash = new InputRule(/[^!-`]--$/, (state: EditorState, _match: string[], _start: number, end: number) => {
@@ -43,33 +41,7 @@ const emDash = new InputRule(/(^|[^`])–-$/, (state: EditorState, _match: strin
 const extension: Extension = {
   inputRules: () => {
     return [ellipsis, enDash, emDash];
-  },
-
-  plugins: () => {
-    return [
-      // apply smarty rules to plain text pastes
-      new Plugin({
-        key: plugin,
-        props: {
-          transformPastedText(text: string) {
-            // emdash
-            text = text.replace(/(\w)---(\w)/g, '$1—$2');
-
-            // endash
-            text = text.replace(/(\w)--(\w)/g, '$1–$2');
-
-            // ellipses
-            text = text.replace(/\.\.\./g, '…');
-
-            // we explicitly don't want fancy quotes in the editor
-            text = fancyQuotesToSimple(text);
-
-            return text;
-          },
-        },
-      }),
-    ];
-  },
+  }
 };
 
 export default extensionIfEnabled(extension, 'smart');

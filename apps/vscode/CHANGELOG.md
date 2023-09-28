@@ -3,6 +3,8 @@
 ## 1.101.0 (Unreleased)
 
 - Improve Render Project format handling when there is only one format
+- Restore format specific preview commands (e.g. "Preview PDF", "Preview DOCX", etc.)
+- Do not apply smarty rules to plain text pastes
 
 ## 1.100.0 (Release on 24 September 2023)
 

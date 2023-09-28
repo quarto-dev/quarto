@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.101.0 (Unreleased)
+## 1.101.0 (Release on 28 September 2023)
 
 - Improve Render Project format handling when there is only one format
 - Restore format specific preview commands (e.g. "Preview PDF", "Preview DOCX", etc.)

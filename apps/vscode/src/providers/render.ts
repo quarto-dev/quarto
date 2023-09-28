@@ -17,7 +17,7 @@ import { workspace, window } from "vscode";
 
 import semver from "semver";
 
-import { QuartoContext, projectDirForDocument, quartoDocumentFormats, quartoProjectConfig } from "quarto-core";
+import { QuartoContext, QuartoFormatInfo, projectDirForDocument, quartoDocumentFormats, quartoProjectConfig } from "quarto-core";
 
 import { Command } from "../core/command";
 
@@ -120,6 +120,7 @@ class RenderDocumentCommand extends RenderCommand
     }
   }
 
+
   private async resolveFormat(targetEditor: QuartoEditor) {
     return new Promise<string | undefined>((resolve) => {
       
@@ -127,30 +128,52 @@ class RenderDocumentCommand extends RenderCommand
         ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
         : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
-      const formats = quartoDocumentFormats(this.quartoContext().runQuarto, targetEditor.document.uri.fsPath, frontMatter);
-      if (formats && formats.length > 1) {
+      const kDeclaredFormats = "Declared Formats";
+      const kOtherFormats = "Other Formats";
+
+
+      const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);
+      if (formats) {
+        const declaredFormats = formats.filter(format => !!format.declared);
+        const otherFormats = formats.filter(format => !format.declared);
+        const asQuickPick = (format: QuartoFormatInfo) => ({
+          format: format.format,
+          label: `$(play) Render ${format.name}`,
+          detail: `format: ${format.format}`,
+          alwaysShow: true
+        });
         const quickPick = window.createQuickPick<FormatQuickPickItem>();
         quickPick.canSelectMany = false;
-        quickPick.items = [
-          {
+        const items: FormatQuickPickItem[] = [];
+        if (declaredFormats.length > 1) {
+          items.push({
             format: "all",
-            label: `$(run-all) Render All Formats`,
-            detail: `formats: ${formats.map(format => format.format).join(', ')}`,
+            label: `$(run-all) Render All ${kDeclaredFormats}`,
+            detail: `formats: ${declaredFormats.map(format => format.format).join(', ')}`,
             alwaysShow: true,
-          },
-          {
+          });
+          items.push({
             format: "default",
-            label: "",
+            label: kDeclaredFormats,
             kind: QuickPickItemKind.Separator,
-          },
-          ...formats.map(format => ({
-            format: format.format,
-            label: `$(play) Render ${format.name}`,
-            detail: `format: ${format.format}`,
-            alwaysShow: true
-          }))
-        ];
-        
+          });
+          items.push(...declaredFormats.map(asQuickPick));
+          items.push({
+            format: "default",
+            label: kOtherFormats,
+            kind: QuickPickItemKind.Separator,
+          });
+          items.push(...otherFormats.map(asQuickPick));
+        } else {
+          items.push(...declaredFormats.map(asQuickPick));
+          items.push({
+            format: "default",
+            label: kOtherFormats,
+            kind: QuickPickItemKind.Separator,
+          });
+          items.push(...otherFormats.map(asQuickPick));
+        }
+        quickPick.items = items;
         let accepted = false;
         quickPick.onDidAccept(async () => {
           accepted = true;
@@ -164,8 +187,6 @@ class RenderDocumentCommand extends RenderCommand
           }
         });
         quickPick.show();
-      } else if (formats && formats.length === 1) {
-        resolve(formats[0].format);
       } else {
         resolve("default");
       }

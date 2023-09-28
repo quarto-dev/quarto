@@ -16,10 +16,13 @@
 
 import path from "node:path";
 import fs from "node:fs";
-     
+
+import * as semver from "semver";
+
 import * as yaml from "js-yaml";
 import { ExecFileSyncOptions } from "child_process";
 import { md5Hash } from "core-node";
+import { QuartoContext } from "./context";
 
 export function projectDirForDocument(doc: string) {
   let dir = path.dirname(doc);
@@ -116,14 +119,24 @@ export type QuartoProjectConfig = {
 export interface QuartoFormatInfo {
   name: string;
   format: string;
+  declared?: boolean;
+  version?: string;
 }
+
+export const htmlFormat: QuartoFormatInfo = { name: "HTML", format: "html" };
+export const docxFormat: QuartoFormatInfo = { name: "MS Word", format: "docx" };
+export const pdfFormat: QuartoFormatInfo = { name: "PDF", format: "pdf" };
+export const typstFormat: QuartoFormatInfo = { name: "PDF (Typst)", format: "typst", version: "1.4.388" };
+
+export const knownFormats = [htmlFormat, typstFormat, pdfFormat, docxFormat];
 
 export type QuartoDocumentFormats = Record<string,QuartoFormatInfo>;
 
 export function quartoDocumentFormats(
-  runQuarto: (options: ExecFileSyncOptions, ...args: string[]) => string,
+  context: QuartoContext,
   file: string,
-  frontMatter: string
+  frontMatter: string,
+  ensureFormats = knownFormats
 ) : Array<QuartoFormatInfo> | undefined {
   
    // disqualifying conditions
@@ -146,13 +159,14 @@ export function quartoDocumentFormats(
   }
 
   // run inspect (expensive)
-  const config = JSON.parse(runQuarto({ cwd: path.dirname(file) }, "inspect", path.basename(file))) as Record<string,unknown>;
+  const config = JSON.parse(context.runQuarto({ cwd: path.dirname(file) }, "inspect", path.basename(file))) as Record<string,unknown>;
   if (config["formats"]) {
     const formatsRaw = config["formats"] as Record<string, { identifier: { ["display-name"]: string }}>;
     const formats = Object.keys(formatsRaw).map(format => {
       const formatInfo: QuartoFormatInfo = {
         name: formatsRaw[format].identifier["display-name"],
         format,
+        declared: true
       };
       return formatInfo;
     });
@@ -160,7 +174,23 @@ export function quartoDocumentFormats(
       hash: formatsHash(file, frontMatter),
       formats
     });
-    return formats;
+    // add 'ensureFormats' (apply version filter)
+    for (const format of ensureFormats) {
+      if (!formats.find(f => f.format === format.format)) {
+        if (!format.version || semver.gte(context.version, format.version)) {
+          formats.push(format);
+        }
+      }
+    }
+    //  return with name fixups
+    return formats
+      .map(format => {
+        const knownFormat = knownFormats.find(f => f.format === format.format);
+        return {
+          ...format,
+          name: knownFormat?.name || format.name
+        };
+    });
   } else {
     return undefined;
   }

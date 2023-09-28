@@ -17,7 +17,7 @@ import * as path from "path";
 import * as fs from "fs";
 
 import { TextDocument, window, Uri, workspace, commands, QuickPickItem } from "vscode";
-import { QuartoContext, quartoDocumentFormats } from "quarto-core";
+import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 
 import { Command } from "../../core/command";
 import {
@@ -29,6 +29,7 @@ import { canPreviewDoc, findQuartoEditor, isNotebook } from "../../core/doc";
 import { renderOnSave } from "./preview-util";
 import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";
+import { QuickPickItemKind } from "vscode";
 
 export function previewCommands(
   quartoContext: QuartoContext,
@@ -66,16 +67,36 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
             ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
             : documentFrontMatterYaml(this.engine_, targetEditor.document);
   
-          const formats = quartoDocumentFormats(this.quartoContext().runQuarto, targetEditor.document.uri.fsPath, frontMatter);
+          const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);
           if (formats) {
-            const quickPick = window.createQuickPick<FormatQuickPickItem>();
-            quickPick.canSelectMany = false;
-            quickPick.items = formats.map(format => ({
+            const declaredFormats = formats.filter(format => !!format.declared);
+            const otherFormats = formats.filter(format => !format.declared);
+            const asQuickPick = (format: QuartoFormatInfo) => ({
               format: format.format,
               label: `$(preview) Preview ${format.name}`,
               detail: `format: ${format.format}`,
               alwaysShow: true
-            }));
+            });
+            const quickPick = window.createQuickPick<FormatQuickPickItem>();
+            quickPick.canSelectMany = false;
+            const items: FormatQuickPickItem[] = [];
+            
+            // declared formats
+            items.push({
+              format: "default",
+              label: "Declared Formats",
+              kind: QuickPickItemKind.Separator,
+            });
+            items.push(...declaredFormats.map(asQuickPick));
+            if (otherFormats.length > 0) {
+              items.push({
+                format: "default",
+                label: "Other Formats",
+                kind: QuickPickItemKind.Separator,
+              });
+              items.push(...otherFormats.map(asQuickPick));
+            }
+            quickPick.items = items;
             quickPick.onDidAccept(async () => {
               quickPick.hide();
               const chosenFormat = quickPick.selectedItems[0].format;

@@ -60,6 +60,7 @@ function displayOJSWarning(warning)
 
     cell.appendChild(
       calloutBlock({
+        heading: "Error",
         type: "error",
         message
       })

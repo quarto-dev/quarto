@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.102.0 (Unreleased)
+
+- Execution keyboard shortcuts more consistent w/ Jupyter
+
 ## 1.101.0 (Release on 28 September 2023)
 
 - Improve Render Project format handling when there is only one format

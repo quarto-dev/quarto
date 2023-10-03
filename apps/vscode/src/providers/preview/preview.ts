@@ -460,7 +460,6 @@ class PreviewManager {
       }
 
       cmd.push("--no-browser");
-      cmd.push("--no-watch-inputs");
     }
 
     // send terminal command

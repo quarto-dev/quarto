@@ -13,7 +13,7 @@
  *
  */
 
-import { lines } from "core";
+import { lines, sleep } from "core";
 import { CodeViewActiveBlockContext, CodeViewSelectionAction } from "editor-types";
 import {
   Position,
@@ -46,10 +46,13 @@ import {
   executeSelectionInteractive,
 } from "./executors";
 import { ExtensionHost } from "../../host";
+import { isKnitrDocument } from "../../host/executors";
+import { commands } from "vscode";
 
 export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
-    new RunSelectionCommand(host, engine),
+    new RunCurrentCommand(host, engine),
+    new RunCurrentAdvanceCommand(host,engine),
     new RunCurrentCellCommand(host, engine),
     new RunNextCellCommand(host, engine),
     new RunPreviousCellCommand(host, engine),
@@ -251,12 +254,12 @@ class RunPreviousCellCommand extends RunCommand implements Command {
   }
 }
 
-class RunSelectionCommand extends RunCommand implements Command {
+class RunCurrentCommand extends RunCommand implements Command {
   constructor(host: ExtensionHost, engine: MarkdownEngine) {
     super(host, engine);
   }
-  private static readonly id = "quarto.runSelection";
-  public readonly id = RunSelectionCommand.id;
+  private static readonly id = "quarto.runCurrent";
+  public readonly id = RunCurrentCommand.id;
 
   override includeFence() {
     return false;
@@ -271,34 +274,44 @@ class RunSelectionCommand extends RunCommand implements Command {
     // get language and attempt language aware runSelection
     const language = languageNameFromBlock(block);
     const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-    if (executor) {
-      const executed = await executeSelectionInteractive(executor);
+    if (executor && isExecutableLanguageBlock(block)) {
 
-      // if the executor isn't capable of lenguage aware runSelection
-      // then determine the selection manually
-      if (!executed) {
-        // if the selection is empty take the whole line, otherwise
-        // take the selected text exactly
-        const selection = editor.selection.isEmpty
-          ? editor.document.getText(
-              new Range(
-                new Position(editor.selection.start.line, 0),
-                new Position(
-                  editor.selection.end.line,
-                  editor.document.lineAt(editor.selection.end).text.length
+      // if the selection is empty and this isn't a knitr document then it resolves to run cell
+      if (editor.selection.isEmpty && !isKnitrDocument(editor.document, this.engine_)) {
+        
+        const code = codeFromBlock(block);
+        await executeInteractive(executor, [code], editor.document);
+
+      } else {
+        // submit
+        const executed = await executeSelectionInteractive(executor);
+
+        // if the executor isn't capable of lenguage aware runSelection
+        // then determine the selection manually
+        if (!executed) {
+          // if the selection is empty take the whole line, otherwise
+          // take the selected text exactly
+          const selection = editor.selection.isEmpty
+            ? editor.document.getText(
+                new Range(
+                  new Position(editor.selection.start.line, 0),
+                  new Position(
+                    editor.selection.end.line,
+                    editor.document.lineAt(editor.selection.end).text.length
+                  )
                 )
               )
-            )
-          : editor.document.getText(editor.selection);
+            : editor.document.getText(editor.selection);
 
-        // for empty selections we advance to the next line
-        if (editor.selection.isEmpty) {
-          const selPos = new Position(editor.selection.start.line + 1, 0);
-          editor.selection = new Selection(selPos, selPos);
+          // for empty selections we advance to the next line
+          if (editor.selection.isEmpty) {
+            const selPos = new Position(editor.selection.start.line + 1, 0);
+            editor.selection = new Selection(selPos, selPos);
+          }
+
+          // run code
+          await executeInteractive(executor, [selection], editor.document);
         }
-
-        // run code
-        await executeInteractive(executor, [selection], editor.document);
       }
     }
   }
@@ -307,29 +320,86 @@ class RunSelectionCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ) : Promise<void> {
-    // if the selection is empty take the whole line, otherwise take the selected text exactly
+    // get selection and active block
     let selection = context.selectedText;
-    let action: CodeViewSelectionAction | undefined;
-    if (selection.length <= 0) {
-      const activeBlock = context.blocks.find(block => block.active);
-      if (activeBlock) {
-        selection = lines(activeBlock.code)[context.selection.start.line];
-        action = "nextline";
-      }
-    }
+    const activeBlock = context.blocks.find(block => block.active);
 
-    // run code
-    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-    if (executor) {
-      await executeInteractive(executor, [selection], editor.document);
-    
-      // advance cursor if necessary
-      if (action) {
-        editor.setBlockSelection(context, "nextline");
+    // if the selection is empty and this isn't a knitr document then it resolves to run cell
+    if (selection.length <= 0 && !isKnitrDocument(editor.document, this.engine_)) {
+      if (activeBlock) {
+        const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
+        if (executor) {
+          await executeInteractive(executor, [activeBlock.code], editor.document);
+          await activateIfRequired(editor);
+        }
+      }
+
+    } else {
+      // if the selection is empty take the whole line, otherwise take the selected text exactly
+      let action: CodeViewSelectionAction | undefined;
+      if (selection.length <= 0) {
+        if (activeBlock) {
+          selection = lines(activeBlock.code)[context.selection.start.line];
+          action = "nextline";
+        }
+      }
+
+      // run code
+      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+      if (executor) {
+        await executeInteractive(executor, [selection], editor.document);
+      
+        // advance cursor if necessary
+        if (action) {
+          editor.setBlockSelection(context, "nextline");
+        }
       }
     }
   }
 }
+
+
+class RunCurrentAdvanceCommand extends RunCommand implements Command {
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
+  }
+  private static readonly id = "quarto.runCurrentAdvance";
+  public readonly id = RunCurrentAdvanceCommand.id;
+
+  override includeFence() {
+    return false;
+  }
+
+  override async doExecute(
+    _editor: TextEditor,
+    _tokens: Token[],
+    _line: number,
+    block: Token
+  ) {
+    if (block && isExecutableLanguageBlock(block)) {
+      await commands.executeCommand("quarto.runCurrentCell");
+      await commands.executeCommand("quarto.goToNextCell");
+    }
+  }
+
+  override async doExecuteVisualMode(
+    editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+    const activeBlock = context.blocks.find(block => block.active);
+    if (activeBlock) {
+      const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
+      if (executor) {        
+        await executeInteractive(executor, [activeBlock.code], editor.document);
+        const blockContext = await editor.getActiveBlockContext();
+        if (blockContext) {
+          await editor.setBlockSelection(blockContext, "nextblock");
+        }
+      }
+    }
+  }
+}
+
 
 class RunCellsAboveCommand extends RunCommand implements Command {
   constructor(host: ExtensionHost, engine: MarkdownEngine) {

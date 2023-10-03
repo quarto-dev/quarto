@@ -21,7 +21,7 @@ import { EditorView, KeyBinding, keymap } from "@codemirror/view";
 
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 
-import { handleArrowToAdjacentNode } from "editor";
+import { codeViewActiveBlockContext, handleArrowToAdjacentNode } from "editor";
 
 import { Behavior, BehaviorContext, State } from ".";
 
@@ -76,16 +76,24 @@ export function keyboardBehavior(context: BehaviorContext, keys: KeyBinding[]) :
     {
       key: "Shift-Enter",
       run: (cmView: EditorView) => {
-        const sel = cmView.state.selection.main;
-        if (sel.from === sel.to &&
-            sel.from === cmView.state.doc.length
-        ) {
-          exitCode(view.state, view.dispatch);
-          view.focus();
+        const cvContext = codeViewActiveBlockContext(context.view.state);
+        if (cvContext && context.pmContext.ui.context.executableLanguges?.().includes(cvContext.activeLanguage)) {
+          context.pmContext.ui.codeview?.codeViewExecute("cell+advance", cvContext);
           return true;
-        }
-        return false;
+        } else {
+          const sel = cmView.state.selection.main;
+          if (sel.from === sel.to &&
+              sel.from === cmView.state.doc.length
+          ) {
+            exitCode(view.state, view.dispatch);
+            view.focus();
+            return true;
+          } else {
+            return false;
+          } 
+        } 
       },
+
     },
    
     // keys passed in from other behaviors

@@ -61,6 +61,9 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
         case "cell":
           await commands.executeCommand("quarto.runCurrentCell");
           break;
+        case "cell+advance":
+          await commands.executeCommand("quarto.runCurrentAdvance");
+          break;
         case "above":
           await commands.executeCommand("quarto.runCellsAbove");
           break;

@@ -21,7 +21,7 @@ export const kCodeViewGetCompletions = 'code_view_get_completions';
 export const kCodeViewExecute = 'code_view_execute';
 export const kCodeViewPreviewDiagram = 'code_view_preview_diagram';
 
-export type CodeViewExecute = "selection" | "cell" | "above" | "below";
+export type CodeViewExecute = "selection" | "cell" | "cell+advance" | "above" | "below";
 
 export interface CodeViewActiveBlockContext {
   activeLanguage: string;

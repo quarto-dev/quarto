@@ -321,8 +321,13 @@
         "category": "Quarto"
       },
       {
-        "command": "quarto.runSelection",
-        "title": "Run Selected Line(s)",
+        "command": "quarto.runCurrent",
+        "title": "Run Cell/Selection",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.runCurrentAdvance",
+        "title": "Run Cell and Advance",
         "category": "Quarto"
       },
       {
@@ -486,15 +491,25 @@
         "mac": "cmd+shift+i"
       },
       {
-        "command": "quarto.runSelection",
+        "command": "quarto.runCurrent",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
         "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
       },
       {
-        "command": "quarto.runSelection",
+        "command": "quarto.runCurrent",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
+        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+      },
+      {
+        "command": "quarto.runCurrentAdvance",
+        "key": "shift+enter",
+        "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
+      },
+      {
+        "command": "quarto.runCurrentAdvance",
+        "key": "shift+enter",
         "when": "activeCustomEditorId == 'quarto.visualEditor'"
       },
       {
@@ -813,11 +828,15 @@
           "when": "editorLangId == quarto"
         },
         {
-          "command": "quarto.runSelection",
+          "command": "quarto.runCurrent",
           "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.runCurrentCell",
+          "when": "false"
+        },
+        {
+          "command": "quarto.runCurrentAdvance",
           "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {

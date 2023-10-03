@@ -50,6 +50,7 @@ import {
   isNotebook,
   preserveEditorFocus,
   previewDirForDocument,
+  quartoCanRenderScript,
   QuartoEditor,
   validatateQuartoCanRender,
 } from "../../core/doc";
@@ -148,6 +149,11 @@ export function activatePreview(
       "setContext",
       "quartoRenderDocActive",
       renderDocActive
+    );
+    vscode.commands.executeCommand(
+      "setContext",
+      "quartoRenderScriptActive",
+      renderDocActive && quartoCanRenderScript(editor.document)
     );
   };
   updateRenderDocActive(window.activeTextEditor);

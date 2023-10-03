@@ -37,6 +37,7 @@ export function previewCommands(
 ): Command[] {
   return [
     new PreviewCommand(quartoContext, engine),
+    new PreviewScriptCommand(quartoContext, engine),
     new PreviewHTMLCommand(quartoContext, engine),
     new PreviewPDFCommand(quartoContext, engine),
     new PreviewTypstCommand(quartoContext, engine),
@@ -136,6 +137,21 @@ class PreviewCommand
   }
   private static readonly id = "quarto.preview";
   public readonly id = PreviewCommand.id;
+
+  protected async doExecute() {
+    return super.renderFormat();
+  }
+}
+
+class PreviewScriptCommand
+  extends PreviewDocumentCommandBase
+  implements Command
+{
+  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
+    super(quartoContext, engine);
+  }
+  private static readonly id = "quarto.previewScript";
+  public readonly id = PreviewScriptCommand.id;
 
   protected async doExecute() {
     return super.renderFormat();

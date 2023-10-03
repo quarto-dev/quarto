@@ -265,6 +265,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.previewScript",
+        "icon": "$(play)",
+        "title": "Quarto Preview"
+      },
+      {
         "command": "quarto.previewHTML",
         "title": "Preview HTML",
         "category": "Quarto"
@@ -465,7 +470,14 @@
       {
         "command": "quarto.preview",
         "key": "ctrl+shift+k",
-        "mac": "cmd+shift+k"
+        "mac": "cmd+shift+k",
+        "when": "!quartoRenderScriptActive"
+      },
+      {
+        "command": "quarto.previewScript",
+        "key": "ctrl+shift+k",
+        "mac": "cmd+shift+k",
+        "when": "quartoRenderScriptActive"
       },
       {
         "command": "quarto.previewContentShortcut",
@@ -656,6 +668,11 @@
           "group": "q_zPreview"
         },
         {
+          "command": "quarto.previewScript",
+          "when": "quartoRenderScriptActive",
+          "group": "q_zPreview"
+        },
+        {
           "command": "quarto.previewHTML",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "q_zPreview"
@@ -685,6 +702,10 @@
         {
           "command": "quarto.preview",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+        },
+        {
+          "command": "quarto.previewScript",
+          "when": "quartoRenderScriptActive"
         },
         {
           "command": "quarto.previewHTML",
@@ -779,6 +800,10 @@
         {
           "command": "quarto.renderDocument",
           "when": "editorLangId == quarto ||  editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+        },
+        {
+          "command": "quarto.previewScript",
+          "when": "false"
         },
         {
           "command": "quarto.preview",

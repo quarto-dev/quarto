@@ -115,16 +115,25 @@ export function isMarkdownDoc(document?: vscode.TextDocument) {
   );
 }
 
-export function validatateQuartoCanRender(document: vscode.TextDocument) {
+export function quartoCanRenderMarkdown(document: vscode.TextDocument) {
   const ext = extname(document.uri.toString()).toLowerCase();
-  if ([".qmd", ".rmd", ".md"].includes(ext)) {
-    return true;
-  } else if ([".py", ".r", ".jl"].includes(ext)) {
+  return [".qmd", ".rmd", ".md"].includes(ext);
+}
+
+export function quartoCanRenderScript(document: vscode.TextDocument) {
+  const ext = extname(document.uri.toString()).toLowerCase();
+  if ([".py", ".r", ".jl"].includes(ext)) {
     return !!document
       .getText()
       .trim()
       .match(/^\s*#\s*%%+\s+\[markdown|raw\]/);
+  } else {
+    return false;
   }
+}
+
+export function validatateQuartoCanRender(document: vscode.TextDocument) {
+  return quartoCanRenderMarkdown(document) || quartoCanRenderScript(document);
 }
 
 export async function resolveQuartoDocUri(

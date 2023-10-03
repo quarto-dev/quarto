@@ -2,7 +2,8 @@
 
 ## 1.102.0 (Unreleased)
 
-- Execution keyboard shortcuts more consistent w/ Jupyter
+- Execution keyboard shortcuts more consistent w/ Jupyter (Shift+Enter, etc.)
+- Quarto: Preview run/title menus for scripts with percent cells
 
 ## 1.101.0 (Release on 28 September 2023)
 

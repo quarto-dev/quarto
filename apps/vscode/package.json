@@ -322,7 +322,7 @@
       },
       {
         "command": "quarto.runCurrent",
-        "title": "Run Cell/Selection",
+        "title": "Run Selection",
         "category": "Quarto"
       },
       {
@@ -332,7 +332,7 @@
       },
       {
         "command": "quarto.runCurrentCell",
-        "title": "Run Current Cell",
+        "title": "Run Cell",
         "category": "Quarto"
       },
       {
@@ -833,7 +833,7 @@
         },
         {
           "command": "quarto.runCurrentCell",
-          "when": "false"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.runCurrentAdvance",

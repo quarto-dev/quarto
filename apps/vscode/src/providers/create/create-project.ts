@@ -113,7 +113,7 @@ function selectProjectType(
       name: "Blog",
       firstRun: ["index.qmd"],
       label: "$(preview) Blog Project",
-      detail: "Blog with index/about pages and posts.",
+      detail: "Blog with index/about pages and posts",
       alwaysShow: true,
     };
     const bookType: CreateProjectQuickPickItem = {
@@ -121,7 +121,7 @@ function selectProjectType(
       name: "Book",
       firstRun: ["index.qmd"],
       label: "$(book) Book Project",
-      detail: "Book with chapters and bibliography.",
+      detail: "Book with chapters and bibliography",
       alwaysShow: true,
     };
     const manuscriptType: CreateProjectQuickPickItem = {
@@ -129,7 +129,7 @@ function selectProjectType(
       name: "Manuscript",
       firstRun: ["index.qmd"],
       label: "$(circuit-board) Manuscript Project",
-      detail: "Scientific manuscript with multiple formats.",
+      detail: "Scientific manuscript with multiple formats",
       alwaysShow: true,
     };
     const quickPick = window.createQuickPick<CreateProjectQuickPickItem>();

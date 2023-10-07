@@ -5,6 +5,7 @@
 - Execution keyboard shortcuts more consistent w/ Jupyter (Shift+Enter, etc.)
 - Quarto: Preview run/title menus for scripts with percent cells
 - Support preview zoom level for server: shiny documents
+- Improved server: shiny support for VS Code in the browser configurations
 
 ## 1.101.0 (Release on 28 September 2023)
 

@@ -1116,6 +1116,13 @@
           "type": "boolean",
           "markdownDescription": "Automatically render documents when they are saved. Note that you can also use the `render-on-save` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\neditor:\n  render-on-save: true\n---\n```\n"
         },
+        "quarto.render.renderOnSaveShiny": {
+          "order": 12,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Automatically render `server: shiny` documents when they are saved. Note that unlike normal documents, this behavior defaults to `true` for `server: shiny` documents. This is to be consistent with the behavior for Shiny applications written in `.py` scripts. You can also use the `render-on-save` YAML option at the project or document level to specify this behavior. For example:\n\n```yaml\n---\nserver: shiny\neditor:\n  render-on-save: false\n---\n```\n"
+        },
         "quarto.render.previewType": {
           "order": 13,
           "scope": "window",

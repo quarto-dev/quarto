@@ -88,9 +88,11 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
   }
 
   // finally, consult vs code settings
-  const render =
-    workspace.getConfiguration("quarto").get<boolean>("render.renderOnSave") ||
-    false;
+  const config = workspace.getConfiguration("quarto");
+  const render = await isQuartoShinyDoc(engine, document)
+    ? config.get<boolean>("render.renderOnSaveShiny", true) 
+    : config.get<boolean>("render.renderOnSave", false);
+
   return render;
 }
 

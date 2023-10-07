@@ -679,7 +679,7 @@ class PreviewManager {
   }
 
   private zoomLevel(uri?: Uri) {
-    if (isHtmlContent(uri?.toString())) {
+    if (uri === undefined ||isHtmlContent(uri.toString())) {
       return this.webviewManager_.getZoomLevelConfig();
     } else {
       return undefined;

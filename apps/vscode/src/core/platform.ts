@@ -58,14 +58,19 @@ export function vsCodeServerProxyUri() {
 }
 
 export function vsCodeWebUrl(serverUrl: string) {
-  const port = new URL(serverUrl).port;
-  if (isRStudioWorkbench()) {
-    return rswURL(port);
-  } else if (isVSCodeServer()) {
-    return vsCodeServerProxyUri()!.replace("{{port}}", `${port}`);
-  } else {
-    return serverUrl;
+  // transform if this is a localhost url
+  const url = new URL(serverUrl);
+  if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+    const port = url.port;
+    if (isRStudioWorkbench()) {
+      return rswURL(port);
+    } else if (isVSCodeServer()) {
+      return vsCodeServerProxyUri()!.replace("{{port}}", `${port}`);
+    } 
   }
+  // default to reflecting back serverUrl
+  return serverUrl;
+  
 }
 
 export function rswURL(port: string) {

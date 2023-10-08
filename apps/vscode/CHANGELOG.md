@@ -10,6 +10,7 @@
 - Support server: shiny documents from .py percent scripts
 - Only prompt for installation of Lua extension when developing extensions
 - Use longer terminal 5-second terminal delay only for conda (venv always activates quickly) 
+- Restore rather than dispose of preview webview on reload
 
 ## 1.101.0 (Release on 28 September 2023)
 

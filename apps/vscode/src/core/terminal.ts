@@ -155,11 +155,11 @@ export async function sendTerminalCommand(
   // wait for up to 5 seconds (note that we can do this without
   // risk of undue delay b/c the state.isInteractedWith bit will
   // flip as soon as the environment has been activated)
-  if (requiresTerminalDelay(terminalEnv)) {
-    const kMaxSleep = 5000;
+  const requiredDelay = requiredTerminalDelay(terminalEnv);
+  if (requiredDelay > 0) {
     const kInterval = 100;
     let totalSleep = 0;
-    while (!terminal.state.isInteractedWith && totalSleep < kMaxSleep) {
+    while (!terminal.state.isInteractedWith && totalSleep < requiredDelay) {
       await sleep(kInterval);
       totalSleep += kInterval;
     }
@@ -183,7 +183,7 @@ export async function killTerminal(name: string, before?: () => Promise<void>) {
 }
 
 
-function requiresTerminalDelay(env?: TerminalEnv) {
+function requiredTerminalDelay(env?: TerminalEnv) : number {
   try {
     if (env?.QUARTO_PYTHON) {
       // look for virtualenv
@@ -192,7 +192,7 @@ function requiresTerminalDelay(env?: TerminalEnv) {
       if (
         venvFiles.map((file) => path.join(binDir, file)).some(fs.existsSync)
       ) {
-        return true;
+        return 1000;
       }
 
       // look for conda env
@@ -205,13 +205,13 @@ function requiresTerminalDelay(env?: TerminalEnv) {
           encoding: "utf-8",
         }) as unknown as string
       ).trim();
-      return output === "True";
+      return output === "True" ? 5000 : 0;
     } else {
-      return false;
+      return 0;
     }
   } catch (err) {
     console.error(err);
-    return false;
+    return 0;
   }
 }
 

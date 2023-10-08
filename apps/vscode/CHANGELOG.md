@@ -8,6 +8,7 @@
 - Improved server: shiny support for VS Code in the browser configurations
 - Default to rendering on save for server: shiny documents
 - Support server: shiny documents from .py percent scripts
+- Only prompt for installation of Lua extension when developing extensions
 
 ## 1.101.0 (Release on 28 September 2023)
 

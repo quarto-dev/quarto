@@ -38,6 +38,13 @@ export async function activateLuaTypes(
   context: ExtensionContext,
   quartoContext: QuartoContext
 ) {
+
+  // check for glob in workspace
+  const workspaceHasFile = async (glob: string) => {
+    const kExclude = "**/{node_modules,renv,packrat,venv,env}/**";
+    return (await workspace.findFiles(glob, kExclude, 10)).length > 0;
+  };
+
   // check pref to see if we are syncing types
   const config = workspace.getConfiguration("quarto");
   if (config.get("lua.provideTypes") === false) {
@@ -64,34 +71,22 @@ export async function activateLuaTypes(
     return;
   }
 
-  // check for glob in workspace
-  const workspaceHasFile = async (glob: string) => {
-    const kExclude = "**/{node_modules,renv,packrat,venv,env}/**";
-    return (await workspace.findFiles(glob, kExclude, 10)).length > 0;
-  };
-
-  // check if we have quarto files
-  if (
-    (await workspaceHasFile("**/*.qmd")) ||
-    (await workspaceHasFile("**/_quarto.{yml,yaml}")) ||
-    (await workspaceHasFile("**/_extension.{yml,yaml}"))
-  ) {
-    if (await workspaceHasFile("**/*.lua")) {
-      await syncLuaTypes(context, quartoContext, luarc);
-    } else {
-      const handler = workspace.onDidOpenTextDocument(
-        async (e) => {
-          if (path.extname(e.fileName) === ".lua") {
-            if (workspace.asRelativePath(e.fileName) !== e.fileName) {
-              await syncLuaTypes(context, quartoContext, luarc);
-              handler.dispose();
-            }
+  // check if we are using lua for extensoin development
+  if (await workspaceHasFile("_extensions/*/*.lua")) {
+    await syncLuaTypes(context, quartoContext, luarc);
+  } else {
+    const handler = workspace.onDidOpenTextDocument(
+      async (e) => {
+        if (path.extname(e.fileName) === ".lua") {
+          if (workspace.asRelativePath(e.fileName) !== e.fileName) {
+            await syncLuaTypes(context, quartoContext, luarc);
+            handler.dispose();
           }
-        },
-        null,
-        context.subscriptions
-      );
-    }
+        }
+      },
+      null,
+      context.subscriptions
+    );
   }
 }
 

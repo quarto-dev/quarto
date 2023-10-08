@@ -81,3 +81,34 @@ export function equalsIgnoreCase(str1: string, str2: string) {
     return str1.localeCompare(str2, undefined, { sensitivity: 'accent' }) === 0;
   }
 }
+
+
+export function trimEmptyLines(
+  lines: string[],
+  trim: "leading" | "trailing" | "all" = "all",
+) {
+  // trim leading lines
+  if (trim === "all" || trim === "leading") {
+    const firstNonEmpty = lines.findIndex((line) => line.trim().length > 0);
+    if (firstNonEmpty === -1) {
+      return [];
+    }
+    lines = lines.slice(firstNonEmpty);
+  }
+
+  // trim trailing lines
+  if (trim === "all" || trim === "trailing") {
+    let lastNonEmpty = -1;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (lines[i].trim().length > 0) {
+        lastNonEmpty = i;
+        break;
+      }
+    }
+    if (lastNonEmpty > -1) {
+      lines = lines.slice(0, lastNonEmpty + 1);
+    }
+  }
+
+  return lines;
+}

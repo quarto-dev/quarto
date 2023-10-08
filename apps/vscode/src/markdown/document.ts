@@ -15,8 +15,9 @@
 
 import * as vscode from "vscode";
 
-import { isFrontMatter, parseFrontMatterStr } from "quarto-core";
+import { isFrontMatter, parseFrontMatterStr, partitionYamlFrontMatter } from "quarto-core";
 import { MarkdownEngine } from "./engine";
+import { isJupyterPercentScript, markdownFromJupyterPercentScript } from "core-node";
 
 export interface MarkdownTextLine {
   text: string;
@@ -35,12 +36,19 @@ export function documentFrontMatterYaml(
   engine: MarkdownEngine,
   doc: vscode.TextDocument
 ) {
-  const tokens = engine.parse(doc);
-  const yaml = tokens.find(isFrontMatter);
-  if (yaml) {
-    return yaml.data;
+  // if its a script we need to extract the front matter
+  if (isJupyterPercentScript(doc.uri.fsPath, doc.getText())) {
+    const markdown = markdownFromJupyterPercentScript(doc.uri.fsPath, doc.getText(), 1);
+    const partitioned = partitionYamlFrontMatter(markdown);
+    return partitioned?.yaml || '';
   } else {
-    return '';
+    const tokens = engine.parse(doc);
+    const yaml = tokens.find(isFrontMatter);
+    if (yaml) {
+      return yaml.data;
+    } else {
+      return '';
+    }
   }
 }
 

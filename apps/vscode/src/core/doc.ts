@@ -26,6 +26,7 @@ import { QuartoContext, projectDirForDocument } from "quarto-core";
 import { TextDocument } from "vscode";
 import { workspace } from "vscode";
 import { NotebookDocument } from "vscode";
+import { isJupyterPercentScript } from "core-node";
 
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
@@ -121,15 +122,7 @@ export function quartoCanRenderMarkdown(document: vscode.TextDocument) {
 }
 
 export function quartoCanRenderScript(document: vscode.TextDocument) {
-  const ext = extname(document.uri.toString()).toLowerCase();
-  if ([".py", ".r", ".jl"].includes(ext)) {
-    return !!document
-      .getText()
-      .trim()
-      .match(/^\s*#\s*%%+\s+\[markdown|raw\]/);
-  } else {
-    return false;
-  }
+  return isJupyterPercentScript(document.uri.fsPath, document.getText());
 }
 
 export function validatateQuartoCanRender(document: vscode.TextDocument) {

@@ -33,4 +33,5 @@ export * from './arrays';
 export * from './limiter';
 export * from './markdownit';
 export * from './jupyter';
+export * from './metadata';
 

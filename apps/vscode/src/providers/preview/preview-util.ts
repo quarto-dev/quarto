@@ -27,9 +27,10 @@ import { isNotebook } from "../../core/doc";
 
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
+import { isKnitrDocument } from "../../host/executors";
 
 
-export async function isQuartoShinyDoc(
+export function isQuartoShinyDoc(
   engine: MarkdownEngine,
   doc?: TextDocument
 ) {
@@ -48,6 +49,14 @@ export async function isQuartoShinyDoc(
   } else {
     return false;
   }
+}
+
+export function isQuartoShinyKnitrDoc(
+  engine: MarkdownEngine,
+  doc?: TextDocument
+) {
+  return doc && isQuartoShinyDoc(engine, doc) && isKnitrDocument(doc, engine);
+  
 }
 
 
@@ -89,7 +98,7 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
 
   // finally, consult vs code settings
   const config = workspace.getConfiguration("quarto");
-  const render = await isQuartoShinyDoc(engine, document)
+  const render = isQuartoShinyDoc(engine, document)
     ? config.get<boolean>("render.renderOnSaveShiny", true) 
     : config.get<boolean>("render.renderOnSave", false);
 

@@ -17,6 +17,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as uuid from "uuid";
 import axios from "axios";
+import * as semver from "semver";
 
 import vscode, {
   commands,
@@ -72,6 +73,7 @@ import {
 import {
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
+  isQuartoShinyKnitrDoc,
   renderOnSave,
 } from "./preview-util";
 
@@ -369,8 +371,13 @@ class PreviewManager {
       (this.previewType_ !== "internal" || this.webviewManager_.hasWebview()) &&
       !!this.terminal_ &&
       this.terminal_.exitStatus === undefined &&
-      !(await isQuartoShinyDoc(this.engine_, doc))
+      !this.usesQuartoServeCommand(doc)
     );
+  }
+
+  private usesQuartoServeCommand(doc?: TextDocument) {
+    return isQuartoShinyKnitrDoc(this.engine_, doc) ||    
+           (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.410"));
   }
 
   private previewRenderRequest(doc: TextDocument, format: string | null) {
@@ -442,7 +449,8 @@ class PreviewManager {
     const options = terminalOptions(kPreviewWindowTitle, target, this.previewEnv_);
 
     // is this is a shiny doc?
-    const isShiny = await isQuartoShinyDoc(this.engine_, doc);
+    const isShiny = isQuartoShinyDoc(this.engine_, doc);
+    const useServeCommand = this.usesQuartoServeCommand(doc);
 
     // clear if a shiny doc
     if (isShiny && this.webviewManager_) {
@@ -453,10 +461,10 @@ class PreviewManager {
     this.terminal_ = window.createTerminal(options);
 
     // create base terminal command
-    const cmd = terminalCommand(isShiny ? "serve" : "preview", this.quartoContext_, target);
+    const cmd = terminalCommand(useServeCommand ? "serve" : "preview", this.quartoContext_, target);
     
     // extra args for normal docs
-    if (!isShiny) {
+    if (!useServeCommand) {
       if (!doc) {
         // project render
         cmd.push("--render", format || "all");
@@ -505,8 +513,9 @@ class PreviewManager {
           /(Browse at|Listening on) (https?:\/\/[^\n]*)/
         );
         if (browseMatch) {
-          // shiny document
-          if (await isQuartoShinyDoc(this.engine_, this.previewDoc_)) {
+          // earlier versions of quarto serve didn't print out vscode urls
+          // correctly so we compenstate for that here
+          if (isQuartoShinyDoc(this.engine_, this.previewDoc_)) {
             this.previewUrl_ = vsCodeWebUrl(browseMatch[2]);
           } else {
             this.previewUrl_ = browseMatch[2];

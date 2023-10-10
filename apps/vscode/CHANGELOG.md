@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.103.0 (Unreleased)
+
+- Compatibility with in-place reload of server: shiny
+- Clear webview URL after restoring it
+
 ## 1.102.0 (Release on 8 October 2023)
 
 - Execution keyboard shortcuts more consistent w/ Jupyter (Shift+Enter, etc.)

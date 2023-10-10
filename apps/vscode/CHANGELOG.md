@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.103.0 (Unreleased)
+## 1.103.0 (Release on 10 October 2023)
 
 - Compatibility with in-place reload of server: shiny
 - Clear webview URL after restoring it

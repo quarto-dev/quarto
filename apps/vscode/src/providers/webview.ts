@@ -51,6 +51,11 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
       window.registerWebviewPanelSerializer(this.viewType_, {
         deserializeWebviewPanel: async (panel, state: S) => {
           this.restoreWebvew(panel, state);
+          setTimeout(() => {
+            panel.webview.postMessage({
+              type: "clear",
+            });
+          }, 100);
         },
       })
     );

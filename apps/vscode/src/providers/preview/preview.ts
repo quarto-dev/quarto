@@ -377,7 +377,7 @@ class PreviewManager {
 
   private usesQuartoServeCommand(doc?: TextDocument) {
     return isQuartoShinyKnitrDoc(this.engine_, doc) ||    
-           (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.410"));
+           (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.414"));
   }
 
   private previewRenderRequest(doc: TextDocument, format: string | null) {

@@ -141,4 +141,5 @@ const kLangCommentChars: Record<string, string> = {
   haskell: "--",
   dot: "//",
   mermaid: "%%",
+  prql: "#",
 };

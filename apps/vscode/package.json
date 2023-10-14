@@ -327,6 +327,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.runLine",
+        "title": "Run Line",
+        "category": "Quarto"
+      },
+      {
         "command": "quarto.runCurrent",
         "title": "Run Selection",
         "category": "Quarto"
@@ -502,6 +507,16 @@
         "command": "quarto.insertCodeCell",
         "key": "ctrl+shift+i",
         "mac": "cmd+shift+i"
+      },
+      {
+        "command": "quarto.runLine",
+        "key": "alt+enter",
+        "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
+      },
+      {
+        "command": "quarto.runLine",
+        "key": "alt+enter",
+        "when": "activeCustomEditorId == 'quarto.visualEditor'"
       },
       {
         "command": "quarto.runCurrent",
@@ -852,6 +867,10 @@
         {
           "command": "quarto.insertCodeCell",
           "when": "editorLangId == quarto"
+        },
+        {
+          "command": "quarto.runLine",
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.runCurrent",

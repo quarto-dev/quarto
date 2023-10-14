@@ -51,6 +51,7 @@ import { commands } from "vscode";
 
 export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
+    new RunLineCommand(host, engine),
     new RunCurrentCommand(host, engine),
     new RunCurrentAdvanceCommand(host,engine),
     new RunCurrentCellCommand(host, engine),
@@ -252,6 +253,64 @@ class RunPreviousCellCommand extends RunCommand implements Command {
       window.showInformationMessage("No more cells available to execute");
     }
   }
+}
+
+class RunLineCommand extends RunCommand implements Command {
+  constructor(host: ExtensionHost, engine: MarkdownEngine) {
+    super(host, engine);
+  }
+  private static readonly id = "quarto.runLine";
+  public readonly id = RunLineCommand.id;
+
+  override includeFence() {
+    return false;
+  }
+
+  override async doExecute(
+    editor: TextEditor,
+    _tokens: Token[],
+    _line: number,
+    block: Token
+  ) {
+    const language = languageNameFromBlock(block);
+    const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
+    if (executor && isExecutableLanguageBlock(block)) {
+    
+      // get code
+      const code = editor.document.getText(
+        new Range(
+          new Position(editor.selection.start.line, 0),
+          new Position(editor.selection.start.line, 
+                        editor.document.lineAt(editor.selection.start).text.length)
+        )
+      );
+      // advance
+      const selPos = new Position(editor.selection.start.line + 1, 0);
+      editor.selection = new Selection(selPos, selPos);
+
+      // execute
+      await executeInteractive(executor, [code], editor.document);    
+      
+    }
+  }
+
+  override async doExecuteVisualMode(editor: QuartoVisualEditor,
+    context: CodeViewActiveBlockContext
+  ) : Promise<void> {
+
+     // get selection, active block, and executor
+     let selection = context.selectedText;
+     const activeBlock = context.blocks.find(block => block.active);
+     const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+     if (!activeBlock || !executor) {
+        return;
+     }
+     
+     selection = lines(activeBlock.code)[context.selection.start.line];
+     await executeInteractive(executor, [selection], editor.document);
+     editor.setBlockSelection(context, "nextline");  
+  }
+
 }
 
 class RunCurrentCommand extends RunCommand implements Command {

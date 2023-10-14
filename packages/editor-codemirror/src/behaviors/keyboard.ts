@@ -103,6 +103,7 @@ export function keyboardBehavior(context: BehaviorContext, keys: KeyBinding[]) :
   // bring in vscode keybindings (but remove ones we already have bound + Shift-Mod-k)
   const excludeKeys = [
     'Shift-Mod-k',  // render (this is yank line in default vscode keybindings)
+    'Alt-Enter',    // we use this for run line
     'Mod-f'         // find (we handle this with our own cross editor find)
   ];
   const baseKeys = coreKeys.map(key => key.key!).concat(excludeKeys);

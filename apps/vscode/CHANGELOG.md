@@ -2,6 +2,7 @@
 
 ## 1.104.0 (Unreleased)
 
+- Run line command that always runs a single line where the cursor is
 - Dispose webview panel after restoring it from workbench reload
 - Add basic editing support for prql code cells
 

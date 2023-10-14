@@ -44,6 +44,12 @@ const languages = [
     source: "source.perl",
   },
   {
+    name: "prql",
+    language: "prql",
+    identifiers: ["prql", "PRQL"],
+    source: "source.prql"
+  },
+  {
     name: "r",
     language: "r",
     identifiers: ["R", "r", "s", "S", "Rprofile", "\\{\\.r.+?\\}", ".+\\-r"],

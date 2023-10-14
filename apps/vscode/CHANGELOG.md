@@ -3,6 +3,7 @@
 ## 1.104.0 (Unreleased)
 
 - Dispose webview panel after restoring it from workbench reload
+- Add basic editing support for prql code cells
 
 ## 1.103.0 (Release on 10 October 2023)
 

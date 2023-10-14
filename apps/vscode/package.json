@@ -163,7 +163,8 @@
           "meta.embedded.block.stan": "stan",
           "meta.embedded.math.quarto": "latex",
           "meta.embedded.block.dot": "dot",
-          "meta.embedded.block.mermaid": "mermaid"
+          "meta.embedded.block.mermaid": "mermaid",
+          "meta.embedded.block.prql": "prql"
         }
       },
       {

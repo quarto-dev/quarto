@@ -66,6 +66,7 @@ const kEmbededLanguages = [
   defineLanguage("sh"),
   defineLanguage("shell"),
   defineLanguage("ruby"),
+  defineLanguage("prql"),
   defineLanguage("rust"),
   defineLanguage("java"),
   defineLanguage("cpp"),

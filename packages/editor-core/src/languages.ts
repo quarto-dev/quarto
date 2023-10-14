@@ -51,6 +51,11 @@ const kEditorLanguages = [
     trigger: ["."]
   },
   {
+    ids: ["prql"],
+    comment: "#",
+    trigger: ["."]
+  },
+  {
     ids: ["bash"],
     comment: "#",
     ext: "sh"

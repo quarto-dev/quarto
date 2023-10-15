@@ -15,6 +15,7 @@
 
 export interface EditorTheme {
   darkMode: boolean;
+  highContrast: boolean;
   solarizedMode: boolean;
   cursorColor: string;
   selectionColor: string;
@@ -27,6 +28,7 @@ export interface EditorTheme {
   divBackgroundColor: string;
   commentColor: string;
   commentBackgroundColor: string;
+  hrBackgroundColor: string;
   gutterBackgroundColor: string;
   gutterTextColor: string;
   toolbarBackgroundColor: string;
@@ -96,6 +98,7 @@ export interface CodeTheme {
 export function defaultTheme(): EditorTheme {
   return {
     darkMode: false,
+    highContrast: false,
     solarizedMode: false,
     cursorColor: 'black',
     selectionColor: '#8cf',
@@ -108,6 +111,7 @@ export function defaultTheme(): EditorTheme {
     divBackgroundColor: 'rgb(243, 243, 243)',
     commentColor: '#3c4c72',
     commentBackgroundColor: '#FFECCB',
+    hrBackgroundColor: '#ddd',
     gutterBackgroundColor: '#f0f0f0',
     gutterTextColor: '#333',
     toolbarBackgroundColor: '#f3f3f3',
@@ -195,6 +199,9 @@ export function applyTheme(theme: EditorTheme) {
     }
     .pm-default-theme .pm-border-background-color {
       background-color: ${defaults.borderBackgroundColor} !important;
+    }
+    .pm-default-theme .pm-hr-background-color {
+      background-color: ${defaults.hrBackgroundColor} !important;
     }
     .pm-default-theme .pm-input-text {
       border-color: ${defaults.paneBorderColor} !important
@@ -335,6 +342,9 @@ export function applyTheme(theme: EditorTheme) {
     }
     .pm-border-background-color {
       background-color: ${theme.borderBackgroundColor}!important;
+    }
+    .pm-hr-background-color {
+      background-color: ${theme.hrBackgroundColor}!important;
     }
     .pm-block-border-color {
       border-color: ${theme.blockBorderColor} !important;

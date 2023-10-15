@@ -37,7 +37,7 @@ const extension = (context: ExtensionContext) => {
           group: 'block',
           parseDOM: [{ tag: 'hr' }],
           toDOM(): DOMOutputSpec {
-            return ['div', ['hr', { class: 'pm-border-background-color' }]];
+            return ['div', ['hr', { class: 'pm-hr-background-color' }]];
           },
         },
         pandoc: {

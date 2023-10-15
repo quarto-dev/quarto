@@ -81,6 +81,7 @@ export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) 
   theme.blockBorderColor = theme.darkMode 
   ? theme.paneBorderColor
   : colors["--vscode-notebook-cellBorderColor"];
+  theme.hrBackgroundColor = theme.highContrast ? colors["--vscode-list-deemphasizedForeground"] : theme.blockBorderColor;
   theme.fixedWidthFont = colors["--vscode-editor-font-family"];
   theme.proportionalFont = fontFamily || defaultPrefs().fontFamily;
 

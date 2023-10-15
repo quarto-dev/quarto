@@ -41,9 +41,10 @@ export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) 
   );
   
   const bodyCls = document.body.classList;
-  theme.darkMode = 
-    bodyCls.contains('vscode-dark') ||
-    (bodyCls.contains('vscode-high-contrast') && !bodyCls.contains('vscode-high-contrast-light'));
+  const hcLight = bodyCls.contains('vscode-high-contrast-light');
+  const hcDark = bodyCls.contains('vscode-high-contrast') && !hcLight;
+  theme.darkMode = bodyCls.contains('vscode-dark') || hcDark;
+  theme.highContrast = hcLight || hcDark;
   theme.solarizedMode = isSolarizedThemeActive();
   theme.cursorColor = colors["--vscode-editorCursor-foreground"];
   theme.selectionColor = colors["--vscode-editor-selectionBackground"];
@@ -76,7 +77,7 @@ export function editorThemeFromVSCode(fontFamily?: string, fontSizePx?: number) 
   theme.disabledTextColor = colors["--vscode-disabledForeground"];
   theme.surfaceWidgetTextColor = theme.gutterTextColor;
   theme.focusOutlineColor = colors["--vscode-focusBorder"];
-  theme.paneBorderColor = colors["--vscode-panel-border"];
+  theme.paneBorderColor = theme.darkMode ? colors["--vscode-commandCenter-border"] : colors["--vscode-panel-border"];
   theme.blockBorderColor = theme.darkMode 
   ? theme.paneBorderColor
   : colors["--vscode-notebook-cellBorderColor"];

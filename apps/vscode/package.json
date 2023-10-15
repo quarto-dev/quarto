@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.103.0",
+  "version": "1.104.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"

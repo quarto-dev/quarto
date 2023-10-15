@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.104.0 (Unreleased)
+## 1.104.0 (Release on 15 October 2023)
 
 - Run line command that always runs a single line where the cursor is
 - Dispose webview panel after restoring it from workbench reload

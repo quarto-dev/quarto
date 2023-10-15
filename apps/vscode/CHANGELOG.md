@@ -5,6 +5,7 @@
 - Run line command that always runs a single line where the cursor is
 - Dispose webview panel after restoring it from workbench reload
 - Add basic editing support for prql code cells
+- Improve appearance of visual editor HR in dark and high contrast modes
 
 ## 1.103.0 (Release on 10 October 2023)
 

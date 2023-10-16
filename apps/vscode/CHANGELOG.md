@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.105.0 (Unreleased)
+
+- Run Line is now Run Selected Line(s) and matches exactly previous behavior of Cmd+Enter
+
 ## 1.104.0 (Release on 15 October 2023)
 
 - Run line command that always runs a single line where the cursor is

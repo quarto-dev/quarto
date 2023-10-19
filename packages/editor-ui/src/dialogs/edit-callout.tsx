@@ -82,7 +82,7 @@ const EditCalloutDialog: React.FC<{
 
   const [attr, setAttr] = useState<AttrEditInput>(props.values.values);
   const [type, setType] = useState(props.values.values.type);
-  const [appearance, setApperance] = useState(props.values.values.appearance);
+  const [appearance, setAppearance] = useState(props.values.values.appearance);
   const [caption, setCaption] = useState(props.values.values.caption);
   const [icon, setIcon] = useState(props.values.values.icon);
 
@@ -121,8 +121,8 @@ const EditCalloutDialog: React.FC<{
             {selectOptions(["note", "tip", "important", "caution", "warning"])}
           </Select>
         </Field>
-        <Field label={t("Apperance")}>
-          <Select value={appearance} onChange={(_ev, data) => setApperance(data.value)} multiple={false}>
+        <Field label={t("Appearance")}>
+          <Select value={appearance} onChange={(_ev, data) => setAppearance(data.value)} multiple={false}>
             {selectOptions(["default", "simple", "minimal"])}
           </Select>
         </Field>

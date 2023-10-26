@@ -37,10 +37,6 @@
     "onLanguage:mermaid",
     "onLanguage:dot",
     "onCommand:quarto.preview",
-    "onCommand:quarto.previewHTML",
-    "onCommand:quarto.previewDOCX",
-    "onCommand:quarto.previewPDF",
-    "onCommand:quarto.previewTypst",
     "onCommand:quarto.previewFormat",
     "onCommand:quarto.renderDocument",
     "onCommand:quarto.renderProject",
@@ -269,27 +265,6 @@
         "command": "quarto.previewScript",
         "icon": "$(play)",
         "title": "Quarto Preview"
-      },
-      {
-        "command": "quarto.previewHTML",
-        "title": "Preview HTML",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.previewDOCX",
-        "title": "Preview DOCX",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.previewPDF",
-        "title": "Preview PDF",
-        "category": "Quarto"
-      },
-      {
-        "command": "quarto.previewTypst",
-        "title": "Preview Typst",
-        "enablement": "quartoCanRenderTypst",
-        "category": "Quarto"
       },
       {
         "command": "quarto.previewFormat",
@@ -689,29 +664,9 @@
           "group": "q_zPreview"
         },
         {
-          "command": "quarto.previewHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "q_zPreview"
-        },
-        {
-          "command": "quarto.previewPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "q_zPreview"
-        },
-        {
-          "command": "quarto.previewTypst",
-          "when": "quartoCanRenderTypst && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "q_zPreview"
-        },
-        {
-          "command": "quarto.previewDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "q_zPreview"
-        },
-        {
           "command": "quarto.previewFormat",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "q_zPreviewFormat"
+          "group": "q_zPreview"
         }
       ],
       "editor/title/run": [
@@ -724,22 +679,6 @@
           "when": "quartoRenderScriptActive"
         },
         {
-          "command": "quarto.previewHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.previewPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.previewTypst",
-          "when": "quartoCanRenderTypst && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
-          "command": "quarto.previewDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
-        },
-        {
           "command": "quarto.previewContentShortcut",
           "when": "editorLangId == mermaid || editorLangId == dot"
         }
@@ -750,25 +689,8 @@
           "group": "q_zPreview"
         },
         {
-          "command": "quarto.previewHTML",
-          "group": "q_zPreview"
-        },
-        {
-          "command": "quarto.previewPDF",
-          "group": "q_zPreview"
-        },
-        {
-          "command": "quarto.previewTypst",
-          "when": "quartoCanRenderTypst",
-          "group": "q_zPreview"
-        },
-        {
-          "command": "quarto.previewDOCX",
-          "group": "q_zPreview"
-        },
-        {
           "command": "quarto.previewFormat",
-          "group": "q_zPreviewFormat"
+          "group": "q_zPreview"
         }
       ],
       "file/newFile": [
@@ -824,22 +746,6 @@
         {
           "command": "quarto.preview",
           "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.previewHTML",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.previewPDF",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.previewTypst",
-          "when": "quartoCanRenderTypst && editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
-        },
-        {
-          "command": "quarto.previewDOCX",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewFormat",

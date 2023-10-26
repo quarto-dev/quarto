@@ -2,6 +2,7 @@
 
 ## 1.106.0 (Unreleased)
 
+- Remove Preview PDF/DOCX/etc. commands (replaced by Preview Format command on editor title menu)
 - When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment
 - Update address bar when previewed content sends 'hashchange' message
 

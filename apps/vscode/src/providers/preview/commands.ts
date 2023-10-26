@@ -38,10 +38,6 @@ export function previewCommands(
   return [
     new PreviewCommand(quartoContext, engine),
     new PreviewScriptCommand(quartoContext, engine),
-    new PreviewHTMLCommand(quartoContext, engine),
-    new PreviewPDFCommand(quartoContext, engine),
-    new PreviewTypstCommand(quartoContext, engine),
-    new PreviewDOCXCommand(quartoContext, engine),
     new PreviewFormatCommand(quartoContext, engine),
     new WalkthroughPreviewCommand(quartoContext, engine),
     new ClearCacheCommand(quartoContext, engine),
@@ -157,70 +153,6 @@ class PreviewScriptCommand
     return super.renderFormat();
   }
 }
-
-class PreviewHTMLCommand
-  extends PreviewDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.previewHTML";
-  public readonly id = PreviewHTMLCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat("html");
-  }
-}
-
-
-class PreviewPDFCommand
-  extends PreviewDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.previewPDF";
-  public readonly id = PreviewPDFCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat("pdf");
-  }
-}
-
-
-class PreviewTypstCommand
-  extends PreviewDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.previewTypst";
-  public readonly id = PreviewTypstCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat("typst");
-  }
-}
-
-
-class PreviewDOCXCommand
-  extends PreviewDocumentCommandBase
-  implements Command
-{
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
-  }
-  private static readonly id = "quarto.previewDOCX";
-  public readonly id = PreviewDOCXCommand.id;
-
-  protected async doExecute() {
-    return super.renderFormat("docx");
-  }
-}
-
 
 class PreviewFormatCommand
   extends PreviewDocumentCommandBase

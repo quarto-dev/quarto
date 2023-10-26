@@ -3,6 +3,7 @@
 ## 1.106.0 (Unreleased)
 
 - When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment
+- Update address bar when previewed content sends 'hashchange' message
 
 ## 1.105.0 (Release on 16 October 2023)
 

@@ -33,6 +33,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
+import { configuredQuartoPath } from "./core/quarto";
 
 export async function activate(context: vscode.ExtensionContext) {
  
@@ -46,8 +47,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const commands = cellCommands(host, engine);
 
   // get quarto context (some features conditional on it)
-  const config = vscode.workspace.getConfiguration("quarto");
-  const quartoPath = config.get("path") as string | undefined;
+  const quartoPath = await configuredQuartoPath();
   const workspaceFolder = vscode.workspace.workspaceFolders?.length
     ? vscode.workspace.workspaceFolders[0].uri.fsPath
     : undefined;
@@ -78,7 +78,7 @@ export async function activate(context: vscode.ExtensionContext) {
     await activateLuaTypes(context, quartoContext);
 
     // lsp
-    const lspClient = await activateLsp(context, engine);
+    const lspClient = await activateLsp(context, quartoContext, engine);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);

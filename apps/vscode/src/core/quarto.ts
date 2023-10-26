@@ -13,10 +13,45 @@
  *
  */
 
+import * as path from "node:path";
+import * as fs from "node:fs";
+
+import { window, env, workspace, Uri } from "vscode";
+import { QuartoContext } from "quarto-core";
+import { activePythonInterpreter, pythonIsCondaEnv, pythonIsVenv } from "./python";
+import { isWindows } from "./platform";
+
+
 import semver from "semver";
 
-import { window, env, Uri } from "vscode";
-import { QuartoContext } from "quarto-core";
+
+export async function configuredQuartoPath() {
+
+  const config = workspace.getConfiguration("quarto");
+  
+  // explicitly configured trumps everything
+  const quartoPath = config.get("path") as string | undefined;
+  if (quartoPath) {
+    return quartoPath;
+  }
+  
+  // if we can use pip quarto then look for it within the currently python (if its a venv/condaenv)
+  const usePipQuarto = config.get("usePipQuarto", true);
+  if (usePipQuarto) {
+    const python = await activePythonInterpreter();
+    if (python) {
+      if (pythonIsVenv(python) || pythonIsCondaEnv(python)) {
+        // check if there is a quarto in the parent directory
+        const binDir = path.dirname(python);
+        const quartoPath = path.join(binDir, isWindows() ? "quarto.exe" : "quarto");
+        if (fs.existsSync(quartoPath)) {
+          return quartoPath;
+        }
+      }
+    }
+  }
+}
+
 
 export async function withMinimumQuartoVersion(
   context: QuartoContext,

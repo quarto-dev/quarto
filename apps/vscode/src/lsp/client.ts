@@ -62,11 +62,13 @@ import {
 } from "../providers/format";
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
+import { LspInitializationOptions, QuartoContext } from "quarto-core";
 
 let client: LanguageClient;
 
 export async function activateLsp(
   context: ExtensionContext,
+  quartoContext: QuartoContext,
   engine: MarkdownEngine
 ) {
 
@@ -108,7 +110,11 @@ export async function activateLsp(
   }
 
   // create client options
+  const initializationOptions : LspInitializationOptions = {
+    quartoBinPath: quartoContext.binPath
+  };
   const clientOptions: LanguageClientOptions = {
+    initializationOptions,
     documentSelector: [
       { scheme: "*", language: "quarto" },
       {

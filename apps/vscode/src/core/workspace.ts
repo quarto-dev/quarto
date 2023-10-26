@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * worksapce.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,14 +13,13 @@
  *
  */
 
-export * from './context';
-export * from './metadata';
-export * from './appdirs';
-export * from './markdown';
-export * from './markdown/parsers/pandoc'
-export * from './storage';
-export * from './dictionaries';
-export * from './position';
-export * from './range';
-export * from './document';
-export * from './lsp';
+import { workspace, WorkspaceFolder, Uri } from "vscode";
+
+export function activeWorkspaceFolder(uri?: Uri) : WorkspaceFolder | undefined {
+  const workspaceFolder = uri 
+    ? workspace.getWorkspaceFolder(uri) 
+    : workspace.workspaceFolders?.length 
+    ? workspace.workspaceFolders[0] 
+    : undefined;
+  return workspaceFolder;
+}

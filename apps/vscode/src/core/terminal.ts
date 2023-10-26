@@ -14,11 +14,8 @@
  */
 
 import * as os from "node:os";
-import path, { dirname } from "node:path";
 import fs from "node:fs";
-import * as child_process from "node:child_process";
 
-import which from "which";
 
 import { Uri, workspace, extensions, window } from "vscode";
 import { pathWithForwardSlashes, shQuote, sleep, winShEscape } from "core";
@@ -26,6 +23,8 @@ import { Terminal } from "vscode";
 import { QuartoContext, fileCrossrefIndexStorage } from "quarto-core";
 import { TerminalOptions } from "vscode";
 import { previewDirForDocument, previewTargetDir } from "./doc";
+import { activeWorkspaceFolder } from "./workspace";
+import { activePythonInterpreter, pythonIsCondaEnv, pythonIsVenv } from "./python";
 
 export interface TerminalEnv {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -34,35 +33,18 @@ export interface TerminalEnv {
   QUARTO_R?: string;
 }
 
-export async function terminalEnv(uri: Uri) : Promise<TerminalEnv> {
+export async function terminalEnv(uri?: Uri) : Promise<TerminalEnv> {
 
   const env: TerminalEnv = {};
 
-  const workspaceFolder = workspace.getWorkspaceFolder(uri);
-
   // QUARTO_PYTHON
-  const pyExtension = extensions.getExtension("ms-python.python");
-  if (pyExtension) {
-    if (!pyExtension.isActive) {
-      await pyExtension.activate();
-    }
-
-    const execDetails = pyExtension.exports.settings.getExecutionDetails(
-      workspaceFolder?.uri
-    );
-    if (Array.isArray(execDetails?.execCommand)) {
-      let quartoPython = execDetails.execCommand[0] as string;
-      if (!path.isAbsolute(quartoPython)) {
-        const path = which.sync(quartoPython, { nothrow: true });
-        if (path) {
-          quartoPython = path;
-        }
-      }
-      env.QUARTO_PYTHON = quartoPython;
-    }
+  const python = await activePythonInterpreter(uri);
+  if (python) {
+    env.QUARTO_PYTHON = python;
   }
 
   // QUARTO_R
+  const workspaceFolder = activeWorkspaceFolder(uri);
   const rExtension =
     extensions.getExtension("REditorSupport.r") ||
     extensions.getExtension("Ikuyadeu.r");
@@ -186,29 +168,17 @@ export async function killTerminal(name: string, before?: () => Promise<void>) {
 function requiredTerminalDelay(env?: TerminalEnv) : number {
   try {
     if (env?.QUARTO_PYTHON) {
-      // look for virtualenv
-      const binDir = dirname(env.QUARTO_PYTHON);
-      const venvFiles = ["activate", "pyvenv.cfg", "../pyvenv.cfg"];
-      if (
-        venvFiles.map((file) => path.join(binDir, file)).some(fs.existsSync)
-      ) {
+      if (pythonIsVenv(env.QUARTO_PYTHON)) {
         return 1000;
+      } else if (pythonIsCondaEnv(env.QUARTO_PYTHON)) {
+        return 5000;
+      } else {
+        return 0;
       }
-
-      // look for conda env
-      const args = [
-        "-c",
-        "import sys, os; print(os.path.exists(os.path.join(sys.prefix, 'conda-meta')))",
-      ];
-      const output = (
-        child_process.execFileSync(shQuote(env.QUARTO_PYTHON), args, {
-          encoding: "utf-8",
-        }) as unknown as string
-      ).trim();
-      return output === "True" ? 5000 : 0;
     } else {
       return 0;
     }
+
   } catch (err) {
     console.error(err);
     return 0;

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.106.0 (Unreleased)
+
+- When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment
+
 ## 1.105.0 (Release on 16 October 2023)
 
 - Run Line is now Run Selected Line(s) and matches exactly previous behavior of Cmd+Enter

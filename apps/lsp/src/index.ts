@@ -13,6 +13,7 @@
  *
  */
 
+import path from "path";
 
 import {
   ClientCapabilities,
@@ -36,8 +37,8 @@ import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
 import { registerCustomMethods } from "./custom";
-import { LspConnection } from "core-node";
-import { initQuartoContext, Document, markdownitParser } from "quarto-core";
+import { isWindows, LspConnection } from "core-node";
+import { initQuartoContext, Document, markdownitParser, LspInitializationOptions } from "quarto-core";
 import { ConfigurationManager, lsConfiguration } from "./config";
 import { LogFunctionLogger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
@@ -62,12 +63,16 @@ const config = lsConfiguration(configManager);
 // Capabilities 
 let capabilities: ClientCapabilities | undefined;
 
+// Initialization options
+let initializationOptions: LspInitializationOptions | undefined;
+
 // Markdowdn language service
 let mdLs: IMdLanguageService | undefined;
 
 connection.onInitialize((params: InitializeParams) => {
 
-  // alias capabilities
+  // alias options and capabilities
+  initializationOptions = params.initializationOptions;
   capabilities = params.capabilities;
 
   connection.onCompletion(async (params, token): Promise<CompletionItem[]> => {
@@ -189,9 +194,15 @@ connection.onInitialized(async () => {
     ? URI.parse(workspaceFolders[0].uri).fsPath
     : undefined;
    
+  // if we were passed a quarto bin path then use that
+  let quartoBinPath : string | undefined;
+  if (initializationOptions?.quartoBinPath) {
+    quartoBinPath = path.join(initializationOptions?.quartoBinPath, isWindows() ? "quarto.exe" : "quarto");
+  }
+
   // initialize quarto
   const quartoContext = initQuartoContext(
-    configManager.getSettings().quarto.path, 
+    quartoBinPath || configManager.getSettings().quarto.path, 
     workspaceDir
   );
   const quarto = await initializeQuarto(quartoContext);

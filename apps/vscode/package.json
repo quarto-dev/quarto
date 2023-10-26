@@ -1130,6 +1130,12 @@
           "default": "",
           "markdownDescription": "A path to the Quarto CLI executable. By default, the extension looks for Quarto CLI in the `PATH`, but if set, will use the path specified instead."
         },
+        "quarto.usePipQuarto": {
+          "order": 11,
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#`."
+        },
         "quarto.render.renderOnSave": {
           "order": 12,
           "scope": "window",

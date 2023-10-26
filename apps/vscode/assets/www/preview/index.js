@@ -90,7 +90,8 @@ window.addEventListener("message", (e) => {
       break;
     }
 
-    case "navigate": {
+    case "navigate":
+    case "hashchange": {
       updateAddressBar(e.data.href);
       break;
     }

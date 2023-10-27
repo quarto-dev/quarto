@@ -26,17 +26,17 @@ You can also install from the [VS Code Extension Marketplace](https://marketplac
 
 The Quarto VS Code extension includes commands and keyboard shortcuts for rendering Quarto documents (both standalone and within websites or books). After rendering, `quarto preview` is used behind the scenes to provide a preview pane within VS Code alongside your document:
 
-![](https://quarto.org/docs/tools/images/vscode-render.png){.border fig-alt="Two windows arranged side by side. The window on the left is a qmd file opened in VSCode. The contents of this document are the same as the first part of the Getting Started: Welcome section of this website. The contents of this document are rendered by Quarto in the window on the right."}
+![](https://quarto.org/docs/tools/images/vscode-render.png)
 
 To render and preview, execute the **Quarto: Preview** command. You can alternatively use the <kbd>Ctrl+Shift+K</kbd> keyboard shortcut, or the **Preview** button at the top right of the editor:
 
-![](https://quarto.org/docs/tools/images/vscode-preview-button.png){.border fig-alt="The top of the Visual Studio code editor. The right side of the editor tab area includes a Preview button."}
+![](https://quarto.org/docs/tools/images/vscode-preview-button.png)
 
 > Note that on the Mac you should use `Cmd` rather than `Ctrl` as the prefix for all Quarto keyboard shortcuts.
 
 The **Quarto: Preview** command renders the default format of the currently active document. If you want to preview a different format, use the **Quarto: Preview Format** command:
 
-![](https://quarto.org/docs/tools/images//vscode-preview-format.png){.border fig-alt="The top of the Visual Studio code editor. The command pallette shows a quick pick list of available formats to preview."}
+![](https://quarto.org/docs/tools/images//vscode-preview-format.png)
 
 After previewing a different format, the **Quarto: Preview** command and <kbd>Ctrl+Shift+K</kbd> keyboard shortcut will be automatically rebound to the newly selected format.
 
@@ -46,7 +46,22 @@ After previewing a different format, the **Quarto: Preview** command and <kbd>Ct
 
 The **Quarto: Preview** command is what you will most commonly use while authoring documents. If you have a single format (e.g. HTML or PDF) then previewing also renders your document so it's ready for distribution once you are happy with the output. However, if you have multiple formats will need to explicitly render them (as preview only renders a single format at a time). You can do this with the **Quarto: Render** command:
 
-![](https://quarto.org/docs/tools/images//vscode-render-command.png){.border fig-alt="The top of the Visual Studio code editor. The command pallette shows a quick pick list of available formats to render."}
+![](https://quarto.org/docs/tools/images//vscode-render-command.png)
+
+
+#### Other Formats
+
+The **Quarto: Preview** command renders the default format of the currently active document. If you want to preview a different format, use the **Quarto: Preview Format** command:
+
+![](images/vscode-preview-format-menu.png)
+
+When you execute **Preview Format**, you'll see a quick pick list of formats to choose from (any formats declared in the document as well as some standard formats like PDF and MS Word):
+
+![](images/vscode-preview-format.png)
+
+After previewing a different format, the **Quarto: Preview** command and <kbd>Ctrl+Shift+K</kbd> keyboard shortcut will be automatically rebound to the newly selected format for the duration of the current preview. To switch back to previewing the original format, use  **Quarto: Preview Format** command again.
+
+> Embedded preview is currently supported for HTML and PDF based formats (including `revealjs` and `beamer` slideshows). However, for Word and other formats you need to use an appropriate external program to preview the output.
 
 ## Render on Save
 
@@ -54,7 +69,7 @@ By default Quarto does not automatically render `.qmd` or `.ipynb` files when yo
 
 However, you can configure the Quarto extension to automatically render whenever you save. You can do this either within VS Code settings or within the YAML options for your project or document. To configure the VS Code setting, search for `quarto.render` in settings and you'll find the **Render on Save** option:
 
-![](https://quarto.org/docs/tools/images//vscode-render-on-save.png){.border fig-alt="The Visual Studio Code Quarto render settings. The Render on Save option is checked."}
+![](https://quarto.org/docs/tools/images//vscode-render-on-save.png)
 
 You might also want to control this behavior on a per-document or per-project basis. If you include the `editor: render-on-save` option in your document or project YAML it will supersede whatever your VS Code setting is. For example:
 
@@ -67,7 +82,7 @@ editor:
 
 If you prefer to use an external browser for preview (or have no preview triggered at all by rendering) you can use the **Preview Type** option to specify an alternate behavior:
 
-![](https://quarto.org/docs/tools/images//vscode-preview-settings.png){.border fig-alt="VS Code settings interface with 'quarto preview type' entered into the search bar. User settings reveals Quarto > Render: Preview Type, with a dropdown to select location for document preview after render. The default, internal, is selected, which previews using a side-by-side panel in VS Code. The other two options in the dropdown are external and none."}
+![](https://quarto.org/docs/tools/images//vscode-preview-settings.png)
 
 
 ## Code Cells

@@ -34,7 +34,7 @@ To render and preview, execute the **Quarto: Preview** command. You can alternat
 
 > Note that on the Mac you should use `Cmd` rather than `Ctrl` as the prefix for all Quarto keyboard shortcuts.
 
-#### Other Formats
+### Other Formats
 
 The **Quarto: Preview** command renders the default format of the currently active document. If you want to preview a different format, use the **Quarto: Preview Format** command:
 
@@ -48,7 +48,7 @@ After previewing a different format, the **Quarto: Preview** command and <kbd>Ct
 
 > Embedded preview is currently supported for HTML and PDF based formats (including `revealjs` and `beamer` slideshows). However, for Word and other formats you need to use an appropriate external program to preview the output.
 
-#### Render Command
+### Render Command
 
 The **Quarto: Preview** command is what you will most commonly use while authoring documents. If you have a single format (e.g. HTML or PDF) then previewing also renders your document so it's ready for distribution once you are happy with the output. However, if you have multiple formats will need to explicitly render them (as preview only renders a single format at a time). You can do this with the **Quarto: Render** command:
 

@@ -6,6 +6,7 @@
 - When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment
 - Update address bar when previewed content sends 'hashchange' message
 - More graceful behavior when Quarto not installed (verify installation, startup error, etc.)
+- Eliminate ellipses input rule (common construct in code blocks)
 
 ## 1.105.0 (Release on 16 October 2023)
 

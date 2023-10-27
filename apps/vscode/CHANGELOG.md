@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.106.0 (Unreleased)
+## 1.106.0 (Release on 27 October 2023)
 
 - Remove Preview PDF/DOCX/etc. commands (replaced by Preview Format command on editor title menu)
 - When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment

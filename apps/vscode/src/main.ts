@@ -24,7 +24,7 @@ import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activateCommon } from "./extension";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
-import { initQuartoContext } from "quarto-core";
+import { initQuartoContext, quartoContextUnavailable } from "quarto-core";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
@@ -91,10 +91,10 @@ export async function activate(context: vscode.ExtensionContext) {
     // assist panel
     const assistCommands = activateQuartoAssistPanel(context, engine);
     commands.push(...assistCommands);
-
-    // walkthough
-    commands.push(...walkthroughCommands(host, quartoContext));
   }
+
+  // walkthough
+  commands.push(...walkthroughCommands(host, quartoContext));
 
   // provide render
   const renderCommands = activateRender(quartoContext, engine);

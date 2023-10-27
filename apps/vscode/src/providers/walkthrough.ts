@@ -23,7 +23,6 @@ import { Command } from "../core/command";
 import { QuartoContext } from "quarto-core";
 import { promptForQuartoInstallation } from "../core/quarto";
 import { ExtensionHost } from "../host";
-import { TextEditor } from "vscode";
 
 export function walkthroughCommands(host: ExtensionHost, quartoContext: QuartoContext): Command[] {
   return [

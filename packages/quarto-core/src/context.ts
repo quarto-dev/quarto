@@ -86,17 +86,21 @@ export function initQuartoContext(
         ),
     };
   } else {
-    return {
-      available: false,
-      version: "",
-      binPath: "",
-      resourcePath: "",
-      pandocPath: "",
-      useCmd: false,
-      runQuarto: () => "",
-      runPandoc: () => "",
-    };
+    return quartoContextUnavailable();
   }
+}
+
+export function quartoContextUnavailable() : QuartoContext {
+  return {
+    available: false,
+    version: "",
+    binPath: "",
+    resourcePath: "",
+    pandocPath: "",
+    useCmd: false,
+    runQuarto: () => "",
+    runPandoc: () => "",
+  };
 }
 
 type QuartoInstallation = {

@@ -180,7 +180,7 @@ export function quartoDocumentFormats(
     // add 'ensureFormats' (apply version filter)
     for (const format of ensureFormats) {
       if (!formats.find(f => f.format === format.format)) {
-        if (!format.version || semver.gte(context.version, format.version)) {
+        if (!format.version || (context.available && semver.gte(context.version, format.version))) {
           formats.push(format);
         }
       }

@@ -35,7 +35,7 @@ export function activateRender(quartoContext: QuartoContext, engine: MarkdownEng
 
   // establish if we should include the typst command
    // indicate that its okay to show
-  if (semver.gte(quartoContext.version, "1.4.388")) {
+  if (quartoContext.available && semver.gte(quartoContext.version, "1.4.388")) {
     commands.executeCommand(
       "setContext",
       "quartoCanRenderTypst",

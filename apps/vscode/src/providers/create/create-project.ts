@@ -158,5 +158,5 @@ function selectProjectType(
 }
 
 function haveManuscripts(context: QuartoContext) {
-  return semver.gte(context.version, "1.4.283");
+  return context.available && semver.gte(context.version, "1.4.283");
 }

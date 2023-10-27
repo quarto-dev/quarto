@@ -117,7 +117,7 @@ export class PandocConverter {
       ['raw_html', 'raw_attribute', 'backtick_code_blocks', autoIds, 
       'grid_tables', 'pipe_tables', 'multiline_tables', 'simple_tables',
       'tex_math_dollars'],
-       [],
+       ['smart'],
     );
 
     // run preprocessors
@@ -181,7 +181,7 @@ export class PandocConverter {
     let format = adjustedFormat(
       pandocFormat.fullName,
       ['raw_html', 'raw_attribute'], // always enable
-      ['auto_identifiers', 'gfm_auto_identifiers'],
+      ['auto_identifiers', 'gfm_auto_identifiers', 'smart'],
     ); // always disable
 
     // disable selected format options

@@ -16,18 +16,10 @@
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 import { PandocOutput, PandocToken, PandocTokenType, ProsemirrorWriter } from '../api/pandoc';
-import { ExtensionContext } from '../api/extension';
-import { kQuoteType, QuoteType, kQuoteChildren, fancyQuotesToSimple } from '../api/quote';
+import { kQuoteType, QuoteType, kQuoteChildren } from '../api/quote';
 
-const extension = (context: ExtensionContext) => {
-  const readText = (text: string) => {
-    // we explicitly don't want fancy quotes in the editor
-    if (context.pandocExtensions.smart) {
-      text = fancyQuotesToSimple(text);
-    }
+const extension = () => {
   
-    return text;
-  };
 
   return {
     nodes: [
@@ -42,7 +34,7 @@ const extension = (context: ExtensionContext) => {
         },
         pandoc: {
           readers: [
-            { token: PandocTokenType.Str, text: true, getText: (t: PandocToken) => readText(t.c) },
+            { token: PandocTokenType.Str, text: true, getText: (t: PandocToken) => t.c },
             { token: PandocTokenType.Space, text: true, getText: () => ' ' },
             { token: PandocTokenType.SoftBreak, text: true, getText: () => ' ' },
             {

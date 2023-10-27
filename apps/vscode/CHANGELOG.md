@@ -7,6 +7,7 @@
 - Update address bar when previewed content sends 'hashchange' message
 - More graceful behavior when Quarto not installed (verify installation, startup error, etc.)
 - Eliminate ellipses input rule (common construct in code blocks)
+- Don't do any special handling for quotes / fancy quotes in visual editor
 
 ## 1.105.0 (Release on 16 October 2023)
 

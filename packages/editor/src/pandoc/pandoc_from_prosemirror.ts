@@ -34,7 +34,6 @@ import { kGfmFormat } from '../api/pandoc_format';
 import { PandocAttr } from '../api/pandoc_attr';
 import { PandocFormat } from '../api/pandoc-types';
 import { fragmentText } from '../api/fragment';
-import { fancyQuotesToSimple } from '../api/quote';
 
 
 export function pandocFromProsemirror(
@@ -232,10 +231,6 @@ class PandocWriter implements PandocOutput {
             });
           }
 
-          // no smart quotes in editor
-          if (this.extensions.smart) {
-            textRun = fancyQuotesToSimple(textRun);
-          }
        
           this.writeToken(PandocTokenType.Str, textRun);
           textRun = '';

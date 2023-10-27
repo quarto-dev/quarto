@@ -125,10 +125,13 @@ export interface QuartoFormatInfo {
 
 export const htmlFormat: QuartoFormatInfo = { name: "HTML", format: "html" };
 export const docxFormat: QuartoFormatInfo = { name: "MS Word", format: "docx" };
-export const pdfFormat: QuartoFormatInfo = { name: "PDF", format: "pdf" };
+export const pdfFormat: QuartoFormatInfo = { name: "PDF (LaTeX)", format: "pdf" };
 export const typstFormat: QuartoFormatInfo = { name: "PDF (Typst)", format: "typst", version: "1.4.388" };
+export const dashboardFormat: QuartoFormatInfo = { name: "Dashboard", format: "dashboard" };
+export const revealjsFormat: QuartoFormatInfo = { name: "RevealJS", format: "revealjs" };
 
-export const knownFormats = [htmlFormat, typstFormat, pdfFormat, docxFormat];
+export const standardFormats = [htmlFormat, typstFormat, pdfFormat, docxFormat];
+export const knownFormats = standardFormats.concat([dashboardFormat, revealjsFormat]);
 
 export type QuartoDocumentFormats = Record<string,QuartoFormatInfo>;
 
@@ -136,7 +139,7 @@ export function quartoDocumentFormats(
   context: QuartoContext,
   file: string,
   frontMatter: string,
-  ensureFormats = knownFormats
+  ensureFormats = standardFormats
 ) : Array<QuartoFormatInfo> | undefined {
   
    // disqualifying conditions

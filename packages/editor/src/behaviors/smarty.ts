@@ -13,7 +13,7 @@
  *
  */
 
-import { ellipsis, InputRule } from 'prosemirror-inputrules';
+import { InputRule } from 'prosemirror-inputrules';
 import { EditorState } from 'prosemirror-state';
 
 import { Extension, extensionIfEnabled } from '../api/extension';
@@ -40,7 +40,7 @@ const emDash = new InputRule(/(^|[^`])–-$/, (state: EditorState, _match: strin
 
 const extension: Extension = {
   inputRules: () => {
-    return [ellipsis, enDash, emDash];
+    return [enDash, emDash];
   }
 };
 

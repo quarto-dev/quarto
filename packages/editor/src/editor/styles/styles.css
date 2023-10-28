@@ -35,6 +35,10 @@
   margin-top: 1em;
 }
 
+.pm-content .pm-heading {
+  line-height: 1.2;
+}
+
 h3.pm-heading {
   font-size: 1.25em !important;
 }

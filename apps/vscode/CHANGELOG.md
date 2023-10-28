@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.107.0 (Unreleased)
+
+- Visual Editor: Use line-height of 1.2 for headings 
+
 ## 1.106.0 (Release on 27 October 2023)
 
 - Remove Preview PDF/DOCX/etc. commands (replaced by Preview Format command on editor title menu)

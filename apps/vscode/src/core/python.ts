@@ -56,15 +56,19 @@ export function pythonIsVenv(python: string) {
 }
 
 export function pythonIsCondaEnv(python: string) {
-  const args = [
-    "-c",
-    "import sys, os; print(os.path.exists(os.path.join(sys.prefix, 'conda-meta')))",
-  ];
-  const output = (
-    child_process.execFileSync(shQuote(python), args, {
-      encoding: "utf-8",
-    }) as unknown as string
-  ).trim();
-  return output === "True";
+  try {
+    const args = [
+      "-c",
+      "import sys, os; print(os.path.exists(os.path.join(sys.prefix, 'conda-meta')))",
+    ];
+    const output = (
+      child_process.execFileSync(shQuote(python), args, {
+        encoding: "utf-8",
+      }) as unknown as string
+    ).trim();
+    return output === "True";
+  } catch {
+    return false;
+  }
 }
 

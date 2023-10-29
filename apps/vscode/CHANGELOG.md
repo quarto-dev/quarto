@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.107.0 (Unreleased)
+## 1.106.1 (Unreleased)
 
 - Visual Editor: Use line-height of 1.2 for headings 
+- Catch initialization errors that occur when probing for Python environments
 
 ## 1.106.0 (Release on 27 October 2023)
 

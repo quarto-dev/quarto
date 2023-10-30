@@ -531,6 +531,17 @@ class QuartoOJSConnector extends OJSConnector {
 
             // hide import statements even if output === "all"
             for (const added of mutation.addedNodes) {
+
+              // https://github.com/quarto-dev/quarto-cli/issues/7426
+              // ObservableHQ.Plot fixup:
+              // remove "background: white" from style declaration
+              if (added.tagName === "svg" && 
+                  Array.from(added.classList)
+                    .some(x => x.match(/plot-[0-9a-f]+/))) {
+                // this overrides the style CSS inside.
+                added.style.background = "none";
+              }
+
               if (
                 added.tagName === "FORM" &&
                 Array.from(added.classList).some(

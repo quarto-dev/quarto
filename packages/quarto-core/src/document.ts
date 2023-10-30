@@ -112,7 +112,7 @@ export function filePathForDoc(doc: Document) {
 const kRegExYAML =
   /(^)(---[ \t]*[\r\n]+(?![ \t]*[\r\n]+)[\W\w]*?[\r\n]+(?:---|\.\.\.))([ \t]*)$/gm;
 
-export function isQuartoRevealDoc(doc: Document | string) {
+export function isQuartoDocWithFormat(doc: Document | string, format: string) {
   if (typeof(doc) !== "string") {
     if (isQuartoDoc(doc)) {
       doc = doc.getText();
@@ -125,10 +125,18 @@ export function isQuartoRevealDoc(doc: Document | string) {
     if (match) {
       const yaml = match[0];
       return (
-        !!yaml.match(/^format:\s+revealjs\s*$/gm) ||
-        !!yaml.match(/^[ \t]*revealjs:\s*(default)?\s*$/gm)
+        !!yaml.match(new RegExp("^format:\\s+" + format + "\\s*$","gm")) ||
+        !!yaml.match(new RegExp("^[ \\t]*" + format + ":\\s*(default)?\\s*$", "gm"))
       );
     }
   }
   return false;
+}
+
+export function isQuartoRevealDoc(doc: Document | string) {
+  return isQuartoDocWithFormat(doc, "revealjs");
+}
+
+export function isQuartoDashboardDoc(doc: Document | string) {
+  return isQuartoDocWithFormat(doc, "dashboard");
 }

@@ -13,7 +13,7 @@
  *
  */
 
-import { AttrToken, EditorContext, Quarto } from "../../quarto";
+import { AttrContext, AttrToken, EditorContext, Quarto } from "../../quarto";
 
 export async function attrCompletions(quarto: Quarto, context: EditorContext) {
   
@@ -60,7 +60,7 @@ function simpleDivToken(context: EditorContext): AttrToken | undefined {
   if (context.line.slice(context.position.column).trim() === "") {
     if (match) {
       return {
-        formats: [],
+        line: context.line,
         context: "div-simple",
         attr: match[2],
         token: match[2],
@@ -100,10 +100,11 @@ function matchCompletionToken(
 
         // return scope & token
         return {
-          context: type(match[2]),
+          line: context.line,
+          context: type(match[2]) as AttrContext,
           attr: match[3],
           token,
-        } as AttrToken;
+        };
       }
     }
   }

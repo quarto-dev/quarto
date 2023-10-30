@@ -15,7 +15,7 @@
 
 import { CompletionItem, Position } from "vscode-languageserver-types";
 
-import { QuartoContext, Document, filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml } from "quarto-core";
+import { QuartoContext, Document, filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml, isQuartoDashboardDoc } from "quarto-core";
 
 import { lines } from "core";
 
@@ -86,8 +86,8 @@ export type AttrContext =
   | "figure";
 
 export interface AttrToken {
+  line: string;
   context: AttrContext;
-  formats: string[];
   attr: string;
   token: string;
 }
@@ -119,6 +119,9 @@ export function codeEditorContext(
   const formats: string[] = [];
   if (isQuartoRevealDoc(code)) {
     formats.push("revealjs");
+  }
+  if (isQuartoDashboardDoc(code)) {
+    formats.push("dashboard");
   }
 
   return {

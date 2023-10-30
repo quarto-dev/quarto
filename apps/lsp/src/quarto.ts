@@ -114,7 +114,7 @@ function initializeAttrCompletionProvider(resourcesPath: string) {
       token.context === kContextDivSimple ? kContextDiv : token.context;
     const completions: CompletionItem[] = attrs
       .filter((attr) => {
-        if (attr.filter && !token.attr.match(attr.filter)) {
+        if (attr.filter && !token.line.match(attr.filter)) {
           // check filter
           return false;
         } else if (

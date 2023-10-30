@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.106.2 (Release on 30 October 2023)
+
+- Support for dashboard completion context
+
 ## 1.106.1 (Release on 29 October 2023)
 
 - Visual Editor: Use line-height of 1.2 for headings 

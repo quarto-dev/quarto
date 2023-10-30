@@ -31,6 +31,8 @@ import { OJSConnector } from "./ojs-connector.js";
 
 import { createQuartoJsxShim } from "./quarto-jsx.js";
 
+import { autosizeOJSPlot } from "./ojs-code-transform.js";
+
 import mime from "mime";
 
 //////////////////////////////////////////////////////////////////////////////
@@ -529,7 +531,6 @@ class QuartoOJSConnector extends OJSConnector {
 
             that.decorateSource(cellDiv, ojsDiv);
 
-            // hide import statements even if output === "all"
             for (const added of mutation.addedNodes) {
               if (
                 added.tagName === "FORM" &&
@@ -537,14 +538,38 @@ class QuartoOJSConnector extends OJSConnector {
                   (x) => x.endsWith("table") && x.startsWith("oi-")
                 )
               ) {
+                // add quarto-specific classes to OJS-generated tables
                 added.classList.add("quarto-ojs-table-fixup");
+
+                // in dashboard, change styles so that autosizing works
+                if (window._ojs.isDashboard) {
+                  const table = added.querySelector("table");
+                  if (table) {
+                    table.style.width = "100%";
+                  }
+                  added.style.maxHeight = null;
+                  added.style.margin = "0 0 0 0";
+                  added.style.padding = "0 0 0 0";
+
+                  // find parentElement with class cell-output-display or cell
+                  let parent = added.parentElement;
+                  while (parent && !parent.classList.contains("cell-output-display") && !parent.classList.contains("cell")) {
+                    parent = parent.parentElement;
+                  }
+                  if (parent !== null && added.clientHeight > parent.clientHeight) {
+                    added.style.maxHeight = `${parent.clientHeight}px`;
+                  }
+                }
               }
 
+              // add quarto-specific classes to OJS-generated buttons
               const addedButtons = added.querySelectorAll("button");
               for (const button of Array.from(addedButtons)) {
                 button.classList.add("btn");
                 button.classList.add("btn-quarto");
               }
+
+              // hide import statements even if output === "all"
               //// Hide imports that aren't javascript code
               //
               // We search here for code.javascript and node span.hljs-... because
@@ -666,6 +691,93 @@ export function createRuntime() {
    || document.querySelector("div.reveal")       // reveal
    || document.querySelector("body"));           // fall-through
 
+  function cards() {
+    if (mainEl === null) {
+      return lib.Generators.observe((change) => {
+        change(undefined);
+      });
+    }
+    return lib.Generators.observe(function(change) {
+      let previous = undefined;
+      function resized() {
+        let changed = false;
+        const result = {};
+        let cellIndex = 0;
+        const handle = (card) => {
+          const cardInfo = {
+            card,
+            width: card.clientWidth,
+            height: card.clientHeight,
+          }
+          result[cellIndex] = cardInfo;
+          if (previous === undefined || 
+              previous[cellIndex].width !== cardInfo.width || 
+              previous[cellIndex].height !== cardInfo.height) {
+            changed = true;
+          }
+          cellIndex++;
+
+          // there can be an id in the card itself, allow that as a key
+          if (card.id) {
+            result[card.id] = cardInfo;
+          }
+        }
+        for (const card of document.querySelectorAll("div.card")) {
+          for (const cell of card.querySelectorAll("div.cell-output-display")) {
+            handle(cell);
+          }
+          for (const cell of card.querySelectorAll("div.quarto-layout-cell")) {
+            handle(cell);
+          }
+        }
+        for (const card of document.querySelectorAll("div")) {
+          if (!(card.id.startsWith("ojs-cell-"))) {
+            continue;
+          }
+          let cardInfoCard;
+          // many possible cases:
+
+          if (card.parentElement.classList.contains("cell-output-display")) {
+            // single cell: card parent is cell-output-display
+            cardInfoCard = card.parentElement;
+          } else if (card.parentElement.classList.contains("quarto-layout-cell")) {
+            // subcell of layout
+            cardInfoCard = card.parentElement;
+          } else if (card.parentElement.parentElement.classList.contains("cell-output-display")) {
+            // subcell of cell-output-display
+            cardInfoCard = card.parentElement.parentElement
+          } else {
+            continue;
+          }
+          const cardInfo = {
+            card: cardInfoCard,
+            width: card.clientWidth,
+            height: card.clientHeight,
+          }
+          result[card.id] = cardInfo;
+          if (previous === undefined || 
+            previous[card.id].width !== cardInfo.width || 
+            previous[card.id].height !== cardInfo.height) {
+            changed = true;
+          }
+          if (card.parentElement.id !== "") {
+            result[card.parentElement.id] = cardInfo;
+          }
+        }
+
+        if (changed) {
+          previous = result;
+          change(result);
+        }
+      }
+      resized();
+      window.addEventListener("resize", resized);
+      return function() {
+        window.removeEventListener("resize", resized);
+      }
+    });
+  }
+
   function width() {
     if (mainEl === null) {
       return lib.Generators.observe((change) => {
@@ -685,6 +797,7 @@ export function createRuntime() {
     });
   }
   lib.width = width;
+  lib.cards = cards;
 
   // hack for "echo: fenced": remove all "//| echo: fenced" lines the hard way, but keep
   // the right line numbers around.
@@ -930,15 +1043,16 @@ export function createRuntime() {
         "script[type='ojs-module-contents']"
       )) {
         for (const call of JSON.parse(el.text).contents) {
+          let source = window._ojs.isDashboard ? autosizeOJSPlot(call.source, call.cellName) : call.source;
           switch (call.methodName) {
             case "interpret":
-              this.interpret(call.source, call.cellName, call.inline);
+              this.interpret(source, call.cellName, call.inline);
               break;
             case "interpretLenient":
-              this.interpretLenient(call.source, call.cellName, call.inline);
+              this.interpretLenient(source, call.cellName, call.inline);
               break;
             case "interpretQuiet":
-              this.interpretQuiet(call.source);
+              this.interpretQuiet(source);
               break;
             default:
               throw new Error(
@@ -971,6 +1085,8 @@ export default function initializeRuntime()
     // necessary for module resolution
 
     hasShiny: false, // true if we have the quarto-ojs-shiny runtime
+
+    isDashboard: document.body.classList.contains("quarto-dashboard"), // true if we are a dashboard format
 
     shinyElementRoot: undefined, // root element for the communication with shiny
     // via DOM

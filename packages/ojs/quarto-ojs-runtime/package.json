@@ -1,6 +1,6 @@
 {
   "name": "quarto-ojs-runtime",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "A runtime for quarto's support of ObservableHQ's reactive Javascript.",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -34,6 +34,8 @@
     "rollup": "^3.2.5",
     "@rollup/plugin-json": "^5.0.1",
     "rollup-plugin-terser": "^7.0.2",
-    "mime": "^3.0.0"
+    "mime": "^3.0.0",
+    "acorn-walk": "^8.2.0",
+    "escodegen": "^2.1.0"
   }
 }

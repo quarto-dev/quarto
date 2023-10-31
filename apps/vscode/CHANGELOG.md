@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.106.3 (Unreleased)
+
+- Ignore trigger characters for YAML completions
+
 ## 1.106.2 (Release on 30 October 2023)
 
 - Support for dashboard completion context

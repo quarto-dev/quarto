@@ -29,6 +29,11 @@ import { EditorContext, Quarto } from "../../quarto";
 
 export async function yamlCompletions(quarto: Quarto, context: EditorContext, stripPadding: boolean) {
  
+  // don't do completions from trigger characters (yaml has none)
+  if (context.trigger) {
+    return null;
+  }
+
   // get completions
   const result = await quarto.getYamlCompletions(context);
   if (result) {

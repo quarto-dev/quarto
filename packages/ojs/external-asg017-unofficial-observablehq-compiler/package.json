@@ -1,6 +1,6 @@
 {
   "name": "external-alex-garcia-unofficial-observablehq-compiler",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A fork of an unofficial compiler to bind @observablehq/parser and @observablehq/runtime",
   "main": "dist/index.js",
   "author": "Carlos Scheidegger <carlos.scheidegger@rstudio.com>",

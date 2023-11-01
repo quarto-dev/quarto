@@ -5,7 +5,7 @@
  */
 
 import { make, simple } from "acorn-walk";
-import { generate } from "escodegen";
+import { generate } from "./escodegen.js";
 import { parseModule } from "external-observablehq-parser";
 
 // we need to patch the base walker ourselves because OJS sometimes

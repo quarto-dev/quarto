@@ -35,7 +35,6 @@
     "@rollup/plugin-json": "^5.0.1",
     "rollup-plugin-terser": "^7.0.2",
     "mime": "^3.0.0",
-    "acorn-walk": "^8.2.0",
-    "escodegen": "^2.1.0"
+    "acorn-walk": "^8.2.0"
   }
 }

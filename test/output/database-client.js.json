@@ -72,5 +72,6 @@
       ]
     ]
   ],
-  "secrets": []
+  "secrets": [],
+  "notificationClients": []
 }

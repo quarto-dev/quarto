@@ -243,5 +243,6 @@
     ]
   ],
   "databaseClients": [],
-  "secrets": []
+  "secrets": [],
+  "notificationClients": []
 }

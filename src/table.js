@@ -1,6 +1,7 @@
-import {ascending, descending, reverse} from "d3-array";
+import {greatest, reverse} from "d3-array";
 import {FileAttachment} from "./fileAttachment.js";
-import {isArrowTable} from "./arrow.js";
+import {isArqueroTable} from "./arquero.js";
+import {isArrowTable, loadArrow} from "./arrow.js";
 import {DuckDBClient} from "./duckdb.js";
 
 const nChecks = 20; // number of values to check in each array
@@ -65,11 +66,18 @@ function objectHasEnumerableKeys(value) {
 }
 
 function isQueryResultSetSchema(schemas) {
-  return (Array.isArray(schemas) && schemas.every((s) => s && typeof s.name === "string"));
+  return (
+    Array.isArray(schemas) &&
+    schemas.every(isColumnSchema)
+  );
 }
 
 function isQueryResultSetColumns(columns) {
   return (Array.isArray(columns) && columns.every((name) => typeof name === "string"));
+}
+
+function isColumnSchema(schema) {
+  return schema && typeof schema.name === "string" && typeof schema.type === "string";
 }
 
 // Returns true if the value represents an array of primitives (i.e., a
@@ -143,43 +151,116 @@ function isTypedArray(value) {
 
 // __query is used by table cells; __query.sql is used by SQL cells.
 export const __query = Object.assign(
-  async (source, operations, invalidation) => {
-    source = await loadDataSource(await source, "table");
+  async (source, operations, invalidation, name) => {
+    source = await loadTableDataSource(await source, name);
     if (isDatabaseClient(source)) return evaluateQuery(source, makeQueryTemplate(operations, source), invalidation);
     if (isDataArray(source)) return __table(source, operations);
     if (!source) throw new Error("missing data source");
     throw new Error("invalid data source");
   },
   {
-    sql(source, invalidation) {
+    sql(source, invalidation, name) {
       return async function () {
-        return evaluateQuery(await loadDataSource(await source, "sql"), arguments, invalidation);
+        return evaluateQuery(await loadSqlDataSource(await source, name), arguments, invalidation);
       };
     }
   }
 );
 
-export async function loadDataSource(source, mode) {
-  if (source instanceof FileAttachment) {
-    if (mode === "table") {
-      switch (source.mimeType) {
-        case "text/csv": return source.csv({typed: true});
-        case "text/tab-separated-values": return source.tsv({typed: true});
-        case "application/json": return source.json();
-      }
+export async function loadDataSource(source, mode, name) {
+  switch (mode) {
+    case "chart": return loadChartDataSource(source);
+    case "table": return loadTableDataSource(source, name);
+    case "sql": return loadSqlDataSource(source, name);
+  }
+  return source;
+}
+
+// We use a weak map to cache loaded data sources by key so that we don’t have
+// to e.g. create separate SQLiteDatabaseClients every time we’re querying the
+// same SQLite file attachment. Since this is a weak map, unused references will
+// be garbage collected when they are no longer desired. Note: the name should
+// be consistent, as it is not part of the cache key!
+function sourceCache(loadSource) {
+  const cache = new WeakMap();
+  return (source, name) => {
+    if (!source || typeof source !== "object") throw new Error("invalid data source");
+    let promise = cache.get(source);
+    if (!promise || (isDataArray(source) && source.length !== promise._numRows)) {
+      // Warning: do not await here! We need to populate the cache synchronously.
+      promise = loadSource(source, name);
+      promise._numRows = source.length; // This will be undefined for DatabaseClients
+      cache.set(source, promise);
     }
-    if (mode === "table" || mode === "sql") {
-      switch (source.mimeType) {
-        case "application/x-sqlite3": return source.sqlite();
-      }
-      if (/\.arrow$/i.test(source.name)) return DuckDBClient.of({__table: await source.arrow({version: 9})});
+    return promise;
+  };
+}
+
+const loadChartDataSource = sourceCache(async (source) => {
+  if (source instanceof FileAttachment) {
+    switch (source.mimeType) {
+      case "text/csv": return source.csv({typed: "auto"});
+      case "text/tab-separated-values": return source.tsv({typed: "auto"});
+      case "application/json": return source.json();
     }
     throw new Error(`unsupported file type: ${source.mimeType}`);
   }
-  if ((mode === "table" || mode === "sql") && isArrowTable(source)) {
-    return DuckDBClient.of({__table: source});
-  }
   return source;
+});
+
+const loadTableDataSource = sourceCache(async (source, name) => {
+  if (source instanceof FileAttachment) {
+    switch (source.mimeType) {
+      case "text/csv": return source.csv();
+      case "text/tab-separated-values": return source.tsv();
+      case "application/json": return source.json();
+      case "application/x-sqlite3": return source.sqlite();
+    }
+    if (/\.(arrow|parquet)$/i.test(source.name)) return loadDuckDBClient(source, name);
+    throw new Error(`unsupported file type: ${source.mimeType}`);
+  }
+  if (isArrowTable(source) || isArqueroTable(source)) return loadDuckDBClient(source, name);
+  if (isDataArray(source) && arrayIsPrimitive(source))
+    return Array.from(source, (value) => ({value}));
+  return source;
+});
+
+const loadSqlDataSource = sourceCache(async (source, name) => {
+  if (source instanceof FileAttachment) {
+    switch (source.mimeType) {
+      case "text/csv":
+      case "text/tab-separated-values":
+      case "application/json": return loadDuckDBClient(source, name);
+      case "application/x-sqlite3": return source.sqlite();
+    }
+    if (/\.(arrow|parquet)$/i.test(source.name)) return loadDuckDBClient(source, name);
+    throw new Error(`unsupported file type: ${source.mimeType}`);
+  }
+  if (isDataArray(source)) return loadDuckDBClient(await asArrowTable(source, name), name);
+  if (isArrowTable(source) || isArqueroTable(source)) return loadDuckDBClient(source, name);
+  return source;
+});
+
+async function asArrowTable(array, name) {
+  const arrow = await loadArrow();
+  return arrayIsPrimitive(array)
+    ? arrow.tableFromArrays({[name]: array})
+    : arrow.tableFromJSON(array);
+}
+
+function loadDuckDBClient(
+  source,
+  name = source instanceof FileAttachment
+    ? getFileSourceName(source)
+    : "__table"
+) {
+  return DuckDBClient.of({[name]: source});
+}
+
+function getFileSourceName(file) {
+  return file.name
+    .replace(/@\d+(?=\.|$)/, "") // strip Observable file version number
+    .replace(/\.\w+$/, ""); // strip file extension
 }
 
 async function evaluateQuery(source, args, invalidation) {
@@ -219,7 +300,7 @@ async function* accumulateQuery(queryRequest) {
   values.schema = queryResponse.schema;
   try {
     for await (const rows of queryResponse.readRows()) {
-      if (performance.now() - then > 10 && values.length > 0) {
+      if (performance.now() - then > 150 && values.length > 0) {
         yield values;
         then = performance.now();
       }
@@ -248,9 +329,13 @@ export function makeQueryTemplate(operations, source) {
     throw new Error("missing from table");
   if (select.columns && select.columns.length === 0)
     throw new Error("at least one column must be selected");
-  const columns = select.columns ? select.columns.map((c) => `t.${escaper(c)}`) : "*";
+  const names = new Map(operations.names?.map(({column, name}) => [column, name]));
+  const columns = select.columns ? select.columns.map((column) =>  {
+    const override = names.get(column);
+    return override ? `${escaper(column)} AS ${escaper(override)}` : escaper(column);
+  }).join(", ") : "*";
   const args = [
-    [`SELECT ${columns} FROM ${formatTable(from.table, escaper)} t`]
+    [`SELECT ${columns} FROM ${formatTable(from.table, escaper)}`]
   ];
   for (let i = 0; i < filter.length; ++i) {
     appendSql(i ? `\nAND ` : `\nWHERE `, args);
@@ -260,7 +345,7 @@ export function makeQueryTemplate(operations, source) {
     appendSql(i ? `, ` : `\nORDER BY `, args);
     appendOrderBy(sort[i], args, escaper);
   }
-  if (source.dialect === "mssql") {
+  if (source.dialect === "mssql" || source.dialect === "oracle") {
     if (slice.to !== null || slice.from !== null) {
       if (!sort.length) {
         if (!select.columns)
@@ -303,8 +388,9 @@ function formatTable(table, escaper) {
     if (table.schema != null) from += escaper(table.schema) + ".";
     from += escaper(table.table);
     return from;
+  } else {
+    return escaper(table);
   }
-  return table;
 }
 
 function appendSql(sql, args) {
@@ -313,20 +399,24 @@ function appendSql(sql, args) {
 }
 
 function appendOrderBy({column, direction}, args, escaper) {
-  appendSql(`t.${escaper(column)} ${direction.toUpperCase()}`, args);
+  appendSql(`${escaper(column)} ${direction.toUpperCase()}`, args);
 }
 
 function appendWhereEntry({type, operands}, args, escaper) {
   if (operands.length < 1) throw new Error("Invalid operand length");
 
   // Unary operations
-  if (operands.length === 1) {
+  // We treat `v` and `nv` as `NULL` and `NOT NULL` unary operations in SQL,
+  // since the database already validates column types.
+  if (operands.length === 1 || type === "v" || type === "nv") {
     appendOperand(operands[0], args, escaper);
     switch (type) {
       case "n":
+      case "nv":
         appendSql(` IS NULL`, args);
         return;
       case "nn":
+      case "v":
         appendSql(` IS NOT NULL`, args);
         return;
       default:
@@ -398,7 +488,7 @@ function appendWhereEntry({type, operands}, args, escaper) {
 
 function appendOperand(o, args, escaper) {
   if (o.type === "column") {
-    appendSql(`t.${escaper(o.value)}`, args);
+    appendSql(escaper(o.value), args);
   } else {
     args.push(o.value);
     args[0].push("");
@@ -420,17 +510,224 @@ function likeOperand(operand) {
   return {...operand, value: `%${operand.value}%`};
 }
 
-// This function applies table cell operations to an in-memory table (array of
-// objects); it should be equivalent to the corresponding SQL query.
-export function __table(source, operations) {
+// Comparator function that moves null values (undefined, null, NaN) to the
+// end of the array.
+function defined(a, b) {
+  return (a == null || !(a >= a)) - (b == null || !(b >= b));
+}
+
+// Comparator function that sorts values in ascending order, with null values at
+// the end.
+function ascendingDefined(a, b) {
+  return defined(a, b) || (a < b ? -1 : a > b ? 1 : 0);
+}
+
+// Comparator function that sorts values in descending order, with null values
+// at the end.
+function descendingDefined(a, b) {
+  return defined(a, b) || (a > b ? -1 : a < b ? 1 : 0);
+}
+
+// Functions for checking type validity
+const isValidNumber = (value) => typeof value === "number" && !Number.isNaN(value);
+const isValidInteger = (value) => Number.isInteger(value) && !Number.isNaN(value);
+const isValidString = (value) => typeof value === "string";
+const isValidBoolean = (value) => typeof value === "boolean";
+const isValidBigint = (value) => typeof value === "bigint";
+const isValidDate = (value) => value instanceof Date && !isNaN(value);
+const isValidBuffer = (value) => value instanceof ArrayBuffer;
+const isValidArray = (value) => Array.isArray(value);
+const isValidObject = (value) => typeof value === "object" && value !== null;
+const isValidOther = (value) => value != null;
+
+// Function to get the correct validity checking function based on type
+export function getTypeValidator(colType) {
+  switch (colType) {
+    case "string":
+      return isValidString;
+    case "bigint":
+      return isValidBigint;
+    case "boolean":
+      return isValidBoolean;
+    case "number":
+      return isValidNumber;
+    case "integer":
+      return isValidInteger;
+    case "date":
+      return isValidDate;
+    case "buffer":
+      return isValidBuffer;
+    case "array":
+      return isValidArray;
+    case "object":
+      return isValidObject;
+    case "other":
+    default:
+      return isValidOther;
+  }
+}
+
+// Accepts dates in the form of ISOString and LocaleDateString, with or without time
+const DATE_TEST = /^(([-+]\d{2})?\d{4}(-\d{2}(-\d{2}))|(\d{1,2})\/(\d{1,2})\/(\d{2,4}))([T ]\d{2}:\d{2}(:\d{2}(\.\d{3})?)?(Z|[-+]\d{2}:\d{2})?)?$/;
+
+export function coerceToType(value, type) {
+  switch (type) {
+    case "string":
+      return typeof value === "string" || value == null ? value : String(value);
+    case "boolean":
+      if (typeof value === "string") {
+        const trimValue = value.trim().toLowerCase();
+        return trimValue === "true"
+          ? true
+          : trimValue === "false"
+          ? false
+          : null;
+      }
+      return typeof value === "boolean" || value == null
+        ? value
+        : Boolean(value);
+    case "bigint":
+      return typeof value === "bigint" || value == null
+        ? value
+        : Number.isInteger(typeof value === "string" && !value.trim() ? NaN : +value)
+        ? BigInt(value) // eslint-disable-line no-undef
+        : undefined;
+    case "integer": // not a target type for coercion, but can be inferred
+    case "number": {
+      return typeof value === "number"
+        ? value
+        : value == null || (typeof value === "string" && !value.trim())
+        ? NaN
+        : Number(value);
+    }
+    case "date": {
+      if (value instanceof Date || value == null) return value;
+      if (typeof value === "number") return new Date(value);
+      const trimValue = String(value).trim();
+      if (typeof value === "string" && !trimValue) return null;
+      return new Date(DATE_TEST.test(trimValue) ? trimValue : NaN);
+    }
+    case "array":
+    case "object":
+    case "buffer":
+    case "other":
+      return value;
+    default:
+      throw new Error(`Unable to coerce to type: ${type}`);
+  }
+}
+
+export function getSchema(source) {
+  const {columns} = source;
+  let {schema} = source;
+  if (!isQueryResultSetSchema(schema)) {
+    schema = inferSchema(source, isQueryResultSetColumns(columns) ? columns : undefined);
+    return {schema, inferred: true};
+  }
+  return {schema, inferred: false};
+}
+
+// This function infers a schema from the source data, if one doesn't already
+// exist, and merges type assertions into that schema. If the schema was
+// inferred or if there are type assertions, it then coerces the rows in the
+// source data to the types specified in the schema.
+function applyTypes(source, operations) {
   const input = source;
-  let {schema, columns} = source;
-  let primitive = arrayIsPrimitive(source);
-  if (primitive) source = Array.from(source, (value) => ({value}));
+  let {schema, inferred} = getSchema(source);
+  const types = new Map(schema.map(({name, type}) => [name, type]));
+  if (operations.types) {
+    for (const {name, type} of operations.types) {
+      types.set(name, type);
+      // update schema with user-selected type
+      if (schema === input.schema) schema = schema.slice(); // copy on write
+      const colIndex = schema.findIndex((col) => col.name === name);
+      if (colIndex > -1) schema[colIndex] = {...schema[colIndex], type};
+    }
+    source = source.map(d => coerceRow(d, types, schema));
+  } else if (inferred) {
+    // Coerce data according to new schema, unless that happened due to
+    // operations.types, above.
+    source = source.map(d => coerceRow(d, types, schema));
+  }
+  return {source, schema};
+}
+
+function applyNames(source, operations) {
+  if (!operations.names) return source;
+  const overridesByName = new Map(operations.names.map((n) => [n.column, n]));
+  return source.map((d) =>
+    Object.fromEntries(Object.keys(d).map((k) => {
+      const override = overridesByName.get(k);
+      return [override?.name ?? k, d[k]];
+    }))
+  );
+}
+
+// This function applies table cell operations to an in-memory table (array of
+// objects); it should be equivalent to the corresponding SQL query. TODO Use
+// DuckDBClient for data arrays, too, and then we wouldn’t need our own __table
+// function to do table operations on in-memory data?
+export function __table(source, operations) {
+  const errors = new Map();
+  const input = source;
+  const typed = applyTypes(source, operations);
+  source = typed.source;
+  let schema = typed.schema;
+  if (operations.derive) {
+    // Derived columns may depend on coerced values from the original data source,
+    // so we must evaluate derivations after the initial inference and coercion
+    // step.
+    const derivedSource = [];
+    operations.derive.map(({name, value}) => {
+      let columnErrors = [];
+      // Derived column formulas may reference renamed columns, so we must
+      // compute derivations on the renamed source. However, we don't modify the
+      // source itself with renamed names until after the other operations are
+      // applied, because operations like filter and sort reference original
+      // column names.
+      // TODO Allow derived columns to reference other derived columns.
+      applyNames(source, operations).map((row, index) => {
+        let resolved;
+        try {
+          // TODO Support referencing `index` and `rows` in the derive function.
+          resolved = value(row);
+        } catch (error) {
+          columnErrors.push({index, error});
+          resolved = undefined;
+        }
+        if (derivedSource[index]) {
+          derivedSource[index] = {...derivedSource[index], [name]: resolved};
+        } else {
+          derivedSource.push({[name]: resolved});
+        }
+      });
+      if (columnErrors.length) errors.set(name, columnErrors);
+    });
+    // Since derived columns are untyped by default, we do a pass of type
+    // inference and coercion after computing the derived values.
+    const typedDerived = applyTypes(derivedSource, operations);
+    // Merge derived source and schema with the source dataset.
+    source = source.map((row, i) => ({...row, ...typedDerived.source[i]}));
+    schema = [...schema, ...typedDerived.schema];
+  }
   for (const {type, operands} of operations.filter) {
     const [{value: column}] = operands;
     const values = operands.slice(1).map(({value}) => value);
     switch (type) {
+      // valid (matches the column type)
+      case "v": {
+        const [colType] = values;
+        const isValid = getTypeValidator(colType);
+        source = source.filter(d => isValid(d[column]));
+        break;
+      }
+      // not valid (doesn't match the column type)
+      case "nv": {
+        const [colType] = values;
+        const isValid = getTypeValidator(colType);
+        source = source.filter(d => !isValid(d[column]));
+        break;
+      }
       case "eq": {
         const [value] = values;
         if (value instanceof Date) {
@@ -503,7 +800,7 @@ export function __table(source, operations) {
     }
   }
   for (const {column, direction} of reverse(operations.sort)) {
-    const compare = direction === "desc" ? descending : ascending;
+    const compare = direction === "desc" ? descendingDefined : ascendingDefined;
     if (source === input) source = source.slice(); // defensive copy
     source.sort((a, b) => compare(a[column], b[column]));
   }
@@ -513,22 +810,148 @@ export function __table(source, operations) {
   if (from > 0 || to < Infinity) {
     source = source.slice(Math.max(0, from), Math.max(0, to));
   }
+  // Preserve the schema for all columns.
+  let fullSchema = schema.slice();
   if (operations.select.columns) {
     if (schema) {
       const schemaByName = new Map(schema.map((s) => [s.name, s]));
       schema = operations.select.columns.map((c) => schemaByName.get(c));
     }
-    if (columns) {
-      columns = operations.select.columns;
-    }
     source = source.map((d) =>
       Object.fromEntries(operations.select.columns.map((c) => [c, d[c]]))
     );
   }
-  if (primitive) source = source.map((d) => d.value);
+  if (operations.names) {
+    const overridesByName = new Map(operations.names.map((n) => [n.column, n]));
+    if (schema) {
+      schema = schema.map((s) => {
+        const override = overridesByName.get(s.name);
+        return ({...s, ...(override ? {name: override.name} : null)});
+      });
+    }
+    if (fullSchema) {
+      fullSchema = fullSchema.map((s) => {
+        const override = overridesByName.get(s.name);
+        return ({...s, ...(override ? {name: override.name} : null)});
+      });
+    }
+    source = applyNames(source, operations);
+  }
   if (source !== input) {
     if (schema) source.schema = schema;
-    if (columns) source.columns = columns;
   }
+  source.fullSchema = fullSchema;
+  source.errors = errors;
   return source;
+}
+
+export function coerceRow(object, types, schema) {
+  const coerced = {};
+  for (const col of schema) {
+    const type = types.get(col.name);
+    const value = object[col.name];
+    coerced[col.name] = type === "raw" ? value : coerceToType(value, type);
+  }
+  return coerced;
+}
+
+function createTypeCount() {
+  return {
+    boolean: 0,
+    integer: 0,
+    number: 0,
+    date: 0,
+    string: 0,
+    array: 0,
+    object: 0,
+    bigint: 0,
+    buffer: 0,
+    defined: 0
+  };
+}
+
+// Caution: the order below matters! 🌶️ The first one that passes the ≥90% test
+// should be the one that we chose, and therefore these types should be listed
+// from most specific to least specific.
+const types = [
+  "boolean",
+  "integer",
+  "number",
+  "date",
+  "bigint",
+  "array",
+  "object",
+  "buffer"
+  // Note: "other" and "string" are intentionally omitted; see below!
+];
+
+// We need to show *all* keys present in the array of Objects
+function getAllKeys(rows) {
+  const keys = new Set();
+  for (const row of rows) {
+    // avoid crash if row is null or undefined
+    if (row) {
+      // only enumerable properties
+      for (const key in row) {
+        // only own properties
+        if (Object.prototype.hasOwnProperty.call(row, key)) {
+          // unique properties, in the order they appear
+          keys.add(key);
+        }
+      }
+    }
+  }
+  return Array.from(keys);
+}
+
+export function inferSchema(source, columns = getAllKeys(source)) {
+  const schema = [];
+  const sampleSize = 100;
+  const sample = source.slice(0, sampleSize);
+  const typeCounts = {};
+  for (const col of columns) {
+    const colCount = typeCounts[col] = createTypeCount();
+    for (const d of sample) {
+      let value = d[col];
+      if (value == null) continue;
+      const type = typeof value;
+      if (type !== "string") {
+        ++colCount.defined;
+        if (Array.isArray(value)) ++colCount.array;
+        else if (value instanceof Date) ++colCount.date;
+        else if (value instanceof ArrayBuffer) ++colCount.buffer;
+        else if (type === "number") {
+          ++colCount.number;
+          if (Number.isInteger(value)) ++colCount.integer;
+        }
+        // bigint, boolean, or object
+        else if (type in colCount) ++colCount[type];
+      } else {
+        value = value.trim();
+        if (!value) continue;
+        ++colCount.defined;
+        ++colCount.string;
+        if (/^(true|false)$/i.test(value)) {
+          ++colCount.boolean;
+        } else if (value && !isNaN(value)) {
+          ++colCount.number;
+          if (Number.isInteger(+value)) ++colCount.integer;
+        } else if (DATE_TEST.test(value)) ++colCount.date;
+      }
+    }
+    // Chose the non-string, non-other type with the greatest count that is also
+    // ≥90%; or if no such type meets that criterion, fallback to string if
+    // ≥90%; and lastly fallback to other.
+    const minCount = Math.max(1, colCount.defined * 0.9);
+    const type =
+      greatest(types, (type) =>
+        colCount[type] >= minCount ? colCount[type] : NaN
+      ) ?? (colCount.string >= minCount ? "string" : "other");
+    schema.push({
+      name: col,
+      type: type,
+      inferred: type
+    });
+  }
+  return schema;
 }

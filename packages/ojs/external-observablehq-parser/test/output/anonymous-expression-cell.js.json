@@ -15,5 +15,6 @@
   "references": [],
   "fileAttachments": [],
   "databaseClients": [],
-  "secrets": []
+  "secrets": [],
+  "notificationClients": []
 }

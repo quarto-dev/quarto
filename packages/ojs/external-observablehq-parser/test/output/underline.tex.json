@@ -59,11 +59,13 @@
     ],
     "fileAttachments": [],
     "databaseClients": [],
-    "secrets": []
+    "secrets": [],
+    "notificationClients": []
   },
   "raw": true,
   "references": [],
   "fileAttachments": [],
   "databaseClients": [],
-  "secrets": []
+  "secrets": [],
+  "notificationClients": []
 }

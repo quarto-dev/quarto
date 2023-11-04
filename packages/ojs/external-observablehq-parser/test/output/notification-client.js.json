@@ -1,45 +1,45 @@
 {
   "type": "Cell",
   "start": 0,
-  "end": 27,
+  "end": 53,
   "id": null,
   "body": {
     "type": "BlockStatement",
     "start": 0,
-    "end": 26,
+    "end": 52,
     "body": [
       {
         "type": "VariableDeclaration",
-        "start": 4,
-        "end": 24,
+        "start": 6,
+        "end": 50,
         "declarations": [
           {
             "type": "VariableDeclarator",
-            "start": 8,
-            "end": 23,
+            "start": 10,
+            "end": 49,
             "id": {
               "type": "Identifier",
-              "start": 8,
-              "end": 9,
+              "start": 10,
+              "end": 11,
               "name": "a"
             },
             "init": {
               "type": "CallExpression",
-              "start": 12,
-              "end": 23,
+              "start": 14,
+              "end": 49,
               "callee": {
                 "type": "Identifier",
-                "start": 12,
-                "end": 18,
-                "name": "Secret"
+                "start": 14,
+                "end": 32,
+                "name": "NotificationClient"
               },
               "arguments": [
                 {
                   "type": "Literal",
-                  "start": 19,
-                  "end": 22,
-                  "value": "a",
-                  "raw": "\"a\""
+                  "start": 33,
+                  "end": 48,
+                  "value": "slack:@claire",
+                  "raw": "\"slack:@claire\""
                 }
               ],
               "optional": false
@@ -55,23 +55,23 @@
   "references": [
     {
       "type": "Identifier",
-      "start": 12,
-      "end": 18,
-      "name": "Secret"
+      "start": 14,
+      "end": 32,
+      "name": "NotificationClient"
     }
   ],
   "fileAttachments": [],
   "databaseClients": [],
-  "secrets": [
+  "secrets": [],
+  "notificationClients": [
     [
-      "a",
+      "slack:@claire",
       [
         {
-          "start": 19,
-          "end": 22
+          "start": 33,
+          "end": 48
         }
       ]
     ]
-  ],
-  "notificationClients": []
+  ]
 }

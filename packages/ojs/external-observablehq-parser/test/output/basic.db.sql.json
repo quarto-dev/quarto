@@ -106,7 +106,8 @@
         ]
       ]
     ],
-    "secrets": []
+    "secrets": [],
+    "notificationClients": []
   },
   "raw": false,
   "references": [
@@ -119,5 +120,6 @@
   ],
   "fileAttachments": [],
   "databaseClients": [],
-  "secrets": []
+  "secrets": [],
+  "notificationClients": []
 }

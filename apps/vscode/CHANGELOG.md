@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.106.3 (Unreleased)
+## 1.106.3 (Release on 2 November 2023)
 
 - Ignore trigger characters for YAML completions
 

@@ -43,7 +43,7 @@ import { pandocToProsemirror } from './pandoc_to_prosemirror';
 import { pandocFromProsemirror } from './pandoc_from_prosemirror';
 import { isParagraphNode } from '../api/paragraph';
 import { PandocFormat, PandocWriterOptions } from '../api/pandoc-types';
-import { lines, normalizeNewlines } from 'core';
+import { escapeRegExpCharacters, lines, normalizeNewlines } from 'core';
 
 export type PandocLineWrapping = 'none' | 'column' | 'sentence';
 
@@ -228,7 +228,8 @@ export class PandocConverter {
     if (options.references?.prefix) {
       const pandocVersion = pandocSemver(pandocCapabilities);
       if (pandocVersion && semver.gte(pandocVersion, "3.1.4")) {
-        markdown = markdown.replace(`{#${options.references.prefix}`, "{#");
+        const regex = new RegExp(escapeRegExpCharacters(`{#${options.references.prefix}`), "g");
+        markdown = markdown.replace(regex, "{#");
       }
     }
 

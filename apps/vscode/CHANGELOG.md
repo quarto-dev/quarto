@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.06.4 (Unreleased)
+
+- Visual Editor: Correctly remove chapter prefixes from section headings after round-trip
+
 ## 1.106.3 (Release on 2 November 2023)
 
 - Ignore trigger characters for YAML completions

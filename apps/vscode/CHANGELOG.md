@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.06.4 (Unreleased)
+## 1.106.4 (Release on 6 November 2023)
 
 - Visual Editor: Correctly remove chapter prefixes from section headings after round-trip
 

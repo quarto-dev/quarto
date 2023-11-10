@@ -33,6 +33,8 @@ import { createQuartoJsxShim } from "./quarto-jsx.js";
 
 import { autosizeOJSPlot } from "./ojs-code-transform.js";
 
+import { base64ToStr } from "./b64.js";
+
 import mime from "mime";
 
 //////////////////////////////////////////////////////////////////////////////
@@ -43,7 +45,7 @@ function displayOJSWarning(warning)
   for (
     const content of document.querySelectorAll('script[type="ojs-module-contents"]')
   ) {
-    for (const cellJson of JSON.parse(content.text).contents) {
+    for (const cellJson of JSON.parse(base64ToStr(content.text)).contents) {
       let cell = document.getElementById(cellJson.cellName) || document.getElementById(`${cellJson.cellName}-1`);
       if (!cell) {
         // give up
@@ -1053,7 +1055,7 @@ export function createRuntime() {
       for (const el of document.querySelectorAll(
         "script[type='ojs-module-contents']"
       )) {
-        for (const call of JSON.parse(el.text).contents) {
+        for (const call of JSON.parse(base64ToStr(el.text)).contents) {
           let source = window._ojs.isDashboard ? autosizeOJSPlot(call.source, call.cellName) : call.source;
           switch (call.methodName) {
             case "interpret":

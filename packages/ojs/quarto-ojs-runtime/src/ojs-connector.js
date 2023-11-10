@@ -17,6 +17,8 @@ import {
 import { parseModule } from "external-observablehq-parser";
 import { Library } from "external-observablehq-stdlib";
 
+import { base64ToStr } from "./b64.js";
+
 //////////////////////////////////////////////////////////////////////////////
 
 class EmptyInspector {
@@ -308,18 +310,19 @@ function importPathResolver(paths, localResolverMap) {
   };
 }
 
+
 function createOjsModuleFromHTMLSrc(text) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(text, "text/html");
   const staticDefns = [];
   for (const el of doc.querySelectorAll('script[type="ojs-define"]')) {
-    staticDefns.push(el.text);
+    staticDefns.push(base64ToStr(el.text));
   }
   const ojsSource = [];
   for (
     const content of doc.querySelectorAll('script[type="ojs-module-contents"]')
   ) {
-    for (const cell of JSON.parse(content.text).contents) {
+    for (const cell of JSON.parse(base64ToStr(content.text)).contents) {
       ojsSource.push(cell.source);
     }
   }

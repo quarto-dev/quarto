@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.107.0 (Unreleased)
+
+- Improved code intelligence for deno / typescript cells
+
 ## 1.106.4 (Release on 6 November 2023)
 
 - Visual Editor: Correctly remove chapter prefixes from section headings after round-trip

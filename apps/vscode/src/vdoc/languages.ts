@@ -20,6 +20,7 @@ export interface EmbeddedLanguage {
   ids: string[];
   extension: string;
   type: "content" | "tempfile";
+  localTempFile?: boolean;
   emptyLine?: string;
   comment?: string;
   trigger?: string[];
@@ -61,6 +62,13 @@ const kEmbededLanguages = [
     canFormat: true,
     canFormatSelection: () => false
   }),
+  defineLanguage("typescript", {
+    type: "tempfile",
+    localTempFile: true,
+    inject: ["// deno-lint-ignore-file"],
+    emptyLine: "//",
+    canFormat: true,
+  }),
   defineLanguage("sql"),
   defineLanguage("bash"),
   defineLanguage("sh"),
@@ -74,13 +82,13 @@ const kEmbededLanguages = [
   // these langauges work w/ text document content provider
   defineLanguage("html", { type: "content" }),
   defineLanguage("css", { type: "content" }),
-  defineLanguage("typescript", { type: "content"}),
   defineLanguage("javascript", { type: "content" }),
   defineLanguage("jsx", { type: "content" }),
 ];
 
 interface LanguageOptions {
   type?: "content" | "tempfile";
+  localTempFile?: boolean;
   emptyLine?: string;
   inject?: string[];
   canFormat?: boolean;
@@ -108,6 +116,7 @@ function defineLanguage(
     ids: language.ids,
     extension: language.ext || language.ids[0],
     type: options?.type || "tempfile",
+    localTempFile: options?.localTempFile,
     comment: language.comment,
     emptyLine: options?.emptyLine,
     trigger: language.trigger,

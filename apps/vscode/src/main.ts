@@ -34,6 +34,7 @@ import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
 import { configuredQuartoPath } from "./core/quarto";
+import { activateDenoConfig } from "./providers/deno-config";
 
 export async function activate(context: vscode.ExtensionContext) {
  
@@ -76,6 +77,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // lua types
     await activateLuaTypes(context, quartoContext);
+
+    // deno config
+    activateDenoConfig(context, engine);
 
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine);

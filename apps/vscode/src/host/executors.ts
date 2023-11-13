@@ -21,6 +21,7 @@ import { MarkdownEngine } from "../markdown/engine";
 import { documentFrontMatter } from "../markdown/document";
 import { isExecutableLanguageBlockOf } from "quarto-core";
 import { workspace } from "vscode";
+import { JupyterKernelspec } from "core";
 
 export interface CellExecutor {
   execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
@@ -158,6 +159,39 @@ function findExecutor(
   } else {
     return kCellExecutors.find((x) => x.language === language);
   }
+}
+
+export function isDenoDocument(
+  document: TextDocument,
+  engine: MarkdownEngine
+) {
+  // check for explicit declarations of various kinds
+  const frontMatter = documentFrontMatter(engine, document);
+  const jupyterOption = frontMatter["jupyter"];
+  const engineOption = frontMatter["engine"];
+
+  // jupyter options
+  if (jupyterOption) {
+    if (jupyterOption === "deno") {
+      return true;
+    } else if (typeof(jupyterOption) === "object") {
+      const kernelspec = (jupyterOption as Record<string,unknown>)["kernelspec"];
+      if (typeof(kernelspec) === "object") {
+        return (kernelspec as JupyterKernelspec).name === "deno";
+      }
+    } else {
+      return false;
+    }
+  }
+ 
+  // another explicit declaration of engine that isn't jupyter
+  if (engineOption && engineOption !== "jupyter") {
+    return false;
+  }
+
+  // if there are typescript language blocks then this is deno
+  const tokens = engine.parse(document);
+  return !!tokens.find(isExecutableLanguageBlockOf("typescript"));
 }
 
 export function isKnitrDocument(

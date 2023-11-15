@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.107.0 (Unreleased)
+## 1.107.0 (Release on 15 November 2023)
 
 - Improved code intelligence for deno / typescript cells
+- Fully register typst language configuration
 
 ## 1.106.4 (Release on 6 November 2023)
 

@@ -63,7 +63,7 @@ export function hooksExtensionHost() : ExtensionHost {
                   language = "r";
                   code = pythonWithReticulate(block);
                 }
-                await hooksApi()?.runtime.executeCode(language, code, true);
+                await hooksApi()?.runtime.executeCode(language, code, false);
               } 
             }
           };

@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.106.4",
+  "version": "1.107.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -103,6 +103,17 @@
           ".mmd"
         ],
         "configuration": "./languages/mermaid/mermaid.configuration.json"
+      },
+      {
+        "id": "typst",
+        "aliases": [
+          "Typst",
+          "mermaid"
+        ],
+        "extensions": [
+          ".typ"
+        ],
+        "configuration": "./languages/typst/typst.configuration.json"
       }
     ],
     "grammars": [

@@ -492,7 +492,8 @@
       {
         "command": "quarto.insertCodeCell",
         "key": "ctrl+shift+i",
-        "mac": "cmd+shift+i"
+        "mac": "cmd+shift+i",
+        "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
       },
       {
         "command": "quarto.runSelection",

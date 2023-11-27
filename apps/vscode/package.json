@@ -678,7 +678,7 @@
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
           "group": "q_zPreview"
         }
       ],

@@ -36,6 +36,7 @@
     "onLanguage:quarto",
     "onLanguage:mermaid",
     "onLanguage:dot",
+    "onLanguage:r",
     "onCommand:quarto.preview",
     "onCommand:quarto.previewFormat",
     "onCommand:quarto.renderDocument",

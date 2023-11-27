@@ -26,7 +26,7 @@ import { QuartoContext, projectDirForDocument } from "quarto-core";
 import { TextDocument } from "vscode";
 import { workspace } from "vscode";
 import { NotebookDocument } from "vscode";
-import { isJupyterPercentScript } from "core-node";
+import { isJupyterPercentScript, isKnitrSpinScript } from "core-node";
 
 export const kQuartoLanguageId = "quarto";
 export const kMarkdownLanguageId = "markdown";
@@ -122,7 +122,9 @@ export function quartoCanRenderMarkdown(document: vscode.TextDocument) {
 }
 
 export function quartoCanRenderScript(document: vscode.TextDocument) {
-  return isJupyterPercentScript(document.uri.fsPath, document.getText());
+  const text = document.getText();
+  return isJupyterPercentScript(document.uri.fsPath, text) ||
+         isKnitrSpinScript(document.uri.fsPath, text);
 }
 
 export function validatateQuartoCanRender(document: vscode.TextDocument) {

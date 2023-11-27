@@ -1,5 +1,5 @@
 /*
- * index.ts
+ * knitr.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -13,18 +13,17 @@
  *
  */
 
-
-export * from './jsonrpc';
-export * from './jsonrpc-lsp'
-export * from './appdirs';
-export * from './exec';
-export * from './git';
-export * from './mime';
-export * from './path';
-export * from './uuid';
-export * from './platform';
-export * from './hash';
-export * from './jupyter';
-export * from './knitr';
+import fs from "node:fs"
+import path from "node:path"
 
 
+export function isKnitrSpinScript(file: string, contents?: string) {
+  const ext = path.extname(file).toLowerCase();
+  if (ext == ".r") {
+    contents = contents || fs.readFileSync(file, { encoding: "utf-8" });
+    // Consider a .R script that can be spinned if it contains a YAML header inside a special `#'` comment
+    return /^\s*#'\s*---[\s\S]+?\s*#'\s*---/.test(contents);
+  } else {
+    return false;
+  }  
+}

@@ -14,7 +14,6 @@
  */
 
 import { editorLanguage } from "editor-core";
-import { Uri, workspace } from "vscode";
 
 export interface EmbeddedLanguage {
   ids: string[];
@@ -26,7 +25,7 @@ export interface EmbeddedLanguage {
   trigger?: string[];
   inject?: string[];
   canFormat?: boolean;
-  canFormatSelection?: (uri: Uri) => boolean;
+  canFormatDocument?: boolean;
 }
 
 export function embeddedLanguage(langauge: string) {
@@ -34,8 +33,8 @@ export function embeddedLanguage(langauge: string) {
   return kEmbededLanguages.find((lang) => lang.ids.includes(langauge));
 }
 
-export function langaugeCanFormatSelection(language: EmbeddedLanguage, uri: Uri) {
-  return !language.canFormatSelection || language.canFormatSelection(uri);
+export function languageCanFormatDocument(language: EmbeddedLanguage) {
+  return language.canFormatDocument !== false; 
 }
 
 const kEmbededLanguages = [
@@ -44,10 +43,7 @@ const kEmbededLanguages = [
     inject: ["# type: ignore", "# flake8: noqa"],
     emptyLine: "#",
     canFormat: true,
-    canFormatSelection: (uri: Uri) => {
-      const settings = workspace.getConfiguration("python", uri);
-      return settings.get<string>("formatting.provider") !== "black";
-    }
+    canFormatDocument: false,
   }),
   defineLanguage("r", {
     emptyLine: "#",
@@ -59,8 +55,7 @@ const kEmbededLanguages = [
   }),
   defineLanguage("matlab", {
     emptyLine: "%",
-    canFormat: true,
-    canFormatSelection: () => false
+    canFormat: true
   }),
   defineLanguage("typescript", {
     type: "tempfile",
@@ -92,7 +87,7 @@ interface LanguageOptions {
   emptyLine?: string;
   inject?: string[];
   canFormat?: boolean;
-  canFormatSelection?: (uri: Uri) => boolean;
+  canFormatDocument?: boolean;
 }
 
 function defineLanguage(
@@ -122,6 +117,6 @@ function defineLanguage(
     trigger: language.trigger,
     inject: options?.inject,
     canFormat: options?.canFormat,
-    canFormatSelection: options?.canFormatSelection
+    canFormatDocument: options?.canFormatDocument
   };
 }

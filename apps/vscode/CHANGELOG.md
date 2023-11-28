@@ -4,6 +4,7 @@
 
 - Correct when clause for Insert Code Cell
 - Preview and Render of Knitr spin scripts (.r)
+- Improved code formatting for Python cells
 
 ## 1.107.0 (Release on 15 November 2023)
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.108.0 (Unreleased)
+## 1.108.0 (Release on 28 November 2023)
 
 - Correct when clause for Insert Code Cell
 - Preview and Render of Knitr spin scripts (.r)

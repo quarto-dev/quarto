@@ -880,7 +880,10 @@ export function createRuntime() {
     }
 
     let name;
-    const currentPath = window.location.href.replace(/[^/]*$/, '');
+
+    // we need to remove the hash from the current path
+    // for this to work in revealjs
+    const currentPath = window.location.href.split("#")[0].replace(/[^/]*$/, '');
 
     if (n.startsWith("/")) {
       // docToRoot can be empty, in which case naive concatenation creates

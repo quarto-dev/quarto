@@ -31,7 +31,7 @@ import {
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
 import { lines } from "core";
-import { TokenCodeBlock, TokenMath, languageBlockAtPosition } from "quarto-core";
+import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtPosition } from "quarto-core";
 
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
@@ -48,7 +48,6 @@ import {
   withVirtualDocUri,
 } from "../vdoc/vdoc";
 
-import { codeFromBlock } from "./cell/executors";
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
@@ -207,7 +206,7 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
 }
 
 async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
-  const blockLines = lines(codeFromBlock(block));
+  const blockLines = lines(codeForExecutableLanguageBlock(block));
   blockLines.push("");
   const vdoc = virtualDocForCode(blockLines, language);
   const edits = await executeFormatDocumentProvider(

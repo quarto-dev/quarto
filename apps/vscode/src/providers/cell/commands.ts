@@ -41,7 +41,7 @@ import { QuartoVisualEditor, VisualEditorProvider } from "../editor/editor";
 import {
   blockHasExecutor,
   blockIsExecutable,
-  codeFromBlock,
+  codeWithoutOptionsFromBlock,
   executeInteractive,
   executeSelectionInteractive,
 } from "./executors";
@@ -166,7 +166,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
       const language = languageNameFromBlock(block);
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        const code = codeFromBlock(block);
+        const code = codeWithoutOptionsFromBlock(block);
         await executeInteractive(executor, [code], editor.document);
       }
     }
@@ -285,7 +285,7 @@ class RunCurrentCommand extends RunCommand implements Command {
       // if the selection is empty and this isn't a knitr document then it resolves to run cell
       if (editor.selection.isEmpty && !isKnitrDocument(editor.document, this.engine_) && !this.runSelection_) {
         
-        const code = codeFromBlock(block);
+        const code = codeWithoutOptionsFromBlock(block);
         await executeInteractive(executor, [code], editor.document);
 
       } else {
@@ -458,7 +458,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
         for (const block of blocks.filter(
           isExecutableLanguageBlockOf(language)
         )) {
-          code.push(codeFromBlock(block));
+          code.push(codeWithoutOptionsFromBlock(block));
         }
 
         // execute
@@ -522,7 +522,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
         }
         // include blocks of this language
         if (blockLanguage === language) {
-          blocks.push(codeFromBlock(blk));
+          blocks.push(codeWithoutOptionsFromBlock(blk));
         }
       }
     }
@@ -582,7 +582,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
         language = blockLanguage;
       }
       if (blockLanguage === language) {
-        blocks.push(codeFromBlock(block));
+        blocks.push(codeWithoutOptionsFromBlock(block));
       }
     }
     if (language && blocks.length > 0) {
@@ -681,7 +681,7 @@ async function runAdjacentBlock(host: ExtensionHost, editor: TextEditor, engine:
   const language = languageNameFromBlock(block);
   const executor = await host.cellExecutorForLanguage(language, editor.document, engine);
   if (executor) {
-    await executeInteractive(executor, [codeFromBlock(block)], editor.document);
+    await executeInteractive(executor, [codeWithoutOptionsFromBlock(block)], editor.document);
   }
 }
 

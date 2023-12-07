@@ -60,7 +60,7 @@ export function blockIsExecutable(host: ExtensionHost, token?: Token) : token is
 }
 
 // skip yaml options for execution
-export function codeFromBlock(token: TokenMath | TokenCodeBlock) {
+export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
   if (isExecutableLanguageBlock(token)) {
     const language = languageNameFromBlock(token);
     if (hasYamlHashOptions(language)) {

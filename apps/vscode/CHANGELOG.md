@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.109.0 (Release on 7 December 2023)
+
+- Apply formatting to correct range in presence of YAML options
+
 ## 1.108.0 (Release on 28 November 2023)
 
 - Correct when clause for Insert Code Cell

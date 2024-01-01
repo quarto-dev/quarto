@@ -6,7 +6,7 @@
 - Enable snippet suggestions in qmd mode
 - Visual Editor: Preserve shortcodes in link targets
 - Correct config value for disabling word based suggestions
-- Embedded syntax hightlighting for Stata
+- Embedded syntax hightlighting and cell execution for Stata
 
 ## 1.109.0 (Release on 7 December 2023)
 

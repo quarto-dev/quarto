@@ -16,8 +16,12 @@
 import { Fragment, Mark, Schema } from 'prosemirror-model';
 import { PluginKey, Plugin } from 'prosemirror-state';
 
+import { tryDecodeUri } from 'core';
+
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
 import { PandocToken, PandocOutput, PandocTokenType } from '../../api/pandoc';
+import { kShortcodePattern } from '../../api/shortcode';
+
 import {
   pandocAttrSpec,
   pandocAttrParseDom,
@@ -112,8 +116,16 @@ const extension = (context: ExtensionContext): Extension => {
               mark: 'link',
               getAttrs: (tok: PandocToken) => {
                 const target = tok.c[kLinkTarget];
+
+                // decode href if this is a shortcode
+                let href = target[kLinkTargetUrl] as string;
+                const decodedRef = tryDecodeUri(href)
+                if (decodedRef.match(kShortcodePattern)) {
+                  href = decodedRef;
+                }
+
                 return {
-                  href: target[kLinkTargetUrl],
+                  href,
                   title: target[kLinkTargetTitle] || null,
                   ...(linkAttr ? pandocAttrReadAST(tok, kLinkAttr) : {}),
                 };

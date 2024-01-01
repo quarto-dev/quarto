@@ -24,6 +24,14 @@ export function isMac() {
   return process.platform === "darwin";
 }
 
+export function isMacArm() {
+  return isMac() && process.arch === "arm64";
+}
+
+export function isMacX86() {
+  return isMac() && process.arch === "x64";
+}
+
 export function isLinux() {
   return process.platform === "linux";
 }

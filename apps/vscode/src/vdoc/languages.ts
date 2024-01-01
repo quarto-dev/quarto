@@ -57,6 +57,9 @@ const kEmbededLanguages = [
     emptyLine: "%",
     canFormat: true
   }),
+  defineLanguage("stata", {
+    emptyLine: "*",
+  }),
   defineLanguage("typescript", {
     type: "tempfile",
     localTempFile: true,

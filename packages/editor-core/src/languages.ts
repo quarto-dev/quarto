@@ -46,6 +46,12 @@ const kEditorLanguages = [
     trigger: ["."]
   },
   {
+    ids: ["stata"],
+    ext: "do",
+    comment: "*",
+    trigger: ["."]
+  },
+  {
     ids: ["sql"],
     comment: "--",
     trigger: ["."]

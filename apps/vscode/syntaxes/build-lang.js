@@ -68,6 +68,12 @@ const languages = [
     source: "source.matlab",
   },
   {
+    name: "stata",
+    language: "stata",
+    identifiers: ["stata"],
+    source: "source.stata",
+  },
+  {
     name: "dot",
     language: "dot",
     identifiers: ["dot"],

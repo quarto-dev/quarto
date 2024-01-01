@@ -55,8 +55,8 @@ interface VSCodeCellExecutor extends CellExecutor {
   executeSelection?: () => Promise<void>;
 }
 
-const pythonCellExecutor: VSCodeCellExecutor = {
-  language: "python",
+const jupyterCellExecutor = (language: string) : VSCodeCellExecutor => ({
+  language,
   requiredExtension: ["ms-toolsai.jupyter"],
   requiredExtensionName: "Jupyter",
   requiredVersion: "2021.8.0",
@@ -75,7 +75,11 @@ const pythonCellExecutor: VSCodeCellExecutor = {
       await commands.executeCommand("jupyter.execSelectionInteractive", code);
     }
   },
-};
+})
+
+const pythonCellExecutor = jupyterCellExecutor("python");
+
+const stataCellExecutor = jupyterCellExecutor("stata");
 
 const rCellExecutor: VSCodeCellExecutor = {
   language: "r",
@@ -137,6 +141,7 @@ const shellCellExecutor = { ...bashCellExecutor, language: "shell" };
 
 const kCellExecutors = [
   pythonCellExecutor,
+  stataCellExecutor,
   rCellExecutor,
   juliaCellExecutor,
   bashCellExecutor,

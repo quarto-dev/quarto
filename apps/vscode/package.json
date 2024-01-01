@@ -877,25 +877,25 @@
     },
     "configurationDefaults": {
       "[r]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[python]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[julia]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[latex]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[dot]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[mermaid]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[lua]": {
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[yaml]": {
         "editor.quickSuggestions": {
@@ -904,7 +904,7 @@
           "strings": "on"
         },
         "editor.quickSuggestionsDelay": 250,
-        "editor.wordBasedSuggestions": false
+        "editor.wordBasedSuggestions": "off"
       },
       "[quarto]": {
         "editor.wordWrap": "on",

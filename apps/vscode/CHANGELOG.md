@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.110.0 (Unreleased)
+
+- MacOS: automatically resolve arch-specific pandoc path
+- Enable snippet suggestions in qmd mode
+
 ## 1.109.0 (Release on 7 December 2023)
 
 - Apply formatting to correct range in presence of YAML options

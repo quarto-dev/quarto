@@ -914,8 +914,8 @@
           "strings": "on"
         },
         "editor.quickSuggestionsDelay": 250,
-        "editor.snippetSuggestions": "none",
-        "editor.wordBasedSuggestions": false,
+        "editor.snippetSuggestions": "bottom",
+        "editor.wordBasedSuggestions": "off",
         "editor.suggestOnTriggerCharacters": true,
         "editor.unicodeHighlight.ambiguousCharacters": false,
         "editor.unicodeHighlight.invisibleCharacters": false

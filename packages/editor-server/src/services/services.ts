@@ -20,10 +20,10 @@ import { mathServer, mathServerMethods } from "./math";
 import { dictionaryServer, dictionaryServerMethods, DictionaryServerOptions } from './dictionary';
 import { JsonRpcServerMethod } from 'core';
 import { prefsServer, prefsServerMethods } from "./prefs";
-import { EditorServerDocuments } from "../server/server";
 import { sourceServer, sourceServerMethods } from "./source";
 import { PandocServerOptions } from "../core/pandoc";
 import { codeViewServerMethods } from "./codeview";
+import { EditorServerDocuments } from "../core";
 
 export {
   mathServer, 

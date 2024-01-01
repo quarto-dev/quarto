@@ -4,6 +4,7 @@
 
 - MacOS: automatically resolve arch-specific pandoc path
 - Enable snippet suggestions in qmd mode
+- Visual Editor: Preserve shortcodes in link targets
 
 ## 1.109.0 (Release on 7 December 2023)
 

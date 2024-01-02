@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.110.0 (Release on 1 January 2023)
+## 1.110.1 (Release on 2 January 2024)
+
+- Target architecture specific pandoc on linux and mac
+
+## 1.110.0 (Release on 1 January 2024)
 
 - MacOS: automatically resolve arch-specific pandoc path
 - Enable snippet suggestions in qmd mode

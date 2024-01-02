@@ -19,7 +19,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { ExecFileSyncOptions } from "node:child_process";
 import * as semver from "semver";
-import { execProgram, isMac, isMacArm } from "core-node";
+import { execProgram, isArm_64 } from "core-node";
 
 export interface QuartoContext {
   available: boolean;
@@ -66,12 +66,12 @@ export function initQuartoContext(
     const windows = os.platform() == "win32";
     const useCmd = windows && semver.lte(quartoInstall.version, "1.1.162");
     let pandocPath = path.join(quartoInstall!.binPath, "tools", "pandoc");
-    // more recent versions of quarto on mac uses architecture-specific tools dir,
+    // more recent versions of quarto use architecture-specific tools dir,
     // if the pandocPath is not found then look in the requisite dir for this arch
-    if (!fs.existsSync(pandocPath) && isMac()) {
+    if (!windows && !fs.existsSync(pandocPath)) {
       pandocPath = path.join(
         path.dirname(pandocPath), 
-        isMacArm() ? "aarch64" : "x86_64", 
+        isArm_64() ? "aarch64" : "x86_64", 
         path.basename(pandocPath)
       );
     }

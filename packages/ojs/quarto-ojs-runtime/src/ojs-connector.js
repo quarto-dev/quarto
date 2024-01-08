@@ -316,7 +316,7 @@ function createOjsModuleFromHTMLSrc(text) {
   const doc = parser.parseFromString(text, "text/html");
   const staticDefns = [];
   for (const el of doc.querySelectorAll('script[type="ojs-define"]')) {
-    staticDefns.push(base64ToStr(el.text));
+    staticDefns.push(el.text);
   }
   const ojsSource = [];
   for (

@@ -92,9 +92,9 @@
     "description": "Insert ordered list"
   },
   "Insert horizontal rule": {
-    "prefix": "horizontal rule",
+    "prefix": ["horizontal rule", "horizontal line"]
     "body": "----------\n",
-    "description": "Insert horizontal rule"
+    "description": "Insert horizontal line"
   },
   "Insert link": {
     "prefix": "link",

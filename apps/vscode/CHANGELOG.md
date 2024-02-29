@@ -2,7 +2,7 @@
 
 ## 1.111.0 (Release on 29 February 2024)
 
-- Use Prevew icon on editor toolbar (text on toolbar no longer supported)
+- Use Preview icon on editor toolbar (text on toolbar no longer supported)
 
 ## 1.110.1 (Release on 2 January 2024)
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.111.0 (Release on 29 February 2024)
+
+- Use Prevew icon on editor toolbar (text on toolbar no longer supported)
+
 ## 1.110.1 (Release on 2 January 2024)
 
 - Target architecture specific pandoc on linux and mac

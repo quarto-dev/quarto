@@ -34,8 +34,6 @@
   "browser": "./browser.js",
   "activationEvents": [
     "onLanguage:r",
-    "onCommand.quarto.editInSourceMode",
-    "onCommand.quarto.editInVisualMode",
     "workspaceContains:**/*.{qmd,rmd}",
     "workspaceContains:**/_quarto.{yml,yaml}",
     "workspaceContains:**/_extension.{yml,yaml}",

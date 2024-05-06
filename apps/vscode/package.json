@@ -33,32 +33,12 @@
   "main": "./out/main.js",
   "browser": "./browser.js",
   "activationEvents": [
-    "onLanguage:quarto",
-    "onLanguage:mermaid",
-    "onLanguage:dot",
     "onLanguage:r",
-    "onCommand:quarto.preview",
-    "onCommand:quarto.previewFormat",
-    "onCommand:quarto.renderDocument",
-    "onCommand:quarto.renderProject",
-    "onCommand.quarto.editInSourceMode",
-    "onCommand.quarto.editInVisualMode",
-    "onCommand:quarto.newDocument",
-    "onCommand:quarto.fileNewDocument",
-    "onCommand:quarto.newPresentation",
-    "onCommand:quarto.newNotebook",
-    "onCommand:quarto.showAssist",
-    "onCommand:quarto.verifyInstallation",
-    "onCommand:quarto.walkthrough.newDocument",
-    "onCommand:quarto.createProject",
-    "onCommand:quarto.fileCreateProject",
     "workspaceContains:**/*.{qmd,rmd}",
     "workspaceContains:**/_quarto.{yml,yaml}",
     "workspaceContains:**/_extension.{yml,yaml}",
     "onWebviewPanel:quarto.previewView",
-    "onWebviewPanel:quarto.diagramView",
-    "onCustomEditor:quarto.visualEditor",
-    "onView:quarto-assist"
+    "onWebviewPanel:quarto.diagramView"
   ],
   "capabilities": {
     "virtualWorkspaces": true

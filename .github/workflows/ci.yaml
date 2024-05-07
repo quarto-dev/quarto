@@ -35,5 +35,5 @@ jobs:
       - name: Upload extension vsix file as a workflow artifact
         uses: actions/upload-artifact@v3
         with:
-          name: quarto-vscode-${{ env.GITHUB_SHA }}
+          name: quarto-vscode-${{ github.sha }}
           path: ${{ steps.package_extension.outputs.vsixPath }}

@@ -74,6 +74,7 @@ import {
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
   isQuartoShinyKnitrDoc,
+  isRPackage,
   renderOnSave,
 } from "./preview-util";
 
@@ -448,6 +449,9 @@ class PreviewManager {
     // terminal options
     const options = terminalOptions(kPreviewWindowTitle, target, this.previewEnv_);
 
+    // is this workspace an R package?
+    const isRPackageWorkspace = await isRPackage();
+
     // is this is a shiny doc?
     const isShiny = isQuartoShinyDoc(this.engine_, doc);
     const useServeCommand = this.usesQuartoServeCommand(doc);
@@ -475,6 +479,11 @@ class PreviewManager {
 
       cmd.push("--no-browser");
       cmd.push("--no-watch-inputs");
+    }
+
+    // use temp output-dir for R package
+    if (isRPackageWorkspace && this.previewRPackageDirConfig()) {
+      cmd.push("--output-dir", tmp.dirSync().name);
     }
 
     // send terminal command
@@ -709,6 +718,10 @@ class PreviewManager {
 
   private previewRevealConfig(): boolean {
     return this.quartoConfig().get("render.previewReveal", true);
+  }
+
+  private previewRPackageDirConfig(): boolean {
+    return this.quartoConfig().get("render.rPackageOutputDirectory", true);
   }
 
   private quartoConfig() {

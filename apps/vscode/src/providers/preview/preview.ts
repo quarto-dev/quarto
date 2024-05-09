@@ -484,6 +484,7 @@ class PreviewManager {
     // use temp output-dir for R package
     if (isRPackageWorkspace && this.previewRPackageDirConfig()) {
       cmd.push("--output-dir", tmp.dirSync().name);
+      cmd.push("--embed-resources");
     }
 
     // send terminal command

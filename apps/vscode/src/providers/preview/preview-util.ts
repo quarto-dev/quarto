@@ -59,8 +59,11 @@ export function isQuartoShinyKnitrDoc(
   
 }
 
-export async function isRPackage() {
+export async function isRPackage(): Promise<boolean> {
   const descriptionLines = await parseRPackageDescription();
+  if (!descriptionLines) {
+    return false;
+  }
   const packageLines = descriptionLines.filter(line => line.startsWith('Package:'));
   const typeLines = descriptionLines.filter(line => line.startsWith('Type:'));
   const typeIsPackage = (typeLines.length > 0

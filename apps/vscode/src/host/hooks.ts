@@ -13,7 +13,7 @@
  *
  */
 
-import { Uri, WebviewPanelOptions, WebviewOptions, ViewColumn } from 'vscode';
+import { Uri, WebviewPanelOptions, WebviewOptions, ViewColumn, commands } from 'vscode';
 
 import * as hooks from 'positron';
 
@@ -65,7 +65,10 @@ export function hooksExtensionHost() : ExtensionHost {
                 }
                 await hooksApi()?.runtime.executeCode(language, code, false);
               } 
-            }
+            },
+            executeSelection: async () : Promise<void> => {
+              await commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});
+            } 
           };
 
         // delegate for other languages

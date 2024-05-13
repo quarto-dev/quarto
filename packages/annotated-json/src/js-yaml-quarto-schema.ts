@@ -13,7 +13,7 @@ import {
   int,
   Schema,
   Type,
-} from "../external/js-yaml";
+} from "./external/js-yaml";
 
 // Standard YAML's JSON schema + an expr tag handler ()
 // http://www.yaml.org/spec/1.2/spec.html#id2803231

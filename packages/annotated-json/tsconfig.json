@@ -1,8 +1,9 @@
 {
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "dist"],
   "extends": "tsconfig/base.json",
   "include": ["src"],
   "compilerOptions": {
-    "allowJs": true
-  }
+    "allowJs": true,
+    "outDir": "./dist",
+  },
 }

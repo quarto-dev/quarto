@@ -7,10 +7,14 @@
   "types": "./src/index.ts",
   "dependencies": {
     "tsconfig": "*",
+    "build": "*",
     "typescript": "^5.4.2",
     "mapped-string": "*",
     "tidyverse-errors": "*",
     "annotated-json": "*"
+  },
+  "scripts": {
+    "build": "tsx build.ts"
   },
   "devDependencies": {  }
 }

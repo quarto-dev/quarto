@@ -12,10 +12,11 @@ import {
   mappedIndexToLineCol,
   mappedLines,
   MappedString,
-  createSourceContext
+  createSourceContext,
+  EitherString
 } from "mapped-string";
 
-import { load as jsYamlParse } from "../external/js-yaml.js";
+import { load as jsYamlParse } from "./external/js-yaml.js";
 
 import { QuartoJSONSchema } from "./js-yaml-quarto-schema";
 import { tidyverseInfo } from "tidyverse-errors";
@@ -65,8 +66,8 @@ function jsYamlParseLenient(yml: string): unknown {
   }
 }
 
-export function readAnnotatedYamlFromString(yml: string) {
-  return readAnnotatedYamlFromMappedString(asMappedString(yml))!;
+export function parse(yml: EitherString): AnnotatedParse {
+  return readAnnotatedYamlFromMappedString(asMappedString(yml));
 }
 
 export function readAnnotatedYamlFromMappedString(
@@ -178,11 +179,11 @@ export function readAnnotatedYamlFromMappedString(
 export function buildJsYamlAnnotation(mappedYaml: MappedString) {
   const yml = mappedYaml.value;
 
-  // deno-lint-ignore no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stack: any[] = [];
   const results: AnnotatedParse[] = [];
 
-  // deno-lint-ignore no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function listener(what: string, state: any) {
     const { result, position, kind } = state;
     if (what === "close") {
@@ -196,7 +197,7 @@ export function buildJsYamlAnnotation(mappedYaml: MappedString) {
           return;
         }
       }
-      // deno-lint-ignore no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const components: any[] = [];
       while (results.length > 0) {
         const last = results[results.length - 1];
@@ -317,7 +318,7 @@ export function buildTreeSitterAnnotation(
 
   const annotate = (
     node: TreeSitterNode,
-    // deno-lint-ignore no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     result: any,
     components: AnnotatedParse[],
   ): AnnotatedParse => {
@@ -348,7 +349,7 @@ export function buildTreeSitterAnnotation(
 
   const buildPair = (node: TreeSitterNode) => {
     let key, value;
-    // deno-lint-ignore no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const children = node.children.filter((n: any) => n.type !== "comment");
 
     if (children.length === 3) {
@@ -409,7 +410,7 @@ export function buildTreeSitterAnnotation(
       }
     },
     "flow_sequence": (node) => {
-      // deno-lint-ignore no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any[] = [], components = [];
       for (let i = 0; i < node.childCount; ++i) {
         const child = node.child(i);
@@ -423,7 +424,7 @@ export function buildTreeSitterAnnotation(
       return annotate(node, result, components);
     },
     "block_mapping": (node) => {
-      // deno-lint-ignore no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: Record<string, any> = {}, components: AnnotatedParse[] = [];
       for (let i = 0; i < node.childCount; ++i) {
         const child = node.child(i);
@@ -452,7 +453,7 @@ export function buildTreeSitterAnnotation(
     },
     "flow_pair": buildPair,
     "flow_mapping": (node) => {
-      // deno-lint-ignore no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: Record<string, any> = {}, components: AnnotatedParse[] = [];
       // skip flow_nodes at the boundary
       for (let i = 0; i < node.childCount; ++i) {

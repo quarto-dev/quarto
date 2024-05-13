@@ -23,3 +23,4 @@
  */
 
 export * from "./types";
+export * from "./annotated-yaml";

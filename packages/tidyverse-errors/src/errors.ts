@@ -54,3 +54,28 @@ export function tidyverseError(msg: string) {
     return `${colors.red("x")} ${msg}`;
   }
 }
+
+export interface ErrorLocation {
+  start: {
+    line: number;
+    column: number;
+  };
+  end: {
+    line: number;
+    column: number;
+  };
+}
+
+export interface TidyverseError {
+  heading: string;
+  error: string[];
+  info: Record<string, string>; // use tag for infos to only display one error of each tag
+  fileName?: string;
+  location?: ErrorLocation;
+  sourceContext?: string;
+}
+
+export function quotedStringColor(msg: string) {
+  return colors.blue(msg);
+}
+

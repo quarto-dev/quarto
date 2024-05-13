@@ -7,7 +7,7 @@
 import { mappedIndexToLineCol } from "./mapped-text";
 import { lines } from "./text";
 import { MappedString, Range } from "./types";
-import * as colors from "ansi-colors";
+import { quotedStringColor } from "tidyverse-errors";
 
 export class InternalError extends Error {
   constructor(
@@ -63,10 +63,6 @@ export function asErrorEx(e: unknown) {
   } else {
     return new ErrorEx("Error", String(e), false, true);
   }
-}
-
-export function quotedStringColor(msg: string) {
-  return colors.blue(msg);
 }
 
 export function formatLineRange(

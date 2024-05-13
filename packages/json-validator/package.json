@@ -1,5 +1,5 @@
 {
-  "name": "mapped-string",
+  "name": "json-validator",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
@@ -8,8 +8,9 @@
   "dependencies": {
     "tsconfig": "*",
     "typescript": "^5.4.2",
-    "ansi-colors": "^4.1.3",
-    "tidyverse-errors": "*"
+    "mapped-string": "*",
+    "tidyverse-errors": "*",
+    "annotated-json": "*"
   },
   "devDependencies": {  }
 }

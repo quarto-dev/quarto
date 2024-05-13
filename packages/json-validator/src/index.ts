@@ -22,8 +22,4 @@
  * SOFTWARE.
  */
 
-export * from "./ranged-text";
-export * from "./mapped-text";
-export * from "./types";
-export * from "./error";
-export * from "./text";
+export * from "./validator";

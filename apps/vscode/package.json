@@ -1073,6 +1073,13 @@
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
         },
+        "quarto.render.rPackageOutputDirectory": {
+          "order": 15,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Render output files in a temporary directory, when in an R package."
+        },
         "quarto.visualEditor.fontSize": {
           "order": 31,
           "scope": "resource",

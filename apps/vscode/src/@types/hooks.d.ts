@@ -8,6 +8,7 @@ declare module 'positron' {
 	export interface PositronApi {
 		version: string;
 		runtime: PositronRuntime;
+		languages: PositronLanguages;
 		window: PositronWindow;
 	}
 
@@ -18,6 +19,26 @@ declare module 'positron' {
 			focus: boolean
 		): Thenable<boolean>;
 	}
+
+	export interface PositronLanguages {
+		registerStatementRangeProvider(
+			selector: vscode.DocumentSelector,
+			provider: StatementRangeProvider
+		): vscode.Disposable;
+	}
+
+	export interface StatementRangeProvider {
+		provideStatementRange(
+			document: vscode.TextDocument,
+			position: vscode.Position,
+			token: vscode.CancellationToken
+		): vscode.ProviderResult<StatementRange>;
+	}
+
+		export interface StatementRange {
+			readonly range: vscode.Range;
+			readonly code?: string;
+		}
 
 	export interface PositronWindow {
 		createPreviewPanel(

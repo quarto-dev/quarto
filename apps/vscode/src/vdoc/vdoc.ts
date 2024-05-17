@@ -116,7 +116,8 @@ export type VirtualDocAction =
   "hover"      | 
   "signature"  | 
   "definition" | 
-  "format";
+  "format"     |
+  "statementRange";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
 

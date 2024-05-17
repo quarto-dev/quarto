@@ -75,7 +75,7 @@ const jupyterCellExecutor = (language: string) : VSCodeCellExecutor => ({
       await commands.executeCommand("jupyter.execSelectionInteractive", code);
     }
   },
-})
+});
 
 const pythonCellExecutor = jupyterCellExecutor("python");
 

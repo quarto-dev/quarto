@@ -34,6 +34,19 @@ export interface HostWebviewPanel extends vscode.Disposable {
   readonly onDidDispose: vscode.Event<void>;
 }
 
+export interface HostStatementRangeProvider {
+  provideStatementRange(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<HostStatementRange>;
+}
+
+export interface HostStatementRange {
+  readonly range: vscode.Range;
+  readonly code?: string;
+}
+
 export interface ExtensionHost {
 
   // code execution
@@ -44,6 +57,11 @@ export interface ExtensionHost {
     engine: MarkdownEngine,
     silent?: boolean
   ) : Promise<CellExecutor | undefined>;
+
+  // statement range provider
+  registerStatementRangeProvider(
+    engine: MarkdownEngine,
+  ): vscode.Disposable;
 
   // preview
   createPreviewPanel(
@@ -73,14 +91,20 @@ function defaultExtensionHost() : ExtensionHost {
   return {
     executableLanguages: (visualMode: boolean, document: TextDocument, engine: MarkdownEngine) => {
       
-       const languages = executableLanguages();
-       const knitr = isKnitrDocument(document, engine);
+      const languages = executableLanguages();
+      const knitr = isKnitrDocument(document, engine);
 
-       // jupyter python (as distinct from knitr python) doesn't work in visual mode b/c
-       // jupyter.execSelectionInteractive  wants a text editor to be active
-       return languages.filter(language => knitr || !visualMode || (language !== "python"));
+      // jupyter python (as distinct from knitr python) doesn't work in visual mode b/c
+      // jupyter.execSelectionInteractive  wants a text editor to be active
+      return languages.filter(language => knitr || !visualMode || (language !== "python"));
     },
     cellExecutorForLanguage,
+    // in the default extension host, this is a noop:
+    registerStatementRangeProvider: (
+      engine: MarkdownEngine,
+		): vscode.Disposable => {
+      return new vscode.Disposable(() => {});
+    },
     createPreviewPanel,
   };
 }

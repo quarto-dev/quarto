@@ -13,14 +13,13 @@
  *
  */
 
-import { Uri, WebviewPanelOptions, WebviewOptions, ViewColumn, commands } from 'vscode';
-
+import * as vscode from 'vscode';
 import * as hooks from 'positron';
 
-import { ExtensionHost, HostWebviewPanel } from '.';
+import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
-import { TextDocument } from 'vscode';
 import { MarkdownEngine } from '../markdown/engine';
+import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
 
 declare global {
 	function acquirePositronApi() : hooks.PositronApi;
@@ -49,14 +48,14 @@ export function hooksExtensionHost() : ExtensionHost {
     // w/o runtimes so we support all languages)
     executableLanguages,
 
-    cellExecutorForLanguage: async (language: string, document: TextDocument, engine: MarkdownEngine, silent?: boolean) 
+    cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean) 
       : Promise<CellExecutor | undefined> => {
       switch(language) {
         // use hooks for known runtimes
         case "python":
         case "r":
           return {
-            execute: async (blocks: string[], _editorUri?: Uri) : Promise<void> => {
+            execute: async (blocks: string[], _editorUri?: vscode.Uri) : Promise<void> => {
               for (const block of blocks) {
                 let code = block;
                 if (language === "python" && isKnitrDocument(document, engine)) {
@@ -67,7 +66,7 @@ export function hooksExtensionHost() : ExtensionHost {
               } 
             },
             executeSelection: async () : Promise<void> => {
-              await commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});
+              await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});
             } 
           };
 
@@ -77,11 +76,20 @@ export function hooksExtensionHost() : ExtensionHost {
       }
     },
 
+    registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
+      const hooks = hooksApi();
+      if (hooks) {
+        return hooks.languages.registerStatementRangeProvider('quarto', 
+          new EmbeddedStatementRangeProvider(engine));
+      }
+      return new vscode.Disposable(() => {});
+    },
+
     createPreviewPanel: (
       viewType: string, 
       title: string,
       preserveFocus?: boolean, 
-      options?: WebviewPanelOptions & WebviewOptions
+      options?: vscode.WebviewPanelOptions & vscode.WebviewOptions
     ): HostWebviewPanel => {
 
       // create preview panel
@@ -109,10 +117,53 @@ class HookWebviewPanel implements HostWebviewPanel {
 
   get webview() { return this.panel_.webview; };
   get visible() { return this.panel_.visible; };
-  reveal(_viewColumn?: ViewColumn, preserveFocus?: boolean) {
+  reveal(_viewColumn?: vscode.ViewColumn, preserveFocus?: boolean) {
     this.panel_.reveal(preserveFocus);
   }
   onDidChangeViewState = this.panel_.onDidChangeViewState;
   onDidDispose = this.panel_.onDidDispose;
   dispose() { this.panel_.dispose(); };
 }
+
+class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
+	private readonly _engine: MarkdownEngine;
+
+	constructor(
+		readonly engine: MarkdownEngine,
+	) {
+		this._engine = engine;
+	}
+
+  async provideStatementRange(
+		document: vscode.TextDocument,
+		position: vscode.Position,
+		token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
+      const vdoc = await virtualDoc(document, position, this._engine);
+      if (vdoc) {
+        const vdocUri = await virtualDocUri(vdoc, document.uri, "statementRange");
+        try {
+          return getStatementRange(vdocUri.uri, adjustedPosition(vdoc.language, position));
+        } catch (error) {
+          return undefined;
+        }finally {
+          if (vdocUri.cleanup) {
+            await vdocUri.cleanup();
+          }
+        }
+      } else {
+        return undefined;
+      }
+    };
+}
+
+async function getStatementRange(
+  uri: vscode.Uri,
+  position: vscode.Position,
+) {
+  return await vscode.commands.executeCommand<hooks.StatementRange>(
+    "vscode.executeStatementRangeProvider",
+    uri,
+    position
+  );
+}
+

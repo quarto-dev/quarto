@@ -35,10 +35,10 @@ declare module 'positron' {
 		): vscode.ProviderResult<StatementRange>;
 	}
 
-		export interface StatementRange {
-			readonly range: vscode.Range;
-			readonly code?: string;
-		}
+	export interface StatementRange {
+		readonly range: vscode.Range;
+		readonly code?: string;
+	}
 
 	export interface PositronWindow {
 		createPreviewPanel(

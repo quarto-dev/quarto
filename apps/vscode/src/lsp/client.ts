@@ -63,6 +63,7 @@ import {
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
+import { extensionHost } from "../host";
 
 let client: LanguageClient;
 
@@ -108,7 +109,8 @@ export async function activateLsp(
   if (config.get("cells.signatureHelp.enabled", true)) {
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
-
+  extensionHost().registerStatementRangeProvider(engine);
+    
   // create client options
   const initializationOptions : LspInitializationOptions = {
     quartoBinPath: quartoContext.binPath

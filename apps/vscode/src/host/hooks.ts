@@ -145,7 +145,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
           return getStatementRange(vdocUri.uri, adjustedPosition(vdoc.language, position));
         } catch (error) {
           return undefined;
-        }finally {
+        } finally {
           if (vdocUri.cleanup) {
             await vdocUri.cleanup();
           }

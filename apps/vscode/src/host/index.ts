@@ -100,9 +100,7 @@ function defaultExtensionHost() : ExtensionHost {
     },
     cellExecutorForLanguage,
     // in the default extension host, this is a noop:
-    registerStatementRangeProvider: (
-      engine: MarkdownEngine,
-		): vscode.Disposable => {
+    registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
       return new vscode.Disposable(() => {});
     },
     createPreviewPanel,

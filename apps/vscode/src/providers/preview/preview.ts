@@ -377,8 +377,8 @@ class PreviewManager {
   }
 
   private usesQuartoServeCommand(doc?: TextDocument) {
-    return isQuartoShinyKnitrDoc(this.engine_, doc) ||    
-           (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.414"));
+    return isQuartoShinyKnitrDoc(this.engine_, doc) ||
+      (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.414"));
   }
 
   private previewRenderRequest(doc: TextDocument, format: string | null) {
@@ -414,7 +414,7 @@ class PreviewManager {
   }
 
   private async killPreview() {
-    await killTerminal(kPreviewWindowTitle, async () =>  await this.previewTerminateRequest());
+    await killTerminal(kPreviewWindowTitle, async () => await this.previewTerminateRequest());
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;
   }
@@ -466,7 +466,7 @@ class PreviewManager {
 
     // create base terminal command
     const cmd = terminalCommand(useServeCommand ? "serve" : "preview", this.quartoContext_, target);
-    
+
     // extra args for normal docs
     if (!useServeCommand) {
       if (!doc) {
@@ -483,8 +483,17 @@ class PreviewManager {
 
     // use temp output-dir for R package
     if (isRPackageWorkspace && this.previewRPackageDirConfig()) {
-      cmd.push("--output-dir", tmp.dirSync().name);
-      cmd.push("--embed-resources");
+      const rPkgRequiredVersion = "1.5.39";
+      if (semver.gte(this.quartoContext_.version, rPkgRequiredVersion)) {
+        cmd.push("--output-dir", tmp.dirSync().name);
+        cmd.push("--embed-resources");
+      } else {
+        window.showWarningMessage(
+          `Rendering requires Quarto version ${rPkgRequiredVersion} or greater`,
+          { modal: true }
+        );
+        return;
+      }
     }
 
     // send terminal command
@@ -698,7 +707,7 @@ class PreviewManager {
   }
 
   private zoomLevel(uri?: Uri) {
-    if (uri === undefined ||isHtmlContent(uri.toString())) {
+    if (uri === undefined || isHtmlContent(uri.toString())) {
       return this.webviewManager_.getZoomLevelConfig();
     } else {
       return undefined;

@@ -87,7 +87,7 @@ export function typeMapping(cslType: string): Type {
 }
 
 export function bibtextTypeToCSLType(bibtexType: string) {
-  switch (bibtexType) {
+  switch (bibtexType.toLowerCase()) {
     case BibTextTypes.article.type:
       return cslTypes.articleJournal;
 

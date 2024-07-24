@@ -67,6 +67,9 @@ export interface CSL {
   // Pages numbers of an article within its journal
   page?: string;
 
+  // Descriptive text or notes about an item (e.g. in an annotated biography)
+  note?: string;
+
   // These properties are often not included in CSL entries and are here
   // primarily because they may need to be sanitized
   ISSN?: string;

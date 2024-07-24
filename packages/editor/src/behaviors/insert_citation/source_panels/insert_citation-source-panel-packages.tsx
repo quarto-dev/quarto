@@ -221,6 +221,9 @@ function packageCitationToCSL(citeInfo: RPackageCitation) {
   if (citeInfo.year !== null) {
     csl.issued = toCSLDate(citeInfo.year);
   }
+  if (citeInfo.note !== null) {
+    csl.note = citeInfo.note;
+  }
   return csl;
 
 }

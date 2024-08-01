@@ -33,11 +33,26 @@ export interface QuartoContext {
   runPandoc: (options: ExecFileSyncOptions, ...args: string[]) => string;
 }
 
+/**
+ * Initialize a Quarto context.
+ * 
+ * @param quartoPath A path to a user-specified Quarto executable. If
+ *  supplied, this will be used in preference to other methods of detecting
+ *  Quarto.
+ * @param workspaceFolder The workspace folder to use for resolving relative
+ *  paths.
+ * @param additionalSearchPaths Additional paths to search for Quarto. These will only be used if
+ *  Quarto is not found in the default locations or the system path.
+ * @param showWarning A function to call to show a warning message.
+ * 
+ * @returns A Quarto context.
+ */
 export function initQuartoContext(
   quartoPath?: string,
   workspaceFolder?: string,
+  additionalSearchPaths?: string[],
   showWarning?: (msg: string) => void
-) {
+): QuartoContext {
   // default warning to log
   showWarning = showWarning || console.log;
 
@@ -57,7 +72,7 @@ export function initQuartoContext(
 
   // if still not found, scan for versions of quarto in known locations
   if (!quartoInstall) {
-    quartoInstall = scanForQuarto();
+    quartoInstall = scanForQuarto(additionalSearchPaths);
   }
 
   // return if we got them
@@ -174,7 +189,14 @@ function detectUserSpecifiedQuarto(
   return detectQuarto(quartoPath);
 }
 
-function scanForQuarto(): QuartoInstallation | undefined {
+/**
+ * Scan for Quarto in known locations.
+ * 
+ * @param additionalSearchPaths Additional paths to search for Quarto (optional)
+ * 
+ * @returns A Quarto installation if found, otherwise undefined
+ */
+function scanForQuarto(additionalSearchPaths?: string[]): QuartoInstallation | undefined {
   const scanPaths: string[] = [];
   if (os.platform() === "win32") {
     scanPaths.push("C:\\Program Files\\Quarto\\bin");
@@ -194,6 +216,10 @@ function scanForQuarto(): QuartoInstallation | undefined {
     scanPaths.push("/opt/quarto/bin");
     scanPaths.push("/usr/lib/rstudio/bin/quarto/bin");
     scanPaths.push("/usr/lib/rstudio-server/bin/quarto/bin");
+  }
+
+  if (additionalSearchPaths) {
+    scanPaths.push(...additionalSearchPaths);
   }
 
   for (const scanPath of scanPaths.filter(fs.existsSync)) {

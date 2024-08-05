@@ -4395,18 +4395,50 @@
       <key>frontMatter</key>
       <dict>
         <key>begin</key>
-        <string>\A-{3}\s*$</string>
-        <key>contentName</key>
-        <string>meta.embedded.block.frontmatter</string>
+        <string>\A(?=(-{3,}))</string>
+        <key>end</key>
+        <string>^ {,3}\1-*[ \t]*$|^[ \t]*\.{3}$</string>
+        <key>applyEndPatternLast</key>
+        <integer>1</integer>
+        <key>endCaptures</key>
+        <dict>
+          <key>0</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.definition.end.frontmatter</string>
+          </dict>
+        </dict>
         <key>patterns</key>
         <array>
           <dict>
-            <key>include</key>
-            <string>source.yaml</string>
+            <key>begin</key>
+            <string>\A(-{3,})(.*)$</string>
+            <key>while</key>
+            <string>^(?! {,3}\1-*[ \t]*$|[ \t]*\.{3}$)</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.definition.begin.frontmatter</string>
+              </dict>
+              <key>2</key>
+              <dict>
+                <key>name</key>
+                <string>comment.frontmatter</string>
+              </dict>
+            </dict>
+            <key>contentName</key>
+            <string>meta.embedded.block.frontmatter</string>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>source.yaml</string>
+              </dict>
+            </array>
           </dict>
         </array>
-        <key>end</key>
-        <string>(^|\G)-{3}|\.{3}\s*$</string>
       </dict>
       <key>inline</key>
       <dict>

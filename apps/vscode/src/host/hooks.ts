@@ -56,14 +56,32 @@ export function hooksExtensionHost() : ExtensionHost {
         case "r":
           return {
             execute: async (blocks: string[], _editorUri?: vscode.Uri) : Promise<void> => {
-              for (const block of blocks) {
-                let code = block;
+              const runtime = hooksApi()?.runtime;
+
+              const executeCode = async (code: string) => {
                 if (language === "python" && isKnitrDocument(document, engine)) {
                   language = "r";
-                  code = pythonWithReticulate(block);
+                  code = pythonWithReticulate(code);
                 }
-                await hooksApi()?.runtime.executeCode(language, code, false);
-              } 
+
+                runtime?.executeCode(language, code, false);
+              };
+
+              // Get the last block that we will actually await on.
+              // If `blocks` is empty, then `lastBlock` is `undefined`.
+              const lastBlock = blocks.pop();
+
+              // Execute synchronously to ensure that the blocks are executed in order,
+              // as opposed to `await`ing at each iteration within the loop. This prevents
+              // someone else from executing their own block while we `await`, which would
+              // lead to ordering issues (https://github.com/posit-dev/positron/issues/4231).
+              for (const block of blocks) {
+                executeCode(block);
+              }
+
+              if (lastBlock !== undefined) {
+                await executeCode(lastBlock);
+              }
             },
             executeSelection: async () : Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});
@@ -166,4 +184,3 @@ async function getStatementRange(
     position
   );
 }
-

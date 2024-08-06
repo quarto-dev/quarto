@@ -1,8 +1,18 @@
 # Changelog
 
-## 1.114.0
+## 1.114.0 (Release on 06 Aug 2024)
 
 - Update front matter Markdown grammar specification (<https://github.com/quarto-dev/quarto/pull/506>).
+
+## 1.113.0 (Release on 30 May 2024)
+
+- Check for new Quarto version for R pkg support.
+
+## 1.112.0 (Release on 29 May 2024)
+
+- Add GH action to generate .visx 
+- Render output in a temp directory when in an R package
+- Improved statement execution
 
 ## 1.111.0 (Release on 29 February 2024)
 

@@ -55,6 +55,8 @@ export async function activate(context: vscode.ExtensionContext) {
   const quartoContext = initQuartoContext(
     quartoPath,
     workspaceFolder,
+    // Look for quarto in the app root; this is where Positron installs it
+    [path.join(vscode.env.appRoot, 'quarto', 'bin')],
     vscode.window.showWarningMessage
   );
   if (quartoContext.available) {

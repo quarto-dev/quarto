@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.114.0 (Release on 06 Aug 2024)
+
+- Update front matter Markdown grammar specification (<https://github.com/quarto-dev/quarto/pull/506>).
+
+## 1.113.0 (Release on 30 May 2024)
+
+- Check for new Quarto version for R pkg support.
+
+## 1.112.0 (Release on 29 May 2024)
+
+- Add GH action to generate .visx 
+- Render output in a temp directory when in an R package
+- Improved statement execution
+
 ## 1.111.0 (Release on 29 February 2024)
 
 - Use Preview icon on editor toolbar (text on toolbar no longer supported)
@@ -45,7 +59,7 @@
 
 ## 1.106.1 (Release on 29 October 2023)
 
-- Visual Editor: Use line-height of 1.2 for headings 
+- Visual Editor: Use line-height of 1.2 for headings
 - Catch initialization errors that occur when probing for Python environments
 
 ## 1.106.0 (Release on 27 October 2023)
@@ -82,7 +96,7 @@
 - Default to rendering on save for server: shiny documents
 - Support server: shiny documents from .py percent scripts
 - Only prompt for installation of Lua extension when developing extensions
-- Use longer terminal 5-second terminal delay only for conda (venv always activates quickly) 
+- Use longer terminal 5-second terminal delay only for conda (venv always activates quickly)
 - Restore rather than dispose of preview webview on reload
 
 ## 1.101.0 (Release on 28 September 2023)
@@ -113,7 +127,7 @@
 
 ## 1.96.0 (Release on 3 September 2023)
 
-- Formatting: format only currently active cell 
+- Formatting: format only currently active cell
 - Syntax highlighting for embedded `typst` raw blocks
 - Revert to previous toggle comment behavior (single line)
 
@@ -124,12 +138,12 @@
 ## 1.95.0 (Release on 25 August 2023)
 
 - Jupyter: Run cell-by-cell only when there are cell magics (%%) present
-- Jupyter: Verify that the ms-toolsai.jupyter extension is installed 
+- Jupyter: Verify that the ms-toolsai.jupyter extension is installed
 - Mark temporary .intellisense. files as plaintext so they are not auto-formatted
 - Use triple-dash for block and line comments
 - Visual Editor: Use correct selection text color in high contrast mode
 - Visual Editor: Workaround Pandoc 3.1.4 change in `--id-prefix` behavior
-- Visual Editor: Remove it_IT spelling dictionary 
+- Visual Editor: Remove it_IT spelling dictionary
 
 ## 1.94.0 (Release on 17 August 2023)
 
@@ -197,7 +211,7 @@
 - Fix issue w/ parsing math blocks at the end of documents
 - Disable styler in R intellisense background document
 - Ensure that all files in the workspace are indexed when required
-- Provide whatever features we can even if Quarto isn't installed 
+- Provide whatever features we can even if Quarto isn't installed
 
 ## 1.87.1 (Release on 31 May 2023)
 
@@ -210,8 +224,8 @@
 - Visual Editor: Support Cmd+Shift+V shortcut for pasting without formatting
 - Visual Editor: Render pasted markdown text rather than treating it literally
 - Language support (highlighting, completion, etc.) for embedded Matlab code cells
-- Render All command to render and preview all specified formats 
-- Fix crash caused by improper initialization of LSP configuration 
+- Render All command to render and preview all specified formats
+- Fix crash caused by improper initialization of LSP configuration
 - Fail gracefully when we are unable to read zotero key
 
 ## 1.86.2 (Release on 26 May 2023)
@@ -266,8 +280,8 @@
 
 ## 1.81.0 (Release on 14 April 2023)
 
-- Configurable zoom behavior for HTML document preview 
-- Notebook markdown renderer for Pandoc/Quarto markdown extensions 
+- Configurable zoom behavior for HTML document preview
+- Notebook markdown renderer for Pandoc/Quarto markdown extensions
 - Correct hover behavior for multiple equations on a single line
 
 ## 1.80.0 (Release on 09 April 2023)
@@ -360,8 +374,8 @@
 - Handle exceptions that occur when writing settings at startup
 - Correct indentation for multi-line YAML completions
 - Fix issue w/ handling visual mode untitled document warning
-- Resolve issue w/ reading large bibliographies 
-- Allow dot ('.') in citation highlighting regex 
+- Resolve issue w/ reading large bibliographies
+- Allow dot ('.') in citation highlighting regex
 - Derive `mathjax.theme` from name of `workbench.colorTheme`
 
 ## 1.67.0 (Release on 18 February 2023)
@@ -371,7 +385,7 @@
 - Change location of edit in visual/source context menu item
 - Use resource scoping for visual editor preferences
 - Resolve full path when setting QUARTO_PYTHON from Python extension config
-- Don't offer LaTeX completions for `\\` 
+- Don't offer LaTeX completions for `\\`
 - Ensure that empty code block class doesn't show up in the visual editor
 - Add `mermaid` and `dot` to insert code cell snippet
 

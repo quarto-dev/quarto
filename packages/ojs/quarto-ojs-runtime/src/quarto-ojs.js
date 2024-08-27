@@ -14,7 +14,6 @@
 // need to run our own version of observable's stdlib (specifically to
 // grab FileAttachments and Library)
 
-
 import { FileAttachments, Library } from "external-observablehq-stdlib";
 
 import { PandocCodeDecorator } from "./pandoc-code-decorator.js";
@@ -39,14 +38,15 @@ import mime from "mime";
 
 //////////////////////////////////////////////////////////////////////////////
 
-function displayOJSWarning(warning)
-{
+function displayOJSWarning(warning) {
   const cells = [];
-  for (
-    const content of document.querySelectorAll('script[type="ojs-module-contents"]')
-  ) {
+  for (const content of document.querySelectorAll(
+    'script[type="ojs-module-contents"]'
+  )) {
     for (const cellJson of JSON.parse(base64ToStr(content.text)).contents) {
-      let cell = document.getElementById(cellJson.cellName) || document.getElementById(`${cellJson.cellName}-1`);
+      let cell =
+        document.getElementById(cellJson.cellName) ||
+        document.getElementById(`${cellJson.cellName}-1`);
       if (!cell) {
         // give up
         continue;
@@ -55,9 +55,7 @@ function displayOJSWarning(warning)
     }
   }
 
-  debugger;
   cells.forEach((cell) => {
-    debugger;
     cell.innerHTML = "";
 
     const message = warning();
@@ -66,33 +64,40 @@ function displayOJSWarning(warning)
       calloutBlock({
         heading: "Error",
         type: "error",
-        message
+        message,
       })
     );
-  })
+  });
 }
 
 function displayQtWebEngineError() {
   displayOJSWarning(() => {
     const message = document.createElement("div");
-    message.appendChild(document.createTextNode("This document uses OJS, which requires JavaScript features not present in this version of QtWebEngine. If you're using RStudio IDE, please upgrade to a "));
+    message.appendChild(
+      document.createTextNode(
+        "This document uses OJS, which requires JavaScript features not present in this version of QtWebEngine. If you're using RStudio IDE, please upgrade to a "
+      )
+    );
     const link = document.createElement("a");
     link.appendChild(document.createTextNode("2022.12 build"));
     link.href = "https://dailies.rstudio.com/rstudio/elsbeth-geranium/";
     message.appendChild(link);
     message.appendChild(document.createTextNode("."));
     return message;
-  })
+  });
 }
 
 function displayFileProtocolError() {
   displayOJSWarning(() => {
     const message = document.createElement("div");
-    message.appendChild(document.createTextNode("This document uses OJS, which requires JavaScript features disabled when running in file://... URLs. In order for these features to work, run this document in a web server."));
+    message.appendChild(
+      document.createTextNode(
+        "This document uses OJS, which requires JavaScript features disabled when running in file://... URLs. In order for these features to work, run this document in a web server."
+      )
+    );
     return message;
-  })
+  });
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Quarto-specific code starts here.
@@ -341,8 +346,7 @@ class QuartoOJSConnector extends OJSConnector {
   clearError(ojsDiv) {
     const cellOutputDisplay = this.findCellOutputDisplay(ojsDiv);
     // if ojs element is inline, there's no div.
-    if (cellOutputDisplay)
-      cellOutputDisplay._errorSpans = [];
+    if (cellOutputDisplay) cellOutputDisplay._errorSpans = [];
   }
 
   signalError(cellDiv, ojsDiv, ojsAst) {
@@ -472,7 +476,8 @@ class QuartoOJSConnector extends OJSConnector {
             cellOutputDisplay = cellDiv;
           }
         }
-        const forceShowDeclarations = (!cellDiv) || (cellDiv.dataset.output === "all");
+        const forceShowDeclarations =
+          !cellDiv || cellDiv.dataset.output === "all";
 
         const config = { childList: true };
         const callback = function (mutationsList) {
@@ -534,13 +539,15 @@ class QuartoOJSConnector extends OJSConnector {
             that.decorateSource(cellDiv, ojsDiv);
 
             for (const added of mutation.addedNodes) {
-
               // https://github.com/quarto-dev/quarto-cli/issues/7426
               // ObservableHQ.Plot fixup:
               // remove "background: white" from style declaration
-              if (added.tagName === "svg" && 
-                  Array.from(added.classList)
-                    .some(x => x.match(/plot-[0-9a-f]+/))) {
+              if (
+                added.tagName === "svg" &&
+                Array.from(added.classList).some((x) =>
+                  x.match(/plot-[0-9a-f]+/)
+                )
+              ) {
                 // this overrides the style CSS inside.
                 added.style.background = "none";
               }
@@ -566,10 +573,17 @@ class QuartoOJSConnector extends OJSConnector {
 
                   // find parentElement with class cell-output-display or cell
                   let parent = added.parentElement;
-                  while (parent && !parent.classList.contains("cell-output-display") && !parent.classList.contains("cell")) {
+                  while (
+                    parent &&
+                    !parent.classList.contains("cell-output-display") &&
+                    !parent.classList.contains("cell")
+                  ) {
                     parent = parent.parentElement;
                   }
-                  if (parent !== null && added.clientHeight > parent.clientHeight) {
+                  if (
+                    parent !== null &&
+                    added.clientHeight > parent.clientHeight
+                  ) {
                     added.style.maxHeight = `${parent.clientHeight}px`;
                   }
                 }
@@ -684,25 +698,29 @@ export function createRuntime() {
     const keys = Object.keys(df);
     return df[keys[0]]
       .map((v, i) =>
-        Object.fromEntries(keys.map((key) => {
-          const v = df[key][i];
-          const result = v === null ? undefined : v;
-          return [key, result];
-        })))
+        Object.fromEntries(
+          keys.map((key) => {
+            const v = df[key][i];
+            const result = v === null ? undefined : v;
+            return [key, result];
+          })
+        )
+      )
       .filter((v) => !Object.values(v).every((e) => e === undefined));
   }
   lib.transpose = () => transpose;
 
-  // TODO this should be user-configurable, so that we can actually 
+  // TODO this should be user-configurable, so that we can actually
   // make it work in arbitrary layouts.
   // There's probably a slick reactive trick to make the element
-  // user settable. 
+  // user settable.
   //
   // Right now we support quarto's standard HTML formats
 
-  const mainEl = (document.querySelector("main") // html
-   || document.querySelector("div.reveal")       // reveal
-   || document.querySelector("body"));           // fall-through
+  const mainEl =
+    document.querySelector("main") || // html
+    document.querySelector("div.reveal") || // reveal
+    document.querySelector("body"); // fall-through
 
   function cards() {
     if (mainEl === null) {
@@ -710,7 +728,7 @@ export function createRuntime() {
         change(undefined);
       });
     }
-    return lib.Generators.observe(function(change) {
+    return lib.Generators.observe(function (change) {
       let previous = undefined;
       function resized() {
         let changed = false;
@@ -721,11 +739,13 @@ export function createRuntime() {
             card,
             width: card.clientWidth,
             height: card.clientHeight,
-          }
+          };
           result[cellIndex] = cardInfo;
-          if (previous === undefined || 
-              previous[cellIndex].width !== cardInfo.width || 
-              previous[cellIndex].height !== cardInfo.height) {
+          if (
+            previous === undefined ||
+            previous[cellIndex].width !== cardInfo.width ||
+            previous[cellIndex].height !== cardInfo.height
+          ) {
             changed = true;
           }
           cellIndex++;
@@ -734,7 +754,7 @@ export function createRuntime() {
           if (card.id) {
             result[card.id] = cardInfo;
           }
-        }
+        };
         for (const card of document.querySelectorAll("div.card")) {
           for (const cell of card.querySelectorAll("div.cell-output-display")) {
             handle(cell);
@@ -744,7 +764,7 @@ export function createRuntime() {
           }
         }
         for (const card of document.querySelectorAll("div")) {
-          if (!(card.id.startsWith("ojs-cell-"))) {
+          if (!card.id.startsWith("ojs-cell-")) {
             continue;
           }
           let cardInfoCard;
@@ -753,12 +773,18 @@ export function createRuntime() {
           if (card.parentElement.classList.contains("cell-output-display")) {
             // single cell: card parent is cell-output-display
             cardInfoCard = card.parentElement;
-          } else if (card.parentElement.classList.contains("quarto-layout-cell")) {
+          } else if (
+            card.parentElement.classList.contains("quarto-layout-cell")
+          ) {
             // subcell of layout
             cardInfoCard = card.parentElement;
-          } else if (card.parentElement.parentElement.classList.contains("cell-output-display")) {
+          } else if (
+            card.parentElement.parentElement.classList.contains(
+              "cell-output-display"
+            )
+          ) {
             // subcell of cell-output-display
-            cardInfoCard = card.parentElement.parentElement
+            cardInfoCard = card.parentElement.parentElement;
           } else {
             continue;
           }
@@ -766,11 +792,13 @@ export function createRuntime() {
             card: cardInfoCard,
             width: card.clientWidth,
             height: card.clientHeight,
-          }
+          };
           result[card.id] = cardInfo;
-          if (previous === undefined || 
-            previous[card.id].width !== cardInfo.width || 
-            previous[card.id].height !== cardInfo.height) {
+          if (
+            previous === undefined ||
+            previous[card.id].width !== cardInfo.width ||
+            previous[card.id].height !== cardInfo.height
+          ) {
             changed = true;
           }
           if (card.parentElement.id !== "") {
@@ -785,9 +813,9 @@ export function createRuntime() {
       }
       resized();
       window.addEventListener("resize", resized);
-      return function() {
+      return function () {
         window.removeEventListener("resize", resized);
-      }
+      };
     });
   }
 
@@ -839,13 +867,11 @@ export function createRuntime() {
   // select all elements to track:
   //   panel elements with ids, and divs with ids and .ojs-track-layout
 
-  const layoutDivs = [...Array.from(
-    document.querySelectorAll("div.quarto-layout-panel div[id]")
-  ),
-  ...Array.from(
-    document.querySelectorAll('div.ojs-track-layout[id]')
-  )];
-  
+  const layoutDivs = [
+    ...Array.from(document.querySelectorAll("div.quarto-layout-panel div[id]")),
+    ...Array.from(document.querySelectorAll("div.ojs-track-layout[id]")),
+  ];
+
   function layoutWidth() {
     return lib.Generators.observe(function (change) {
       const ourWidths = Object.fromEntries(
@@ -883,7 +909,9 @@ export function createRuntime() {
 
     // we need to remove the hash from the current path
     // for this to work in revealjs
-    const currentPath = window.location.href.split("#")[0].replace(/[^/]*$/, '');
+    const currentPath = window.location.href
+      .split("#")[0]
+      .replace(/[^/]*$/, "");
 
     if (n.startsWith("/")) {
       // docToRoot can be empty, in which case naive concatenation creates
@@ -904,8 +932,7 @@ export function createRuntime() {
     return {
       url: name,
       mimeType: mimeType,
-    }
-
+    };
   }
   lib.FileAttachment = () => FileAttachments(fileAttachmentPathResolver);
 
@@ -1059,7 +1086,9 @@ export function createRuntime() {
         "script[type='ojs-module-contents']"
       )) {
         for (const call of JSON.parse(base64ToStr(el.text)).contents) {
-          let source = window._ojs.isDashboard ? autosizeOJSPlot(call.source, call.cellName) : call.source;
+          let source = window._ojs.isDashboard
+            ? autosizeOJSPlot(call.source, call.cellName)
+            : call.source;
           switch (call.methodName) {
             case "interpret":
               this.interpret(source, call.cellName, call.inline);
@@ -1090,9 +1119,7 @@ export function createRuntime() {
   return result;
 }
 
-
-export default function initializeRuntime()
-{
+export default function initializeRuntime() {
   // TODO "obs" or "ojs"? Inconsistent naming.
   window._ojs = {
     ojsConnector: undefined,
@@ -1110,4 +1137,3 @@ export default function initializeRuntime()
   window._ojs.runtime = createRuntime();
   window._ojs.jsx = createQuartoJsxShim();
 }
-

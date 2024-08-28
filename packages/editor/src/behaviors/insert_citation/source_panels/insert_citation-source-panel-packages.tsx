@@ -208,6 +208,8 @@ function packageCitationToCSL(citeInfo: RPackageCitation) {
   }
   if (citeInfo.booktitle !== null) {
     csl['container-title'] = citeInfo.booktitle;
+  } else if (citeInfo.journal !== null) {
+    csl['container-title'] = citeInfo.journal;
   }
   if (citeInfo.pages !== null) {
     csl.page = citeInfo.pages;

@@ -44,12 +44,11 @@ export function hasHooks() {
 }
 
 type TaskId = number;
+type TaskCallback = () => Promise<void>;
 
 interface Task {
   id: TaskId,
-  runtime: hooks.PositronRuntime,
-  language: string,
-  blocks: string[]
+  callback: TaskCallback
 }
 
 class TaskQueue implements Disposable {
@@ -92,9 +91,17 @@ class TaskQueue implements Disposable {
   }
 
   /**
+   * Construct a new `Task` that can be pushed onto the queue
+   */
+  task(callback: TaskCallback): Task {
+    const id = this.id();
+    return { id, callback }
+  }
+
+  /**
    * Retrives an `id` to be used with the next task
    */
-  id(): TaskId {
+  private id(): TaskId {
     let id = this._id;
     this._id++;
     return id;
@@ -132,10 +139,7 @@ class TaskQueue implements Disposable {
     this._running = true;
 
     try {
-      // Run each block sequentially
-      for (const block of task.blocks) {
-        await task.runtime.executeCode(task.language, block, false);
-      }
+      await task.callback();
     } finally {
       this._running = false;
       this._onDidFinishTask.fire(task.id);
@@ -171,15 +175,21 @@ export function hooksExtensionHost() : ExtensionHost {
                 language = "r";
                 blocks = blocks.map(pythonWithReticulate);
               }
+              
+              // Our callback executes each block sequentially
+              const callback = async () => {
+                for (const block of blocks) {
+                  await runtime.executeCode(language, block, false);
+                }
+              }
 
-              // Get our task id and construct the task
-              const id = TaskQueue.instance.id();
-              const task = { id, runtime, language, blocks };
+              // Construct a new task that calls our `callback` when its our turn
+              const task = TaskQueue.instance.task(callback);
 
               // Construct a promise that resolves when our task finishes
               const finished = new Promise<void>((resolve, _reject) => {
-                const handle = TaskQueue.instance.onDidFinishTask((finishedId) => {
-                  if (id === finishedId) {
+                const handle = TaskQueue.instance.onDidFinishTask((id) => {
+                  if (task.id === id) {
                     handle.dispose();
                     resolve();
                   }

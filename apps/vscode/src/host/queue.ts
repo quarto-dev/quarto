@@ -40,7 +40,7 @@ export class TaskQueue implements Disposable {
 
   /**
    * Enqueue a `callback` for execution
-   * 
+   *
    * Returns a promise that resolves when the task finishes
    */
   async enqueue(callback: TaskCallback): Promise<void> {
@@ -60,7 +60,7 @@ export class TaskQueue implements Disposable {
     // Put the task on the back of the queue.
     // Immediately run it if possible.
     this._tasks.push(task);
-    this.run();
+    await this.run();
 
     return out;
   }
@@ -96,7 +96,7 @@ export class TaskQueue implements Disposable {
     }
 
     // Run next task if one is in the queue
-    this.run();
+    await this.run();
   }
 
   /**

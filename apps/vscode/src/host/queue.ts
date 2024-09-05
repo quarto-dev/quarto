@@ -23,70 +23,46 @@ export interface Task {
   callback: TaskCallback
 }
 
+/**
+ * A task queue that maintains the ordering of tasks submitted to the queue
+ */
 export class TaskQueue implements Disposable {
-  /// Singleton instance
-  private static _instance: TaskQueue;
-
   private _id: TaskId = 0;
   private _tasks: Task[] = [];
   private _running = false;
 
   private readonly _onDidFinishTask = new EventEmitter<TaskId>();
-  onDidFinishTask = this._onDidFinishTask.event;
+  private readonly onDidFinishTask = this._onDidFinishTask.event;
 
-  /**
-   * Disposal method
-   *
-   * Not currently used since the singleton is effectively a global variable.
-   */
   dispose(): void {
     this._onDidFinishTask.dispose();
   }
 
   /**
-   * Constructor
-   *
-   * Private since we only want one of these. Access using `instance()` instead.
+   * Enqueue a `callback` for execution
+   * 
+   * Returns a promise that resolves when the task finishes
    */
-  private constructor() { }
+  async enqueue(callback: TaskCallback): Promise<void> {
+    // Create an official task out of this callback
+    const task = this.task(callback);
 
-  /**
-   * Accessor for the singleton instance
-   *
-   * Creates it if it doesn't exist.
-   */
-  static get instance(): TaskQueue {
-    if (!TaskQueue._instance) {
-      TaskQueue._instance = new TaskQueue();
-    }
-    return TaskQueue._instance;
-  }
+    // Create a promise that resolves when the task is done
+    const out = new Promise<void>((resolve, _reject) => {
+      const handle = this.onDidFinishTask((id) => {
+        if (task.id === id) {
+          handle.dispose();
+          resolve();
+        }
+      });
+    });
 
-  /**
-   * Construct a new `Task` that can be pushed onto the queue
-   */
-  task(callback: TaskCallback): Task {
-    const id = this.id();
-    return { id, callback }
-  }
-
-  /**
-   * Retrives an `id` to be used with the next task
-   */
-  private id(): TaskId {
-    let id = this._id;
-    this._id++;
-    return id;
-  }
-
-  /**
-   * Pushes a `task` into the queue. Immediately runs it if nothing else is running.
-   */
-  async push(task: Task) {
+    // Put the task on the back of the queue.
+    // Immediately run it if possible.
     this._tasks.push(task);
-
-    // Immediately run the task if possible
     this.run();
+
+    return out;
   }
 
   /**
@@ -101,7 +77,8 @@ export class TaskQueue implements Disposable {
       return;
     }
 
-    const task = this._tasks.pop();
+    // Pop off the first task in the queue
+    const task = this._tasks.shift();
 
     if (task === undefined) {
       // Nothing to run right now
@@ -114,10 +91,28 @@ export class TaskQueue implements Disposable {
       await task.callback();
     } finally {
       this._running = false;
+      // Let the promise know this task is done
       this._onDidFinishTask.fire(task.id);
     }
 
     // Run next task if one is in the queue
     this.run();
+  }
+
+  /**
+   * Construct a new `Task` that can be pushed onto the queue
+   */
+  private task(callback: TaskCallback): Task {
+    const id = this.id();
+    return { id, callback }
+  }
+
+  /**
+   * Retrives an `id` to be used with the next task
+   */
+  private id(): TaskId {
+    let id = this._id;
+    this._id++;
+    return id;
   }
 }

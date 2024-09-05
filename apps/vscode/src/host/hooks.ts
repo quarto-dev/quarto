@@ -20,7 +20,7 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
-import { TaskQueue } from './queue';
+import { TaskQueueManager } from './manager';
 
 declare global {
 	function acquirePositronApi() : hooks.PositronApi;
@@ -76,24 +76,7 @@ export function hooksExtensionHost() : ExtensionHost {
                 }
               }
 
-              // Construct a new task that calls our `callback` when its our turn
-              const task = TaskQueue.instance.task(callback);
-
-              // Construct a promise that resolves when our task finishes
-              const finished = new Promise<void>((resolve, _reject) => {
-                const handle = TaskQueue.instance.onDidFinishTask((id) => {
-                  if (task.id === id) {
-                    handle.dispose();
-                    resolve();
-                  }
-                });
-              });
-
-              // Push the task, which may immediately run it, and then wait for it to finish.
-              // Using a task queue ensures that another call to `execute()` can't interleave
-              // its own executions while we `await` between `blocks`.
-              await TaskQueue.instance.push(task);
-              await finished;
+              await TaskQueueManager.instance.enqueue(language, callback);
             },
             executeSelection: async () : Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});

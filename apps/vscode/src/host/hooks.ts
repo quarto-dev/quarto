@@ -20,6 +20,7 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
+import { Disposable } from 'vscode';
 
 declare global {
 	function acquirePositronApi() : hooks.PositronApi;
@@ -42,6 +43,109 @@ export function hasHooks() {
   return !!hooksApi();
 }
 
+type TaskId = number;
+
+interface Task {
+  id: TaskId,
+  runtime: hooks.PositronRuntime,
+  language: string,
+  blocks: string[]
+}
+
+class TaskQueue implements Disposable {
+  /// Singleton instance
+  private static _instance: TaskQueue;
+
+  private _id: TaskId = 0;
+  private _tasks: Task[] = [];
+  private _running = false;
+
+  private readonly _onDidFinishTask = new vscode.EventEmitter<TaskId>();
+  onDidFinishTask = this._onDidFinishTask.event;
+
+  /**
+   * Disposal method
+   *
+   * Not currently used since the singleton is effectively a global variable.
+   */
+  dispose(): void {
+    this._onDidFinishTask.dispose();
+  }
+
+  /**
+   * Constructor
+   *
+   * Private since we only want one of these. Access using `instance()` instead.
+   */
+  private constructor() { }
+
+  /**
+   * Accessor for the singleton instance
+   *
+   * Creates it if it doesn't exist.
+   */
+  static get instance(): TaskQueue {
+    if (!TaskQueue._instance) {
+      TaskQueue._instance = new TaskQueue();
+    }
+    return TaskQueue._instance;
+  }
+
+  /**
+   * Retrives an `id` to be used with the next task
+   */
+  id(): TaskId {
+    let id = this._id;
+    this._id++;
+    return id;
+  }
+
+  /**
+   * Pushes a `task` into the queue. Immediately runs it if nothing else is running.
+   */
+  async push(task: Task) {
+    this._tasks.push(task);
+
+    // Immediately run the task if possible
+    this.run();
+  }
+
+  /**
+   * Runs a task in the queue
+   *
+   * If we are currently running something else, bails. `run()` will be called again
+   * once the other task finishes.
+   */
+  private async run() {
+    if (this._running) {
+      // Someone else is running, we will get recalled once they finish
+      return;
+    }
+
+    const task = this._tasks.pop();
+
+    if (task === undefined) {
+      // Nothing to run right now
+      return;
+    }
+
+    this._running = true;
+
+    try {
+      // Run each block sequentially
+      for (const block of task.blocks) {
+        await task.runtime.executeCode(task.language, block, false);
+      }
+    } finally {
+      this._running = false;
+      this._onDidFinishTask.fire(task.id);
+    }
+
+    // Run next task if one is in the queue
+    this.run();
+  }
+}
+
 export function hooksExtensionHost() : ExtensionHost {
   return {
     // supported executable languages (we delegate to the default for langugaes
@@ -58,30 +162,35 @@ export function hooksExtensionHost() : ExtensionHost {
             execute: async (blocks: string[], _editorUri?: vscode.Uri) : Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
-              const executeCode = async (code: string) => {
-                if (language === "python" && isKnitrDocument(document, engine)) {
-                  language = "r";
-                  code = pythonWithReticulate(code);
-                }
-
-                runtime?.executeCode(language, code, false);
-              };
-
-              // Get the last block that we will actually await on.
-              // If `blocks` is empty, then `lastBlock` is `undefined`.
-              const lastBlock = blocks.pop();
-
-              // Execute synchronously to ensure that the blocks are executed in order,
-              // as opposed to `await`ing at each iteration within the loop. This prevents
-              // someone else from executing their own block while we `await`, which would
-              // lead to ordering issues (https://github.com/posit-dev/positron/issues/4231).
-              for (const block of blocks) {
-                executeCode(block);
+              if (runtime === undefined) {
+                // Can't do anything without a runtime
+                return;
               }
 
-              if (lastBlock !== undefined) {
-                await executeCode(lastBlock);
+              if (language === "python" && isKnitrDocument(document, engine)) {
+                language = "r";
+                blocks = blocks.map(pythonWithReticulate);
               }
+
+              // Get our task id and construct the task
+              const id = TaskQueue.instance.id();
+              const task = { id, runtime, language, blocks };
+
+              // Construct a promise that resolves when our task finishes
+              const finished = new Promise<void>((resolve, _reject) => {
+                const handle = TaskQueue.instance.onDidFinishTask((finishedId) => {
+                  if (id === finishedId) {
+                    handle.dispose();
+                    resolve();
+                  }
+                });
+              });
+
+              // Push the task, which may immediately run it, and then wait for it to finish.
+              // Using a task queue ensures that another call to `execute()` can't interleave
+              // its own executions while we `await` between `blocks`.
+              await TaskQueue.instance.push(task);
+              await finished;
             },
             executeSelection: async () : Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});

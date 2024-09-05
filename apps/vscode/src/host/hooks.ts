@@ -20,7 +20,7 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
-import { Disposable } from 'vscode';
+import { TaskQueue } from './queue';
 
 declare global {
 	function acquirePositronApi() : hooks.PositronApi;
@@ -41,113 +41,6 @@ export function hooksApi() : hooks.PositronApi | null {
 
 export function hasHooks() {
   return !!hooksApi();
-}
-
-type TaskId = number;
-type TaskCallback = () => Promise<void>;
-
-interface Task {
-  id: TaskId,
-  callback: TaskCallback
-}
-
-class TaskQueue implements Disposable {
-  /// Singleton instance
-  private static _instance: TaskQueue;
-
-  private _id: TaskId = 0;
-  private _tasks: Task[] = [];
-  private _running = false;
-
-  private readonly _onDidFinishTask = new vscode.EventEmitter<TaskId>();
-  onDidFinishTask = this._onDidFinishTask.event;
-
-  /**
-   * Disposal method
-   *
-   * Not currently used since the singleton is effectively a global variable.
-   */
-  dispose(): void {
-    this._onDidFinishTask.dispose();
-  }
-
-  /**
-   * Constructor
-   *
-   * Private since we only want one of these. Access using `instance()` instead.
-   */
-  private constructor() { }
-
-  /**
-   * Accessor for the singleton instance
-   *
-   * Creates it if it doesn't exist.
-   */
-  static get instance(): TaskQueue {
-    if (!TaskQueue._instance) {
-      TaskQueue._instance = new TaskQueue();
-    }
-    return TaskQueue._instance;
-  }
-
-  /**
-   * Construct a new `Task` that can be pushed onto the queue
-   */
-  task(callback: TaskCallback): Task {
-    const id = this.id();
-    return { id, callback }
-  }
-
-  /**
-   * Retrives an `id` to be used with the next task
-   */
-  private id(): TaskId {
-    let id = this._id;
-    this._id++;
-    return id;
-  }
-
-  /**
-   * Pushes a `task` into the queue. Immediately runs it if nothing else is running.
-   */
-  async push(task: Task) {
-    this._tasks.push(task);
-
-    // Immediately run the task if possible
-    this.run();
-  }
-
-  /**
-   * Runs a task in the queue
-   *
-   * If we are currently running something else, bails. `run()` will be called again
-   * once the other task finishes.
-   */
-  private async run() {
-    if (this._running) {
-      // Someone else is running, we will get recalled once they finish
-      return;
-    }
-
-    const task = this._tasks.pop();
-
-    if (task === undefined) {
-      // Nothing to run right now
-      return;
-    }
-
-    this._running = true;
-
-    try {
-      await task.callback();
-    } finally {
-      this._running = false;
-      this._onDidFinishTask.fire(task.id);
-    }
-
-    // Run next task if one is in the queue
-    this.run();
-  }
 }
 
 export function hooksExtensionHost() : ExtensionHost {

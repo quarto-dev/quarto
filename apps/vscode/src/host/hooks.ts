@@ -18,9 +18,9 @@ import * as hooks from 'positron';
 
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
+import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
-import { TaskQueueManager } from './manager';
 
 declare global {
 	function acquirePositronApi() : hooks.PositronApi;
@@ -76,7 +76,7 @@ export function hooksExtensionHost() : ExtensionHost {
                 }
               }
 
-              await TaskQueueManager.instance.add(language, callback);
+              await ExecuteQueue.instance.add(language, callback);
             },
             executeSelection: async () : Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});

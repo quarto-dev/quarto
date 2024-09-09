@@ -1,5 +1,5 @@
 /*
- * manager.ts
+ * execute-queue.ts
  *
  * Copyright (C) 2024 by Posit Software, PBC
  *
@@ -16,13 +16,14 @@
 import PQueue from 'p-queue';
 
 /**
- * Manager of multiple queues
+ * Language specific execution queue
  *
- * A singleton class that constructs and manages multiple queues, identified by their `key`.
+ * A singleton class that constructs and manages multiple execution queues, identified by
+ * their `key` (typically the language name).
  */
-export class TaskQueueManager {
+export class ExecuteQueue {
   /// Singleton instance
-  private static _instance: TaskQueueManager;
+  private static _instance: ExecuteQueue;
 
   /// Maps a `key` to its `queue`
   private _queues = new Map<string, PQueue>();
@@ -39,13 +40,13 @@ export class TaskQueueManager {
    *
    * Creates it if it doesn't exist.
    */
-  static get instance(): TaskQueueManager {
-    if (!TaskQueueManager._instance) {
-      // Initialize manager if we've never accessed it
-      TaskQueueManager._instance = new TaskQueueManager();
+  static get instance(): ExecuteQueue {
+    if (!ExecuteQueue._instance) {
+      // Initialize if we've never accessed it
+      ExecuteQueue._instance = new ExecuteQueue();
     }
 
-    return TaskQueueManager._instance;
+    return ExecuteQueue._instance;
   }
 
   /**

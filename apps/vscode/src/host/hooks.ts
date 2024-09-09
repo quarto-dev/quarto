@@ -76,7 +76,7 @@ export function hooksExtensionHost() : ExtensionHost {
                 }
               }
 
-              await TaskQueueManager.instance.enqueue(language, callback);
+              await TaskQueueManager.instance.add(language, callback);
             },
             executeSelection: async () : Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});

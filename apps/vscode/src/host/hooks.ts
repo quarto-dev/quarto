@@ -18,6 +18,7 @@ import * as hooks from 'positron';
 
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
+import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
 
@@ -56,14 +57,26 @@ export function hooksExtensionHost() : ExtensionHost {
         case "r":
           return {
             execute: async (blocks: string[], _editorUri?: vscode.Uri) : Promise<void> => {
-              for (const block of blocks) {
-                let code = block;
-                if (language === "python" && isKnitrDocument(document, engine)) {
-                  language = "r";
-                  code = pythonWithReticulate(block);
+              const runtime = hooksApi()?.runtime;
+
+              if (runtime === undefined) {
+                // Can't do anything without a runtime
+                return;
+              }
+
+              if (language === "python" && isKnitrDocument(document, engine)) {
+                language = "r";
+                blocks = blocks.map(pythonWithReticulate);
+              }
+              
+              // Our callback executes each block sequentially
+              const callback = async () => {
+                for (const block of blocks) {
+                  await runtime.executeCode(language, block, false);
                 }
-                await hooksApi()?.runtime.executeCode(language, code, false);
-              } 
+              }
+
+              await ExecuteQueue.instance.add(language, callback);
             },
             executeSelection: async () : Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});
@@ -166,4 +179,3 @@ async function getStatementRange(
     position
   );
 }
-

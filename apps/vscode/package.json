@@ -1356,6 +1356,7 @@
     "markdown-it": "^13.0.1",
     "markdown-it-highlightjs": "^4.0.1",
     "nanoid": "^4.0.0",
+    "p-queue": "^8.0.1",
     "picomatch": "^2.3.1",
     "quarto-core": "*",
     "quarto-lsp": "*",

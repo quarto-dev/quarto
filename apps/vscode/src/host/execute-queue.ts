@@ -31,7 +31,7 @@ export class ExecuteQueue {
   /**
    * Constructor
    *
-   * Private since we only want one of these per `key`. Access using `instance()` instead.
+   * Private since we only want one of these. Access using `instance()` instead.
    */
   private constructor() { }
 

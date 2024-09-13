@@ -2,6 +2,7 @@
 
 ## 1.115.0
 
+- In Source Mode, `Insert Code Cell` now places your cursor directly into the code cell if you've already specified the language in a previous cell (<https://github.com/quarto-dev/quarto/pull/540>).
 - Improved reliability of sequential execution of code cells in Positron (<https://github.com/quarto-dev/quarto/pull/510>).
 
 ## 1.114.0 (Release on 06 Aug 2024)

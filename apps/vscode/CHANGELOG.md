@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.115.0
+
+- Improved reliability of sequential execution of code cells in Positron (<https://github.com/quarto-dev/quarto/pull/510>).
+
 ## 1.114.0 (Release on 06 Aug 2024)
 
 - Update front matter Markdown grammar specification (<https://github.com/quarto-dev/quarto/pull/506>).
@@ -10,7 +14,7 @@
 
 ## 1.112.0 (Release on 29 May 2024)
 
-- Add GH action to generate .visx 
+- Add GH action to generate .visx
 - Render output in a temp directory when in an R package
 - Improved statement execution
 

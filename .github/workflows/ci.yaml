@@ -2,15 +2,16 @@
 name: Build VS Code Extension
 
 on:
-  release:
-    types:
-      - published
   push:
     branches:
       - main
+    paths:
+      - apps/vscode 
   pull_request:
     branches:
       - main
+    paths:
+      - apps/vscode 
   workflow_dispatch:
 
 jobs:
@@ -40,31 +41,3 @@ jobs:
         with:
           name: quarto-vscode-${{ github.sha }}
           path: ${{ steps.package_extension.outputs.vsixPath }}
-  
-
-  publish-extension:
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'release' &&
-      github.repository_owner == 'quarto-dev'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
-      - run: yarn install --immutable --immutable-cache --check-cache
-
-      - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v1
-        with:
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          yarn: true
-          packagePath: apps/vscode
-
-      - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v1
-        with:
-          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
-          registryUrl: https://marketplace.visualstudio.com
-          yarn: true
-          packagePath: apps/vscode

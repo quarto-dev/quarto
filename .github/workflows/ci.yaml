@@ -47,27 +47,24 @@ jobs:
     if: |
       github.event_name == 'release' &&
       github.repository_owner == 'quarto-dev'
-    needs:
-      - package-extension
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: latest
       - run: yarn install --immutable --immutable-cache --check-cache
-      - uses: actions/download-artifact@v4
-        with:
-          name: quarto-vscode-${{ github.sha }}
 
       - name: Publish to Open VSX Registry
         uses: HaaLeo/publish-vscode-extension@v1
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ${{ needs.package_extension.outputs.vsixPath }}
+          yarn: true
+          packagePath: apps/vscode
 
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v1
         with:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
-          extensionFile: ${{ needs.package_extension.outputs.vsixPath }}
-          registryUrl: https://marketplace.visualstudio.com        
+          registryUrl: https://marketplace.visualstudio.com
+          yarn: true
+          packagePath: apps/vscode

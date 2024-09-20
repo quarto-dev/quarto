@@ -1,11 +1,18 @@
 name: Publish VS Code Extension to Marketplaces
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      ready_to_go:
+        type: boolean
+        required: true
+        description: |
+          The changelog and version are up-to-date for the VS Code extension! 🚀
 
 jobs:
   publish-extension:
     runs-on: ubuntu-latest
+    if:  ${{ inputs.ready_to_go }}
     outputs:
       vsixPath: ${{ steps.publish_extension.outputs.vsixPath }}
     steps:
@@ -14,7 +21,6 @@ jobs:
         with:
           node-version: latest
       - run: yarn install --immutable --immutable-cache --check-cache
-
 
       - name: Publish to Open VSX Registry
         uses: HaaLeo/publish-vscode-extension@v1

@@ -233,7 +233,6 @@ export class PandocConverter {
     // if the pandoc version is >= 3.1.4 then fix IDs that were broken by
     // the change in --id-prefix behavior
     if (options.references?.prefix) {
-      const pandocVersion = pandocSemver(pandocCapabilities);
       if (pandocVersion && semver.gte(pandocVersion, "3.1.4")) {
         const regex = new RegExp(escapeRegExpCharacters(`{#${options.references.prefix}`), "g");
         markdown = markdown.replace(regex, "{#");

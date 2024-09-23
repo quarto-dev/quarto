@@ -173,6 +173,13 @@ export class PandocConverter {
       this.markWriters,
     );
 
+    let disableRawHtml = false;
+    const pandocVersion = pandocSemver(pandocCapabilities);
+    if (pandocVersion && semver.gte(pandocVersion, "3.2.0")) {
+      // work around change in pandoc 3.2+: https://github.com/jgm/pandoc/issues/9677
+      disableRawHtml = true;
+    }
+ 
     // adjust format. we always need to be able to write raw_attribute b/c that's how preprocessors
     // hoist content through pandoc into our prosemirror token parser. since we open this door when
     // reading, users could end up writing raw inlines, and in that case we want them to echo back
@@ -180,12 +187,12 @@ export class PandocConverter {
     // ever want to generate auto identifiers so we disable them here.
     let format = adjustedFormat(
       pandocFormat.fullName,
-      ['raw_html', 'raw_attribute'], // always enable
+      disableRawHtml ? ['raw_attribute'] : ['raw_html', 'raw_attribute'],
       ['auto_identifiers', 'gfm_auto_identifiers', 'smart'],
     ); // always disable
 
     // disable selected format options
-    format = pandocFormatWith(format, disabledFormatOptions(format, pandocFormat, doc), '');
+    format = pandocFormatWith(format, disabledFormatOptions(format, disableRawHtml, pandocFormat, doc), '');
 
     // prepare pandoc options
     let pandocOptions: string[] = [];
@@ -266,7 +273,7 @@ function adjustedFormat(format: string, extensions: string[], disabled: string[]
   return newFormat;
 }
 
-function disabledFormatOptions(format: string, pandocFormat: PandocFormat, doc: ProsemirrorNode) {
+function disabledFormatOptions(format: string, disableRawHtml: boolean, pandocFormat: PandocFormat, doc: ProsemirrorNode) {
   // (prefer pipe and grid tables). users can still force the availability of these by
   // adding those format flags but all known markdown variants that support tables also
   // support pipe tables so this seems unlikely to ever be required.
@@ -284,6 +291,10 @@ function disabledFormatOptions(format: string, pandocFormat: PandocFormat, doc: 
   // these modes we just nix the disabling
   if (format.startsWith(kGfmFormat) || format.startsWith(kCommonmarkFormat)) {
     disabledTableTypes = '';
+  }
+
+  if (disableRawHtml) {
+    disabledTableTypes += "-raw_html";
   }
 
   // return

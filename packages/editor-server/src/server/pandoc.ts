@@ -55,6 +55,13 @@ import { EditorServerOptions } from './server';
 
 export function pandocServer(options: EditorServerOptions) : PandocServer {
 
+  // work around change in pandoc 3.2+: https://github.com/jgm/pandoc/issues/9677 by
+  // using a custom pandoc writer
+  function substituteCustomMarkdownWriter(format: string): string {
+    const customWriterScript = path.join(options.pandoc.resourcesDir, 'md-writer.lua')
+    return format.replace(/^markdown(?=[-+]|$)/, customWriterScript);
+  }
+
   async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
     return pandoc(options.pandoc, args, stdin);
   }
@@ -100,9 +107,9 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
       return ast;
     },
     async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
-      const markdown = await runPandoc(
+     const markdown = await runPandoc(
         ["--from", "json",
-         "--to", format, ...options],
+         "--to", substituteCustomMarkdownWriter(format), ...options],
          JSON.stringify(ast)
       );
       return markdown;

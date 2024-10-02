@@ -3,6 +3,7 @@
 ## 1.116.0 (Not yet released)
 
 - Fix issue with raw html blocks being removed from document by Visual Editor (<https://github.com/quarto-dev/quarto/issues/552>)
+- Fix issue with raw latex blocks being removed from document by Visual Editor (<https://github.com/quarto-dev/quarto/issues/558>)
 
 ## 1.115.0 (Release on 20 September 2024)
 

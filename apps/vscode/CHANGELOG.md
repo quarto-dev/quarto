@@ -569,7 +569,7 @@
 - Pass absolute path to `quarto preview` (prevent problems with shells that change dir on init)
 - Only render on save when the preview server is already running
 
-## 1.37.0 (Release on 2022-09-5)
+## 1.37.0 (Release on 2022-09-05)
 
 - Open external preview links in new window (requires Quarto v1.2)
 - Set `QUARTO_WORKING_DIR` environment variable (ensures correct working dir is used for preview)

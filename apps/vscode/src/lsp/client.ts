@@ -64,6 +64,7 @@ import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { extensionHost } from "../host";
+import semver from "semver";
 
 let client: LanguageClient;
 
@@ -110,11 +111,16 @@ export async function activateLsp(
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
   extensionHost().registerStatementRangeProvider(engine);
-    
+
   // create client options
-  const initializationOptions : LspInitializationOptions = {
+  const initializationOptions: LspInitializationOptions = {
     quartoBinPath: quartoContext.binPath
   };
+
+  const documentSelectorPattern = semver.gte(quartoContext.version, "1.6.24") ?
+    "**/_{brand,quarto,metadata,extension}*.{yml,yaml}" :
+    "**/_{quarto,metadata,extension}*.{yml,yaml}";
+
   const clientOptions: LanguageClientOptions = {
     initializationOptions,
     documentSelector: [
@@ -122,7 +128,7 @@ export async function activateLsp(
       {
         scheme: "*",
         language: "yaml",
-        pattern: "**/_{quarto,metadata,extension}*.{yml,yaml}",
+        pattern: documentSelectorPattern,
       },
     ],
     middleware,
@@ -284,7 +290,7 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
         );
         const resolveLocation = (location: Location) => {
           if (isLanguageVirtualDoc(vdoc.language, location.uri) ||
-              location.uri.toString() === vdocUri.uri.toString()) {
+            location.uri.toString() === vdocUri.uri.toString()) {
             return new Location(
               document.uri,
               unadjustedRange(vdoc.language, location.range)
@@ -295,7 +301,7 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
         };
         const resolveLocationLink = (location: LocationLink) => {
           if (isLanguageVirtualDoc(vdoc.language, location.targetUri) ||
-              location.targetUri.toString() === vdocUri.uri.toString()) {
+            location.targetUri.toString() === vdocUri.uri.toString()) {
             const locationLink: LocationLink = {
               targetRange: unadjustedRange(vdoc.language, location.targetRange),
               originSelectionRange: location.originSelectionRange

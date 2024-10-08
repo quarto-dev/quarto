@@ -64,6 +64,7 @@ import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { extensionHost } from "../host";
+import semver from "semver";
 
 let client: LanguageClient;
 
@@ -115,6 +116,11 @@ export async function activateLsp(
   const initializationOptions: LspInitializationOptions = {
     quartoBinPath: quartoContext.binPath
   };
+
+  const documentSelectorPattern = semver.gte(quartoContext.version, "1.6.24") ?
+    "**/_{brand,quarto,metadata,extension}*.{yml,yaml}" :
+    "**/_{quarto,metadata,extension}*.{yml,yaml}";
+
   const clientOptions: LanguageClientOptions = {
     initializationOptions,
     documentSelector: [
@@ -122,7 +128,7 @@ export async function activateLsp(
       {
         scheme: "*",
         language: "yaml",
-        pattern: "**/_{brand,quarto,metadata,extension}*.{yml,yaml}",
+        pattern: documentSelectorPattern,
       },
     ],
     middleware,

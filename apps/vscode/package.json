@@ -36,6 +36,7 @@
     "onLanguage:r",
     "workspaceContains:**/*.{qmd,rmd}",
     "workspaceContains:**/_quarto.{yml,yaml}",
+    "workspaceContains:**/_brand.{yml,yaml}",
     "workspaceContains:**/_extension.{yml,yaml}",
     "onWebviewPanel:quarto.previewView",
     "onWebviewPanel:quarto.diagramView"

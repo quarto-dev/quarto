@@ -47,7 +47,7 @@ jobs:
       - name: Publish GH release
         uses: softprops/action-gh-release@v2
         with:
-          name: VSC extension - v$${{ steps.project-version.outputs.version }}
-          tag_name: v${{ steps.project-version.outputs.version }}-vsix
+          name: VSC extension - v$${{ steps.extension-version.outputs.version }}
+          tag_name: v${{ steps.extension-version.outputs.version }}-vsix
           fail_on_unmatched_files: true
           files: ${{ steps.publish_extension.outputs.vsixPath }}    

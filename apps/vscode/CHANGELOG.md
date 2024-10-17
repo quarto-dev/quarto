@@ -42,7 +42,7 @@
 - Enable snippet suggestions in qmd mode
 - Visual Editor: Preserve shortcodes in link targets
 - Correct config value for disabling word based suggestions
-- Embedded syntax hightlighting and cell execution for Stata
+- Embedded syntax highlighting and cell execution for Stata
 
 ## 1.109.0 (Release on 2023-12-07)
 
@@ -283,7 +283,7 @@
 - Exclude parens from cite/crossref highlighting in visual editor
 - Correct hover/preview behavior for display math in lists
 - Syntax highlighting for `plantuml` code blocks
-- Remove custom paste hadling for links (too many unwanted side effects)
+- Remove custom paste handling for links (too many unwanted side effects)
 - Only update Quarto Assist panel for Quarto docs
 - Visual mode select all in codeblock now targets just the code block
 - Correctly advance selection for line-by-line execution in visual mode
@@ -530,7 +530,7 @@
 - Respect `eval: false` for cell execution commands
 - LaTeX equation preview: include \newcommand (and similar) definitions in preview
 - Correct package.json configuration for quick suggestions
-- Outline view: protect against unparseable YAML in title block
+- Outline view: protect against unparsable YAML in title block
 
 ## 1.44.0 (Release on 2022-10-03)
 

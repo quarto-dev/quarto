@@ -180,7 +180,7 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
 
     if (vdoc && !isWithinYamlComment(document, position)) {
-      // if there is a trigger character make sure the langauge supports it
+      // if there is a trigger character make sure the language supports it
       const language = vdoc.language;
       if (context.triggerCharacter) {
         if (

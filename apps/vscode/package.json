@@ -1166,7 +1166,7 @@
             "sentence"
           ],
           "markdownEnumDescriptions": [
-            "Do not perform any text wraping",
+            "Do not perform any text wrapping",
             "Wrap text to occupy a fixed number of columns",
             "Insert a line break after each sentence"
           ]

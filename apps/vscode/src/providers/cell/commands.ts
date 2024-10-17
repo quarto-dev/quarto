@@ -292,7 +292,7 @@ class RunCurrentCommand extends RunCommand implements Command {
         // submit
         const executed = await executeSelectionInteractive(executor);
 
-        // if the executor isn't capable of lenguage aware runSelection
+        // if the executor isn't capable of language aware runSelection
         // then determine the selection manually
         if (!executed) {
           // if the selection is empty take the whole line, otherwise
@@ -515,7 +515,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
       // skip if the cell is above or at the cursor
       if (line < blk.range.start.line) {
-        // set langauge if needed
+        // set language if needed
         const blockLanguage = languageNameFromBlock(blk);
         if (!language) {
           language = blockLanguage;

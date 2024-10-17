@@ -73,7 +73,7 @@ export function jupyterErrorLocation(
     /An error occurred while executing the following cell:\s+(-{3,})\s+([\S\s]+?)\r?\n(\1)[\S\s]+line (\d+)\)/;
   const jupyterMatch = output.match(jupyterPattern);
   if (jupyterMatch) {
-    // read target file and searh for the match (normalized)
+    // read target file and search for the match (normalized)
     if (fs.statSync(previewTarget).isFile()) {
       const cellSrc = jupyterMatch[2];
       const previewSrc = normalizeNewlines(

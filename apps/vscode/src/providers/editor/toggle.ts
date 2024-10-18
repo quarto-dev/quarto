@@ -12,16 +12,99 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-
+import * as vscode from "vscode";
 import { commands, window, workspace, TextDocument, ViewColumn } from "vscode";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
+import * as quarto from "quarto-core";
+import fs from "node:fs";
+import * as path from 'path';
+import yaml from "js-yaml";
 import { VisualEditorProvider } from "./editor";
 
 
+export async function determineMode(doc: TextDocument, config: string | undefined): Promise<boolean> {
+  const text = doc.getText()
 
+  let editorOpener = undefined;
 
-export function editInVisualModeCommand() : Command {
+  // check if file itself has a mode
+  if (hasEditorMode(text, "source")) {
+    editorOpener = "source";
+  }
+  else if (hasEditorMode(text, "visual")) {
+    editorOpener = "visual";
+  }
+  // check if has a _quarto.yml or _quarto.yaml file with editor specified
+  else {
+    editorOpener = workspaceHasQuartoYaml();
+  }
+  if (editorOpener && editorOpener != config) {
+    editorOpener = editorOpener === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
+    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    await vscode.commands.executeCommand("vscode.openWith",
+      doc.uri,
+      editorOpener
+    );
+    return true;
+  }
+
+  return false;
+}
+
+export async function setEditorOpener() {
+  const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
+  const viewType = config === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
+  vscode.workspace.getConfiguration('workbench').update('editor.defaultView', viewType, true);
+  await vscode.commands.executeCommand("workbench.action.setDefaultEditor",
+    vscode.Uri.file('filename.qmd'),
+    viewType
+  );
+}
+
+export function workspaceHasQuartoYaml() {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+
+  if (workspaceFolders && workspaceFolders.length > 0) {
+    const rootPath = workspaceFolders[0].uri.fsPath;  // Only look in the root directory of the first workspace folder
+
+    const quartoFilePathYml = path.join(rootPath, '_quarto.yml');
+    const quartoFilePathYaml = path.join(rootPath, '_quarto.yaml');
+
+    let fileContent: string | null = null;
+
+    if (fs.existsSync(quartoFilePathYml)) {
+      fileContent = fs.readFileSync(quartoFilePathYml, 'utf8');
+    } else if (fs.existsSync(quartoFilePathYaml)) {
+      fileContent = fs.readFileSync(quartoFilePathYaml, 'utf8');
+    }
+
+    if (fileContent) {
+      const parsedYaml = yaml.load(fileContent) as any;
+      if (parsedYaml.editor === 'visual' || parsedYaml.editor === 'source') {
+        return parsedYaml.editor;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+export function hasEditorMode(doc: string, mode: string) {
+  if (doc) {
+    const match = doc.match(quarto.kRegExYAML);
+    if (match) {
+      const yaml = match[0];
+      return (
+        !!yaml.match(new RegExp("^editor:\\s+" + mode + "\\s*$", "gm")) ||
+        !!yaml.match(new RegExp("^[ \\t]*" + mode + ":\\s*(default)?\\s*$", "gm"))
+      );
+    }
+  }
+  return false;
+}
+
+export function editInVisualModeCommand(): Command {
   return {
     id: "quarto.editInVisualMode",
     execute() {
@@ -33,14 +116,14 @@ export function editInVisualModeCommand() : Command {
   };
 }
 
-export function editInSourceModeCommand() : Command {
+export function editInSourceModeCommand(): Command {
   return {
     id: "quarto.editInSourceMode",
     execute() {
       const activeVisual = VisualEditorProvider.activeEditor();
       if (activeVisual) {
         reopenEditorInSourceMode(activeVisual.document, '', activeVisual.viewColumn);
-      } 
+      }
     }
   };
 }
@@ -49,14 +132,14 @@ export async function reopenEditorInVisualMode(
   document: TextDocument,
   viewColumn?: ViewColumn
 ) {
- 
+
   // save then close
   await commands.executeCommand("workbench.action.files.save");
   await commands.executeCommand('workbench.action.closeActiveEditor');
 
   // open in visual mode
-  await commands.executeCommand("vscode.openWith", 
-    document.uri, 
+  await commands.executeCommand("vscode.openWith",
+    document.uri,
     VisualEditorProvider.viewType,
     {
       viewColumn
@@ -65,8 +148,8 @@ export async function reopenEditorInVisualMode(
 }
 
 export async function reopenEditorInSourceMode(
-  document: TextDocument, 
-  untitledContent?: string, 
+  document: TextDocument,
+  untitledContent?: string,
   viewColumn?: ViewColumn
 ) {
   if (!document.isUntitled) {
@@ -91,5 +174,5 @@ export async function reopenEditorInSourceMode(
       await window.showTextDocument(doc, viewColumn, false);
     }
   });
-  
+
 }

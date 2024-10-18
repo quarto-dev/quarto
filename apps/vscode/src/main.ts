@@ -29,15 +29,20 @@ import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
 import { activateCreate } from "./providers/create/create";
-import { activateEditor } from "./providers/editor/editor";
+import { activateEditor, VisualEditorProvider } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
+import { determineMode, setEditorOpener } from "./providers/editor/toggle";
+import { URI } from "vscode-languageserver-types";
+import { config } from "vscode-nls";
+
+let suppressOpenHandler = false;
 
 export async function activate(context: vscode.ExtensionContext) {
- 
+
   // create extension host
   const host = extensionHost();
 
@@ -125,9 +130,36 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
+
+  // if positron
+  setEditorOpener();
+
+  vscode.workspace.onDidChangeConfiguration(async (event) => {
+    if (event.affectsConfiguration('quarto.defaultEditor')) {
+      setEditorOpener();
+    }
+  });
+  // end if positron
+
+  const documentOpenHandler = vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
+    // Check if the document language is "quarto"
+    const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
+    if (suppressOpenHandler) {
+      suppressOpenHandler = false; // Reset the flag
+      return; // Prevent further execution
+    }
+    if (document.languageId === 'quarto') {
+      suppressOpenHandler = await determineMode(document, config);
+
+    }
+  });
+
+  // Add the event handler to the context subscriptions
+  context.subscriptions.push(documentOpenHandler);
+
 }
 
 export async function deactivate() {
   return deactivateLsp();
-} 
+}
 

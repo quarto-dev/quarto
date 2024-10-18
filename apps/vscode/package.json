@@ -1036,6 +1036,16 @@
           "default": true,
           "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#`."
         },
+        "quarto.defaultEditor": {
+          "order": 11,
+          "type": "string",
+          "markdownDescription": "Default editor",
+          "enum": [
+            "source",
+            "visual"
+          ],
+          "default": "source"
+        },
         "quarto.render.renderOnSave": {
           "order": 12,
           "scope": "window",

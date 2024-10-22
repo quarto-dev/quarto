@@ -36,8 +36,6 @@ import { extensionHost } from "./host";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 import { determineMode, setEditorOpener } from "./providers/editor/toggle";
-import { URI } from "vscode-languageserver-types";
-import { config } from "vscode-nls";
 
 let suppressOpenHandler = false;
 
@@ -139,24 +137,34 @@ export async function activate(context: vscode.ExtensionContext) {
       setEditorOpener();
     }
   });
-  // end if positron
 
   const documentOpenHandler = vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
     // Check if the document language is "quarto"
     const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
+    if (document.languageId != 'quarto') {
+      return;
+    }
     if (suppressOpenHandler) {
       suppressOpenHandler = false; // Reset the flag
-      return; // Prevent further execution
+      return;
     }
-    if (document.languageId === 'quarto') {
-      suppressOpenHandler = await determineMode(document, config);
-
+    const editorMode = await determineMode(document.getText());
+    if (editorMode && editorMode != config) {
+      suppressOpenHandler = true;
+      const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
+      await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+      await vscode.commands.executeCommand("vscode.openWith",
+        document.uri,
+        editorOpener
+      );
+      return;
     }
   });
 
   // Add the event handler to the context subscriptions
   context.subscriptions.push(documentOpenHandler);
 
+  // end if positron
 }
 
 export async function deactivate() {

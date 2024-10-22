@@ -14,42 +14,31 @@
  */
 import * as vscode from "vscode";
 import { commands, window, workspace, TextDocument, ViewColumn } from "vscode";
-import { Command } from "../../core/command";
-import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
+import * as path from 'path';
 import * as quarto from "quarto-core";
 import fs from "node:fs";
-import * as path from 'path';
 import yaml from "js-yaml";
+import { Command } from "../../core/command";
+import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 
 
-export async function determineMode(doc: TextDocument, config: string | undefined): Promise<boolean> {
-  const text = doc.getText()
-
+export async function determineMode(doc: string): Promise<string | undefined> {
   let editorOpener = undefined;
 
   // check if file itself has a mode
-  if (hasEditorMode(text, "source")) {
+  if (hasEditorMode(doc, "source")) {
     editorOpener = "source";
   }
-  else if (hasEditorMode(text, "visual")) {
+  else if (hasEditorMode(doc, "visual")) {
     editorOpener = "visual";
   }
   // check if has a _quarto.yml or _quarto.yaml file with editor specified
   else {
     editorOpener = workspaceHasQuartoYaml();
   }
-  if (editorOpener && editorOpener != config) {
-    editorOpener = editorOpener === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
-    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-    await vscode.commands.executeCommand("vscode.openWith",
-      doc.uri,
-      editorOpener
-    );
-    return true;
-  }
 
-  return false;
+  return editorOpener;
 }
 
 export async function setEditorOpener() {

@@ -496,11 +496,21 @@
       },
       {
         "command": "quarto.runCurrent",
+        "mac": "ctrl+enter",
+        "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
+      },      
+      {
+        "command": "quarto.runCurrent",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
         "when": "activeCustomEditorId == 'quarto.visualEditor'"
       },
       {
+        "command": "quarto.runCurrent",
+        "mac": "ctrl+enter",
+        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+      },      
+      {
         "command": "quarto.runCurrentAdvance",
         "key": "shift+enter",
         "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
@@ -518,8 +528,18 @@
       },
       {
         "command": "quarto.runCurrentCell",
+        "mac": "ctrl+shift+enter",
+        "when": "editorTextFocus && editorLangId == quarto && !findInputFocussed && !replaceInputFocussed"
+      },
+      {
+        "command": "quarto.runCurrentCell",
         "key": "ctrl+shift+enter",
         "mac": "cmd+shift+enter",
+        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+      },
+      {
+        "command": "quarto.runCurrentCell",
+        "mac": "ctrl+shift+enter",
         "when": "activeCustomEditorId == 'quarto.visualEditor'"
       },
       {

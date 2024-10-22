@@ -37,8 +37,6 @@ import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 import { determineMode, setEditorOpener } from "./providers/editor/toggle";
 
-let suppressOpenHandler = false;
-
 export async function activate(context: vscode.ExtensionContext) {
 
   // create extension host
@@ -138,19 +136,17 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  const documentOpenHandler = vscode.workspace.onDidOpenTextDocument(async (document: vscode.TextDocument) => {
+  const documentOpenHandler = vscode.window.onDidChangeActiveTextEditor(async () => {
     // Check if the document language is "quarto"
+
+    const document = vscode.window.activeTextEditor?.document
+    if (!document || document.languageId != 'quarto') {
+      return;
+    }
     const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
-    if (document.languageId != 'quarto') {
-      return;
-    }
-    if (suppressOpenHandler) {
-      suppressOpenHandler = false; // Reset the flag
-      return;
-    }
+
     const editorMode = await determineMode(document.getText());
     if (editorMode && editorMode != config) {
-      suppressOpenHandler = true;
       const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
       await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
       await vscode.commands.executeCommand("vscode.openWith",

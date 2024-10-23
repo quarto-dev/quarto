@@ -12,16 +12,76 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-
+import * as vscode from "vscode";
 import { commands, window, workspace, TextDocument, ViewColumn } from "vscode";
+import * as path from 'path';
+import * as quarto from "quarto-core";
+import fs from "node:fs";
+import yaml from "js-yaml";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 
+export function determineMode(doc: TextDocument): string | undefined {
+  let editorOpener = undefined;
+  const text = doc.getText();
+  // check if file itself has a mode
+  if (hasEditorMode(text, "source")) {
+    editorOpener = "source";
+  }
+  else if (hasEditorMode(text, "visual")) {
+    editorOpener = "visual";
+  }
+  // check if has a _quarto.yml or _quarto.yaml file with editor specified
+  else {
+    editorOpener = modeFromQuartoYaml(doc);
+  }
 
+  return editorOpener;
+}
 
+export async function setEditorOpener() {
+  const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
+  const viewType = config === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
 
-export function editInVisualModeCommand() : Command {
+  await vscode.commands.executeCommand("workbench.action.setDefaultEditor",
+    '*.qmd',
+    viewType
+  );
+}
+
+export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
+  const metadataFiles = quarto.metadataFilesForDocument(doc.uri.fsPath);
+  if (!metadataFiles) {
+    return undefined;
+  }
+  if (metadataFiles) {
+    for (const metadataFile of metadataFiles) {
+      const yamlText = quarto.yamlFromMetadataFile(metadataFile);
+      if (yamlText?.editor === "source" || yamlText?.editor === "visual") {
+        return yamlText?.editor;
+      }
+    }
+  }
+  return undefined;
+}
+
+export function hasEditorMode(doc: string, mode: string): boolean {
+
+  if (doc) {
+    const match = doc.match(quarto.kRegExYAML);
+    if (match) {
+      const yaml = match[0];
+      return (
+        !!yaml.match(new RegExp("editor:\\s+" + mode + "\\s*$", "gm")) ||
+        !!yaml.match(new RegExp("^[ \\t]*" + "mode:\\s*" + mode + "\\s*$", "gm"))
+      );
+    }
+  }
+  return false;
+}
+
+export function editInVisualModeCommand(): Command {
   return {
     id: "quarto.editInVisualMode",
     execute() {
@@ -33,14 +93,14 @@ export function editInVisualModeCommand() : Command {
   };
 }
 
-export function editInSourceModeCommand() : Command {
+export function editInSourceModeCommand(): Command {
   return {
     id: "quarto.editInSourceMode",
     execute() {
       const activeVisual = VisualEditorProvider.activeEditor();
       if (activeVisual) {
         reopenEditorInSourceMode(activeVisual.document, '', activeVisual.viewColumn);
-      } 
+      }
     }
   };
 }
@@ -49,14 +109,14 @@ export async function reopenEditorInVisualMode(
   document: TextDocument,
   viewColumn?: ViewColumn
 ) {
- 
+
   // save then close
   await commands.executeCommand("workbench.action.files.save");
   await commands.executeCommand('workbench.action.closeActiveEditor');
 
   // open in visual mode
-  await commands.executeCommand("vscode.openWith", 
-    document.uri, 
+  await commands.executeCommand("vscode.openWith",
+    document.uri,
     VisualEditorProvider.viewType,
     {
       viewColumn
@@ -65,8 +125,8 @@ export async function reopenEditorInVisualMode(
 }
 
 export async function reopenEditorInSourceMode(
-  document: TextDocument, 
-  untitledContent?: string, 
+  document: TextDocument,
+  untitledContent?: string,
   viewColumn?: ViewColumn
 ) {
   if (!document.isUntitled) {
@@ -91,5 +151,5 @@ export async function reopenEditorInSourceMode(
       await window.showTextDocument(doc, viewColumn, false);
     }
   });
-  
+
 }

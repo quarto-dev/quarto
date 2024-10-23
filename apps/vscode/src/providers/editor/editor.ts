@@ -14,19 +14,19 @@
  */
 
 import path, { extname } from "path";
-
+import { determineMode } from "./toggle"
 import debounce from "lodash.debounce";
 
-import { 
+import {
   window,
-  workspace, 
-  ExtensionContext, 
-  Disposable, 
-  CustomTextEditorProvider, 
-  TextDocument, 
-  WebviewPanel, 
-  CancellationToken, 
-  Uri, 
+  workspace,
+  ExtensionContext,
+  Disposable,
+  CustomTextEditorProvider,
+  TextDocument,
+  WebviewPanel,
+  CancellationToken,
+  Uri,
   Webview,
   Range,
   env,
@@ -118,6 +118,26 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // setup request transport 
     const lspRequest = lspClientTransport(lspClient);
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(async () => {
+      // Check if the document language is "quarto"
+
+      const document = window.activeTextEditor?.document
+      if (!document || document.languageId != 'quarto') {
+        return;
+      }
+      const config = workspace.getConfiguration('quarto').get<string>('defaultEditor');
+
+      const editorMode = await determineMode(document);
+      if (editorMode && editorMode != config) {
+        const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
+        await commands.executeCommand('workbench.action.closeActiveEditor');
+        await commands.executeCommand("vscode.openWith",
+          document.uri,
+          editorOpener
+        );
+        return;
+      }
+    }));
 
     // track edits in the active editor if its untitled. this enables us to recover the
     // content when we switch to an untitled document, which otherwise are just dropped
@@ -149,7 +169,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       const document = editor.document;
       if (document && isQuartoDoc(document)) {
         const uri = document.uri.toString();
-        
         // check for switch (one shot)
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
         this.visualEditorPendingSwitchToSource.delete(uri);

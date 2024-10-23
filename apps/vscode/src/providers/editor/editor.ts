@@ -78,7 +78,7 @@ export function activateEditor(
   quartoContext: QuartoContext,
   lspClient: LanguageClient,
   engine: MarkdownEngine
-) : Command[] {
+): Command[] {
   // register the provider
   context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
 
@@ -114,30 +114,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     quartoContext: QuartoContext,
     lspClient: LanguageClient,
     engine: MarkdownEngine
-  ) : Disposable {
+  ): Disposable {
 
     // setup request transport 
     const lspRequest = lspClientTransport(lspClient);
-    context.subscriptions.push(window.onDidChangeActiveTextEditor(async () => {
-      // Check if the document language is "quarto"
-
-      const document = window.activeTextEditor?.document
-      if (!document || document.languageId != 'quarto') {
-        return;
-      }
-      const config = workspace.getConfiguration('quarto').get<string>('defaultEditor');
-
-      const editorMode = await determineMode(document);
-      if (editorMode && editorMode != config) {
-        const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
-        await commands.executeCommand('workbench.action.closeActiveEditor');
-        await commands.executeCommand("vscode.openWith",
-          document.uri,
-          editorOpener
-        );
-        return;
-      }
-    }));
 
     // track edits in the active editor if its untitled. this enables us to recover the
     // content when we switch to an untitled document, which otherwise are just dropped
@@ -160,7 +140,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     }));
 
     // when the active editor changes see if we have a visual editor position for it
-    context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(() => {
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(async () => {
       // resolve active editor
       const editor = window.activeTextEditor;
       if (!editor) {
@@ -171,6 +151,20 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         const uri = document.uri.toString();
         // check for switch (one shot)
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
+
+        // see if user has specified visual or source mode
+        const config = workspace.getConfiguration('quarto').get<string>('defaultEditor');
+        const editorMode = await determineMode(document);
+        if (editorMode && editorMode != config && !isSwitch) {
+          const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
+          await commands.executeCommand('workbench.action.closeActiveEditor');
+          await commands.executeCommand("vscode.openWith",
+            document.uri,
+            editorOpener
+          );
+          return;
+        }
+
         this.visualEditorPendingSwitchToSource.delete(uri);
 
         // check for pos (one shot)

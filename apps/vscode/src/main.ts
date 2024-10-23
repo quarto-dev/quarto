@@ -24,18 +24,19 @@ import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activateCommon } from "./extension";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
-import { initQuartoContext, quartoContextUnavailable } from "quarto-core";
+import { initQuartoContext } from "quarto-core";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
 import { activateCreate } from "./providers/create/create";
-import { activateEditor, VisualEditorProvider } from "./providers/editor/editor";
+import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
-import { modeFromQuartoYaml, setEditorOpener } from "./providers/editor/toggle";
+import { setEditorOpener } from "./providers/editor/toggle";
+import { hasHooks } from "./host/hooks";
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -127,16 +128,17 @@ export async function activate(context: vscode.ExtensionContext) {
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
 
-  // if positron
-  setEditorOpener();
 
-  const defaultEditor = vscode.workspace.onDidChangeConfiguration(async (event) => {
-    if (event.affectsConfiguration('quarto.defaultEditor')) {
-      setEditorOpener();
-    }
-  });
-  context.subscriptions.push(defaultEditor);
-  // end if positron
+  if (hasHooks()) {
+    // Positron allows user to set visual or source as default mode
+    setEditorOpener();
+    const defaultEditor = vscode.workspace.onDidChangeConfiguration(async (event) => {
+      if (event.affectsConfiguration('quarto.defaultEditor')) {
+        setEditorOpener();
+      }
+    });
+    context.subscriptions.push(defaultEditor);
+  }
 }
 
 export async function deactivate() {

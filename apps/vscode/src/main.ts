@@ -128,7 +128,6 @@ export async function activate(context: vscode.ExtensionContext) {
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
 
-
   if (hasHooks()) {
     // Positron allows user to set visual or source as default mode
     setEditorOpener();

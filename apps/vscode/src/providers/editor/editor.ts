@@ -13,7 +13,7 @@
  *
  */
 
-import path, { extname } from "path";
+import path, { extname, win32 } from "path";
 import { determineMode } from "./toggle"
 import debounce from "lodash.debounce";
 
@@ -58,13 +58,22 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
 import { JsonRpcRequestTransport } from "core";
-import { 
-  editInSourceModeCommand, 
-  editInVisualModeCommand, 
-  reopenEditorInSourceMode 
+import {
+  editInSourceModeCommand,
+  editInVisualModeCommand,
+  reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 
+const labels = [
+  "(Working Tree)",
+  "(Deleted)",
+  "(Theirs)",
+  "(Ours)",
+  "(Untracked)",
+  "(Intent to add)",
+  "(Type changed)"
+];
 
 export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus() : Promise<boolean>;
@@ -146,16 +155,21 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       if (!editor) {
         return;
       }
+
       const document = editor.document;
       if (document && isQuartoDoc(document)) {
         const uri = document.uri.toString();
         // check for switch (one shot)
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
 
+        // check to see if this is a git diff. if so, do not try to change editor mode
+        const tabLabel = window.tabGroups.activeTabGroup.activeTab?.label
+        const isDiff = labels.some(label => tabLabel?.includes(label))
+
         // see if user has specified visual or source mode
         const config = workspace.getConfiguration('quarto').get<string>('defaultEditor');
         const editorMode = await determineMode(document);
-        if (editorMode && editorMode != config && !isSwitch) {
+        if (editorMode && editorMode != config && !isSwitch && !isDiff) {
           const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
           await commands.executeCommand('workbench.action.closeActiveEditor');
           await commands.executeCommand("vscode.openWith",

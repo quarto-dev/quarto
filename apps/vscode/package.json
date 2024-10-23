@@ -1039,7 +1039,7 @@
         "quarto.defaultEditor": {
           "order": 11,
           "type": "string",
-          "markdownDescription": "Default editor",
+          "markdownDescription": "Default editor. Only applicable in Positron.",
           "enum": [
             "source",
             "visual"

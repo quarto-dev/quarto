@@ -22,20 +22,19 @@ import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 
-
-export async function determineMode(doc: string): Promise<string | undefined> {
+export function determineMode(doc: TextDocument): string | undefined {
   let editorOpener = undefined;
-
+  const text = doc.getText();
   // check if file itself has a mode
-  if (hasEditorMode(doc, "source")) {
+  if (hasEditorMode(text, "source")) {
     editorOpener = "source";
   }
-  else if (hasEditorMode(doc, "visual")) {
+  else if (hasEditorMode(text, "visual")) {
     editorOpener = "visual";
   }
   // check if has a _quarto.yml or _quarto.yaml file with editor specified
   else {
-    editorOpener = workspaceHasQuartoYaml();
+    editorOpener = modeFromQuartoYaml(doc);
   }
 
   return editorOpener;
@@ -44,49 +43,38 @@ export async function determineMode(doc: string): Promise<string | undefined> {
 export async function setEditorOpener() {
   const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
   const viewType = config === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
-  vscode.workspace.getConfiguration('workbench').update('editor.defaultView', viewType, true);
+
   await vscode.commands.executeCommand("workbench.action.setDefaultEditor",
-    vscode.Uri.file('filename.qmd'),
+    '*.qmd',
     viewType
   );
 }
 
-export function workspaceHasQuartoYaml() {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-
-  if (workspaceFolders && workspaceFolders.length > 0) {
-    const rootPath = workspaceFolders[0].uri.fsPath;  // Only look in the root directory of the first workspace folder
-
-    const quartoFilePathYml = path.join(rootPath, '_quarto.yml');
-    const quartoFilePathYaml = path.join(rootPath, '_quarto.yaml');
-
-    let fileContent: string | null = null;
-
-    if (fs.existsSync(quartoFilePathYml)) {
-      fileContent = fs.readFileSync(quartoFilePathYml, 'utf8');
-    } else if (fs.existsSync(quartoFilePathYaml)) {
-      fileContent = fs.readFileSync(quartoFilePathYaml, 'utf8');
-    }
-
-    if (fileContent) {
-      const parsedYaml = yaml.load(fileContent) as any;
-      if (parsedYaml.editor === 'visual' || parsedYaml.editor === 'source') {
-        return parsedYaml.editor;
+export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
+  const metadataFiles = quarto.metadataFilesForDocument(doc.uri.fsPath);
+  if (!metadataFiles) {
+    return undefined;
+  }
+  if (metadataFiles) {
+    for (const metadataFile of metadataFiles) {
+      const yamlText = quarto.yamlFromMetadataFile(metadataFile);
+      if (yamlText?.editor === "source" || yamlText?.editor === "visual") {
+        return yamlText?.editor;
       }
     }
   }
-
   return undefined;
 }
 
-export function hasEditorMode(doc: string, mode: string) {
+export function hasEditorMode(doc: string, mode: string): boolean {
+
   if (doc) {
     const match = doc.match(quarto.kRegExYAML);
     if (match) {
       const yaml = match[0];
       return (
-        !!yaml.match(new RegExp("^editor:\\s+" + mode + "\\s*$", "gm")) ||
-        !!yaml.match(new RegExp("^[ \\t]*" + mode + ":\\s*(default)?\\s*$", "gm"))
+        !!yaml.match(new RegExp("editor:\\s+" + mode + "\\s*$", "gm")) ||
+        !!yaml.match(new RegExp("^[ \\t]*" + "mode:\\s*" + mode + "\\s*$", "gm"))
       );
     }
   }

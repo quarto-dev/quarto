@@ -35,7 +35,7 @@ import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
-import { determineMode, setEditorOpener } from "./providers/editor/toggle";
+import { modeFromQuartoYaml, setEditorOpener } from "./providers/editor/toggle";
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -130,36 +130,12 @@ export async function activate(context: vscode.ExtensionContext) {
   // if positron
   setEditorOpener();
 
-  vscode.workspace.onDidChangeConfiguration(async (event) => {
+  const defaultEditor = vscode.workspace.onDidChangeConfiguration(async (event) => {
     if (event.affectsConfiguration('quarto.defaultEditor')) {
       setEditorOpener();
     }
   });
-
-  const documentOpenHandler = vscode.window.onDidChangeActiveTextEditor(async () => {
-    // Check if the document language is "quarto"
-
-    const document = vscode.window.activeTextEditor?.document
-    if (!document || document.languageId != 'quarto') {
-      return;
-    }
-    const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
-
-    const editorMode = await determineMode(document.getText());
-    if (editorMode && editorMode != config) {
-      const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
-      await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-      await vscode.commands.executeCommand("vscode.openWith",
-        document.uri,
-        editorOpener
-      );
-      return;
-    }
-  });
-
-  // Add the event handler to the context subscriptions
-  context.subscriptions.push(documentOpenHandler);
-
+  context.subscriptions.push(defaultEditor);
   // end if positron
 }
 

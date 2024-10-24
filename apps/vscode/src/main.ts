@@ -35,8 +35,7 @@ import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
-import { setEditorOpener } from "./providers/editor/toggle";
-import { hasHooks } from "./host/hooks";
+import { defaultEditorOpener } from "./providers/editor/configurations"
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -128,16 +127,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
 
-  if (hasHooks()) {
-    // Positron allows user to set visual or source as default mode
-    setEditorOpener();
-    const defaultEditor = vscode.workspace.onDidChangeConfiguration(async (event) => {
-      if (event.affectsConfiguration('quarto.defaultEditor')) {
-        setEditorOpener();
-      }
-    });
-    context.subscriptions.push(defaultEditor);
-  }
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(async () => {
+    defaultEditorOpener()
+  }));
 }
 
 export async function deactivate() {

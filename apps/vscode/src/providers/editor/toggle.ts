@@ -12,12 +12,9 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-import * as vscode from "vscode";
+
 import { commands, window, workspace, TextDocument, ViewColumn } from "vscode";
-import * as path from 'path';
 import * as quarto from "quarto-core";
-import fs from "node:fs";
-import yaml from "js-yaml";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
@@ -27,10 +24,10 @@ export function determineMode(doc: TextDocument): string | undefined {
   const text = doc.getText();
   // check if file itself has a mode
   if (hasEditorMode(text, "source")) {
-    editorOpener = "source";
+    editorOpener = "textEditor";
   }
   else if (hasEditorMode(text, "visual")) {
-    editorOpener = "visual";
+    editorOpener = VisualEditorProvider.viewType;
   }
   // check if has a _quarto.yml or _quarto.yaml file with editor specified
   else {
@@ -38,16 +35,6 @@ export function determineMode(doc: TextDocument): string | undefined {
   }
 
   return editorOpener;
-}
-
-export async function setEditorOpener() {
-  const config = vscode.workspace.getConfiguration('quarto').get<string>('defaultEditor');
-  const viewType = config === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
-
-  await vscode.commands.executeCommand("workbench.action.setDefaultEditor",
-    '*.qmd',
-    viewType
-  );
 }
 
 export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
@@ -58,8 +45,11 @@ export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
   if (metadataFiles) {
     for (const metadataFile of metadataFiles) {
       const yamlText = quarto.yamlFromMetadataFile(metadataFile);
-      if (yamlText?.editor === "source" || yamlText?.editor === "visual") {
-        return yamlText?.editor;
+      if (yamlText?.editor === "source") {
+        return "textEditor"
+      }
+      if (yamlText?.editor === "visual") {
+        return VisualEditorProvider.viewType;
       }
     }
   }

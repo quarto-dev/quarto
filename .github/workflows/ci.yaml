@@ -6,12 +6,12 @@ on:
     branches:
       - main
     paths:
-      - apps/vscode 
+      - 'apps/vscode/**' 
   pull_request:
     branches:
       - main
     paths:
-      - apps/vscode 
+      - 'apps/vscode/**' 
   workflow_dispatch:
 
 jobs:

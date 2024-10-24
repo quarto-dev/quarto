@@ -17,6 +17,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as tmp from "tmp";
+import * as uuid from "uuid";
 import {
   commands,
   Hover,
@@ -33,10 +34,10 @@ import { EmbeddedLanguage } from "./languages";
 const languageVirtualDocs = new Map<String, TextDocument>();
 
 export async function virtualDocUriFromTempFile(
-  virtualDoc: VirtualDoc, 
-  docPath: string, 
+  virtualDoc: VirtualDoc,
+  docPath: string,
   local: boolean
-) : Promise<VirtualDocUri> {
+): Promise<VirtualDocUri> {
 
   // if this is local then create it alongside the docPath and return a cleanup 
   // function to remove it when the action is completed. 
@@ -121,7 +122,9 @@ function createVirtualDocTempFile(virtualDoc: VirtualDoc) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
-  const tmpPath = path.join(vdocTempDir, ext, ".intellisense." + ext);
+  const tmpPath = path.join(
+    vdocTempDir, ext, ".intellisense." + uuid.v4() + "." + ext
+  );
   fs.writeFileSync(tmpPath, virtualDoc.content);
 
   return tmpPath;

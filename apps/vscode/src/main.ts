@@ -69,9 +69,11 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
     // ensure quarto is on the path
-    context.environmentVariableCollection.prepend(
+    const envVarCollection = context.environmentVariableCollection as vscode.GlobalEnvironmentVariableCollection;
+    envVarCollection.prepend(
       "PATH",
-      path.delimiter + quartoContext.binPath + path.delimiter
+      path.delimiter + quartoContext.binPath + path.delimiter,
+      { applyAtShellIntegration: true, applyAtProcessCreation: true }
     );
 
     // status bar

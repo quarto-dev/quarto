@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/vscode/**' 
+      - 'apps/vscode/**'
   pull_request:
     branches:
       - main

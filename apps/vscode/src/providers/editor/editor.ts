@@ -63,6 +63,7 @@ import {
   editInVisualModeCommand,
   reopenEditorInSourceMode
 } from "./toggle";
+import { defaultEditorOpener } from "../editor/configurations"
 import { ExtensionHost } from "../../host";
 
 const labels = [
@@ -76,9 +77,9 @@ const labels = [
 ];
 
 export interface QuartoVisualEditor extends QuartoEditor {
-  hasFocus() : Promise<boolean>;
-  getActiveBlockContext() : Promise<CodeViewActiveBlockContext | null>;
-  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : Promise<void>;
+  hasFocus(): Promise<boolean>;
+  getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
+  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
 }
 
 export function activateEditor(
@@ -97,28 +98,28 @@ export function activateEditor(
 
 
 export class VisualEditorProvider implements CustomTextEditorProvider {
-  
+
   // track the last contents of any active untitled docs (used
   // for recovering from attempt to edit )
   private static activeUntitled?: { uri: Uri, content: string };
 
   // track the last edited line of code in text editors (used for syncing position)
-  private static editorLastSourcePos = new Map<string,number>();
+  private static editorLastSourcePos = new Map<string, number>();
 
   // track the list source location in visual editors (used for syncing position)
-  private static visualEditorLastSourcePos = new Map<string,SourcePos>();
+  private static visualEditorLastSourcePos = new Map<string, SourcePos>();
 
   // track pending switch to source
   private static visualEditorPendingSwitchToSource = new Set<string>();
 
   // track pending xref navigations
-  private static visualEditorPendingXRefNavigations = new Map<string,XRef>();
+  private static visualEditorPendingXRefNavigations = new Map<string, XRef>();
 
   // track visual editors
   private static visualEditors = visualEditorTracker();
 
   public static register(
-    context: ExtensionContext, 
+    context: ExtensionContext,
     host: ExtensionHost,
     quartoContext: QuartoContext,
     lspClient: LanguageClient,
@@ -150,31 +151,33 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // when the active editor changes see if we have a visual editor position for it
     context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(async () => {
-      // resolve active editor
-      const editor = window.activeTextEditor;
-      if (!editor) {
-        return;
-      }
 
-      const document = editor.document;
-      if (document && isQuartoDoc(document)) {
-        const uri = document.uri.toString();
+      // resolve if active editor is text or visual
+      const editor = window.activeTextEditor;
+      const visualEditor = VisualEditorProvider.activeEditor();
+
+      let document = editor?.document || visualEditor?.document;
+      if (!document) { return; }
+
+      // determine what mode editor should be in
+      const config = defaultEditorOpener();
+      const editorMode = await determineMode(document);
+
+      if (editor && isQuartoDoc(document)) {
+        
         // check for switch (one shot)
+        const uri = document.uri.toString();
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
 
         // check to see if this is a git diff. if so, do not try to change editor mode
         const tabLabel = window.tabGroups.activeTabGroup.activeTab?.label
         const isDiff = labels.some(label => tabLabel?.includes(label))
 
-        // see if user has specified visual or source mode
-        const config = workspace.getConfiguration('quarto').get<string>('defaultEditor');
-        const editorMode = await determineMode(document);
         if (editorMode && editorMode != config && !isSwitch && !isDiff) {
-          const editorOpener = editorMode === 'visual' ? VisualEditorProvider.viewType : 'textEditor';
           await commands.executeCommand('workbench.action.closeActiveEditor');
           await commands.executeCommand("vscode.openWith",
-            document.uri,
-            editorOpener
+            document?.uri,
+            editorMode
           );
           return;
         }

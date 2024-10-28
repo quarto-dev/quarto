@@ -20,7 +20,8 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
+import { virtualDoc, virtualDocUri, adjustedPosition, unadjustedRange } from "../vdoc/vdoc";
+import { EmbeddedLanguage } from '../vdoc/languages';
 
 declare global {
   function acquirePositronApi(): hooks.PositronApi;
@@ -155,7 +156,11 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     if (vdoc) {
       const vdocUri = await virtualDocUri(vdoc, document.uri, "statementRange");
       try {
-        return getStatementRange(vdocUri.uri, adjustedPosition(vdoc.language, position));
+        return getStatementRange(
+          vdocUri.uri,
+          adjustedPosition(vdoc.language, position),
+          vdoc.language
+        );
       } catch (error) {
         return undefined;
       } finally {
@@ -172,10 +177,12 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
 async function getStatementRange(
   uri: vscode.Uri,
   position: vscode.Position,
+  language: EmbeddedLanguage
 ) {
-  return await vscode.commands.executeCommand<hooks.StatementRange>(
+  const result = await vscode.commands.executeCommand<hooks.StatementRange>(
     "vscode.executeStatementRangeProvider",
     uri,
     position
   );
+  return { range: unadjustedRange(language, result.range), code: result.code };
 }

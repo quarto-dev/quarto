@@ -46,6 +46,7 @@ import {
   executeSelectionInteractive,
 } from "./executors";
 import { ExtensionHost } from "../../host";
+import { hasHooks } from "../../host/hooks";
 import { isKnitrDocument } from "../../host/executors";
 import { commands } from "vscode";
 
@@ -281,18 +282,23 @@ class RunCurrentCommand extends RunCommand implements Command {
     const language = languageNameFromBlock(block);
     const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
     if (executor && isExecutableLanguageBlock(block)) {
+      // Resolve this command to "run cell" when we can't find a selection:
+      // - the selection is empty
+      // - this is not a knitr document
+      // - this is not a Python or R document being used in Positron
+      const resolveToRunCell = editor.selection.isEmpty &&
+        !this.runSelection_ &&
+        !isKnitrDocument(editor.document, this.engine_) &&
+        (!hasHooks() && (language === "python" || language === "r"));
 
-      // if the selection is empty and this isn't a knitr document then it resolves to run cell
-      if (editor.selection.isEmpty && !isKnitrDocument(editor.document, this.engine_) && !this.runSelection_) {
-
+      if (resolveToRunCell) {
         const code = codeWithoutOptionsFromBlock(block);
         await executeInteractive(executor, [code], editor.document);
-
       } else {
         // submit
         const executed = await executeSelectionInteractive(executor);
 
-        // if the executor isn't capable of lenguage aware runSelection
+        // if the executor isn't capable of language aware runSelection
         // then determine the selection manually
         if (!executed) {
           // if the selection is empty take the whole line, otherwise

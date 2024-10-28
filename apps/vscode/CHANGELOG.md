@@ -2,6 +2,8 @@
 
 ## 1.117.0 (unreleased)
 
+- Improved statement execution for Python `.qmd` files in Positron (<https://github.com/quarto-dev/quarto/pull/589>)
+
 ## 1.116.0 (Release on 2024-10-08)
 
 - Fix issue with raw html blocks being removed from document by Visual Editor (<https://github.com/quarto-dev/quarto/issues/552>)

@@ -18,10 +18,11 @@ import * as quarto from "quarto-core";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
+import { Uri } from "vscode";
 
-export function determineMode(doc: TextDocument): string | undefined {
+export function determineMode(text: string, uri: Uri): string | undefined {
   let editorOpener = undefined;
-  const text = doc.getText();
+
   // check if file itself has a mode
   if (hasEditorMode(text, "source")) {
     editorOpener = "textEditor";
@@ -31,14 +32,14 @@ export function determineMode(doc: TextDocument): string | undefined {
   }
   // check if has a _quarto.yml or _quarto.yaml file with editor specified
   else {
-    editorOpener = modeFromQuartoYaml(doc);
+    editorOpener = modeFromQuartoYaml(uri);
   }
 
   return editorOpener;
 }
 
-export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
-  const metadataFiles = quarto.metadataFilesForDocument(doc.uri.fsPath);
+export function modeFromQuartoYaml(uri: Uri): string | undefined {
+  const metadataFiles = quarto.metadataFilesForDocument(uri.fsPath);
   if (!metadataFiles) {
     return undefined;
   }
@@ -46,7 +47,7 @@ export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
     for (const metadataFile of metadataFiles) {
       const yamlText = quarto.yamlFromMetadataFile(metadataFile);
       if (yamlText?.editor === "source") {
-        return "default"
+        return "textEditor";
       }
       if (yamlText?.editor === "visual") {
         return VisualEditorProvider.viewType;
@@ -103,7 +104,7 @@ export async function reopenEditorInVisualMode(
   // save then close
   await commands.executeCommand("workbench.action.files.save");
   await commands.executeCommand('workbench.action.closeActiveEditor');
-
+  VisualEditorProvider.recordPendingSwitchToVisual(document);
   // open in visual mode
   await commands.executeCommand("vscode.openWith",
     document.uri,

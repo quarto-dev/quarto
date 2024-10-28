@@ -19,10 +19,10 @@ export function defaultEditorOpener(): string | undefined {
   const target = 'workbench.editorAssociations';
 
   const inspectType = vscode.workspace.getConfiguration(undefined).inspect(target)?.globalValue as { "*.qmd"?: string };
-  if (!inspectType) { return "textEditor"; }
+  if (!inspectType) { return "default"; }
 
   if (inspectType.hasOwnProperty("*.qmd")) {
     return inspectType["*.qmd"];
   }
-  return "textEditor"
+  return "default";
 }

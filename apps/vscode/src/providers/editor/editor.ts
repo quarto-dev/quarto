@@ -35,7 +35,7 @@ import {
   ViewColumn,
   Selection,
   TextEditorRevealType,
-  GlobPattern
+  GlobPattern, TabInputText, TabGroups, Tab, TabGroup
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -66,6 +66,7 @@ import {
 } from "./toggle";
 import { defaultEditorOpener } from "../editor/configurations"
 import { ExtensionHost } from "../../host";
+import { TabInputCustom } from "vscode";
 
 const labels = [
   "(Working Tree)",
@@ -113,6 +114,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   // track pending switch to source
   private static visualEditorPendingSwitchToSource = new Set<string>();
 
+  // track pending switch to visual
+  private static editorPendingSwitchToVisual = new Set<string>();
+
   // track pending xref navigations
   private static visualEditorPendingXRefNavigations = new Map<string, XRef>();
 
@@ -150,32 +154,61 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
     }));
 
+    context.subscriptions.push(window.tabGroups.onDidChangeTabs(async (t) => {
+      if (t.closed.length > 0) { return; }
+      const tabs = t.changed.length > 0 ? t.changed : t.opened;
+
+
+      if (tabs.length > 0) {
+        for (const tab of tabs) {
+          if (tab.isActive && tab.label.endsWith(".qmd") && (tab.input instanceof TabInputText || tab.input instanceof TabInputCustom)) {
+            // determine what mode editor should be in
+            const uri = tab.input.uri;
+
+            const isTextEditor = tab.input instanceof TabInputText;
+            const viewType = isTextEditor ? "textEditor" : tab.input.viewType;
+
+            // get file contents
+            const fileData = await workspace.fs.readFile(uri);
+            const fileContent = Buffer.from(fileData).toString('utf8');
+            const editorMode = determineMode(fileContent, uri);
+            let isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
+            this.editorPendingSwitchToVisual.delete(uri.toString());
+
+            if (editorMode && editorMode != viewType && !isSwitch) {
+              const allTabs = window.tabGroups.all?.[0]?.tabs;
+
+              // find tab to close if swapping editor type. we don't want to close an active
+              // tab since a tab we are opening has not been set as active yet. we also don't
+              // want to close preview tabs since they will automatically be overriden
+              const tabsToClose = allTabs.filter(tab => (
+                tab.input?.uri?.toString() === uri?.toString()) && (tab.isActive == false || tab.isPreview == true)
+              );
+
+              await window.tabGroups.close(tabsToClose, false);
+              await commands.executeCommand("vscode.openWith", uri, editorMode);
+              return;
+            }
+          }
+        }
+      }
+    }));
+
+
     // when the active editor changes see if we have a visual editor position for it
-    context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(async (editor: TextEditor | undefined) => {
+    context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(() => {
 
-      let document = editor?.document;
-
-      if (editor && document && isQuartoDoc(document)) {
-        // determine what mode editor should be in
-        const config = defaultEditorOpener();
-        const editorMode = determineMode(document);
+      // resolve active editor
+      const editor = window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      const document = editor.document;
+      if (document && isQuartoDoc(document)) {
+        const uri = document.uri.toString();
 
         // check for switch (one shot)
-        const uri = document.uri.toString();
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
-
-        // check to see if this is a git diff. if so, do not try to change editor mode
-        const tabLabel = window.tabGroups.activeTabGroup.activeTab?.label
-        const isDiff = labels.some(label => tabLabel?.includes(label))
-
-        if (editorMode && editorMode != config && !isSwitch && !isDiff) {
-          await commands.executeCommand('workbench.action.closeActiveEditor');
-          await commands.executeCommand("vscode.openWith",
-            document?.uri,
-            editorMode
-          );
-          return;
-        }
 
         this.visualEditorPendingSwitchToSource.delete(uri);
 
@@ -232,6 +265,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static recordPendingSwitchToSource(document: TextDocument) {
     this.visualEditorPendingSwitchToSource.add(document.uri.toString());
+  }
+
+  public static recordPendingSwitchToVisual(document: TextDocument) {
+    this.editorPendingSwitchToVisual.add(document.uri.toString());
   }
 
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {

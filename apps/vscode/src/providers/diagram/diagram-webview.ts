@@ -91,7 +91,7 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
   private async updatePreview(state?: DiagramState) {
     
     if (this.isVisible()) {
-      // see if there is an explcit state update (otherwise inspect hte active editor)
+      // see if there is an explicit state update (otherwise inspect the active editor)
       if (state) {
         
         this.updateViewState(state);

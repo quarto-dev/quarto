@@ -28,9 +28,9 @@ export interface EmbeddedLanguage {
   canFormatDocument?: boolean;
 }
 
-export function embeddedLanguage(langauge: string) {
-  langauge = langauge.split("-").pop() || "";
-  return kEmbededLanguages.find((lang) => lang.ids.includes(langauge));
+export function embeddedLanguage(language: string) {
+  language = language.split("-").pop() || "";
+  return kEmbededLanguages.find((lang) => lang.ids.includes(language));
 }
 
 export function languageCanFormatDocument(language: EmbeddedLanguage) {
@@ -38,7 +38,7 @@ export function languageCanFormatDocument(language: EmbeddedLanguage) {
 }
 
 const kEmbededLanguages = [
-  // these langauges required creating a temp file
+  // these languages required creating a temp file
   defineLanguage("python", {
     inject: ["# type: ignore", "# flake8: noqa"],
     emptyLine: "#",
@@ -77,7 +77,7 @@ const kEmbededLanguages = [
   defineLanguage("java"),
   defineLanguage("cpp"),
   defineLanguage("go"),
-  // these langauges work w/ text document content provider
+  // these languages work w/ text document content provider
   defineLanguage("html", { type: "content" }),
   defineLanguage("css", { type: "content" }),
   defineLanguage("javascript", { type: "content" }),
@@ -98,7 +98,7 @@ function defineLanguage(
   options?: LanguageOptions
 ): EmbeddedLanguage {
  
-  // lookup langauge
+  // lookup language
   const language = editorLanguage(id);
   if (!language) {
     throw new Error(`Unknown language ${id}`);

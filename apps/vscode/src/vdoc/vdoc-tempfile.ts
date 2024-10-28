@@ -94,8 +94,8 @@ export async function deactivateVirtualDocTempFiles() {
   });
 }
 
-export function isLanguageVirtualDoc(langauge: EmbeddedLanguage, uri: Uri) {
-  return languageVirtualDocs.get(langauge.extension)?.uri.toString() === uri.toString();
+export function isLanguageVirtualDoc(language: EmbeddedLanguage, uri: Uri) {
+  return languageVirtualDocs.get(language.extension)?.uri.toString() === uri.toString();
 }
 
 // delete a document

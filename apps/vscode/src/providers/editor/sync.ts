@@ -66,8 +66,8 @@ export function editorSyncManager(
 ) : EditorSyncManager {
 
   // state: an update from the visual editor that we have yet to apply. we don't 
-  // apply these on every keystoke b/c they are expensive. we poll to apply these
-  // udpates periodically and also apply them immediately on save and when the 
+  // apply these on every keystroke b/c they are expensive. we poll to apply these
+  // updates periodically and also apply them immediately on save and when the 
   // visual editor instructs us to do so (e.g. when it loses focus)
   let pendingVisualEdit: unknown | undefined;
 
@@ -76,7 +76,7 @@ export function editorSyncManager(
   let supressNextUpdate = false; 
 
   // collect a pending edit, converting it to markdown and setting the supressNextUpdate bit
-  // if we fail get the markdown then we neither clear the pending edit nor supress the update
+  // if we fail get the markdown then we neither clear the pending edit nor suppress the update
   const collectPendingVisualEdit = async () : Promise<string | undefined> => {
     if (pendingVisualEdit) {
       const state = pendingVisualEdit;
@@ -135,7 +135,7 @@ export function editorSyncManager(
       }
     },
 
-    // notification that the visual editor changed (enque the change)
+    // notification that the visual editor changed (enqueue the change)
     onVisualEditorChanged: async (state: unknown) => {
       pendingVisualEdit = state;
     },
@@ -144,7 +144,7 @@ export function editorSyncManager(
     flushPendingUpdates: collectAndApplyPendingVisualEdit,
 
     // notification that the document changed, let the visual editor
-    // know about the change unless the next update is supressed. note that
+    // know about the change unless the next update is suppressed. note that
     // the visual editor will throttle these changes internally (and
     // apply them immediately when it receives focus)
     onDocumentChanged: async () => {
@@ -155,7 +155,7 @@ export function editorSyncManager(
       }
     },
 
-    // notification that we are saving (allow flusing of visual editor changes)
+    // notification that we are saving (allow flushing of visual editor changes)
     onDocumentSaving: async () : Promise<TextEdit[]> => {
       // attempt to collect pending edit
       const markdown = await collectPendingVisualEdit();

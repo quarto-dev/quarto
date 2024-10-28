@@ -2221,10 +2221,10 @@
   resolved "https://registry.yarnpkg.com/@types/vscode-webview/-/vscode-webview-1.57.1.tgz#0bf2c9d57698b99be2bb2813272169f7f62eb714"
   integrity sha512-ghW5SfuDmsGDS2A4xkvGsLwDRNc3Vj5rS6rPOyPm/IryZuf3wceZKxgYaUoW+k9f0f/CB7y2c1rRsdOWZWn0PQ==
 
-"@types/vscode@1.94.0":
-  version "1.94.0"
-  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.94.0.tgz#ccd2111b6ecaba6ad4da19c2d524828fa73ae250"
-  integrity sha512-UyQOIUT0pb14XSqJskYnRwD2aG0QrPVefIfrW1djR+/J4KeFQ0i1+hjZoaAmeNf3Z2jleK+R2hv+EboG/m8ruw==
+"@types/vscode@1.75.0":
+  version "1.75.0"
+  resolved "https://registry.yarnpkg.com/@types/vscode/-/vscode-1.75.0.tgz#f1892a727db9a0eb4997058a804170b8c0ba218e"
+  integrity sha512-SAr0PoOhJS6FUq5LjNr8C/StBKALZwDVm3+U4pjF/3iYkt3GioJOPV/oB1Sf1l7lROe4TgrMyL5N1yaEgTWycw==
 
 "@types/wcwidth@^1.0.0":
   version "1.0.0"

@@ -1036,16 +1036,6 @@
           "default": true,
           "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#`."
         },
-        "quarto.defaultEditor": {
-          "order": 11,
-          "type": "string",
-          "markdownDescription": "Default editor. Only applicable in Positron.",
-          "enum": [
-            "source",
-            "visual"
-          ],
-          "default": "source"
-        },
         "quarto.render.renderOnSave": {
           "order": 12,
           "scope": "window",
@@ -1392,7 +1382,7 @@
     "@types/semver": "^7.3.13",
     "@types/tmp": "^0.2.3",
     "@types/uuid": "^9.0.0",
-    "@types/vscode": "1.94.0",
+    "@types/vscode": "1.75.0",
     "@types/which": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",

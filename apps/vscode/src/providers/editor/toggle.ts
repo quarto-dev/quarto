@@ -46,7 +46,7 @@ export function modeFromQuartoYaml(doc: TextDocument): string | undefined {
     for (const metadataFile of metadataFiles) {
       const yamlText = quarto.yamlFromMetadataFile(metadataFile);
       if (yamlText?.editor === "source") {
-        return "textEditor"
+        return "default"
       }
       if (yamlText?.editor === "visual") {
         return VisualEditorProvider.viewType;

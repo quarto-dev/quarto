@@ -64,7 +64,6 @@ import {
   editInVisualModeCommand,
   reopenEditorInSourceMode
 } from "./toggle";
-import { defaultEditorOpener } from "../editor/configurations"
 import { ExtensionHost } from "../../host";
 import { TabInputCustom } from "vscode";
 

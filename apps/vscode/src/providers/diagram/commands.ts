@@ -41,7 +41,7 @@ export function diagramCommands(
 
 
 class PreviewDiagramCommand implements Command {
-  constructor(private readonly manager_: QuartoDiagramWebviewManager) {}
+  constructor(private readonly manager_: QuartoDiagramWebviewManager) { }
   execute(options?: PreviewDiagramOptions): void {
     // set selection to line if requested
     if (options?.textEditorLine !== undefined && window.activeTextEditor) {
@@ -58,7 +58,7 @@ class PreviewDiagramCommand implements Command {
 }
 
 class PreviewContentShortcutCommand implements Command {
-  constructor(private readonly engine_: MarkdownEngine) {}
+  constructor(private readonly engine_: MarkdownEngine) { }
   async execute(): Promise<void> {
     // first determine whether this is an alias for preview math or preview diagram
     if (window.activeTextEditor) {
@@ -91,11 +91,11 @@ class PreviewContentShortcutCommand implements Command {
           activate: true
         });
       } else {
-         // info message
+        // info message
         window.showInformationMessage(
           "No content preview available (selection not within an equation or diagram)"
         );
-      }     
+      }
     }
   }
 

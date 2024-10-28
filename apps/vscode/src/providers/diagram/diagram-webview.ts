@@ -64,7 +64,7 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
   }
 
   public showDiagram(state?: DiagramState, activate = true) {
-    
+
     if (!this.activeView_ && !activate) {
       return;
     }
@@ -89,14 +89,14 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
 
 
   private async updatePreview(state?: DiagramState) {
-    
+
     if (this.isVisible()) {
       // see if there is an explcit state update (otherwise inspect hte active editor)
       if (state) {
-        
+
         this.updateViewState(state);
-      
-      // inspect the active editor for a diagram
+
+        // inspect the active editor for a diagram
       } else if (window.activeTextEditor) {
         const doc = window.activeTextEditor.document;
         if (isQuartoDoc(doc) && window.activeTextEditor.selection) {
@@ -127,7 +127,7 @@ export class QuartoDiagramWebviewManager extends QuartoWebviewManager<
         if (veDiagram) {
           this.updateViewState(veDiagram);
         }
-      } 
+      }
     }
   }
 

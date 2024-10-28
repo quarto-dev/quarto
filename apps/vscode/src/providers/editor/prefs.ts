@@ -79,25 +79,25 @@ export async function vscodePrefsServer(
   engine: MarkdownEngine,
   document: TextDocument,
   onPrefsChanged: (prefs: Prefs) => void
-) : Promise<[PrefsServer, Disposable]>  {
+): Promise<[PrefsServer, Disposable]> {
 
   const server = prefsServer();
   const defaults = defaultPrefs();
 
-  const getPrefs = async () : Promise<Prefs> => {  
-    
+  const getPrefs = async (): Promise<Prefs> => {
+
     const configuration = workspace.getConfiguration(undefined, document.uri);
-    
+
     const globalPrefs = await server.getPrefs();
-    const prefs = { 
-      
+    const prefs = {
+
       ...(globalPrefs),
 
-      ...readPerDocumentPrefs(document, globalPrefs), 
+      ...readPerDocumentPrefs(document, globalPrefs),
 
       // theme
-      darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark || 
-                window.activeColorTheme.kind === ColorThemeKind.HighContrast,
+      darkMode: window.activeColorTheme.kind === ColorThemeKind.Dark ||
+        window.activeColorTheme.kind === ColorThemeKind.HighContrast,
       fontSize: configuration.get<number>(kQuartoEditorFontSize, 0) || configuration.get<number>(kEditorFontSize, defaults.fontSize),
       fontFamily: configuration.get<string>(kQuartoEditorFontFamily) || configuration.get<string>(kMarkdownPreviewFontFamily, defaults.fontFamily),
       maxContentWidth: configuration.get<number>(kQuartoEditorMaxContentWidth, defaults.maxContentWidth),
@@ -111,7 +111,7 @@ export async function vscodePrefsServer(
 
       // markdown writer settings
       ...(await readMarkdownPrefs(context, engine, document)),
-     
+
       // vscode code editor settings
       spacesForTab: configuration.get<boolean>(kEditorInsertSpaces, true),
       tabWidth: configuration.get<number>(kEditorTabSize, 4),
@@ -132,7 +132,7 @@ export async function vscodePrefsServer(
   const kThrottleDelayMs = 100;
   const firePrefsChanged = throttle(() => {
     getPrefs().then(onPrefsChanged);
-  }, kThrottleDelayMs, { leading: false, trailing: true});
+  }, kThrottleDelayMs, { leading: false, trailing: true });
 
 
   // subscribe to changes that can affect prefs
@@ -172,11 +172,11 @@ export async function vscodePrefsServer(
   return [
     {
       getPrefs,
-      setPrefs: async (prefs: Prefs) : Promise<void> => {
+      setPrefs: async (prefs: Prefs): Promise<void> => {
         server.setPrefs(prefs);
         writePerDocumentPrefs(document, prefs);
       }
-    }, 
+    },
     {
       dispose() {
         for (const disposable of disposables) {
@@ -189,8 +189,8 @@ export async function vscodePrefsServer(
 
 
 async function readMarkdownPrefs(
-  context: QuartoContext, 
-  engine: MarkdownEngine, 
+  context: QuartoContext,
+  engine: MarkdownEngine,
   document: TextDocument
 ) {
 
@@ -242,19 +242,19 @@ async function readMarkdownPrefs(
   return prefs;
 }
 
-function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: MarkdownPrefs) {
+function resolveMarkdownPrefs(frontMatter: Record<string, unknown>, prefs: MarkdownPrefs) {
 
   // copy baseline prefs
   const resolved = { ...prefs };
 
   // determine editor key
-  const editorKey = (frontMatter["editor"] || frontMatter["editor_options"]) as Record<string,unknown>;
+  const editorKey = (frontMatter["editor"] || frontMatter["editor_options"]) as Record<string, unknown>;
   if (!editorKey || typeof editorKey !== "object") {
     return resolved;
   }
 
   // markdown options
-  const markdownKey = editorKey["markdown"] as Record<string,unknown>;
+  const markdownKey = editorKey["markdown"] as Record<string, unknown>;
   if (!markdownKey || typeof markdownKey !== "object") {
     return resolved;
   }
@@ -262,7 +262,7 @@ function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: Markdo
   // markdown wrap
   const wrap = markdownKey["wrap"];
   if (wrap) {
-    if (typeof(wrap) === "number") {
+    if (typeof (wrap) === "number") {
       resolved.markdownWrap = "column";
       resolved.markdownWrapColumn = wrap;
     } else if (wrap === "none") {
@@ -273,8 +273,8 @@ function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: Markdo
   }
 
   // markdown references
-  const referencesKey = markdownKey["references"] as Record<string,unknown>;
-  if (referencesKey && typeof(referencesKey) === "object") {
+  const referencesKey = markdownKey["references"] as Record<string, unknown>;
+  if (referencesKey && typeof (referencesKey) === "object") {
     const location = referencesKey["location"];
     if (location) {
       if (location === 'block') {
@@ -286,7 +286,7 @@ function resolveMarkdownPrefs(frontMatter: Record<string,unknown>, prefs: Markdo
       }
     }
     const prefix = referencesKey["prefix"];
-    resolved.markdownReferencesPrefix = prefix && typeof(prefix) === "string"
+    resolved.markdownReferencesPrefix = prefix && typeof (prefix) === "string"
       ? prefix
       : resolved.markdownReferencesPrefix;
 
@@ -302,7 +302,7 @@ interface PerDocumentPrefs {
   showOutline: boolean;
 }
 
-function readPerDocumentPrefs(document: TextDocument, defaultPrefs: Prefs) : PerDocumentPrefs {
+function readPerDocumentPrefs(document: TextDocument, defaultPrefs: Prefs): PerDocumentPrefs {
   const storage = filePrefsStorage(document.uri.fsPath);
   if (existsSync(storage)) {
     const prefs = JSON.parse(readFileSync(storage, { encoding: "utf8" }));

@@ -61,7 +61,7 @@ export class EditorRenderCacheKey {
     public readonly url: Uri,
     public readonly version: number,
     public readonly wordRange: Range | undefined
-  ) {}
+  ) { }
 
   public equals(other: EditorRenderCacheKey): boolean {
     if (this.url.toString() !== other.url.toString()) {

@@ -42,9 +42,9 @@ declare module 'positron' {
 
 	export interface PositronWindow {
 		createPreviewPanel(
-			viewType: string, 
-			title: string, 
-			preserveFocus?: boolean, 
+			viewType: string,
+			title: string,
+			preserveFocus?: boolean,
 			options?: PreviewOptions
 		): PreviewPanel;
 	}

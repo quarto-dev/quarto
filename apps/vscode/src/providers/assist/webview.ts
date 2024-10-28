@@ -48,8 +48,7 @@ enum UpdateMode {
 }
 
 export class QuartoAssistViewProvider
-  implements WebviewViewProvider, Disposable
-{
+  implements WebviewViewProvider, Disposable {
   public static readonly viewType = "quarto-assist";
 
   constructor(context: ExtensionContext) {
@@ -132,7 +131,7 @@ export class QuartoAssistViewProvider
       this.render(true, async (
         asWebviewUri: (uri: Uri) => Uri,
         token: CancellationToken
-      ) : Promise<Assist | undefined> => {
+      ): Promise<Assist | undefined> => {
         return renderCodeViewAssist(context, lspRequest, asWebviewUri, token);
       });
     }
@@ -169,11 +168,11 @@ export class QuartoAssistViewProvider
   }
 
   private async render(ignoreCache = false, renderFn = renderActiveAssist) {
-    
+
     if (!this.shouldRender()) {
       return;
     }
-   
+
     // don't render if the editor state hasn't changed (i.e. the cursor
     // isn't on a new word range)
     const newRenderCacheKey = createRenderCacheKey(window.activeTextEditor);
@@ -220,9 +219,8 @@ export class QuartoAssistViewProvider
         if (this.view_) {
           this.view_.webview.postMessage({
             type: "update",
-            body: `<div class="${assist.type.toLowerCase()}">${
-              assist.html
-            }</div>`,
+            body: `<div class="${assist.type.toLowerCase()}">${assist.html
+              }</div>`,
             updateMode: this.updateMode_,
           });
           this.view_.title = assist.type;
@@ -260,18 +258,18 @@ export class QuartoAssistViewProvider
   private shouldRender() {
     // ignore if we have no view
     if (!this.view_) {
-     return false;
-   }
+      return false;
+    }
 
-   // ignore if we are pinned
-   else if (this.pinned_) {
-     return false ;
-   }
+    // ignore if we are pinned
+    else if (this.pinned_) {
+      return false;
+    }
 
-   else {
-     return true;
-   }
- }
+    else {
+      return true;
+    }
+  }
 
 
   private updateConfiguration() {

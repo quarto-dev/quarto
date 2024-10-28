@@ -18,10 +18,10 @@ import { EmbeddedLanguage } from "./languages";
 import { adjustedPosition, unadjustedRange, VirtualDoc, virtualDocUri, withVirtualDocUri } from "./vdoc";
 
 export async function vdocCompletions(
-  vdoc: VirtualDoc, 
-  position: Position, 
+  vdoc: VirtualDoc,
+  position: Position,
   trigger: string | undefined,
-  language: EmbeddedLanguage, 
+  language: EmbeddedLanguage,
   parentUri: Uri
 ) {
 

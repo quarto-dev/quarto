@@ -21,7 +21,7 @@ import { VisualEditorProvider } from "./editor";
 
 
 
-export function editInVisualModeCommand() : Command {
+export function editInVisualModeCommand(): Command {
   return {
     id: "quarto.editInVisualMode",
     execute() {
@@ -33,14 +33,14 @@ export function editInVisualModeCommand() : Command {
   };
 }
 
-export function editInSourceModeCommand() : Command {
+export function editInSourceModeCommand(): Command {
   return {
     id: "quarto.editInSourceMode",
     execute() {
       const activeVisual = VisualEditorProvider.activeEditor();
       if (activeVisual) {
         reopenEditorInSourceMode(activeVisual.document, '', activeVisual.viewColumn);
-      } 
+      }
     }
   };
 }
@@ -49,14 +49,14 @@ export async function reopenEditorInVisualMode(
   document: TextDocument,
   viewColumn?: ViewColumn
 ) {
- 
+
   // save then close
   await commands.executeCommand("workbench.action.files.save");
   await commands.executeCommand('workbench.action.closeActiveEditor');
 
   // open in visual mode
-  await commands.executeCommand("vscode.openWith", 
-    document.uri, 
+  await commands.executeCommand("vscode.openWith",
+    document.uri,
     VisualEditorProvider.viewType,
     {
       viewColumn
@@ -65,8 +65,8 @@ export async function reopenEditorInVisualMode(
 }
 
 export async function reopenEditorInSourceMode(
-  document: TextDocument, 
-  untitledContent?: string, 
+  document: TextDocument,
+  untitledContent?: string,
   viewColumn?: ViewColumn
 ) {
   if (!document.isUntitled) {
@@ -91,5 +91,5 @@ export async function reopenEditorInSourceMode(
       await window.showTextDocument(doc, viewColumn, false);
     }
   });
-  
+
 }

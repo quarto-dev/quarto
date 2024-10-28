@@ -17,16 +17,16 @@ import path, { extname } from "path";
 
 import debounce from "lodash.debounce";
 
-import { 
+import {
   window,
-  workspace, 
-  ExtensionContext, 
-  Disposable, 
-  CustomTextEditorProvider, 
-  TextDocument, 
-  WebviewPanel, 
-  CancellationToken, 
-  Uri, 
+  workspace,
+  ExtensionContext,
+  Disposable,
+  CustomTextEditorProvider,
+  TextDocument,
+  WebviewPanel,
+  CancellationToken,
+  Uri,
   Webview,
   Range,
   env,
@@ -58,18 +58,18 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
 import { JsonRpcRequestTransport } from "core";
-import { 
-  editInSourceModeCommand, 
-  editInVisualModeCommand, 
-  reopenEditorInSourceMode 
+import {
+  editInSourceModeCommand,
+  editInVisualModeCommand,
+  reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 
 
 export interface QuartoVisualEditor extends QuartoEditor {
-  hasFocus() : Promise<boolean>;
-  getActiveBlockContext() : Promise<CodeViewActiveBlockContext | null>;
-  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : Promise<void>;
+  hasFocus(): Promise<boolean>;
+  getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
+  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
 }
 
 export function activateEditor(
@@ -78,7 +78,7 @@ export function activateEditor(
   quartoContext: QuartoContext,
   lspClient: LanguageClient,
   engine: MarkdownEngine
-) : Command[] {
+): Command[] {
   // register the provider
   context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
 
@@ -88,33 +88,33 @@ export function activateEditor(
 
 
 export class VisualEditorProvider implements CustomTextEditorProvider {
-  
+
   // track the last contents of any active untitled docs (used
   // for recovering from attempt to edit )
   private static activeUntitled?: { uri: Uri, content: string };
 
   // track the last edited line of code in text editors (used for syncing position)
-  private static editorLastSourcePos = new Map<string,number>();
+  private static editorLastSourcePos = new Map<string, number>();
 
   // track the list source location in visual editors (used for syncing position)
-  private static visualEditorLastSourcePos = new Map<string,SourcePos>();
+  private static visualEditorLastSourcePos = new Map<string, SourcePos>();
 
   // track pending switch to source
   private static visualEditorPendingSwitchToSource = new Set<string>();
 
   // track pending xref navigations
-  private static visualEditorPendingXRefNavigations = new Map<string,XRef>();
+  private static visualEditorPendingXRefNavigations = new Map<string, XRef>();
 
   // track visual editors
   private static visualEditors = visualEditorTracker();
 
   public static register(
-    context: ExtensionContext, 
+    context: ExtensionContext,
     host: ExtensionHost,
     quartoContext: QuartoContext,
     lspClient: LanguageClient,
     engine: MarkdownEngine
-  ) : Disposable {
+  ): Disposable {
 
     // setup request transport 
     const lspRequest = lspClientTransport(lspClient);
@@ -149,7 +149,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       const document = editor.document;
       if (document && isQuartoDoc(document)) {
         const uri = document.uri.toString();
-        
+
         // check for switch (one shot)
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
         this.visualEditorPendingSwitchToSource.delete(uri);
@@ -166,7 +166,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
           // find the index
           let cursorIndex = -1;
-          for (let i=(pos.locations.length-1); i>=0; i--) {
+          for (let i = (pos.locations.length - 1); i >= 0; i--) {
             if (pos.pos >= pos.locations[i].pos) {
               cursorIndex = i;
               break;
@@ -178,11 +178,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
           source.getSourcePosLocations(document.getText()).then(locations => {
             // map to source line
             const selLine = (cursorIndex !== -1 && (locations.length > cursorIndex))
-              ? (locations[cursorIndex] || locations[locations.length-1]).pos - 1
+              ? (locations[cursorIndex] || locations[locations.length - 1]).pos - 1
               : 0;
 
             // navigate
-            const selRange = new  Range(selLine, 0, selLine, 0);
+            const selRange = new Range(selLine, 0, selLine, 0);
             editor.selection = new Selection(selRange.start, selRange.end);
             editor.revealRange(selRange, TextEditorRevealType.InCenter);
           });
@@ -209,11 +209,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     this.visualEditorPendingSwitchToSource.add(document.uri.toString());
   }
 
-  public static activeEditor(includeVisible?: boolean) : QuartoVisualEditor | undefined {
+  public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
-      return { 
-        document: editor.document, 
+      return {
+        document: editor.document,
         hasFocus: async () => {
           return await editor.editor.isFocused();
         },
@@ -229,14 +229,14 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         setBlockSelection: async (context, action) => {
           await editor.editor.setBlockSelection(context, action);
         },
-        viewColumn: editor.webviewPanel.viewColumn 
+        viewColumn: editor.webviewPanel.viewColumn
       };
     } else {
       return undefined;
     }
   }
 
-  public static editorForUri(uri: Uri) : TrackedEditor | undefined {
+  public static editorForUri(uri: Uri): TrackedEditor | undefined {
     return this.visualEditors.editorForUri(uri);
   }
 
@@ -245,23 +245,23 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   }
 
   constructor(private readonly context: ExtensionContext,
-              private readonly extensionHost: ExtensionHost,
-              private readonly quartoContext: QuartoContext,
-              private readonly lspRequest: JsonRpcRequestTransport,
-              private readonly engine: MarkdownEngine) {}
+    private readonly extensionHost: ExtensionHost,
+    private readonly quartoContext: QuartoContext,
+    private readonly lspRequest: JsonRpcRequestTransport,
+    private readonly engine: MarkdownEngine) { }
 
- 
+
   public async resolveCustomTextEditor(
     document: TextDocument,
     webviewPanel: WebviewPanel,
     _token: CancellationToken
   ) {
 
-     // if the document is untitled then capture its contents (as vscode throws it on the floor
+    // if the document is untitled then capture its contents (as vscode throws it on the floor
     // and we may need it to do a re-open)
-    const untitledContent = 
-      (document.isUntitled && 
-      VisualEditorProvider.activeUntitled?.uri.toString() === document.uri.toString())
+    const untitledContent =
+      (document.isUntitled &&
+        VisualEditorProvider.activeUntitled?.uri.toString() === document.uri.toString())
         ? VisualEditorProvider.activeUntitled.content
         : undefined;
 
@@ -277,11 +277,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       const kLearnMore = "Learn More...";
       const result = await window.showInformationMessage<string>(
         "You are activating Quarto visual markdown editing mode.",
-        { 
-          modal: true, 
-          detail: 
-            "Visual mode enables you to author using a familiar word processor style interface.\n\n" + 
-            "Markdown code will be re-formatted using the Pandoc markdown writer." 
+        {
+          modal: true,
+          detail:
+            "Visual mode enables you to author using a familiar word processor style interface.\n\n" +
+            "Markdown code will be re-formatted using the Pandoc markdown writer."
         },
         kUseVisualMode,
         kLearnMore
@@ -297,7 +297,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         this.context.globalState.update(kVisualModeConfirmed, true);
       }
     }
-  
+
     // some storage locations
     const projectDir = document.isUntitled ? undefined : projectDirForDocument(document.fileName);
     const workspaceDir = this.quartoContext.workspaceDir;
@@ -318,11 +318,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const xref = VisualEditorProvider.visualEditorPendingXRefNavigations.get(sourceUri);
     VisualEditorProvider.visualEditorPendingXRefNavigations.delete(sourceUri);
 
-     // sync manager
+    // sync manager
     const syncManager = editorSyncManager(
-      document, 
-      client.editor, 
-      this.lspRequest, 
+      document,
+      client.editor,
+      this.lspRequest,
       xref || sourcePos
     );
 
@@ -330,12 +330,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const host: VSCodeVisualEditorHost = {
 
       // editor is querying for context
-      getHostContext: async () : Promise<HostContext> => {
+      getHostContext: async (): Promise<HostContext> => {
         return {
           documentPath: document.isUntitled ? null : document.fileName,
           projectDir,
-          resourceDir: document.isUntitled 
-            ? (workspaceDir || process.cwd()) 
+          resourceDir: document.isUntitled
+            ? (workspaceDir || process.cwd())
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows(),
           executableLanguages: this.extensionHost.executableLanguages(true, document, this.engine)
@@ -442,9 +442,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // setup server on webview iframe
     disposables.push(visualEditorServer(
-      webviewPanel, 
-      this.lspRequest, 
-      host, 
+      webviewPanel,
+      this.lspRequest,
+      host,
       prefsServer,
       vscodeCodeViewServer(this.engine, document, this.lspRequest)
     ));
@@ -454,7 +454,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // monitor image file changes
     const kImagePattern = '**/*.{png,svg,jpg,jpeg}';
-    const globPattern : GlobPattern = docDir  
+    const globPattern: GlobPattern = docDir
       ? { baseUri: Uri.file(docDir), base: docDir, pattern: kImagePattern }
       : kImagePattern;
     const watcher = workspace.createFileSystemWatcher(globPattern);
@@ -467,13 +467,13 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     watcher.onDidDelete(onChange);
 
     // load editor webview (include current doc path in localResourceRoots)
-    webviewPanel.webview.options = { 
+    webviewPanel.webview.options = {
       localResourceRoots: [
-        this.context.extensionUri, 
+        this.context.extensionUri,
         ...(workspace.workspaceFolders ? workspace.workspaceFolders.map(folder => folder.uri) : []),
         ...(docDir ? [Uri.file(docDir)] : [])
       ],
-      enableScripts: true 
+      enableScripts: true
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
@@ -486,7 +486,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         disposable.dispose();
       }
     });
-   
+
   }
 
   private editorAssetUri(webview: Webview, file: string) {
@@ -503,7 +503,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
    * Get the static html used for the editor webviews.
    */
   private getHtmlForWebview(webview: Webview): string {
-   
+
     const scriptUri = this.editorAssetUri(webview, "index.js");
     const stylesUri = this.editorAssetUri(webview, "style.css");
     const codiconsUri = this.extensionResourceUrl(webview, [
@@ -553,7 +553,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 }
 
 async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) {
-  
+
   const docDir = path.dirname(baseDoc.uri.fsPath);
   const filePath = path.normalize(path.isAbsolute(file) ? file : path.join(docDir, file));
   const uri = Uri.file(filePath);
@@ -575,11 +575,11 @@ async function navigateToFile(baseDoc: TextDocument, file: string, xref?: XRef) 
     } else {
       await openWith(VisualEditorProvider.viewType);
     }
-  
+
   } else if (ext === ".ipynb") {
-    
+
     await openWith("jupyter-notebook");
-  
+
   } else {
 
     const doc = await workspace.openTextDocument(uri);
@@ -608,13 +608,13 @@ interface VisualEditorTracker {
   activeEditor: (includeVisible?: boolean) => TrackedEditor | undefined;
 }
 
-function visualEditorTracker() : VisualEditorTracker {
+function visualEditorTracker(): VisualEditorTracker {
 
   const activeEditors = new Array<TrackedEditor>();
 
   return {
-    track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : Disposable => {
-      activeEditors.push({document, webviewPanel, editor});
+    track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor): Disposable => {
+      activeEditors.push({ document, webviewPanel, editor });
       return {
         dispose: () => {
           const idx = activeEditors.findIndex(editor => editor.webviewPanel === webviewPanel);
@@ -631,20 +631,20 @@ function visualEditorTracker() : VisualEditorTracker {
       return activeEditors.find(editor => {
         try {
           return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
-        } catch(err) {
+        } catch (err) {
           // we've seen activeEditors hold on to references to disposed editors (can't on the 
           // surface see how this would occur as we subscribe to dispose, but as an insurance
           // policy let's eat any exception that occurs, since a single zombie webviewPanel
           // would prevent rendering of other panels
           return false;
-        } 
-        
+        }
+
       });
     }
   };
 }
 
-function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : Disposable {
+function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor): Disposable {
 
   let hasFocus = false;
   let cancelled = false;
@@ -655,18 +655,18 @@ function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) : 
     editor.focus();
   };
 
-   // if we are focused when the window loses focus then restore on re-focus
-   let reFocus = false;
-   const evWindow = window.onDidChangeWindowState(async (event) => {
-     if (!event.focused && hasFocus) {
-       reFocus = true;
-     } else if (event.focused && reFocus) {
-       setTimeout(async () => {
+  // if we are focused when the window loses focus then restore on re-focus
+  let reFocus = false;
+  const evWindow = window.onDidChangeWindowState(async (event) => {
+    if (!event.focused && hasFocus) {
+      reFocus = true;
+    } else if (event.focused && reFocus) {
+      setTimeout(async () => {
         await focusEditor();
         reFocus = false;
-       }, 200);
-     } 
-   });
+      }, 200);
+    }
+  });
 
   // periodically check for focus 
   const timer = setInterval(async () => {

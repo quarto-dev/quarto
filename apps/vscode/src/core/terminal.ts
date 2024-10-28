@@ -33,7 +33,7 @@ export interface TerminalEnv {
   QUARTO_R?: string;
 }
 
-export async function terminalEnv(uri?: Uri) : Promise<TerminalEnv> {
+export async function terminalEnv(uri?: Uri): Promise<TerminalEnv> {
 
   const env: TerminalEnv = {};
 
@@ -119,17 +119,17 @@ export function terminalCommand(command: string, context: QuartoContext, target?
 }
 
 export async function sendTerminalCommand(
-  terminal: Terminal, 
-  terminalEnv: TerminalEnv, 
-  context: QuartoContext, 
+  terminal: Terminal,
+  terminalEnv: TerminalEnv,
+  context: QuartoContext,
   cmd: string[]
 ) {
-  
+
   // create cmd text
   const cmdText = context.useCmd
-      ? `cmd /C"${cmd.join(" ")}"`
-      : cmd.join(" ");
-  
+    ? `cmd /C"${cmd.join(" ")}"`
+    : cmd.join(" ");
+
   // show the terminal
   terminal.show(true);
 
@@ -165,7 +165,7 @@ export async function killTerminal(name: string, before?: () => Promise<void>) {
 }
 
 
-function requiredTerminalDelay(env?: TerminalEnv) : number {
+function requiredTerminalDelay(env?: TerminalEnv): number {
   try {
     if (env?.QUARTO_PYTHON) {
       if (pythonIsVenv(env.QUARTO_PYTHON)) {

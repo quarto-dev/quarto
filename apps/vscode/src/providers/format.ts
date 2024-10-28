@@ -86,7 +86,7 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
               );
             }
           } else {
-            return (await formatActiveCell(editor, engine) ) || [];
+            return (await formatActiveCell(editor, engine)) || [];
           }
         }
       }
@@ -130,7 +130,7 @@ export function embeddedDocumentRangeFormattingProvider(
 
 class FormatCellCommand implements Command {
   public readonly id = "quarto.formatCell";
-  constructor(private readonly engine_: MarkdownEngine) {}
+  constructor(private readonly engine_: MarkdownEngine) { }
 
   public async execute(): Promise<void> {
     const editor = window.activeTextEditor;

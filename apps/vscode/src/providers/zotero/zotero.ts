@@ -30,11 +30,11 @@ const kZoteroConfigureLibrary = "quarto.zoteroConfigureLibrary";
 const kZoteroSyncWebLibrary = "quarto.zoteroSyncWebLibrary";
 const kZoteroUnauthorized = "quarto.zoteroUnauthorized";
 
-export async function activateZotero(context: ExtensionContext, lspClient: LanguageClient) : Promise<Command[]> {
+export async function activateZotero(context: ExtensionContext, lspClient: LanguageClient): Promise<Command[]> {
 
   // establish zotero connection
   const lspRequest = lspClientTransport(lspClient);
-  const zotero = editorZoteroJsonRpcServer(lspRequest);  
+  const zotero = editorZoteroJsonRpcServer(lspRequest);
 
   // set quarto config for back end
   await syncZoteroConfig(context, zotero);
@@ -44,7 +44,7 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
   commands.push(new ZoteroConfigureLibraryCommand(kZoteroConfigureLibrary, context, zotero));
   commands.push(new ZoteroSyncWebLibraryCommand(kZoteroSyncWebLibrary, context, zotero));
   commands.push(new ZoteroUnauthorizedCommand(kZoteroUnauthorized, context, zotero));
-   
+
   // return commands
   return commands;
 }
@@ -65,12 +65,12 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
     // if this isn't a retry then provide an initial delay (for the lsp to be ready)
     if (retry === undefined) {
       await sleep(500);
-    // if this is our final retry then bail
+      // if this is our final retry then bail
     } else if (retry === 5) {
       return;
     }
     const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
-    const type = zoteroConfig.get<"none"|"local"|"web">(kLibrary, "local");
+    const type = zoteroConfig.get<"none" | "local" | "web">(kLibrary, "local");
     const dataDir = zoteroConfig.get<string>(kDataDir, "");
     const apiKey = await safeReadZoteroApiKey(context);
     try {
@@ -79,11 +79,11 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
         dataDir,
         apiKey
       });
-    } catch(error) {
+    } catch (error) {
       const message = error instanceof Error ? error.message : JSON.stringify(error);
       console.log("Error setting zotero library config: " + message);
       setTimeout(() => setLspLibraryConfig((retry || 0) + 1), 1000);
-    }   
+    }
   };
   await setLspLibraryConfig();
 
@@ -100,15 +100,15 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
 
   // monitor changes to configuration
   context.subscriptions.push(workspace.onDidChangeConfiguration(async (e) => {
-    
+
     // sync changes to base config
-    if (e.affectsConfiguration(kZoteroLibrary) || 
-        e.affectsConfiguration(kZoteroDataDir)) {
+    if (e.affectsConfiguration(kZoteroLibrary) ||
+      e.affectsConfiguration(kZoteroDataDir)) {
 
       // if we are switching to web then prompt for an api key if we don't have one
       const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
-      if (zoteroConfig.get(kLibrary) === "web" && 
-          !(await safeReadZoteroApiKey(context))) {
+      if (zoteroConfig.get(kLibrary) === "web" &&
+        !(await safeReadZoteroApiKey(context))) {
         await commands.executeCommand(kZoteroConfigureLibrary);
       } else {
         await setLspLibraryConfig();
@@ -119,11 +119,11 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
     if (e.affectsConfiguration(kZoteroGroupLibraries)) {
       // read updated library list
       const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
-      const updatedGroupLibraries =  zoteroConfig.get<string[]>(kGroupLibraries, []);
-      
+      const updatedGroupLibraries = zoteroConfig.get<string[]>(kGroupLibraries, []);
+
       // sync if we are in web mode and there are new libraries added
-      if (zoteroConfig.get(kLibrary) === "web" && 
-          updatedGroupLibraries.length > groupLibraries.length) {
+      if (zoteroConfig.get(kLibrary) === "web" &&
+        updatedGroupLibraries.length > groupLibraries.length) {
         const apiKey = await safeReadZoteroApiKey(context);
         if (apiKey) {
           await syncWebLibraries(apiKey);
@@ -139,9 +139,9 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
 // proxy for zotero requests that:
 // (a) forwards the currently configured collections (group libraries)
 // (b) checks for unauthorized errors and prompts for re-authorization
-export function zoteroLspProxy(lspRequest: JsonRpcRequestTransport){
+export function zoteroLspProxy(lspRequest: JsonRpcRequestTransport) {
 
-  const zoteroLsp = editorZoteroJsonRpcServer(lspRequest); 
+  const zoteroLsp = editorZoteroJsonRpcServer(lspRequest);
 
   const handleZoteroResult = (result: ZoteroResult) => {
     if (result.status === 'notfound' && result.unauthorized) {
@@ -154,7 +154,7 @@ export function zoteroLspProxy(lspRequest: JsonRpcRequestTransport){
     const fileCollections = [...collections];
     if (fileCollections.length === 0) {
       const zoteroConfig = workspace.getConfiguration(
-        "quarto.zotero", 
+        "quarto.zotero",
         file ? Uri.file(file) : null
       );
       const groupLibraries = zoteroConfig.get<string[]>("groupLibraries", []);
@@ -167,7 +167,7 @@ export function zoteroLspProxy(lspRequest: JsonRpcRequestTransport){
   };
 
   return zoteroServerMethods({
-    
+
     ...zoteroLsp,
 
     getCollections: async (
@@ -175,27 +175,27 @@ export function zoteroLspProxy(lspRequest: JsonRpcRequestTransport){
       collections: string[],
       cached: ZoteroCollectionSpec[],
       useCache: boolean,
-    ) : Promise<ZoteroResult> => {
+    ): Promise<ZoteroResult> => {
       return handleZoteroResult(
         await zoteroLsp.getCollections(
-          file, 
-          collectionsForFile(collections, file), 
-          cached, 
+          file,
+          collectionsForFile(collections, file),
+          cached,
           useCache
         )
       );
     },
 
-    getLibraryNames: async () : Promise<ZoteroResult> => {
+    getLibraryNames: async (): Promise<ZoteroResult> => {
       return handleZoteroResult(
         await zoteroLsp.getLibraryNames()
       );
     },
-  
-    getActiveCollectionSpecs: async (file: string | null, collections: string[]) : Promise<ZoteroResult> => {
+
+    getActiveCollectionSpecs: async (file: string | null, collections: string[]): Promise<ZoteroResult> => {
       return handleZoteroResult(
         await zoteroLsp.getActiveCollectionSpecs(
-          file, 
+          file,
           collectionsForFile(collections, file)
         )
       );
@@ -209,33 +209,33 @@ class ZoteroConfigureLibraryCommand implements Command {
     public readonly id: string,
     private readonly context: ExtensionContext,
     private readonly zotero: ZoteroServer
-  ) {}
+  ) { }
 
   async execute() {
 
     const inputBox = window.createInputBox();
     inputBox.title = "Connect Zotero Web Library";
     inputBox.prompt = "Provide a Zotero Web API key to enable support for Zotero citations in " +
-                      "the Quarto Visual Editor. You can generate keys at https://www.zotero.org/settings/keys";
-    inputBox.password = true;     
-    inputBox.ignoreFocusOut = true;            
+      "the Quarto Visual Editor. You can generate keys at https://www.zotero.org/settings/keys";
+    inputBox.password = true;
+    inputBox.ignoreFocusOut = true;
     inputBox.placeholder = "Zotero Web API Key";
     inputBox.onDidAccept(async () => {
-    
+
       // get key 
       const apiKey = inputBox.value.trim();
 
       // helper to save it
       const saveApiKey = async () => {
-        await this.context.secrets.store(kQuartoZoteroWebApiKey,apiKey);
+        await this.context.secrets.store(kQuartoZoteroWebApiKey, apiKey);
         inputBox.hide();
       };
 
       if (apiKey) {
         const valid = await zoteroValidateApiKey(apiKey);
         if (!valid) {
-          inputBox.validationMessage = "The API key you entered could not be validated with the Zotero web service. " + 
-                                      "Please ensure that you have entered the key correctly and that it is currently valid.";
+          inputBox.validationMessage = "The API key you entered could not be validated with the Zotero web service. " +
+            "Please ensure that you have entered the key correctly and that it is currently valid.";
         } else {
           // save the secret and notify the server
           await saveApiKey();
@@ -245,7 +245,7 @@ class ZoteroConfigureLibraryCommand implements Command {
         }
       } else {
         await saveApiKey();
-      }     
+      }
     });
     inputBox.onDidChangeValue(() => {
       inputBox.validationMessage = "";
@@ -260,7 +260,7 @@ class ZoteroSyncWebLibraryCommand implements Command {
     public readonly id: string,
     private readonly context: ExtensionContext,
     private readonly zotero: ZoteroServer
-  ) {}
+  ) { }
 
   async execute() {
     const apiKey = await safeReadZoteroApiKey(this.context);
@@ -269,10 +269,11 @@ class ZoteroSyncWebLibraryCommand implements Command {
     } else {
       const result = await window.showInformationMessage(
         "Zotero Web Library Not Configured",
-        { 
-          modal: true, 
+        {
+          modal: true,
           detail: `You do not currently have a Zotero web library configured.` +
-                  `Do you want to configure a web library now?` },
+            `Do you want to configure a web library now?`
+        },
         "Yes",
         "No"
       );
@@ -288,17 +289,18 @@ class ZoteroUnauthorizedCommand implements Command {
     public readonly id: string,
     private readonly context: ExtensionContext,
     private readonly zotero: ZoteroServer
-  ) {}
+  ) { }
 
   async execute() {
     const kYes = "Configure Zotero API Key";
-    const kNo =  "Disable Zotero Web Library";
+    const kNo = "Disable Zotero Web Library";
     const result = await window.showInformationMessage(
       "Zotero API Key Unauthorized",
-      { 
-        modal: true, 
+      {
+        modal: true,
         detail: `Your Zotero API key is no longer authorized. ` +
-                `Do you want to configure a new API key now?` },
+          `Do you want to configure a new API key now?`
+      },
       kYes,
       kNo
     );
@@ -327,7 +329,7 @@ async function syncWebLibraries(apiKey: string) {
         }
         increment = increment || (progressRemaining * 0.1);
         progressRemaining -= increment;
-        progress.report( { message, increment });
+        progress.report({ message, increment });
       },
       log() {
         // don't log in foreground sync
@@ -341,7 +343,7 @@ async function syncWebLibraries(apiKey: string) {
     try {
       const zotero = await zoteroApi(apiKey, progressHandler);
       await zoteroSyncWebLibraries(zotero, progressHandler);
-    } catch(error) {
+    } catch (error) {
       if (!(error instanceof SyncCancelledError)) {
         const message = error instanceof Error ? error.message : JSON.stringify(error);
         window.showErrorMessage("Error occurred during sync: " + message);
@@ -360,7 +362,7 @@ class SyncCancelledError extends Error {
 async function safeReadZoteroApiKey(context: ExtensionContext) {
   try {
     return await context.secrets.get(kQuartoZoteroWebApiKey);
-  } catch(error) {
+  } catch (error) {
     console.log("Error reading zotero api key");
     return undefined;
   }

@@ -33,7 +33,7 @@ export function cellOptionsForToken(token: Token): Record<string, unknown> {
 }
 
 export function cellOptions(language: string, source: string[]): Record<string, unknown> {
-  
+
   const commentChars = langCommentChars(language);
   const optionPattern = optionCommentPattern(commentChars[0]);
   const optionSuffix = commentChars[1] || "";
@@ -70,7 +70,7 @@ export function cellOptions(language: string, source: string[]): Record<string, 
         !Array.isArray(options) &&
         options !== null
       ) {
-        return options as Record<string,unknown>;
+        return options as Record<string, unknown>;
       } else {
         return {};
       }

@@ -26,10 +26,10 @@ import { isHttpUrl, kImageExtensions } from "core";
 
 
 export function documentImageResolver(
-  doc: TextDocument, 
+  doc: TextDocument,
   projectDir?: string
-) : EditorUIImageResolver {
-  
+): EditorUIImageResolver {
+
   // compute doc and project dirs
   const docDir = path.normalize(path.dirname(doc.fileName));
   projectDir = projectDir ? path.normalize(projectDir) : undefined;
@@ -54,7 +54,7 @@ export function documentImageResolver(
     // try for a short name w/ integer, fallback to a longer one
     ext = ext || ".png";
     const imagesDir = ensureImagesDir();
-    for (let i=0; i<100; i++) {
+    for (let i = 0; i < 100; i++) {
       const imagePath = path.join(imagesDir, `${stem}${(i > 0 || !preserveStem) ? ('-' + (i + 1)) : ''}${ext}`);
       if (!fs.existsSync(imagePath)) {
         return imagePath;
@@ -71,10 +71,10 @@ export function documentImageResolver(
     // doc dir relative
     if (uri.startsWith(docDir)) {
       return relative(docDir, uri);
-    // project dir relative (start w/ slash)
+      // project dir relative (start w/ slash)
     } else if (projectDir && uri.startsWith(projectDir)) {
       return `/${relative(projectDir, uri)}`;
-    // otherwise copy to images dir
+      // otherwise copy to images dir
     } else {
       const parsedPath = path.parse(uri);
       const imagePath = uniqueImagePath(parsedPath.name, parsedPath.ext, true);
@@ -85,7 +85,7 @@ export function documentImageResolver(
 
   return {
 
-    resolveImageUris: async (uris: string[]) : Promise<string[]> => {
+    resolveImageUris: async (uris: string[]): Promise<string[]> => {
       return uris.map(uri => {
         if (isHttpUrl(uri)) {
           return uri;
@@ -94,7 +94,7 @@ export function documentImageResolver(
         }
       });
     },
-    resolveBase64Images: async (base64Images: string[]) : Promise<string[]> => {
+    resolveBase64Images: async (base64Images: string[]): Promise<string[]> => {
       return base64Images.map(base64 => {
         const kImgRegex = /^data:image\/(\w+);base64,/;
         const match = base64.match(kImgRegex);
@@ -107,10 +107,10 @@ export function documentImageResolver(
         } else {
           return null;
         }
-       ;
+        ;
       }).filter(image => image !== null) as string[];
     },
-    selectImage: async () : Promise<string | null> => {
+    selectImage: async (): Promise<string | null> => {
       const file = await vscode.window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,

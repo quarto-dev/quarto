@@ -42,7 +42,7 @@ export function diagramCodeLensProvider(
         }
 
         const block = diagramBlocks[i];
-       
+
         // push code lens
         const range = new Range(block.range.start.line, 0, block.range.start.line, 0);
         lenses.push(
@@ -55,7 +55,7 @@ export function diagramCodeLensProvider(
             }),
           ]
         );
-        
+
       }
       return lenses;
     },

@@ -40,9 +40,8 @@ export function virtualDocUriFromEmbeddedContent(
   virtualDocumentContents.set(originalUri, virtualDoc.content);
 
   // form uri
-  const vdocUriString = `${kQmdEmbeddedContent}://${
-    virtualDoc.language
-  }/${encodeURIComponent(originalUri)}.${virtualDoc.language.extension}`;
+  const vdocUriString = `${kQmdEmbeddedContent}://${virtualDoc.language
+    }/${encodeURIComponent(originalUri)}.${virtualDoc.language.extension}`;
   const vdocUri = Uri.parse(vdocUriString);
 
   // return it

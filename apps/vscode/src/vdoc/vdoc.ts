@@ -75,10 +75,10 @@ export function virtualDocForLanguage(
 
 function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
   const lines: string[] = [];
-   for (let i = 0; i < document.lineCount; i++) {
-     lines.push(language.emptyLine || "");
-   }
-   return lines;
+  for (let i = 0; i < document.lineCount; i++) {
+    lines.push(language.emptyLine || "");
+  }
+  return lines;
 }
 
 function fillLinesFromBlock(lines: string[], document: TextDocument, block: Token) {
@@ -92,13 +92,13 @@ function fillLinesFromBlock(lines: string[], document: TextDocument, block: Toke
 }
 
 function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
-  for (let i=0; i<2; i++) {
-    lines.push(language.emptyLine || ""); 
+  for (let i = 0; i < 2; i++) {
+    lines.push(language.emptyLine || "");
   }
 }
 
 export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
-  
+
   const lines = [...code];
 
   if (language.inject) {
@@ -111,12 +111,12 @@ export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
   };
 }
 
-export type VirtualDocAction = 
-  "completion" | 
-  "hover"      | 
-  "signature"  | 
-  "definition" | 
-  "format"     |
+export type VirtualDocAction =
+  "completion" |
+  "hover" |
+  "signature" |
+  "definition" |
+  "format" |
   "statementRange";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
@@ -132,10 +132,10 @@ export async function withVirtualDocUri<T>(virtualDocUri: VirtualDocUri, f: (uri
 }
 
 export async function virtualDocUri(
-  virtualDoc: VirtualDoc, 
-  parentUri: Uri, 
+  virtualDoc: VirtualDoc,
+  parentUri: Uri,
   action: VirtualDocAction
-) : Promise<VirtualDocUri> {
+): Promise<VirtualDocUri> {
 
   // format and definition actions use a transient local vdoc
   // (so they can get project-specific paths and formatting config)

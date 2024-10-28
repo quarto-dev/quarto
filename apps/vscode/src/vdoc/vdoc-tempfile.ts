@@ -33,10 +33,10 @@ import { EmbeddedLanguage } from "./languages";
 const languageVirtualDocs = new Map<String, TextDocument>();
 
 export async function virtualDocUriFromTempFile(
-  virtualDoc: VirtualDoc, 
-  docPath: string, 
+  virtualDoc: VirtualDoc,
+  docPath: string,
   local: boolean
-) : Promise<VirtualDocUri> {
+): Promise<VirtualDocUri> {
 
   // if this is local then create it alongside the docPath and return a cleanup 
   // function to remove it when the action is completed. 

@@ -45,19 +45,19 @@ export class PreviewEnvManager {
   }
 
   public async previewEnv(uri: Uri) {
-    
+
     const env: PreviewEnv = {
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      QUARTO_LOG: this.outputFile_, 
-      
+      QUARTO_LOG: this.outputFile_,
+
       // eslint-disable-next-line @typescript-eslint/naming-convention 
       QUARTO_RENDER_TOKEN: this.renderToken_,
 
       ...(await terminalEnv(uri))
-    
+
     };
-   
+
     return env;
   }
   private readonly outputFile_: string;

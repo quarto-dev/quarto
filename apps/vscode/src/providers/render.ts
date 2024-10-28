@@ -31,10 +31,10 @@ import { documentFrontMatterYaml } from "../markdown/document";
 import { QuickPickItemKind } from "vscode";
 import { Uri } from "vscode";
 
-export function activateRender(quartoContext: QuartoContext, engine: MarkdownEngine) : Command[] {
+export function activateRender(quartoContext: QuartoContext, engine: MarkdownEngine): Command[] {
 
   // establish if we should include the typst command
-   // indicate that its okay to show
+  // indicate that its okay to show
   if (quartoContext.available && semver.gte(quartoContext.version, "1.4.388")) {
     commands.executeCommand(
       "setContext",
@@ -80,8 +80,7 @@ export interface FormatQuickPickItem extends QuickPickItem {
 
 
 class RenderDocumentCommand extends RenderCommand
-  implements Command
-{
+  implements Command {
   constructor(quartoContext: QuartoContext, private readonly engine_: MarkdownEngine) {
     super(quartoContext);
   }
@@ -98,7 +97,7 @@ class RenderDocumentCommand extends RenderCommand
         await targetEditor.activate();
       }
       await commands.executeCommand("workbench.action.files.save");
-      
+
       // kill any existing terminal
       const kQuartoRenderTitle = "Quarto Render";
       await killTerminal(kQuartoRenderTitle);
@@ -108,7 +107,7 @@ class RenderDocumentCommand extends RenderCommand
       if (format === undefined) {
         return;
       }
-      
+
       // create new terminal
       const target = targetEditor.document.uri;
       const env = await terminalEnv(target);
@@ -122,7 +121,7 @@ class RenderDocumentCommand extends RenderCommand
         cmd.push(format);
       }
       await sendTerminalCommand(terminal, env, this.quartoContext(), cmd);
-      
+
       // focus the editor (sometimes the terminal steals focus)
       if (!isNotebook(targetEditor.document)) {
         await targetEditor.activate();
@@ -134,8 +133,8 @@ class RenderDocumentCommand extends RenderCommand
 
   private async resolveFormat(targetEditor: QuartoEditor) {
     return new Promise<string | undefined>((resolve) => {
-      
-      const frontMatter = targetEditor.notebook 
+
+      const frontMatter = targetEditor.notebook
         ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
         : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
@@ -203,7 +202,7 @@ class RenderDocumentCommand extends RenderCommand
       }
     });
   }
-  
+
 }
 
 
@@ -212,7 +211,7 @@ class RenderProjectCommand extends RenderCommand implements Command {
   public readonly id = RenderProjectCommand.id;
 
   constructor(quartoContext: QuartoContext,
-              private readonly engine_: MarkdownEngine) {
+    private readonly engine_: MarkdownEngine) {
     super(quartoContext);
   }
 
@@ -228,7 +227,7 @@ class RenderProjectCommand extends RenderCommand implements Command {
         projectDir = Uri.file(docProjectDir);
       }
     }
-    
+
     // if we didn't find it yet use the workspace
     if (!projectDir && workspace.workspaceFolders) {
       for (const folder of workspace.workspaceFolders) {
@@ -239,42 +238,42 @@ class RenderProjectCommand extends RenderCommand implements Command {
       }
     }
 
-  
+
     // render if we have a project dir
     if (projectDir) {
-    
-       // kill any existing terminal
-       const kQuartoRenderTitle = "Quarto Render";
-       await killTerminal(kQuartoRenderTitle);
- 
-       // determine format
-       const format = await this.resolveFormat(projectDir);
-       if (format === undefined) {
-          return;
-       }
 
-       // create new terminal
-       const env = await terminalEnv(projectDir);
-       const options = terminalOptions(kQuartoRenderTitle, projectDir, env);
-       const terminal = window.createTerminal(options);
- 
-       // build terminal command and send it
-       const cmd = terminalCommand("render", this.quartoContext());
-       if (format !== "default") {
+      // kill any existing terminal
+      const kQuartoRenderTitle = "Quarto Render";
+      await killTerminal(kQuartoRenderTitle);
+
+      // determine format
+      const format = await this.resolveFormat(projectDir);
+      if (format === undefined) {
+        return;
+      }
+
+      // create new terminal
+      const env = await terminalEnv(projectDir);
+      const options = terminalOptions(kQuartoRenderTitle, projectDir, env);
+      const terminal = window.createTerminal(options);
+
+      // build terminal command and send it
+      const cmd = terminalCommand("render", this.quartoContext());
+      if (format !== "default") {
         cmd.push("--to");
         cmd.push(format);
-       }
-       await sendTerminalCommand(terminal, env, this.quartoContext(), cmd);
+      }
+      await sendTerminalCommand(terminal, env, this.quartoContext(), cmd);
     } else {
       // no project found!
       window.showInformationMessage("No project available to render.");
     }
   }
 
-  private async resolveFormat(projectDir: Uri) : Promise<string | undefined> {
+  private async resolveFormat(projectDir: Uri): Promise<string | undefined> {
     return new Promise(async (resolve) => {
       const config = await quartoProjectConfig(this.quartoContext().runQuarto, projectDir.fsPath);
-      if (config?.config.project.type === "book" && typeof(config?.config.format) === "object") {
+      if (config?.config.project.type === "book" && typeof (config?.config.format) === "object") {
         const formats = Object.keys(config?.config.format);
         if (formats.length > 1) {
           const quickPick = window.createQuickPick<FormatQuickPickItem>();
@@ -316,6 +315,6 @@ class RenderProjectCommand extends RenderCommand implements Command {
         resolve("default");
       }
     });
-   
+
   }
 }

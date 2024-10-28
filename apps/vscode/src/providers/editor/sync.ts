@@ -49,7 +49,7 @@ For the visual editor propagating its own changes:
 */
 
 export interface EditorSyncManager {
-  init: () => Promise<void>;  
+  init: () => Promise<void>;
   onVisualEditorChanged: (state: unknown) => Promise<void>;
   flushPendingUpdates: () => Promise<void>;
   onDocumentChanged: () => Promise<void>;
@@ -59,11 +59,11 @@ export interface EditorSyncManager {
 
 // sync the document model w/ the visual editor
 export function editorSyncManager(
-  document: TextDocument, 
+  document: TextDocument,
   visualEditor: VSCodeVisualEditor,
   request: JsonRpcRequestTransport,
   navigation?: XRef | number
-) : EditorSyncManager {
+): EditorSyncManager {
 
   // state: an update from the visual editor that we have yet to apply. we don't 
   // apply these on every keystoke b/c they are expensive. we poll to apply these
@@ -73,11 +73,11 @@ export function editorSyncManager(
 
   // state: don't propagate the next model change we get to the visual editor
   // (as the change actually resulted from a visual editor sync)
-  let supressNextUpdate = false; 
+  let supressNextUpdate = false;
 
   // collect a pending edit, converting it to markdown and setting the supressNextUpdate bit
   // if we fail get the markdown then we neither clear the pending edit nor supress the update
-  const collectPendingVisualEdit = async () : Promise<string | undefined> => {
+  const collectPendingVisualEdit = async (): Promise<string | undefined> => {
     if (pendingVisualEdit) {
       const state = pendingVisualEdit;
       try {
@@ -115,12 +115,12 @@ export function editorSyncManager(
     // initialize the connection to the visual editor by providing it
     // with its initial contents and syncing the canonnical markdown
     // back to the document
-    init: async() => {
+    init: async () => {
       // determine the current sourcePos
       const markdown = document.getText();
       let initialNav: NavLocation | undefined;
       if (markdown) {
-        if (typeof(navigation) === "number") {
+        if (typeof (navigation) === "number") {
           const source = editorSourceJsonRpcServer(request);
           const locations = await source.getSourcePosLocations(markdown);
           initialNav = { locations, pos: navigation };
@@ -128,7 +128,7 @@ export function editorSyncManager(
           initialNav = navigation;
         }
       }
-     
+
       const editorMarkdown = await visualEditor.init(markdown, initialNav);
       if (editorMarkdown && (editorMarkdown !== document.getText())) {
         await updateWorkspaceDocument(document, editorMarkdown);
@@ -156,7 +156,7 @@ export function editorSyncManager(
     },
 
     // notification that we are saving (allow flusing of visual editor changes)
-    onDocumentSaving: async () : Promise<TextEdit[]> => {
+    onDocumentSaving: async (): Promise<TextEdit[]> => {
       // attempt to collect pending edit
       const markdown = await collectPendingVisualEdit();
       if (markdown) {
@@ -172,7 +172,7 @@ export function editorSyncManager(
     // notification that a document completed saving (failsafe for changes
     // that didn't get applied b/c of onDocumentSaving no longer being
     // called b/c vscode deems that it is running for too long)
-    onDocumentSaved: async () : Promise<void> => {
+    onDocumentSaved: async (): Promise<void> => {
       collectAndApplyPendingVisualEdit();
     }
   };

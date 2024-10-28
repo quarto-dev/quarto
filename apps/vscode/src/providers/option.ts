@@ -76,7 +76,7 @@ function handleOptionEnter(editor: TextEditor, comment: string) {
   // current line info
   const currentLineNumber = editor.selection.active.line;
   const currentLine = editor.document.lineAt(editor.selection.start).text;
- 
+
   // apply edits
   if (currentLine.trim() === optionComment.trim()) {
     editor.edit((builder) => {

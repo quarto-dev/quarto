@@ -91,30 +91,30 @@ export async function renderCodeViewAssist(
     const hover = (await lspRequest(kCodeViewAssist, [context])) as LspHover | undefined;
     if (hover) {
       const contents = [new MarkdownString((hover.contents as MarkupContent).value)];
-      const range = hover.range 
+      const range = hover.range
         ? new Range(
-            hover.range.start.line, 
-            hover.range.start.character, 
-            hover.range.end.line, 
-            hover.range.end.character
-          ) 
+          hover.range.start.line,
+          hover.range.start.character,
+          hover.range.end.line,
+          hover.range.end.character
+        )
         : undefined;
       const assist = getAssistFromHovers([{ contents, range }], asWebviewUri);
       if (assist) {
         return assist;
       }
-    } 
+    }
     return undefined;
-  
+
   } else {
     const language = embeddedLanguage(context.language);
     if (language) {
-      const vdoc = virtualDocForCode(context.code, language);    
+      const vdoc = virtualDocForCode(context.code, language);
       const vdocUri = await virtualDocUri(vdoc, Uri.file(context.filepath), "hover");
       return await withVirtualDocUri<Assist | undefined>(vdocUri, async () => {
         try {
           const position = new Position(context.selection.start.line, context.selection.start.character);
-        
+
           // check for hover
           const hover = await getHover(vdocUri, language, position);
           if (hover) {
@@ -123,7 +123,7 @@ export async function renderCodeViewAssist(
               return assist;
             }
           }
-      
+
           if (token.isCancellationRequested) {
             return undefined;
           }
@@ -136,16 +136,16 @@ export async function renderCodeViewAssist(
         } catch (error) {
           console.error(error);
         }
-      
+
         return undefined;
-    
+
       });
     } else {
       return undefined;
     }
   }
 
-  
+
 }
 
 export async function renderActiveAssist(

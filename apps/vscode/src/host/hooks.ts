@@ -23,12 +23,12 @@ import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, virtualDocUri, adjustedPosition } from "../vdoc/vdoc";
 
 declare global {
-	function acquirePositronApi() : hooks.PositronApi;
+  function acquirePositronApi(): hooks.PositronApi;
 }
 
-let api : hooks.PositronApi | null | undefined;
+let api: hooks.PositronApi | null | undefined;
 
-export function hooksApi() : hooks.PositronApi | null {
+export function hooksApi(): hooks.PositronApi | null {
   if (api === undefined) {
     try {
       api = acquirePositronApi();
@@ -43,20 +43,20 @@ export function hasHooks() {
   return !!hooksApi();
 }
 
-export function hooksExtensionHost() : ExtensionHost {
+export function hooksExtensionHost(): ExtensionHost {
   return {
     // supported executable languages (we delegate to the default for langugaes
     // w/o runtimes so we support all languages)
     executableLanguages,
 
-    cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean) 
+    cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
       : Promise<CellExecutor | undefined> => {
-      switch(language) {
+      switch (language) {
         // use hooks for known runtimes
         case "python":
         case "r":
           return {
-            execute: async (blocks: string[], _editorUri?: vscode.Uri) : Promise<void> => {
+            execute: async (blocks: string[], _editorUri?: vscode.Uri): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -68,7 +68,7 @@ export function hooksExtensionHost() : ExtensionHost {
                 language = "r";
                 blocks = blocks.map(pythonWithReticulate);
               }
-              
+
               // Our callback executes each block sequentially
               const callback = async () => {
                 for (const block of blocks) {
@@ -78,9 +78,9 @@ export function hooksExtensionHost() : ExtensionHost {
 
               await ExecuteQueue.instance.add(language, callback);
             },
-            executeSelection: async () : Promise<void> => {
-              await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', {languageId: language});
-            } 
+            executeSelection: async (): Promise<void> => {
+              await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
+            }
           };
 
         // delegate for other languages
@@ -92,16 +92,16 @@ export function hooksExtensionHost() : ExtensionHost {
     registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
       const hooks = hooksApi();
       if (hooks) {
-        return hooks.languages.registerStatementRangeProvider('quarto', 
+        return hooks.languages.registerStatementRangeProvider('quarto',
           new EmbeddedStatementRangeProvider(engine));
       }
-      return new vscode.Disposable(() => {});
+      return new vscode.Disposable(() => { });
     },
 
     createPreviewPanel: (
-      viewType: string, 
+      viewType: string,
       title: string,
-      preserveFocus?: boolean, 
+      preserveFocus?: boolean,
       options?: vscode.WebviewPanelOptions & vscode.WebviewOptions
     ): HostWebviewPanel => {
 
@@ -117,7 +117,7 @@ export function hooksExtensionHost() : ExtensionHost {
           portMapping: options?.portMapping
         }
       )!;
-      
+
       // adapt to host interface
       return new HookWebviewPanel(panel);
     }
@@ -126,7 +126,7 @@ export function hooksExtensionHost() : ExtensionHost {
 
 
 class HookWebviewPanel implements HostWebviewPanel {
-  constructor(private readonly panel_: hooks.PreviewPanel) {}
+  constructor(private readonly panel_: hooks.PreviewPanel) { }
 
   get webview() { return this.panel_.webview; };
   get visible() { return this.panel_.visible; };
@@ -139,34 +139,34 @@ class HookWebviewPanel implements HostWebviewPanel {
 }
 
 class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
-	private readonly _engine: MarkdownEngine;
+  private readonly _engine: MarkdownEngine;
 
-	constructor(
-		readonly engine: MarkdownEngine,
-	) {
-		this._engine = engine;
-	}
+  constructor(
+    readonly engine: MarkdownEngine,
+  ) {
+    this._engine = engine;
+  }
 
   async provideStatementRange(
-		document: vscode.TextDocument,
-		position: vscode.Position,
-		token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
-      const vdoc = await virtualDoc(document, position, this._engine);
-      if (vdoc) {
-        const vdocUri = await virtualDocUri(vdoc, document.uri, "statementRange");
-        try {
-          return getStatementRange(vdocUri.uri, adjustedPosition(vdoc.language, position));
-        } catch (error) {
-          return undefined;
-        } finally {
-          if (vdocUri.cleanup) {
-            await vdocUri.cleanup();
-          }
-        }
-      } else {
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
+    const vdoc = await virtualDoc(document, position, this._engine);
+    if (vdoc) {
+      const vdocUri = await virtualDocUri(vdoc, document.uri, "statementRange");
+      try {
+        return getStatementRange(vdocUri.uri, adjustedPosition(vdoc.language, position));
+      } catch (error) {
         return undefined;
+      } finally {
+        if (vdocUri.cleanup) {
+          await vdocUri.cleanup();
+        }
       }
-    };
+    } else {
+      return undefined;
+    }
+  };
 }
 
 async function getStatementRange(

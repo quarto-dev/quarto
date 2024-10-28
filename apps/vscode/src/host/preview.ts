@@ -13,12 +13,12 @@
  *
  */
 
-import { window, WebviewPanel, WebviewOptions, WebviewPanelOptions, ViewColumn} from "vscode";
+import { window, WebviewPanel, WebviewOptions, WebviewPanelOptions, ViewColumn } from "vscode";
 
 export function createPreviewPanel(
-  viewType: string, 
+  viewType: string,
   title: string,
-  preserveFocus?: boolean, 
+  preserveFocus?: boolean,
   options?: WebviewPanelOptions & WebviewOptions
 ): WebviewPanel {
   return window.createWebviewPanel(

@@ -13,35 +13,35 @@
  *
  */
 
-import { 
-  CompletionItem as VCompletionItem, 
-  CompletionItemKind as VCompletionItemKind, 
-  MarkdownString, 
-  SnippetString, 
+import {
+  CompletionItem as VCompletionItem,
+  CompletionItemKind as VCompletionItemKind,
+  MarkdownString,
+  SnippetString,
   Range,
   Position,
-  TextDocument, 
+  TextDocument,
   commands
 } from "vscode";
 
-import { 
-  CompletionItem, 
-  CompletionItemKind, 
-  CompletionItemLabelDetails, 
-  CompletionList, 
-  InsertTextFormat, 
-  MarkupContent, 
-  MarkupKind 
+import {
+  CompletionItem,
+  CompletionItemKind,
+  CompletionItemLabelDetails,
+  CompletionList,
+  InsertTextFormat,
+  MarkupContent,
+  MarkupKind
 } from "vscode-languageserver-types";
 
 import { JsonRpcRequestTransport } from "core";
 
-import { 
+import {
   CodeViewCellContext,
-  CodeViewCompletionContext, 
-  CodeViewExecute, 
-  CodeViewServer, 
-  DiagramState, 
+  CodeViewCompletionContext,
+  CodeViewExecute,
+  CodeViewServer,
+  DiagramState,
   kCodeViewGetCompletions,
 } from "editor-types";
 
@@ -51,13 +51,13 @@ import { vdocCompletions } from "../../vdoc/vdoc-completion";
 import { MarkdownEngine } from "../../markdown/engine";
 
 
-export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport) : CodeViewServer {
+export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport): CodeViewServer {
   return {
     async codeViewAssist(context: CodeViewCellContext) {
       await commands.executeCommand("quarto.codeViewAssist", context, lspRequest);
     },
     async codeViewExecute(execute: CodeViewExecute) {
-      switch(execute) {
+      switch (execute) {
         case "cell":
           await commands.executeCommand("quarto.runCurrentCell");
           break;
@@ -72,31 +72,31 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
           break;
       }
     },
-    async codeViewCompletions(context: CodeViewCompletionContext) : Promise<CompletionList> {
+    async codeViewCompletions(context: CodeViewCompletionContext): Promise<CompletionList> {
 
       // if this is yaml then call the lsp directly
       if (context.language === "yaml") {
 
         return lspRequest(kCodeViewGetCompletions, [context]);
-      
+
       } else {
-        
+
         // see if we have an embedded langaage
         const language = embeddedLanguage(context.language);
         if (language) {
-          
+
           // if this is a yaml comment line then call the lsp
           const line = context.code[context.selection.start.line];
           if (language.comment && line.startsWith(`${language.comment}| `)) {
             return lspCellYamlOptionsCompletions(context, lspRequest);
 
-          // otherwise delegate to vscode completion system
+            // otherwise delegate to vscode completion system
           } else {
             const vdoc = virtualDocForCode(context.code, language);
             const completions = await vdocCompletions(
               vdoc,
               new Position(
-                context.selection.start.line, 
+                context.selection.start.line,
                 context.selection.start.character
               ),
               undefined,
@@ -113,7 +113,7 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
             items: [],
             isIncomplete: false
           };
-        }      
+        }
       }
     },
     async codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
@@ -123,8 +123,8 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
 }
 
 function lspCellYamlOptionsCompletions(context: CodeViewCompletionContext, lspRequest: JsonRpcRequestTransport) {
-   // strip out lines that aren't in the code block
-   const code = context.code.map((codeLine, index) => {
+  // strip out lines that aren't in the code block
+  const code = context.code.map((codeLine, index) => {
     if (index < context.cellBegin || index > context.cellEnd) {
       return "";
     } else {
@@ -151,32 +151,32 @@ function lspCellYamlOptionsCompletions(context: CodeViewCompletionContext, lspRe
   }]);
 }
 
-export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : CompletionItem {
-  const insertText =  item.insertText instanceof SnippetString 
+export function vsCompletionItemToLsCompletionItem(item: VCompletionItem): CompletionItem {
+  const insertText = item.insertText instanceof SnippetString
     ? item.insertText.value
     : item.insertText || "";
   const completion: CompletionItem = {
     ...labelWithDetails(item),
     kind: vsKindToLsKind(item.kind),
     detail: item.detail,
-    documentation: item.documentation instanceof MarkdownString 
-      ? mdStringToMdContent(item.documentation) 
+    documentation: item.documentation instanceof MarkdownString
+      ? mdStringToMdContent(item.documentation)
       : item.documentation,
     sortText: item.sortText && /^\d/.test(item.sortText) ? item.sortText : undefined,
     filterText: item.filterText,
     insertText,
-    insertTextFormat: item.insertText instanceof SnippetString 
-      ? InsertTextFormat.Snippet 
+    insertTextFormat: item.insertText instanceof SnippetString
+      ? InsertTextFormat.Snippet
       : InsertTextFormat.PlainText,
     command: item.command
   };
   if (item.range) {
-    const isRange = (x?: unknown) : x is Range => { return !!x && !!(x as Record<string,unknown>).start; };
+    const isRange = (x?: unknown): x is Range => { return !!x && !!(x as Record<string, unknown>).start; };
     if (isRange(item.range)) {
       completion.textEdit = {
         newText: insertText,
         range: {
-          start: item.range.start, 
+          start: item.range.start,
           end: item.range.end
         }
       };
@@ -184,7 +184,7 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : Comp
       completion.textEdit = {
         newText: insertText,
         insert: {
-          start: item.range.inserting.start, 
+          start: item.range.inserting.start,
           end: item.range.replacing.end
         },
         replace: {
@@ -192,15 +192,15 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem) : Comp
           end: item.range.replacing.end
         }
       };
-     
+
     }
   }
   return completion;
-  
+
 }
 
-export function labelWithDetails(item: VCompletionItem) : { label: string, labelWithDetails: CompletionItemLabelDetails} {
-  if (typeof(item.label) === "string") {
+export function labelWithDetails(item: VCompletionItem): { label: string, labelWithDetails: CompletionItemLabelDetails } {
+  if (typeof (item.label) === "string") {
     return {
       label: item.label,
       labelWithDetails: {
@@ -217,12 +217,12 @@ export function labelWithDetails(item: VCompletionItem) : { label: string, label
   }
 }
 
-export function vsKindToLsKind(kind?: VCompletionItemKind) : CompletionItemKind | undefined{
+export function vsKindToLsKind(kind?: VCompletionItemKind): CompletionItemKind | undefined {
   if (kind === undefined) {
     return undefined;
   }
 
-  switch(kind) {
+  switch (kind) {
     case VCompletionItemKind.Text:
       return CompletionItemKind.Text;
     case VCompletionItemKind.Method:
@@ -280,7 +280,7 @@ export function vsKindToLsKind(kind?: VCompletionItemKind) : CompletionItemKind 
   }
 }
 
-function mdStringToMdContent(mdString: MarkdownString) : MarkupContent {
+function mdStringToMdContent(mdString: MarkdownString): MarkupContent {
   return {
     kind: MarkupKind.Markdown,
     value: mdString.value

@@ -1,7 +1,7 @@
 /*
  * vdoc-tempfile.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2024 by Posit Software, PBC
  * Copyright (c) 2019 Takashi Tamura
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -17,6 +17,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as tmp from "tmp";
+import * as uuid from "uuid";
 import {
   commands,
   Hover,
@@ -27,42 +28,27 @@ import {
   WorkspaceEdit,
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
-import { EmbeddedLanguage } from "./languages";
-
-// one virtual doc per language file extension
-const languageVirtualDocs = new Map<String, TextDocument>();
 
 export async function virtualDocUriFromTempFile(
-  virtualDoc: VirtualDoc, 
-  docPath: string, 
+  virtualDoc: VirtualDoc,
+  docPath: string,
   local: boolean
-) : Promise<VirtualDocUri> {
+): Promise<VirtualDocUri> {
+  const newVirtualDocUri = (doc: TextDocument) =>
+    <VirtualDocUri>{
+      uri: doc.uri,
+      cleanup: async () => await deleteDocument(doc),
+    };
 
-  // if this is local then create it alongside the docPath and return a cleanup 
-  // function to remove it when the action is completed. 
+  // if this is local then create it alongside the docPath and return a cleanup
+  // function to remove it when the action is completed.
   if (local || virtualDoc.language.localTempFile) {
     const ext = virtualDoc.language.extension;
     const vdocPath = path.join(path.dirname(docPath), `.vdoc.${ext}`);
     fs.writeFileSync(vdocPath, virtualDoc.content);
     const vdocUri = Uri.file(vdocPath);
     const doc = await workspace.openTextDocument(vdocUri);
-    return {
-      uri: doc.uri,
-      cleanup: async () => await deleteDocument(doc)
-    };
-  }
-
-  // do we have an existing document?
-  const langVdoc = languageVirtualDocs.get(virtualDoc.language.extension);
-  if (langVdoc && !langVdoc.isClosed) {
-    if (langVdoc.getText() === virtualDoc.content) {
-      // if its content is identical to what's passed in then just return it
-      return { uri: langVdoc.uri };
-    } else {
-      // otherwise remove it (it will get recreated below)
-      await deleteDocument(langVdoc);
-      languageVirtualDocs.delete(virtualDoc.language.extension);
-    }
+    return newVirtualDocUri(doc);
   }
 
   // write the virtual doc as a temp file
@@ -71,31 +57,17 @@ export async function virtualDocUriFromTempFile(
   // open the document and save a reference to it
   const vdocUri = Uri.file(vdocTempFile);
   const doc = await workspace.openTextDocument(vdocUri);
-  languageVirtualDocs.set(virtualDoc.language.extension, doc);
 
-  // if this is the first time getting a virtual doc for this
-  // language then execute a dummy request to cause it to load
-  if (!langVdoc) {
-    await commands.executeCommand<Hover[]>(
-      "vscode.executeHoverProvider",
-      vdocUri,
-      new Position(0, 0)
-    );
-  }
+  // TODO: Reevaluate whether this is necessary. Old comment:
+  // > if this is the first time getting a virtual doc for this
+  // > language then execute a dummy request to cause it to load
+  await commands.executeCommand<Hover[]>(
+    "vscode.executeHoverProvider",
+    vdocUri,
+    new Position(0, 0)
+  );
 
-  // return the uri
-  return { uri: doc.uri };
-}
-
-// delete any vdocs left open
-export async function deactivateVirtualDocTempFiles() {
-  languageVirtualDocs.forEach(async (doc) => {
-    await deleteDocument(doc);
-  });
-}
-
-export function isLanguageVirtualDoc(langauge: EmbeddedLanguage, uri: Uri) {
-  return languageVirtualDocs.get(langauge.extension)?.uri.toString() === uri.toString();
+  return newVirtualDocUri(doc);
 }
 
 // delete a document
@@ -121,7 +93,7 @@ function createVirtualDocTempFile(virtualDoc: VirtualDoc) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
-  const tmpPath = path.join(vdocTempDir, ext, ".intellisense." + ext);
+  const tmpPath = path.join(vdocTempDir, ext, ".intellisense." + uuid.v4() + "." + ext);
   fs.writeFileSync(tmpPath, virtualDoc.content);
 
   return tmpPath;

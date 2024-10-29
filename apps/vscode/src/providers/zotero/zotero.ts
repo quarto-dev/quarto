@@ -222,7 +222,7 @@ class ZoteroConfigureLibraryCommand implements Command {
     inputBox.placeholder = "Zotero Web API Key";
     inputBox.onDidAccept(async () => {
 
-      // get key 
+      // get key
       const apiKey = inputBox.value.trim();
 
       // helper to save it

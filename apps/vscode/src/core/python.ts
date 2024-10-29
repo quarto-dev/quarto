@@ -71,4 +71,3 @@ export function pythonIsCondaEnv(python: string) {
     return false;
   }
 }
-

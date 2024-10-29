@@ -21,11 +21,11 @@ import { isXRef, NavLocation, VSCodeVisualEditor, XRef } from "editor-types";
 
 import { getWholeRange } from "../../core/doc";
 
-/* Strategy for managing synchronization of edits between source and visual mode. 
+/* Strategy for managing synchronization of edits between source and visual mode.
 
-This is made more complicated by the fact that getting/setting visual editor markdown 
+This is made more complicated by the fact that getting/setting visual editor markdown
 is expensive (requires a pandoc round trip) so is throttled by 1 second. We also need
-to guard against edits pinging back and forth (esp. w/ the requirement on flushing all 
+to guard against edits pinging back and forth (esp. w/ the requirement on flushing all
 pending edits on save)
 
 For the visual editor syncing to external changes:
@@ -33,7 +33,7 @@ For the visual editor syncing to external changes:
 1) Only accept external edits when NOT focused (once the visual editor is focused it
    is the definitive source of changes to the document)
 
-2) These external edits are throttled by 1 second so we don't get constant (expensive) 
+2) These external edits are throttled by 1 second so we don't get constant (expensive)
    refreshing of the visual editor when users type in the text editor.
 
 For the visual editor propagating its own changes:
@@ -65,9 +65,9 @@ export function editorSyncManager(
   navigation?: XRef | number
 ): EditorSyncManager {
 
-  // state: an update from the visual editor that we have yet to apply. we don't 
+  // state: an update from the visual editor that we have yet to apply. we don't
   // apply these on every keystoke b/c they are expensive. we poll to apply these
-  // udpates periodically and also apply them immediately on save and when the 
+  // udpates periodically and also apply them immediately on save and when the
   // visual editor instructs us to do so (e.g. when it loses focus)
   let pendingVisualEdit: unknown | undefined;
 
@@ -208,4 +208,3 @@ async function updateWorkspaceDocument(document: TextDocument, markdown: string)
   updateDocument(editor, document, markdown);
   await workspace.applyEdit(edit);
 };
-

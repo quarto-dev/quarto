@@ -51,7 +51,7 @@ export class PreviewEnvManager {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       QUARTO_LOG: this.outputFile_,
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       QUARTO_RENDER_TOKEN: this.renderToken_,
 
       ...(await terminalEnv(uri))

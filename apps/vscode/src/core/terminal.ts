@@ -184,4 +184,3 @@ function requiredTerminalDelay(env?: TerminalEnv): number {
     return 0;
   }
 }
-

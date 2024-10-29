@@ -133,7 +133,7 @@ function lspCellYamlOptionsCompletions(context: CodeViewCompletionContext, lspRe
   });
   // include language header (we offset cellEnd below accordingly)
   code.splice(context.cellBegin, 0, `{${context.language}}`);
-  // make request 
+  // make request
   return lspRequest(kCodeViewGetCompletions, [{
     ...context,
     code,

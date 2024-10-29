@@ -349,5 +349,3 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;
   return !!line.match(/^\s*#\s*\| /);
 }
-
-

@@ -320,4 +320,3 @@ function writePerDocumentPrefs(document: TextDocument, prefs: PerDocumentPrefs) 
   const storage = filePrefsStorage(document.uri.fsPath);
   writeFileSync(storage, JSON.stringify(prefs), { encoding: "utf8" });
 }
-

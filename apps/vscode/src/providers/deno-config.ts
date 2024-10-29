@@ -43,9 +43,3 @@ export function activateDenoConfig(context: ExtensionContext, engine: MarkdownEn
     workspace.onDidSaveTextDocument(ensureDenoConfig, null, context.subscriptions);
   }
 }
-
-
-
-
-
-

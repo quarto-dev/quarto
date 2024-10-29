@@ -72,6 +72,3 @@ declare module 'positron' {
 		readonly previewPanel: PreviewPanel;
 	}
 }
-
-
-

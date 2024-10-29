@@ -38,8 +38,8 @@ export async function virtualDocUriFromTempFile(
   local: boolean
 ): Promise<VirtualDocUri> {
 
-  // if this is local then create it alongside the docPath and return a cleanup 
-  // function to remove it when the action is completed. 
+  // if this is local then create it alongside the docPath and return a cleanup
+  // function to remove it when the action is completed.
   if (local || virtualDoc.language.localTempFile) {
     const ext = virtualDoc.language.extension;
     const vdocPath = path.join(path.dirname(docPath), `.vdoc.${ext}`);

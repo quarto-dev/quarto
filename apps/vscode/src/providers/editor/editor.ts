@@ -24,7 +24,6 @@ import {
   Disposable,
   CustomTextEditorProvider,
   TextDocument,
-  TextEditor,
   WebviewPanel,
   CancellationToken,
   Uri,
@@ -35,7 +34,8 @@ import {
   ViewColumn,
   Selection,
   TextEditorRevealType,
-  GlobPattern, TabInputText, TabGroups, Tab, TabGroup
+  GlobPattern,
+  TabInputText
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -66,16 +66,6 @@ import {
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 import { TabInputCustom } from "vscode";
-
-const labels = [
-  "(Working Tree)",
-  "(Deleted)",
-  "(Theirs)",
-  "(Ours)",
-  "(Untracked)",
-  "(Intent to add)",
-  "(Type changed)"
-];
 
 export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus(): Promise<boolean>;

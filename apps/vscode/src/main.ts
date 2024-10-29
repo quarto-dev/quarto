@@ -32,11 +32,12 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
+import { initQuartoContext } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 
 export async function activate(context: vscode.ExtensionContext) {
- 
+
   // create extension host
   const host = extensionHost();
 
@@ -128,5 +129,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate() {
   return deactivateLsp();
-} 
+}
 

@@ -144,13 +144,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     }));
 
     context.subscriptions.push(window.tabGroups.onDidChangeTabs(async (t) => {
-      if (t.closed.length > 0) { return; }
-      const tabs = t.changed.length > 0 ? t.changed : t.opened;
-
+      const tabs = t.opened;
 
       if (tabs.length > 0) {
         for (const tab of tabs) {
-          if (tab.isActive && tab.label.endsWith(".qmd") && (tab.input instanceof TabInputText || tab.input instanceof TabInputCustom)) {
+          if (tab.label.endsWith(".qmd") && (tab.input instanceof TabInputText || tab.input instanceof TabInputCustom)) {
             // determine what mode editor should be in
             const uri = tab.input.uri;
 
@@ -162,7 +160,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             const fileContent = Buffer.from(fileData).toString('utf8');
             const editorMode = determineMode(fileContent, uri);
             let isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
-            this.editorPendingSwitchToVisual.delete(uri.toString());
+            if (this.editorPendingSwitchToVisual.has(uri.toString())) {
+              this.editorPendingSwitchToVisual.delete(uri.toString());
+            }
 
             if (editorMode && editorMode != viewType && !isSwitch) {
               const allTabs = window.tabGroups.all?.[0]?.tabs;
@@ -170,8 +170,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
               // find tab to close if swapping editor type. we don't want to close an active
               // tab since a tab we are opening has not been set as active yet. we also don't
               // want to close preview tabs since they will automatically be overriden
-              const tabsToClose = allTabs.filter(tab => (
-                tab.input?.uri?.toString() === uri?.toString()) && (tab.isActive == false || tab.isPreview == true)
+              const tabsToClose = allTabs.filter(tab =>
+                ((tab.input instanceof TabInputText) || (tab.input instanceof TabInputCustom)) &&
+                (tab.input?.uri?.toString() === uri?.toString()) &&
+                (tab.isActive == false || tab.isPreview == true)
               );
 
               await window.tabGroups.close(tabsToClose, false);
@@ -208,7 +210,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         if (!isSwitch) {
           return;
         }
-
         if (pos) {
 
           // find the index

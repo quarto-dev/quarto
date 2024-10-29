@@ -176,7 +176,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
                 (tab.isActive == false || tab.isPreview == true)
               );
 
-              await window.tabGroups.close(tabsToClose, false);
+              await window.tabGroups.close(tabsToClose, true);
               await commands.executeCommand("vscode.openWith", uri, editorMode);
               return;
             }

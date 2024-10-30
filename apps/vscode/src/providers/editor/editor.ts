@@ -165,15 +165,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             }
 
             if (editorMode && editorMode != viewType && !isSwitch) {
-              const allTabs = window.tabGroups.all?.[0]?.tabs;
+              const allTabs = window.tabGroups.all.flatMap(group => group.tabs);
 
-              // find tab to close if swapping editor type. we don't want to close an active
-              // tab since a tab we are opening has not been set as active yet. we also don't
-              // want to close preview tabs since they will automatically be overriden
+              // find tab to close if swapping editor type
               const tabsToClose = allTabs.filter(tab =>
                 ((tab.input instanceof TabInputText) || (tab.input instanceof TabInputCustom)) &&
-                (tab.input?.uri?.toString() === uri?.toString()) &&
-                (tab.isActive == false || tab.isPreview == true)
+                (tab.input?.uri?.toString() === uri?.toString())
               );
 
               await window.tabGroups.close(tabsToClose, true);

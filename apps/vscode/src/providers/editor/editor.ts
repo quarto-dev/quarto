@@ -164,16 +164,22 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
               this.editorPendingSwitchToVisual.delete(uri.toString());
             }
 
+            // The `tab` we get from the change event is not precisely the same
+            // as the tab in `window.tabGroups`, so if we try and close `tab` we
+            // get a "tab not found" error. The one we care about does exist, but we have
+            // manually find it via URI, which is a stable field to match on.
             if (editorMode && editorMode != viewType && !isSwitch) {
               const allTabs = window.tabGroups.all.flatMap(group => group.tabs);
 
               // find tab to close if swapping editor type
-              const tabsToClose = allTabs.filter(tab =>
+              const tabToClose = allTabs.find(tab =>
                 ((tab.input instanceof TabInputText) || (tab.input instanceof TabInputCustom)) &&
                 (tab.input?.uri?.toString() === uri?.toString())
               );
-
-              await window.tabGroups.close(tabsToClose, true);
+              if (!tabToClose) {
+                return;
+              }
+              await window.tabGroups.close(tabToClose, true);
               await commands.executeCommand("vscode.openWith", uri, editorMode);
               return;
             }

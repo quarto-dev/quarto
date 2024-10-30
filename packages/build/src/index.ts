@@ -21,7 +21,6 @@ export interface BuildOptions {
   outfile: string;
   assets?: Array<AssetPair>;
   bundle?: boolean;    // true
-  minify?: boolean;    // false
   format?: Format;     // cjs
   platform?: Platform; // node
   external?: string[]; // []
@@ -36,25 +35,24 @@ export async function runBuild(options: BuildOptions) {
     bundle = true,
     format = 'cjs',
     platform = 'node',
-    minify = false,
     external,
     dev = false
   } = options;
 
-  await build({ 
+  await build({
     entryPoints,
     outfile,
     bundle,
-    minify,
+    minify: !dev,
     format,
     platform,
     external,
     sourcemap: dev,
     watch: dev ? {
       onRebuild(error) {
-        if (error) 
+        if (error)
           console.error('[watch] build failed:', error)
-        else 
+        else
           console.log('[watch] build finished')
       },
     } : false,
@@ -65,9 +63,8 @@ export async function runBuild(options: BuildOptions) {
       }),
     ] : [],
   });
-   
+
   if (dev) {
     console.log("[watch] build finished, watching for changes...");
   }
 }
-

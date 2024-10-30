@@ -14,12 +14,63 @@
  */
 
 import { commands, window, workspace, TextDocument, ViewColumn } from "vscode";
+import * as quarto from "quarto-core";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
+import { Uri } from "vscode";
 
+export function determineMode(text: string, uri: Uri): string | undefined {
+  let editorOpener = undefined;
 
+  // check if file itself has a mode
+  if (hasEditorMode(text, "source")) {
+    editorOpener = "textEditor";
+  }
+  else if (hasEditorMode(text, "visual")) {
+    editorOpener = VisualEditorProvider.viewType;
+  }
+  // check if has a _quarto.yml or _quarto.yaml file with editor specified
+  else {
+    editorOpener = modeFromQuartoYaml(uri);
+  }
 
+  return editorOpener;
+}
+
+export function modeFromQuartoYaml(uri: Uri): string | undefined {
+  const metadataFiles = quarto.metadataFilesForDocument(uri.fsPath);
+  if (!metadataFiles) {
+    return undefined;
+  }
+  if (metadataFiles) {
+    for (const metadataFile of metadataFiles) {
+      const yamlText = quarto.yamlFromMetadataFile(metadataFile);
+      if (yamlText?.editor === "source") {
+        return "textEditor";
+      }
+      if (yamlText?.editor === "visual") {
+        return VisualEditorProvider.viewType;
+      }
+    }
+  }
+  return undefined;
+}
+
+export function hasEditorMode(doc: string, mode: string): boolean {
+
+  if (doc) {
+    const match = doc.match(quarto.kRegExYAML);
+    if (match) {
+      const yaml = match[0];
+      return (
+        !!yaml.match(new RegExp("editor:\\s+" + mode + "\\s*$", "gm")) ||
+        !!yaml.match(new RegExp("^[ \\t]*" + "mode:\\s*" + mode + "\\s*$", "gm"))
+      );
+    }
+  }
+  return false;
+}
 
 export function editInVisualModeCommand(): Command {
   return {
@@ -53,7 +104,7 @@ export async function reopenEditorInVisualMode(
   // save then close
   await commands.executeCommand("workbench.action.files.save");
   await commands.executeCommand('workbench.action.closeActiveEditor');
-
+  VisualEditorProvider.recordPendingSwitchToVisual(document);
   // open in visual mode
   await commands.executeCommand("vscode.openWith",
     document.uri,

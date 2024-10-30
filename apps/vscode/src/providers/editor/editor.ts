@@ -13,8 +13,8 @@
  *
  */
 
-import path, { extname } from "path";
-
+import path, { extname, win32 } from "path";
+import { determineMode } from "./toggle"
 import debounce from "lodash.debounce";
 
 import {
@@ -34,7 +34,8 @@ import {
   ViewColumn,
   Selection,
   TextEditorRevealType,
-  GlobPattern
+  GlobPattern,
+  TabInputText
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -64,7 +65,7 @@ import {
   reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
-
+import { TabInputCustom } from "vscode";
 
 export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus(): Promise<boolean>;
@@ -101,6 +102,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   // track pending switch to source
   private static visualEditorPendingSwitchToSource = new Set<string>();
+
+  // track pending switch to visual
+  private static editorPendingSwitchToVisual = new Set<string>();
 
   // track pending xref navigations
   private static visualEditorPendingXRefNavigations = new Map<string, XRef>();
@@ -139,8 +143,55 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
     }));
 
+    context.subscriptions.push(window.tabGroups.onDidChangeTabs(async (t) => {
+      const tabs = t.opened;
+
+      if (tabs.length > 0) {
+        for (const tab of tabs) {
+          if (tab.label.endsWith(".qmd") && (tab.input instanceof TabInputText || tab.input instanceof TabInputCustom)) {
+            // determine what mode editor should be in
+            const uri = tab.input.uri;
+
+            const isTextEditor = tab.input instanceof TabInputText;
+            const viewType = isTextEditor ? "textEditor" : tab.input.viewType;
+
+            // get file contents
+            const fileData = await workspace.fs.readFile(uri);
+            const fileContent = Buffer.from(fileData).toString('utf8');
+            const editorMode = determineMode(fileContent, uri);
+            let isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
+            if (this.editorPendingSwitchToVisual.has(uri.toString())) {
+              this.editorPendingSwitchToVisual.delete(uri.toString());
+            }
+
+            // The `tab` we get from the change event is not precisely the same
+            // as the tab in `window.tabGroups`, so if we try and close `tab` we
+            // get a "tab not found" error. The one we care about does exist, but we have
+            // manually find it via URI, which is a stable field to match on.
+            if (editorMode && editorMode != viewType && !isSwitch) {
+              const allTabs = window.tabGroups.all.flatMap(group => group.tabs);
+
+              // find tab to close if swapping editor type
+              const tabToClose = allTabs.find(tab =>
+                ((tab.input instanceof TabInputText) || (tab.input instanceof TabInputCustom)) &&
+                (tab.input?.uri?.toString() === uri?.toString())
+              );
+              if (!tabToClose) {
+                return;
+              }
+              await window.tabGroups.close(tabToClose, true);
+              await commands.executeCommand("vscode.openWith", uri, editorMode);
+              return;
+            }
+          }
+        }
+      }
+    }));
+
+
     // when the active editor changes see if we have a visual editor position for it
     context.subscriptions.push(window.onDidChangeActiveTextEditor(debounce(() => {
+
       // resolve active editor
       const editor = window.activeTextEditor;
       if (!editor) {
@@ -152,6 +203,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
         // check for switch (one shot)
         const isSwitch = this.visualEditorPendingSwitchToSource.has(uri);
+
         this.visualEditorPendingSwitchToSource.delete(uri);
 
         // check for pos (one shot)
@@ -161,7 +213,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         if (!isSwitch) {
           return;
         }
-
         if (pos) {
 
           // find the index
@@ -207,6 +258,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static recordPendingSwitchToSource(document: TextDocument) {
     this.visualEditorPendingSwitchToSource.add(document.uri.toString());
+  }
+
+  public static recordPendingSwitchToVisual(document: TextDocument) {
+    this.editorPendingSwitchToVisual.add(document.uri.toString());
   }
 
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {

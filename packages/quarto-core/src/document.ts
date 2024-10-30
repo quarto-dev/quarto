@@ -110,7 +110,7 @@ export function filePathForDoc(doc: Document) {
   return URI.parse(doc.uri).fsPath;
 }
 
-const kRegExYAML =
+export const kRegExYAML =
   /(^)(---[ \t]*[\r\n]+(?![ \t]*[\r\n]+)[\W\w]*?[\r\n]+(?:---|\.\.\.))([ \t]*)$/gm;
 
 export function isQuartoDocWithFormat(doc: Document | string, format: string) {

@@ -24,7 +24,6 @@ import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activateCommon } from "./extension";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
-import { initQuartoContext, quartoContextUnavailable } from "quarto-core";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
@@ -33,11 +32,12 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
+import { initQuartoContext } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 
 export async function activate(context: vscode.ExtensionContext) {
- 
+
   // create extension host
   const host = extensionHost();
 
@@ -129,5 +129,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate() {
   return deactivateLsp();
-} 
+}
 

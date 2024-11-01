@@ -21,6 +21,7 @@ export interface BuildOptions {
   outfile: string;
   assets?: Array<AssetPair>;
   bundle?: boolean;    // true
+  minify?: boolean;    // false
   format?: Format;     // cjs
   platform?: Platform; // node
   external?: string[]; // []
@@ -33,6 +34,7 @@ export async function runBuild(options: BuildOptions) {
     outfile,
     assets,
     bundle = true,
+    minify = false,
     format = 'cjs',
     platform = 'node',
     external,
@@ -43,7 +45,7 @@ export async function runBuild(options: BuildOptions) {
     entryPoints,
     outfile,
     bundle,
-    minify: !dev,
+    minify,
     format,
     platform,
     external,

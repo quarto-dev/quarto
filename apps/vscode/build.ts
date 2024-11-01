@@ -22,5 +22,6 @@ runBuild({
   entryPoints: ['./src/main.ts'],
   outfile: './out/main.js',
   external: ['vscode'],
+  minify: !dev,
   dev
 });

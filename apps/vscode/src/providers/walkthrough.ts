@@ -35,7 +35,7 @@ class VerifyInstallationCommand implements Command {
   private static readonly id = "quarto.verifyInstallation";
   public readonly id = VerifyInstallationCommand.id;
 
-  constructor(private readonly quartoContext_: QuartoContext) {}
+  constructor(private readonly quartoContext_: QuartoContext) { }
 
   async execute(): Promise<void> {
     if (this.quartoContext_.available) {
@@ -53,7 +53,7 @@ class WalkthroughNewDocumentCommand implements Command {
   private static readonly id = "quarto.walkthrough.newDocument";
   public readonly id = WalkthroughNewDocumentCommand.id;
 
-  constructor(private readonly host_: ExtensionHost) {}
+  constructor(private readonly host_: ExtensionHost) { }
 
   async execute(): Promise<void> {
     const saveDir = defaultSaveDir();

@@ -34,7 +34,7 @@ export function embeddedLanguage(langauge: string) {
 }
 
 export function languageCanFormatDocument(language: EmbeddedLanguage) {
-  return language.canFormatDocument !== false; 
+  return language.canFormatDocument !== false;
 }
 
 const kEmbededLanguages = [
@@ -97,7 +97,7 @@ function defineLanguage(
   id: string,
   options?: LanguageOptions
 ): EmbeddedLanguage {
- 
+
   // lookup langauge
   const language = editorLanguage(id);
   if (!language) {

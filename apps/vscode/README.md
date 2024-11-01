@@ -21,7 +21,6 @@ The easiest way to install is directly from within VS Code (search extensions fo
 
 You can also install from the [VS Code Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=quarto.quarto), the [Open VSX Registry](https://open-vsx.org/extension/quarto/quarto) or directly from a [VISX extension file](#visx-install).
 
-
 ## Render and Preview
 
 The Quarto VS Code extension includes commands and keyboard shortcuts for rendering Quarto documents (both standalone and within websites or books). After rendering, `quarto preview` is used behind the scenes to provide a preview pane within VS Code alongside your document:
@@ -44,7 +43,7 @@ When you execute **Preview Format**, you'll see a quick pick list of formats to 
 
 ![](https://quarto.org/docs/tools/images/vscode-preview-format.png)
 
-After previewing a different format, the **Quarto: Preview** command and <kbd>Ctrl+Shift+K</kbd> keyboard shortcut will be automatically rebound to the newly selected format for the duration of the current preview. To switch back to previewing the original format, use  **Quarto: Preview Format** command again.
+After previewing a different format, the **Quarto: Preview** command and <kbd>Ctrl+Shift+K</kbd> keyboard shortcut will be automatically rebound to the newly selected format for the duration of the current preview. To switch back to previewing the original format, use **Quarto: Preview Format** command again.
 
 > Embedded preview is currently supported for HTML and PDF based formats (including `revealjs` and `beamer` slideshows). However, for Word and other formats you need to use an appropriate external program to preview the output.
 
@@ -64,7 +63,7 @@ However, you can configure the Quarto extension to automatically render whenever
 
 You might also want to control this behavior on a per-document or per-project basis. If you include the `editor: render-on-save` option in your document or project YAML it will supersede whatever your VS Code setting is. For example:
 
-``` yaml
+```yaml
 editor:
   render-on-save: true
 ```
@@ -74,7 +73,6 @@ editor:
 If you prefer to use an external browser for preview (or have no preview triggered at all by rendering) you can use the **Preview Type** option to specify an alternate behavior:
 
 ![](https://quarto.org/docs/tools/images/vscode-preview-settings.png)
-
 
 ## Code Cells
 

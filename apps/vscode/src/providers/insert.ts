@@ -30,7 +30,7 @@ export function insertCommands(engine: MarkdownEngine): Command[] {
 }
 
 class InsertCodeCellCommand implements Command {
-  constructor(private readonly engine_: MarkdownEngine) {}
+  constructor(private readonly engine_: MarkdownEngine) { }
   private static readonly id = "quarto.insertCodeCell";
   public readonly id = InsertCodeCellCommand.id;
 

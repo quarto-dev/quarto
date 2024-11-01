@@ -55,7 +55,7 @@ interface VSCodeCellExecutor extends CellExecutor {
   executeSelection?: () => Promise<void>;
 }
 
-const jupyterCellExecutor = (language: string) : VSCodeCellExecutor => ({
+const jupyterCellExecutor = (language: string): VSCodeCellExecutor => ({
   language,
   requiredExtension: ["ms-toolsai.jupyter"],
   requiredExtensionName: "Jupyter",
@@ -179,16 +179,16 @@ export function isDenoDocument(
   if (jupyterOption) {
     if (jupyterOption === "deno") {
       return true;
-    } else if (typeof(jupyterOption) === "object") {
-      const kernelspec = (jupyterOption as Record<string,unknown>)["kernelspec"];
-      if (typeof(kernelspec) === "object") {
+    } else if (typeof (jupyterOption) === "object") {
+      const kernelspec = (jupyterOption as Record<string, unknown>)["kernelspec"];
+      if (typeof (kernelspec) === "object") {
         return (kernelspec as JupyterKernelspec).name === "deno";
       }
     } else {
       return false;
     }
   }
- 
+
   // another explicit declaration of engine that isn't jupyter
   if (engineOption && engineOption !== "jupyter") {
     return false;

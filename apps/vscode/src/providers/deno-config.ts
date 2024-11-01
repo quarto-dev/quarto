@@ -34,7 +34,7 @@ export function activateDenoConfig(context: ExtensionContext, engine: MarkdownEn
           if (isDenoDocument(doc, engine)) {
             await config.update("deno.enable", true, null);
           }
-    
+
         }
       }
     };
@@ -43,9 +43,3 @@ export function activateDenoConfig(context: ExtensionContext, engine: MarkdownEn
     workspace.onDidSaveTextDocument(ensureDenoConfig, null, context.subscriptions);
   }
 }
-
-
-
-
-
-

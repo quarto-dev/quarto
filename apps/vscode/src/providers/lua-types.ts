@@ -102,8 +102,8 @@ async function syncLuaTypes(
     const neverInstall: MessageItem = { title: "Don't Ask Again" };
     const result = await window.showInformationMessage<MessageItem>(
       "Quarto can provide completion and diagnostics for Lua scripts in this workspace if the " +
-        "[Lua extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua) " +
-        "is installed. Do you want to install it now?",
+      "[Lua extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua) " +
+      "is installed. Do you want to install it now?",
       install,
       notNow,
       neverInstall

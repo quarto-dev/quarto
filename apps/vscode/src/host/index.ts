@@ -24,7 +24,7 @@ import { TextDocument } from "vscode";
 import { MarkdownEngine } from "../markdown/engine";
 
 export type { CellExecutor };
-export type { EditorToolbarProvider,  ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
+export type { EditorToolbarProvider, ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
 
 export interface HostWebviewPanel extends vscode.Disposable {
   readonly webview: vscode.Webview;
@@ -50,13 +50,13 @@ export interface HostStatementRange {
 export interface ExtensionHost {
 
   // code execution
-  executableLanguages(visualMode: boolean, document: TextDocument, engine: MarkdownEngine) : string[];
+  executableLanguages(visualMode: boolean, document: TextDocument, engine: MarkdownEngine): string[];
   cellExecutorForLanguage(
-    language: string, 
+    language: string,
     document: TextDocument,
     engine: MarkdownEngine,
     silent?: boolean
-  ) : Promise<CellExecutor | undefined>;
+  ): Promise<CellExecutor | undefined>;
 
   // statement range provider
   registerStatementRangeProvider(
@@ -65,21 +65,21 @@ export interface ExtensionHost {
 
   // preview
   createPreviewPanel(
-    viewType: string, 
+    viewType: string,
     title: string,
-    preserveFocus?: boolean, 
+    preserveFocus?: boolean,
     options?: WebviewPanelOptions & WebviewOptions
   ): HostWebviewPanel;
 
   // editor toolbar
   registerEditorToolbarProvider?(
-    selector: DocumentSelector, 
+    selector: DocumentSelector,
     provider: EditorToolbarProvider
   ): Disposable;
 
 }
 
-export function extensionHost() : ExtensionHost {
+export function extensionHost(): ExtensionHost {
   if (hasHooks()) {
     return hooksExtensionHost();
   } else {
@@ -87,10 +87,10 @@ export function extensionHost() : ExtensionHost {
   }
 }
 
-function defaultExtensionHost() : ExtensionHost {
+function defaultExtensionHost(): ExtensionHost {
   return {
     executableLanguages: (visualMode: boolean, document: TextDocument, engine: MarkdownEngine) => {
-      
+
       const languages = executableLanguages();
       const knitr = isKnitrDocument(document, engine);
 
@@ -101,7 +101,7 @@ function defaultExtensionHost() : ExtensionHost {
     cellExecutorForLanguage,
     // in the default extension host, this is a noop:
     registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      return new vscode.Disposable(() => {});
+      return new vscode.Disposable(() => { });
     },
     createPreviewPanel,
   };

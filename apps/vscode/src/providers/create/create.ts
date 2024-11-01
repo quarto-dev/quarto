@@ -30,7 +30,7 @@ export async function activateCreate(
       await window.showTextDocument(doc, ViewColumn.Active, false);
     }
   }
- 
+
   // commands
   return [
     new CreateProjectCommand("quarto.createProject", context, quartoContext),
@@ -41,4 +41,3 @@ export async function activateCreate(
     ),
   ];
 }
-

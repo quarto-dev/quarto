@@ -120,12 +120,12 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     engine: MarkdownEngine
   ): Disposable {
 
-    // setup request transport 
+    // setup request transport
     const lspRequest = lspClientTransport(lspClient);
 
     // track edits in the active editor if its untitled. this enables us to recover the
     // content when we switch to an untitled document, which otherwise are just dropped
-    // on the floor by vscode 
+    // on the floor by vscode
     context.subscriptions.push(workspace.onDidChangeTextDocument(e => {
       const doc = window.activeTextEditor?.document;
       if (doc && isQuartoDoc(doc) && doc.isUntitled && (doc.uri.toString() === e.document.uri.toString())) {
@@ -381,7 +381,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       xref || sourcePos
     );
 
-    // editor container implementation   
+    // editor container implementation
     const host: VSCodeVisualEditorHost = {
 
       // editor is querying for context
@@ -687,7 +687,7 @@ function visualEditorTracker(): VisualEditorTracker {
         try {
           return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
         } catch (err) {
-          // we've seen activeEditors hold on to references to disposed editors (can't on the 
+          // we've seen activeEditors hold on to references to disposed editors (can't on the
           // surface see how this would occur as we subscribe to dispose, but as an insurance
           // policy let's eat any exception that occurs, since a single zombie webviewPanel
           // would prevent rendering of other panels
@@ -723,7 +723,7 @@ function focusTracker(webviewPanel: WebviewPanel, editor: VSCodeVisualEditor): D
     }
   });
 
-  // periodically check for focus 
+  // periodically check for focus
   const timer = setInterval(async () => {
     // update focus state
     hasFocus = await editor.isFocused();

@@ -47,13 +47,13 @@ export function activateDiagram(
   return diagramCommands(diagramManager, engine);
 }
 
-export async function visualEditorDiagramState() : Promise<DiagramState | undefined> {
-  
+export async function visualEditorDiagramState(): Promise<DiagramState | undefined> {
+
   const visualEditor = VisualEditorProvider.activeEditor();
   if (visualEditor) {
     const blockContext = await visualEditor.getActiveBlockContext();
     if (blockContext) {
-      const engine =  languageDiagramEngine(blockContext.activeLanguage);
+      const engine = languageDiagramEngine(blockContext.activeLanguage);
       if (engine) {
         const activeBlock = blockContext.blocks.find(block => block.active);
         if (activeBlock) {

@@ -47,7 +47,7 @@ export function quartoCellExecuteCodeLensProvider(
         }
 
         const block = executableBlocks[i];
-      
+
         // detect the language and see if it has a cell executor
         const language = languageNameFromBlock(block);
         if (!hasExecutor(host, language)) {
@@ -87,7 +87,7 @@ export function quartoCellExecuteCodeLensProvider(
             })
           );
         }
-        
+
       }
       return lenses;
     },

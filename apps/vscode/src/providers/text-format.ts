@@ -63,7 +63,7 @@ class ToggleCommand implements Command {
       const shift = shifts
         .map(([pos, s]) =>
           selection.start.line === pos.line &&
-          selection.start.character >= pos.character
+            selection.start.character >= pos.character
             ? s
             : 0
         )

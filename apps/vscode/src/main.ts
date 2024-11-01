@@ -90,7 +90,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
     commands.push(...editorCommands);
 
-    // zotero 
+    // zotero
     const zoteroCommands = await activateZotero(context, lspClient);
     commands.push(...zoteroCommands);
 
@@ -130,4 +130,3 @@ export async function activate(context: vscode.ExtensionContext) {
 export async function deactivate() {
   return deactivateLsp();
 }
-

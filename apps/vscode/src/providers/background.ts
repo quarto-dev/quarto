@@ -69,7 +69,7 @@ export function activateBackgroundHighlighter(
   // update highlighting on changes to the document (if its visible)
   vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      const visibleEditor = vscode.window.visibleTextEditors.find(editor => { 
+      const visibleEditor = vscode.window.visibleTextEditors.find(editor => {
         return editor.document.uri.toString() === event.document.uri.toString();
       });
       if (visibleEditor) {
@@ -155,7 +155,7 @@ async function setEditorHighlightDecorations(
   const inlineRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
-    
+
     // find code blocks
     const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
@@ -163,7 +163,7 @@ async function setEditorHighlightDecorations(
     }
 
     // find inline executable code
-    for (let i=0; i<editor.document.lineCount; i++) {
+    for (let i = 0; i < editor.document.lineCount; i++) {
       const line = editor.document.lineAt(i);
       const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
       for (const match of matches) {
@@ -193,7 +193,7 @@ function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
 }
 
 class HiglightingConfig {
-  constructor() {}
+  constructor() { }
 
   public enabled() {
     return this.enabled_;

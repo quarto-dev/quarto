@@ -19,7 +19,7 @@ import { Parser, Document, QuartoContext, Token, markdownitParser } from "quarto
 import { Range, Position } from "vscode-languageserver-types";
 
 export class MarkdownEngine {
-  
+
   private readonly parser_: Parser;
 
   public constructor() {
@@ -35,9 +35,9 @@ export class MarkdownEngine {
       get lineCount() { return document.lineCount; },
       getText(range?: Range | undefined): string {
         const r = range ? new vscode.Range(
-          range.start.line, 
-          range.start.character, 
-          range.end.line, 
+          range.start.line,
+          range.start.character,
+          range.end.line,
           range.end.character
         ) : undefined;
         return document.getText(r);
@@ -49,5 +49,5 @@ export class MarkdownEngine {
     return this.parser_(doc);
   }
 
-  
+
 }

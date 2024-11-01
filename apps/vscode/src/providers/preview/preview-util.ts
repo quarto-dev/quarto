@@ -56,7 +56,7 @@ export function isQuartoShinyKnitrDoc(
   doc?: TextDocument
 ) {
   return doc && isQuartoShinyDoc(engine, doc) && isKnitrDocument(doc, engine);
-  
+
 }
 
 export async function isRPackage(): Promise<boolean> {
@@ -126,7 +126,7 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
   // finally, consult vs code settings
   const config = workspace.getConfiguration("quarto");
   const render = isQuartoShinyDoc(engine, document)
-    ? config.get<boolean>("render.renderOnSaveShiny", true) 
+    ? config.get<boolean>("render.renderOnSaveShiny", true)
     : config.get<boolean>("render.renderOnSave", false);
 
   return render;

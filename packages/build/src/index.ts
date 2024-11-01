@@ -34,14 +34,14 @@ export async function runBuild(options: BuildOptions) {
     outfile,
     assets,
     bundle = true,
+    minify = false,
     format = 'cjs',
     platform = 'node',
-    minify = false,
     external,
     dev = false
   } = options;
 
-  await build({ 
+  await build({
     entryPoints,
     outfile,
     bundle,
@@ -52,9 +52,9 @@ export async function runBuild(options: BuildOptions) {
     sourcemap: dev,
     watch: dev ? {
       onRebuild(error) {
-        if (error) 
+        if (error)
           console.error('[watch] build failed:', error)
-        else 
+        else
           console.log('[watch] build finished')
       },
     } : false,
@@ -65,9 +65,8 @@ export async function runBuild(options: BuildOptions) {
       }),
     ] : [],
   });
-   
+
   if (dev) {
     console.log("[watch] build finished, watching for changes...");
   }
 }
-

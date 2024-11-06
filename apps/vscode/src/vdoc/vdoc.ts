@@ -117,7 +117,8 @@ export type VirtualDocAction =
   "signature" |
   "definition" |
   "format" |
-  "statementRange";
+  "statementRange" |
+  "helpTopic";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
 

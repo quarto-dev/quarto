@@ -16,7 +16,7 @@
 import * as vscode from 'vscode';
 import * as hooks from 'positron';
 
-import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
+import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
@@ -95,6 +95,15 @@ export function hooksExtensionHost(): ExtensionHost {
       if (hooks) {
         return hooks.languages.registerStatementRangeProvider('quarto',
           new EmbeddedStatementRangeProvider(engine));
+      }
+      return new vscode.Disposable(() => { });
+    },
+
+    registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
+      const hooks = hooksApi();
+      if (hooks) {
+        return hooks.languages.registerHelpTopicProvider('quarto',
+          new EmbeddedHelpTopicProvider(engine));
       }
       return new vscode.Disposable(() => { });
     },
@@ -185,4 +194,41 @@ async function getStatementRange(
     position
   );
   return { range: unadjustedRange(language, result.range), code: result.code };
+}
+
+class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {
+  private readonly _engine: MarkdownEngine;
+
+  constructor(
+    readonly engine: MarkdownEngine,
+  ) {
+    this._engine = engine;
+  }
+
+  async provideHelpTopic(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken): Promise<string | undefined> {
+    const vdoc = await virtualDoc(document, position, this._engine);
+    if (vdoc) {
+      const vdocUri = await virtualDocUri(vdoc, document.uri, "helpTopic");
+      try {
+        const res = await vscode.commands.executeCommand<string>(
+          "positron.executeHelpTopicProvider",
+          vdocUri.uri,
+          adjustedPosition(vdoc.language, position),
+          vdoc.language
+        );
+        return res;
+      } catch (error) {
+        return undefined;
+      } finally {
+        if (vdocUri.cleanup) {
+          await vdocUri.cleanup();
+        }
+      }
+    } else {
+      return undefined;
+    }
+  };
 }

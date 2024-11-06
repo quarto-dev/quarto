@@ -110,6 +110,7 @@ export async function activateLsp(
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
   extensionHost().registerStatementRangeProvider(engine);
+  extensionHost().registerHelpTopicProvider(engine);
 
   // create client options
   const initializationOptions: LspInitializationOptions = {

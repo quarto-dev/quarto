@@ -25,6 +25,10 @@ declare module 'positron' {
 			selector: vscode.DocumentSelector,
 			provider: StatementRangeProvider
 		): vscode.Disposable;
+		registerHelpTopicProvider(
+			selector: vscode.DocumentSelector,
+			provider: HelpTopicProvider
+		): vscode.Disposable;
 	}
 
 	export interface StatementRangeProvider {
@@ -33,6 +37,14 @@ declare module 'positron' {
 			position: vscode.Position,
 			token: vscode.CancellationToken
 		): vscode.ProviderResult<StatementRange>;
+	}
+
+	export interface HelpTopicProvider {
+		provideHelpTopic(
+			document: vscode.TextDocument,
+			position: vscode.Position,
+			token: vscode.CancellationToken
+		): vscode.ProviderResult<string>;
 	}
 
 	export interface StatementRange {

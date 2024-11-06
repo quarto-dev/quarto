@@ -213,13 +213,12 @@ class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {
     if (vdoc) {
       const vdocUri = await virtualDocUri(vdoc, document.uri, "helpTopic");
       try {
-        const res = await vscode.commands.executeCommand<string>(
+        return await vscode.commands.executeCommand<string>(
           "positron.executeHelpTopicProvider",
           vdocUri.uri,
           adjustedPosition(vdoc.language, position),
           vdoc.language
         );
-        return res;
       } catch (error) {
         return undefined;
       } finally {

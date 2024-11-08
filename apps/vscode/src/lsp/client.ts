@@ -227,7 +227,7 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
       // execute hover
       try {
-        return getHover(vdocUri, vdoc.language, position);
+        return getHover(vdocUri.uri, vdoc.language, position);
       } catch (error) {
         console.log(error);
       } finally {
@@ -254,7 +254,7 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
     if (vdoc) {
       const vdocUri = await virtualDocUri(vdoc, document.uri, "signature");
       try {
-        return getSignatureHelpHover(vdocUri, vdoc.language, position, context.triggerCharacter);
+        return getSignatureHelpHover(vdocUri.uri, vdoc.language, position, context.triggerCharacter);
       } catch (error) {
         return undefined;
       } finally {

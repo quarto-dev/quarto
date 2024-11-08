@@ -178,8 +178,7 @@ async function executeFormatDocumentProvider(
   document: TextDocument,
   options: FormattingOptions
 ): Promise<TextEdit[] | undefined> {
-  const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
-  const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+  const edits = await withVirtualDocUri(vdoc, document.uri, "format", async (uri: Uri) => {
     return await commands.executeCommand<TextEdit[]>(
       "vscode.executeFormatDocumentProvider",
       uri,

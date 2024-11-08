@@ -122,12 +122,19 @@ export type VirtualDocAction =
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
 
-export async function withVirtualDocUri<T>(virtualDocUri: VirtualDocUri, f: (uri: Uri) => Promise<T>) {
+export async function withVirtualDocUri<T>(
+  vdoc: VirtualDoc,
+  parentUri: Uri,
+  action: VirtualDocAction,
+  f: (uri: Uri) => Promise<T>
+) {
+  const vdocUri = await virtualDocUri(vdoc, parentUri, action);
+
   try {
-    return await f(virtualDocUri.uri);
+    return await f(vdocUri.uri);
   } finally {
-    if (virtualDocUri.cleanup) {
-      virtualDocUri.cleanup();
+    if (vdocUri.cleanup) {
+      vdocUri.cleanup();
     }
   }
 }

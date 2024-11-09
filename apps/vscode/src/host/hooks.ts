@@ -163,20 +163,13 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "statementRange");
-      try {
+      return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
         return getStatementRange(
-          vdocUri.uri,
+          uri,
           adjustedPosition(vdoc.language, position),
           vdoc.language
         );
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
-        }
-      }
+      });
     } else {
       return undefined;
     }

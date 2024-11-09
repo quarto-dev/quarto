@@ -1,6 +1,8 @@
 # Changelog
 
-## 1.117.0 (unreleased)
+## 1.118.0 (unreleased)
+
+## 1.117.0 (Release on 2024-11-07)
 
 - Fix issue with temp files for LSP request virtual documents (<https://github.com/quarto-dev/quarto/pull/585>)
 - Improved statement execution for Python `.qmd` files in Positron (<https://github.com/quarto-dev/quarto/pull/589>)

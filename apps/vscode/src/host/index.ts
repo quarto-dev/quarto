@@ -47,6 +47,14 @@ export interface HostStatementRange {
   readonly code?: string;
 }
 
+export interface HostHelpTopicProvider {
+  provideHelpTopic(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<string>;
+}
+
 export interface ExtensionHost {
 
   // code execution
@@ -60,6 +68,11 @@ export interface ExtensionHost {
 
   // statement range provider
   registerStatementRangeProvider(
+    engine: MarkdownEngine,
+  ): vscode.Disposable;
+
+  // help topic provider
+  registerHelpTopicProvider(
     engine: MarkdownEngine,
   ): vscode.Disposable;
 
@@ -99,8 +112,11 @@ function defaultExtensionHost(): ExtensionHost {
       return languages.filter(language => knitr || !visualMode || (language !== "python"));
     },
     cellExecutorForLanguage,
-    // in the default extension host, this is a noop:
+    // in the default extension host, both of these are just a noop:
     registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
+      return new vscode.Disposable(() => { });
+    },
+    registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
       return new vscode.Disposable(() => { });
     },
     createPreviewPanel,

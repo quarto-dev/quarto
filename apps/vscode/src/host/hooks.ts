@@ -16,11 +16,11 @@
 import * as vscode from 'vscode';
 import * as hooks from 'positron';
 
-import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider } from '.';
+import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, virtualDocUri, adjustedPosition, unadjustedRange } from "../vdoc/vdoc";
+import { virtualDoc, virtualDocUri, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from '../vdoc/languages';
 
 declare global {
@@ -99,6 +99,15 @@ export function hooksExtensionHost(): ExtensionHost {
       return new vscode.Disposable(() => { });
     },
 
+    registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
+      const hooks = hooksApi();
+      if (hooks) {
+        return hooks.languages.registerHelpTopicProvider('quarto',
+          new EmbeddedHelpTopicProvider(engine));
+      }
+      return new vscode.Disposable(() => { });
+    },
+
     createPreviewPanel: (
       viewType: string,
       title: string,
@@ -154,20 +163,13 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "statementRange");
-      try {
+      return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
         return getStatementRange(
-          vdocUri.uri,
+          uri,
           adjustedPosition(vdoc.language, position),
           vdoc.language
         );
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
-        }
-      }
+      });
     } else {
       return undefined;
     }
@@ -185,4 +187,34 @@ async function getStatementRange(
     position
   );
   return { range: unadjustedRange(language, result.range), code: result.code };
+}
+
+class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {
+  private readonly _engine: MarkdownEngine;
+
+  constructor(
+    readonly engine: MarkdownEngine,
+  ) {
+    this._engine = engine;
+  }
+
+  async provideHelpTopic(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken): Promise<string | undefined> {
+    const vdoc = await virtualDoc(document, position, this._engine);
+
+    if (vdoc) {
+      return await withVirtualDocUri(vdoc, document.uri, "helpTopic", async (uri: vscode.Uri) => {
+        return await vscode.commands.executeCommand<string>(
+          "positron.executeHelpTopicProvider",
+          uri,
+          adjustedPosition(vdoc.language, position),
+          vdoc.language
+        );
+      });
+    } else {
+      return undefined;
+    }
+  };
 }

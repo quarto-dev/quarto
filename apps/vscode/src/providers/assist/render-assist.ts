@@ -110,13 +110,13 @@ export async function renderCodeViewAssist(
     const language = embeddedLanguage(context.language);
     if (language) {
       const vdoc = virtualDocForCode(context.code, language);
-      const vdocUri = await virtualDocUri(vdoc, Uri.file(context.filepath), "hover");
-      return await withVirtualDocUri<Assist | undefined>(vdocUri, async () => {
+      const parentUri = Uri.file(context.filepath);
+      return await withVirtualDocUri<Assist | undefined>(vdoc, parentUri, "hover", async (uri: Uri) => {
         try {
           const position = new Position(context.selection.start.line, context.selection.start.character);
 
           // check for hover
-          const hover = await getHover(vdocUri, language, position);
+          const hover = await getHover(uri, language, position);
           if (hover) {
             const assist = getAssistFromHovers([hover], asWebviewUri);
             if (assist) {
@@ -129,7 +129,7 @@ export async function renderCodeViewAssist(
           }
 
           // check for signature tip
-          const signatureHover = await getSignatureHelpHover(vdocUri, language, position);
+          const signatureHover = await getSignatureHelpHover(uri, language, position);
           if (signatureHover) {
             return getAssistFromSignatureHelp(signatureHover);
           }

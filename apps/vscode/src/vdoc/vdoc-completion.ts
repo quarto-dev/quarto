@@ -24,10 +24,7 @@ export async function vdocCompletions(
   language: EmbeddedLanguage,
   parentUri: Uri
 ) {
-
-  const vdocUri = await virtualDocUri(vdoc, parentUri, "completion");
-
-  const completions = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+  const completions = await withVirtualDocUri(vdoc, parentUri, "completion", async (uri: Uri) => {
     return await commands.executeCommand<CompletionList>(
       "vscode.executeCompletionItemProvider",
       uri,

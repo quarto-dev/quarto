@@ -20,7 +20,7 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTo
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, virtualDocUri, adjustedPosition, unadjustedRange } from "../vdoc/vdoc";
+import { virtualDoc, virtualDocUri, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from '../vdoc/languages';
 
 declare global {
@@ -210,22 +210,16 @@ class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {
     position: vscode.Position,
     token: vscode.CancellationToken): Promise<string | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine);
+
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "helpTopic");
-      try {
+      return await withVirtualDocUri(vdoc, document.uri, "helpTopic", async (uri: vscode.Uri) => {
         return await vscode.commands.executeCommand<string>(
           "positron.executeHelpTopicProvider",
-          vdocUri.uri,
+          uri,
           adjustedPosition(vdoc.language, position),
           vdoc.language
         );
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
-        }
-      }
+      });
     } else {
       return undefined;
     }

@@ -159,10 +159,10 @@ export function languageAtPosition(tokens: Token[], position: Position) {
   if (block) {
     const language = languageFromBlock(block);
     // expose cell language for use in keybindings, etc
-    commands.executeCommand('setContext', 'quarto.cellLang', language?.extension);
+    commands.executeCommand('setContext', 'quarto.cellLangId', language?.ids[0]);
     return language;
   } else {
-    commands.executeCommand('setContext', 'quarto.cellLang', undefined);
+    commands.executeCommand('setContext', 'quarto.cellLangId', undefined);
     return undefined;
   }
 }

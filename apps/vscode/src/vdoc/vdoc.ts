@@ -13,7 +13,7 @@
  *
  */
 
-import { Position, TextDocument, Uri, Range } from "vscode";
+import { Position, TextDocument, Uri, Range, commands } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 import { isQuartoDoc } from "../core/doc";
@@ -157,8 +157,12 @@ export async function virtualDocUri(
 export function languageAtPosition(tokens: Token[], position: Position) {
   const block = languageBlockAtPosition(tokens, position);
   if (block) {
-    return languageFromBlock(block);
+    const language = languageFromBlock(block);
+    // expose cell language for use in keybindings, etc
+    commands.executeCommand('setContext', 'quarto.cellLangId', language?.ids[0]);
+    return language;
   } else {
+    commands.executeCommand('setContext', 'quarto.cellLangId', undefined);
     return undefined;
   }
 }

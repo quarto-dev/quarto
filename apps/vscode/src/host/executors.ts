@@ -126,6 +126,25 @@ const juliaCellExecutor: VSCodeCellExecutor = {
   },
 };
 
+const csharpCellExecutor: VSCodeCellExecutor = {
+  language: "csharp",
+  requiredExtension: ["ms-dotnettools.dotnet-interactive-vscode"],
+  requiredExtensionName: "Polyglot Notebooks",
+  requiredVersion: "1.0.55", // Adjust minimum version as needed
+  execute: async (blocks: string[], editorUri?: Uri) => {
+    const extension = extensions.getExtension("ms-dotnettools.dotnet-interactive-vscode");
+    if (extension) {
+      if (!extension.isActive) {
+        await extension.activate();
+      }
+
+      await jupyterCellExecutor("csharp").execute(blocks);
+    } else {
+      window.showErrorMessage("Unable to execute code - Polyglot Notebooks extension not found");
+    }
+  }
+};
+
 const bashCellExecutor: VSCodeCellExecutor = {
   language: "bash",
   execute: async (blocks: string[]) => {
@@ -147,6 +166,7 @@ const kCellExecutors = [
   bashCellExecutor,
   shCellExecutor,
   shellCellExecutor,
+  csharpCellExecutor
 ];
 
 function findExecutor(

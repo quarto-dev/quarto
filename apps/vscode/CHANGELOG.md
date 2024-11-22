@@ -3,7 +3,7 @@
 ## 1.118.0 (unreleased)
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)
-- Expose new context keys for the language of a specific cell (<https://github.com/quarto-dev/quarto/pull/607>)
+- Expose new context keys for the main language of a document (<https://github.com/quarto-dev/quarto/pull/608>)
 
 ## 1.117.0 (Release on 2024-11-07)
 

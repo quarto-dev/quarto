@@ -4,6 +4,7 @@
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)
 - Expose new context keys for the language of a specific cell (<https://github.com/quarto-dev/quarto/pull/607>)
+- No longer send all snippet suggestions to the bottom of the completion list (<https://github.com/quarto-dev/quarto/pull/609>).
 
 ## 1.117.0 (Release on 2024-11-07)
 

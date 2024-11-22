@@ -22,6 +22,7 @@ import { isQuartoDoc, kQuartoDocSelector } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { isExecutableLanguageBlock } from "quarto-core";
 import { vscRange } from "../core/range";
+import { mainLanguage } from "../vdoc/vdoc";
 
 export function activateBackgroundHighlighter(
   context: vscode.ExtensionContext,
@@ -161,6 +162,10 @@ async function setEditorHighlightDecorations(
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
       blockRanges.push(vscRange(block.range));
     }
+
+    // expose cell language for use in keybindings, etc
+    const language = mainLanguage(tokens);
+    vscode.commands.executeCommand('setContext', 'quartoLangId', language?.ids[0]);
 
     // find inline executable code
     for (let i = 0; i < editor.document.lineCount; i++) {

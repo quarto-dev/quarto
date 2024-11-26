@@ -27,19 +27,6 @@ export function activateContextKeySetter(
   engine: MarkdownEngine
 ) {
 
-  // set context keys when docs are opened
-  vscode.workspace.onDidOpenTextDocument(
-    (doc) => {
-      if (doc === vscode.window.activeTextEditor?.document) {
-        if (isQuartoDoc(doc)) {
-          setContextKeys(vscode.window.activeTextEditor, engine);
-        }
-      }
-    },
-    null,
-    context.subscriptions
-  );
-
   // set context keys when active text editor changes
   vscode.window.onDidChangeActiveTextEditor(
     (editor) => {

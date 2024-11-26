@@ -23,6 +23,7 @@ import { activateDiagram } from "./providers/diagram/diagram";
 import { activateOptionEnterProvider } from "./providers/option";
 import { textFormattingCommands } from "./providers/text-format";
 import { activateCodeFormatting } from "./providers/format";
+import { activateContextKeySetter } from "./providers/context-keys";
 import { ExtensionHost } from "./host";
 
 export function activateCommon(
@@ -36,6 +37,9 @@ export function activateCommon(
 
   // background highlighter
   activateBackgroundHighlighter(context, engine);
+
+  // context setter
+  activateContextKeySetter(context, engine);
 
   // diagramming
   const diagramCommands = activateDiagram(context, host, engine);

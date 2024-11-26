@@ -13,7 +13,6 @@
  *
  */
 
-
 import * as vscode from "vscode";
 import debounce from "lodash.debounce";
 
@@ -41,24 +40,24 @@ export function activateContextKeySetter(
     context.subscriptions
   );
 
-  // set context keys when visible text editors change
-  vscode.window.onDidChangeVisibleTextEditors(
-    (_editors) => {
-      triggerUpdateContextKeys(engine);
+  // set context keys when active text editor changes
+  vscode.window.onDidChangeActiveTextEditor(
+    (editor) => {
+      if (editor) {
+        setContextKeys(editor, engine);
+      }
     },
     null,
     context.subscriptions
   );
 
-  // set context keys on changes to the document (if its visible)
+  // set context keys on changes to the document (if it's active)
   vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      const visibleEditor = vscode.window.visibleTextEditors.find(editor => {
-        return editor.document.uri.toString() === event.document.uri.toString();
-      });
-      if (visibleEditor) {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (activeEditor) {
         debounce(
-          () => setContextKeys(visibleEditor, engine),
+          () => setContextKeys(activeEditor, engine),
           debounceOnDidChangeDocumentMs
         )();
       }
@@ -66,16 +65,6 @@ export function activateContextKeySetter(
     null,
     context.subscriptions
   );
-
-  // set context keys at activation time
-  triggerUpdateContextKeys(engine);
-
-}
-
-function triggerUpdateContextKeys(engine: MarkdownEngine) {
-  for (const editor of vscode.window.visibleTextEditors) {
-    setContextKeys(editor, engine);
-  }
 }
 
 function setContextKeys(editor: vscode.TextEditor, engine: MarkdownEngine) {

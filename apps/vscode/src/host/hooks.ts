@@ -55,6 +55,7 @@ export function hooksExtensionHost(): ExtensionHost {
       switch (language) {
         // use hooks for known runtimes
         case "python":
+        case "csharp":
         case "r":
           return {
             execute: async (blocks: string[], _editorUri?: vscode.Uri): Promise<void> => {

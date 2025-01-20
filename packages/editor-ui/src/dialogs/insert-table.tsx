@@ -91,7 +91,12 @@ const InsertTableDialog: React.FC<{
 
       {props.options.captions ? (
         <Field label={t("Caption")}>
-          <Input value={caption} onChange={(_ev, data) => setCaption(data.value)} placeholder={t("(Optional)")}/>
+          <Textarea
+            value={caption}
+            onChange={(_ev, data) => setCaption(data.value)}
+            placeholder={t("(Optional)")}
+            resize="vertical"
+          />
         </Field>
       ) : null}
 

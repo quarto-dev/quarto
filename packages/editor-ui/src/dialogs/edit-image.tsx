@@ -167,7 +167,7 @@ const imagePanel =
             value={alt}
             onChange={(_ev, data) => setAlt(data.value)}
             placeholder={t("(Optional)")}
-            style={{ height: "100px" }}
+            resize="vertical"
           />
         </Field>
       : null

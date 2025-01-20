@@ -154,10 +154,11 @@ const imagePanel =
       : null
     }
     <Field label={t("Caption")}>
-      <Input 
+      <Textarea
         value={caption} 
         onChange={(_ev, data) => setCaption(data.value)}
         placeholder={t("(Optional)")}
+        resize="vertical"
       />
     </Field>
   

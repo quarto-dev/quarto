@@ -2,6 +2,8 @@
 
 ## 1.119.0 (unreleased)
 
+- Visual Editor: uses a text box for alternative text and captions in callouts, images, and tables interface. (<https://github.com/quarto-dev/quarto/pull/644>)
+
 ## 1.118.0 (Release on 2024-11-26)
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)

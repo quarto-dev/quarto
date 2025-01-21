@@ -2,7 +2,7 @@
 
 ## 1.119.0 (unreleased)
 
-- Visual Editor: "Inset image" command now uses a text box for the alternative text. (<https://github.com/quarto-dev/quarto/pull/599>)
+- Visual Editor: uses a text box for alternative text and captions in callouts, images, and tables interface. (<https://github.com/quarto-dev/quarto/pull/599>)
 
 ## 1.118.0 (Release on 2024-11-26)
 

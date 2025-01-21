@@ -15,7 +15,7 @@
 
 import React, { useState } from "react";
 
-import { Checkbox, Field, Input, makeStyles } from "@fluentui/react-components";
+import { Checkbox, Field, Input, makeStyles, Textarea } from "@fluentui/react-components";
 
 import { 
   ModalDialog,

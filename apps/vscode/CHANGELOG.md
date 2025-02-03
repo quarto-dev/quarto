@@ -2,6 +2,8 @@
 
 ## 1.119.0 (unreleased)
 
+- Fix `language` typos throughout the codebase (<https://github.com/quarto-dev/quarto/pull/650>)
+
 ## 1.118.0 (Release on 2024-11-26)
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)

@@ -2,6 +2,8 @@
 
 ## 1.119.0 (unreleased)
 
+- Ensure `#|` is added only at the beginning of a new line (<https://github.com/quarto-dev/quarto/pull/649>).
+
 ## 1.118.0 (Release on 2024-11-26)
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)

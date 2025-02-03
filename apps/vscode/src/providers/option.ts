@@ -84,7 +84,7 @@ function handleOptionEnter(editor: TextEditor, comment: string) {
     });
   } else if (currentLine.startsWith(optionComment)) {
     editor.edit((builder) => {
-      builder.insert(editor.selection.start.translate(1, 0), optionComment);
+      builder.insert(editor.selection.start.translate(1, -editor.selection.active.character), optionComment);
     });
   }
 }

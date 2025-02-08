@@ -327,6 +327,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // prompt the user
     const kVisualModeConfirmed = "visualModeConfirmed";
+    if (process.env.CI === "true") {
+      this.context.globalState.update(kVisualModeConfirmed, true);
+    }
     if (this.context.globalState.get(kVisualModeConfirmed) !== true) {
       const kUseVisualMode = "Use Visual Mode";
       const kLearnMore = "Learn More...";

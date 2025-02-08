@@ -206,13 +206,13 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
 }
 
 async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
-  const optionComment = languageOptionComment(language.ids[0]);
+  const optionComment = languageOptionComment(language.ids[0]) + "| ";
   const blockLines = lines(codeForExecutableLanguageBlock(block));
-  let codeStartLine = block.range.start.line;
+  let optionLines = 0;
   if (optionComment) {
     for (const line of blockLines) {
       if (line.startsWith(optionComment)) {
-        codeStartLine++;
+        optionLines++;
       } else {
         break;
       }
@@ -238,7 +238,7 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
         );
         return new TextEdit(range, edit.newText);
       })
-      .filter(edit => blockRange.contains(edit.range) && edit.range.start.line >= codeStartLine);
+      .filter(edit => blockRange.contains(edit.range) && edit.range.start.line > block.range.start.line + optionLines);
     return adjustedEdits;
   }
 }

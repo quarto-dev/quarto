@@ -20,6 +20,8 @@
 - Update cell background configuration to add the ability to use the appropriate theme color. The `quarto.cells.background` settings have changed names so you may need to update your configuration (<https://github.com/quarto-dev/quarto/pull/679>).
 - Use new command to switch between source and visual editors in Positron (<https://github.com/quarto-dev/quarto/pull/684>).
 
+- Protect code cell options from formatting (<https://github.com/quarto-dev/quarto/pull/655>).
+
 ## 1.118.0 (Release on 2024-11-26)
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)

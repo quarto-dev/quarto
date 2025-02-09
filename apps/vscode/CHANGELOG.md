@@ -2,7 +2,7 @@
 
 ## 1.119.0 (unreleased)
 
-- Use `CI` to bypass the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
+- Use `CI=true` or `QUARTO_VISUAL_EDITOR_CONFIRMED=true` to bypass the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
 
 ## 1.118.0 (Release on 2024-11-26)
 

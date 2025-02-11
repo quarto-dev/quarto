@@ -336,9 +336,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       "QUARTO_VISUAL_EDITOR_CONFIRMED"
     ];
     envVars.forEach(envVar => {
-      console.log(`Checking for environment variable: ${envVar}`);
       if (process.env[envVar] !== undefined) {
-        console.log(`Setting visual mode confirmation to ${process.env[envVar] === "true"}`);
         this.context.globalState.update(kVisualModeConfirmed, process.env[envVar] === "true");
       }
     });

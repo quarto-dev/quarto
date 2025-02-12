@@ -45,7 +45,7 @@ body:
     attributes:
       label: Your environment
       description: |
-        Please document the IDE (_e.g._ RStudio, VSCode, NVim), its version, and the operating system you're running (_e.g., MacOS Ventura 13.4, Windows 11, Linux Debian 11, _etc._).
+        Please document the IDE (_e.g._ RStudio, Positron, VSCode, NVim), its version, and the operating system you're running (_e.g., MacOS Ventura 13.4, Windows 11, Linux Debian 11, _etc._).
       placeholder: |
         - IDE: RStudio 2023.03.1+446 | VSCode | Positron
         - OS: MacOS Ventura 13.4 | Windows | Ubuntu

@@ -15,7 +15,7 @@ body:
         - If you're reporting an issue with **Quarto CLI**, please visit https://github.com/quarto-dev/quarto-cli
         - If you're reporting an issue inside **RStudio**, please visit https://github.com/rstudio/rstudio
         - If you're reporting an issue inside **Positron**, please visit https://github.com/posit-dev/positron
-        - If you want to ask for help, please use the [Q&A GitHub Discussions](https://github.com/quarto-dev/quarto-cli/discussions/categories/q-a).
+        - If you want to ask for help with using Quarto, please use the [Q&A GitHub Discussions](https://github.com/quarto-dev/quarto-cli/discussions/categories/q-a).
 
         Thank you for using Quarto!
 

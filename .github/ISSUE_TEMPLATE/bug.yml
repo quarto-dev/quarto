@@ -29,8 +29,7 @@ body:
     attributes:
       label: Steps to reproduce
       description: |
-        Tell us how to reproduce this bug.  
-        Please include a minimal, fully reproducible example as a self-contained Quarto document or a link to a Git repository.
+        Tell us how to reproduce this bug.
 
   - type: textarea
     attributes:

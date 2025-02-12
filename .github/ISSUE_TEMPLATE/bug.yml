@@ -9,7 +9,7 @@ body:
         Welcome to the Quarto GitHub repository!
         We are always happy to hear feedback from our users.
 
-        This is the repository for the Visual Editor and the Quarto extension VSCode/Positron.
+        This is the repository for the Visual Editor and the Quarto extension for VSCode and Positron.
 
         - If you're reporting an issue with the **VS Code extension** or the **Visual Editor**, **you are in thr right place**.
         - If you're reporting an issue with **Quarto CLI**, please visit https://github.com/quarto-dev/quarto-cli

@@ -2,6 +2,8 @@
 
 ## 1.119.0 (unreleased)
 
+- Use `QUARTO_VISUAL_EDITOR_CONFIRMED` > `PW_TEST` > `CI` to bypass (`true`) or force (`false`) the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
+
 ## 1.118.0 (Release on 2024-11-26)
 
 - Provide F1 help at cursor in Positron (<https://github.com/quarto-dev/quarto/pull/599>)

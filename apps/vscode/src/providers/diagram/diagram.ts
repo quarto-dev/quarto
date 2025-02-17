@@ -32,7 +32,7 @@ export function activateDiagram(
   host: ExtensionHost,
   engine: MarkdownEngine
 ): Command[] {
-  // initiaize manager
+  // initialize manager
   const diagramManager = new QuartoDiagramWebviewManager(context, host, engine);
 
   // code lens

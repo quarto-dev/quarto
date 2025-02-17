@@ -949,7 +949,7 @@ header when requesting a document from a URL:
 `--no-check-certificate`
 
 :   Disable the certificate verification to allow access to
-    unsecure HTTP resources (for example when the certificate
+    insecure HTTP resources (for example when the certificate
     is no longer valid or self signed).
 
 ## Options affecting specific writers {.options}

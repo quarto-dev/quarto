@@ -63,7 +63,7 @@
     "{ rank=same|min|max; x; y }": {
         "prefix": "rank",
         "body": [
-            "{ rank=${1|same,min,max,# max is bottom|}; ${2:space delimitted list }};"
+            "{ rank=${1|same,min,max,# max is bottom|}; ${2:space delimited list }};"
         ],
         "description": "{rank=same|min|max; x; y}"
     },

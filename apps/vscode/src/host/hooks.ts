@@ -74,7 +74,7 @@ export function hooksExtensionHost(): ExtensionHost {
               // Our callback executes each block sequentially
               const callback = async () => {
                 for (const block of blocks) {
-                  await runtime.executeCode(language, block, false);
+                  await runtime.executeCode(language, block, false, true);
                 }
               }
 

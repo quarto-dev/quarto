@@ -16,7 +16,8 @@ declare module 'positron' {
 		executeCode(
 			languageId: string,
 			code: string,
-			focus: boolean
+			focus: boolean,
+			allowIncomplete: boolean
 		): Thenable<boolean>;
 	}
 

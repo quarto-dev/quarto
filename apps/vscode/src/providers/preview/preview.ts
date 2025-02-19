@@ -533,7 +533,7 @@ class PreviewManager {
         );
         if (browseMatch) {
           // earlier versions of quarto serve didn't print out vscode urls
-          // correctly so we compenstate for that here
+          // correctly so we compensate for that here
           if (isQuartoShinyDoc(this.engine_, this.previewDoc_)) {
             this.previewUrl_ = vsCodeWebUrl(browseMatch[2]);
           } else {

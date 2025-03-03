@@ -327,6 +327,20 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // prompt the user
     const kVisualModeConfirmed = "visualModeConfirmed";
+
+    // Check for environment variables to force the state of the visual editor confirmation modal
+    // QUARTO_VISUAL_EDITOR_CONFIRMED > PW_TEST > CI
+    const envVars = [
+      "CI",
+      "PW_TEST",
+      "QUARTO_VISUAL_EDITOR_CONFIRMED"
+    ];
+    envVars.forEach(envVar => {
+      if (process.env[envVar] !== undefined) {
+        this.context.globalState.update(kVisualModeConfirmed, process.env[envVar] === "true");
+      }
+    });
+
     if (this.context.globalState.get(kVisualModeConfirmed) !== true) {
       const kUseVisualMode = "Use Visual Mode";
       const kLearnMore = "Learn More...";

@@ -1,0 +1,55 @@
+name: Bug report
+description: Report an error or unexpected behavior with Visual Editor or Quarto VSCode/Positron IDEs
+labels: [bug]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to the Quarto GitHub repository!
+        We are always happy to hear feedback from our users.
+
+        This is the repository for the Visual Editor and the Quarto extension for VSCode and Positron.
+
+        - If you're reporting an issue with the **VS Code extension** or the **Visual Editor**, you are in the right place! 🎉 
+        - If you're reporting an issue with **Quarto CLI**, please visit https://github.com/quarto-dev/quarto-cli
+        - If you're reporting an issue inside **RStudio**, please visit https://github.com/rstudio/rstudio
+        - If you're reporting an issue inside **Positron**, please visit https://github.com/posit-dev/positron
+        - If you want to ask for help with using Quarto, please use the [Q&A GitHub Discussions](https://github.com/quarto-dev/quarto-cli/discussions/categories/q-a).
+
+        Thank you for using Quarto!
+
+  - type: textarea
+    attributes:
+      label: Bug description
+      description: Description of the bug.
+      placeholder: Please describe the bug here.
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Tell us how to reproduce this bug.
+
+  - type: textarea
+    attributes:
+      label: Actual behavior
+      description: Tell us what happens instead.
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: Tell us what should happen.
+
+  - type: textarea
+    attributes:
+      label: Your environment
+      description: |
+        Please document the IDE (_e.g._ RStudio, Positron, VSCode, NVim), its version, and the operating system you're running (_e.g., MacOS Ventura 13.4, Windows 11, Linux Debian 11, _etc._).
+      placeholder: |
+        - IDE: RStudio 2023.03.1+446 | VSCode | Positron
+        - OS: MacOS Ventura 13.4 | Windows | Ubuntu
+
+  - type: markdown
+    attributes:
+      value: "_Thanks for submitting this bug report!_"

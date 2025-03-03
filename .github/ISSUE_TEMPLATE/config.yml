@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Issue with Quarto CLI
+    url: https://github.com/quarto-dev/quarto-cli
+    about: Please report issues with the Quarto CLI here
+  - name: Quarto Community Support
+    url: https://github.com/quarto-dev/quarto-cli/discussions/categories/q-a
+    about: Please ask and answer questions in our Discussion board

@@ -27,7 +27,7 @@ jobs:
       - run: yarn install --immutable --immutable-cache --check-cache
 
       - name: Package extension
-        uses: HaaLeo/publish-vscode-extension@v1
+        uses: HaaLeo/publish-vscode-extension@v2
         id: package_extension
         with:
           pat: not-a-real-pat

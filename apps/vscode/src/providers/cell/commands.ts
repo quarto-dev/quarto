@@ -521,7 +521,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
       // skip if the cell is above or at the cursor
       if (line < blk.range.start.line) {
-        // set langauge if needed
+        // set language if needed
         const blockLanguage = languageNameFromBlock(blk);
         if (!language) {
           language = blockLanguage;

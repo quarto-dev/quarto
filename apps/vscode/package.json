@@ -937,22 +937,32 @@
           "default": true,
           "markdownDescription": "Show parameter help when editing function calls."
         },
-        "quarto.cells.background.enabled": {
+        "quarto.cells.background": {
           "order": 19,
           "scope": "window",
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Enable coloring the background of executable code cells."
+          "type": "string",
+          "default": "default",
+          "enum": [
+            "default",
+            "useTheme",
+            "off"
+          ],
+          "markdownDescription": "Controls the background coloring of executable code cells.",
+          "enumDescriptions": [
+            "Use the default light and dark background colors. Can specify colors in `quarto.cells.background.lightDefault` and `quarto.cells.background.darkDefault`",
+            "Use the `notebook.selectedCellBackground` color from the VS Code theme.",
+            "Disable background coloring of executable code cells."
+          ]
         },
-        "quarto.cells.background.light": {
+        "quarto.cells.background.lightDefault": {
           "order": 20,
           "scope": "window",
           "type": "string",
           "format": "color",
           "default": "#E1E1E166",
-          "markdownDescription": "CSS color for background of executable code cells on light themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
+          "markdownDescription": "CSS color for background of executable code cells on light themes. Only used when `quarto.cells.background: \"default\"`.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
         },
-        "quarto.cells.background.dark": {
+        "quarto.cells.background.darkDefault": {
           "order": 21,
           "scope": "window",
           "type": "string",
@@ -960,14 +970,6 @@
           "default": "#40404066",
           "markdownDescription": "CSS color for background of executable code cells on dark themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
         },
-        "quarto.cells.background.useTheme": {
-					"order": 22,
-					"scope": "window",
-					"type": "string",
-					"format": "color",
-					"default": false,
-					"markdownDescription": "Should the background of executable code cells be based on the theme provided color.\n\nThis uses the `notebook.selectedCellBackground` color from the VSCode theme."
-				},
 				"quarto.cells.background.delay": {
 					"order": 23,
           "scope": "window",

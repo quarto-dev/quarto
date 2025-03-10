@@ -192,6 +192,12 @@ function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
   editor.setDecorations(highlightingConfig.backgroundDecoration(), []);
 }
 
+enum CellBackground {
+  default = "default",
+  off = "off",
+  useTheme = "useTheme",
+}
+
 class HiglightingConfig {
   constructor() { }
 
@@ -213,18 +219,18 @@ class HiglightingConfig {
 
   public sync() {
     const config = vscode.workspace.getConfiguration("quarto");
-    const useTheme = config.get("cells.background.useTheme", false);
+    const backgroundOption = config.get<CellBackground>("cells.background", CellBackground.default);
     let light, dark;
-    if (useTheme) {
+    if (backgroundOption === CellBackground.useTheme) {
       const activeCellBackgroundThemeColor = new vscode.ThemeColor('notebook.selectedCellBackground');
       light = activeCellBackgroundThemeColor;
       dark = activeCellBackgroundThemeColor;
     } else {
-      light = config.get("cells.background.light", "#E1E1E166");
-      dark = config.get("cells.background.dark", "#40404066");
+      light = config.get<string>("cells.background.lightDefault", "#E1E1E166");
+      dark = config.get<string>("cells.background.darkDefault", "#40404066");
     }
 
-    this.enabled_ = config.get("cells.background.enabled", true);
+    this.enabled_ = backgroundOption !== CellBackground.off;
     this.delayMs_ = config.get("cells.background.delay", 250);
 
 

@@ -4,6 +4,7 @@
 
 - Use `QUARTO_VISUAL_EDITOR_CONFIRMED` > `PW_TEST` > `CI` to bypass (`true`) or force (`false`) the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
 - Fix behavior in Positron when running a cell containing invalid/incomplete code (<https://github.com/quarto-dev/quarto/pull/664>).
+- Ensure `#|` is added only at the beginning of a new line (<https://github.com/quarto-dev/quarto/pull/649>).
 - Fix `language` typos throughout the codebase (<https://github.com/quarto-dev/quarto/pull/650>)
 
 ## 1.118.0 (Release on 2024-11-26)

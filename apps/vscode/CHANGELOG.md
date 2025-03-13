@@ -6,7 +6,7 @@
 - Fix behavior in Positron when running a cell containing invalid/incomplete code (<https://github.com/quarto-dev/quarto/pull/664>).
 - Ensure `#|` is added only at the beginning of a new line (<https://github.com/quarto-dev/quarto/pull/649>).
 - Fix `language` typos throughout the codebase (<https://github.com/quarto-dev/quarto/pull/650>)
-- Update cell background configuration to add the ability to use the appropriate theme color. The `quarto.cells.background` settings have changed names so you may need to update your configuration (<https://github.com/quarto-dev/quarto/pull/650>).
+- Update cell background configuration to add the ability to use the appropriate theme color. The `quarto.cells.background` settings have changed names so you may need to update your configuration (<https://github.com/quarto-dev/quarto/pull/679>).
 
 ## 1.118.0 (Release on 2024-11-26)
 

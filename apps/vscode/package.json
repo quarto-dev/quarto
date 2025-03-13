@@ -937,7 +937,7 @@
           "default": true,
           "markdownDescription": "Show parameter help when editing function calls."
         },
-        "quarto.cells.background.enable": {
+        "quarto.cells.background.enabled": {
           "type": "boolean",
           "description": "Enable coloring the background of executable code cells.",
           "deprecationMessage": "Deprecated: Please use quarto.cells.background.color instead."

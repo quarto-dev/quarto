@@ -1,0 +1,6 @@
+[codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = .git*,*.svg,i18n,*.lock,*.css,*.min.*,.codespellrc,packages,completion,assets,package.json
+check-hidden = true
+ignore-regex = \b[a-z]+[A-Z][A-Za-z]*\b
+# ignore-words-list =

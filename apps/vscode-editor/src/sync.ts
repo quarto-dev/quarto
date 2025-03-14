@@ -172,7 +172,7 @@ export async function syncEditorToHost(
         // apply initial theme
         applyDisplayPrefs();
 
-        // init editor contents and sync cannonical version back to text editor
+        // init editor contents and sync canonical version back to text editor
         const result = await editor.setMarkdown(markdown, writerOptions(), false);
         if (result) {
 

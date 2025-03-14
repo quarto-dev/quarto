@@ -46,7 +46,7 @@ export function hasHooks() {
 
 export function hooksExtensionHost(): ExtensionHost {
   return {
-    // supported executable languages (we delegate to the default for langugaes
+    // supported executable languages (we delegate to the default for languages
     // w/o runtimes so we support all languages)
     executableLanguages,
 

@@ -99,7 +99,7 @@ export async function activate(context: vscode.ExtensionContext) {
     commands.push(...assistCommands);
   }
 
-  // walkthough
+  // walkthrough
   commands.push(...walkthroughCommands(host, quartoContext));
 
   // provide render

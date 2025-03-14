@@ -25,7 +25,7 @@ export async function resolveDirectoryForCreate(
   subdirTitle: string,
   forceSubdirPrompt: boolean
 ) {
-  // select direcotry (see if we have a default parent)
+  // select directory (see if we have a default parent)
   const kDefaultParentDir = `quarto.create${name}.dir`;
   const defaultParent = context.globalState.get<string | undefined>(
     kDefaultParentDir,

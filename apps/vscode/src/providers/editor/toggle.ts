@@ -19,6 +19,7 @@ import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 import { Uri } from "vscode";
+import { hasHooks } from "../../host/hooks";
 
 export function determineMode(text: string, uri: Uri): string | undefined {
   let editorOpener = undefined;
@@ -100,19 +101,22 @@ export async function reopenEditorInVisualMode(
   document: TextDocument,
   viewColumn?: ViewColumn
 ) {
-
-  // save then close
-  await commands.executeCommand("workbench.action.files.save");
-  await commands.executeCommand('workbench.action.closeActiveEditor');
-  VisualEditorProvider.recordPendingSwitchToVisual(document);
-  // open in visual mode
-  await commands.executeCommand("vscode.openWith",
-    document.uri,
-    VisualEditorProvider.viewType,
-    {
-      viewColumn
-    }
-  );
+  if (hasHooks()) {
+    commands.executeCommand('positron.reopenWith', document.uri, 'quarto.visualEditor');
+  } else {
+    // save then close
+    await commands.executeCommand("workbench.action.files.save");
+    await commands.executeCommand('workbench.action.closeActiveEditor');
+    VisualEditorProvider.recordPendingSwitchToVisual(document);
+    // open in visual mode
+    await commands.executeCommand("vscode.openWith",
+      document.uri,
+      VisualEditorProvider.viewType,
+      {
+        viewColumn
+      }
+    );
+  }
 }
 
 export async function reopenEditorInSourceMode(
@@ -120,27 +124,30 @@ export async function reopenEditorInSourceMode(
   untitledContent?: string,
   viewColumn?: ViewColumn
 ) {
-  if (!document.isUntitled) {
-    await commands.executeCommand("workbench.action.files.save");
-  }
-
-  // note pending switch to source
-  VisualEditorProvider.recordPendingSwitchToSource(document);
-
-  // close editor (return immediately as if we don't then any
-  // rpc method that calls this wil result in an error b/c the webview
-  // has been torn down by the time we return)
-  commands.executeCommand('workbench.action.closeActiveEditor').then(async () => {
-    if (document.isUntitled) {
-      const doc = await workspace.openTextDocument({
-        language: kQuartoLanguageId,
-        content: untitledContent || '',
-      });
-      await window.showTextDocument(doc, viewColumn, false);
-    } else {
-      const doc = await workspace.openTextDocument(document.uri);
-      await window.showTextDocument(doc, viewColumn, false);
+  if (hasHooks()) {
+    commands.executeCommand('positron.reopenWith', document.uri, 'default');
+  } else {
+    if (!document.isUntitled) {
+      await commands.executeCommand("workbench.action.files.save");
     }
-  });
 
+    // note pending switch to source
+    VisualEditorProvider.recordPendingSwitchToSource(document);
+
+    // close editor (return immediately as if we don't then any
+    // rpc method that calls this wil result in an error b/c the webview
+    // has been torn down by the time we return)
+    commands.executeCommand('workbench.action.closeActiveEditor').then(async () => {
+      if (document.isUntitled) {
+        const doc = await workspace.openTextDocument({
+          language: kQuartoLanguageId,
+          content: untitledContent || '',
+        });
+        await window.showTextDocument(doc, viewColumn, false);
+      } else {
+        const doc = await workspace.openTextDocument(document.uri);
+        await window.showTextDocument(doc, viewColumn, false);
+      }
+    });
+  }
 }

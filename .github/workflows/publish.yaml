@@ -31,6 +31,13 @@ jobs:
           yarn: true
           packagePath: apps/vscode
 
+      - name: Publish to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v2
+        with:
+            pat: ${{ secrets.OPEN_VSX_TOKEN }}
+            yarn: true
+            packagePath: apps/vscode
+
       - name: Get version of VS Code extension to publish
         id: extension-version
         uses: 'euberdeveloper/ga-project-version@main'

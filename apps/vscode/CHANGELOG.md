@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.119.0 (unreleased)
+## 1.119.0 (Release on 2025-03-21)
 
 - Use `QUARTO_VISUAL_EDITOR_CONFIRMED` > `PW_TEST` > `CI` to bypass (`true`) or force (`false`) the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
 - Fix behavior in Positron when running a cell containing invalid/incomplete code (<https://github.com/quarto-dev/quarto/pull/664>).

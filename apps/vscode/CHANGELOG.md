@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.120.0 (unreleased)
+
 ## 1.119.0 (Release on 2025-03-21)
 
 - Use `QUARTO_VISUAL_EDITOR_CONFIRMED` > `PW_TEST` > `CI` to bypass (`true`) or force (`false`) the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).

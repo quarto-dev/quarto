@@ -22,6 +22,7 @@ import {
   Location,
   LocationLink,
   Definition,
+  LogOutputChannel,
 } from "vscode";
 import {
   LanguageClient,
@@ -70,7 +71,8 @@ let client: LanguageClient;
 export async function activateLsp(
   context: ExtensionContext,
   quartoContext: QuartoContext,
-  engine: MarkdownEngine
+  engine: MarkdownEngine,
+  outputChannel: LogOutputChannel
 ) {
 
   // The server is implemented in node
@@ -132,6 +134,7 @@ export async function activateLsp(
       },
     ],
     middleware,
+    outputChannel
   };
 
   // Create the language client and start the client.

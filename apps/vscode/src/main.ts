@@ -37,6 +37,10 @@ import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 
 export async function activate(context: vscode.ExtensionContext) {
+  // create output channel for extension logs and lsp client logs
+  const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
+
+  outputChannel.info("Activating Quarto extension.");
 
   // create extension host
   const host = extensionHost();
@@ -84,7 +88,7 @@ export async function activate(context: vscode.ExtensionContext) {
     activateDenoConfig(context, engine);
 
     // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine);
+    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
@@ -125,6 +129,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
+
+  outputChannel.info("Activated Quarto extension.");
 }
 
 export async function deactivate() {

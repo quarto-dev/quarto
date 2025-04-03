@@ -22,13 +22,6 @@ jobs:
           node-version: latest
       - run: yarn install --immutable --immutable-cache --check-cache
 
-      - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v2
-        with:
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          yarn: true
-          packagePath: apps/vscode
-
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v2
         id: publish_extension
@@ -37,6 +30,13 @@ jobs:
           registryUrl: https://marketplace.visualstudio.com
           yarn: true
           packagePath: apps/vscode
+
+      - name: Publish to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v2
+        with:
+            pat: ${{ secrets.OPEN_VSX_TOKEN }}
+            yarn: true
+            packagePath: apps/vscode
 
       - name: Get version of VS Code extension to publish
         id: extension-version

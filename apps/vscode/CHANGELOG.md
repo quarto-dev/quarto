@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.121.0 (unreleased)
+
 ## 1.120.0 (Release on 2025-04-07)
 
 - Fix issue where format on save could overwrite the contents of a document with incorrect results (<https://github.com/quarto-dev/quarto/pull/688>).

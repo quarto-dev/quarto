@@ -253,7 +253,8 @@
         "command": "quarto.preview",
         "title": "Preview",
         "icon": "$(preview)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "displayTitleOnActionBar": true
       },
       {
         "command": "quarto.previewScript",

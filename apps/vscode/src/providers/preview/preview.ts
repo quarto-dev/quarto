@@ -120,7 +120,7 @@ export function activatePreview(
     if (editor) {
       if (
         canPreviewDoc(editor.document) &&
-        (await renderOnSave(engine, editor.document)) &&
+        (await renderOnSave(engine, editor.document, context)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine, quartoContext);
@@ -172,7 +172,7 @@ export function activatePreview(
   );
 
   // preview commands
-  return previewCommands(quartoContext, engine);
+  return previewCommands(quartoContext, context, engine);
 }
 
 

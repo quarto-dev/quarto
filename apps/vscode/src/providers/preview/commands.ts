@@ -23,6 +23,7 @@ import {
   workspace,
   commands,
   QuickPickItemKind,
+  ExtensionContext,
 } from "vscode";
 import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 
@@ -39,15 +40,16 @@ import { FormatQuickPickItem, RenderCommand } from "../render";
 
 export function previewCommands(
   quartoContext: QuartoContext,
+  context: ExtensionContext,
   engine: MarkdownEngine
 ): Command[] {
   return [
-    new PreviewCommand(quartoContext, engine),
-    new PreviewScriptCommand(quartoContext, engine),
-    new PreviewFormatCommand(quartoContext, engine),
-    new WalkthroughPreviewCommand(quartoContext, engine),
+    new PreviewCommand(quartoContext, context, engine),
+    new PreviewScriptCommand(quartoContext, context, engine),
+    new PreviewFormatCommand(quartoContext, context, engine),
+    new WalkthroughPreviewCommand(quartoContext, context, engine),
     new ClearCacheCommand(quartoContext, engine),
-    new ToggleRenderOnSaveCommand(),
+    new ToggleRenderOnSaveCommand(context),
   ];
 }
 const kChooseFormat = "EB451697-D09E-48F5-AA40-4DAE7E1D31B8";
@@ -56,6 +58,7 @@ const kChooseFormat = "EB451697-D09E-48F5-AA40-4DAE7E1D31B8";
 abstract class PreviewDocumentCommandBase extends RenderCommand {
   constructor(
     quartoContext: QuartoContext,
+    private readonly context_: ExtensionContext,
     private readonly engine_: MarkdownEngine
   ) {
     super(quartoContext);
@@ -63,7 +66,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
   protected async renderFormat(format?: string | null, onShow?: () => void) {
     const targetEditor = findQuartoEditor(this.engine_, this.quartoContext(), canPreviewDoc);
     if (targetEditor) {
-      const hasRenderOnSave = await renderOnSave(this.engine_, targetEditor.document);
+      const hasRenderOnSave = await renderOnSave(this.engine_, targetEditor.document, this.context_);
       const render =
         !hasRenderOnSave ||
         (hasRenderOnSave && format) ||
@@ -134,8 +137,8 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
 class PreviewCommand
   extends PreviewDocumentCommandBase
   implements Command {
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
+  constructor(quartoContext: QuartoContext, context: ExtensionContext, engine: MarkdownEngine) {
+    super(quartoContext, context, engine);
   }
   private static readonly id = "quarto.preview";
   public readonly id = PreviewCommand.id;
@@ -148,8 +151,8 @@ class PreviewCommand
 class PreviewScriptCommand
   extends PreviewDocumentCommandBase
   implements Command {
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
+  constructor(quartoContext: QuartoContext, context: ExtensionContext, engine: MarkdownEngine) {
+    super(quartoContext, context, engine);
   }
   private static readonly id = "quarto.previewScript";
   public readonly id = PreviewScriptCommand.id;
@@ -162,8 +165,8 @@ class PreviewScriptCommand
 class PreviewFormatCommand
   extends PreviewDocumentCommandBase
   implements Command {
-  constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
-    super(quartoContext, engine);
+  constructor(quartoContext: QuartoContext, context: ExtensionContext, engine: MarkdownEngine) {
+    super(quartoContext, context, engine);
   }
   private static readonly id = "quarto.previewFormat";
   public readonly id = PreviewFormatCommand.id;
@@ -247,15 +250,14 @@ function cacheDirForDocument(doc: TextDocument) {
 }
 
 class ToggleRenderOnSaveCommand implements Command {
-  constructor() { }
+  constructor(private readonly context_: ExtensionContext) { }
   private static readonly id = "quarto.toggleRenderOnSave";
   public readonly id = ToggleRenderOnSaveCommand.id;
 
   async execute() {
-    const config = workspace.getConfiguration("quarto");
-    let renderOnSave = config.get<boolean>("render.renderOnSave", false);
+    let renderOnSave = this.context_.workspaceState.get<boolean>('positron.quarto.toggleRenderOnSave') === true;
     renderOnSave = !renderOnSave;
-    config.update("render.renderOnSave", renderOnSave, true);
+    this.context_.workspaceState.update('positron.quarto.toggleRenderOnSave', renderOnSave);
     commands.executeCommand<boolean>('setContext', 'quarto.renderOnSave', renderOnSave);
   }
 }

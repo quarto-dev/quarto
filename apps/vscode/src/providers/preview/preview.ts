@@ -112,11 +112,12 @@ export function activatePreview(
     context.subscriptions.push(previewManager);
   }
 
-  // initialize Positron toggle from setting
+  // initialize Positron toggle from setting, store in workspace storage
   if (hasHooks()) {
     const config = workspace.getConfiguration("quarto");
     const renderOnSave = config.get<boolean>("render.renderOnSave", false);
     commands.executeCommand<boolean>("setContext", "quarto.renderOnSave", renderOnSave);
+    context.workspaceState.update('positron.quarto.toggleRenderOnSave', renderOnSave);
   }
 
   // render on save
@@ -129,7 +130,7 @@ export function activatePreview(
     if (editor) {
       if (
         canPreviewDoc(editor.document) &&
-        (await renderOnSave(engine, editor.document)) &&
+        (await renderOnSave(engine, editor.document, context)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine, quartoContext);
@@ -181,7 +182,7 @@ export function activatePreview(
   );
 
   // preview commands
-  return previewCommands(quartoContext, engine);
+  return previewCommands(quartoContext, context, engine);
 }
 
 

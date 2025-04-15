@@ -253,7 +253,11 @@
         "command": "quarto.preview",
         "title": "Preview",
         "icon": "$(preview)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.previewScript",
@@ -424,6 +428,15 @@
         "title": "Toggle Code",
         "category": "Quarto",
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+      },
+      {
+        "command": "quarto.toggleRenderOnSave",
+        "title": "Render on Save",
+        "enablement": "isPositron",
+        "actionBarOptions": {
+            "controlType": "checkbox",
+            "checked": "quarto.renderOnSave == true"
+        }
       },
       {
         "command": "quarto.zoteroConfigureLibrary",
@@ -676,6 +689,12 @@
         {
           "command": "quarto.previewContentShortcut",
           "when": "editorLangId == mermaid || editorLangId == dot"
+        }
+      ],
+      "editor/actions/right": [
+        {
+          "command": "quarto.toggleRenderOnSave",
+          "group": "navigation@101"
         }
       ],
       "notebook/toolbar": [

@@ -28,7 +28,6 @@ import { isNotebook } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
 import { isKnitrDocument } from "../../host/executors";
-import { ExtensionContext } from "vscode";
 
 
 export function isQuartoShinyDoc(

@@ -23,7 +23,6 @@ import {
   workspace,
   commands,
   QuickPickItemKind,
-  ExtensionContext
 } from "vscode";
 import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 

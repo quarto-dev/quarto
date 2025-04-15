@@ -22,6 +22,7 @@ import * as semver from "semver";
 import vscode, {
   commands,
   env,
+  workspace,
   ExtensionContext,
   MessageItem,
   Terminal,
@@ -88,6 +89,7 @@ import {
   yamlErrorLocation,
 } from "./preview-errors";
 import { ExtensionHost } from "../../host";
+import { hasHooks } from "../../host/hooks";
 
 tmp.setGracefulCleanup();
 
@@ -110,6 +112,13 @@ export function activatePreview(
     context.subscriptions.push(previewManager);
   }
 
+  // initialize Positron toggle from setting
+  if (hasHooks()) {
+    const config = workspace.getConfiguration("quarto");
+    const renderOnSave = config.get<boolean>("render.renderOnSave", false);
+    commands.executeCommand<boolean>("setContext", "quarto.renderOnSave", renderOnSave);
+  }
+
   // render on save
   const onSave = async (docUri: Uri) => {
     const editor = findQuartoEditor(
@@ -120,7 +129,7 @@ export function activatePreview(
     if (editor) {
       if (
         canPreviewDoc(editor.document) &&
-        (await renderOnSave(engine, editor.document, context)) &&
+        (await renderOnSave(engine, editor.document)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine, quartoContext);
@@ -172,7 +181,7 @@ export function activatePreview(
   );
 
   // preview commands
-  return previewCommands(quartoContext, context, engine);
+  return previewCommands(quartoContext, engine);
 }
 
 

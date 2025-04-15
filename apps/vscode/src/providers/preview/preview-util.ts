@@ -88,7 +88,7 @@ async function parseRPackageDescription(): Promise<string[]> {
   return [''];
 }
 
-export async function renderOnSave(engine: MarkdownEngine, document: TextDocument, context: ExtensionContext) {
+export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
   // if its a notebook and we don't have a save hook for notebooks then don't
   // allow renderOnSave (b/c we can't detect the saves)
   if (isNotebook(document) && !haveNotebookSaveEvents()) {
@@ -100,13 +100,7 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
     return true;
   }
 
-  // first look at workspace state for toggle value in Positron
-  const toggleRenderOnSave = context.workspaceState.get<boolean>('positron.quarto.toggleRenderOnSave') === true;
-  if (toggleRenderOnSave) {
-    return toggleRenderOnSave;
-  }
-
-  // next look for document level editor setting
+  // first look for document level editor setting
   const docYaml = documentFrontMatter(engine, document);
   const docSetting = readRenderOnSave(docYaml);
   if (docSetting !== undefined) {

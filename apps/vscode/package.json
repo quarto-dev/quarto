@@ -426,6 +426,16 @@
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
       },
       {
+        "command": "quarto.toggleRenderOnSave",
+        "title": "Render on Save",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "checkbox",
+          "checked": "(quarto.editor.type == quarto && quarto.editor.renderOnSave) || (quarto.editor.type == 'quarto-shiny' && quarto.editor.renderOnSaveShiny)"
+        }
+      },
+      {
         "command": "quarto.zoteroConfigureLibrary",
         "category": "Quarto",
         "title": "Zotero - Connect Web Library"
@@ -608,6 +618,13 @@
       }
     ],
     "menus": {
+      "editor/actions/right": [
+        {
+          "command": "quarto.toggleRenderOnSave",
+          "when": "editorLangId == quarto && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
+          "group": "Quarto"
+        }
+      ],
       "editor/context": [
         {
           "command": "quarto.formatCell",

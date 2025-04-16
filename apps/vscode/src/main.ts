@@ -35,6 +35,7 @@ import { extensionHost } from "./host";
 import { initQuartoContext } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
+import { toggleRenderOnSaveOverride } from "./providers/context-keys";
 
 export async function activate(context: vscode.ExtensionContext) {
   // create output channel for extension logs and lsp client logs
@@ -102,6 +103,11 @@ export async function activate(context: vscode.ExtensionContext) {
     const assistCommands = activateQuartoAssistPanel(context, engine);
     commands.push(...assistCommands);
   }
+
+  context.subscriptions.push(vscode.commands.registerCommand('quarto.toggleRenderOnSave', () => {
+    toggleRenderOnSaveOverride();
+  }));
+
 
   // walkthough
   commands.push(...walkthroughCommands(host, quartoContext));

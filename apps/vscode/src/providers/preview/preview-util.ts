@@ -123,13 +123,10 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
     }
   }
 
-  // finally, consult vs code settings
-  const config = workspace.getConfiguration("quarto");
-  const render = isQuartoShinyDoc(engine, document)
-    ? config.get<boolean>("render.renderOnSaveShiny", true)
-    : config.get<boolean>("render.renderOnSave", false);
-
-  return render;
+  // finally, consult configuration.
+  return !isQuartoShinyDoc(engine, document)
+    ? readRenderOnSaveConfiguration()
+    : readRenderOnSaveShinyConfiguration();
 }
 
 export function haveNotebookSaveEvents() {
@@ -137,6 +134,22 @@ export function haveNotebookSaveEvents() {
     semver.gte(vscode.version, "1.67.0") &&
     !!(workspace as any).onDidSaveNotebookDocument
   );
+}
+
+/**
+ * Reads the quarto.render.renderOnSave configuration.
+ * @returns A boolean which indicates whether quarto.render.renderOnSave is enabled.
+ */
+function readRenderOnSaveConfiguration() {
+  return workspace.getConfiguration("quarto").get<boolean>("render.renderOnSave", false);
+}
+
+/**
+ * Reads the quarto.render.renderOnSaveShiny configuration.
+ * @returns A boolean which indicates whether quarto.render.renderOnSaveShiny is enabled.
+ */
+function readRenderOnSaveShinyConfiguration() {
+  return workspace.getConfiguration("quarto").get<boolean>("render.renderOnSaveShiny", true);
 }
 
 function readRenderOnSave(yaml: Record<string, unknown>) {

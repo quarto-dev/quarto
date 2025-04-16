@@ -137,14 +137,6 @@ export function haveNotebookSaveEvents() {
   );
 }
 
-function readRenderOnSaveConfiguration() {
-  return workspace.getConfiguration("quarto").get<boolean>("render.renderOnSave", false);
-}
-
-function readRenderOnSaveShinyConfiguration() {
-  return workspace.getConfiguration("quarto").get<boolean>("render.renderOnSaveShiny", true);
-}
-
 function readRenderOnSave(yaml: Record<string, unknown>) {
   if (typeof yaml["editor"] === "object") {
     const yamlObj = yaml["editor"] as Record<string, unknown>;

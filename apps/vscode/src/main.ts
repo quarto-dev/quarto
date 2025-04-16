@@ -103,12 +103,6 @@ export async function activate(context: vscode.ExtensionContext) {
     const assistCommands = activateQuartoAssistPanel(context, engine);
     commands.push(...assistCommands);
   }
-
-  context.subscriptions.push(vscode.commands.registerCommand('quarto.toggleRenderOnSave', () => {
-    toggleRenderOnSaveOverride();
-  }));
-
-
   // walkthough
   commands.push(...walkthroughCommands(host, quartoContext));
 

@@ -436,6 +436,18 @@
         }
       },
       {
+        "command": "quarto.toggleEditMode",
+        "title": "Edit Mode",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "toggle",
+          "leftTitle": "Source",
+          "rightTitle": "Visual",
+          "toggled": "quarto.editMode == 'visual'"
+        }
+      },
+      {
         "command": "quarto.zoteroConfigureLibrary",
         "category": "Quarto",
         "title": "Zotero - Connect Web Library"
@@ -621,6 +633,11 @@
       "editor/actions/right": [
         {
           "command": "quarto.toggleRenderOnSave",
+          "when": "editorLangId == quarto && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
+          "group": "Quarto"
+        },
+        {
+          "command": "quarto.toggleEditMode",
           "when": "editorLangId == quarto && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
           "group": "Quarto"
         }

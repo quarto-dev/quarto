@@ -58,6 +58,14 @@ export function activateContextKeySetter(
   setEditorContextKeys(vscode.window.activeTextEditor, engine);
   setLanguageContextKeys(vscode.window.activeTextEditor, engine);
 
+  // register for render configuration change notification
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+    // if the change affects quarto.render.renderOnSave or quarto.render.renderOnSaveShiny, set the editor context keys.
+    if (event.affectsConfiguration('quarto.render.renderOnSave') || event.affectsConfiguration('quarto.render.renderOnSaveShiny')) {
+      setEditorContextKeys(vscode.window.activeTextEditor, engine);
+    }
+  }));
+
   // set context keys when active text editor changes
   vscode.window.onDidChangeActiveTextEditor(activeTextEditor => {
     setEditorContextKeys(activeTextEditor, engine);

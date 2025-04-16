@@ -124,7 +124,7 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
     }
   }
 
-  // finally, consult configuration.
+  // finally, consult configuration
   return !isQuartoShinyDoc(engine, document)
     ? getRenderOnSave()
     : getRenderOnSaveShiny();
@@ -137,18 +137,10 @@ export function haveNotebookSaveEvents() {
   );
 }
 
-/**
- * Reads the quarto.render.renderOnSave configuration.
- * @returns A boolean which indicates whether quarto.render.renderOnSave is enabled.
- */
 function readRenderOnSaveConfiguration() {
   return workspace.getConfiguration("quarto").get<boolean>("render.renderOnSave", false);
 }
 
-/**
- * Reads the quarto.render.renderOnSaveShiny configuration.
- * @returns A boolean which indicates whether quarto.render.renderOnSaveShiny is enabled.
- */
 function readRenderOnSaveShinyConfiguration() {
   return workspace.getConfiguration("quarto").get<boolean>("render.renderOnSaveShiny", true);
 }

@@ -92,13 +92,14 @@ export function activateContextKeySetter(
 
 // toggles render on save override
 export function toggleRenderOnSaveOverride() {
+  // toggle the render on save override based on the editor type (quarto or quarto-shiny)
   if (quartoEditorType === 'quarto') {
     // if this is the first override, read the quarto.render.renderOnSave configuration
     if (renderOnSaveOverride === undefined) {
       renderOnSaveOverride = readRenderOnSaveConfiguration();
     }
 
-    // toggle the override.
+    // toggle the render on save override
     renderOnSaveOverride = !renderOnSaveOverride;
     outputChannel.info(`Setting quarto.editor.renderOnSave context key to "${renderOnSaveOverride}"`);
     vscode.commands.executeCommand<boolean>('setContext', 'quarto.editor.renderOnSave', renderOnSaveOverride);
@@ -108,7 +109,7 @@ export function toggleRenderOnSaveOverride() {
       renderOnSaveShinyOverride = readRenderOnSaveShinyConfiguration();
     }
 
-    // toggle the override.
+    // toggle the render on save override
     renderOnSaveShinyOverride = !renderOnSaveShinyOverride;
     outputChannel.info(`Setting quarto.editor.renderOnSaveShiny context key to "${renderOnSaveShinyOverride}"`);
     vscode.commands.executeCommand<boolean>('setContext', 'quarto.editor.renderOnSaveShiny', renderOnSaveShinyOverride);
@@ -116,6 +117,7 @@ export function toggleRenderOnSaveOverride() {
 }
 
 function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, engine: MarkdownEngine) {
+  // if a Quarto doc is active, set the editor context keys
   if (isQuartoDoc(activeTextEditor?.document)) {
     // set the quarto.editor.type context key
     quartoEditorType = !isQuartoShinyDoc(engine, activeTextEditor?.document)

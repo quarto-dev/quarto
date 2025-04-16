@@ -35,7 +35,6 @@ import { extensionHost } from "./host";
 import { initQuartoContext } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
-import { toggleRenderOnSaveOverride } from "./providers/context-keys";
 
 export async function activate(context: vscode.ExtensionContext) {
   // create output channel for extension logs and lsp client logs

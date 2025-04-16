@@ -21,11 +21,9 @@ import { MarkdownEngine } from "../markdown/engine";
 import { mainLanguage } from "../vdoc/vdoc";
 import { isQuartoShinyDoc } from "./preview/preview-util";
 import { workspace } from "vscode";
+import { VisualEditorProvider } from "./editor/editor";
 
 const debounceOnDidChangeDocumentMs = 250;
-
-// temporary create an output channel for quarto state changes
-const outputChannel = vscode.window.createOutputChannel("Quarto State", { log: true });
 
 // state for quarto.editor.type context key
 let quartoEditorType: 'quarto' | 'quarto-shiny' | undefined = undefined;
@@ -92,6 +90,16 @@ export function getRenderOnSaveShiny() {
     : renderOnSaveShinyOverride;
 }
 
+// toggles edit mode
+export function toggleEditMode() {
+  const quartoVisualEditor = VisualEditorProvider.activeEditor();
+  if (quartoVisualEditor !== undefined) {
+    vscode.commands.executeCommand('quarto.editInSourceMode');
+  } else {
+    vscode.commands.executeCommand('quarto.editInVisualMode');
+  }
+}
+
 // toggles render on save override
 export function toggleRenderOnSaveOverride() {
   // toggle the render on save override based on the editor type (quarto or quarto-shiny)
@@ -103,7 +111,6 @@ export function toggleRenderOnSaveOverride() {
 
     // toggle the render on save override
     renderOnSaveOverride = !renderOnSaveOverride;
-    outputChannel.info(`Setting quarto.editor.renderOnSave context key to "${renderOnSaveOverride}"`);
     vscode.commands.executeCommand<boolean>('setContext', 'quarto.editor.renderOnSave', renderOnSaveOverride);
   } else if (quartoEditorType === 'quarto-shiny') {
     // if this is the first override, read the quarto.render.renderOnSaveShiny configuration
@@ -113,7 +120,6 @@ export function toggleRenderOnSaveOverride() {
 
     // toggle the render on save override
     renderOnSaveShinyOverride = !renderOnSaveShinyOverride;
-    outputChannel.info(`Setting quarto.editor.renderOnSaveShiny context key to "${renderOnSaveShinyOverride}"`);
     vscode.commands.executeCommand<boolean>('setContext', 'quarto.editor.renderOnSaveShiny', renderOnSaveShinyOverride);
   }
 }
@@ -126,7 +132,6 @@ function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, e
     quartoEditorType = !isQuartoShinyDoc(engine, activeTextEditor?.document)
       ? 'quarto'
       : 'quarto-shiny';
-    outputChannel.info(`Setting quarto.editor.type context key to "${quartoEditorType}"`);
     vscode.commands.executeCommand<string>(
       'setContext',
       'quarto.editor.type',
@@ -137,7 +142,6 @@ function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, e
     const renderOnSave = renderOnSaveOverride === undefined
       ? readRenderOnSaveConfiguration()
       : renderOnSaveOverride;
-    outputChannel.info(`Setting quarto.editor.renderOnSave context key to "${renderOnSave}"`);
     vscode.commands.executeCommand<string>(
       'setContext',
       'quarto.editor.renderOnSave',
@@ -148,7 +152,6 @@ function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, e
     const renderOnSaveShiny = renderOnSaveShinyOverride === undefined ?
       readRenderOnSaveShinyConfiguration() :
       renderOnSaveShinyOverride;
-    outputChannel.info(`Setting quarto.editor.renderOnSaveShiny context key to "${renderOnSaveShiny}"`);
     vscode.commands.executeCommand<string>(
       'setContext',
       'quarto.editor.renderOnSaveShiny',

@@ -62,7 +62,8 @@ import { JsonRpcRequestTransport } from "core";
 import {
   editInSourceModeCommand,
   editInVisualModeCommand,
-  renderOnSaveCommand,
+  toggleEditModeCommand,
+  toggleRenderOnSaveCommand,
   reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
@@ -88,7 +89,8 @@ export function activateEditor(
   return [
     editInVisualModeCommand(),
     editInSourceModeCommand(),
-    renderOnSaveCommand()
+    toggleEditModeCommand(),
+    toggleRenderOnSaveCommand()
   ];
 }
 

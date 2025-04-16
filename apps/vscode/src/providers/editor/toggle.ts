@@ -20,7 +20,7 @@ import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 import { Uri } from "vscode";
 import { hasHooks } from "../../host/hooks";
-import { toggleRenderOnSaveOverride } from "../context-keys";
+import { toggleEditMode, toggleRenderOnSaveOverride } from "../context-keys";
 
 export function determineMode(text: string, uri: Uri): string | undefined {
   let editorOpener = undefined;
@@ -98,7 +98,16 @@ export function editInSourceModeCommand(): Command {
   };
 }
 
-export function renderOnSaveCommand(): Command {
+export function toggleEditModeCommand(): Command {
+  return {
+    id: 'quarto.toggleEditMode',
+    execute() {
+      toggleEditMode();
+    }
+  };
+}
+
+export function toggleRenderOnSaveCommand(): Command {
   return {
     id: 'quarto.toggleRenderOnSave',
     execute() {

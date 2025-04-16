@@ -38,18 +38,6 @@ let renderOnSaveOverride: boolean | undefined = undefined;
 // this is only defined when the user has changed the value at runtime
 let renderOnSaveShinyOverride: boolean | undefined = undefined;
 
-export function getRenderOnSave() {
-  return renderOnSaveOverride === undefined
-    ? readRenderOnSaveConfiguration()
-    : renderOnSaveOverride;
-}
-
-export function getRenderOnSaveShiny() {
-  return renderOnSaveShinyOverride === undefined
-    ? readRenderOnSaveShinyConfiguration()
-    : renderOnSaveShinyOverride;
-}
-
 export function activateContextKeySetter(
   context: vscode.ExtensionContext,
   engine: MarkdownEngine
@@ -58,7 +46,7 @@ export function activateContextKeySetter(
   setEditorContextKeys(vscode.window.activeTextEditor, engine);
   setLanguageContextKeys(vscode.window.activeTextEditor, engine);
 
-  // register for render configuration change notification
+  // register for quarto.render.renderOnSave or quarto.render.renderOnSaveShiny configuration change notification
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
     // if the change affects quarto.render.renderOnSave or quarto.render.renderOnSaveShiny, set the editor context keys.
     if (event.affectsConfiguration('quarto.render.renderOnSave') || event.affectsConfiguration('quarto.render.renderOnSaveShiny')) {
@@ -90,6 +78,20 @@ export function activateContextKeySetter(
   );
 }
 
+// gets render on save
+export function getRenderOnSave() {
+  return renderOnSaveOverride === undefined
+    ? readRenderOnSaveConfiguration()
+    : renderOnSaveOverride;
+}
+
+// gets render on save shiny
+export function getRenderOnSaveShiny() {
+  return renderOnSaveShinyOverride === undefined
+    ? readRenderOnSaveShinyConfiguration()
+    : renderOnSaveShinyOverride;
+}
+
 // toggles render on save override
 export function toggleRenderOnSaveOverride() {
   // toggle the render on save override based on the editor type (quarto or quarto-shiny)
@@ -116,6 +118,7 @@ export function toggleRenderOnSaveOverride() {
   }
 }
 
+// sets editor context keys
 function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, engine: MarkdownEngine) {
   // if a Quarto doc is active, set the editor context keys
   if (isQuartoDoc(activeTextEditor?.document)) {

@@ -38,6 +38,18 @@ let renderOnSaveOverride: boolean | undefined = undefined;
 // this is only defined when the user has changed the value at runtime
 let renderOnSaveShinyOverride: boolean | undefined = undefined;
 
+export function getRenderOnSave() {
+  return renderOnSaveOverride === undefined
+    ? readRenderOnSaveConfiguration()
+    : renderOnSaveOverride;
+}
+
+export function getRenderOnSaveShiny() {
+  return renderOnSaveShinyOverride === undefined
+    ? readRenderOnSaveShinyConfiguration()
+    : renderOnSaveShinyOverride;
+}
+
 export function activateContextKeySetter(
   context: vscode.ExtensionContext,
   engine: MarkdownEngine
@@ -98,9 +110,9 @@ export function toggleRenderOnSaveOverride() {
 function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, engine: MarkdownEngine) {
   if (isQuartoDoc(activeTextEditor?.document)) {
     // set the quarto.editor.type context key
-    quartoEditorType = !isQuartoShinyDoc(engine, activeTextEditor?.document) ?
-      'quarto' :
-      'quarto-shiny';
+    quartoEditorType = !isQuartoShinyDoc(engine, activeTextEditor?.document)
+      ? 'quarto'
+      : 'quarto-shiny';
     outputChannel.info(`Setting quarto.editor.type context key to "${quartoEditorType}"`);
     vscode.commands.executeCommand<string>(
       'setContext',
@@ -109,9 +121,9 @@ function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, e
     );
 
     // set the quarto.editor.renderOnSave context key
-    const renderOnSave = renderOnSaveOverride === undefined ?
-      readRenderOnSaveConfiguration() :
-      renderOnSaveOverride;
+    const renderOnSave = renderOnSaveOverride === undefined
+      ? readRenderOnSaveConfiguration()
+      : renderOnSaveOverride;
     outputChannel.info(`Setting quarto.editor.renderOnSave context key to "${renderOnSave}"`);
     vscode.commands.executeCommand<string>(
       'setContext',

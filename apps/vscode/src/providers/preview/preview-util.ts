@@ -28,6 +28,7 @@ import { isNotebook } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
 import { isKnitrDocument } from "../../host/executors";
+import { getRenderOnSave, getRenderOnSaveShiny } from "../context-keys";
 
 
 export function isQuartoShinyDoc(
@@ -125,8 +126,8 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
 
   // finally, consult configuration.
   return !isQuartoShinyDoc(engine, document)
-    ? readRenderOnSaveConfiguration()
-    : readRenderOnSaveShinyConfiguration();
+    ? getRenderOnSave()
+    : getRenderOnSaveShiny();
 }
 
 export function haveNotebookSaveEvents() {

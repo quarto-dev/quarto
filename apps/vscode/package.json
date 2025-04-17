@@ -253,7 +253,11 @@
         "command": "quarto.preview",
         "title": "Preview",
         "icon": "$(preview)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.previewScript",
@@ -982,7 +986,11 @@
           "type": "string",
           "markdownDescription": "Control the background coloring of executable code cells.",
           "default": "default",
-          "enum": ["default", "useTheme", "off"],
+          "enum": [
+            "default",
+            "useTheme",
+            "off"
+          ],
           "markdownEnumDescriptions": [
             "Use the default light and dark background colors. Specify these colors with `quarto.cells.background.lightDefault` and `quarto.cells.background.darkDefault`.",
             "Use the `notebook.selectedCellBackground` color from the current VS Code theme.",

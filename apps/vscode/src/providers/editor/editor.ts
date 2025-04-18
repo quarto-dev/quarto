@@ -14,7 +14,7 @@
  */
 
 import path, { extname, win32 } from "path";
-import { determineMode } from "./toggle"
+import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
 import {
@@ -62,6 +62,8 @@ import { JsonRpcRequestTransport } from "core";
 import {
   editInSourceModeCommand,
   editInVisualModeCommand,
+  toggleEditModeCommand,
+  toggleRenderOnSaveCommand,
   reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
@@ -84,7 +86,12 @@ export function activateEditor(
   context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
 
   // return commands
-  return [editInVisualModeCommand(), editInSourceModeCommand()];
+  return [
+    editInVisualModeCommand(),
+    editInSourceModeCommand(),
+    toggleEditModeCommand(),
+    toggleRenderOnSaveCommand()
+  ];
 }
 
 

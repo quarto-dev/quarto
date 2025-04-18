@@ -253,7 +253,11 @@
         "command": "quarto.preview",
         "title": "Preview",
         "icon": "$(preview)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.previewScript",
@@ -424,6 +428,28 @@
         "title": "Toggle Code",
         "category": "Quarto",
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+      },
+      {
+        "command": "quarto.toggleEditMode",
+        "title": "Edit Mode",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "toggle",
+          "leftTitle": "Source",
+          "rightTitle": "Visual",
+          "toggled": "activeCustomEditorId == 'quarto.visualEditor'"
+        }
+      },
+      {
+        "command": "quarto.toggleRenderOnSave",
+        "title": "Render on Save",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "checkbox",
+          "checked": "((activeCustomEditorId == 'quarto.visualEditor' || quarto.editor.type == quarto) && quarto.editor.renderOnSave) || ((activeCustomEditorId == 'quarto.visualEditor' || quarto.editor.type == 'quarto-shiny') && quarto.editor.renderOnSaveShiny)"
+        }
       },
       {
         "command": "quarto.zoteroConfigureLibrary",
@@ -608,6 +634,18 @@
       }
     ],
     "menus": {
+      "editor/actions/right": [
+        {
+          "command": "quarto.toggleRenderOnSave",
+          "when": "(activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto) && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
+          "group": "Quarto"
+        },
+        {
+          "command": "quarto.toggleEditMode",
+          "when": "(activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto) && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
+          "group": "Quarto"
+        }
+      ],
       "editor/context": [
         {
           "command": "quarto.formatCell",
@@ -948,7 +986,11 @@
           "type": "string",
           "markdownDescription": "Control the background coloring of executable code cells.",
           "default": "default",
-          "enum": ["default", "useTheme", "off"],
+          "enum": [
+            "default",
+            "useTheme",
+            "off"
+          ],
           "markdownEnumDescriptions": [
             "Use the default light and dark background colors. Specify these colors with `quarto.cells.background.lightDefault` and `quarto.cells.background.darkDefault`.",
             "Use the `notebook.selectedCellBackground` color from the current VS Code theme.",

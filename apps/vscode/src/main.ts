@@ -102,7 +102,6 @@ export async function activate(context: vscode.ExtensionContext) {
     const assistCommands = activateQuartoAssistPanel(context, engine);
     commands.push(...assistCommands);
   }
-
   // walkthough
   commands.push(...walkthroughCommands(host, quartoContext));
 

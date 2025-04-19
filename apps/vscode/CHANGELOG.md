@@ -3,6 +3,7 @@
 ## 1.121.0 (unreleased)
 
 - Add new controls for Positron editor action bar (<https://github.com/quarto-dev/quarto/pull/698>).
+- Improved editor focus preservation behavior.
 
 ## 1.120.0 (Release on 2025-04-07)
 

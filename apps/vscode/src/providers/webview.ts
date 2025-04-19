@@ -81,7 +81,6 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     if (this.activeView_) {
       this.activeView_.reveal();
       this.resolveOnShow();
-      preserveEditorFocus();
     }
   }
 

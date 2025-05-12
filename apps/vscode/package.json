@@ -448,7 +448,7 @@
         "enablement": "editorLangId == quarto",
         "actionBarOptions": {
           "controlType": "checkbox",
-          "checked": "((activeCustomEditorId == 'quarto.visualEditor' || quarto.editor.type == quarto) && quarto.editor.renderOnSave) || ((activeCustomEditorId == 'quarto.visualEditor' || quarto.editor.type == 'quarto-shiny') && quarto.editor.renderOnSaveShiny)"
+          "checked": "(quarto.editor.type == quarto && quarto.editor.renderOnSave) || (quarto.editor.type == 'quarto-shiny' && quarto.editor.renderOnSaveShiny)"
         }
       },
       {
@@ -634,16 +634,21 @@
       }
     ],
     "menus": {
-      "editor/actions/right": [
+      "editor/actions/left": [
+        {
+          "command": "quarto.preview",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
+        },
         {
           "command": "quarto.toggleRenderOnSave",
-          "when": "(activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto) && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
-          "group": "Quarto"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
         },
         {
           "command": "quarto.toggleEditMode",
-          "when": "(activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto) && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
-          "group": "Quarto"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "1_editor_mode"
         }
       ],
       "editor/context": [

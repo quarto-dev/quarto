@@ -114,6 +114,7 @@ export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
 export type VirtualDocAction =
   "completion" |
   "hover" |
+  "inlayHints" |
   "signature" |
   "definition" |
   "format" |
@@ -209,6 +210,13 @@ export function adjustedPosition(language: EmbeddedLanguage, pos: Position) {
 
 export function unadjustedPosition(language: EmbeddedLanguage, pos: Position) {
   return new Position(pos.line - (language.inject?.length || 0), pos.character);
+}
+
+export function adjustedRange(language: EmbeddedLanguage, range: Range) {
+  return new Range(
+    adjustedPosition(language, range.start),
+    adjustedPosition(language, range.end)
+  );
 }
 
 export function unadjustedRange(language: EmbeddedLanguage, range: Range) {

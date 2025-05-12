@@ -28,7 +28,8 @@ export function middlewareCapabilities() : ServerCapabilities {
     },
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
-    definitionProvider: true
+    definitionProvider: true,
+    inlayHintProvider: true
   }
 };
 

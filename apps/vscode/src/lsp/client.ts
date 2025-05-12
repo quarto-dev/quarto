@@ -21,6 +21,7 @@ import {
   ProviderResult,
   Location,
   LocationLink,
+  Range,
   Definition,
   LogOutputChannel,
 } from "vscode";
@@ -35,6 +36,7 @@ import {
   CancellationToken,
   commands,
   CompletionContext,
+  InlayHint,
   Position,
   TextDocument,
 } from "vscode";
@@ -43,12 +45,15 @@ import {
   ProvideCompletionItemsSignature,
   ProvideDefinitionSignature,
   ProvideHoverSignature,
+  ProvideInlayHintsSignature,
   ProvideSignatureHelpSignature,
   State,
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
   adjustedPosition,
+  unadjustedPosition,
+  adjustedRange,
   unadjustedRange,
   virtualDoc,
   virtualDocUri,
@@ -104,6 +109,7 @@ export async function activateLsp(
     provideDocumentRangeFormattingEdits: embeddedDocumentRangeFormattingProvider(
       engine
     ),
+    provideInlayHints: embeddedInlayHintsProvider(engine),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);
@@ -340,6 +346,43 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
       }
     } else {
       return await next(document, position, token);
+    }
+  };
+}
+
+export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
+  return async (
+    document: TextDocument,
+    range: Range,
+    token: CancellationToken,
+    next: ProvideInlayHintsSignature
+  ): Promise<InlayHint[] | undefined> => {
+    const vdoc = await virtualDoc(document, new Position(7, 0), engine);
+    console.log("[InlayHints] Triggered for", vdoc);
+    console.log(`[InlayHints] Range:`, range.start, range.end);
+    if (vdoc) {
+      const vdocUri = await virtualDocUri(vdoc, document.uri, "inlayHints");
+      console.log(`[InlayHints] Triggered for ${vdocUri.uri.toString()}`);
+      const vRange = adjustedRange(vdoc.language, range);
+      console.log(`[InlayHints] vRange:`, vRange.start, vRange.end);
+      try {
+        const inlayHints = await commands.executeCommand<InlayHint[]>(
+          "vscode.executeInlayHintProvider",
+          vdocUri.uri,
+          vRange
+        );
+        console.log("✅ Inlay hints result:", inlayHints);
+        // Map results back to original doc range if needed (optional for inlay hints)
+        inlayHints.forEach((inlayHint) => {
+          inlayHint.position = unadjustedPosition(vdoc.language, inlayHint.position);
+        });
+        return inlayHints;
+      } catch (e) {
+        console.warn("Inlay hint error", e);
+        return undefined;
+      }
+    } else {
+      return await next(document, range, token) ?? undefined;
     }
   };
 }

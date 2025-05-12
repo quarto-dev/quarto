@@ -47,8 +47,6 @@ export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
       const vdocUri = await virtualDocUri(vdoc, document.uri, "inlayHints");
       const vRange = adjustedRange(vdoc.language, range);
 
-      console.log(`[Inlayhints} Language vdoc handled: ${lang} of ${vdocUri.uri.toString()} at ${pos.line}`);
-
       try {
         const hints = await commands.executeCommand<InlayHint[]>(
           "vscode.executeInlayHintProvider",

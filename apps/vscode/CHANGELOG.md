@@ -2,6 +2,8 @@
 
 ## 1.122.0 (unreleased)
 
+- Change controls on Positron editor action bar and fix "Render on Save" behavior (<https://github.com/quarto-dev/quarto/pull/706>).
+
 ## 1.121.0 (Release on 2025-05-02)
 
 - Add new controls for Positron editor action bar (<https://github.com/quarto-dev/quarto/pull/698>).

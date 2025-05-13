@@ -57,6 +57,13 @@ export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
         if (hints && hints.length > 0) {
           hints.forEach((hint) => {
             hint.position = unadjustedPosition(vdoc.language, hint.position);
+            if (Array.isArray(hint.textEdits) && hint.textEdits.length > 0) {
+              hint.textEdits.forEach((edit) => {
+                const start = unadjustedPosition(vdoc.language, edit.range.start);
+                const end = unadjustedPosition(vdoc.language, edit.range.end);
+                edit.range = new Range(start, end);
+              });
+            }
           });
           allHints.push(...hints);
         }

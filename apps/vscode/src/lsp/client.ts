@@ -62,6 +62,7 @@ import {
 } from "../providers/format";
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
+import { embeddedInlayHintsProvider } from "../providers/inlay-hints";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { extensionHost } from "../host";
 import semver from "semver";
@@ -104,6 +105,7 @@ export async function activateLsp(
     provideDocumentRangeFormattingEdits: embeddedDocumentRangeFormattingProvider(
       engine
     ),
+    provideInlayHints: embeddedInlayHintsProvider(engine),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);

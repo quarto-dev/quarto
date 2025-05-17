@@ -296,8 +296,13 @@
       },
       {
         "command": "quarto.insertCodeCell",
+        "icon": "$(insert)",
         "title": "Insert Code Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.runSelection",
@@ -649,6 +654,13 @@
           "command": "quarto.toggleEditMode",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "1_editor_mode"
+        }
+      ],
+      "editor/actions/right": [
+        {
+          "command": "quarto.insertCodeCell",
+          "when": "editorLangId == quarto",
+          "group": "2_execute"
         }
       ],
       "editor/context": [

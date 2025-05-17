@@ -3,6 +3,7 @@
 ## 1.122.0 (unreleased)
 
 - Change controls on Positron editor action bar and fix "Render on Save" behavior (<https://github.com/quarto-dev/quarto/pull/706>).
+- Add additional new control ("Insert Code Cell") to Positron editor action bar (<https://github.com/quarto-dev/quarto/pull/709>).
 
 ## 1.121.0 (Release on 2025-05-02)
 

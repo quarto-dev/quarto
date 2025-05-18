@@ -85,10 +85,7 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
         // see if we have an embedded langaage
         const language = embeddedLanguage(context.language);
 
-        // is this in Positron? If so, no completions
-        // TODO: fix LSP issues for visual editor in Positron:
-        // https://github.com/posit-dev/positron/issues/1805
-        if (language && !hasHooks()) {
+        if (language) {
 
           // if this is a yaml comment line then call the lsp
           const line = context.code[context.selection.start.line];
@@ -96,7 +93,11 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
             return lspCellYamlOptionsCompletions(context, lspRequest);
 
             // otherwise delegate to vscode completion system
-          } else {
+            // is this in Positron? If so, no completions
+            // TODO: fix LSP issues for visual editor in Positron:
+            // https://github.com/posit-dev/positron/issues/1805
+          }
+          if (!hasHooks()) {
             const vdoc = virtualDocForCode(context.code, language);
             const completions = await vdocCompletions(
               vdoc,
@@ -113,12 +114,11 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
               isIncomplete: false
             };
           }
-        } else {
-          return {
-            items: [],
-            isIncomplete: false
-          };
         }
+        return {
+          items: [],
+          isIncomplete: false
+        };
       }
     },
     async codeViewPreviewDiagram(state: DiagramState, activate: boolean) {

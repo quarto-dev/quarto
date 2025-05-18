@@ -45,6 +45,7 @@ import {
   kCodeViewGetCompletions,
 } from "editor-types";
 
+import { hasHooks } from "../../host/hooks";
 import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode } from "../../vdoc/vdoc";
 import { vdocCompletions } from "../../vdoc/vdoc-completion";
@@ -83,7 +84,11 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
 
         // see if we have an embedded langaage
         const language = embeddedLanguage(context.language);
-        if (language) {
+
+        // is this in Positron? If so, no completions
+        // TODO: fix LSP issues for visual editor in Positron:
+        // https://github.com/posit-dev/positron/issues/1805
+        if (language && !hasHooks()) {
 
           // if this is a yaml comment line then call the lsp
           const line = context.code[context.selection.start.line];

@@ -3,6 +3,7 @@
 ## 1.122.0 (unreleased)
 
 - Change controls on Positron editor action bar and fix "Render on Save" behavior (<https://github.com/quarto-dev/quarto/pull/706>).
+- Turn off completions in visual mode in Positron, as a temporary stopgap until we can invest more in LSP features in the visual editor (<https://github.com/quarto-dev/quarto/pull/710>).
 
 ## 1.121.0 (Release on 2025-05-02)
 

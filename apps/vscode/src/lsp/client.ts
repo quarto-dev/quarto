@@ -52,7 +52,6 @@ import {
   adjustedPosition,
   unadjustedRange,
   virtualDoc,
-  virtualDocUri,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";

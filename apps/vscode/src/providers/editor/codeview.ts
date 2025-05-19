@@ -74,52 +74,53 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
       }
     },
     async codeViewCompletions(context: CodeViewCompletionContext): Promise<CompletionList> {
-
       // if this is yaml then call the lsp directly
       if (context.language === "yaml") {
-
         return lspRequest(kCodeViewGetCompletions, [context]);
+      }
 
-      } else {
-
-        // see if we have an embedded langaage
-        const language = embeddedLanguage(context.language);
-
-        if (language) {
-
-          // if this is a yaml comment line then call the lsp
-          const line = context.code[context.selection.start.line];
-          if (language.comment && line.startsWith(`${language.comment}| `)) {
-            return lspCellYamlOptionsCompletions(context, lspRequest);
-
-            // otherwise delegate to vscode completion system
-            // is this in Positron? If so, no completions
-            // TODO: fix LSP issues for visual editor in Positron:
-            // https://github.com/posit-dev/positron/issues/1805
-          }
-          if (!hasHooks()) {
-            const vdoc = virtualDocForCode(context.code, language);
-            const completions = await vdocCompletions(
-              vdoc,
-              new Position(
-                context.selection.start.line,
-                context.selection.start.character
-              ),
-              undefined,
-              language,
-              document.uri
-            );
-            return {
-              items: completions.map(vsCompletionItemToLsCompletionItem),
-              isIncomplete: false
-            };
-          }
-        }
+      // see if we have an embedded langaage
+      const language = embeddedLanguage(context.language);
+      if (!language) {
         return {
           items: [],
           isIncomplete: false
         };
       }
+
+      // if this is a yaml comment line then call the lsp
+      const line = context.code[context.selection.start.line];
+      if (language.comment && line.startsWith(`${language.comment}| `)) {
+        return lspCellYamlOptionsCompletions(context, lspRequest);
+      }
+
+      // if this is Positron, no visual editor completions
+      // TODO: fix LSP issues for visual editor in Positron:
+      // https://github.com/posit-dev/positron/issues/1805
+      if (hasHooks()) {
+        return {
+          items: [],
+          isIncomplete: false
+        };
+      }
+
+      // otherwise delegate to vscode completion system
+      const vdoc = virtualDocForCode(context.code, language);
+      const completions = await vdocCompletions(
+        vdoc,
+        new Position(
+          context.selection.start.line,
+          context.selection.start.character
+        ),
+        undefined,
+        language,
+        document.uri
+      );
+
+      return {
+        items: completions.map(vsCompletionItemToLsCompletionItem),
+        isIncomplete: false
+      };
     },
     async codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
       commands.executeCommand("quarto.previewDiagram", { state, activate });

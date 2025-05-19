@@ -23,6 +23,7 @@ import {
   LocationLink,
   Definition,
   LogOutputChannel,
+  Uri
 } from "vscode";
 import {
   LanguageClient,
@@ -52,6 +53,7 @@ import {
   unadjustedRange,
   virtualDoc,
   virtualDocUri,
+  withVirtualDocUri,
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
@@ -225,19 +227,13 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      // get uri for hover
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "hover");
-
-      // execute hover
-      try {
-        return getHover(vdocUri.uri, vdoc.language, position);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
+      return await withVirtualDocUri(vdoc, document.uri, "hover", async (uri: Uri) => {
+        try {
+          return await getHover(uri, vdoc.language, position);
+        } catch (error) {
+          console.log(error);
         }
-      }
+      });
     }
 
     // default to server delegation

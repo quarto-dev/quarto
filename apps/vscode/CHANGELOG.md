@@ -2,6 +2,7 @@
 
 ## 1.122.0 (unreleased)
 
+- Language server temporary files are now permanently deleted, bypassing the trash can (<https://github.com/quarto-dev/quarto/pull/714>).
 - Change controls on Positron editor action bar and fix "Render on Save" behavior (<https://github.com/quarto-dev/quarto/pull/706>).
 
 ## 1.121.0 (Release on 2025-05-02)

@@ -18,9 +18,9 @@ export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
     range: Range,
     token: CancellationToken,
     next: ProvideInlayHintsSignature
-  ): Promise<InlayHint[] | undefined> => {
+  ): Promise<InlayHint[] | null | undefined> => {
     if (!isQuartoDoc(document, true)) {
-      return await next(document, range, token) ?? undefined;
+      return await next(document, range, token);
     }
 
     const tokens = engine.parse(document);

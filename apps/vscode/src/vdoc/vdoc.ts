@@ -130,6 +130,8 @@ export async function withVirtualDocUri<T>(
 ): Promise<T> {
   const vdocUri = await virtualDocUri(vdoc, parentUri, action);
 
+  // try-finally without a catch allows `f()` to propagate an exception up to the caller
+  // while still allowing us to clean up the vdoc tempfile.
   try {
     return await f(vdocUri.uri);
   } finally {

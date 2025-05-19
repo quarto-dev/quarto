@@ -251,16 +251,13 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "signature");
-      try {
-        return getSignatureHelpHover(vdocUri.uri, vdoc.language, position, context.triggerCharacter);
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
+      return await withVirtualDocUri(vdoc, document.uri, "signature", async (uri: Uri) => {
+        try {
+          return await getSignatureHelpHover(uri, vdoc.language, position, context.triggerCharacter);
+        } catch (error) {
+          return undefined;
         }
-      }
+      });
     } else {
       return await next(document, position, context, token);
     }

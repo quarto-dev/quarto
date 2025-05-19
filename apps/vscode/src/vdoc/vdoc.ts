@@ -141,7 +141,7 @@ export async function withVirtualDocUri<T>(
   }
 }
 
-export async function virtualDocUri(
+async function virtualDocUri(
   virtualDoc: VirtualDoc,
   parentUri: Uri,
   action: VirtualDocAction

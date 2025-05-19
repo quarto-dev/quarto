@@ -44,7 +44,6 @@ import {
   VirtualDoc,
   virtualDocForCode,
   virtualDocForLanguage,
-  virtualDocUri,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
 

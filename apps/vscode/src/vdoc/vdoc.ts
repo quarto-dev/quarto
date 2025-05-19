@@ -127,7 +127,7 @@ export async function withVirtualDocUri<T>(
   parentUri: Uri,
   action: VirtualDocAction,
   f: (uri: Uri) => Promise<T>
-) {
+): Promise<T> {
   const vdocUri = await virtualDocUri(vdoc, parentUri, action);
 
   try {

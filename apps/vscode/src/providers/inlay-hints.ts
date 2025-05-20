@@ -9,7 +9,7 @@ import {
 import { ProvideInlayHintsSignature } from "vscode-languageclient";
 import { unadjustedPosition, adjustedRange, languages, virtualDocForLanguage, withVirtualDocUri, unadjustedRange } from "../vdoc/vdoc";
 import { MarkdownEngine } from "../markdown/engine";
-import { isQuartoDoc } from "../core/doc";
+import { isQuartoDoc, isQuartoYaml } from "../core/doc";
 
 /**
  * Provides inlay hints for all embedded languages within a single document
@@ -27,6 +27,13 @@ export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
     token: CancellationToken,
     next: ProvideInlayHintsSignature
   ): Promise<InlayHint[] | null | undefined> => {
+    if (isQuartoYaml(document)) {
+      // The LSP client tracks quarto related yaml files like `_quarto.yaml`,
+      // but we don't provide inlay hints for these. Calling `next()` results
+      // in an "unhandled method" toast notification, so we return `undefined`
+      // directly instead. Is there a better solution?
+      return undefined;
+    }
     if (!isQuartoDoc(document, true)) {
       return await next(document, range, token);
     }

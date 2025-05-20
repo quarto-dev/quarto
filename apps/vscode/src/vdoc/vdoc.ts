@@ -189,6 +189,39 @@ export function mainLanguage(
   }
 }
 
+/**
+ * Compute the unique set of `EmbeddedLanguages` found within this array of `Token[]`
+ */
+export function languages(
+  tokens: Token[]
+): EmbeddedLanguage[] {
+  const ids = new Set<string>();
+  const languages: EmbeddedLanguage[] = [];
+
+  tokens.filter(isExecutableLanguageBlock).forEach(token => {
+    const language = languageFromBlock(token);
+
+    if (!language) {
+      // This would be unexpected since we filtered to executable language blocks
+      return;
+    }
+
+    // `EmbeddedLanguage` doesn't have a unique identifier, it probably should.
+    // For now we join all `ids` and call that the identifier.
+    const id = language.ids.join("-");
+
+    if (ids.has(id)) {
+      // We've seen this `EmbeddedLanguage` already
+      return;
+    }
+
+    ids.add(id);
+    languages.push(language);
+  });
+
+  return languages;
+}
+
 export function languageFromBlock(token: Token) {
   const name = languageNameFromBlock(token);
   return embeddedLanguage(name);

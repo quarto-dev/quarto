@@ -1,17 +1,25 @@
-import { InlayHint, Range } from "vscode";
 import {
+  InlayHint,
+  Range,
   CancellationToken,
   commands,
-  Position,
   TextDocument,
+  Uri
 } from "vscode";
-
 import { ProvideInlayHintsSignature } from "vscode-languageclient";
-import { unadjustedPosition, adjustedRange, languageAtPosition, virtualDoc, virtualDocUri } from "../vdoc/vdoc";
+import { unadjustedPosition, adjustedRange, languages, virtualDocForLanguage, withVirtualDocUri, unadjustedRange } from "../vdoc/vdoc";
 import { MarkdownEngine } from "../markdown/engine";
-
 import { isQuartoDoc } from "../core/doc";
 
+/**
+ * Provides inlay hints for all embedded languages within a single document
+ *
+ * Note that `vscode.executeInlayHintProvider` does not currently "resolve"
+ * inlay hints, so if the underlying provider delays the text edits (that you'd
+ * get when you double click) to resolve time, then we will never see them in the
+ * quarto document (for example, pylance delays, but basedpyright does not).
+ * https://github.com/microsoft/vscode/issues/249359
+ */
 export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
   return async (
     document: TextDocument,
@@ -25,57 +33,60 @@ export function embeddedInlayHintsProvider(engine: MarkdownEngine) {
 
     const tokens = engine.parse(document);
 
-    // Find the start position of each embedded language
-    const languagePositions: Map<String, Position> = new Map();
-    for (let line = range.start.line; line < range.end.line; line++) {
-      const pos = new Position(line, 0);
-      const lang = languageAtPosition(tokens, pos)?.extension;
-      if (lang && !languagePositions.has(lang)) {
-        languagePositions.set(lang, pos);
-      }
-    }
+    // Determine all embedded languages used within this document
+    const embeddedLanguages = languages(tokens);
 
     // Fetch inlay hints for each embedded language
-    const allHints: InlayHint[] = [];
-    for (const [lang, pos] of languagePositions.entries()) {
-      const vdoc = await virtualDoc(document, pos, engine);
+    const hints: InlayHint[] = [];
+
+    for (const embeddedLanguage of embeddedLanguages) {
+      const vdoc = virtualDocForLanguage(document, tokens, embeddedLanguage);
+
       if (!vdoc) {
-        console.error(`[InlayHints] No virtual document produced for ${lang} at ${pos.line}`);
+        const language = embeddedLanguage.ids.at(0) ?? "??";
+        console.error(`[InlayHints] No virtual document produced for language: ${language}.`);
         continue;
       };
 
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "inlayHints");
-      const vRange = adjustedRange(vdoc.language, range);
+      // Map `range` into adjusted vdoc range
+      const vdocRange = adjustedRange(vdoc.language, range);
 
-      try {
-        const hints = await commands.executeCommand<InlayHint[]>(
-          "vscode.executeInlayHintProvider",
-          vdocUri.uri,
-          vRange
-        );
-        // Map results back to original doc range if needed (optional for inlay hints)
-        if (hints && hints.length > 0) {
-          hints.forEach((hint) => {
-            hint.position = unadjustedPosition(vdoc.language, hint.position);
-            if (Array.isArray(hint.textEdits) && hint.textEdits.length > 0) {
-              hint.textEdits.forEach((edit) => {
-                const start = unadjustedPosition(vdoc.language, edit.range.start);
-                const end = unadjustedPosition(vdoc.language, edit.range.end);
-                edit.range = new Range(start, end);
-              });
-            }
-          });
-          allHints.push(...hints);
+      // Get inlay hints for this embedded language's vdoc
+      const vdocHints = await withVirtualDocUri(vdoc, document.uri, "inlayHints", async (uri: Uri) => {
+        try {
+          return await commands.executeCommand<InlayHint[]>(
+            "vscode.executeInlayHintProvider",
+            uri,
+            vdocRange
+          );
+        } catch (error) {
+          const language = embeddedLanguage.ids.at(0) ?? "??";
+          console.warn(`[InlayHints] Error getting hints for language: ${language}. ${error}`);
         }
-      } catch (e) {
-        console.warn(`[InlayHints] Error getting hints for ${lang}:`, e);
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
-        }
+      })
+
+      if (!vdocHints) {
+        continue;
       }
+
+      // Map results back to original doc range. Two places to update:
+      // - `InlayHint.position`
+      // - `InlayHint.textEdits.range`
+      vdocHints.forEach((hint) => {
+        // Unconditional `position` of where to show the inlay hint
+        hint.position = unadjustedPosition(vdoc.language, hint.position);
+
+        // Optional set of `textEdits` to "accept" the inlay hint
+        if (hint.textEdits) {
+          hint.textEdits.forEach((textEdit) => {
+            textEdit.range = unadjustedRange(vdoc.language, textEdit.range);
+          });
+        }
+      });
+
+      hints.push(...vdocHints);
     }
 
-    return allHints;
+    return hints;
   };
 }

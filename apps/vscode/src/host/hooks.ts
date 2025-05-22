@@ -20,7 +20,7 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTo
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, virtualDocUri, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
+import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from '../vdoc/languages';
 
 declare global {

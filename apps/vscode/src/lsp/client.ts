@@ -23,6 +23,7 @@ import {
   LocationLink,
   Definition,
   LogOutputChannel,
+  Uri
 } from "vscode";
 import {
   LanguageClient,
@@ -51,7 +52,7 @@ import {
   adjustedPosition,
   unadjustedRange,
   virtualDoc,
-  virtualDocUri,
+  withVirtualDocUri,
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
@@ -225,19 +226,13 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      // get uri for hover
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "hover");
-
-      // execute hover
-      try {
-        return getHover(vdocUri.uri, vdoc.language, position);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
+      return await withVirtualDocUri(vdoc, document.uri, "hover", async (uri: Uri) => {
+        try {
+          return await getHover(uri, vdoc.language, position);
+        } catch (error) {
+          console.log(error);
         }
-      }
+      });
     }
 
     // default to server delegation
@@ -255,16 +250,13 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "signature");
-      try {
-        return getSignatureHelpHover(vdocUri.uri, vdoc.language, position, context.triggerCharacter);
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
+      return await withVirtualDocUri(vdoc, document.uri, "signature", async (uri: Uri) => {
+        try {
+          return await getSignatureHelpHover(uri, vdoc.language, position, context.triggerCharacter);
+        } catch (error) {
+          return undefined;
         }
-      }
+      });
     } else {
       return await next(document, position, context, token);
     }
@@ -280,64 +272,61 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "definition");
-      try {
-        const definitions = await commands.executeCommand<
-          ProviderResult<Definition | LocationLink[]>
-        >(
-          "vscode.executeDefinitionProvider",
-          vdocUri.uri,
-          adjustedPosition(vdoc.language, position)
-        );
-        const resolveLocation = (location: Location) => {
-          if (location.uri.toString() === vdocUri.uri.toString()) {
-            return new Location(
-              document.uri,
-              unadjustedRange(vdoc.language, location.range)
-            );
+      return await withVirtualDocUri(vdoc, document.uri, "definition", async (uri: Uri) => {
+        try {
+          const definitions = await commands.executeCommand<
+            ProviderResult<Definition | LocationLink[]>
+          >(
+            "vscode.executeDefinitionProvider",
+            uri,
+            adjustedPosition(vdoc.language, position)
+          );
+          const resolveLocation = (location: Location) => {
+            if (location.uri.toString() === uri.toString()) {
+              return new Location(
+                document.uri,
+                unadjustedRange(vdoc.language, location.range)
+              );
+            } else {
+              return location;
+            }
+          };
+          const resolveLocationLink = (location: LocationLink) => {
+            if (location.targetUri.toString() === uri.toString()) {
+              const locationLink: LocationLink = {
+                targetRange: unadjustedRange(vdoc.language, location.targetRange),
+                originSelectionRange: location.originSelectionRange
+                  ? unadjustedRange(vdoc.language, location.originSelectionRange)
+                  : undefined,
+                targetSelectionRange: location.targetSelectionRange
+                  ? unadjustedRange(vdoc.language, location.targetSelectionRange)
+                  : undefined,
+                targetUri: document.uri,
+              };
+              return locationLink;
+            } else {
+              return location;
+            }
+          };
+          if (definitions instanceof Location) {
+            return resolveLocation(definitions);
+          } else if (Array.isArray(definitions) && definitions.length > 0) {
+            if (definitions[0] instanceof Location) {
+              return definitions.map((definition) =>
+                resolveLocation(definition as Location)
+              );
+            } else {
+              return definitions.map((definition) =>
+                resolveLocationLink(definition as LocationLink)
+              );
+            }
           } else {
-            return location;
+            return definitions;
           }
-        };
-        const resolveLocationLink = (location: LocationLink) => {
-          if (location.targetUri.toString() === vdocUri.uri.toString()) {
-            const locationLink: LocationLink = {
-              targetRange: unadjustedRange(vdoc.language, location.targetRange),
-              originSelectionRange: location.originSelectionRange
-                ? unadjustedRange(vdoc.language, location.originSelectionRange)
-                : undefined,
-              targetSelectionRange: location.targetSelectionRange
-                ? unadjustedRange(vdoc.language, location.targetSelectionRange)
-                : undefined,
-              targetUri: document.uri,
-            };
-            return locationLink;
-          } else {
-            return location;
-          }
-        };
-        if (definitions instanceof Location) {
-          return resolveLocation(definitions);
-        } else if (Array.isArray(definitions) && definitions.length > 0) {
-          if (definitions[0] instanceof Location) {
-            return definitions.map((definition) =>
-              resolveLocation(definition as Location)
-            );
-          } else {
-            return definitions.map((definition) =>
-              resolveLocationLink(definition as LocationLink)
-            );
-          }
-        } else {
-          return definitions;
+        } catch (error) {
+          return undefined;
         }
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
-        }
-      }
+      });
     } else {
       return await next(document, position, token);
     }

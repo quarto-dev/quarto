@@ -122,14 +122,26 @@ export type VirtualDocAction =
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
 
+/**
+ * Execute a callback on a virtual document's temporary URI
+ *
+ * This method automatically cleans up the temporary URI after executing `f`.
+ *
+ * @param vdoc The virtual document to create a temporary URI for
+ * @param parentUri The virtual document's original URI it was virtualized from
+ * @param f The callback to execute
+ * @returns A Promise evaluating to an object of type `T` returned by `f`
+ */
 export async function withVirtualDocUri<T>(
   vdoc: VirtualDoc,
   parentUri: Uri,
   action: VirtualDocAction,
   f: (uri: Uri) => Promise<T>
-) {
+): Promise<T> {
   const vdocUri = await virtualDocUri(vdoc, parentUri, action);
 
+  // try-finally without a catch allows `f()` to propagate an exception up to the caller
+  // while still allowing us to clean up the vdoc tempfile.
   try {
     return await f(vdocUri.uri);
   } finally {
@@ -139,7 +151,10 @@ export async function withVirtualDocUri<T>(
   }
 }
 
-export async function virtualDocUri(
+// To be used through `withVirtualDocUri()`. Not safe to export on its own! The
+// cleanup hook must be called, and relying on the caller to do this is a huge
+// footgun.
+async function virtualDocUri(
   virtualDoc: VirtualDoc,
   parentUri: Uri,
   action: VirtualDocAction

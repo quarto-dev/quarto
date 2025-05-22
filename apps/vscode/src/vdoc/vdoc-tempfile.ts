@@ -75,12 +75,21 @@ export async function virtualDocUriFromTempFile(
   };
 }
 
-// delete a document
+/**
+ * Delete a virtual document's on disk temporary file
+ *
+ * Since this is an ephemeral file, we bypass the trash (Trash on Mac, Recycle
+ * Bin on Windows) and permadelete it instead so our trash isn't cluttered with
+ * thousands of these files. This should also avoid issues with users on network
+ * drives, which don't necessarily have access to their Recycle Bin (#708).
+ *
+ * @param doc The `TextDocument` to delete
+ */
 async function deleteDocument(doc: TextDocument) {
   try {
-    const edit = new WorkspaceEdit();
-    edit.deleteFile(doc.uri);
-    await workspace.applyEdit(edit);
+    await workspace.fs.delete(doc.uri, {
+      useTrash: false
+    });
   } catch (error) {
     const msg = error instanceof Error ? error.message : JSON.stringify(error);
     console.log(`Error removing vdoc at ${doc.fileName}: ${msg}`);

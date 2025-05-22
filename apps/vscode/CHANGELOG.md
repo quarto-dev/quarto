@@ -2,6 +2,7 @@
 
 ## 1.122.0 (unreleased)
 
+- Language server temporary files are now permanently deleted, bypassing the trash can (<https://github.com/quarto-dev/quarto/pull/714>).
 - Change controls on Positron editor action bar and fix "Render on Save" behavior (<https://github.com/quarto-dev/quarto/pull/706>).
 - Turn off completions in visual mode in Positron, as a temporary stopgap until we can invest more in LSP features in the visual editor (<https://github.com/quarto-dev/quarto/pull/710>).
 

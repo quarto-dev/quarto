@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.123.0 (unreleased)
+
+
 ## 1.122.0 (Release on 2025-05-26)
 
 - Language server temporary files are now permanently deleted, bypassing the trash can (<https://github.com/quarto-dev/quarto/pull/714>).

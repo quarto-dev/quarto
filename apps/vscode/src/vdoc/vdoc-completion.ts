@@ -15,19 +15,16 @@
 
 import { commands, Position, Uri, CompletionList, CompletionItem, Range } from "vscode";
 import { EmbeddedLanguage } from "./languages";
-import { adjustedPosition, unadjustedRange, VirtualDoc, virtualDocUri, withVirtualDocUri } from "./vdoc";
+import { adjustedPosition, unadjustedRange, VirtualDoc, withVirtualDocUri } from "./vdoc";
 
 export async function vdocCompletions(
-  vdoc: VirtualDoc, 
-  position: Position, 
+  vdoc: VirtualDoc,
+  position: Position,
   trigger: string | undefined,
-  language: EmbeddedLanguage, 
+  language: EmbeddedLanguage,
   parentUri: Uri
 ) {
-
-  const vdocUri = await virtualDocUri(vdoc, parentUri, "completion");
-
-  const completions = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+  const completions = await withVirtualDocUri(vdoc, parentUri, "completion", async (uri: Uri) => {
     return await commands.executeCommand<CompletionList>(
       "vscode.executeCompletionItemProvider",
       uri,

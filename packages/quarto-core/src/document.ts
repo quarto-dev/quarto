@@ -1,7 +1,7 @@
 /*
  * document.ts
  *
- * Copyright (C) 2023 by Posit Software, PBC
+ * Copyright (C) 2023-2024 by Posit Software, PBC
  * Copyright (c) Microsoft Corporation. All rights reserved.
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -22,50 +22,50 @@ import { makeRange } from 'quarto-core';
  * A document in the workspace.
  */
 export interface Document {
-	/**
-	 * The uri of the document, as a string.
-	 */
-	readonly uri: string;
+  /**
+   * The uri of the document, as a string.
+   */
+  readonly uri: string;
 
-	/**
-	 * The uri of the document, as a URI. 
-	 */
-	readonly $uri?: URI;
-	
-	/**
-	 * The lanugageId of the document
-	 */
-	readonly languageId : string | undefined;
+  /**
+   * The uri of the document, as a URI. 
+   */
+  readonly $uri?: URI;
 
-	/**
-	 * Version number of the document's content. 
-	 */
-	readonly version: number;
+  /**
+   * The lanugageId of the document
+   */
+  readonly languageId: string | undefined;
 
-	/**
-	 * The total number of lines in the document.
-	 */
-	readonly lineCount: number;
+  /**
+   * Version number of the document's content. 
+   */
+  readonly version: number;
 
-	/**
-	 * Get text contents of the document.
-	 * 
-	 * @param range Optional range to get the text of. If not specified, the entire document content is returned.
-	 */
-	getText(range?: Range): string;
+  /**
+   * The total number of lines in the document.
+   */
+  readonly lineCount: number;
 
-	/**
-	 * Converts an offset in the document into a {@link Position position}.
-	 */
-	positionAt(offset: number): Position;
+  /**
+   * Get text contents of the document.
+   * 
+   * @param range Optional range to get the text of. If not specified, the entire document content is returned.
+   */
+  getText(range?: Range): string;
+
+  /**
+   * Converts an offset in the document into a {@link Position position}.
+   */
+  positionAt(offset: number): Position;
 }
 
 export function getLine(doc: Document, line: number): string {
-	return doc.getText(makeRange(line, 0, line, Number.MAX_VALUE)).replace(/\r?\n$/, '');
+  return doc.getText(makeRange(line, 0, line, Number.MAX_VALUE)).replace(/\r?\n$/, '');
 }
 
 export function getDocUri(doc: Document): URI {
-	return doc.$uri ?? URI.parse(doc.uri);
+  return doc.$uri ?? URI.parse(doc.uri);
 }
 
 
@@ -100,6 +100,7 @@ export function isQuartoYaml(doc: Document) {
   return (
     doc.languageId === kYamlLanguageId &&
     (doc.uri.match(/_quarto(-.*?)?\.ya?ml$/) ||
+      doc.uri.match(/_brand\.ya?ml$/) ||
       doc.uri.match(/_metadata\.ya?ml$/) ||
       doc.uri.match(/_extension\.ya?ml$/))
   );
@@ -109,11 +110,11 @@ export function filePathForDoc(doc: Document) {
   return URI.parse(doc.uri).fsPath;
 }
 
-const kRegExYAML =
+export const kRegExYAML =
   /(^)(---[ \t]*[\r\n]+(?![ \t]*[\r\n]+)[\W\w]*?[\r\n]+(?:---|\.\.\.))([ \t]*)$/gm;
 
 export function isQuartoDocWithFormat(doc: Document | string, format: string) {
-  if (typeof(doc) !== "string") {
+  if (typeof (doc) !== "string") {
     if (isQuartoDoc(doc)) {
       doc = doc.getText();
     } else {
@@ -125,7 +126,7 @@ export function isQuartoDocWithFormat(doc: Document | string, format: string) {
     if (match) {
       const yaml = match[0];
       return (
-        !!yaml.match(new RegExp("^format:\\s+" + format + "\\s*$","gm")) ||
+        !!yaml.match(new RegExp("^format:\\s+" + format + "\\s*$", "gm")) ||
         !!yaml.match(new RegExp("^[ \\t]*" + format + ":\\s*(default)?\\s*$", "gm"))
       );
     }

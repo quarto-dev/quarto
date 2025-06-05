@@ -81,7 +81,6 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     if (this.activeView_) {
       this.activeView_.reveal();
       this.resolveOnShow();
-      preserveEditorFocus();
     }
   }
 
@@ -93,7 +92,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     return !!this.activeView_ && this.activeView_.webviewPanel().visible;
   }
 
-  protected onViewStateChanged() {}
+  protected onViewStateChanged() { }
 
   private resolveOnShow() {
     if (this.onShow_) {
@@ -238,7 +237,7 @@ export abstract class QuartoWebview<T> extends Disposable {
       "codicon",
       "codicon.ttf",
     ]);
-    
+
     return /* html */ `<!DOCTYPE html>
 			<html>
 			<head>
@@ -247,9 +246,8 @@ export abstract class QuartoWebview<T> extends Disposable {
 				<meta http-equiv="Content-Security-Policy" content="
 					default-src 'none';
 					font-src ${this._webviewPanel.webview.cspSource};
-					style-src ${this._webviewPanel.webview.cspSource} ${
-      allowUnsafe ? "'unsafe-inline'" : ""
-    };
+					style-src ${this._webviewPanel.webview.cspSource} ${allowUnsafe ? "'unsafe-inline'" : ""
+      };
 					script-src 'nonce-${nonce}' ${allowUnsafe ? "'unsafe-eval'" : ""};
           connect-src ${this._webviewPanel.webview.cspSource} ;
 					frame-src *;

@@ -51,7 +51,7 @@ export class QuartoPreviewWebviewManager extends QuartoWebviewManager<
       this.activeView_.setOnError(handler);
     }
   }
-  public getZoomLevelConfig() : "auto" | number {
+  public getZoomLevelConfig(): "auto" | number {
     return this.context.globalState.get<"auto" | number>(kQuarotPreviewZoomLevel, "auto");
   }
 }

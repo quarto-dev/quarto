@@ -21,11 +21,11 @@ import { isXRef, NavLocation, VSCodeVisualEditor, XRef } from "editor-types";
 
 import { getWholeRange } from "../../core/doc";
 
-/* Strategy for managing synchronization of edits between source and visual mode. 
+/* Strategy for managing synchronization of edits between source and visual mode.
 
-This is made more complicated by the fact that getting/setting visual editor markdown 
+This is made more complicated by the fact that getting/setting visual editor markdown
 is expensive (requires a pandoc round trip) so is throttled by 1 second. We also need
-to guard against edits pinging back and forth (esp. w/ the requirement on flushing all 
+to guard against edits pinging back and forth (esp. w/ the requirement on flushing all
 pending edits on save)
 
 For the visual editor syncing to external changes:
@@ -33,7 +33,7 @@ For the visual editor syncing to external changes:
 1) Only accept external edits when NOT focused (once the visual editor is focused it
    is the definitive source of changes to the document)
 
-2) These external edits are throttled by 1 second so we don't get constant (expensive) 
+2) These external edits are throttled by 1 second so we don't get constant (expensive)
    refreshing of the visual editor when users type in the text editor.
 
 For the visual editor propagating its own changes:
@@ -49,7 +49,7 @@ For the visual editor propagating its own changes:
 */
 
 export interface EditorSyncManager {
-  init: () => Promise<void>;  
+  init: () => Promise<void>;
   onVisualEditorChanged: (state: unknown) => Promise<void>;
   flushPendingUpdates: () => Promise<void>;
   onDocumentChanged: () => Promise<void>;
@@ -59,25 +59,25 @@ export interface EditorSyncManager {
 
 // sync the document model w/ the visual editor
 export function editorSyncManager(
-  document: TextDocument, 
+  document: TextDocument,
   visualEditor: VSCodeVisualEditor,
   request: JsonRpcRequestTransport,
   navigation?: XRef | number
-) : EditorSyncManager {
+): EditorSyncManager {
 
-  // state: an update from the visual editor that we have yet to apply. we don't 
+  // state: an update from the visual editor that we have yet to apply. we don't
   // apply these on every keystoke b/c they are expensive. we poll to apply these
-  // udpates periodically and also apply them immediately on save and when the 
+  // udpates periodically and also apply them immediately on save and when the
   // visual editor instructs us to do so (e.g. when it loses focus)
   let pendingVisualEdit: unknown | undefined;
 
   // state: don't propagate the next model change we get to the visual editor
   // (as the change actually resulted from a visual editor sync)
-  let supressNextUpdate = false; 
+  let supressNextUpdate = false;
 
   // collect a pending edit, converting it to markdown and setting the supressNextUpdate bit
   // if we fail get the markdown then we neither clear the pending edit nor supress the update
-  const collectPendingVisualEdit = async () : Promise<string | undefined> => {
+  const collectPendingVisualEdit = async (): Promise<string | undefined> => {
     if (pendingVisualEdit) {
       const state = pendingVisualEdit;
       try {
@@ -115,12 +115,12 @@ export function editorSyncManager(
     // initialize the connection to the visual editor by providing it
     // with its initial contents and syncing the canonnical markdown
     // back to the document
-    init: async() => {
+    init: async () => {
       // determine the current sourcePos
       const markdown = document.getText();
       let initialNav: NavLocation | undefined;
       if (markdown) {
-        if (typeof(navigation) === "number") {
+        if (typeof (navigation) === "number") {
           const source = editorSourceJsonRpcServer(request);
           const locations = await source.getSourcePosLocations(markdown);
           initialNav = { locations, pos: navigation };
@@ -128,7 +128,7 @@ export function editorSyncManager(
           initialNav = navigation;
         }
       }
-     
+
       const editorMarkdown = await visualEditor.init(markdown, initialNav);
       if (editorMarkdown && (editorMarkdown !== document.getText())) {
         await updateWorkspaceDocument(document, editorMarkdown);
@@ -156,7 +156,7 @@ export function editorSyncManager(
     },
 
     // notification that we are saving (allow flusing of visual editor changes)
-    onDocumentSaving: async () : Promise<TextEdit[]> => {
+    onDocumentSaving: async (): Promise<TextEdit[]> => {
       // attempt to collect pending edit
       const markdown = await collectPendingVisualEdit();
       if (markdown) {
@@ -172,7 +172,7 @@ export function editorSyncManager(
     // notification that a document completed saving (failsafe for changes
     // that didn't get applied b/c of onDocumentSaving no longer being
     // called b/c vscode deems that it is running for too long)
-    onDocumentSaved: async () : Promise<void> => {
+    onDocumentSaved: async (): Promise<void> => {
       collectAndApplyPendingVisualEdit();
     }
   };
@@ -208,4 +208,3 @@ async function updateWorkspaceDocument(document: TextDocument, markdown: string)
   updateDocument(editor, document, markdown);
   await workspace.applyEdit(edit);
 };
-

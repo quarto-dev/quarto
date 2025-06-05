@@ -224,11 +224,20 @@ repository:
       ]{4}|\t)'}
   separator: {match: '(^|\G)[ ]{0,3}([\*\-\_])([ ]{0,2}\2){2,}[ \t]*$\n?', name: meta.separator.quarto}
   frontMatter:
-    begin: \A-{3}\s*$
-    contentName: meta.embedded.block.frontmatter
+    begin: \A(?=(-{3,}))
+    end: ^ {,3}\1-*[ \t]*$|^[ \t]*\.{3}$
+    applyEndPatternLast: 1
+    endCaptures:
+      0: {name: punctuation.definition.end.frontmatter}
     patterns:
-    - {include: source.yaml}
-    end: (^|\G)-{3}|\.{3}\s*$
+    - begin: \A(-{3,})(.*)$
+      while: ^(?! {,3}\1-*[ \t]*$|[ \t]*\.{3}$)
+      beginCaptures:
+        "1": {name: punctuation.definition.begin.frontmatter}
+        "2": {name: comment.frontmatter}
+      contentName: meta.embedded.block.frontmatter
+      patterns:
+      - {include: source.yaml}
   inline:
     patterns:
     - {include: '#ampersand'}

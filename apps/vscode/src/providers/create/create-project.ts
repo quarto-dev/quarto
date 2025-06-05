@@ -27,7 +27,7 @@ export class CreateProjectCommand implements Command {
     public readonly id: string,
     private readonly context_: ExtensionContext,
     private readonly quartoContext_: QuartoContext
-  ) {}
+  ) { }
 
   async execute() {
     await withMinimumQuartoVersion(

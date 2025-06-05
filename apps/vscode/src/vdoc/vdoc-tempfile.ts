@@ -1,7 +1,7 @@
 /*
  * vdoc-tempfile.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2024 by Posit Software, PBC
  * Copyright (c) 2019 Takashi Tamura
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -17,6 +17,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as tmp from "tmp";
+import * as uuid from "uuid";
 import {
   commands,
   Hover,
@@ -27,102 +28,125 @@ import {
   WorkspaceEdit,
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
-import { EmbeddedLanguage } from "./languages";
 
-// one virtual doc per language file extension
-const languageVirtualDocs = new Map<String, TextDocument>();
-
+/**
+ * Create an on disk temporary file containing the contents of the virtual document
+ *
+ * @param virtualDoc The document to use when populating the temporary file
+ * @param docPath The path to the original document the virtual document is
+ *   based on. When `local` is `true`, this is used to determine the directory
+ *   to create the temporary file in.
+ * @param local Whether or not the temporary file should be created "locally" in
+ *   the workspace next to `docPath` or in a temporary directory outside the
+ *   workspace.
+ * @returns A `VirtualDocUri`
+ */
 export async function virtualDocUriFromTempFile(
-  virtualDoc: VirtualDoc, 
-  docPath: string, 
+  virtualDoc: VirtualDoc,
+  docPath: string,
   local: boolean
-) : Promise<VirtualDocUri> {
+): Promise<VirtualDocUri> {
+  const useLocal = local || virtualDoc.language.localTempFile;
 
-  // if this is local then create it alongside the docPath and return a cleanup 
-  // function to remove it when the action is completed. 
-  if (local || virtualDoc.language.localTempFile) {
-    const ext = virtualDoc.language.extension;
-    const vdocPath = path.join(path.dirname(docPath), `.vdoc.${ext}`);
-    fs.writeFileSync(vdocPath, virtualDoc.content);
-    const vdocUri = Uri.file(vdocPath);
-    const doc = await workspace.openTextDocument(vdocUri);
-    return {
-      uri: doc.uri,
-      cleanup: async () => await deleteDocument(doc)
-    };
-  }
+  // If `useLocal`, then create the temporary document alongside the `docPath`
+  // so tools like formatters have access to workspace configuration. Otherwise,
+  // create it in a temp directory.
+  const virtualDocFilepath = useLocal
+    ? createVirtualDocLocalFile(virtualDoc, path.dirname(docPath))
+    : createVirtualDocTempfile(virtualDoc);
 
-  // do we have an existing document?
-  const langVdoc = languageVirtualDocs.get(virtualDoc.language.extension);
-  if (langVdoc && !langVdoc.isClosed) {
-    if (langVdoc.getText() === virtualDoc.content) {
-      // if its content is identical to what's passed in then just return it
-      return { uri: langVdoc.uri };
-    } else {
-      // otherwise remove it (it will get recreated below)
-      await deleteDocument(langVdoc);
-      languageVirtualDocs.delete(virtualDoc.language.extension);
-    }
-  }
+  const virtualDocUri = Uri.file(virtualDocFilepath);
+  const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
 
-  // write the virtual doc as a temp file
-  const vdocTempFile = createVirtualDocTempFile(virtualDoc);
-
-  // open the document and save a reference to it
-  const vdocUri = Uri.file(vdocTempFile);
-  const doc = await workspace.openTextDocument(vdocUri);
-  languageVirtualDocs.set(virtualDoc.language.extension, doc);
-
-  // if this is the first time getting a virtual doc for this
-  // language then execute a dummy request to cause it to load
-  if (!langVdoc) {
+  if (!useLocal) {
+    // TODO: Reevaluate whether this is necessary. Old comment:
+    // > if this is the first time getting a virtual doc for this
+    // > language then execute a dummy request to cause it to load
     await commands.executeCommand<Hover[]>(
       "vscode.executeHoverProvider",
-      vdocUri,
+      virtualDocUri,
       new Position(0, 0)
     );
   }
 
-  // return the uri
-  return { uri: doc.uri };
+  return <VirtualDocUri>{
+    uri: virtualDocTextDocument.uri,
+    cleanup: async () => await deleteDocument(virtualDocTextDocument),
+  };
 }
 
-// delete any vdocs left open
-export async function deactivateVirtualDocTempFiles() {
-  languageVirtualDocs.forEach(async (doc) => {
-    await deleteDocument(doc);
-  });
-}
-
-export function isLanguageVirtualDoc(langauge: EmbeddedLanguage, uri: Uri) {
-  return languageVirtualDocs.get(langauge.extension)?.uri.toString() === uri.toString();
-}
-
-// delete a document
+/**
+ * Delete a virtual document's on disk temporary file
+ *
+ * Since this is an ephemeral file, we bypass the trash (Trash on Mac, Recycle
+ * Bin on Windows) and permadelete it instead so our trash isn't cluttered with
+ * thousands of these files. This should also avoid issues with users on network
+ * drives, which don't necessarily have access to their Recycle Bin (#708).
+ *
+ * @param doc The `TextDocument` to delete
+ */
 async function deleteDocument(doc: TextDocument) {
   try {
-    const edit = new WorkspaceEdit();
-    edit.deleteFile(doc.uri);
-    await workspace.applyEdit(edit);
+    await workspace.fs.delete(doc.uri, {
+      useTrash: false
+    });
   } catch (error) {
     const msg = error instanceof Error ? error.message : JSON.stringify(error);
     console.log(`Error removing vdoc at ${doc.fileName}: ${msg}`);
   }
 }
 
-// create temp files for vdocs. use a base directory that has a subdirectory
-// for each extension used within the document. this is a no-op if the
-// file already exists
 tmp.setGracefulCleanup();
-const vdocTempDir = tmp.dirSync().name;
-function createVirtualDocTempFile(virtualDoc: VirtualDoc) {
-  const ext = virtualDoc.language.extension;
-  const dir = path.join(vdocTempDir, ext);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-  const tmpPath = path.join(vdocTempDir, ext, ".intellisense." + ext);
-  fs.writeFileSync(tmpPath, virtualDoc.content);
+const VIRTUAL_DOC_TEMP_DIRECTORY = tmp.dirSync().name;
 
-  return tmpPath;
+/**
+ * Creates a virtual document in a temporary directory
+ *
+ * The temporary directory is automatically cleaned up on process exit.
+ *
+ * @param virtualDoc The document to use when populating the temporary file
+ * @returns The path to the temporary file
+ */
+function createVirtualDocTempfile(virtualDoc: VirtualDoc): string {
+  const filepath = generateVirtualDocFilepath(VIRTUAL_DOC_TEMP_DIRECTORY, virtualDoc.language.extension);
+  createVirtualDoc(filepath, virtualDoc.content);
+  return filepath;
+}
+
+/**
+ * Creates a virtual document in the provided directory
+ *
+ * @param virtualDoc The document to use when populating the temporary file
+ * @param directory The directory to create the temporary file in
+ * @returns The path to the temporary file
+ */
+function createVirtualDocLocalFile(virtualDoc: VirtualDoc, directory: string): string {
+  const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
+  createVirtualDoc(filepath, virtualDoc.content);
+  return filepath;
+}
+
+/**
+ * Creates a file filled with the provided content
+ */
+function createVirtualDoc(filepath: string, content: string): void {
+  const directory = path.dirname(filepath);
+
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory);
+  }
+
+  fs.writeFileSync(filepath, content);
+}
+
+/**
+ * Generates a unique virtual document file path
+ *
+ * It is important for virtual documents to have unique file paths. If a static
+ * name like `.vdoc.{ext}` is used, it is possible for one language server
+ * request to overwrite the contents of the virtual document while another
+ * language server request is running (#683).
+ */
+function generateVirtualDocFilepath(directory: string, extension: string): string {
+  return path.join(directory, ".vdoc." + uuid.v4() + "." + extension);
 }

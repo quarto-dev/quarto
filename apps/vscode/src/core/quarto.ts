@@ -28,13 +28,13 @@ import semver from "semver";
 export async function configuredQuartoPath() {
 
   const config = workspace.getConfiguration("quarto");
-  
+
   // explicitly configured trumps everything
   const quartoPath = config.get("path") as string | undefined;
   if (quartoPath) {
     return quartoPath;
   }
-  
+
   // if we can use pip quarto then look for it within the currently python (if its a venv/condaenv)
   const usePipQuarto = config.get("usePipQuarto", true);
   if (usePipQuarto) {

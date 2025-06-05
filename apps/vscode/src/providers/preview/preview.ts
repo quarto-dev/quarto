@@ -74,6 +74,7 @@ import {
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
   isQuartoShinyKnitrDoc,
+  isRPackage,
   renderOnSave,
 } from "./preview-util";
 
@@ -203,13 +204,13 @@ export async function previewDoc(
     previewManager.setOnShow(onShow);
   }
 
-  // activate the editor
-  if (!isNotebook(editor.document)) {
-    await editor.activate();
-  }
-
-  // if this wasn't a renderOnSave then save
+  // if this wasn't a renderOnSave then activate the editor and save
   if (!renderOnSave) {
+    // activate the editor
+    if (!isNotebook(editor.document)) {
+      await editor.activate();
+    }
+
     await commands.executeCommand("workbench.action.files.save");
     if (editor.document.isDirty) {
       return;
@@ -246,8 +247,10 @@ export async function previewDoc(
     );
 
     // focus the editor (sometimes the terminal steals focus)
-    if (!isNotebook(previewEditor.document)) {
-      await previewEditor.activate();
+    if (!renderOnSave) {
+      if (!isNotebook(previewEditor.document)) {
+        await previewEditor.activate();
+      }
     }
   }
 }
@@ -376,8 +379,8 @@ class PreviewManager {
   }
 
   private usesQuartoServeCommand(doc?: TextDocument) {
-    return isQuartoShinyKnitrDoc(this.engine_, doc) ||    
-           (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.414"));
+    return isQuartoShinyKnitrDoc(this.engine_, doc) ||
+      (isQuartoShinyDoc(this.engine_, doc) && semver.lte(this.quartoContext_.version, "1.4.414"));
   }
 
   private previewRenderRequest(doc: TextDocument, format: string | null) {
@@ -413,7 +416,7 @@ class PreviewManager {
   }
 
   private async killPreview() {
-    await killTerminal(kPreviewWindowTitle, async () =>  await this.previewTerminateRequest());
+    await killTerminal(kPreviewWindowTitle, async () => await this.previewTerminateRequest());
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;
   }
@@ -448,6 +451,9 @@ class PreviewManager {
     // terminal options
     const options = terminalOptions(kPreviewWindowTitle, target, this.previewEnv_);
 
+    // is this workspace an R package?
+    const isRPackageWorkspace = await isRPackage();
+
     // is this is a shiny doc?
     const isShiny = isQuartoShinyDoc(this.engine_, doc);
     const useServeCommand = this.usesQuartoServeCommand(doc);
@@ -462,7 +468,7 @@ class PreviewManager {
 
     // create base terminal command
     const cmd = terminalCommand(useServeCommand ? "serve" : "preview", this.quartoContext_, target);
-    
+
     // extra args for normal docs
     if (!useServeCommand) {
       if (!doc) {
@@ -475,6 +481,21 @@ class PreviewManager {
 
       cmd.push("--no-browser");
       cmd.push("--no-watch-inputs");
+    }
+
+    // use temp output-dir for R package
+    if (isRPackageWorkspace && this.previewRPackageDirConfig()) {
+      const rPkgRequiredVersion = "1.5.39";
+      if (semver.gte(this.quartoContext_.version, rPkgRequiredVersion)) {
+        cmd.push("--output-dir", tmp.dirSync().name);
+        cmd.push("--embed-resources");
+      } else {
+        window.showWarningMessage(
+          `Rendering requires Quarto version ${rPkgRequiredVersion} or greater`,
+          { modal: true }
+        );
+        return;
+      }
     }
 
     // send terminal command
@@ -688,7 +709,7 @@ class PreviewManager {
   }
 
   private zoomLevel(uri?: Uri) {
-    if (uri === undefined ||isHtmlContent(uri.toString())) {
+    if (uri === undefined || isHtmlContent(uri.toString())) {
       return this.webviewManager_.getZoomLevelConfig();
     } else {
       return undefined;
@@ -709,6 +730,10 @@ class PreviewManager {
 
   private previewRevealConfig(): boolean {
     return this.quartoConfig().get("render.previewReveal", true);
+  }
+
+  private previewRPackageDirConfig(): boolean {
+    return this.quartoConfig().get("render.rPackageOutputDirectory", true);
   }
 
   private quartoConfig() {

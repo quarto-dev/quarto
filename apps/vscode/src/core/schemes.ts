@@ -33,5 +33,5 @@ export function hasFileScheme(uri: Uri) {
 }
 
 export function isOfScheme(scheme: string, link: string): boolean {
-	return link.toLowerCase().startsWith(scheme + ':');
+  return link.toLowerCase().startsWith(scheme + ':');
 }

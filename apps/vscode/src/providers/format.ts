@@ -44,7 +44,6 @@ import {
   VirtualDoc,
   virtualDocForCode,
   virtualDocForLanguage,
-  virtualDocUri,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
 
@@ -86,7 +85,7 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
               );
             }
           } else {
-            return (await formatActiveCell(editor, engine) ) || [];
+            return (await formatActiveCell(editor, engine)) || [];
           }
         }
       }
@@ -130,7 +129,7 @@ export function embeddedDocumentRangeFormattingProvider(
 
 class FormatCellCommand implements Command {
   public readonly id = "quarto.formatCell";
-  constructor(private readonly engine_: MarkdownEngine) {}
+  constructor(private readonly engine_: MarkdownEngine) { }
 
   public async execute(): Promise<void> {
     const editor = window.activeTextEditor;
@@ -178,8 +177,7 @@ async function executeFormatDocumentProvider(
   document: TextDocument,
   options: FormattingOptions
 ): Promise<TextEdit[] | undefined> {
-  const vdocUri = await virtualDocUri(vdoc, document.uri, "format");
-  const edits = await withVirtualDocUri(vdocUri, async (uri: Uri) => {
+  const edits = await withVirtualDocUri(vdoc, document.uri, "format", async (uri: Uri) => {
     return await commands.executeCommand<TextEdit[]>(
       "vscode.executeFormatDocumentProvider",
       uri,

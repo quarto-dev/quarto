@@ -63,11 +63,11 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
         !(await isPreviewRunningForDoc(targetEditor.document));
       if (render) {
         if (format === kChooseFormat) {
-          
-          const frontMatter = targetEditor.notebook 
+
+          const frontMatter = targetEditor.notebook
             ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
             : documentFrontMatterYaml(this.engine_, targetEditor.document);
-  
+
           const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);
           if (formats) {
             const declaredFormats = formats.filter(format => !!format.declared);
@@ -81,7 +81,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
             const quickPick = window.createQuickPick<FormatQuickPickItem>();
             quickPick.canSelectMany = false;
             const items: FormatQuickPickItem[] = [];
-            
+
             // declared formats
             items.push({
               format: "default",
@@ -126,8 +126,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
 
 class PreviewCommand
   extends PreviewDocumentCommandBase
-  implements Command
-{
+  implements Command {
   constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
     super(quartoContext, engine);
   }
@@ -141,8 +140,7 @@ class PreviewCommand
 
 class PreviewScriptCommand
   extends PreviewDocumentCommandBase
-  implements Command
-{
+  implements Command {
   constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
     super(quartoContext, engine);
   }
@@ -156,8 +154,7 @@ class PreviewScriptCommand
 
 class PreviewFormatCommand
   extends PreviewDocumentCommandBase
-  implements Command
-{
+  implements Command {
   constructor(quartoContext: QuartoContext, engine: MarkdownEngine) {
     super(quartoContext, engine);
   }
@@ -187,7 +184,7 @@ class ClearCacheCommand implements Command {
   constructor(
     private readonly quartoContext_: QuartoContext,
     private readonly engine_: MarkdownEngine
-  ) {}
+  ) { }
 
   async execute(): Promise<void> {
     // see if there is a cache to clear

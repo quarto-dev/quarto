@@ -28,6 +28,7 @@ import { isNotebook } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
 import { isKnitrDocument } from "../../host/executors";
+import { getRenderOnSave, getRenderOnSaveShiny } from "../context-keys";
 
 
 export function isQuartoShinyDoc(
@@ -56,9 +57,36 @@ export function isQuartoShinyKnitrDoc(
   doc?: TextDocument
 ) {
   return doc && isQuartoShinyDoc(engine, doc) && isKnitrDocument(doc, engine);
-  
+
 }
 
+export async function isRPackage(): Promise<boolean> {
+  const descriptionLines = await parseRPackageDescription();
+  if (!descriptionLines) {
+    return false;
+  }
+  const packageLines = descriptionLines.filter(line => line.startsWith('Package:'));
+  const typeLines = descriptionLines.filter(line => line.startsWith('Type:'));
+  const typeIsPackage = (typeLines.length > 0
+    ? typeLines[0].toLowerCase().includes('package')
+    : false);
+  const typeIsPackageOrMissing = typeLines.length === 0 || typeIsPackage;
+  return packageLines.length > 0 && typeIsPackageOrMissing;
+}
+
+async function parseRPackageDescription(): Promise<string[]> {
+  if (vscode.workspace.workspaceFolders !== undefined) {
+    const folderUri = vscode.workspace.workspaceFolders[0].uri;
+    const fileUri = vscode.Uri.joinPath(folderUri, 'DESCRIPTION');
+    try {
+      const bytes = await vscode.workspace.fs.readFile(fileUri);
+      const descriptionText = Buffer.from(bytes).toString('utf8');
+      const descriptionLines = descriptionText.split(/(\r?\n)/);
+      return descriptionLines;
+    } catch { }
+  }
+  return [''];
+}
 
 export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
   // if its a notebook and we don't have a save hook for notebooks then don't
@@ -96,13 +124,10 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
     }
   }
 
-  // finally, consult vs code settings
-  const config = workspace.getConfiguration("quarto");
-  const render = isQuartoShinyDoc(engine, document)
-    ? config.get<boolean>("render.renderOnSaveShiny", true) 
-    : config.get<boolean>("render.renderOnSave", false);
-
-  return render;
+  // finally, consult configuration
+  return !isQuartoShinyDoc(engine, document)
+    ? getRenderOnSave()
+    : getRenderOnSaveShiny();
 }
 
 export function haveNotebookSaveEvents() {

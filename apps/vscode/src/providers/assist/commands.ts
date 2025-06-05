@@ -28,7 +28,7 @@ export class PreviewMathCommand implements Command {
   constructor(
     private readonly provider_: QuartoAssistViewProvider,
     private readonly engine_: MarkdownEngine
-  ) {}
+  ) { }
   async execute(line: number): Promise<void> {
     if (window.activeTextEditor) {
       const doc = window.activeTextEditor.document;
@@ -59,7 +59,7 @@ export class PreviewMathCommand implements Command {
 export class ShowAssistCommand implements Command {
   private static readonly id = "quarto.showAssist";
   public readonly id = ShowAssistCommand.id;
-  constructor(private readonly provider_: QuartoAssistViewProvider) {}
+  constructor(private readonly provider_: QuartoAssistViewProvider) { }
   async execute(): Promise<void> {
     activateAssistPanel(this.provider_);
   }
@@ -69,7 +69,7 @@ export class ShowAssistCommand implements Command {
 export class CodeViewAssistCommand implements Command {
   private static readonly id = "quarto.codeViewAssist";
   public readonly id = CodeViewAssistCommand.id;
-  constructor(private readonly provider_: QuartoAssistViewProvider) {}
+  constructor(private readonly provider_: QuartoAssistViewProvider) { }
   async execute(context: CodeViewCellContext, lspRequest: JsonRpcRequestTransport): Promise<void> {
     this.provider_.codeViewAssist(context, lspRequest);
   }

@@ -1,0 +1,53 @@
+name: Publish VS Code Extension to Marketplaces
+
+on:
+  workflow_dispatch:
+    inputs:
+      ready_to_go:
+        type: boolean
+        required: true
+        description: |
+          The changelog and version are up-to-date for the VS Code extension! 🚀
+
+jobs:
+  publish-extension:
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.ready_to_go }}
+    outputs:
+      vsixPath: ${{ steps.publish_extension.outputs.vsixPath }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - run: yarn install --immutable --immutable-cache --check-cache
+
+      - name: Publish to Visual Studio Marketplace
+        uses: HaaLeo/publish-vscode-extension@v2
+        id: publish_extension
+        with:
+          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+          registryUrl: https://marketplace.visualstudio.com
+          yarn: true
+          packagePath: apps/vscode
+
+      - name: Publish to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v2
+        with:
+            pat: ${{ secrets.OPEN_VSX_TOKEN }}
+            yarn: true
+            packagePath: apps/vscode
+
+      - name: Get version of VS Code extension to publish
+        id: extension-version
+        uses: 'euberdeveloper/ga-project-version@main'
+        with:
+          path: apps/vscode/package.json
+
+      - name: Publish GH release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: VSC extension - v${{ steps.extension-version.outputs.version }}
+          tag_name: v${{ steps.extension-version.outputs.version }}-vsix
+          fail_on_unmatched_files: true
+          files: ${{ steps.publish_extension.outputs.vsixPath }}

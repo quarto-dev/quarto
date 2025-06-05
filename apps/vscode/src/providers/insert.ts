@@ -30,7 +30,7 @@ export function insertCommands(engine: MarkdownEngine): Command[] {
 }
 
 class InsertCodeCellCommand implements Command {
-  constructor(private readonly engine_: MarkdownEngine) {}
+  constructor(private readonly engine_: MarkdownEngine) { }
   private static readonly id = "quarto.insertCodeCell";
   public readonly id = InsertCodeCellCommand.id;
 
@@ -98,17 +98,22 @@ class InsertCodeCellCommand implements Command {
           }
         }
 
-        // order by language
-        const allLangs = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
-        const languages = language 
-          ? [language, allLangs.filter(lang => lang !== language)]
-          : allLangs;
-        
+        // if we have a known language, use it and put the cursor directly in the
+        // code cell, otherwise let the user select the language first
+        let header;
+
+        if (language) {
+          header = "```{" + language + "}";
+        } else {
+          const languages = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
+          header = "```{${1|" + languages.join(",") + "|}}";
+        }
+
         // insert snippet
         await commands.executeCommand("editor.action.insertSnippet", {
           snippet: [
             ...(insertTopPaddingLine ? [""] : []),
-            "```{${1|" + languages.join(",") + "|}}",
+            header,
             "${TM_SELECTED_TEXT}$0",
             "```"
           ].join("\n"),

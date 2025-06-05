@@ -17,21 +17,21 @@
 import { Disposable, WebviewPanel } from "vscode";
 
 
-import { 
+import {
   VSC_VE_Init,
   VSC_VE_Focus,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_GetSlideIndex,
-  VSC_VE_ApplyExternalEdit, 
+  VSC_VE_ApplyExternalEdit,
   VSC_VE_GetActiveBlockContext,
   VSC_VE_SetBlockSelection,
   VSC_VEH_EditorResourceUri,
-  VSC_VEH_GetHostContext, 
+  VSC_VEH_GetHostContext,
   VSC_VEH_ReopenSourceMode,
   VSC_VEH_OnEditorUpdated,
   VSC_VEH_OnEditorStateChanged,
   VSC_VEH_FlushEditorUpdates,
-  VSC_VEH_OnEditorReady, 
+  VSC_VEH_OnEditorReady,
   VSC_VEH_OpenURL,
   VSC_VEH_NavigateToXRef,
   VSC_VEH_NavigateToFile,
@@ -53,23 +53,23 @@ import {
   CodeViewSelectionAction
 } from "editor-types";
 
-import { 
-  jsonRpcPostMessageServer, 
-  JsonRpcPostMessageTarget, 
+import {
+  jsonRpcPostMessageServer,
+  JsonRpcPostMessageTarget,
   JsonRpcServerMethod,
   jsonRpcPostMessageRequestTransport,
   JsonRpcRequestTransport
 } from "core";
 
 
-import { 
+import {
   prefsServerMethods,
   codeViewServerMethods
 } from "editor-server";
 import { zoteroLspProxy } from "../zotero/zotero";
 
 // interface to visual editor (vscode custom editor embedded in iframe)
-export function visualEditorClient(webviewPanel: WebviewPanel) 
+export function visualEditorClient(webviewPanel: WebviewPanel)
   : { editor: VSCodeVisualEditor, connected: () => boolean, dispose: VoidFunction } {
 
   let isConnected = true;
@@ -85,7 +85,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       getSlideIndex: () => request(VSC_VE_GetSlideIndex, []),
       getActiveBlockContext: () => request(VSC_VE_GetActiveBlockContext, []),
       setBlockSelection: (
-        context: CodeViewActiveBlockContext, 
+        context: CodeViewActiveBlockContext,
         action: CodeViewSelectionAction
       ) => request(VSC_VE_SetBlockSelection, [context, action]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
@@ -108,9 +108,9 @@ export function visualEditorServer(
   host: VSCodeVisualEditorHost,
   prefsServer: PrefsServer,
   codeViewServer: CodeViewServer
-) : Disposable {
-  
-  
+): Disposable {
+
+
   // table of methods we implement directly
   const extensionMethods = {
     ...prefsServerMethods(prefsServer),
@@ -138,7 +138,7 @@ export function visualEditorServer(
 
 
 
-function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpcServerMethod> {
+function editorHostMethods(host: VSCodeVisualEditorHost): Record<string, JsonRpcServerMethod> {
   const methods: Record<string, JsonRpcServerMethod> = {
     [VSC_VEH_GetHostContext]: () => host.getHostContext(),
     [VSC_VEH_ReopenSourceMode]: () => host.reopenSourceMode(),
@@ -162,7 +162,7 @@ function editorHostMethods(host: VSCodeVisualEditorHost) : Record<string,JsonRpc
 const voidPromise = (ret: void) => Promise.resolve();
 
 
-function webviewPanelPostMessageTarget(webviewPanel: WebviewPanel) : JsonRpcPostMessageTarget {
+function webviewPanelPostMessageTarget(webviewPanel: WebviewPanel): JsonRpcPostMessageTarget {
   return {
     postMessage: (data) => {
       webviewPanel.webview.postMessage(data);

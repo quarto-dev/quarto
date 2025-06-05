@@ -24,7 +24,6 @@ import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activateCommon } from "./extension";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
-import { initQuartoContext, quartoContextUnavailable } from "quarto-core";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
@@ -33,11 +32,16 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";;
 import { extensionHost } from "./host";
+import { initQuartoContext } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 
 export async function activate(context: vscode.ExtensionContext) {
- 
+  // create output channel for extension logs and lsp client logs
+  const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
+
+  outputChannel.info("Activating Quarto extension.");
+
   // create extension host
   const host = extensionHost();
 
@@ -55,6 +59,8 @@ export async function activate(context: vscode.ExtensionContext) {
   const quartoContext = initQuartoContext(
     quartoPath,
     workspaceFolder,
+    // Look for quarto in the app root; this is where Positron installs it
+    [path.join(vscode.env.appRoot, 'quarto', 'bin')],
     vscode.window.showWarningMessage
   );
   if (quartoContext.available) {
@@ -82,13 +88,13 @@ export async function activate(context: vscode.ExtensionContext) {
     activateDenoConfig(context, engine);
 
     // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine);
+    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
     commands.push(...editorCommands);
 
-    // zotero 
+    // zotero
     const zoteroCommands = await activateZotero(context, lspClient);
     commands.push(...zoteroCommands);
 
@@ -96,7 +102,6 @@ export async function activate(context: vscode.ExtensionContext) {
     const assistCommands = activateQuartoAssistPanel(context, engine);
     commands.push(...assistCommands);
   }
-
   // walkthough
   commands.push(...walkthroughCommands(host, quartoContext));
 
@@ -123,9 +128,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
+
+  outputChannel.info("Activated Quarto extension.");
 }
 
 export async function deactivate() {
   return deactivateLsp();
-} 
-
+}

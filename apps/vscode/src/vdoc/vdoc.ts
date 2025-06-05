@@ -75,10 +75,10 @@ export function virtualDocForLanguage(
 
 function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
   const lines: string[] = [];
-   for (let i = 0; i < document.lineCount; i++) {
-     lines.push(language.emptyLine || "");
-   }
-   return lines;
+  for (let i = 0; i < document.lineCount; i++) {
+    lines.push(language.emptyLine || "");
+  }
+  return lines;
 }
 
 function fillLinesFromBlock(lines: string[], document: TextDocument, block: Token) {
@@ -92,13 +92,13 @@ function fillLinesFromBlock(lines: string[], document: TextDocument, block: Toke
 }
 
 function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
-  for (let i=0; i<2; i++) {
-    lines.push(language.emptyLine || ""); 
+  for (let i = 0; i < 2; i++) {
+    lines.push(language.emptyLine || "");
   }
 }
 
 export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
-  
+
   const lines = [...code];
 
   if (language.inject) {
@@ -111,30 +111,54 @@ export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
   };
 }
 
-export type VirtualDocAction = 
-  "completion" | 
-  "hover"      | 
-  "signature"  | 
-  "definition" | 
-  "format";
+export type VirtualDocAction =
+  "completion" |
+  "hover" |
+  "signature" |
+  "definition" |
+  "format" |
+  "statementRange" |
+  "helpTopic";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
 
-export async function withVirtualDocUri<T>(virtualDocUri: VirtualDocUri, f: (uri: Uri) => Promise<T>) {
+/**
+ * Execute a callback on a virtual document's temporary URI
+ *
+ * This method automatically cleans up the temporary URI after executing `f`.
+ *
+ * @param vdoc The virtual document to create a temporary URI for
+ * @param parentUri The virtual document's original URI it was virtualized from
+ * @param f The callback to execute
+ * @returns A Promise evaluating to an object of type `T` returned by `f`
+ */
+export async function withVirtualDocUri<T>(
+  vdoc: VirtualDoc,
+  parentUri: Uri,
+  action: VirtualDocAction,
+  f: (uri: Uri) => Promise<T>
+): Promise<T> {
+  const vdocUri = await virtualDocUri(vdoc, parentUri, action);
+
+  // try-finally without a catch allows `f()` to propagate an exception up to the caller
+  // while still allowing us to clean up the vdoc tempfile.
   try {
-    return await f(virtualDocUri.uri);
+    return await f(vdocUri.uri);
   } finally {
-    if (virtualDocUri.cleanup) {
-      virtualDocUri.cleanup();
+    if (vdocUri.cleanup) {
+      vdocUri.cleanup();
     }
   }
 }
 
-export async function virtualDocUri(
-  virtualDoc: VirtualDoc, 
-  parentUri: Uri, 
+// To be used through `withVirtualDocUri()`. Not safe to export on its own! The
+// cleanup hook must be called, and relying on the caller to do this is a huge
+// footgun.
+async function virtualDocUri(
+  virtualDoc: VirtualDoc,
+  parentUri: Uri,
   action: VirtualDocAction
-) : Promise<VirtualDocUri> {
+): Promise<VirtualDocUri> {
 
   // format and definition actions use a transient local vdoc
   // (so they can get project-specific paths and formatting config)

@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.111.0",
+  "version": "1.123.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -28,37 +28,18 @@
   ],
   "private": true,
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.75.0"
   },
   "main": "./out/main.js",
   "browser": "./browser.js",
   "activationEvents": [
-    "onLanguage:quarto",
-    "onLanguage:mermaid",
-    "onLanguage:dot",
     "onLanguage:r",
-    "onCommand:quarto.preview",
-    "onCommand:quarto.previewFormat",
-    "onCommand:quarto.renderDocument",
-    "onCommand:quarto.renderProject",
-    "onCommand.quarto.editInSourceMode",
-    "onCommand.quarto.editInVisualMode",
-    "onCommand:quarto.newDocument",
-    "onCommand:quarto.fileNewDocument",
-    "onCommand:quarto.newPresentation",
-    "onCommand:quarto.newNotebook",
-    "onCommand:quarto.showAssist",
-    "onCommand:quarto.verifyInstallation",
-    "onCommand:quarto.walkthrough.newDocument",
-    "onCommand:quarto.createProject",
-    "onCommand:quarto.fileCreateProject",
     "workspaceContains:**/*.{qmd,rmd}",
     "workspaceContains:**/_quarto.{yml,yaml}",
+    "workspaceContains:**/_brand.{yml,yaml}",
     "workspaceContains:**/_extension.{yml,yaml}",
     "onWebviewPanel:quarto.previewView",
-    "onWebviewPanel:quarto.diagramView",
-    "onCustomEditor:quarto.visualEditor",
-    "onView:quarto-assist"
+    "onWebviewPanel:quarto.diagramView"
   ],
   "capabilities": {
     "virtualWorkspaces": true
@@ -272,7 +253,11 @@
         "command": "quarto.preview",
         "title": "Preview",
         "icon": "$(preview)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.previewScript",
@@ -311,8 +296,13 @@
       },
       {
         "command": "quarto.insertCodeCell",
+        "icon": "$(insert)",
         "title": "Insert Code Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.runSelection",
@@ -443,6 +433,28 @@
         "title": "Toggle Code",
         "category": "Quarto",
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+      },
+      {
+        "command": "quarto.toggleEditMode",
+        "title": "Edit Mode",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "toggle",
+          "leftTitle": "Source",
+          "rightTitle": "Visual",
+          "toggled": "activeCustomEditorId == 'quarto.visualEditor'"
+        }
+      },
+      {
+        "command": "quarto.toggleRenderOnSave",
+        "title": "Render on Save",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "checkbox",
+          "checked": "(quarto.editor.type == quarto && quarto.editor.renderOnSave) || (quarto.editor.type == 'quarto-shiny' && quarto.editor.renderOnSaveShiny)"
+        }
       },
       {
         "command": "quarto.zoteroConfigureLibrary",
@@ -627,6 +639,30 @@
       }
     ],
     "menus": {
+      "editor/actions/left": [
+        {
+          "command": "quarto.preview",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
+        },
+        {
+          "command": "quarto.toggleRenderOnSave",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
+        },
+        {
+          "command": "quarto.toggleEditMode",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "1_editor_mode"
+        }
+      ],
+      "editor/actions/right": [
+        {
+          "command": "quarto.insertCodeCell",
+          "when": "editorLangId == quarto",
+          "group": "2_execute"
+        }
+      ],
       "editor/context": [
         {
           "command": "quarto.formatCell",
@@ -915,7 +951,6 @@
           "strings": "on"
         },
         "editor.quickSuggestionsDelay": 250,
-        "editor.snippetSuggestions": "bottom",
         "editor.wordBasedSuggestions": "off",
         "editor.suggestOnTriggerCharacters": true,
         "editor.unicodeHighlight.ambiguousCharacters": false,
@@ -958,27 +993,42 @@
           "markdownDescription": "Show parameter help when editing function calls."
         },
         "quarto.cells.background.enabled": {
+          "type": "boolean",
+          "description": "Enable coloring the background of executable code cells.",
+          "deprecationMessage": "Deprecated: Please use quarto.cells.background.color instead."
+        },
+        "quarto.cells.background.color": {
           "order": 19,
           "scope": "window",
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Enable coloring the background of executable code cells."
+          "type": "string",
+          "markdownDescription": "Control the background coloring of executable code cells.",
+          "default": "default",
+          "enum": [
+            "default",
+            "useTheme",
+            "off"
+          ],
+          "markdownEnumDescriptions": [
+            "Use the default light and dark background colors. Specify these colors with `quarto.cells.background.lightDefault` and `quarto.cells.background.darkDefault`.",
+            "Use the `notebook.selectedCellBackground` color from the current VS Code theme.",
+            "Disable background coloring of executable code cells."
+          ]
         },
-        "quarto.cells.background.light": {
+        "quarto.cells.background.lightDefault": {
           "order": 20,
           "scope": "window",
           "type": "string",
           "format": "color",
           "default": "#E1E1E166",
-          "markdownDescription": "CSS color for background of executable code cells on light themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
+          "markdownDescription": "CSS color for background of executable code cells on light themes.\n\n*Note that this color should include an alpha channel, like #RRGGBBAA, so that selections show up against the background.*"
         },
-        "quarto.cells.background.dark": {
+        "quarto.cells.background.darkDefault": {
           "order": 21,
           "scope": "window",
           "type": "string",
           "format": "color",
           "default": "#40404066",
-          "markdownDescription": "CSS color for background of executable code cells on dark themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
+          "markdownDescription": "CSS color for background of executable code cells on dark themes.\n\n*Note that this color should include an alpha channel, like #RRGGBBAA, so that selections show up against the background.*"
         },
         "quarto.cells.background.delay": {
           "order": 22,
@@ -1092,6 +1142,13 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
+        },
+        "quarto.render.rPackageOutputDirectory": {
+          "order": 15,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Render output files in a temporary directory, when in an R package."
         },
         "quarto.visualEditor.fontSize": {
           "order": 31,
@@ -1369,6 +1426,7 @@
     "markdown-it": "^13.0.1",
     "markdown-it-highlightjs": "^4.0.1",
     "nanoid": "^4.0.0",
+    "p-queue": "^8.0.1",
     "picomatch": "^2.3.1",
     "quarto-core": "*",
     "quarto-lsp": "*",
@@ -1394,7 +1452,7 @@
     "@types/semver": "^7.3.13",
     "@types/tmp": "^0.2.3",
     "@types/uuid": "^9.0.0",
-    "@types/vscode": "1.66.0",
+    "@types/vscode": "1.75.0",
     "@types/which": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",

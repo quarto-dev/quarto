@@ -416,6 +416,7 @@ export function applyTheme(theme: EditorTheme) {
     .pm-ace-first-line-meta .ace_text-layer .ace_line_group:first-child,
     .pm-ace-first-line-meta .ace_text-layer .ace_line_group:first-child span {
       color: ${theme.lightTextColor} !important;
+      background: none !important;
     }
     .pm-ace-collapsed.pm-ace-focused {
       border-color: ${theme.paneBorderColor} !important;

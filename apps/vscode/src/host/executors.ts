@@ -55,7 +55,7 @@ interface VSCodeCellExecutor extends CellExecutor {
   executeSelection?: () => Promise<void>;
 }
 
-const jupyterCellExecutor = (language: string) : VSCodeCellExecutor => ({
+const jupyterCellExecutor = (language: string): VSCodeCellExecutor => ({
   language,
   requiredExtension: ["ms-toolsai.jupyter"],
   requiredExtensionName: "Jupyter",
@@ -75,7 +75,7 @@ const jupyterCellExecutor = (language: string) : VSCodeCellExecutor => ({
       await commands.executeCommand("jupyter.execSelectionInteractive", code);
     }
   },
-})
+});
 
 const pythonCellExecutor = jupyterCellExecutor("python");
 
@@ -126,6 +126,25 @@ const juliaCellExecutor: VSCodeCellExecutor = {
   },
 };
 
+const csharpCellExecutor: VSCodeCellExecutor = {
+  language: "csharp",
+  requiredExtension: ["ms-dotnettools.dotnet-interactive-vscode"],
+  requiredExtensionName: "Polyglot Notebooks",
+  requiredVersion: "1.0.55", // Adjust minimum version as needed
+  execute: async (blocks: string[], editorUri?: Uri) => {
+    const extension = extensions.getExtension("ms-dotnettools.dotnet-interactive-vscode");
+    if (extension) {
+      if (!extension.isActive) {
+        await extension.activate();
+      }
+
+      await jupyterCellExecutor("csharp").execute(blocks);
+    } else {
+      window.showErrorMessage("Unable to execute code - Polyglot Notebooks extension not found");
+    }
+  }
+};
+
 const bashCellExecutor: VSCodeCellExecutor = {
   language: "bash",
   execute: async (blocks: string[]) => {
@@ -147,6 +166,7 @@ const kCellExecutors = [
   bashCellExecutor,
   shCellExecutor,
   shellCellExecutor,
+  csharpCellExecutor
 ];
 
 function findExecutor(
@@ -179,16 +199,16 @@ export function isDenoDocument(
   if (jupyterOption) {
     if (jupyterOption === "deno") {
       return true;
-    } else if (typeof(jupyterOption) === "object") {
-      const kernelspec = (jupyterOption as Record<string,unknown>)["kernelspec"];
-      if (typeof(kernelspec) === "object") {
+    } else if (typeof (jupyterOption) === "object") {
+      const kernelspec = (jupyterOption as Record<string, unknown>)["kernelspec"];
+      if (typeof (kernelspec) === "object") {
         return (kernelspec as JupyterKernelspec).name === "deno";
       }
     } else {
       return false;
     }
   }
- 
+
   // another explicit declaration of engine that isn't jupyter
   if (engineOption && engineOption !== "jupyter") {
     return false;

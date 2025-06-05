@@ -69,7 +69,7 @@ export function activateBackgroundHighlighter(
   // update highlighting on changes to the document (if its visible)
   vscode.workspace.onDidChangeTextDocument(
     (event) => {
-      const visibleEditor = vscode.window.visibleTextEditors.find(editor => { 
+      const visibleEditor = vscode.window.visibleTextEditors.find(editor => {
         return editor.document.uri.toString() === event.document.uri.toString();
       });
       if (visibleEditor) {
@@ -155,7 +155,7 @@ async function setEditorHighlightDecorations(
   const inlineRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
-    
+
     // find code blocks
     const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
@@ -163,7 +163,7 @@ async function setEditorHighlightDecorations(
     }
 
     // find inline executable code
-    for (let i=0; i<editor.document.lineCount; i++) {
+    for (let i = 0; i < editor.document.lineCount; i++) {
       const line = editor.document.lineAt(i);
       const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
       for (const match of matches) {
@@ -192,8 +192,14 @@ function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
   editor.setDecorations(highlightingConfig.backgroundDecoration(), []);
 }
 
+enum CellBackgroundColor {
+  default = "default",
+  off = "off",
+  useTheme = "useTheme",
+}
+
 class HiglightingConfig {
-  constructor() {}
+  constructor() { }
 
   public enabled() {
     return this.enabled_;
@@ -213,10 +219,18 @@ class HiglightingConfig {
 
   public sync() {
     const config = vscode.workspace.getConfiguration("quarto");
-    const light = config.get("cells.background.light", "#E1E1E166");
-    const dark = config.get("cells.background.dark", "#40404066");
+    const backgroundOption = config.get<CellBackgroundColor>("cells.background.color", CellBackgroundColor.default);
+    let light, dark;
+    if (backgroundOption === CellBackgroundColor.useTheme) {
+      const activeCellBackgroundThemeColor = new vscode.ThemeColor('notebook.selectedCellBackground');
+      light = activeCellBackgroundThemeColor;
+      dark = activeCellBackgroundThemeColor;
+    } else {
+      light = config.get<string>("cells.background.lightDefault", "#E1E1E166");
+      dark = config.get<string>("cells.background.darkDefault", "#40404066");
+    }
 
-    this.enabled_ = config.get("cells.background.enabled", true);
+    this.enabled_ = backgroundOption !== CellBackgroundColor.off;
     this.delayMs_ = config.get("cells.background.delay", 250);
 
 

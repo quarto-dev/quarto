@@ -52,7 +52,7 @@ export function activateOptionEnterProvider(
               );
               if (block) {
                 const language = languageNameFromBlock(block);
-                // handle option enter for the this langauge if we can
+                // handle option enter for the this language if we can
                 const optionComment = languageOptionComment(language);
                 if (optionComment) {
                   handleOptionEnter(window.activeTextEditor, optionComment);
@@ -76,7 +76,7 @@ function handleOptionEnter(editor: TextEditor, comment: string) {
   // current line info
   const currentLineNumber = editor.selection.active.line;
   const currentLine = editor.document.lineAt(editor.selection.start).text;
- 
+
   // apply edits
   if (currentLine.trim() === optionComment.trim()) {
     editor.edit((builder) => {
@@ -84,19 +84,19 @@ function handleOptionEnter(editor: TextEditor, comment: string) {
     });
   } else if (currentLine.startsWith(optionComment)) {
     editor.edit((builder) => {
-      builder.insert(editor.selection.start.translate(1, 0), optionComment);
+      builder.insert(editor.selection.start.translate(1, -editor.selection.active.character), optionComment);
     });
   }
 }
 
-function languageOptionComment(langauge: string) {
+function languageOptionComment(language: string) {
   // some mappings
-  if (langauge === "ojs") {
-    langauge = "js";
+  if (language === "ojs") {
+    language = "js";
   }
 
-  if (Object.keys(kLangCommentChars).includes(langauge)) {
-    return kLangCommentChars[langauge];
+  if (Object.keys(kLangCommentChars).includes(language)) {
+    return kLangCommentChars[language];
   } else {
     return undefined;
   }

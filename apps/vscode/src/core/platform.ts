@@ -66,11 +66,11 @@ export function vsCodeWebUrl(serverUrl: string) {
       return rswURL(port);
     } else if (isVSCodeServer()) {
       return vsCodeServerProxyUri()!.replace("{{port}}", `${port}`);
-    } 
+    }
   }
   // default to reflecting back serverUrl
   return serverUrl;
-  
+
 }
 
 export function rswURL(port: string) {

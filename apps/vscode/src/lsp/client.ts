@@ -22,6 +22,8 @@ import {
   Location,
   LocationLink,
   Definition,
+  LogOutputChannel,
+  Uri
 } from "vscode";
 import {
   LanguageClient,
@@ -50,10 +52,9 @@ import {
   adjustedPosition,
   unadjustedRange,
   virtualDoc,
-  virtualDocUri,
+  withVirtualDocUri,
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
-import { deactivateVirtualDocTempFiles, isLanguageVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
 import {
@@ -63,13 +64,16 @@ import {
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
+import { extensionHost } from "../host";
+import semver from "semver";
 
 let client: LanguageClient;
 
 export async function activateLsp(
   context: ExtensionContext,
   quartoContext: QuartoContext,
-  engine: MarkdownEngine
+  engine: MarkdownEngine,
+  outputChannel: LogOutputChannel
 ) {
 
   // The server is implemented in node
@@ -108,11 +112,18 @@ export async function activateLsp(
   if (config.get("cells.signatureHelp.enabled", true)) {
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
+  extensionHost().registerStatementRangeProvider(engine);
+  extensionHost().registerHelpTopicProvider(engine);
 
   // create client options
-  const initializationOptions : LspInitializationOptions = {
+  const initializationOptions: LspInitializationOptions = {
     quartoBinPath: quartoContext.binPath
   };
+
+  const documentSelectorPattern = semver.gte(quartoContext.version, "1.6.24") ?
+    "**/_{brand,quarto,metadata,extension}*.{yml,yaml}" :
+    "**/_{quarto,metadata,extension}*.{yml,yaml}";
+
   const clientOptions: LanguageClientOptions = {
     initializationOptions,
     documentSelector: [
@@ -120,10 +131,11 @@ export async function activateLsp(
       {
         scheme: "*",
         language: "yaml",
-        pattern: "**/_{quarto,metadata,extension}*.{yml,yaml}",
+        pattern: documentSelectorPattern,
       },
     ],
     middleware,
+    outputChannel
   };
 
   // Create the language client and start the client.
@@ -152,8 +164,6 @@ export async function activateLsp(
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  deactivateVirtualDocTempFiles();
-
   if (!client) {
     return undefined;
   }
@@ -172,7 +182,7 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
 
     if (vdoc && !isWithinYamlComment(document, position)) {
-      // if there is a trigger character make sure the langauge supports it
+      // if there is a trigger character make sure the language supports it
       const language = vdoc.language;
       if (context.triggerCharacter) {
         if (
@@ -216,19 +226,13 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      // get uri for hover
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "hover");
-
-      // execute hover
-      try {
-        return getHover(vdocUri, vdoc.language, position);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
+      return await withVirtualDocUri(vdoc, document.uri, "hover", async (uri: Uri) => {
+        try {
+          return await getHover(uri, vdoc.language, position);
+        } catch (error) {
+          console.log(error);
         }
-      }
+      });
     }
 
     // default to server delegation
@@ -246,16 +250,13 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "signature");
-      try {
-        return getSignatureHelpHover(vdocUri, vdoc.language, position, context.triggerCharacter);
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
+      return await withVirtualDocUri(vdoc, document.uri, "signature", async (uri: Uri) => {
+        try {
+          return await getSignatureHelpHover(uri, vdoc.language, position, context.triggerCharacter);
+        } catch (error) {
+          return undefined;
         }
-      }
+      });
     } else {
       return await next(document, position, context, token);
     }
@@ -271,66 +272,61 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      const vdocUri = await virtualDocUri(vdoc, document.uri, "definition");
-      try {
-        const definitions = await commands.executeCommand<
-          ProviderResult<Definition | LocationLink[]>
-        >(
-          "vscode.executeDefinitionProvider",
-          vdocUri.uri,
-          adjustedPosition(vdoc.language, position)
-        );
-        const resolveLocation = (location: Location) => {
-          if (isLanguageVirtualDoc(vdoc.language, location.uri) ||
-              location.uri.toString() === vdocUri.uri.toString()) {
-            return new Location(
-              document.uri,
-              unadjustedRange(vdoc.language, location.range)
-            );
+      return await withVirtualDocUri(vdoc, document.uri, "definition", async (uri: Uri) => {
+        try {
+          const definitions = await commands.executeCommand<
+            ProviderResult<Definition | LocationLink[]>
+          >(
+            "vscode.executeDefinitionProvider",
+            uri,
+            adjustedPosition(vdoc.language, position)
+          );
+          const resolveLocation = (location: Location) => {
+            if (location.uri.toString() === uri.toString()) {
+              return new Location(
+                document.uri,
+                unadjustedRange(vdoc.language, location.range)
+              );
+            } else {
+              return location;
+            }
+          };
+          const resolveLocationLink = (location: LocationLink) => {
+            if (location.targetUri.toString() === uri.toString()) {
+              const locationLink: LocationLink = {
+                targetRange: unadjustedRange(vdoc.language, location.targetRange),
+                originSelectionRange: location.originSelectionRange
+                  ? unadjustedRange(vdoc.language, location.originSelectionRange)
+                  : undefined,
+                targetSelectionRange: location.targetSelectionRange
+                  ? unadjustedRange(vdoc.language, location.targetSelectionRange)
+                  : undefined,
+                targetUri: document.uri,
+              };
+              return locationLink;
+            } else {
+              return location;
+            }
+          };
+          if (definitions instanceof Location) {
+            return resolveLocation(definitions);
+          } else if (Array.isArray(definitions) && definitions.length > 0) {
+            if (definitions[0] instanceof Location) {
+              return definitions.map((definition) =>
+                resolveLocation(definition as Location)
+              );
+            } else {
+              return definitions.map((definition) =>
+                resolveLocationLink(definition as LocationLink)
+              );
+            }
           } else {
-            return location;
+            return definitions;
           }
-        };
-        const resolveLocationLink = (location: LocationLink) => {
-          if (isLanguageVirtualDoc(vdoc.language, location.targetUri) ||
-              location.targetUri.toString() === vdocUri.uri.toString()) {
-            const locationLink: LocationLink = {
-              targetRange: unadjustedRange(vdoc.language, location.targetRange),
-              originSelectionRange: location.originSelectionRange
-                ? unadjustedRange(vdoc.language, location.originSelectionRange)
-                : undefined,
-              targetSelectionRange: location.targetSelectionRange
-                ? unadjustedRange(vdoc.language, location.targetSelectionRange)
-                : undefined,
-              targetUri: document.uri,
-            };
-            return locationLink;
-          } else {
-            return location;
-          }
-        };
-        if (definitions instanceof Location) {
-          return resolveLocation(definitions);
-        } else if (Array.isArray(definitions) && definitions.length > 0) {
-          if (definitions[0] instanceof Location) {
-            return definitions.map((definition) =>
-              resolveLocation(definition as Location)
-            );
-          } else {
-            return definitions.map((definition) =>
-              resolveLocationLink(definition as LocationLink)
-            );
-          }
-        } else {
-          return definitions;
+        } catch (error) {
+          return undefined;
         }
-      } catch (error) {
-        return undefined;
-      } finally {
-        if (vdocUri.cleanup) {
-          await vdocUri.cleanup();
-        }
-      }
+      });
     } else {
       return await next(document, position, token);
     }
@@ -341,5 +337,3 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;
   return !!line.match(/^\s*#\s*\| /);
 }
-
-

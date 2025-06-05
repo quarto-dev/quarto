@@ -124,7 +124,7 @@ export function quartoCanRenderMarkdown(document: vscode.TextDocument) {
 export function quartoCanRenderScript(document: vscode.TextDocument) {
   const text = document.getText();
   return isJupyterPercentScript(document.uri.fsPath, text) ||
-         isKnitrSpinScript(document.uri.fsPath, text);
+    isKnitrSpinScript(document.uri.fsPath, text);
 }
 
 export function validatateQuartoCanRender(document: vscode.TextDocument) {

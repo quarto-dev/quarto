@@ -2,6 +2,7 @@
 
 ## 1.123.0 (unreleased)
 
+- Fixed a bug with switching between source and visual editors in Positron (<https://github.com/quarto-dev/quarto/pull/732>).
 
 ## 1.122.0 (Release on 2025-05-26)
 

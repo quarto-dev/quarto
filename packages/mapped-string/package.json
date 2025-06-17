@@ -1,5 +1,5 @@
 {
-  "name": "mapped-string",
+  "name": "@quarto/mapped-string",
   "version": "0.1.0",
   "description": "A string data structure with integrated source maps.",
   "license": "MIT",

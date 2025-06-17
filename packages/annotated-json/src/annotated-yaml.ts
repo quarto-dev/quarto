@@ -16,6 +16,7 @@ import {
   EitherString
 } from "@quarto/mapped-string";
 
+// @ts-ignore
 import { load as jsYamlParse } from "./external/js-yaml.js";
 
 import { QuartoJSONSchema } from "./js-yaml-quarto-schema";

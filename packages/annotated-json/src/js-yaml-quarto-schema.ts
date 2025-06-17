@@ -2,9 +2,10 @@
  * js-yaml-quarto-schema.ts
  *
  * Copyright (C) 2024 by Posit Software, PBC
- * 
+ *
  */
 
+// @ts-ignore
 import {
   _null, // this is "nil" in deno's version...? :shrug:
   bool,

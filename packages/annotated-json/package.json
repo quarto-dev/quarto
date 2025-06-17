@@ -22,8 +22,5 @@
     "tsconfig": "*",
     "typescript": "^5.4.2"
   },
-  "scripts": {
-    "build": "tsx build.ts"
-  },
   "devDependencies": {  }
 }

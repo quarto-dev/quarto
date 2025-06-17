@@ -292,7 +292,7 @@ export function join(mappedStrs: EitherString[], sep: string): MappedString {
     } else {
       innerStrings.push(mappedStr);
     }
-    if (i < mappedStrs.length) {
+    if (i < mappedStrs.length - 1) {
       innerStrings.push(mappedSep);
     }
   }
@@ -333,11 +333,11 @@ export function mappedReplace(
       return str;
     }
     return mappedConcat([
-      mappedSubstring(str, 0, target.lastIndex),
+      mappedSubstring(str, 0, result.index!),
       asMappedString(replacement),
       mappedSubstring(
         str,
-        target.lastIndex + result[0].length,
+        result.index! + result[0].length,
         str.value.length,
       ),
     ]);
@@ -351,10 +351,10 @@ export function mappedReplace(
   const pieces: MappedString[] = [];
   while (result) {
     pieces.push(
-      mappedSubstring(str, currentRange, target.lastIndex),
+      mappedSubstring(str, currentRange, result.index!),
     );
     pieces.push(asMappedString(replacement));
-    currentRange = target.lastIndex + result[0].length;
+    currentRange = result.index! + result[0].length;
 
     result = target.exec(str.value);
   }

@@ -1,7 +1,18 @@
 {
-  "name": "json-validator",
+  "name": "@quarto/json-validator",
   "version": "0.1.0",
-  "private": true,
+  "description": "A validation library for JSON objects with an emphasis on good error messages.",
+  "author": {
+    "name": "Posit PBC"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quarto-dev/quarto.git"
+  },
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -9,13 +20,12 @@
     "tsconfig": "*",
     "build": "*",
     "typescript": "^5.4.2",
-    "mapped-string": "*",
-    "tidyverse-errors": "*",
-    "annotated-json": "*"
+    "@quarto/mapped-string": "^0.1.0",
+    "@quarto/tidyverse-errors": "^0.1.1",
+    "@quarto/annotated-json": "^0.1.0"
   },
   "scripts": {
     "build": "tsx build.ts"
   },
   "devDependencies": {  }
 }
-

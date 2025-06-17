@@ -21,5 +21,10 @@
     "typescript": "^5.4.2",
     "ansi-colors": "^4.1.3"
   },
-  "devDependencies": {  }
+  "devDependencies": {
+    "tsx": "^4.7.1"
+  },
+  "scripts": {
+    "test": "node --import tsx --test test/*.test.ts"
+  }
 }

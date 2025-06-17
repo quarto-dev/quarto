@@ -1,7 +1,18 @@
 {
-  "name": "tidyverse-errors",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@quarto/tidyverse-errors",
+  "version": "0.1.1",
+  "description": "Format errors using the tidyverse style.",
+  "author": {
+    "name": "Posit PBC"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quarto-dev/quarto.git"
+  },
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -12,4 +23,3 @@
   },
   "devDependencies": {  }
 }
-

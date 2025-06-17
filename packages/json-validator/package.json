@@ -1,6 +1,6 @@
 {
   "name": "@quarto/json-validator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A validation library for JSON objects with an emphasis on good error messages.",
   "author": {
     "name": "Posit PBC"
@@ -20,12 +20,10 @@
     "tsconfig": "*",
     "build": "*",
     "typescript": "^5.4.2",
-    "@quarto/mapped-string": "^0.1.0",
-    "@quarto/tidyverse-errors": "^0.1.1",
-    "@quarto/annotated-json": "^0.1.0"
-  },
-  "scripts": {
-    "build": "tsx build.ts"
+    "regexpp": "^3.2.0",
+    "@quarto/mapped-string": "^0.1.1",
+    "@quarto/tidyverse-errors": "^0.1.2",
+    "@quarto/annotated-json": "^0.1.1"
   },
   "devDependencies": {  }
 }

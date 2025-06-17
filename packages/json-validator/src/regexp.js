@@ -7,7 +7,7 @@
  *
  */
 
-import * as regexpp from "./external/regexpp.mjs";
+import * as regexpp from "regexpp";
 
 function prefixesFromParse(parse) {
   if (parse.type === "Pattern" || parse.type === "CapturingGroup") {

@@ -32,7 +32,7 @@ import {
 
 import { resolveSchema } from "./resolve";
 
-import { MappedString } from "mapped-string";
+import { MappedString } from "@quarto/mapped-string";
 import { createLocalizedError } from "./errors";
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -13,19 +13,17 @@ import { YAMLSchemaT } from "./types";
 import { quotedStringColor, TidyverseError } from "tidyverse-errors";
 
 import {
+  editDistance, // this truly needs to be in a separate package
   mappedIndexToLineCol,
   MappedString,
   mappedString,
   Range,
-  ErrorLocation
-} from "mapped-string";
+  ErrorLocation, formatLineRange, lines
+} from "@quarto/mapped-string";
 
 import { possibleSchemaKeys, possibleSchemaValues } from "./schema-utils";
 
-// this truly needs to be in a separate package
-import { editDistance } from "mapped-string";
-
-import { AnnotatedParse, JSONValue } from "annotated-json";
+import { AnnotatedParse, JSONValue } from "@quarto/annotated-json";
 
 import {
   InstancePath,
@@ -38,9 +36,6 @@ import {
   schemaType,
 } from "./types";
 
-import { formatLineRange, lines } from "mapped-string";
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 export function locationString(loc: ErrorLocation) {
@@ -49,14 +44,12 @@ export function locationString(loc: ErrorLocation) {
     if (start.column === end.column) {
       return `(line ${start.line + 1}, column ${start.column + 1})`;
     } else {
-      return `(line ${start.line + 1}, columns ${start.column + 1}--${
-        end.column + 1
-      })`;
+      return `(line ${start.line + 1}, columns ${start.column + 1}--${end.column + 1
+        })`;
     }
   } else {
-    return `(line ${start.line + 1}, column ${start.column + 1} through line ${
-      end.line + 1
-    }, column ${end.column + 1})`;
+    return `(line ${start.line + 1}, column ${start.column + 1} through line ${end.line + 1
+      }, column ${end.column + 1})`;
   }
 }
 
@@ -177,7 +170,7 @@ function navigate(
     return annotation;
   } else if (
     ["sequence", "block_sequence", "flow_sequence"].indexOf(annotation.kind) !==
-      -1
+    -1
   ) {
     const searchKey = Number(path[pathIndex]);
     if (
@@ -347,28 +340,23 @@ function formatHeadingForValueError(
       if (empty) {
         return "YAML value is missing.";
       } else {
-        return `YAML value ${verbatimInput} must ${
-          schemaDescription(error.schema)
-        }.`;
+        return `YAML value ${verbatimInput} must ${schemaDescription(error.schema)
+          }.`;
       }
     case "number": // array
       if (empty) {
-        return `Array entry ${lastFragment + 1} is empty but it must instead ${
-          schemaDescription(error.schema)
-        }.`;
+        return `Array entry ${lastFragment + 1} is empty but it must instead ${schemaDescription(error.schema)
+          }.`;
       } else {
-        return `Array entry ${
-          lastFragment + 1
-        } with value ${verbatimInput} failed to ${
-          schemaDescription(error.schema)
-        }.`;
+        return `Array entry ${lastFragment + 1
+          } with value ${verbatimInput} failed to ${schemaDescription(error.schema)
+          }.`;
       }
     case "string": { // object
       const formatLastFragment = '"' + colors.blue(lastFragment) + '"';
       if (empty) {
-        return `Field ${formatLastFragment} has empty value but it must instead ${
-          schemaDescription(error.schema)
-        }`;
+        return `Field ${formatLastFragment} has empty value but it must instead ${schemaDescription(error.schema)
+          }`;
       } else {
         if (verbatimInput.indexOf("\n") !== -1) {
           return `Field ${formatLastFragment} has value
@@ -377,9 +365,8 @@ ${verbatimInput}
 
 The value must instead ${schemaDescription(error.schema)}.`;
         } else {
-          return `Field ${formatLastFragment} has value ${verbatimInput}, which must instead ${
-            schemaDescription(error.schema)
-          }`;
+          return `Field ${formatLastFragment} has value ${verbatimInput}, which must instead ${schemaDescription(error.schema)
+            }`;
         }
       }
     }
@@ -541,11 +528,10 @@ ${reindented}
         schema,
       ),
       error: [
-        `${subject}is of type ${
-          goodType(
-            error.violatingObject
-              .result,
-          )
+        `${subject}is of type ${goodType(
+          error.violatingObject
+            .result,
+        )
         }.`,
       ],
       info: {},
@@ -636,11 +622,10 @@ function checkForBadColon(
   const errorMessage = `The value ${verbatimInput} is a string.`;
   const suggestion1 =
     `In YAML, key-value pairs in objects must be separated by a space.`;
-  const suggestion2 = `Did you mean ${
-    quotedStringColor(
-      quotedStringColor(getVerbatimInput(error)).replace(/:/g, ": "),
-    )
-  } instead?`;
+  const suggestion2 = `Did you mean ${quotedStringColor(
+    quotedStringColor(getVerbatimInput(error)).replace(/:/g, ": "),
+  )
+    } instead?`;
   const newError: TidyverseError = {
     heading: formatHeadingForValueError(error, parse, schema),
     error: [errorMessage],
@@ -684,11 +669,10 @@ function checkForBadEquals(
   const errorMessage = `The value ${verbatimInput} is a string.`;
   const suggestion1 =
     `In YAML, key-value pairs in objects must be separated by a colon and a space.`;
-  const suggestion2 = `Did you mean ${
-    quotedStringColor(
-      quotedStringColor(getVerbatimInput(error)).replace(/ *= */g, ": "),
-    )
-  } instead?`;
+  const suggestion2 = `Did you mean ${quotedStringColor(
+    quotedStringColor(getVerbatimInput(error)).replace(/ *= */g, ": "),
+  )
+    } instead?`;
   const newError: TidyverseError = {
     heading: formatHeadingForValueError(error, parse, schema),
     error: [errorMessage],
@@ -785,7 +769,7 @@ function checkForNearbyRequired(
         }
       }
     },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   }, (_) => {
     throw new Error("required error on a non-object schema");
   });
@@ -816,20 +800,16 @@ function checkForNearbyRequired(
 
     const suggestions = bestCorrection!.map((s: string) => colors.blue(s));
     if (suggestions.length === 1) {
-      error.niceError.info[`did-you-mean-key`] = `Is ${
-        suggestions[0]
-      } a typo of ${colors.blue(missingKey)}?`;
+      error.niceError.info[`did-you-mean-key`] = `Is ${suggestions[0]
+        } a typo of ${colors.blue(missingKey)}?`;
     } else if (suggestions.length === 2) {
-      error.niceError.info[`did-you-mean-key`] = `Is ${suggestions[0]} or ${
-        suggestions[1]
-      } a typo of ${colors.blue(missingKey)}?`;
+      error.niceError.info[`did-you-mean-key`] = `Is ${suggestions[0]} or ${suggestions[1]
+        } a typo of ${colors.blue(missingKey)}?`;
     } else {
-      suggestions[suggestions.length - 1] = `or ${
-        suggestions[suggestions.length - 1]
-      }`;
-      error.niceError.info[`did-you-mean-key`] = `Is one of ${
-        suggestions.join(", ")
-      } a typo of ${colors.blue(missingKey)}?`;
+      suggestions[suggestions.length - 1] = `or ${suggestions[suggestions.length - 1]
+        }`;
+      error.niceError.info[`did-you-mean-key`] = `Is one of ${suggestions.join(", ")
+        } a typo of ${colors.blue(missingKey)}?`;
     }
   }
 
@@ -893,20 +873,16 @@ function checkForNearbyCorrection(
 
   const suggestions = bestCorrection!.map((s: string) => colors.blue(s));
   if (suggestions.length === 1) {
-    error.niceError.info[`did-you-mean-${keyOrValue}`] = `Did you mean ${
-      suggestions[0]
-    }?`;
+    error.niceError.info[`did-you-mean-${keyOrValue}`] = `Did you mean ${suggestions[0]
+      }?`;
   } else if (suggestions.length === 2) {
-    error.niceError.info[`did-you-mean-${keyOrValue}`] = `Did you mean ${
-      suggestions[0]
-    } or ${suggestions[1]}?`;
+    error.niceError.info[`did-you-mean-${keyOrValue}`] = `Did you mean ${suggestions[0]
+      } or ${suggestions[1]}?`;
   } else {
-    suggestions[suggestions.length - 1] = `or ${
-      suggestions[suggestions.length - 1]
-    }`;
-    error.niceError.info[`did-you-mean-${keyOrValue}`] = `Did you mean ${
-      suggestions.join(", ")
-    }?`;
+    suggestions[suggestions.length - 1] = `or ${suggestions[suggestions.length - 1]
+      }`;
+    error.niceError.info[`did-you-mean-${keyOrValue}`] = `Did you mean ${suggestions.join(", ")
+      }?`;
   }
 
   return error;
@@ -994,7 +970,7 @@ export function createSourceContext(
         contextLines.push(content);
         contextLines.push(
           " ".repeat(prefixWidth + startColumn - 1) +
-            "~".repeat(endColumn - startColumn + 1),
+          "~".repeat(endColumn - startColumn + 1),
         );
       }
     }

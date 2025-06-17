@@ -7,7 +7,7 @@
 import { mappedIndexToLineCol } from "./mapped-text";
 import { lines } from "./text";
 import { MappedString, Range } from "./types";
-import { quotedStringColor } from "tidyverse-errors";
+import { quotedStringColor } from "@quarto/tidyverse-errors";
 
 export class InternalError extends Error {
   constructor(
@@ -177,7 +177,7 @@ export function createSourceContext(
         contextLines.push(content);
         contextLines.push(
           " ".repeat(prefixWidth + startColumn - 1) +
-            "~".repeat(endColumn - startColumn + 1),
+          "~".repeat(endColumn - startColumn + 1),
         );
       }
     }

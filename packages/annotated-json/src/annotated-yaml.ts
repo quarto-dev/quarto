@@ -14,12 +14,12 @@ import {
   MappedString,
   createSourceContext,
   EitherString
-} from "mapped-string";
+} from "@quarto/mapped-string";
 
 import { load as jsYamlParse } from "./external/js-yaml.js";
 
 import { QuartoJSONSchema } from "./js-yaml-quarto-schema";
-import { tidyverseInfo } from "tidyverse-errors";
+import { tidyverseInfo } from "@quarto/tidyverse-errors";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TreeSitterParse = any;
@@ -99,7 +99,7 @@ export function readAnnotatedYamlFromMappedString(
 
   try {
     return buildJsYamlAnnotation(mappedSource);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     if (e.name === "YAMLError") {
       e.name = "YAML Parsing";
@@ -129,15 +129,13 @@ export function readAnnotatedYamlFromMappedString(
           start: m1.index! + 1,
           end: m1.index! + m1[0].length,
         });
-        e.stack = `${e.reason} (${filename}, ${line + 1}:${
-          column + 1
-        })\n${sourceContext}`;
+        e.stack = `${e.reason} (${filename}, ${line + 1}:${column + 1
+          })\n${sourceContext}`;
         e.message = e.stack;
-        e.message = `${e.message}\n${
-          tidyverseInfo(
-            "Is it possible you missed a space after a colon in the key-value mapping?",
-          )
-        }`;
+        e.message = `${e.message}\n${tidyverseInfo(
+          "Is it possible you missed a space after a colon in the key-value mapping?",
+        )
+          }`;
       } else {
         const f = lineColToIndex(mappedSource.value);
         const location = { line: Number(m[1]) - 1, column: Number(m[2] - 1) };
@@ -150,24 +148,21 @@ export function readAnnotatedYamlFromMappedString(
           start: offset,
           end: offset + 1,
         });
-        e.stack = `${e.reason} (${filename}, ${line + 1}:${
-          column + 1
-        })\n${sourceContext}`;
+        e.stack = `${e.reason} (${filename}, ${line + 1}:${column + 1
+          })\n${sourceContext}`;
         e.message = e.stack;
         if (
           mappedLines(mappedSource)[location.line].value.indexOf("!expr") !==
-            -1 &&
+          -1 &&
           e.reason.match(/bad indentation of a mapping entry/)
         ) {
-          e.message = `${e.message}\n${
-            tidyverseInfo(
-              "YAML tags like !expr must be followed by YAML strings.",
-            )
-          }\n${
-            tidyverseInfo(
+          e.message = `${e.message}\n${tidyverseInfo(
+            "YAML tags like !expr must be followed by YAML strings.",
+          )
+            }\n${tidyverseInfo(
               "Is it possible you need to quote the value you passed to !expr ?",
             )
-          }`;
+            }`;
         }
       }
       e.stack = "";
@@ -603,7 +598,7 @@ export function locateCursor(
       kind: keyOrValue!,
       annotation: innermostAnnotation!,
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     if (e.message === kInternalLocateError) {
       return {
@@ -642,7 +637,7 @@ export function locateAnnotation(
             annotation.components[j].start,
             annotation.components[j].end,
           ).trim() ===
-            value
+          value
         ) {
           // on last entry, we discriminate between key and value contexts
           if (i === position.length - 1) {
@@ -707,7 +702,7 @@ export function navigate(
     return annotation;
   } else if (
     ["sequence", "block_sequence", "flow_sequence"].indexOf(annotation.kind) !==
-      -1
+    -1
   ) {
     const searchKey = Number(path[pathIndex]);
     if (

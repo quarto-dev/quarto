@@ -7,7 +7,7 @@
  *
  */
 
-import { MappedString } from "mapped-string";
+import { MappedString } from "@quarto/mapped-string";
 
 // https://github.com/microsoft/TypeScript/issues/1897#issuecomment-822032151
 export type JSONValue =

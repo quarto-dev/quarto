@@ -1,6 +1,6 @@
 {
   "name": "@quarto/tidyverse-errors",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Format errors using the tidyverse style.",
   "author": {
     "name": "Posit PBC"

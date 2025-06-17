@@ -4,8 +4,8 @@
  * Copyright (C) 2022 Posit Software, PBC
  */
 
-import { TidyverseError } from "tidyverse-errors";
-import { ErrorLocation, MappedString } from "mapped-string";
+import { TidyverseError } from "@quarto/tidyverse-errors";
+import { ErrorLocation, MappedString } from "@quarto/mapped-string";
 
 import {
   AnnotatedParse,
@@ -51,7 +51,7 @@ export interface YAMLSchemaT {
     result: ValidatedParseResult,
     _src: MappedString,
     message: string,
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: (a: string) => any,
     log: (a: TidyverseError) => unknown,
@@ -359,4 +359,3 @@ export function schemaDescription(schema: Schema): string {
     return schema.description || `be ${schemaType(schema)}`;
   }
 }
-

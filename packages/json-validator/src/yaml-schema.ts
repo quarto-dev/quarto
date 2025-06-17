@@ -7,7 +7,7 @@
  * Copyright (C) 2022 Posit Software, PBC
  */
 
-import { MappedString } from "mapped-string";
+import { MappedString } from "@quarto/mapped-string";
 
 import { TidyverseError } from "tidyverse-errors";
 import { ValidatorErrorHandlerFunction } from "./types";

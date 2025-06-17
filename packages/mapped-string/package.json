@@ -1,6 +1,6 @@
 {
   "name": "@quarto/mapped-string",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A string data structure with integrated source maps.",
   "license": "MIT",
   "author": {
@@ -23,7 +23,7 @@
     "tsconfig": "*",
     "typescript": "^5.4.2",
     "ansi-colors": "^4.1.3",
-    "@quarto/tidyverse-errors": "^0.1.1"
+    "@quarto/tidyverse-errors": "^0.1.2"
   },
   "devDependencies": {  }
 }

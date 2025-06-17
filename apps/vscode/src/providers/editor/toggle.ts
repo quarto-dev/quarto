@@ -121,6 +121,8 @@ export async function reopenEditorInVisualMode(
   viewColumn?: ViewColumn
 ) {
   if (hasHooks()) {
+    // note pending switch to visual
+    VisualEditorProvider.recordPendingSwitchToVisual(document);
     commands.executeCommand('positron.reopenWith', document.uri, 'quarto.visualEditor');
   } else {
     // save then close
@@ -144,6 +146,9 @@ export async function reopenEditorInSourceMode(
   viewColumn?: ViewColumn
 ) {
   if (hasHooks()) {
+    // note pending switch to source
+    VisualEditorProvider.recordPendingSwitchToSource(document);
+
     commands.executeCommand('positron.reopenWith', document.uri, 'default');
   } else {
     if (!document.isUntitled) {

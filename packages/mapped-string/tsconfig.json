@@ -3,7 +3,14 @@
   "extends": "tsconfig/base.json",
   "include": ["src"],
   "compilerOptions": {
-    "allowJs": true,
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": "./src",
     "outDir": "./dist",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2018",
+    "moduleResolution": "node",
+    "allowJs": true,
   },
 }

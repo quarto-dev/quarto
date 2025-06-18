@@ -1,6 +1,6 @@
 {
   "name": "@quarto/tidyverse-errors",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Format errors using the tidyverse style.",
   "author": {
     "name": "Posit PBC"
@@ -14,8 +14,16 @@
     "url": "git+https://github.com/quarto-dev/quarto.git"
   },
   "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
   "dependencies": {
     "tsconfig": "*",
     "typescript": "^5.4.2",
@@ -25,6 +33,7 @@
     "tsx": "^4.7.1"
   },
   "scripts": {
+    "build": "tsc",
     "test": "node --import tsx --test test/*.test.ts"
   }
 }

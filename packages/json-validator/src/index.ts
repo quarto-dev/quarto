@@ -25,4 +25,5 @@
 export * from "./validator";
 export type * from "./types";
 export * from "./schema";
+export * from "./validator-queue";
 export { initState, setInitializer } from "./state";

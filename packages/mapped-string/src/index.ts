@@ -24,6 +24,6 @@
 
 export * from "./ranged-text";
 export * from "./mapped-text";
-export * from "./types";
+export type * from "./types";
 export * from "./error";
 export * from "./text";

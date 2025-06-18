@@ -10,7 +10,7 @@ import { ErrorLocation, MappedString } from "@quarto/mapped-string";
 import {
   AnnotatedParse,
   JSONValue
-} from "annotated-json";
+} from "@quarto/annotated-json";
 
 export interface ValidatedParseResult {
   result: JSONValue;

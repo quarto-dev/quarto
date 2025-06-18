@@ -8,16 +8,12 @@
  */
 
 import { MappedString } from "@quarto/mapped-string";
-
-import { TidyverseError } from "tidyverse-errors";
-import { ValidatorErrorHandlerFunction } from "./types";
+import { TidyverseError } from "@quarto/tidyverse-errors";
+import { AnnotatedParse } from "@quarto/annotated-json";
 
 import { validate } from "./validator";
-import { ValidatedParseResult } from "./types";
-
-import { AnnotatedParse } from "annotated-json";
 import {
-  LocalizedError,
+  ValidatorErrorHandlerFunction, ValidatedParseResult, LocalizedError,
   Schema,
 } from "./types";
 

@@ -1,6 +1,6 @@
 {
   "name": "@quarto/json-validator",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A validation library for JSON objects with an emphasis on good error messages.",
   "author": {
     "name": "Posit PBC"

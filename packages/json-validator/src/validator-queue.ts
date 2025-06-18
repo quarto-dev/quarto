@@ -9,9 +9,7 @@ import { YAMLSchema } from "./yaml-schema";
 
 import { setDefaultErrorHandlers } from "./errors";
 
-import { ValidatorErrorHandlerFunction } from "./types";
-
-import { RefSchema, Schema, schemaType } from "./types";
+import { ValidatorErrorHandlerFunction, RefSchema, Schema, schemaType } from "./types";
 
 const yamlValidators: Record<string, YAMLSchema> = {};
 

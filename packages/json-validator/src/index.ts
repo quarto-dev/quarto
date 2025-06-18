@@ -23,7 +23,6 @@
  */
 
 export * from "./validator";
-export * from "./types";
+export type * from "./types";
 export * from "./schema";
 export { initState, setInitializer } from "./state";
-export { asMappedString } from "@quarto/mapped-string";

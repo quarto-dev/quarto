@@ -8,7 +8,7 @@
 
 import {
   AnnotatedParse, JSONValue
-} from "annotated-json";
+} from "@quarto/annotated-json";
 
 import {
   AllOfSchema,

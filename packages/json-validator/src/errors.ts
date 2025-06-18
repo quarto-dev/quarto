@@ -10,7 +10,7 @@ import * as colors from "ansi-colors";
 
 import { YAMLSchemaT } from "./types";
 
-import { quotedStringColor, TidyverseError } from "tidyverse-errors";
+import { quotedStringColor, TidyverseError } from "@quarto/tidyverse-errors";
 
 import {
   editDistance, // this truly needs to be in a separate package

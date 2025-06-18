@@ -28,7 +28,7 @@
     "tsconfig": "*",
     "typescript": "^5.4.2",
     "@quarto/mapped-string": "^0.1.7",
-    "@quarto/tidyverse-errors": "^0.1.3",
+    "@quarto/tidyverse-errors": "^0.1.3"
   },
   "devDependencies": {
     "tsx": "^4.7.1"

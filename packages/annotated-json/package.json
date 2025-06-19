@@ -1,6 +1,6 @@
 {
   "name": "@quarto/annotated-json",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A data structure for storing and manipulation a JSON object together with source locations of its constituent parts.",
   "license": "MIT",
   "author": {
@@ -14,27 +14,21 @@
     "type": "git",
     "url": "git+https://github.com/quarto-dev/quarto.git"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    }
-  },
+  "main": "dist/cjs/index.js",
+  "types": "dist/cjs/index.d.ts",
   "files": ["dist"],
   "dependencies": {
     "tsconfig": "*",
     "typescript": "^5.4.2",
-    "@quarto/mapped-string": "^0.1.7",
-    "@quarto/tidyverse-errors": "^0.1.3"
+    "@quarto/mapped-string": "^0.1.8",
+    "@quarto/tidyverse-errors": "^0.1.9"
   },
   "devDependencies": {
     "tsx": "^4.7.1"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:cjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
     "test": "node --import tsx --test test/*.test.ts"
   }
 }

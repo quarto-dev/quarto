@@ -1,23 +1,17 @@
-# @quarto/mapped-string
+tl;dr DO NOT EDIT THESE FILES!!
 
-A TypeScript library that provides a string data structure with integrated source maps, enabling precise tracking of character positions through string transformations.
+## packages/_*
 
-## Overview
+The packages in `package/_*` (that is, with a leading _) are copies of their namesakes that lack underscores.
+They exist to allow code reuse among bundlers that don't agree in how to resolve modules.
 
-`@quarto/mapped-string` solves a common problem in text processing: maintaining accurate source location information when performing string manipulations. This is particularly valuable for error reporting.
+These packages have no build steps and are pure typescript.
 
-The library centers around the `MappedString` interface, which wraps a regular string with a `map` function that can translate any character index back to its position in the original source. Operations like `mappedSubstring`, `mappedReplace`, `mappedTrim`, and `skipRegexp` all preserve this mapping information, allowing complex string processing pipelines while maintaining perfect source location fidelity.
+The packages without underscore will have more typical package.json setups.
 
-## Key Features
+The files in `packages/_*/src/*.ts` will be identical to those in `packages/*/src/*.ts`, _except_ for the imports.ts file.
 
-- **Source mapping preservation**: Every string operation maintains bidirectional mapping to original positions
-- **Composable transformations**: Chain multiple string operations while preserving location information
-- **Error location reporting**: Built-in support for precise error reporting with line/column information
-- **String method equivalents**: Mapped versions of common string operations like `trim`, `replace`, `split`, and `substring`
-- **TypeScript support**: Full type safety with comprehensive interfaces and type definitions
+This file centralizes all the import syntax that must differ between the two package versions.
 
-## Installation
-
-```bash
-npm install @quarto/mapped-string
-```
+Ideally, we would keep the two package file versions as symbolic links of each other, but using symbolic links triggers a compilation bug in `vite build` where files end up being resolved from the wrong location. As a result, we are forced to maintain explicit copies
+that need to be in sync with each other.

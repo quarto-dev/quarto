@@ -34,6 +34,7 @@
     "editor": "*",
     "editor-core": "*",
     "editor-types": "*",
+    "@quarto/_tidyverse-errors": "*",
     "markdown-it": "^13.0.1",
     "prosemirror-commands": "^1.3.1",
     "prosemirror-gapcursor": "^1.3.1",

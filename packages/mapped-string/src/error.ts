@@ -7,7 +7,7 @@
 import { mappedIndexToLineCol } from "./mapped-text";
 import { lines } from "./text";
 import { MappedString, Range } from "./types";
-import { quotedStringColor } from "@quarto/tidyverse-errors";
+import { quotedStringColor } from "./imports";
 
 export class InternalError extends Error {
   constructor(

@@ -22,20 +22,4 @@
  * SOFTWARE.
  */
 
-export * from "./ranged-text";
-export * from "./mapped-text";
-
-// TODO I couldn't find a way to export * from here
-// so we export each type individually
-export {
-  type Range,
-  type RangedSubstring,
-  type StringMapResult,
-  type MappedString,
-  type EitherString,
-  type StringChunk,
-  type ErrorLocation,
-  type TidyverseError
-} from "./types";
-export * from "./error";
-export * from "./text";
+export * from "./errors";

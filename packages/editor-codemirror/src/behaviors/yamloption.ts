@@ -20,14 +20,19 @@ import { EditorView } from "@codemirror/view";
 import { editorLanguage } from "editor-core";
 import { Behavior, BehaviorContext } from ".";
 
-export function yamlOptionBehavior(context: BehaviorContext) : Behavior {
+import * as t from "@quarto/_tidyverse-errors";
+import * as m from "@quarto/_mapped-string";
+
+export function yamlOptionBehavior(context: BehaviorContext): Behavior {
+
+  console.log({ t, m });
 
   // track current language
-  let language  = '';
+  let language = '';
   const updateLanguage = (nd: ProsemirrorNode) => {
     language = context.options.lang(nd, nd.textContent) || '';
   }
-  
+
   return {
 
     keys: [
@@ -52,10 +57,10 @@ export function yamlOptionBehavior(context: BehaviorContext) : Behavior {
 
 
 const handlerEnterKey = (cmView: EditorView, language: string) => {
- 
+
   // capture current line
   const line = cmView.state.doc.lineAt(cmView.state.selection.main.from);
-  
+
   // perform the default action
   if (insertNewlineAndIndent(cmView)) {
     // if the current block has a language with a commnt char defined then check
@@ -79,7 +84,7 @@ const handlerEnterKey = (cmView: EditorView, language: string) => {
             to: newlineSel.to,
             insert: optionComment,
           },
-          selection: {anchor: newlineSel.from + optionComment.length}
+          selection: { anchor: newlineSel.from + optionComment.length }
         })
       }
     }
@@ -88,5 +93,3 @@ const handlerEnterKey = (cmView: EditorView, language: string) => {
     return false;
   }
 }
-
-

@@ -23,10 +23,11 @@ import { Behavior, BehaviorContext } from ".";
 import * as t from "@quarto/_tidyverse-errors";
 import * as m from "@quarto/_mapped-string";
 import * as a from "@quarto/_annotated-json";
+import * as v from "@quarto/_json-validator";
 
 export function yamlOptionBehavior(context: BehaviorContext): Behavior {
 
-  console.log({ t, m, a });
+  console.log({ t, m, a, v });
 
   // track current language
   let language = '';

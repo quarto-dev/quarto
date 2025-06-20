@@ -262,7 +262,7 @@ export function reindent(
     if (v <= 2) {
       return str;
     }
-    return ls.map((l: string) => l.startsWith(oldIndent) ? l.slice(v - 2) : l).join(
+    return ls.map((l) => l.startsWith(oldIndent) ? l.slice(v - 2) : l).join(
       "\n",
     );
   } else {
@@ -272,7 +272,7 @@ export function reindent(
     if (newIndent >= first) {
       return str;
     }
-    return ls.map((l: string) =>
+    return ls.map((l) =>
       l.startsWith(oldIndent) ? l.slice(first - newIndent) : l
     ).join("\n");
   }

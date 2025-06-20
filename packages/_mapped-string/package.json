@@ -1,6 +1,7 @@
 {
-  "name": "@quarto/mapped-string",
-  "version": "0.1.8",
+  "name": "@quarto/_mapped-string",
+  "version": "0.1.9",
+  "private": true,
   "description": "A string data structure with integrated source maps.",
   "license": "MIT",
   "author": {
@@ -14,23 +15,15 @@
     "type": "git",
     "url": "git+https://github.com/quarto-dev/quarto.git"
   },
-  "main": "dist/cjs/index.js",
-  "types": "dist/cjs/index.d.ts",
-  "files": ["dist"],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "dependencies": {
     "tsconfig": "*",
     "typescript": "^5.4.2",
     "ansi-colors": "^4.1.3",
-    "@quarto/tidyverse-errors": "^0.1.9"
+    "@quarto/_tidyverse-errors": "*"
   },
   "devDependencies": {
     "tsx": "^4.7.1"
-  },
-  "scripts": {
-    "build": "npm run build:cjs",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "test": "node --import tsx --test test/*.test.ts",
-    "clean": "rm -rf dist",
-    "publish": "npm run clean && npm run build && npm publish"
   }
 }

@@ -33,6 +33,8 @@
   "scripts": {
     "build": "npm run build:cjs",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "clean": "rm -rf dist",
+    "publish": "npm run clean && npm run build && npm publish"
   }
 }

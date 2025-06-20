@@ -1,7 +1,7 @@
 ## `@quarto/_*` vs. `@quarto/*`
 
-You might have noticed the presence of repeated packages like @quarto/mapped-string and @quarto/_mapped-string
-in this repo. Why do they exist?
+You might have noticed the presence of repeated packages like @quarto/mapped-string and @quarto/_mapped-string in this repo.
+Why do they exist?
 
 ### Resolving packages from different projects
 
@@ -27,10 +27,11 @@ The packages without underscore will have more typical package.json setups, and 
 
 Ideally we wouldn't need anything like this horrendous hack.
 
-We first experienced this problem trying to import a library like mapped-string from both inside apps/vscode-editor and from a typical npm library that uses mapped-string (like annotated-json).
+We first experienced a problem trying to import a library like mapped-string from both inside apps/vscode-editor and from a typical npm library that uses mapped-string (like annotated-json).
 
 It is clearly possible to have a single library that can resolve correctly in these settings.
 Concrete examples are `ansi-colors` and `markdown-it`.
 We could learn how to make this technique work in our monorepo, but I believe that these libraries end "overbundling" some of their npm exports by running a bundler and pushing the bundled JS.
 I would like to avoid this problem because it causes a large degree of bloat in the resulting JS.
-We need to study the problem more.
+
+Conclusion: we need to study the problem more.

@@ -17,7 +17,7 @@
  */
 
 import { Node as ProsemirrorNode } from 'prosemirror-model'
-import { EditorView as PMEditorView} from "prosemirror-view";
+import { EditorView as PMEditorView } from "prosemirror-view";
 
 import { Extension, Transaction } from "@codemirror/state";
 import { EditorView, KeyBinding } from '@codemirror/view';
@@ -35,6 +35,7 @@ import { completionBehavior } from './completion';
 import { yamlOptionBehavior } from './yamloption';
 import { toolbarBehavior } from './toolbar';
 import { diagramBehavior } from './diagram';
+import { validationBehavior } from './validation';
 
 export interface Behavior {
   extensions?: Extension[];
@@ -55,9 +56,9 @@ export interface BehaviorContext {
 }
 
 export enum State { Updating, Escaping };
-export type WithState = (state: State, fn: () => void) => void; 
+export type WithState = (state: State, fn: () => void) => void;
 
-export function createBehaviors(context: BehaviorContext) : Behavior[] {
+export function createBehaviors(context: BehaviorContext): Behavior[] {
   const behaviors = [
     langModeBehavior(context),
     completionBehavior(context),
@@ -69,6 +70,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
     yamlOptionBehavior(context),
     toolbarBehavior(context),
     diagramBehavior(context),
+    validationBehavior(context)
   ];
   behaviors.push(keyboardBehavior(context, behaviors.flatMap(behavior => behavior.keys || [])));
   return behaviors;
@@ -76,7 +78,7 @@ export function createBehaviors(context: BehaviorContext) : Behavior[] {
 
 export function behaviorExtensions(
   behaviors: Behavior[]
-) : Extension[] {
+): Extension[] {
   return behaviors.flatMap(behavior => (behavior.extensions || []));
 }
 
@@ -84,7 +86,7 @@ export function behaviorInit(
   behaviors: Behavior[],
   pmNode: ProsemirrorNode, cmView: EditorView
 ) {
-  behaviors.forEach(behavior =>  behavior.init?.(pmNode, cmView));
+  behaviors.forEach(behavior => behavior.init?.(pmNode, cmView));
 }
 
 export function behaviorCmUpdate(
@@ -104,8 +106,5 @@ export function behaviorPmUpdate(
 export function behaviorCleanup(
   behaviors: Behavior[]
 ) {
-  behaviors.forEach(behavior =>  behavior.cleanup?.());
+  behaviors.forEach(behavior => behavior.cleanup?.());
 }
-
-
-

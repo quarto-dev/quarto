@@ -14,6 +14,8 @@
  *
  */
 
+import * as fs from 'fs';
+import { Utils } from 'vscode-uri';
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Disposable } from 'core';
@@ -21,17 +23,23 @@ import { Document } from 'quarto-core';
 import { IWorkspace } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { MdDocumentSymbolProvider } from './document-symbols';
+import { LsConfiguration } from '../config';
 
 export class MdWorkspaceSymbolProvider extends Disposable {
-
+  readonly #config: LsConfiguration;
   readonly #cache: MdWorkspaceInfoCache<readonly lsp.SymbolInformation[]>;
   readonly #symbolProvider: MdDocumentSymbolProvider;
+  readonly #workspace: IWorkspace;
 
   constructor(
     workspace: IWorkspace,
+    config: LsConfiguration,
     symbolProvider: MdDocumentSymbolProvider,
   ) {
     super();
+
+    this.#workspace = workspace;
+    this.#config = config;
     this.#symbolProvider = symbolProvider;
 
     this.#cache = this._register(new MdWorkspaceInfoCache(workspace, (doc, token) => this.provideDocumentSymbolInformation(doc, token)));
@@ -40,6 +48,12 @@ export class MdWorkspaceSymbolProvider extends Disposable {
   public async provideWorkspaceSymbols(query: string, token: CancellationToken): Promise<lsp.WorkspaceSymbol[]> {
     if (token.isCancellationRequested) {
       return [];
+    }
+
+    switch (this.#config.exportSymbolsToWorkspace) {
+      case 'all': break;
+      case 'default': if (shouldExportSymbolsToWorkspace(this.#workspace)) return []; else break;
+      case 'none': return [];
     }
 
     const allSymbols = await this.#cache.values();
@@ -72,4 +86,18 @@ export class MdWorkspaceSymbolProvider extends Disposable {
       }
     }
   }
+}
+
+function shouldExportSymbolsToWorkspace(workspace: IWorkspace): boolean {
+  return isRPackage(workspace);
+}
+
+function isRPackage(workspace: IWorkspace): boolean {
+  if (workspace.workspaceFolders === undefined) {
+    return false;
+  }
+
+  const projectPath = workspace.workspaceFolders[0];
+  const descPath = Utils.joinPath(projectPath, 'DESCRIPTION');
+  return fs.existsSync(descPath.fsPath);
 }

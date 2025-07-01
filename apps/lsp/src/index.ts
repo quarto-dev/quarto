@@ -53,9 +53,7 @@ import { registerDiagnostics } from "./diagnostics";
 const connection = createConnection(ProposedFeatures.all);
 
 // Initialize logger
-const logger = new LogFunctionLogger(
-  console.log.bind(console),
-);
+const logger = new LogFunctionLogger(console.log.bind(console));
 
 // Create text document manager
 const documents: TextDocuments<Document> = new TextDocuments(TextDocument);
@@ -71,10 +69,12 @@ let capabilities: ClientCapabilities | undefined;
 // Initialization options
 let initializationOptions: LspInitializationOptions | undefined;
 
-// Markdowdn language service
+// Markdown language service
 let mdLs: IMdLanguageService | undefined;
 
 connection.onInitialize((params: InitializeParams) => {
+  // We're connected, log messages via LSP
+  logger.setConnection(connection);
 
   // alias options and capabilities
   initializationOptions = params.initializationOptions;

@@ -62,6 +62,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
 
   setConnection(connection: Connection) {
     this._connection = connection;
+    this.log(LogLevel.Debug, 'LSP is now connected');
   }
 
   setConfigurationManager(config: ConfigurationManager) {
@@ -91,7 +92,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
       return;
     }
 
-    this.appendLine(`[lsp-${this.toLevelLabel(level)} ${LogFunctionLogger.now()}] ${message}`);
+    this.appendLine(`[lsp-${this.toLevelLabel(level)}] ${message}`);
     if (data) {
       this.appendLine(LogFunctionLogger.data2String(data));
     }

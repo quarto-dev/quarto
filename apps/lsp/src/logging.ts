@@ -47,15 +47,22 @@ export class LogFunctionLogger extends Disposable implements ILogger {
   }
 
   private _logLevel: LogLevel;
+  private _config?: ConfigurationManager;
 
   constructor(
     private readonly _logFn: typeof console.log,
-    private readonly _config: ConfigurationManager,
   ) {
     super();
 
+    // Be verbose during init until we have a chance to get the user configuration
+    this._logLevel = LogLevel.Debug;
+  }
+
+  setConfigurationManager(config: ConfigurationManager) {
+    this._config = config;
+
     this._register(this._config.onDidChangeConfiguration(() => {
-      this._logLevel = LogFunctionLogger.readLogLevel(this._config);
+      this._logLevel = LogFunctionLogger.readLogLevel(this._config!);
     }));
 
     this._logLevel = LogFunctionLogger.readLogLevel(this._config);
@@ -84,11 +91,19 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     }
   }
 
+  public logNotification(method: string) {
+    this.log(LogLevel.Trace, `Got notification: '${method}'`);
+  }
+
+  public logRequest(method: string) {
+    this.log(LogLevel.Trace, `Got request: '${method}'`);
+  }
+
   private toLevelLabel(level: LogLevel): string {
     switch (level) {
-      case LogLevel.Off: return 'Off';
-      case LogLevel.Debug: return 'Debug';
-      case LogLevel.Trace: return 'Trace';
+      case LogLevel.Off: return 'off';
+      case LogLevel.Debug: return 'debug';
+      case LogLevel.Trace: return 'trace';
     }
   }
 

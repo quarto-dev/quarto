@@ -45,4 +45,16 @@ export interface ILogger {
    * @param data Additional information about what is being logged.
    */
   log(level: LogLevel, message: string, data?: Record<string, unknown>): void;
+
+  /**
+   * Log notification at Trace level.
+   * @param method Message type name.
+   */
+  logNotification(method: string): void;
+
+  /**
+   * Log request at Trace level.
+   * @param method Message type name.
+   */
+  logRequest(method: string): void;
 }

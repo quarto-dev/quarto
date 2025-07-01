@@ -24,7 +24,8 @@ import {
   IncludeWorkspaceHeaderCompletions,
   LsConfiguration,
   defaultLsConfiguration,
-  PreferredMdPathExtensionStyle
+  PreferredMdPathExtensionStyle,
+  ILogger
 } from './service';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
@@ -131,9 +132,14 @@ export class ConfigurationManager extends Disposable {
   public readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
   private _settings: Settings;
+  private _logger: ILogger;
 
-  constructor(private readonly connection_: Connection) {
+  constructor(
+    private readonly connection_: Connection,
+    logger: ILogger,
+  ) {
     super();
+    this._logger = logger;
     this._settings = defaultSettings();
   }
 
@@ -163,6 +169,7 @@ export class ConfigurationManager extends Disposable {
       undefined
     );
     this.connection_.onDidChangeConfiguration(() => {
+      this._logger.logNotification('didChangeConfiguration');
       this.update();
     });
   }

@@ -23,6 +23,7 @@ import { Disposable } from 'core';
 import { ILogger, LogLevel } from "./service";
 
 import { ConfigurationManager } from './config';
+import { Connection } from 'vscode-languageserver';
 
 export class LogFunctionLogger extends Disposable implements ILogger {
 
@@ -47,6 +48,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
   }
 
   private _logLevel: LogLevel;
+  private _connection?: Connection;
   private _config?: ConfigurationManager;
 
   constructor(
@@ -56,6 +58,10 @@ export class LogFunctionLogger extends Disposable implements ILogger {
 
     // Be verbose during init until we have a chance to get the user configuration
     this._logLevel = LogLevel.Debug;
+  }
+
+  setConnection(connection: Connection) {
+    this._connection = connection;
   }
 
   setConfigurationManager(config: ConfigurationManager) {
@@ -85,7 +91,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
       return;
     }
 
-    this.appendLine(`[${this.toLevelLabel(level)} ${LogFunctionLogger.now()}] ${message}`);
+    this.appendLine(`[lsp-${this.toLevelLabel(level)} ${LogFunctionLogger.now()}] ${message}`);
     if (data) {
       this.appendLine(LogFunctionLogger.data2String(data));
     }
@@ -108,6 +114,11 @@ export class LogFunctionLogger extends Disposable implements ILogger {
   }
 
   private appendLine(value: string): void {
-    this._logFn(value);
+    // If we're connected, send log messages to client as LSP notifications
+    if (this._connection) {
+      this._connection.console.log(value);
+    } else {
+      this._logFn(value);
+    }
   }
 }

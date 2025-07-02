@@ -69,14 +69,18 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     this._config = config;
 
     this._register(this._config.onDidChangeConfiguration(() => {
-      this._logLevel = LogFunctionLogger.readLogLevel(this._config!);
+      this._logLevel = LogFunctionLogger.currentLogLevel(this._config!);
     }));
 
-    this._logLevel = LogFunctionLogger.readLogLevel(this._config);
+    this._logLevel = LogFunctionLogger.currentLogLevel(this._config);
   }
 
-  private static readLogLevel(config: ConfigurationManager): LogLevel {
-    switch (config.getSettings().markdown.server.log) {
+  private static currentLogLevel(config: ConfigurationManager): LogLevel {
+    return config.getSettings().quarto.logLevel;
+  }
+
+  public static parseLogLevel(logLevel: string): LogLevel {
+    switch (logLevel) {
       case 'trace': return LogLevel.Trace;
       case 'debug': return LogLevel.Debug;
       case 'off':

@@ -17,6 +17,7 @@
 import * as picomatch from 'picomatch';
 import { URI } from 'vscode-uri';
 import { MathjaxSupportedExtension } from 'editor-types';
+import { LogLevel } from './logging';
 
 /**
  * Preferred style for file paths to {@link markdownFileExtensions markdown files}.
@@ -39,6 +40,8 @@ export enum PreferredMdPathExtensionStyle {
 }
 
 export interface LsConfiguration {
+  readonly logLevel: LogLevel;
+
   /**
    * List of file extensions should be considered markdown.
    *
@@ -73,15 +76,15 @@ export interface LsConfiguration {
 
   readonly includeWorkspaceHeaderCompletions: 'never' | 'onSingleOrDoubleHash' | 'onDoubleHash';
 
-  readonly colorTheme: "light" | "dark";
+  readonly colorTheme: 'light' | 'dark';
   readonly mathjaxScale: number;
   readonly mathjaxExtensions: readonly MathjaxSupportedExtension[];
-
 }
 
 export const defaultMarkdownFileExtension = 'qmd';
 
 const defaultConfig: LsConfiguration = {
+  logLevel: LogLevel.Trace,
   markdownFileExtensions: [defaultMarkdownFileExtension, 'md'],
   knownLinkedToFileExtensions: [
     'jpg',
@@ -104,7 +107,7 @@ const defaultConfig: LsConfiguration = {
     "**/env/**"
   ],
   includeWorkspaceHeaderCompletions: 'never',
-  colorTheme: "light",
+  colorTheme: 'light',
   mathjaxScale: 1,
   mathjaxExtensions: []
 };

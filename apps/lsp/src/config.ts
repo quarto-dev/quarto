@@ -28,6 +28,7 @@ import {
   ILogger,
   LogLevel
 } from './service';
+import { LogFunctionLogger } from './logging';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 
@@ -36,6 +37,7 @@ export interface Settings {
     readonly colorTheme: string;
   };
   readonly quarto: {
+    readonly logLevel: LogLevel;
     readonly path: string;
     readonly mathjax: {
       readonly scale: number;
@@ -43,10 +45,6 @@ export interface Settings {
     }
   };
   readonly markdown: {
-    readonly server: {
-      readonly log: 'off' | 'debug' | 'trace';
-    };
-
     readonly preferredMdPathExtensionStyle: 'auto' | 'includeExtension' | 'removeExtension';
 
     readonly suggest: {
@@ -85,6 +83,7 @@ function defaultSettings(): Settings {
       colorTheme: 'Dark+'
     },
     quarto: {
+      logLevel: LogLevel.Trace,
       path: "",
       mathjax: {
         scale: 1,
@@ -92,9 +91,6 @@ function defaultSettings(): Settings {
       }
     },
     markdown: {
-      server: {
-        log: 'off'
-      },
       preferredMdPathExtensionStyle: 'auto',
       suggest: {
         paths: {
@@ -154,6 +150,7 @@ export class ConfigurationManager extends Disposable {
         colorTheme: settings.workbench.colorTheme
       },
       quarto: {
+        logLevel: LogFunctionLogger.parseLogLevel(settings.quarto.server.logLevel),
         path: settings.quarto.path,
         mathjax: {
           scale: settings.quarto.mathjax.scale,

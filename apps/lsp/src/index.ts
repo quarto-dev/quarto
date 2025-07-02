@@ -75,6 +75,7 @@ let mdLs: IMdLanguageService | undefined;
 connection.onInitialize((params: InitializeParams) => {
   // We're connected, log messages via LSP
   logger.setConnection(connection);
+  logger.logRequest('initialize');
 
   // alias options and capabilities
   initializationOptions = params.initializationOptions;

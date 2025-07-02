@@ -25,7 +25,8 @@ import {
   LsConfiguration,
   defaultLsConfiguration,
   PreferredMdPathExtensionStyle,
-  ILogger
+  ILogger,
+  LogLevel
 } from './service';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
@@ -144,6 +145,7 @@ export class ConfigurationManager extends Disposable {
   }
 
   public async update() {
+    this._logger.log(LogLevel.Trace, 'Sending \'configuration\' request');
     const settings = await this.connection_.workspace.getConfiguration();
 
     this._settings = {
@@ -163,15 +165,21 @@ export class ConfigurationManager extends Disposable {
   }
 
   public async subscribe() {
-    await this.update();
+    // Ignore the settings in parameters, the modern usage is to fetch the settings
+    // when we get this notification
+    this.connection_.onDidChangeConfiguration((_params) => {
+      this._logger.logNotification('didChangeConfiguration');
+      this.update();
+    });
+
+    // Get notified of configuration changes by client
     await this.connection_.client.register(
       DidChangeConfigurationNotification.type,
       undefined
     );
-    this.connection_.onDidChangeConfiguration(() => {
-      this._logger.logNotification('didChangeConfiguration');
-      this.update();
-    });
+
+    // Retrieve initial values for settings of interest
+    await this.update();
   }
 
   public getSettings(): Settings {

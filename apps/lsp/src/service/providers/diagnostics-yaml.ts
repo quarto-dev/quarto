@@ -53,7 +53,7 @@ export async function provideYamlDiagnostics(
       source: "quarto",
     };
   });
-  
+
 }
 
 function lintSeverity(item: LintItem) {

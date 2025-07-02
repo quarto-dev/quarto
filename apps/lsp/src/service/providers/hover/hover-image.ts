@@ -71,4 +71,3 @@ function pngToDataUrl(png: string): string {
   const b64Start = "data:image/png;base64,";
   return b64Start + base64data;
 }
-

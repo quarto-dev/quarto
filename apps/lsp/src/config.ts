@@ -141,7 +141,7 @@ export class ConfigurationManager extends Disposable {
   }
 
   public async update() {
-    this._logger.log(LogLevel.Trace, 'Sending \'configuration\' request');
+    this._logger.logTrace('Sending \'configuration\' request');
     const settings = await this.connection_.workspace.getConfiguration();
 
     this._settings = {

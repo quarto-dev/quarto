@@ -210,7 +210,7 @@ export class DiagnosticComputer {
     readonly links: readonly MdLink[];
     readonly statCache: ResourceMap<{ readonly exists: boolean }>;
   }> {
-    this.#logger.log(LogLevel.Debug, 'DiagnosticComputer.compute', { document: doc.uri, version: doc.version });
+    this.#logger.logDebug('DiagnosticComputer.compute', { document: doc.uri, version: doc.version });
 
     const { links, definitions } = await this.#linkProvider.getLinks(doc);
     const statCache = new ResourceMap<{ readonly exists: boolean }>();
@@ -235,7 +235,7 @@ export class DiagnosticComputer {
       ])).flat());
     }
 
-    this.#logger.log(LogLevel.Trace, 'DiagnosticComputer.compute finished', { document: doc.uri, version: doc.version, diagnostics });
+    this.#logger.logTrace('DiagnosticComputer.compute finished', { document: doc.uri, version: doc.version, diagnostics });
 
     return {
       links: links,
@@ -612,7 +612,7 @@ class FileLinkState extends Disposable {
   }
 
   #onLinkedResourceChanged(resource: URI, exists: boolean) {
-    this.#logger.log(LogLevel.Trace, 'FileLinkState.onLinkedResourceChanged', { resource, exists });
+    this.#logger.logTrace('FileLinkState.onLinkedResourceChanged', { resource, exists });
 
     const entry = this.#linkedToFile.get(resource);
     if (entry) {
@@ -650,7 +650,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
     this.#linkWatcher = this._register(linkWatcher);
 
     this._register(this.#linkWatcher.onDidChangeLinkedToFile(e => {
-      logger.log(LogLevel.Trace, 'DiagnosticsManager.onDidChangeLinkedToFile', { resource: e.changedResource });
+      logger.logTrace('DiagnosticsManager.onDidChangeLinkedToFile', { resource: e.changedResource });
 
       this.#onLinkedToFileChanged.fire({
         changedResource: e.changedResource,

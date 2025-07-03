@@ -52,15 +52,21 @@ export interface ILogger {
    */
   log(level: LogLevel, message: string, data?: Record<string, unknown>): void;
 
+  logTrace(message: string, data?: Record<string, unknown>): void;
+  logDebug(message: string, data?: Record<string, unknown>): void;
+  logInfo(message: string, data?: Record<string, unknown>): void;
+  logWarn(message: string, data?: Record<string, unknown>): void;
+  logError(message: string, data?: Record<string, unknown>): void;
+
   /**
    * Log notification at Trace level.
    * @param method Message type name.
    */
-  logNotification(method: string): void;
+  logNotification(method: string, data?: Record<string, unknown>): void;
 
   /**
    * Log request at Trace level.
    * @param method Message type name.
    */
-  logRequest(method: string): void;
+  logRequest(method: string, data?: Record<string, unknown>): void;
 }

@@ -18,14 +18,20 @@
  * The level of verbosity that the language service logs at.
  */
 export enum LogLevel {
-  /** Disable logging */
-  Off,
+  /** Log extremely verbose info about language server operation, such as calls into the file system */
+  Trace,
 
   /** Log verbose info about language server operation, such as when references are re-computed for a md file. */
   Debug,
 
-  /** Log extremely verbose info about language server operation, such as calls into the file system */
-  Trace,
+  /** Informational messages that highlight the progress of the application at coarse-grained level. */
+  Info,
+
+  /** Potentially harmful situations which still allow the application to continue running. */
+  Warn,
+
+  /** Error events that might still allow the application to continue running. */
+  Error,
 }
 
 /**

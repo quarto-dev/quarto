@@ -83,16 +83,18 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     switch (logLevel) {
       case 'trace': return LogLevel.Trace;
       case 'debug': return LogLevel.Debug;
-      case 'off':
+      case 'info': return LogLevel.Info;
+      case 'warn': return LogLevel.Warn;
+      case 'error': return LogLevel.Error;
       default:
-        return LogLevel.Off;
+        return LogLevel.Warn;
     }
   }
 
   get level(): LogLevel { return this._logLevel; }
 
   public log(level: LogLevel, message: string, data?: unknown): void {
-    if (this.level < level) {
+    if (level < this.level) {
       return;
     }
 
@@ -112,9 +114,11 @@ export class LogFunctionLogger extends Disposable implements ILogger {
 
   private toLevelLabel(level: LogLevel): string {
     switch (level) {
-      case LogLevel.Off: return 'off';
-      case LogLevel.Debug: return 'debug';
       case LogLevel.Trace: return 'trace';
+      case LogLevel.Debug: return 'debug';
+      case LogLevel.Info: return 'info';
+      case LogLevel.Warn: return 'warn';
+      case LogLevel.Error: return 'error';
     }
   }
 

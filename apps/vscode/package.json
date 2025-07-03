@@ -1314,7 +1314,9 @@
           "enum": [
             "trace",
             "debug",
-            "off"
+            "info",
+            "warn",
+            "error"
           ],
           "markdownDescription": "Log level for the Quarto language server."
         }

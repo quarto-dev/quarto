@@ -35,7 +35,6 @@ import {
   ILogger,
   IMdLanguageService,
   IWorkspace,
-  LogLevel,
 } from "./service";
 import {
   ConfigurationManager,
@@ -130,7 +129,7 @@ export async function registerDiagnostics(
         FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
       > => {
 
-        logger.log(LogLevel.Debug, "connection.languages.diagnostics.on", {
+        logger.logDebug("connection.languages.diagnostics.on", {
           document: params.textDocument.uri,
         });
 

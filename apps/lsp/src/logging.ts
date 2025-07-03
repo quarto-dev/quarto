@@ -62,7 +62,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
 
   setConnection(connection: Connection) {
     this._connection = connection;
-    this.log(LogLevel.Debug, 'LSP is now connected');
+    this.logInfo('LSP is now connected');
   }
 
   setConfigurationManager(config: ConfigurationManager) {
@@ -104,12 +104,27 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     }
   }
 
-  public logNotification(method: string) {
-    this.log(LogLevel.Trace, `Got notification: '${method}'`);
+  public logTrace(message: string, data?: Record<string, unknown>): void {
+    this.log(LogLevel.Trace, message, data);
+  }
+  public logDebug(message: string, data?: Record<string, unknown>): void {
+    this.log(LogLevel.Debug, message, data);
+  }
+  public logInfo(message: string, data?: Record<string, unknown>): void {
+    this.log(LogLevel.Info, message, data);
+  }
+  public logWarn(message: string, data?: Record<string, unknown>): void {
+    this.log(LogLevel.Warn, message, data);
+  }
+  public logError(message: string, data?: Record<string, unknown>): void {
+    this.log(LogLevel.Error, message, data);
   }
 
-  public logRequest(method: string) {
-    this.log(LogLevel.Trace, `Got request: '${method}'`);
+  public logNotification(method: string, data?: Record<string, unknown>) {
+    this.logTrace(`Got notification: '${method}'`, data);
+  }
+  public logRequest(method: string, data?: Record<string, unknown>) {
+    this.logTrace(`Got request: '${method}'`, data);
   }
 
   private toLevelLabel(level: LogLevel): string {

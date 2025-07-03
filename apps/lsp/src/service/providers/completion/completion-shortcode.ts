@@ -30,8 +30,8 @@ import { jupyterFromJSON, kCellId, kCellLabel, kCellTags, partitionCellOptions }
 
 const kShortcodeRegex = /(^\s*{{< )(embed|include)(\s+)([^\s]+)?.*? >}}\s*$/;
 
-export async function shortcodeCompletions(context: EditorContext, workspace: IWorkspace) : Promise<CompletionItem[] | null> {
-  
+export async function shortcodeCompletions(context: EditorContext, workspace: IWorkspace): Promise<CompletionItem[] | null> {
+
   // bypass if the current line doesn't contain a {{< (performance optimization so we don't execute
   // the regexes below if we don't need to)
   if (context.line.indexOf("{{<") === -1) {
@@ -40,7 +40,7 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
 
   const match = context.line.match(kShortcodeRegex);
   if (match) {
-    // is the cursor in the file region (group 4) and is the 
+    // is the cursor in the file region (group 4) and is the
     // next character a space?
     const beginFile = match[1].length + match[2].length + match[3].length;
     const endFile = beginFile + (match[4]?.length || 0);
@@ -80,10 +80,10 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
       } catch {
         return null;
       }
-    
+
       const completions: CompletionItem[] = [];
       for (const [name, type] of dirInfo) {
-        
+
         // screen out hidden
         if (name.startsWith(".")) {
           continue;
@@ -98,7 +98,7 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
             continue;
           }
         }
-      
+
         // create completion
         const uri = Utils.joinPath(parentDir, name);
         const isDir = type.isDirectory;
@@ -125,7 +125,7 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
         });
       }
       return completions;
-    }    
+    }
   }
 
   return null;
@@ -133,10 +133,10 @@ export async function shortcodeCompletions(context: EditorContext, workspace: IW
 }
 
 function resolveReference(
-  docUri: URI, 
+  docUri: URI,
   workspace: IWorkspace,
   ref: string): URI | undefined {
-  
+
   if (ref.startsWith('/')) {
     const workspaceFolder = getWorkspaceFolder(workspace, docUri);
     if (workspaceFolder) {
@@ -163,7 +163,7 @@ function resolvePath(root: URI, ref: string): URI | undefined {
   }
 }
 
-function ipynbCompletions(uri: URI) : CompletionItem[] | null {
+function ipynbCompletions(uri: URI): CompletionItem[] | null {
   const ipynbPath = uri.fsPath;
   if (fs.existsSync(ipynbPath)) {
     const modified = fs.statSync(ipynbPath).mtime.getTime();
@@ -184,18 +184,18 @@ function ipynbCompletions(uri: URI) : CompletionItem[] | null {
   }
 }
 
-const ipynbEmbedIds = new Map<string,{ modified: number, ids: string[]}>();
+const ipynbEmbedIds = new Map<string, { modified: number, ids: string[] }>();
 
-function readIpynbEmbedIds(ipynbPath: string) : string[] | null {
+function readIpynbEmbedIds(ipynbPath: string): string[] | null {
   const embedIds: string[] = [];
   const nbContents = fs.readFileSync(ipynbPath, { encoding: "utf-8" });
   const nb = jupyterFromJSON(nbContents);
   for (const cell of nb.cells) {
     if (cell.cell_type === "code") {
       const { yaml } = partitionCellOptions(nb.metadata.kernelspec.language, cell.source);
-      if (typeof(yaml?.[kCellLabel]) === "string") {
+      if (typeof (yaml?.[kCellLabel]) === "string") {
         embedIds.push(yaml[kCellLabel])
-      } else if (typeof(yaml?.[kCellId]) === "string") {
+      } else if (typeof (yaml?.[kCellId]) === "string") {
         embedIds.push(yaml[kCellId])
       } else if (Array.isArray(cell.metadata[kCellTags]) && cell.metadata[kCellTags].length) {
         embedIds.push(String(cell.metadata[kCellTags][0]))
@@ -211,7 +211,7 @@ function readIpynbEmbedIds(ipynbPath: string) : string[] | null {
   return embedIds.length ? embedIds : null;
 }
 
-function idToCompletion(id: string) : CompletionItem {
+function idToCompletion(id: string): CompletionItem {
   return {
     label: id,
     kind: CompletionItemKind.Field

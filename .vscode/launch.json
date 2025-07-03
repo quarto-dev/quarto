@@ -5,7 +5,6 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-    
 		{
 			"name": "Run VS Code Extension",
 			"type": "extensionHost",
@@ -24,6 +23,6 @@
       "port": 6009,
       "restart": true,
       "outFiles": ["${workspaceRoot}/out/**/*.js"]
-    },
+    }
 	]
 }

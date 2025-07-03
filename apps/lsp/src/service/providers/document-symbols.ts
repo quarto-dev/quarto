@@ -21,119 +21,119 @@ import { MdTableOfContentsProvider, TableOfContents, TocEntry, TocEntryType } fr
 import { MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
 
 interface MarkdownSymbol {
-	readonly level: number;
-	readonly parent: MarkdownSymbol | undefined;
-	readonly children: lsp.DocumentSymbol[];
-	readonly range: lsp.Range;
+  readonly level: number;
+  readonly parent: MarkdownSymbol | undefined;
+  readonly children: lsp.DocumentSymbol[];
+  readonly range: lsp.Range;
 }
 
 export interface ProvideDocumentSymbolOptions {
-	readonly includeLinkDefinitions?: boolean;
+  readonly includeLinkDefinitions?: boolean;
 }
 
 export class MdDocumentSymbolProvider {
 
-	readonly #tocProvider: MdTableOfContentsProvider;
-	readonly #linkProvider: MdLinkProvider;
-	readonly #logger: ILogger;
+  readonly #tocProvider: MdTableOfContentsProvider;
+  readonly #linkProvider: MdLinkProvider;
+  readonly #logger: ILogger;
 
-	constructor(
-		tocProvider: MdTableOfContentsProvider,
-		linkProvider: MdLinkProvider,
-		logger: ILogger,
-	) {
-		this.#tocProvider = tocProvider;
-		this.#linkProvider = linkProvider;
-		this.#logger = logger;
-	}
+  constructor(
+    tocProvider: MdTableOfContentsProvider,
+    linkProvider: MdLinkProvider,
+    logger: ILogger,
+  ) {
+    this.#tocProvider = tocProvider;
+    this.#linkProvider = linkProvider;
+    this.#logger = logger;
+  }
 
-	public async provideDocumentSymbols(document: Document, options: ProvideDocumentSymbolOptions, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
-		this.#logger.log(LogLevel.Debug, 'DocumentSymbolProvider.provideDocumentSymbols', { document: document.uri, version: document.version });
+  public async provideDocumentSymbols(document: Document, options: ProvideDocumentSymbolOptions, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
+    this.#logger.log(LogLevel.Debug, 'DocumentSymbolProvider.provideDocumentSymbols', { document: document.uri, version: document.version });
 
-		if (token.isCancellationRequested) {
-			return [];
-		}
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		const linkSymbols = await (options.includeLinkDefinitions ? this.#provideLinkDefinitionSymbols(document, token) : []);
-		if (token.isCancellationRequested) {
-			return [];
-		}
+    const linkSymbols = await (options.includeLinkDefinitions ? this.#provideLinkDefinitionSymbols(document, token) : []);
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		const toc = await this.#tocProvider.getForDocument(document);
-		if (token.isCancellationRequested) {
-			return [];
-		}
+    const toc = await this.#tocProvider.getForDocument(document);
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		return this.#toSymbolTree(document, linkSymbols, toc);
-	}
+    return this.#toSymbolTree(document, linkSymbols, toc);
+  }
 
-	#toSymbolTree(document: Document, linkSymbols: readonly lsp.DocumentSymbol[], toc: TableOfContents): lsp.DocumentSymbol[] {
-		const root: MarkdownSymbol = {
-			level: -Infinity,
-			children: [],
-			parent: undefined,
-			range: makeRange(0, 0, document.lineCount + 1, 0),
-		};
-		const additionalSymbols = [...linkSymbols];
-		this.#buildTocSymbolTree(root, toc.entries.filter(entry => entry.type !== TocEntryType.Title), additionalSymbols);
-		// Put remaining link definitions into top level document instead of last header
-		root.children.push(...additionalSymbols);
-		return root.children;
-	}
+  #toSymbolTree(document: Document, linkSymbols: readonly lsp.DocumentSymbol[], toc: TableOfContents): lsp.DocumentSymbol[] {
+    const root: MarkdownSymbol = {
+      level: -Infinity,
+      children: [],
+      parent: undefined,
+      range: makeRange(0, 0, document.lineCount + 1, 0),
+    };
+    const additionalSymbols = [...linkSymbols];
+    this.#buildTocSymbolTree(root, toc.entries.filter(entry => entry.type !== TocEntryType.Title), additionalSymbols);
+    // Put remaining link definitions into top level document instead of last header
+    root.children.push(...additionalSymbols);
+    return root.children;
+  }
 
-	async #provideLinkDefinitionSymbols(document: Document, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
-		const { links } = await this.#linkProvider.getLinks(document);
-		if (token.isCancellationRequested) {
-			return [];
-		}
+  async #provideLinkDefinitionSymbols(document: Document, token: CancellationToken): Promise<lsp.DocumentSymbol[]> {
+    const { links } = await this.#linkProvider.getLinks(document);
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		return links
-			.filter(link => link.kind === MdLinkKind.Definition)
-			.map((link): lsp.DocumentSymbol => this.#definitionToDocumentSymbol(link as MdLinkDefinition));
-	}
+    return links
+      .filter(link => link.kind === MdLinkKind.Definition)
+      .map((link): lsp.DocumentSymbol => this.#definitionToDocumentSymbol(link as MdLinkDefinition));
+  }
 
-	#definitionToDocumentSymbol(def: MdLinkDefinition): lsp.DocumentSymbol {
-		return {
-			kind: lsp.SymbolKind.Constant,
-			name: `[${def.ref.text}]`,
-			selectionRange: def.ref.range,
-			range: def.source.range,
-		};
-	}
+  #definitionToDocumentSymbol(def: MdLinkDefinition): lsp.DocumentSymbol {
+    return {
+      kind: lsp.SymbolKind.Constant,
+      name: `[${def.ref.text}]`,
+      selectionRange: def.ref.range,
+      range: def.source.range,
+    };
+  }
 
-	#buildTocSymbolTree(parent: MarkdownSymbol, entries: readonly TocEntry[], additionalSymbols: lsp.DocumentSymbol[]): void {
-		if (entries.length) {
-			while (additionalSymbols.length && isBefore(additionalSymbols[0].range.end, entries[0].sectionLocation.range.start)) {
-				parent.children.push(additionalSymbols.shift()!);
-			}
-		}
+  #buildTocSymbolTree(parent: MarkdownSymbol, entries: readonly TocEntry[], additionalSymbols: lsp.DocumentSymbol[]): void {
+    if (entries.length) {
+      while (additionalSymbols.length && isBefore(additionalSymbols[0].range.end, entries[0].sectionLocation.range.start)) {
+        parent.children.push(additionalSymbols.shift()!);
+      }
+    }
 
-		if (!entries.length) {
-			return;
-		}
+    if (!entries.length) {
+      return;
+    }
 
-		const entry = entries[0];
-		const symbol = this.#tocToDocumentSymbol(entry);
-		symbol.children = [];
+    const entry = entries[0];
+    const symbol = this.#tocToDocumentSymbol(entry);
+    symbol.children = [];
 
-		while (entry.level <= parent.level) {
-			parent = parent.parent!;
-		}
-		parent.children.push(symbol);
+    while (entry.level <= parent.level) {
+      parent = parent.parent!;
+    }
+    parent.children.push(symbol);
 
-		this.#buildTocSymbolTree({ level: entry.level, children: symbol.children, parent, range: entry.sectionLocation.range }, entries.slice(1), additionalSymbols);
-	}
+    this.#buildTocSymbolTree({ level: entry.level, children: symbol.children, parent, range: entry.sectionLocation.range }, entries.slice(1), additionalSymbols);
+  }
 
-	#tocToDocumentSymbol(entry: TocEntry): lsp.DocumentSymbol {
-		return {
-			name: this.#getTocSymbolName(entry),
-			kind: this.#getTocSymbolKind(entry),
-			range: entry.sectionLocation.range,
-			selectionRange: entry.sectionLocation.range
-		};
-	}
+  #tocToDocumentSymbol(entry: TocEntry): lsp.DocumentSymbol {
+    return {
+      name: this.#getTocSymbolName(entry),
+      kind: this.#getTocSymbolKind(entry),
+      range: entry.sectionLocation.range,
+      selectionRange: entry.sectionLocation.range
+    };
+  }
 
-	#getTocSymbolKind(entry: TocEntry): lsp.SymbolKind {
+  #getTocSymbolKind(entry: TocEntry): lsp.SymbolKind {
     switch (entry.type) {
       case TocEntryType.Title: {
         return lsp.SymbolKind.File;
@@ -147,7 +147,7 @@ export class MdDocumentSymbolProvider {
     }
   }
 
-	#getTocSymbolName(entry: TocEntry): string {
-		return entry.text || " ";
-	}
+  #getTocSymbolName(entry: TocEntry): string {
+    return entry.text || " ";
+  }
 }

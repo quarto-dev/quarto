@@ -111,7 +111,7 @@ export function codeEditorContext(
   embedded: boolean,
   explicit?: boolean,
   trigger?: string
-) : EditorContext {
+): EditorContext {
   const line = lines(code)[pos.line];
   const position = { row: pos.line, column: pos.character };
 
@@ -145,14 +145,14 @@ export function docEditorContext(
   pos: Position,
   explicit: boolean,
   trigger?: string
-) : EditorContext {
+): EditorContext {
   const path = filePathForDoc(doc);
   const filetype = isQuartoDoc(doc)
     ? "markdown"
     : isQuartoYaml(doc)
-    ? "yaml"
-    : "markdown"; // should never get here
- 
+      ? "yaml"
+      : "markdown"; // should never get here
+
   const code = doc.getText();
 
   return codeEditorContext(
@@ -165,5 +165,3 @@ export function docEditorContext(
     trigger
   )
 }
-
-

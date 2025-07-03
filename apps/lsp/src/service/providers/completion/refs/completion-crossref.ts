@@ -44,10 +44,10 @@ function xrefCompletion(includeFilename: boolean) {
     label: `${xref.type}-${xref.id}${xref.suffix || ""}`,
     documentation: xref.title
       ? {
-          kind: MarkupKind.Markdown,
-          value:
-            xref.title + (includeFilename ? " — _" + xref.file + "_" : ""),
-        }
+        kind: MarkupKind.Markdown,
+        value:
+          xref.title + (includeFilename ? " — _" + xref.file + "_" : ""),
+      }
       : undefined,
   });
 }

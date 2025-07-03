@@ -60,7 +60,7 @@ documents.listen(connection);
 const configManager = new ConfigurationManager(connection);
 const config = lsConfiguration(configManager);
 
-// Capabilities 
+// Capabilities
 let capabilities: ClientCapabilities | undefined;
 
 // Initialization options
@@ -84,7 +84,7 @@ connection.onInitialize((params: InitializeParams) => {
     return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
   })
 
-  connection.onHover(async (params, token) : Promise<Hover | null | undefined> => {
+  connection.onHover(async (params, token): Promise<Hover | null | undefined> => {
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return null;
@@ -151,7 +151,7 @@ connection.onInitialize((params: InitializeParams) => {
 
   // register no-op methods to enable client middleware
   middlewareRegister(connection);
-   
+
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -181,7 +181,7 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 // further config dependent initialization
-connection.onInitialized(async () => {  
+connection.onInitialized(async () => {
 
   // sync config if possible
   if (capabilities?.workspace?.configuration) {
@@ -193,23 +193,23 @@ connection.onInitialized(async () => {
   const workspaceDir = workspaceFolders?.length
     ? URI.parse(workspaceFolders[0].uri).fsPath
     : undefined;
-   
+
   // if we were passed a quarto bin path then use that
-  let quartoBinPath : string | undefined;
+  let quartoBinPath: string | undefined;
   if (initializationOptions?.quartoBinPath) {
     quartoBinPath = path.join(initializationOptions?.quartoBinPath, isWindows() ? "quarto.exe" : "quarto");
   }
 
   // initialize quarto
   const quartoContext = initQuartoContext(
-    quartoBinPath || configManager.getSettings().quarto.path, 
+    quartoBinPath || configManager.getSettings().quarto.path,
     workspaceDir
   );
   const quarto = await initializeQuarto(quartoContext);
 
   // initialize logger
   const logger = new LogFunctionLogger(
-    console.log.bind(console), 
+    console.log.bind(console),
     configManager
   );
 
@@ -218,7 +218,7 @@ connection.onInitialized(async () => {
     workspaceFolders?.map(value => URI.parse(value.uri)) || [],
     documents,
     connection,
-    capabilities!, 
+    capabilities!,
     config,
     logger
   )
@@ -232,7 +232,7 @@ connection.onInitialized(async () => {
     quarto,
     workspace,
     documents,
-    parser, 
+    parser,
     logger
   });
 
@@ -246,7 +246,7 @@ connection.onInitialized(async () => {
     logger
   );
 
-  // create lsp connection (jsonrpc bridge) 
+  // create lsp connection (jsonrpc bridge)
   const lspConnection: LspConnection = {
     onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
       return connection.onRequest(method, handler);
@@ -262,5 +262,5 @@ connection.onInitialized(async () => {
 // ensure that the deno runtime won't exit b/c of the event queue being empty
 setInterval(() => { /* */ }, 1000);
 
-// listen 
+// listen
 connection.listen();

@@ -24,52 +24,52 @@ import { MdDocumentSymbolProvider } from './document-symbols';
 
 export class MdWorkspaceSymbolProvider extends Disposable {
 
-	readonly #cache: MdWorkspaceInfoCache<readonly lsp.SymbolInformation[]>;
-	readonly #symbolProvider: MdDocumentSymbolProvider;
+  readonly #cache: MdWorkspaceInfoCache<readonly lsp.SymbolInformation[]>;
+  readonly #symbolProvider: MdDocumentSymbolProvider;
 
-	constructor(
-		workspace: IWorkspace,
-		symbolProvider: MdDocumentSymbolProvider,
-	) {
-		super();
-		this.#symbolProvider = symbolProvider;
+  constructor(
+    workspace: IWorkspace,
+    symbolProvider: MdDocumentSymbolProvider,
+  ) {
+    super();
+    this.#symbolProvider = symbolProvider;
 
-		this.#cache = this._register(new MdWorkspaceInfoCache(workspace, (doc, token) => this.provideDocumentSymbolInformation(doc, token)));
-	}
+    this.#cache = this._register(new MdWorkspaceInfoCache(workspace, (doc, token) => this.provideDocumentSymbolInformation(doc, token)));
+  }
 
-	public async provideWorkspaceSymbols(query: string, token: CancellationToken): Promise<lsp.WorkspaceSymbol[]> {
-		if (token.isCancellationRequested) {
-			return [];
-		}
-	
-		const allSymbols = await this.#cache.values();
-		
-		if (token.isCancellationRequested) {
-			return [];
-		}
+  public async provideWorkspaceSymbols(query: string, token: CancellationToken): Promise<lsp.WorkspaceSymbol[]> {
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		const normalizedQueryStr = query.toLowerCase();
-		return allSymbols.flat().filter(symbolInformation => symbolInformation.name.toLowerCase().includes(normalizedQueryStr));
-	}
+    const allSymbols = await this.#cache.values();
 
-	public async provideDocumentSymbolInformation(document: Document, token: CancellationToken): Promise<lsp.SymbolInformation[]> {
-		const docSymbols = await this.#symbolProvider.provideDocumentSymbols(document, {}, token);
-		if (token.isCancellationRequested) {
-			return [];
-		}
-		return Array.from(this.#toSymbolInformation(document.uri, docSymbols));
-	}
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-	*#toSymbolInformation(uri: string, docSymbols: readonly lsp.DocumentSymbol[]): Iterable<lsp.SymbolInformation> {
-		for (const symbol of docSymbols) {
-			yield {
-				name: symbol.name,
-				kind: lsp.SymbolKind.String,
-				location: { uri, range: symbol.selectionRange }
-			};
-			if (symbol.children) {
-				yield* this.#toSymbolInformation(uri, symbol.children);
-			}
-		}
-	}
+    const normalizedQueryStr = query.toLowerCase();
+    return allSymbols.flat().filter(symbolInformation => symbolInformation.name.toLowerCase().includes(normalizedQueryStr));
+  }
+
+  public async provideDocumentSymbolInformation(document: Document, token: CancellationToken): Promise<lsp.SymbolInformation[]> {
+    const docSymbols = await this.#symbolProvider.provideDocumentSymbols(document, {}, token);
+    if (token.isCancellationRequested) {
+      return [];
+    }
+    return Array.from(this.#toSymbolInformation(document.uri, docSymbols));
+  }
+
+  *#toSymbolInformation(uri: string, docSymbols: readonly lsp.DocumentSymbol[]): Iterable<lsp.SymbolInformation> {
+    for (const symbol of docSymbols) {
+      yield {
+        name: symbol.name,
+        kind: lsp.SymbolKind.String,
+        location: { uri, range: symbol.selectionRange }
+      };
+      if (symbol.children) {
+        yield* this.#toSymbolInformation(uri, symbol.children);
+      }
+    }
+  }
 }

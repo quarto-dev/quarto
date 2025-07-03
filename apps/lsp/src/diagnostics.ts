@@ -56,7 +56,7 @@ export async function registerDiagnostics(
 
   const subs: Disposable[] = [];
 
-  
+
 
   // baseline diagnostics sent on save (and cleared on change)
   const saveDiagnosticsSources: Array<(doc: Document) => Promise<Diagnostic[]>> = [];

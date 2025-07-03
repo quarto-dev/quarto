@@ -71,10 +71,21 @@ export function schemaExhaustiveCompletions(schema: Schema): boolean {
 
 const definitionsObject: Record<string, ConcreteSchema> = {};
 
+/**
+ * Check if a schema definition exists in the current definitions object.
+ * @param key - The key of the schema definition to check.
+ * @returns True if the schema definition exists, false otherwise.
+ */
 export function hasSchemaDefinition(key: string): boolean {
   return definitionsObject[key] !== undefined;
 }
 
+/**
+ * Get a schema definition by its key.
+ * @param key - The key of the schema definition to retrieve.
+ * @returns The schema definition corresponding to the key.
+ * @throws Error if the schema definition does not exist.
+ */
 export function getSchemaDefinition(key: string): ConcreteSchema {
   if (definitionsObject[key] === undefined) {
     throw new Error(`Schema ${key} not found.`);
@@ -82,6 +93,11 @@ export function getSchemaDefinition(key: string): ConcreteSchema {
   return definitionsObject[key];
 }
 
+/**
+ * Set a schema definition in the current definitions object.
+ * @param schema - The schema definition to set.
+ * @throws Error if the schema does not have a $id property.
+ */
 export function setSchemaDefinition(schema: ConcreteSchema) {
   if (schema.$id === undefined) {
     throw new Error(
@@ -95,11 +111,25 @@ export function setSchemaDefinition(schema: ConcreteSchema) {
   }
 }
 
+/**
+ * Get the schema definitions object. This is a shallow copy of the current definitions.
+ * @returns A copy of the schema definitions object.
+ */
 export function getSchemaDefinitionsObject(): Record<
   string,
   ConcreteSchema
 > {
   return Object.assign({}, definitionsObject);
+}
+
+/**
+ * Set the schema definitions object. This will replace the existing definitions.
+ * @param newDefinitions - The new definitions to set.
+ */
+export function setSchemaDefinitionsObject(
+  newDefinitions: Record<string, ConcreteSchema>
+): void {
+  Object.assign(definitionsObject, newDefinitions);
 }
 
 export function expandAliasesFrom(

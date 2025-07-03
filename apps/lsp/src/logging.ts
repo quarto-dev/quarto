@@ -95,9 +95,12 @@ export class LogFunctionLogger extends Disposable implements ILogger {
       return;
     }
 
-    this.appendLine(`[lsp-${this.toLevelLabel(level)}] ${message}`);
+    // Mention log level because until we switch to languageclient 10.x, the
+    // output channel will use the `info` level for all our messages.
+    // See https://github.com/microsoft/vscode-languageserver-node/issues/1116.
+    this.appendLine(level, `[lsp-${this.toLevelLabel(level)}] ${message}`);
     if (data) {
-      this.appendLine(LogFunctionLogger.data2String(data));
+      this.appendLine(level, LogFunctionLogger.data2String(data));
     }
   }
 
@@ -134,10 +137,28 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     }
   }
 
-  private appendLine(value: string): void {
+  private appendLine(level: LogLevel, value: string): void {
     // If we're connected, send log messages to client as LSP notifications
     if (this._connection) {
-      this._connection.console.log(value);
+      // The log level is not currently forwarded to our `LogOutputChannel` on
+      // the client side. We'll need to update to languageclient 10.x for this,
+      // see https://github.com/microsoft/vscode-languageserver-node/issues/1116.
+      switch (level) {
+        case LogLevel.Error:
+          this._connection.console.error(value);
+          break;
+        case LogLevel.Warn:
+          this._connection.console.warn(value);
+          break;
+        case LogLevel.Info:
+          this._connection.console.info(value);
+          break;
+        case LogLevel.Debug:
+        case LogLevel.Trace:
+        default:
+          this._connection.console.log(value);
+          break;
+      }
     } else {
       this._logFn(value);
     }

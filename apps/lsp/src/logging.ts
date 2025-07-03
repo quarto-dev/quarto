@@ -55,9 +55,6 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     private readonly _logFn: typeof console.log,
   ) {
     super();
-
-    // Be verbose during init until we have a chance to get the user configuration
-    this._logLevel = LogLevel.Debug;
   }
 
   setConnection(connection: Connection) {

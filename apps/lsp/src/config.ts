@@ -140,6 +140,20 @@ export class ConfigurationManager extends Disposable {
     this._settings = defaultSettings();
   }
 
+  public init(logLevel?: string) {
+    const initLogLevel = LogFunctionLogger.parseLogLevel(
+      logLevel ?? "warn"
+    );
+
+    this._settings = {
+      ...this._settings,
+      quarto: {
+        ...this._settings.quarto,
+        logLevel: initLogLevel,
+      }
+    };
+  }
+
   public async update() {
     this._logger.logTrace('Sending \'configuration\' request');
     const settings = await this.connection_.workspace.getConfiguration();

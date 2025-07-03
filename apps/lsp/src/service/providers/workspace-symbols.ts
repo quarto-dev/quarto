@@ -14,8 +14,6 @@
  *
  */
 
-import * as fs from 'fs';
-import { Utils } from 'vscode-uri';
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { Disposable } from 'core';
@@ -24,6 +22,7 @@ import { IWorkspace } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { MdDocumentSymbolProvider } from './document-symbols';
 import { LsConfiguration } from '../config';
+import { isRPackage } from '../../r-utils';
 
 export class MdWorkspaceSymbolProvider extends Disposable {
   readonly #config: LsConfiguration;
@@ -52,7 +51,7 @@ export class MdWorkspaceSymbolProvider extends Disposable {
 
     switch (this.#config.exportSymbolsToWorkspace) {
       case 'all': break;
-      case 'default': if (shouldExportSymbolsToWorkspace(this.#workspace)) return []; else break;
+      case 'default': if (await shouldExportSymbolsToWorkspace(this.#workspace)) return []; else break;
       case 'none': return [];
     }
 
@@ -88,16 +87,6 @@ export class MdWorkspaceSymbolProvider extends Disposable {
   }
 }
 
-function shouldExportSymbolsToWorkspace(workspace: IWorkspace): boolean {
-  return isRPackage(workspace);
-}
-
-function isRPackage(workspace: IWorkspace): boolean {
-  if (workspace.workspaceFolders === undefined) {
-    return false;
-  }
-
-  const projectPath = workspace.workspaceFolders[0];
-  const descPath = Utils.joinPath(projectPath, 'DESCRIPTION');
-  return fs.existsSync(descPath.fsPath);
+async function shouldExportSymbolsToWorkspace(workspace: IWorkspace): Promise<boolean> {
+  return await isRPackage(workspace);
 }

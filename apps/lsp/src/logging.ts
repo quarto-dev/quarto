@@ -143,18 +143,8 @@ export class LogFunctionLogger extends Disposable implements ILogger {
       // The log level is not currently forwarded to our `LogOutputChannel` on
       // the client side. We'll need to update to languageclient 10.x for this,
       // see https://github.com/microsoft/vscode-languageserver-node/issues/1116.
+      // So just emit everything via `log` for now.
       switch (level) {
-        case LogLevel.Error:
-          this._connection.console.error(value);
-          break;
-        case LogLevel.Warn:
-          this._connection.console.warn(value);
-          break;
-        case LogLevel.Info:
-          this._connection.console.info(value);
-          break;
-        case LogLevel.Debug:
-        case LogLevel.Trace:
         default:
           this._connection.console.log(value);
           break;

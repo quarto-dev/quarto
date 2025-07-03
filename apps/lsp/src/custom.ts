@@ -14,10 +14,10 @@
  */
 import path from "path";
 
-import { 
-  defaultEditorServerOptions, 
-  dictionaryServerMethods, 
-  editorServerMethods, 
+import {
+  defaultEditorServerOptions,
+  dictionaryServerMethods,
+  editorServerMethods,
   mathServerMethods,
   EditorServerOptions,
   sourceServerMethods,
@@ -34,14 +34,14 @@ import { yamlHover } from "./service/providers/hover/hover-yaml";
 import { Quarto, codeEditorContext } from "./service/quarto";
 
 export function registerCustomMethods(
-  quarto: Quarto, 
+  quarto: Quarto,
   connection: LspConnection,
   documents: TextDocuments<Document>
 ) {
 
   const resourcesDir = path.join(__dirname, "resources");
 
-  const options : EditorServerOptions = {
+  const options: EditorServerOptions = {
     ...defaultEditorServerOptions(
       quarto,
       resourcesDir,
@@ -67,20 +67,20 @@ export function registerCustomMethods(
 }
 
 
-async function codeViewAssist(quarto: Quarto, context: CodeViewCellContext) : Promise<Hover | undefined> {
-  
+async function codeViewAssist(quarto: Quarto, context: CodeViewCellContext): Promise<Hover | undefined> {
+
   const edContext = codeEditorContext(
     context.filepath,
     context.language == "yaml" ? "yaml" : "script",
     context.code.join("\n"),
     Position.create(context.selection.start.line, context.selection.start.character),
     false
-  );  
+  );
 
   return await yamlHover(quarto, edContext) || undefined;
 }
 
-async function codeViewCompletions(quarto: Quarto, context: CodeViewCompletionContext) : Promise<CompletionList> {
+async function codeViewCompletions(quarto: Quarto, context: CodeViewCompletionContext): Promise<CompletionList> {
   // handle yaml completions within the lsp (the rest are currently handled in the vscode extension)
   const edContext = codeEditorContext(
     context.filepath,

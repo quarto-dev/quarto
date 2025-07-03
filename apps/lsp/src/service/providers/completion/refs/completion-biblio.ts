@@ -38,9 +38,9 @@ export async function biblioCompletions(
         label: ref.id,
         documentation: ref.cite
           ? {
-              kind: MarkupKind.Markdown,
-              value: ref.cite,
-            }
+            kind: MarkupKind.Markdown,
+            value: ref.cite,
+          }
           : undefined,
       }));
   } else {

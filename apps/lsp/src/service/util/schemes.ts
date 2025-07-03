@@ -15,7 +15,6 @@
  */
 
 export const Schemes = Object.freeze({
-	file: 'file',
-	untitled: 'untitled',
+  file: 'file',
+  untitled: 'untitled',
 });
-

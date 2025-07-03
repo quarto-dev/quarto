@@ -40,7 +40,7 @@ import { registerCustomMethods } from "./custom";
 import { isWindows, LspConnection } from "core-node";
 import { initQuartoContext, Document, markdownitParser, LspInitializationOptions } from "quarto-core";
 import { ConfigurationManager, lsConfiguration } from "./config";
-import { LogFunctionLogger } from "./logging";
+import { Logger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService } from "./service";
@@ -53,7 +53,7 @@ import { registerDiagnostics } from "./diagnostics";
 const connection = createConnection(ProposedFeatures.all);
 
 // Initialize logger
-const logger = new LogFunctionLogger(console.log.bind(console));
+const logger = new Logger(console.log.bind(console));
 
 // Create text document manager
 const documents: TextDocuments<Document> = new TextDocuments(TextDocument);

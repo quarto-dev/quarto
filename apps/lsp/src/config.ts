@@ -28,7 +28,7 @@ import {
   ILogger,
   LogLevel
 } from './service';
-import { LogFunctionLogger } from './logging';
+import { Logger } from './logging';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 
@@ -141,7 +141,7 @@ export class ConfigurationManager extends Disposable {
   }
 
   public init(logLevel?: string) {
-    const initLogLevel = LogFunctionLogger.parseLogLevel(
+    const initLogLevel = Logger.parseLogLevel(
       logLevel ?? "warn"
     );
 
@@ -164,7 +164,7 @@ export class ConfigurationManager extends Disposable {
         colorTheme: settings.workbench.colorTheme
       },
       quarto: {
-        logLevel: LogFunctionLogger.parseLogLevel(settings.quarto.server.logLevel),
+        logLevel: Logger.parseLogLevel(settings.quarto.server.logLevel),
         path: settings.quarto.path,
         mathjax: {
           scale: settings.quarto.mathjax.scale,

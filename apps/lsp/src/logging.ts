@@ -25,8 +25,7 @@ import { ILogger, LogLevel } from "./service";
 import { ConfigurationManager } from './config';
 import { Connection } from 'vscode-languageserver';
 
-export class LogFunctionLogger extends Disposable implements ILogger {
-
+export class Logger extends Disposable implements ILogger {
   private static now(): string {
     const now = new Date();
     return String(now.getUTCHours()).padStart(2, '0')
@@ -66,10 +65,10 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     this._config = config;
 
     this._register(this._config.onDidChangeConfiguration(() => {
-      this._logLevel = LogFunctionLogger.currentLogLevel(this._config!);
+      this._logLevel = Logger.currentLogLevel(this._config!);
     }));
 
-    this._logLevel = LogFunctionLogger.currentLogLevel(this._config);
+    this._logLevel = Logger.currentLogLevel(this._config);
   }
 
   private static currentLogLevel(config: ConfigurationManager): LogLevel {
@@ -100,7 +99,7 @@ export class LogFunctionLogger extends Disposable implements ILogger {
     // See https://github.com/microsoft/vscode-languageserver-node/issues/1116.
     this.appendLine(level, `[lsp-${this.toLevelLabel(level)}] ${message}`);
     if (data) {
-      this.appendLine(level, LogFunctionLogger.data2String(data));
+      this.appendLine(level, Logger.data2String(data));
     }
   }
 

@@ -83,7 +83,7 @@ function defaultSettings(): Settings {
       colorTheme: 'Dark+'
     },
     quarto: {
-      logLevel: LogLevel.Trace,
+      logLevel: LogLevel.Info,
       path: "",
       mathjax: {
         scale: 1,

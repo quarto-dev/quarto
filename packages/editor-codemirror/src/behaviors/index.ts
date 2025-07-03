@@ -70,7 +70,7 @@ export function createBehaviors(context: BehaviorContext): Behavior[] {
     yamlOptionBehavior(context),
     toolbarBehavior(context),
     diagramBehavior(context),
-    validationBehavior(context)
+    validationBehavior()
   ];
   behaviors.push(keyboardBehavior(context, behaviors.flatMap(behavior => behavior.keys || [])));
   return behaviors;

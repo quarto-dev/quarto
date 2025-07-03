@@ -14,7 +14,7 @@
  */
 import { EditorView } from "@codemirror/view";
 import { Node } from "prosemirror-model";
-import { Behavior, BehaviorContext } from ".";
+import { Behavior } from ".";
 
 import { Decoration, DecorationSet } from "@codemirror/view"
 import { StateField, StateEffect } from "@codemirror/state"
@@ -24,7 +24,7 @@ import * as m from "@quarto/_mapped-string"
 import * as v from "@quarto/_json-validator"
 import * as j from "@quarto/_annotated-json"
 
-export function validationBehavior(context: BehaviorContext): Behavior {
+export function validationBehavior(): Behavior {
   return {
     extensions: [validationErrorHoverTooltip],
 
@@ -32,8 +32,8 @@ export function validationBehavior(context: BehaviorContext): Behavior {
       applyValidation(pmNode, cmView)
     },
     pmUpdate(pmNode, updatePmNode, cmView) {
-      // TODO: remove old validation decorations!
-      //applyValidation(updatePmNode, cmView)
+      clearUnderlines(cmView)
+      applyValidation(updatePmNode, cmView)
     }
   }
 }
@@ -78,14 +78,14 @@ const schema3 = {
 // codeblock is yaml frontmatter, if it is then we validate the yaml and add
 // error underline decoration with an attached error message that is displayed
 // on hover via `validationErrorHoverTooltip`.
-const applyValidation = (pmNode: Node, cmView: EditorView) => {
+const applyValidation = async (pmNode: Node, cmView: EditorView) => {
   const t = pmNode.textContent.trim()
   if (t.startsWith('---')) {
     const [_, extractedYamlString] = t.split('---')
     const ttYamlString = m.asMappedString(extractedYamlString)
     const ttAnnotation = j.parse(ttYamlString)
 
-    v.withValidator(schema3, async (validator) => {
+    await v.withValidator(schema3, async (validator) => {
       const result = await validator.validateParse(ttYamlString, ttAnnotation);
       console.log('validator result on extractedYamlString:', result);
       for (const error of result.errors)
@@ -106,16 +106,24 @@ const applyValidation = (pmNode: Node, cmView: EditorView) => {
 const addUnderline = StateEffect.define<{ from: number, to: number, message: string }>({
   map: ({ from, to, message }, change) => ({ from: change.mapPos(from), to: change.mapPos(to), message })
 })
+const removeUnderlines = StateEffect.define({
+  map: () => { }
+})
 const underlineField = StateField.define<DecorationSet>({
   create() {
     return Decoration.none
   },
   update(underlines, tr) {
     underlines = underlines.map(tr.changes)
-    for (let e of tr.effects) if (e.is(addUnderline)) {
-      underlines = underlines.update({
-        add: [Decoration.mark({ class: "cm-underline", message: e.value.message }).range(e.value.from, e.value.to)]
-      })
+    for (let e of tr.effects) {
+      if (e.is(addUnderline)) {
+        underlines = underlines.update({
+          add: [Decoration.mark({ class: "cm-underline", message: e.value.message }).range(e.value.from, e.value.to)]
+        })
+      }
+      if (e.is(removeUnderlines)) {
+        underlines = underlines.update({ filter: () => false })
+      }
     }
     return underlines
   },
@@ -132,6 +140,10 @@ const underline = (cmView: EditorView, from: number, to: number, message: string
   if (!cmView.state.field(underlineField, false))
     effects.push(StateEffect.appendConfig.of([underlineField, underlineTheme]))
   cmView.dispatch({ effects })
+}
+const clearUnderlines = (cmView: EditorView) => {
+  if (!!cmView.state.field(underlineField, false))
+    cmView.dispatch({ effects: [removeUnderlines.of()] })
 }
 
 // helper function for positionally picking data from a DecorationSet

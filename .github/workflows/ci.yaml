@@ -6,11 +6,13 @@ on:
     branches:
       - main
     paths:
+      - 'apps/lsp/**'
       - 'apps/vscode/**'
   pull_request:
     branches:
       - main
     paths:
+      - 'apps/lsp/**'
       - 'apps/vscode/**'
   workflow_dispatch:
 

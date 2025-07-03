@@ -149,6 +149,13 @@ export class Logger extends Disposable implements ILogger {
           break;
       }
     } else {
+      // Note that by default, languageserver redirects `console.log` to the
+      // client. However this is only the case with StdIo connections:
+      // https://github.com/microsoft/vscode-languageserver-node/blob/df56e720/server/src/node/main.ts#L262-L264
+      // While we currently only use StdIo to connect the LSP, and so the branch
+      // above to explicitly log via our connection object is not strictly
+      // necessary, it's still better to use our own logger abstraction that we
+      // are in control of.
       this._logFn(value);
     }
   }

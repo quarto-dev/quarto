@@ -117,7 +117,8 @@ export async function activateLsp(
 
   // create client options
   const initializationOptions: LspInitializationOptions = {
-    quartoBinPath: quartoContext.binPath
+    quartoBinPath: quartoContext.binPath,
+    logLevel: config.get("server.logLevel"),
   };
 
   const documentSelectorPattern = semver.gte(quartoContext.version, "1.6.24") ?

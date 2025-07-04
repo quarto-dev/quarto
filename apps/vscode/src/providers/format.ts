@@ -138,9 +138,13 @@ class FormatCellCommand implements Command {
       const edits = await formatActiveCell(editor, this.engine_);
       if (edits) {
         editor.edit((editBuilder) => {
-          edits.forEach((edit) => {
-            editBuilder.replace(edit.range, edit.newText);
-          });
+          // Sort edits by descending start position to avoid range shifting issues
+          edits
+            .slice()
+            .sort((a, b) => b.range.start.compareTo(a.range.start))
+            .forEach((edit) => {
+              editBuilder.replace(edit.range, edit.newText);
+            });
         });
       } else {
         window.showInformationMessage(
@@ -204,15 +208,21 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
 }
 
 async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
+  // Create virtual document containing the block
   const blockLines = lines(codeForExecutableLanguageBlock(block));
   blockLines.push("");
   const vdoc = virtualDocForCode(blockLines, language);
+
   const edits = await executeFormatDocumentProvider(
     vdoc,
     doc,
     formattingOptions(doc.uri, vdoc.language)
   );
+
   if (edits) {
+    // Because we format with the block code copied in an empty virtual
+    // document, we need to adjust the ranges to match the edits to the block
+    // cell in the original file.
     const blockRange = new Range(
       new Position(block.range.start.line, block.range.start.character),
       new Position(block.range.end.line, block.range.end.character)

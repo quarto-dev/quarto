@@ -209,8 +209,7 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
 
 async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
   // Create virtual document containing the block
-  const blockLines = lines(codeForExecutableLanguageBlock(block));
-  blockLines.push("");
+  const blockLines = lines(codeForExecutableLanguageBlock(block, false));
   const vdoc = virtualDocForCode(blockLines, language);
 
   const edits = await executeFormatDocumentProvider(

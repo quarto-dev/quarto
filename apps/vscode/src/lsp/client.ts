@@ -117,7 +117,8 @@ export async function activateLsp(
 
   // create client options
   const initializationOptions: LspInitializationOptions = {
-    quartoBinPath: quartoContext.binPath
+    quartoBinPath: quartoContext.binPath,
+    logLevel: config.get("server.logLevel"),
   };
 
   const documentSelectorPattern = semver.gte(quartoContext.version, "1.6.24") ?
@@ -145,6 +146,17 @@ export async function activateLsp(
     serverOptions,
     clientOptions
   );
+
+  // Notify LSP of quarto setting changes
+  context.subscriptions.push(workspace.onDidChangeConfiguration(e => {
+    if (client.state !== State.Running) {
+      return;
+    }
+
+    if (e.affectsConfiguration("quarto")) {
+      client.sendNotification("workspace/didChangeConfiguration", {});
+    }
+  }));
 
   // return once the server is running
   return new Promise<LanguageClient>((resolve, reject) => {

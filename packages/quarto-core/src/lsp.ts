@@ -15,4 +15,5 @@
 
 export interface LspInitializationOptions {
   quartoBinPath?: string;
+  logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
 }

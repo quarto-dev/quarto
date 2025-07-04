@@ -33,7 +33,6 @@ import { Document, isQuartoDoc } from "quarto-core";
 import {
   FileStat,
   ILogger,
-  LogLevel,
   LsConfiguration,
   IWorkspace,
   IWorkspaceWithWatching,
@@ -98,7 +97,7 @@ export function languageServiceWorkspace(
   const onDidDeleteMarkdownDocument = new Emitter<URI>();
 
   const doDeleteDocument = (uri: URI) => {
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.deleteDocument', { document: uri.toString() });
+    logger.logTrace('VsCodeClientWorkspace.deleteDocument', { document: uri.toString() });
     documentCache.delete(uri);
     onDidDeleteMarkdownDocument.fire(uri);
   }
@@ -107,7 +106,7 @@ export function languageServiceWorkspace(
     if (!isRelevantMarkdownDocument(e.document)) {
       return;
     }
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.TextDocument.onDidOpen', { document: e.document.uri });
+    logger.logNotification('onDidOpen', { document: e.document.uri });
 
     const uri = URI.parse(e.document.uri);
     const doc = documentCache.get(uri);
@@ -132,7 +131,7 @@ export function languageServiceWorkspace(
       return;
     }
 
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.TextDocument.onDidChanceContent', { document: e.document.uri });
+    logger.logNotification('onDidChangeContent', { document: e.document.uri });
 
     const uri = URI.parse(e.document.uri);
     const entry = documentCache.get(uri);
@@ -147,7 +146,7 @@ export function languageServiceWorkspace(
       return;
     }
 
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.TextDocument.onDidClose', { document: e.document.uri });
+    logger.logNotification('onDidClose', { document: e.document.uri });
 
     const uri = URI.parse(e.document.uri);
     const doc = documentCache.get(uri);
@@ -254,7 +253,7 @@ export function languageServiceWorkspace(
     },
 
     async stat(resource: URI): Promise<FileStat | undefined> {
-      logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.stat', { resource: resource.toString() });
+      logger.logTrace('VsCodeClientWorkspace.stat', { resource: resource.toString() });
       if (documentCache.has(resource)) {
         return { isDirectory: false };
       }
@@ -262,7 +261,7 @@ export function languageServiceWorkspace(
     },
 
     async readDirectory(resource: URI): Promise<Iterable<readonly [string, FileStat]>> {
-      logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.readDirectory', { resource: resource.toString() });
+      logger.logTrace('VsCodeClientWorkspace.readDirectory', { resource: resource.toString() });
       const result = await fspromises.readdir(resource.fsPath, { withFileTypes: true });
       return result.map(value => [value.name, { isDirectory: value.isDirectory() }]);
     },
@@ -313,7 +312,7 @@ export function languageServiceWorkspace(
       // keep document cache up to date and notify clients
       for (const change of changes) {
         const resource = URI.parse(change.uri);
-        logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.onDidChangeWatchedFiles', { type: change.type, resource: resource.toString() });
+        logger.logTrace('VsCodeClientWorkspace.onDidChangeWatchedFiles', { type: change.type, resource: resource.toString() });
         switch (change.type) {
           case FileChangeType.Changed: {
             const entry = documentCache.get(resource);
@@ -356,7 +355,7 @@ export function languageServiceWorkspace(
     const fsWorkspace: IWorkspaceWithWatching = {
       ...workspace,
       watchFile(resource, options) {
-        logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.watchFile', { resource: resource.toString() });
+        logger.logTrace('VsCodeClientWorkspace.watchFile', { resource: resource.toString() });
 
         const entry = {
           resource,
@@ -371,7 +370,7 @@ export function languageServiceWorkspace(
           onDidChange: entry.onDidChange.event,
           onDidDelete: entry.onDidDelete.event,
           dispose: () => {
-            logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.disposeWatcher', { resource: resource.toString() });
+            logger.logTrace('VsCodeClientWorkspace.disposeWatcher', { resource: resource.toString() });
             watchers.delete(entry.resource.toString());
           }
         };

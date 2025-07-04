@@ -119,7 +119,7 @@ export class MdReferencesProvider extends Disposable {
   }
 
   public async getReferencesAtPosition(document: Document, position: lsp.Position, token: CancellationToken): Promise<MdReference[]> {
-    this.#logger.log(LogLevel.Debug, 'ReferencesProvider.getReferencesAtPosition', { document: document.uri, version: document.version });
+    this.#logger.logDebug('ReferencesProvider.getReferencesAtPosition', { document: document.uri, version: document.version });
 
     const toc = await this.#tocProvider.getForDocument(document);
     if (token.isCancellationRequested) {
@@ -135,7 +135,7 @@ export class MdReferencesProvider extends Disposable {
   }
 
   public async getReferencesToFileInWorkspace(resource: URI, token: CancellationToken): Promise<MdReference[]> {
-    this.#logger.log(LogLevel.Debug, 'ReferencesProvider.getAllReferencesToFileInWorkspace', { resource });
+    this.#logger.logDebug('ReferencesProvider.getAllReferencesToFileInWorkspace', { resource });
 
     if (token.isCancellationRequested) {
       return [];

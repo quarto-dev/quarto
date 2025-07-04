@@ -41,7 +41,7 @@ export class MdSelectionRangeProvider {
   }
 
   public async provideSelectionRanges(document: Document, positions: readonly Position[], token: CancellationToken): Promise<lsp.SelectionRange[] | undefined> {
-    this.#logger.log(LogLevel.Debug, 'MdSelectionRangeProvider.provideSelectionRanges', { document: document.uri, version: document.version });
+    this.#logger.logDebug('MdSelectionRangeProvider.provideSelectionRanges', { document: document.uri, version: document.version });
 
     if (token.isCancellationRequested) {
       return undefined;

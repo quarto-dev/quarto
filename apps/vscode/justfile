@@ -1,0 +1,8 @@
+install:
+  rm -rf *.vsix && vsce package && code --install-extension *.vsix && positron --install-extension *.vsix
+
+install-vscode:
+  rm -rf *.vsix && vsce package && code --install-extension *.vsix
+
+install-positron:
+  rm -rf *.vsix && vsce package && positron --install-extension *.vsix

@@ -233,8 +233,17 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
           new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
         );
         return new TextEdit(range, edit.newText);
-      })
-      .filter(edit => blockRange.contains(edit.range));
+      });
+
+    // Bail if any edit is out of range. We used to filter these edits out but
+    // this could bork the cell.
+    if (edits.some(edit => !blockRange.contains(edit.range))) {
+      window.showInformationMessage(
+        "Formatting edits were out of range and could not be applied to the code cell."
+      );
+      return [];
+    }
+
     return adjustedEdits;
   }
 }

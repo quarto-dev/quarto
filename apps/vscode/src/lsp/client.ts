@@ -147,17 +147,6 @@ export async function activateLsp(
     clientOptions
   );
 
-  // Notify LSP of quarto setting changes
-  context.subscriptions.push(workspace.onDidChangeConfiguration(e => {
-    if (client.state !== State.Running) {
-      return;
-    }
-
-    if (e.affectsConfiguration("quarto")) {
-      client.sendNotification("workspace/didChangeConfiguration", {});
-    }
-  }));
-
   // return once the server is running
   return new Promise<LanguageClient>((resolve, reject) => {
 

@@ -172,8 +172,9 @@ export class ConfigurationManager extends Disposable {
   }
 
   public async subscribe() {
-    // Ignore the settings in parameters, the modern usage is to fetch the settings
-    // when we get this notification
+    // Ignore the settings in parameters, the modern usage is to fetch the
+    // settings when we get this notification. This causes the client to send
+    // any updates for settings under the `quarto` section.
     this.connection_.onDidChangeConfiguration((_params) => {
       this._logger.logNotification('didChangeConfiguration');
       this.update();

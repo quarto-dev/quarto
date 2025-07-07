@@ -140,16 +140,12 @@ export class ConfigurationManager extends Disposable {
     this._settings = defaultSettings();
   }
 
-  public init(logLevel?: string) {
-    const initLogLevel = Logger.parseLogLevel(
-      logLevel ?? "warn"
-    );
-
+  public init(logLevel: LogLevel) {
     this._settings = {
       ...this._settings,
       quarto: {
         ...this._settings.quarto,
-        logLevel: initLogLevel,
+        logLevel,
       }
     };
   }

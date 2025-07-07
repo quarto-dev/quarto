@@ -46,7 +46,7 @@ export class Logger extends Disposable implements ILogger {
     return JSON.stringify(data, undefined, 2);
   }
 
-  private _logLevel: LogLevel;
+  private _logLevel = LogLevel.Warn;
   private _connection?: Connection;
   private _config?: ConfigurationManager;
 
@@ -54,6 +54,10 @@ export class Logger extends Disposable implements ILogger {
     private readonly _logFn: typeof console.log,
   ) {
     super();
+  }
+
+  init(logLevel: LogLevel): void {
+    this._logLevel = logLevel;
   }
 
   setConnection(connection: Connection) {

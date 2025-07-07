@@ -75,7 +75,11 @@ let mdLs: IMdLanguageService | undefined;
 connection.onInitialize((params: InitializeParams) => {
   // Set log level from initialization options if provided so that we use the
   // expected level as soon as possible
-  configManager.init(params.initializationOptions?.logLevel);
+  const initLogLevel = Logger.parseLogLevel(
+    params.initializationOptions?.logLevel ?? "warn"
+  );
+  logger.init(initLogLevel);
+  configManager.init(initLogLevel);
 
   // We're connected, log messages via LSP
   logger.setConnection(connection);

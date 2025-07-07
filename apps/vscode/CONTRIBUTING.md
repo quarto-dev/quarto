@@ -1,10 +1,18 @@
 # Building the extension
 
-We collect our dev commands in `./justfile` and use the [just](https://github.com/casey/just) command runner to run these.
+To develop the Quarto VS Code extension, clone the quarto mono-repo, run `yarn` at top level, then run the `yarn dev-vscode` command:
 
-- `just` or `just install`: Build and package the extension into a `vsix` file, then install it in VS Code and Positron. Note that this command deletes `*.vsix` in the current directory.
+```sh
+yarn             # install dependencies
+yarn dev-vscode  # run development/debug version of extension
+```
 
-- `just dev`: Build the extension and its dependencies with the `dev` flag and watch for changes.
+Install the dev version of the extension in VS Code or Positron with:
+
+```sh
+yarn install-vscode
+yarn install-positron
+```
 
 
 # Debugging the extension
@@ -17,7 +25,7 @@ The extension must have been built in dev mode (see the build section). The `dev
 
 Here is the process:
 
-- Let `just dev` run in the background somewhere.
+- Let `yarn dev-vscode` run in the background somewhere.
 
 - Open the `apps/vscode` folder in VS Code or Positron and go to the `Run and debug` pane.
 

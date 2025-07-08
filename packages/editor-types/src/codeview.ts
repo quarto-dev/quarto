@@ -13,7 +13,7 @@
  *
  */
 
-import { CompletionList, Range} from "vscode-languageserver-types";
+import { CompletionList, Range } from "vscode-languageserver-types";
 import { DiagramState } from "./diagram";
 
 export const kCodeViewAssist = 'code_view_assist';
@@ -48,8 +48,7 @@ export interface CodeViewCompletionContext extends CodeViewCellContext {
 export interface CodeViewServer {
   codeViewAssist: (contxt: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
+  codeViewDiagnostics: (context: CodeViewCellContext) => Promise<any>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
-
-

@@ -17,25 +17,25 @@
 import { EditorView } from "@codemirror/view";
 
 
-import { 
-  autocompletion, 
-  Completion, 
-  CompletionContext, 
-  CompletionResult, 
-  insertCompletionText, 
-  pickedCompletion, 
-  snippet, 
+import {
+  autocompletion,
+  Completion,
+  CompletionContext,
+  CompletionResult,
+  insertCompletionText,
+  pickedCompletion,
+  snippet,
   startCompletion
 } from "@codemirror/autocomplete"
 
-import { 
+import {
   CompletionItem,
   CompletionItemKind,
-  InsertReplaceEdit, 
-  InsertTextFormat, 
-  MarkupContent, 
-  MarkupKind, 
-  TextEdit 
+  InsertReplaceEdit,
+  InsertTextFormat,
+  MarkupContent,
+  MarkupKind,
+  TextEdit
 } from "vscode-languageserver-types";
 
 import md from "markdown-it";
@@ -47,7 +47,7 @@ import { CodeViewCompletionContext, codeViewCompletionContext } from "editor";
 import { Behavior, BehaviorContext } from ".";
 import { escapeRegExpCharacters } from "core";
 
-export function completionBehavior(behaviorContext: BehaviorContext) : Behavior {
+export function completionBehavior(behaviorContext: BehaviorContext): Behavior {
 
   // don't provide behavior if we don't have completions
   if (!behaviorContext.pmContext.ui.codeview) {
@@ -59,7 +59,7 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
       autocompletion({
         closeOnBlur: true,
         override: [
-          async (context: CompletionContext) : Promise<CompletionResult | null> => {
+          async (context: CompletionContext): Promise<CompletionResult | null> => {
 
             // no completions if there is no path
             const filepath = behaviorContext.pmContext.ui.context.getDocumentPath();
@@ -87,11 +87,14 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
             // if we aren't explcit then filter based on match (letter + wordchar + optional trigger chars)
             if (!context.explicit) {
               const trigger = (language.trigger || ["."]);
-              const match = context.matchBefore(new RegExp('(^|[ \t])[\\\\A-Za-z_\\.][\\w_\\(\\)\\[\\]' +  escapeRegExpCharacters(trigger.join('')) + ']*'));
+              const match = context.matchBefore(new RegExp('(^|[ \t])[\\\\A-Za-z_\\.][\\w_\\(\\)\\[\\]' + escapeRegExpCharacters(trigger.join('')) + ']*'));
               if (!match) {
                 return null;
               }
             }
+
+            const diagnostics = getDiagnostics(context, cvContext, behaviorContext)
+            console.log('DEBUG 2 DIAGNOSTICS!', diagnostics)
 
             // get completions
             return getCompletions(context, cvContext, behaviorContext);
@@ -102,11 +105,26 @@ export function completionBehavior(behaviorContext: BehaviorContext) : Behavior 
   }
 }
 
+async function getDiagnostics(
+  context: CompletionContext,
+  cvContext: CodeViewCompletionContext,
+  behaviorContext: BehaviorContext
+): Promise<any> {
+
+  const diagnostics = await behaviorContext.pmContext.ui.codeview?.codeViewDiagnostics(cvContext);
+  if (context.aborted || !diagnostics) {
+    console.log('DEBUG FAILED DIAGNOSTICS!', diagnostics)
+    return null;
+  }
+  console.log('DEBUG GOT DIAGNOSTICS!', diagnostics)
+  return diagnostics
+}
+
 async function getCompletions(
   context: CompletionContext,
   cvContext: CodeViewCompletionContext,
   behaviorContext: BehaviorContext
-) : Promise<CompletionResult | null> {
+): Promise<CompletionResult | null> {
 
   // get completions
   const completions = await behaviorContext.pmContext.ui.codeview?.codeViewCompletions(cvContext);
@@ -123,7 +141,7 @@ async function getCompletions(
       } else {
         return 0;
       }
-    });  
+    });
   }
 
   // compute token
@@ -131,13 +149,13 @@ async function getCompletions(
 
   // compute from
   const itemFrom = (item: CompletionItem) => {
-      // compute from
-      return item.textEdit 
-      ? InsertReplaceEdit.is(item.textEdit) 
-          ? context.pos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
-          : TextEdit.is(item.textEdit)
-              ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
-              : context.pos
+    // compute from
+    return item.textEdit
+      ? InsertReplaceEdit.is(item.textEdit)
+        ? context.pos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
+        : TextEdit.is(item.textEdit)
+          ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
+          : context.pos
       : context.pos;
   }
 
@@ -150,7 +168,7 @@ async function getCompletions(
     const replaceText = context.state.sliceDoc(itemFrom(item), context.pos).toLowerCase();
 
     if (haveOrder) {
-      
+
       // if the replaceText doesn't start with "." then bury items that do
       if (!replaceText.startsWith(".") && item.label.startsWith(".")) {
         return -99;
@@ -158,9 +176,9 @@ async function getCompletions(
 
       // only boost things that have a prefix match
       if (item.label.toLowerCase().startsWith(replaceText) ||
-         (item.textEdit && item.textEdit.newText.toLowerCase().startsWith(replaceText)) ||
-         (item.insertText && item.insertText.toLowerCase().startsWith(replaceText))) {
-        return -99 + Math.round(((total-index)/total) * 198);;
+        (item.textEdit && item.textEdit.newText.toLowerCase().startsWith(replaceText)) ||
+        (item.insertText && item.insertText.toLowerCase().startsWith(replaceText))) {
+        return -99 + Math.round(((total - index) / total) * 198);;
       } else {
         return -99;
       }
@@ -173,16 +191,16 @@ async function getCompletions(
   // return completions
   return {
     from: context.pos,
-    
+
     options: completions.items
       .filter(item => {
-        
+
         // no text completions that aren't snippets
         if (item.kind === CompletionItemKind.Text &&
-            item.insertTextFormat !== InsertTextFormat.Snippet) {
+          item.insertTextFormat !== InsertTextFormat.Snippet) {
           return false;
         }
-          
+
         // compute text to replace
         const replaceText = context.state.sliceDoc(itemFrom(item), context.pos).toLowerCase();
 
@@ -190,19 +208,19 @@ async function getCompletions(
         if (!item.textEdit && token) {
           return false;
         }
-       
+
         // require at least inclusion
         return item.label.toLowerCase().includes(replaceText) ||
-                (item.insertText && item.insertText.toLowerCase().includes(replaceText));
+          (item.insertText && item.insertText.toLowerCase().includes(replaceText));
       })
-      .map((item,index) : Completion => {
+      .map((item, index): Completion => {
         return {
           label: item.label,
           detail: item.detail && !item.documentation ? item.detail : undefined,
           type: vsKindToType(item.kind),
-          info: () : Node | null => {
+          info: (): Node | null => {
             if (item.documentation) {
-              return infoNodeForItem(item);   
+              return infoNodeForItem(item);
             } else {
               return null;
             }
@@ -216,7 +234,7 @@ async function getCompletions(
             if (item.insertTextFormat === InsertTextFormat.Snippet) {
               const insertSnippet = snippet(insertText.replace(/\$(\d+)/g, "$${$1}"));
               insertSnippet(view, completion, from, context.pos);
-            // normal completions
+              // normal completions
             } else {
               view.dispatch({
                 ...insertCompletionText(view.state, insertText, from, context.pos),
@@ -236,13 +254,13 @@ async function getCompletions(
 
 function vsKindToType(kind?: CompletionItemKind) {
   kind = kind || CompletionItemKind.Text;
-  switch(kind) {
+  switch (kind) {
     case CompletionItemKind.Method:
-    case CompletionItemKind.Constructor: 
+    case CompletionItemKind.Constructor:
       return "method";
     case CompletionItemKind.Function:
       return "function";
-    case CompletionItemKind.Field: 
+    case CompletionItemKind.Field:
     case CompletionItemKind.Property:
     case CompletionItemKind.Event:
       return "property";
@@ -259,23 +277,23 @@ function vsKindToType(kind?: CompletionItemKind) {
     case CompletionItemKind.File:
     case CompletionItemKind.Folder:
       return "namespace";
-    case CompletionItemKind.Value: 
+    case CompletionItemKind.Value:
     case CompletionItemKind.Constant:
       return "constant";
-    case CompletionItemKind.Enum: 
+    case CompletionItemKind.Enum:
     case CompletionItemKind.EnumMember:
       return "enum";
-    case CompletionItemKind.Keyword: 
+    case CompletionItemKind.Keyword:
       return "keyword";
     case CompletionItemKind.TypeParameter:
       return "type";
 
     case CompletionItemKind.Text:
-    case CompletionItemKind.Snippet: 
+    case CompletionItemKind.Snippet:
     case CompletionItemKind.Color:
     case CompletionItemKind.Operator:
     default:
-      return "text"; 
+      return "text";
   }
 }
 
@@ -293,7 +311,7 @@ function infoNodeForItem(item: CompletionItem) {
     span.innerText = text;
     return span;
   }
-  
+
   if (item.detail && !item.documentation) {
     return headerEl(item.detail, "span");
   } else if (item.documentation) {
@@ -309,13 +327,13 @@ function infoNodeForItem(item: CompletionItem) {
         mdDiv.innerHTML = html;
         // remove mdn links
         mdDiv.querySelectorAll("p").forEach(paraEl => {
-          if (paraEl.childElementCount === 1 && 
-              paraEl.firstElementChild?.tagName === "A") {
+          if (paraEl.childElementCount === 1 &&
+            paraEl.firstElementChild?.tagName === "A") {
             paraEl.parentElement?.removeChild(paraEl);
           }
         });
-        
-       
+
+
         infoDiv.appendChild(mdDiv);
       } else {
         infoDiv.appendChild(textDiv(item.documentation.value));
@@ -326,5 +344,5 @@ function infoNodeForItem(item: CompletionItem) {
     return infoDiv;
   } else {
     return null;
-  }                    
+  }
 }

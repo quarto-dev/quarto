@@ -17,15 +17,15 @@ import { CompletionList } from 'vscode-languageserver-types';
 
 import { SkinTone } from './emoji';
 
-import { 
-  EditorUISpelling, 
-  EditorDialogs, 
-  EditorDisplay, 
-  EditorUIImageResolver, 
-  CodeViewCompletionContext, 
-  CodeViewExecute, 
-  CodeViewActiveBlockContext, 
-  DiagramState, 
+import {
+  EditorUISpelling,
+  EditorDialogs,
+  EditorDisplay,
+  EditorUIImageResolver,
+  CodeViewCompletionContext,
+  CodeViewExecute,
+  CodeViewActiveBlockContext,
+  DiagramState,
   CodeViewCellContext
 } from 'editor-types';
 
@@ -133,6 +133,7 @@ export interface EditorUICodeView {
   codeViewAssist: (context: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
+  codeViewDiagnostics: (context: CodeViewCompletionContext) => Promise<any>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
 
@@ -319,4 +320,3 @@ export interface EditorUIImages {
     tag_edit: string;
   };
 }
-

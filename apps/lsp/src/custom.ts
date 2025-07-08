@@ -31,7 +31,7 @@ import { Hover, Position, TextDocuments } from "vscode-languageserver";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
 import { yamlCompletions } from "./service/providers/completion/completion-yaml";
 import { yamlHover } from "./service/providers/hover/hover-yaml";
-import { Quarto, codeEditorContext } from "./service/quarto";
+import { EditorContext, LintItem, Quarto, codeEditorContext } from "./service/quarto";
 
 export function registerCustomMethods(
   quarto: Quarto,
@@ -63,9 +63,31 @@ export function registerCustomMethods(
     // we have the yaml hover and completions here so provide entry points for them
     [kCodeViewAssist]: args => codeViewAssist(quarto, args[0]),
     [kCodeViewGetCompletions]: args => codeViewCompletions(quarto, args[0]),
+    'codeViewGetDiagnostics': args => codeViewDiagnostics(quarto, args[0])
   });
 }
 
+async function codeViewDiagnostics(quarto: Quarto, context: CodeViewCellContext) {
+  const edContext = codeEditorContext(
+    context.filepath,
+    context.language == "yaml" ? "yaml" : "script",
+    context.code.join("\n"),
+    Position.create(context.selection.start.line, context.selection.start.character),
+    false
+  );
+
+  return await diagnostics(quarto, edContext) ?? undefined;
+
+}
+export async function diagnostics(quarto: Quarto, context: EditorContext): Promise<LintItem[] | null> {
+  if (!quarto?.getYamlDiagnostics) return null;
+
+  try {
+    return await quarto.getYamlDiagnostics(context);
+  } catch {
+    return null;
+  }
+}
 
 async function codeViewAssist(quarto: Quarto, context: CodeViewCellContext): Promise<Hover | undefined> {
 

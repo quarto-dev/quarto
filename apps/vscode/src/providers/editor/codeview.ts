@@ -73,6 +73,12 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
           break;
       }
     },
+    async codeViewDiagnostics(context: CodeViewCellContext): Promise<any> {
+      // if this is yaml then call the lsp directly
+      if (context.language === "yaml") {
+        return lspRequest('codeViewGetDiagnostics', [context]);
+      }
+    },
     async codeViewCompletions(context: CodeViewCompletionContext): Promise<CompletionList> {
       // if this is yaml then call the lsp directly
       if (context.language === "yaml") {

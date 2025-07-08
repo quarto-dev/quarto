@@ -134,7 +134,7 @@ export interface EditorUICodeView {
   codeViewAssist: (context: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
-  codeViewDiagnostics: (context: CodeViewCompletionContext) => Promise<LintItem[] | undefined>;
+  codeViewDiagnostics: (context: CodeViewCellContext) => Promise<LintItem[] | undefined>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
 

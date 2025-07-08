@@ -35,7 +35,7 @@ import { completionBehavior } from './completion';
 import { yamlOptionBehavior } from './yamloption';
 import { toolbarBehavior } from './toolbar';
 import { diagramBehavior } from './diagram';
-import { validationBehavior } from './validation';
+import { diagnosticsBehavior } from './diagnostics';
 
 export interface Behavior {
   extensions?: Extension[];
@@ -70,7 +70,7 @@ export function createBehaviors(context: BehaviorContext): Behavior[] {
     yamlOptionBehavior(context),
     toolbarBehavior(context),
     diagramBehavior(context),
-    validationBehavior()
+    diagnosticsBehavior(context)
   ];
   behaviors.push(keyboardBehavior(context, behaviors.flatMap(behavior => behavior.keys || [])));
   return behaviors;

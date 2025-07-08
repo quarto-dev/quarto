@@ -72,7 +72,7 @@ async function codeViewDiagnostics(quarto: Quarto, context: CodeViewCellContext)
     context.filepath,
     context.language == "yaml" ? "yaml" : "script",
     context.code.join("\n"),
-    Position.create(context.selection.start.line, context.selection.start.character),
+    Position.create(0, 0),
     false
   );
 

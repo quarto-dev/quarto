@@ -48,7 +48,7 @@ import {
   CodeViewActiveBlockContext,
   DiagramState,
   CodeViewCellContext,
-
+  kCodeViewGetDiagnostics
 } from "editor-types";
 
 
@@ -88,7 +88,7 @@ export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport): C
       return request(kCodeViewExecute, [execute, context]);
     },
     codeViewDiagnostics(context: CodeViewCellContext) {
-      return request('codeViewGetDiagnostics', [context])
+      return request(kCodeViewGetDiagnostics, [context])
     },
     codeViewCompletions(context: CodeViewCompletionContext) {
       return request(kCodeViewGetCompletions, [context]);

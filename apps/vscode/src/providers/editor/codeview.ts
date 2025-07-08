@@ -43,6 +43,8 @@ import {
   CodeViewServer,
   DiagramState,
   kCodeViewGetCompletions,
+  kCodeViewGetDiagnostics,
+  LintItem
 } from "editor-types";
 
 import { hasHooks } from "../../host/hooks";
@@ -73,10 +75,10 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
           break;
       }
     },
-    async codeViewDiagnostics(context: CodeViewCellContext): Promise<any> {
+    async codeViewDiagnostics(context: CodeViewCellContext): Promise<LintItem[] | undefined> {
       // if this is yaml then call the lsp directly
       if (context.language === "yaml") {
-        return lspRequest('codeViewGetDiagnostics', [context]);
+        return lspRequest(kCodeViewGetDiagnostics, [context]);
       }
     },
     async codeViewCompletions(context: CodeViewCompletionContext): Promise<CompletionList> {

@@ -35,12 +35,12 @@ import {
   CompletionResult,
   EditorContext,
   HoverResult,
-  LintItem,
   AttrContext,
   AttrToken,
   kContextDiv,
   kContextDivSimple
 } from "./service/quarto";
+import { LintItem } from "editor-types";
 
 export async function initializeQuarto(context: QuartoContext): Promise<Quarto> {
   const quartoModule = await initializeQuartoYamlModule(context.resourcePath) as QuartoYamlModule;

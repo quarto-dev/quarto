@@ -26,7 +26,8 @@ import {
   CodeViewExecute,
   CodeViewActiveBlockContext,
   DiagramState,
-  CodeViewCellContext
+  CodeViewCellContext,
+  LintItem
 } from 'editor-types';
 
 export * from './spelling';
@@ -133,7 +134,7 @@ export interface EditorUICodeView {
   codeViewAssist: (context: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
-  codeViewDiagnostics: (context: CodeViewCompletionContext) => Promise<any>;
+  codeViewDiagnostics: (context: CodeViewCompletionContext) => Promise<LintItem[] | undefined>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
 

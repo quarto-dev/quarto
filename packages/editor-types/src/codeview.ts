@@ -20,6 +20,7 @@ export const kCodeViewAssist = 'code_view_assist';
 export const kCodeViewGetCompletions = 'code_view_get_completions';
 export const kCodeViewExecute = 'code_view_execute';
 export const kCodeViewPreviewDiagram = 'code_view_preview_diagram';
+export const kCodeViewGetDiagnostics = 'code_view_get_diagnostics';
 
 export type CodeViewExecute = "selection" | "cell" | "cell+advance" | "above" | "below";
 
@@ -41,6 +42,21 @@ export interface CodeViewCellContext {
   selection: Range;
 }
 
+// copy&pasted these from `apps/lsp/src/service/quarto.ts`
+// is there a way to import from there?
+export const kStartRow = "start.row";
+export const kStartColumn = "start.column";
+export const kEndRow = "end.row";
+export const kEndColumn = "end.column";
+export interface LintItem {
+  [kStartRow]: number;
+  [kStartColumn]: number;
+  [kEndRow]: number;
+  [kEndColumn]: number;
+  text: string;
+  type: string;
+}
+
 export interface CodeViewCompletionContext extends CodeViewCellContext {
   explicit: boolean;
 }
@@ -48,7 +64,7 @@ export interface CodeViewCompletionContext extends CodeViewCellContext {
 export interface CodeViewServer {
   codeViewAssist: (contxt: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
-  codeViewDiagnostics: (context: CodeViewCellContext) => Promise<any>;
+  codeViewDiagnostics: (context: CodeViewCellContext) => Promise<LintItem[] | undefined>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }

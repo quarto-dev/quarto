@@ -28,10 +28,10 @@ import { LspConnection, registerLspServerMethods } from "core-node";
 import { userDictionaryDir, Document } from "quarto-core";
 import { CompletionList } from "vscode-languageserver-types";
 import { Hover, Position, TextDocuments } from "vscode-languageserver";
-import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetCompletions } from "editor-types";
+import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetDiagnostics, kCodeViewGetCompletions, LintItem } from "editor-types";
 import { yamlCompletions } from "./service/providers/completion/completion-yaml";
 import { yamlHover } from "./service/providers/hover/hover-yaml";
-import { EditorContext, LintItem, Quarto, codeEditorContext } from "./service/quarto";
+import { EditorContext, Quarto, codeEditorContext } from "./service/quarto";
 
 export function registerCustomMethods(
   quarto: Quarto,
@@ -63,11 +63,11 @@ export function registerCustomMethods(
     // we have the yaml hover and completions here so provide entry points for them
     [kCodeViewAssist]: args => codeViewAssist(quarto, args[0]),
     [kCodeViewGetCompletions]: args => codeViewCompletions(quarto, args[0]),
-    'codeViewGetDiagnostics': args => codeViewDiagnostics(quarto, args[0])
+    [kCodeViewGetDiagnostics]: args => codeViewDiagnostics(quarto, args[0])
   });
 }
 
-async function codeViewDiagnostics(quarto: Quarto, context: CodeViewCellContext) {
+async function codeViewDiagnostics(quarto: Quarto, context: CodeViewCellContext): Promise<LintItem[] | undefined> {
   const edContext = codeEditorContext(
     context.filepath,
     context.language == "yaml" ? "yaml" : "script",

@@ -21,6 +21,7 @@ import {
   kCodeViewExecute,
   kCodeViewPreviewDiagram,
   kCodeViewAssist,
+  kCodeViewGetDiagnostics
 } from "editor-types";
 
 
@@ -30,7 +31,7 @@ export function codeViewServerMethods(server: CodeViewServer): Record<string, Js
     [kCodeViewAssist]: args => server.codeViewAssist(args[0]),
     [kCodeViewExecute]: args => server.codeViewExecute(args[0], args[1]),
     [kCodeViewGetCompletions]: args => server.codeViewCompletions(args[0]),
-    'codeViewGetDiagnostics': args => server.codeViewDiagnostics(args[0]),
+    [kCodeViewGetDiagnostics]: args => server.codeViewDiagnostics(args[0]),
     [kCodeViewPreviewDiagram]: args => server.codeViewPreviewDiagram(args[0], args[1])
   }
   return methods;

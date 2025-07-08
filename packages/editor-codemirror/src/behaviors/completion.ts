@@ -42,7 +42,7 @@ import md from "markdown-it";
 
 import { editorLanguage } from "editor-core";
 
-import { CodeViewCompletionContext, codeViewCompletionContext } from "editor";
+import { CodeViewCompletionContext, codeViewCompletionContext, LintItem } from "editor";
 
 import { Behavior, BehaviorContext } from ".";
 import { escapeRegExpCharacters } from "core";
@@ -109,15 +109,11 @@ async function getDiagnostics(
   context: CompletionContext,
   cvContext: CodeViewCompletionContext,
   behaviorContext: BehaviorContext
-): Promise<any> {
-
+): Promise<LintItem[] | undefined> {
   const diagnostics = await behaviorContext.pmContext.ui.codeview?.codeViewDiagnostics(cvContext);
-  if (context.aborted || !diagnostics) {
-    console.log('DEBUG FAILED DIAGNOSTICS!', diagnostics)
-    return null;
-  }
-  console.log('DEBUG GOT DIAGNOSTICS!', diagnostics)
-  return diagnostics
+  if (context.aborted || !diagnostics) return undefined;
+
+  return diagnostics;
 }
 
 async function getCompletions(

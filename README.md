@@ -24,4 +24,4 @@ yarn dev-vscode  # run development/debug version of extension
 
 Use the VS Code **Run and Debug** pane in the activity bar to run a version of VS Code with the development build of the extension.
 
-See our [`CONTRIBUTING`]((https://github.com/quarto-dev/quarto/blob/main/apps/vscode/CONTRIBUTING.md)) file for more information
+See our [`CONTRIBUTING`](https://github.com/quarto-dev/quarto/blob/main/apps/vscode/CONTRIBUTING.md) file for more information

@@ -347,6 +347,10 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
   }
 }
 
+export function stripYamlFrontmatterDelimiters(lines: string[]): string[] {
+  return lines.map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
+}
+
 export function codeViewCellContext(filepath: string, state: EditorState): CodeViewCellContext | undefined {
 
   // get blocks (for active language only)
@@ -356,7 +360,7 @@ export function codeViewCellContext(filepath: string, state: EditorState): CodeV
     // if this is yaml we strip the delimiters and use only the active block
     if (activeBlockContext.activeLanguage === "yaml") {
       const activeBlock = activeBlockContext.blocks.find(block => block.active) || activeBlockContext.blocks[0];
-      const codeLines = lines(activeBlock.code).map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
+      const codeLines = stripYamlFrontmatterDelimiters(lines(activeBlock.code));
       return {
         filepath,
         language: activeBlockContext.activeLanguage,

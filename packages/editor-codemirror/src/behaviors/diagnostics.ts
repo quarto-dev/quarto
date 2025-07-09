@@ -20,7 +20,16 @@ import { Decoration, DecorationSet } from "@codemirror/view";
 import { StateField, StateEffect } from "@codemirror/state";
 import { hoverTooltip } from "@codemirror/view";
 
-import { CodeViewCellContext, codeViewCellContext, kEndColumn, kEndRow, kStartColumn, kStartRow, LintItem } from "editor";
+import {
+  CodeViewCellContext,
+  codeViewCellContext,
+  kEndColumn,
+  kEndRow,
+  kStartColumn,
+  kStartRow,
+  LintItem,
+  stripYamlFrontmatterDelimiters
+} from "editor";
 import { lines } from "core";
 import { Position } from "vscode-languageserver-types";
 
@@ -52,13 +61,14 @@ export function diagnosticsBehavior(behaviorContext: BehaviorContext): Behavior 
       if (filepath === null) return;
 
       const code = lines(pmNode.textContent);
+      const strippedCodeLines = stripYamlFrontmatterDelimiters(code);
 
       // here we hand-craft an artisinal cellContext because `codeViewCellContext(..)`
       // seems to return undefined inside of init
       const cellContext = {
         filepath,
         language: 'yaml',
-        code: code.map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : ""),
+        code: strippedCodeLines,
         cellBegin: 0,
         cellEnd: code.length - 1,
         selection: EMPTY_CODEVIEW_SELECTION
@@ -102,10 +112,7 @@ async function getDiagnostics(
   cellContext: CodeViewCellContext,
   behaviorContext: BehaviorContext
 ): Promise<LintItem[] | undefined> {
-  const diagnostics = await behaviorContext.pmContext.ui.codeview?.codeViewDiagnostics(cellContext);
-  if (!diagnostics) return undefined;
-
-  return diagnostics;
+  return await behaviorContext.pmContext.ui.codeview?.codeViewDiagnostics(cellContext);
 }
 
 //Check if there is an underline at position and display a tooltip there
@@ -205,14 +212,15 @@ const rangeAndSpecOfDecorationAtPos = (pos: number, d: DecorationSet) => {
 };
 
 /**
- * @param strs A representation of a string, split by newlines.
+ * @param lines A representation of a string, split by newlines.
  * @param [row, col] row and column into the string, row being the same as line number
- * @returns An index into the string i.e. An index into `strs.join('\n')`
+ * @returns An index into the string i.e. An index into `lines.join('\n')`
  */
-function rowColumnToIndex(strs: string[], [col, row]: [number, number]): number {
+function rowColumnToIndex(lines: string[], [col, row]: [number, number]): number {
   let index = 0;
   for (let i = 0; i < row; i++) {
-    index += strs[i].length + 1;
+    // + 1 to account for the newline character
+    index += lines[i].length + 1;
   }
   return index + col;
 }

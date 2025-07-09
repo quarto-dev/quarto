@@ -16,7 +16,7 @@
  *
  */
 
-import { Node as ProsemirrorNode } from 'prosemirror-model'
+import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorView as PMEditorView } from "prosemirror-view";
 
 import { Extension, Transaction } from "@codemirror/state";
@@ -52,7 +52,7 @@ export interface BehaviorContext {
   getPos: boolean | (() => number);
   options: CodeViewOptions;
   pmContext: ExtensionContext;
-  withState: WithState
+  withState: WithState;
 }
 
 export enum State { Updating, Escaping };

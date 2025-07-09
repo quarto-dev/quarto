@@ -2,6 +2,7 @@
 
 ## 1.124.0 (unreleased)
 
+- Add yaml frontmatter validation to visual editor (<https://github.com/quarto-dev/quarto/pull/744>).
 
 ## 1.123.0 (Release on 2025-06-17)
 

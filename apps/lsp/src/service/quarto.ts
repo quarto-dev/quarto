@@ -18,21 +18,7 @@ import { CompletionItem, Position } from "vscode-languageserver-types";
 import { QuartoContext, Document, filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml, isQuartoDashboardDoc } from "quarto-core";
 
 import { lines } from "core";
-
-
-export const kStartRow = "start.row";
-export const kStartColumn = "start.column";
-export const kEndRow = "end.row";
-export const kEndColumn = "end.column";
-
-export interface LintItem {
-  [kStartRow]: number;
-  [kStartColumn]: number;
-  [kEndRow]: number;
-  [kEndColumn]: number;
-  text: string;
-  type: string;
-}
+import { LintItem } from "editor-types";
 
 export interface CompletionResult {
   token: string;

@@ -43,6 +43,8 @@ import {
   CodeViewServer,
   DiagramState,
   kCodeViewGetCompletions,
+  kCodeViewGetDiagnostics,
+  LintItem
 } from "editor-types";
 
 import { hasHooks } from "../../host/hooks";
@@ -71,6 +73,12 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
         case "below":
           await commands.executeCommand("quarto.runCellsBelow");
           break;
+      }
+    },
+    async codeViewDiagnostics(context: CodeViewCellContext): Promise<LintItem[] | undefined> {
+      // if this is yaml then call the lsp directly
+      if (context.language === "yaml") {
+        return lspRequest(kCodeViewGetDiagnostics, [context]);
       }
     },
     async codeViewCompletions(context: CodeViewCompletionContext): Promise<CompletionList> {
@@ -205,7 +213,7 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem): Compl
 
 }
 
-export function labelWithDetails(item: VCompletionItem): { label: string, labelWithDetails: CompletionItemLabelDetails } {
+export function labelWithDetails(item: VCompletionItem): { label: string, labelWithDetails: CompletionItemLabelDetails; } {
   if (typeof (item.label) === "string") {
     return {
       label: item.label,

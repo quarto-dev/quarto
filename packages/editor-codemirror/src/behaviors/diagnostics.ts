@@ -27,7 +27,15 @@ import { CodeViewCellContext, codeViewCellContext, kEndColumn, kEndRow, kStartCo
 import { lines } from "core";
 import { Position } from "vscode-languageserver-types";
 
-const EMPTY_SELECTION = { start: Position.create(0, 0), end: Position.create(0, 0) }
+const EMPTY_CODEVIEW_SELECTION = { start: Position.create(0, 0), end: Position.create(0, 0) }
+
+const ERROR_ICON_HTML_STR = `<span style="color: red; font-size: 24px; vertical-align: text-bottom; padding-right: 8px;">⚠︎</span>`
+const ERROR_TOOLTIP_DIV_STYLES = {
+  "box-shadow": 'rgba(0, 0, 0, 0.16) 0px 0px 8px 2px',
+  border: '1px solid lightgrey',
+  padding: '4px 11px',
+  "font-family": 'monospace'
+}
 
 export function diagnosticsBehavior(behaviorContext: BehaviorContext): Behavior {
   // don't provide behavior if we don't have validation
@@ -36,7 +44,7 @@ export function diagnosticsBehavior(behaviorContext: BehaviorContext): Behavior 
   }
 
   return {
-    extensions: [underlinedDrrorHoverTooltip],
+    extensions: [underlinedErrorHoverTooltip],
 
     async init(pmNode, cmView) {
       const language = behaviorContext.options.lang(pmNode, pmNode.textContent)
@@ -56,7 +64,7 @@ export function diagnosticsBehavior(behaviorContext: BehaviorContext): Behavior 
         code: code.map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : ""),
         cellBegin: 0,
         cellEnd: code.length - 1,
-        selection: EMPTY_SELECTION
+        selection: EMPTY_CODEVIEW_SELECTION
       }
 
       const diagnostics = await getDiagnostics(cellContext, behaviorContext)
@@ -64,11 +72,7 @@ export function diagnosticsBehavior(behaviorContext: BehaviorContext): Behavior 
 
       for (const error of diagnostics) {
         underline(cmView,
-          // Note: strangely, `error[kStartColumn]` gives the text editor *row* index and vice versa;
-          // so we have to pass `error[kStartColumn]` as row and vice versa.
-          // Note: to get the correct index, `code` must not have delimiters stripped out
           rowColumnToIndex(code, [error[kStartColumn], error[kStartRow]]),
-          // same here
           rowColumnToIndex(code, [error[kEndColumn], error[kEndRow]]),
           error.text
         )
@@ -102,17 +106,12 @@ export function diagnosticsBehavior(behaviorContext: BehaviorContext): Behavior 
       const diagnostics = await getDiagnostics(cellContext, behaviorContext)
       if (!diagnostics) return
 
-      console.log('UPDATE DEBUG!!', cellContext)
-
       const codeLines = lines(updatePmNode.textContent)
       for (const error of diagnostics) {
         underline(cmView,
-          // strangely, `error[kStartColumn]` gives the visual *row* index and vice versa
           rowColumnToIndex(codeLines, [error[kStartColumn], error[kStartRow]]),
           rowColumnToIndex(codeLines, [error[kEndColumn], error[kEndRow]]),
-          '<div style="padding: 4px 11px; font-family: monospace;"><span style="color: red; font-size: 24px; vertical-align: text-bottom;">⚠︎</span> ' +
-          error.text +
-          '</div>'
+          error.text
         )
       }
     }
@@ -131,7 +130,7 @@ async function getDiagnostics(
 
 //Check if there is an underline at position and display a tooltip there
 //We want to show the error message as well
-const underlinedDrrorHoverTooltip = hoverTooltip((view, pos) => {
+const underlinedErrorHoverTooltip = hoverTooltip((view, pos) => {
   const f = view.state.field(underlineField, false)
   if (!f) return null
 
@@ -144,14 +143,14 @@ const underlinedDrrorHoverTooltip = hoverTooltip((view, pos) => {
     end: to,
     above: true,
     create() {
-      let dom = document.createElement("div")
-      Object.assign(dom.style, {
-        "box-shadow": 'rgba(0, 0, 0, 0.16) 0px 0px 8px 2px',
-        border: '1px solid lightgrey'
-      })
-      dom.innerHTML = '<div style="padding: 4px 11px; font-family: monospace;"><span style="color: red; font-size: 24px; vertical-align: text-bottom;">⚠︎</span> ' +
-        spec.message +
-        '</div>'
+      const dom = document.createElement("div")
+      Object.assign(dom.style, ERROR_TOOLTIP_DIV_STYLES)
+      dom.innerHTML = ERROR_ICON_HTML_STR
+
+      const messageSpanEl = document.createElement("span")
+      messageSpanEl.innerText = spec.message
+      dom.append(messageSpanEl)
+
       return { dom }
     }
   }
@@ -229,6 +228,10 @@ const clearUnderlines = (cmView: EditorView) => {
     cmView.dispatch({ effects: [removeUnderlines.of()] })
 }
 
+//----------------
+// HELPERS
+//----------------
+
 // helper function for positionally picking data from a DecorationSet
 const rangeAndSpecOfDecorationAtPos = (pos: number, d: DecorationSet) => {
   let spec: any | undefined
@@ -246,10 +249,15 @@ const rangeAndSpecOfDecorationAtPos = (pos: number, d: DecorationSet) => {
   return spec !== undefined ? { range: { from: from!, to: to! }, spec } : undefined
 }
 
-function rowColumnToIndex(strs: string[], [row, col]: [number, number]): number {
+/**
+ * @param strs A representation of a string, split by newlines.
+ * @param [row, col] row and column into the string, row being the same as line number
+ * @returns An index into the string i.e. An index into `strs.join('\n')`
+ */
+function rowColumnToIndex(strs: string[], [col, row]: [number, number]): number {
   let index = 0
-  for (let i = 0; i < col; i++) {
+  for (let i = 0; i < row; i++) {
     index += strs[i].length + 1
   }
-  return index + row
+  return index + col
 }

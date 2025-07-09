@@ -33,6 +33,6 @@ export function codeViewServerMethods(server: CodeViewServer): Record<string, Js
     [kCodeViewGetCompletions]: args => server.codeViewCompletions(args[0]),
     [kCodeViewGetDiagnostics]: args => server.codeViewDiagnostics(args[0]),
     [kCodeViewPreviewDiagram]: args => server.codeViewPreviewDiagram(args[0], args[1])
-  }
+  };
   return methods;
 }

@@ -213,7 +213,7 @@ export function vsCompletionItemToLsCompletionItem(item: VCompletionItem): Compl
 
 }
 
-export function labelWithDetails(item: VCompletionItem): { label: string, labelWithDetails: CompletionItemLabelDetails } {
+export function labelWithDetails(item: VCompletionItem): { label: string, labelWithDetails: CompletionItemLabelDetails; } {
   if (typeof (item.label) === "string") {
     return {
       label: item.label,

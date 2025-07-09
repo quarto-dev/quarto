@@ -123,7 +123,7 @@ export interface EditorUIContext extends EditorUIImageResolver {
   reopenInSourceMode?: () => void,
 
   // executable languages
-  executableLanguges?: () => string[]
+  executableLanguges?: () => string[];
 }
 
 export interface EditorUIMath {
@@ -164,7 +164,7 @@ export interface EditorUIPrefs {
   lineNumbers: () => boolean,
   showWhitespace: () => boolean,
   blinkingCursor: () => boolean,
-  quickSuggestions: () => boolean
+  quickSuggestions: () => boolean;
 }
 
 

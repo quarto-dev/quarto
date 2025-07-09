@@ -26,7 +26,7 @@ import {
   pickedCompletion,
   snippet,
   startCompletion
-} from "@codemirror/autocomplete"
+} from "@codemirror/autocomplete";
 
 import {
   CompletionItem,
@@ -51,7 +51,7 @@ export function completionBehavior(behaviorContext: BehaviorContext): Behavior {
 
   // don't provide behavior if we don't have completions
   if (!behaviorContext.pmContext.ui.codeview) {
-    return {}
+    return {};
   }
 
   return {
@@ -99,7 +99,7 @@ export function completionBehavior(behaviorContext: BehaviorContext): Behavior {
         ]
       })
     ]
-  }
+  };
 }
 
 async function getCompletions(
@@ -139,7 +139,7 @@ async function getCompletions(
           ? context.pos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
           : context.pos
       : context.pos;
-  }
+  };
 
   // use order to create boost
   const total = completions.items.length;
@@ -168,7 +168,7 @@ async function getCompletions(
     } else {
       return undefined;
     }
-  }
+  };
 
   // return completions
   return {
@@ -221,14 +221,14 @@ async function getCompletions(
               view.dispatch({
                 ...insertCompletionText(view.state, insertText, from, context.pos),
                 annotations: pickedCompletion.of(completion)
-              })
+              });
               if (item.command?.command === "editor.action.triggerSuggest") {
                 startCompletion(view);
               }
             }
           },
           boost: boostScore(index)
-        }
+        };
       })
   };
 }
@@ -287,12 +287,12 @@ function infoNodeForItem(item: CompletionItem) {
     header.classList.add("cm-completionInfoHeader");
     header.innerText = text;
     return header;
-  }
+  };
   const textDiv = (text: string) => {
     const span = document.createElement("div");
     span.innerText = text;
     return span;
-  }
+  };
 
   if (item.detail && !item.documentation) {
     return headerEl(item.detail, "span");

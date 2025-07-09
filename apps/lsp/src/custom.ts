@@ -22,7 +22,7 @@ import {
   EditorServerOptions,
   sourceServerMethods,
   editorServerDocuments,
-} from "editor-server"
+} from "editor-server";
 
 import { LspConnection, registerLspServerMethods } from "core-node";
 import { userDictionaryDir, Document } from "quarto-core";
@@ -116,5 +116,5 @@ async function codeViewCompletions(quarto: Quarto, context: CodeViewCompletionCo
   return {
     isIncomplete: false,
     items: completions || []
-  }
+  };
 }

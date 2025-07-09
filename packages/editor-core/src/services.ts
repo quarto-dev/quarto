@@ -68,7 +68,7 @@ export function editorSourceJsonRpcServer(request: JsonRpcRequestTransport): Sou
     getSourcePosLocations(markdown: string): Promise<SourcePosLocation[]> {
       return request(kSourceGetSourcePosLocations, [markdown]);
     },
-  }
+  };
 }
 
 export function editorMathJsonRpcServer(request: JsonRpcRequestTransport): MathServer {
@@ -76,7 +76,7 @@ export function editorMathJsonRpcServer(request: JsonRpcRequestTransport): MathS
     mathjaxTypeset(math: string, options: MathjaxTypesetOptions) {
       return request(kMathMathjaxTypesetSvg, [math, options]);
     }
-  }
+  };
 }
 
 export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport): CodeViewServer {
@@ -88,7 +88,7 @@ export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport): C
       return request(kCodeViewExecute, [execute, context]);
     },
     codeViewDiagnostics(context: CodeViewCellContext) {
-      return request(kCodeViewGetDiagnostics, [context])
+      return request(kCodeViewGetDiagnostics, [context]);
     },
     codeViewCompletions(context: CodeViewCompletionContext) {
       return request(kCodeViewGetCompletions, [context]);
@@ -96,7 +96,7 @@ export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport): C
     codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
       return request(kCodeViewPreviewDiagram, [state, activate]);
     },
-  }
+  };
 }
 
 export function editorDictionaryJsonRpcServer(request: JsonRpcRequestTransport): DictionaryServer {
@@ -122,7 +122,7 @@ export function editorDictionaryJsonRpcServer(request: JsonRpcRequestTransport):
     unignoreWord(word: IgnoredWord): Promise<string[]> {
       return request(kDictionaryUnignoreWord, [word]);
     }
-  }
+  };
 }
 
 export function editorPrefsJsonRpcServer(request: JsonRpcRequestTransport): PrefsServer {
@@ -133,5 +133,5 @@ export function editorPrefsJsonRpcServer(request: JsonRpcRequestTransport): Pref
     setPrefs(prefs: Prefs): Promise<void> {
       return request(kPrefsSetPrefs, [prefs]);
     }
-  }
+  };
 }

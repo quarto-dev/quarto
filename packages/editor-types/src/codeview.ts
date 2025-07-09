@@ -26,7 +26,7 @@ export type CodeViewExecute = "selection" | "cell" | "cell+advance" | "above" | 
 
 export interface CodeViewActiveBlockContext {
   activeLanguage: string;
-  blocks: Array<{ pos: number, language: string, code: string; active: boolean }>;
+  blocks: Array<{ pos: number, language: string, code: string; active: boolean; }>;
   selection: Range;
   selectedText: string;
 }
@@ -42,8 +42,6 @@ export interface CodeViewCellContext {
   selection: Range;
 }
 
-// copy&pasted these from `apps/lsp/src/service/quarto.ts`
-// is there a way to import from there?
 export const kStartRow = "start.row";
 export const kStartColumn = "start.column";
 export const kEndRow = "end.row";

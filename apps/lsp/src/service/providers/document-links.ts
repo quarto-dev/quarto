@@ -779,7 +779,7 @@ export class MdLinkProvider extends Disposable {
 
     this.#linkComputer = new MdLinkComputer(parser, this.#workspace);
     this.#linkCache = this._register(new MdDocumentInfoCache(this.#workspace, async (doc, token) => {
-      logger.log(LogLevel.Debug, 'LinkProvider.compute', { document: doc.uri, version: doc.version });
+      logger.logDebug('LinkProvider.compute', { document: doc.uri, version: doc.version });
 
       const links = await this.#linkComputer.getAllLinks(doc, token);
       return {

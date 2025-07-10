@@ -45,7 +45,7 @@ export class MdFoldingProvider {
   }
 
   public async provideFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-    this.#logger.log(LogLevel.Debug, 'MdFoldingProvider.provideFoldingRanges', { document: document.uri, version: document.version });
+    this.#logger.logDebug('MdFoldingProvider.provideFoldingRanges', { document: document.uri, version: document.version });
 
     if (token.isCancellationRequested) {
       return [];

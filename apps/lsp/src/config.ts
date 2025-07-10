@@ -24,8 +24,11 @@ import {
   IncludeWorkspaceHeaderCompletions,
   LsConfiguration,
   defaultLsConfiguration,
-  PreferredMdPathExtensionStyle
+  PreferredMdPathExtensionStyle,
+  ILogger,
+  LogLevel
 } from './service';
+import { Logger } from './logging';
 
 export type ValidateEnabled = 'ignore' | 'warning' | 'error' | 'hint';
 
@@ -34,6 +37,7 @@ export interface Settings {
     readonly colorTheme: string;
   };
   readonly quarto: {
+    readonly logLevel: LogLevel;
     readonly path: string;
     readonly mathjax: {
       readonly scale: number;
@@ -41,10 +45,6 @@ export interface Settings {
     }
   };
   readonly markdown: {
-    readonly server: {
-      readonly log: 'off' | 'debug' | 'trace';
-    };
-
     readonly preferredMdPathExtensionStyle: 'auto' | 'includeExtension' | 'removeExtension';
 
     readonly suggest: {
@@ -83,6 +83,7 @@ function defaultSettings(): Settings {
       colorTheme: 'Dark+'
     },
     quarto: {
+      logLevel: LogLevel.Warn,
       path: "",
       mathjax: {
         scale: 1,
@@ -90,9 +91,6 @@ function defaultSettings(): Settings {
       }
     },
     markdown: {
-      server: {
-        log: 'off'
-      },
       preferredMdPathExtensionStyle: 'auto',
       suggest: {
         paths: {
@@ -131,13 +129,29 @@ export class ConfigurationManager extends Disposable {
   public readonly onDidChangeConfiguration = this._onDidChangeConfiguration.event;
 
   private _settings: Settings;
+  private _logger: ILogger;
 
-  constructor(private readonly connection_: Connection) {
+  constructor(
+    private readonly connection_: Connection,
+    logger: ILogger,
+  ) {
     super();
+    this._logger = logger;
     this._settings = defaultSettings();
   }
 
+  public init(logLevel: LogLevel) {
+    this._settings = {
+      ...this._settings,
+      quarto: {
+        ...this._settings.quarto,
+        logLevel,
+      }
+    };
+  }
+
   public async update() {
+    this._logger.logTrace('Sending \'configuration\' request');
     const settings = await this.connection_.workspace.getConfiguration();
 
     this._settings = {
@@ -146,6 +160,7 @@ export class ConfigurationManager extends Disposable {
         colorTheme: settings.workbench.colorTheme
       },
       quarto: {
+        logLevel: Logger.parseLogLevel(settings.quarto.server.logLevel),
         path: settings.quarto.path,
         mathjax: {
           scale: settings.quarto.mathjax.scale,
@@ -157,14 +172,22 @@ export class ConfigurationManager extends Disposable {
   }
 
   public async subscribe() {
-    await this.update();
+    // Ignore the settings in parameters, the modern usage is to fetch the
+    // settings when we get this notification. This causes the client to send
+    // any updates for settings under the `quarto` section.
+    this.connection_.onDidChangeConfiguration((_params) => {
+      this._logger.logNotification('didChangeConfiguration');
+      this.update();
+    });
+
+    // Get notified of configuration changes by client
     await this.connection_.client.register(
       DidChangeConfigurationNotification.type,
       undefined
     );
-    this.connection_.onDidChangeConfiguration(() => {
-      this.update();
-    });
+
+    // Retrieve initial values for settings of interest
+    await this.update();
   }
 
   public getSettings(): Settings {

@@ -1306,6 +1306,19 @@
             "type": "string"
           },
           "uniqueItems": true
+        },
+        "quarto.server.logLevel": {
+          "scope": "window",
+          "type": "string",
+          "default": "warn",
+          "enum": [
+            "trace",
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "markdownDescription": "Log level for the Quarto language server."
         }
       }
     },

@@ -1413,7 +1413,8 @@
     "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
-    "build-lang": "node syntaxes/build-lang"
+    "build-lang": "node syntaxes/build-lang",
+    "test": "vscode-test"
   },
   "dependencies": {
     "axios": "^1.2.1",
@@ -1459,7 +1460,8 @@
     "@types/which": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
-    "@vscode/test-electron": "^2.2.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^2.15.0",
     "build": "*",
     "esbuild": "^0.16.7",

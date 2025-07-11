@@ -1414,8 +1414,7 @@
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang",
-    "test-build": "yarn run build test",
-    "test": "vscode-test"
+    "test": "yarn run build test && vscode-test"
   },
   "dependencies": {
     "axios": "^1.2.1",

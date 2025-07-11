@@ -28,4 +28,4 @@ jobs:
       - name: Compile and run tests
         run: |
           yarn install --immutable --immutable-cache --check-cache
-          yarn test-vscode
+          xvfb-run yarn test-vscode

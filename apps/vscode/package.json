@@ -1414,7 +1414,7 @@
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang",
-    "test-build": "tsc -p tsconfig.test.json",
+    "test-build": "yarn run build test",
     "test": "vscode-test"
   },
   "dependencies": {
@@ -1424,6 +1424,7 @@
     "editor-core": "*",
     "editor-server": "*",
     "editor-types": "*",
+    "glob": "^11.0.3",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",

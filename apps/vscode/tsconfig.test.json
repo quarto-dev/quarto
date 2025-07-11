@@ -1,0 +1,12 @@
+{
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2021",
+    "outDir": "./test-out",
+    "lib": ["ES2021"],
+    "sourceMap": true,
+    "strict": true
+  },
+  "extends": "tsconfig/base.json"
+}

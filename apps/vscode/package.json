@@ -1414,6 +1414,7 @@
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang",
+    "test-build": "tsc -p tsconfig.test.json",
     "test": "vscode-test"
   },
   "dependencies": {

@@ -7,13 +7,18 @@ yarn             # install dependencies
 yarn dev-vscode  # run development/debug version of extension
 ```
 
+Run the extension tests with:
+
+```sh
+yarn test-vscode # compile the test files and run them with the vscode-test CLI
+```
+
 Install the dev version of the extension in VS Code or Positron with:
 
 ```sh
 yarn install-vscode
 yarn install-positron
 ```
-
 
 # Debugging the extension
 

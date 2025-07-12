@@ -1,0 +1,31 @@
+
+name: Test VS Code Extension
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Update build environment and install XVFB
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install --fix-missing xvfb
+
+      - name: Compile and run tests
+        run: |
+          yarn install --immutable --immutable-cache --check-cache
+          xvfb-run yarn test-vscode

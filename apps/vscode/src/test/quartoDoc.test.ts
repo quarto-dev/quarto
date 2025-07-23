@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as assert from "assert";
 import { exampleWorkspacePath, exampleWorkspaceOutPath, copyFile, wait } from "./test-utils";
 import { isQuartoDoc } from "../core/doc";
+import { extension } from "./extension";
 
 const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1600;
 
@@ -24,6 +25,10 @@ suite("Quarto basics", () => {
     const doc = await vscode.workspace.openTextDocument(exampleWorkspaceOutPath("hello.qmd"));
     const editor = await vscode.window.showTextDocument(doc);
 
+    console.log('extension().isActive', extension().isActive);
+
+    await extension().activate();
+
     // manually confirm visual mode so dialogue pop-up doesn't show because dialogues cause test errors
     // and switch to visual editor
     await vscode.commands.executeCommand("quarto.test_setkVisualModeConfirmedTrue");
@@ -39,6 +44,8 @@ suite("Quarto basics", () => {
   test("Roundtrip doesn't change hello.qmd", async () => {
     const doc = await vscode.workspace.openTextDocument(exampleWorkspaceOutPath("hello.qmd"));
     const editor = await vscode.window.showTextDocument(doc);
+
+    await extension().activate();
 
     const docTextBefore = doc.getText();
 

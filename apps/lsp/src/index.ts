@@ -29,9 +29,9 @@ import {
   WorkspaceSymbol
 } from "vscode-languageserver";
 
-import { CompletionItem, Hover, Location } from "vscode-languageserver-types"
+import { CompletionItem, Hover, Location } from "vscode-languageserver-types";
 
-import { createConnection } from "vscode-languageserver/node"
+import { createConnection } from "vscode-languageserver/node";
 
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -46,6 +46,8 @@ import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService } from "./service";
 import { initializeQuarto } from "./quarto";
 import { registerDiagnostics } from "./diagnostics";
+
+
 
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -98,7 +100,7 @@ connection.onInitialize((params: InitializeParams) => {
     }
 
     return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
-  })
+  });
 
   connection.onHover(async (params, token): Promise<Hover | null | undefined> => {
     logger.logRequest('hover');
@@ -108,7 +110,7 @@ connection.onInitialize((params: InitializeParams) => {
       return null;
     }
     return mdLs?.getHover(document, params.position, config, token);
-  })
+  });
 
 
   connection.onDocumentLinks(async (params, token): Promise<DocumentLink[]> => {
@@ -249,7 +251,7 @@ connection.onInitialized(async () => {
     capabilities!,
     config,
     logger
-  )
+  );
 
   // initialize parser
   const parser = markdownitParser();
@@ -279,7 +281,7 @@ connection.onInitialized(async () => {
     onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
       return connection.onRequest(method, handler);
     }
-  }
+  };
 
   // register custom methods
   registerCustomMethods(quarto, lspConnection, documents);

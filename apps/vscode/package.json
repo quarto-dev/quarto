@@ -1319,6 +1319,17 @@
             "error"
           ],
           "markdownDescription": "Log level for the Quarto language server."
+        },
+        "quarto.symbols.exportToWorkspace": {
+          "type": "string",
+          "enum": ["default", "all", "none"],
+          "enumDescriptions": [
+            "Depends on the project type: `\"none\"` in R packages, `\"all\"` otherwise.",
+            "",
+            ""
+          ],
+          "default": "default",
+          "description": "Whether Markdown elements like section headers are included in workspace symbol search."
         }
       }
     },

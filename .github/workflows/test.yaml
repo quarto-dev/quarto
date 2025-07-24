@@ -29,9 +29,8 @@ jobs:
 
       - name: Build vscode extension
         run: |
-          cd apps/vscode
           yarn install
-          yarn run build
+          yarn run build-vscode
 
       - name: Compile and run tests
         run: |

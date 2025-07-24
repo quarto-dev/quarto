@@ -25,6 +25,14 @@ jobs:
           sudo apt-get -y update
           sudo apt-get -y install --fix-missing xvfb
 
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Build vscode extension
+        run: |
+          cd apps/vscode
+          yarn install
+          yarn run build
+
       - name: Compile and run tests
         run: |
           yarn install --immutable --immutable-cache --check-cache

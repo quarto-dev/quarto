@@ -4,7 +4,7 @@ import { exampleWorkspacePath, exampleWorkspaceOutPath, copyFile, wait } from ".
 import { isQuartoDoc } from "../core/doc";
 import { extension } from "./extension";
 
-const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1600;
+const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
 
 suite("Quarto basics", function () {
   // Before we run any tests, we should copy any files that get edited in the tests to file under `exampleWorkspaceOutPath`
@@ -24,10 +24,12 @@ suite("Quarto basics", function () {
   // Note: the following tests may be flaky. They rely on waiting estimated amounts of time for commands to complete.
   test("Can edit in visual mode", async function () {
     // don't run this in CI for now because we haven't figured out how to get the LSP to start
-    if (process.env['CI']) this.skip();
+    // if (process.env['CI']) this.skip();
 
     const doc = await vscode.workspace.openTextDocument(exampleWorkspaceOutPath("hello.qmd"));
     const editor = await vscode.window.showTextDocument(doc);
+
+    await extension().activate();
 
     // manually confirm visual mode so dialogue pop-up doesn't show because dialogues cause test errors
     // and switch to visual editor
@@ -43,10 +45,12 @@ suite("Quarto basics", function () {
   //       does in `/examples`.
   test("Roundtrip doesn't change hello.qmd", async function () {
     // don't run this in CI for now because we haven't figured out how to get the LSP to start
-    if (process.env['CI']) this.skip();
+    // if (process.env['CI']) this.skip();
 
     const doc = await vscode.workspace.openTextDocument(exampleWorkspaceOutPath("hello.qmd"));
     const editor = await vscode.window.showTextDocument(doc);
+
+    await extension().activate();
 
     const docTextBefore = doc.getText();
 
@@ -59,6 +63,6 @@ suite("Quarto basics", function () {
     await wait(300);
 
     const docTextAfter = doc.getText();
-    assert.ok(docTextBefore === docTextAfter);
+    assert.ok(docTextBefore === docTextAfter, docTextAfter);
   });
 });

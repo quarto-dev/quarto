@@ -5,7 +5,7 @@ export default defineConfig([
     files: 'test-out/*.test.js',
     workspaceFolder: 'src/test/examples',
     mocha: {
-      timeout: 3000,
+      timeout: 5000,
     },
   },
 ]);

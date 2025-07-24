@@ -23,9 +23,6 @@ suite("Quarto basics", function () {
 
   // Note: the following tests may be flaky. They rely on waiting estimated amounts of time for commands to complete.
   test("Can edit in visual mode", async function () {
-    // don't run this in CI for now because we haven't figured out how to get the LSP to start
-    // if (process.env['CI']) this.skip();
-
     const doc = await vscode.workspace.openTextDocument(exampleWorkspaceOutPath("hello.qmd"));
     const editor = await vscode.window.showTextDocument(doc);
 
@@ -44,9 +41,6 @@ suite("Quarto basics", function () {
   //       test. That's okay for this test, but could cause issues if you expect a qmd to look how it
   //       does in `/examples`.
   test("Roundtrip doesn't change hello.qmd", async function () {
-    // don't run this in CI for now because we haven't figured out how to get the LSP to start
-    // if (process.env['CI']) this.skip();
-
     const doc = await vscode.workspace.openTextDocument(exampleWorkspaceOutPath("hello.qmd"));
     const editor = await vscode.window.showTextDocument(doc);
 

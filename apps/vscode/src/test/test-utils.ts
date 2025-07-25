@@ -13,36 +13,12 @@ export const EXTENSION_ROOT_DIR =
 
 export const TEST_PATH = path.join(EXTENSION_ROOT_DIR, "src", "test");
 export const WORKSPACE_PATH = path.join(TEST_PATH, "examples");
+export const WORKSPACE_OUT_PATH = path.join(TEST_PATH, "examples-out");
 
-export function exampleWorkspacePath(file: string): string {
-  return path.join(WORKSPACE_PATH, file);
-}
-export function exampleWorkspaceOutPath(file: string): string {
-  return path.join(WORKSPACE_PATH, 'examples-out', file);
+export function examplesOutUri(fileName: string = ''): vscode.Uri {
+  return vscode.Uri.file(path.join(WORKSPACE_OUT_PATH, fileName));
 }
 
 export function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-export async function copyFile(
-  sourcePath: string,
-  destPath: string,
-): Promise<boolean> {
-  try {
-    const wsedit = new vscode.WorkspaceEdit();
-    const data = await vscode.workspace.fs.readFile(
-      vscode.Uri.file(sourcePath)
-    );
-    const destFileUri = vscode.Uri.file(destPath);
-    wsedit.createFile(destFileUri, { ignoreIfExists: true });
-
-    await vscode.workspace.fs.writeFile(destFileUri, data);
-
-    let isDone = await vscode.workspace.applyEdit(wsedit);
-    if (isDone) return true;
-    else return false;
-  } catch (err) {
-    return false;
-  }
 }

@@ -10,3 +10,5 @@ format: html
 ```
 
 *YO!*
+
+note the lack of newline at the end of this file.

@@ -38,11 +38,14 @@ export function isExecutableLanguageBlock(token: Token) : token is TokenMath | T
   }
 }
 
-export function codeForExecutableLanguageBlock(token: TokenMath | TokenCodeBlock) {
+export function codeForExecutableLanguageBlock(
+  token: TokenMath | TokenCodeBlock,
+  appendNewline = true,
+) {
   if (isMath(token)) {
     return token.data.text;
   } else if (isCodeBlock(token)) {
-    return token.data + "\n";
+    return token.data + (appendNewline ? "\n" : "");
   } else {
     return "";
   }

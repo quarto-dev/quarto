@@ -35,7 +35,7 @@ export interface QuartoContext {
 
 /**
  * Initialize a Quarto context.
- * 
+ *
  * @param quartoPath A path to a user-specified Quarto executable. If
  *  supplied, this will be used in preference to other methods of detecting
  *  Quarto.
@@ -44,7 +44,7 @@ export interface QuartoContext {
  * @param additionalSearchPaths Additional paths to search for Quarto. These will only be used if
  *  Quarto is not found in the default locations or the system path.
  * @param showWarning A function to call to show a warning message.
- * 
+ *
  * @returns A Quarto context.
  */
 export function initQuartoContext(
@@ -80,13 +80,13 @@ export function initQuartoContext(
     // use cmd suffix for older versions of quarto on windows
     const windows = os.platform() == "win32";
     const useCmd = windows && semver.lte(quartoInstall.version, "1.1.162");
-    let pandocPath = path.join(quartoInstall!.binPath, "tools", "pandoc");
+    let pandocPath = process.env["QUARTO_PANDOC"] || path.join(quartoInstall!.binPath, "tools", "pandoc");
     // more recent versions of quarto use architecture-specific tools dir,
     // if the pandocPath is not found then look in the requisite dir for this arch
     if (!windows && !fs.existsSync(pandocPath)) {
       pandocPath = path.join(
-        path.dirname(pandocPath), 
-        isArm_64() ? "aarch64" : "x86_64", 
+        path.dirname(pandocPath),
+        isArm_64() ? "aarch64" : "x86_64",
         path.basename(pandocPath)
       );
     }
@@ -114,7 +114,7 @@ export function initQuartoContext(
   }
 }
 
-export function quartoContextUnavailable() : QuartoContext {
+export function quartoContextUnavailable(): QuartoContext {
   return {
     available: false,
     version: "",
@@ -179,8 +179,8 @@ function detectUserSpecifiedQuarto(
   if (!fs.statSync(quartoPath).isFile()) {
     showWarning(
       "Specified quarto executable is a directory not a file: '" +
-        quartoPath +
-        "'"
+      quartoPath +
+      "'"
     );
     return undefined;
   }
@@ -191,9 +191,9 @@ function detectUserSpecifiedQuarto(
 
 /**
  * Scan for Quarto in known locations.
- * 
+ *
  * @param additionalSearchPaths Additional paths to search for Quarto (optional)
- * 
+ *
  * @returns A Quarto installation if found, otherwise undefined
  */
 function scanForQuarto(additionalSearchPaths?: string[]): QuartoInstallation | undefined {

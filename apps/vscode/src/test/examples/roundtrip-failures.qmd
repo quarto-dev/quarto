@@ -1,0 +1,22 @@
+``````{=markdown}
+```{=markdown}
+hi
+```
+``````
+
+kBlockCapsuleSentinel uuid sentinel leak during SE→VE
+``````{{python}}
+```
+dog
+```
+``````
+
+`````
+```{python}
+a = 3
+````
+`````
+
+_YO!_
+
+be careful of newline at end of file, roundtripping removes it:

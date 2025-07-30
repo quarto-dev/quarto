@@ -114,6 +114,8 @@ async function getCompletions(
     return null;
   }
 
+  console.log('getCompletions', completions, [...completions.items])
+
   // order completions
   const haveOrder = !!completions.items?.[0].sortText;
   if (haveOrder) {

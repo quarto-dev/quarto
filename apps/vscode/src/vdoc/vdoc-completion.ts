@@ -25,6 +25,7 @@ export async function vdocCompletions(
   parentUri: Uri
 ) {
   const completions = await withVirtualDocUri(vdoc, parentUri, "completion", async (uri: Uri) => {
+    console.log('vdocCompletions vdoc uri, adjustedPosition, trigger', uri, adjustedPosition(language, position), trigger)
     return await commands.executeCommand<CompletionList>(
       "vscode.executeCompletionItemProvider",
       uri,
@@ -32,6 +33,7 @@ export async function vdocCompletions(
       trigger
     );
   });
+  console.log('completions!!!', completions)
   return completions.items.map((completion: CompletionItem) => {
     if (language.inject && completion.range) {
       if (completion.range instanceof Range) {
@@ -49,5 +51,4 @@ export async function vdocCompletions(
     }
     return completion;
   });
-
 }

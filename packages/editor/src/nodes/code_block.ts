@@ -35,7 +35,7 @@ import { hasFencedCodeBlocks } from '../api/pandoc_format';
 import { precedingListItemInsertPos, precedingListItemInsert } from '../api/list';
 import { EditorOptions } from '../api/options';
 import { OmniInsertGroup } from '../api/omni_insert';
-import { blockCapsuleParagraphTokenHandler, blockCapsuleSourceWithoutPrefix, blockCapsuleTextHandler, encodedBlockCapsuleRegex, PandocBlockCapsule, PandocBlockCapsuleFilter } from '../api/pandoc_capsule';
+import { blockCapsuleHandlerOr, blockCapsuleParagraphTokenHandler, blockCapsuleSourceWithoutPrefix, blockCapsuleStrTokenHandler, blockCapsuleTextHandler, encodedBlockCapsuleRegex, PandocBlockCapsule, PandocBlockCapsuleFilter } from '../api/pandoc_capsule';
 
 const kNoAttributesSentinel = 'CEF7FA46';
 
@@ -70,12 +70,12 @@ const extension = (context: ExtensionContext): Extension => {
             const fontClass = 'pm-fixedwidth-font';
             const attrs = hasAttr
               ? pandocAttrToDomAttr({
-                  ...node.attrs,
-                  classes: [...node.attrs.classes, fontClass],
-                })
+                ...node.attrs,
+                classes: [...node.attrs.classes, fontClass],
+              })
               : {
-                  class: fontClass,
-                };
+                class: fontClass,
+              };
             return ['pre', attrs, ['code', 0]];
           },
         },
@@ -114,19 +114,19 @@ const extension = (context: ExtensionContext): Extension => {
                 }
               }
             }
-            
+
             output.writeToken(PandocTokenType.CodeBlock, () => {
               if (hasAttr) {
                 const id = pandocExtensions.fenced_code_attributes ? node.attrs.id : '';
                 const keyvalue = pandocExtensions.fenced_code_attributes ? node.attrs.keyvalue : [];
-                
+
                 // if there are no attributes this will end up outputting a code block
                 // without the fence markers (rather indenting the code block 4 spaces).
                 // we don't want this so we add a sentinel class to the attributes to
                 // force the fence markers (which we then cleanup below in the postprocessor)
                 const classes = [...node.attrs.classes];
                 if (!pandocAttrAvailable(node.attrs) && pandocExtensions.backtick_code_blocks) {
-                  classes.push(kNoAttributesSentinel)
+                  classes.push(kNoAttributesSentinel);
                 }
 
                 output.writeAttr(id, classes, keyvalue);
@@ -138,11 +138,11 @@ const extension = (context: ExtensionContext): Extension => {
           },
           blockCapsuleFilter: escapedRmdChunkBlockCapsuleFilter(),
           markdownPostProcessor: (markdown: string) => {
-             // cleanup the sentinel classes we may have added above
+            // cleanup the sentinel classes we may have added above
             if (pandocExtensions.backtick_code_blocks) {
               markdown = markdown.replace(
-                new RegExp("``` " + kNoAttributesSentinel, 'g'), 
-                 "``` " + " ".repeat(kNoAttributesSentinel.length)
+                new RegExp("``` " + kNoAttributesSentinel, 'g'),
+                "``` " + " ".repeat(kNoAttributesSentinel.length)
               );
             }
             return markdown;
@@ -301,9 +301,9 @@ function codeBlockAttrEdit(pandocExtensions: PandocExtensions, pandocCapabilitie
             tags.push(`#${node.attrs.id}`);
           }
           if (node.attrs.classes) {
-            for (let i=1; i<node.attrs.classes.length; i++) {
+            for (let i = 1; i < node.attrs.classes.length; i++) {
               tags.push(`.${node.attrs.classes[i]}`);
-            } 
+            }
             if (node.attrs.classes.length > 0) {
               const lang = node.attrs.classes[0];
               if (pandocCapabilities.highlight_languages.includes(lang) || lang === 'tex') {
@@ -315,7 +315,7 @@ function codeBlockAttrEdit(pandocExtensions: PandocExtensions, pandocCapabilitie
           }
           if (node.attrs.keyvalue && node.attrs.keyvalue.length) {
             tags.push(`${node.attrs.keyvalue.map(
-              (kv: [string,string]) => kv[0] + '="' + (kv[1] || '1') + '"').join(' ')}
+              (kv: [string, string]) => kv[0] + '="' + (kv[1] || '1') + '"').join(' ')}
             `);
           }
           return tags;
@@ -364,9 +364,17 @@ export function escapedRmdChunkBlockCapsuleFilter(): PandocBlockCapsuleFilter {
       encodedBlockCapsuleRegex(undefined, undefined, 'gm'),
     ),
 
-    // we are looking for a paragraph token consisting entirely of a block capsule of our type.
-    // if find that then return the block capsule text
-    handleToken: blockCapsuleParagraphTokenHandler(kEscapedRmdChunkBlockCapsuleType),
+    // we are looking for a paragraph token consisting entirely of a block capsule of our type
+    //   OR a string token with a block capsule of our type. if find that then return the
+    //   block capsule text.
+    // Historical note: we were previously only using the paragraph handler, but it did not work if the
+    //   code block did not have a blank line between it and the previous paragraph becuase
+    //   Pandoc would parse the block capsule into the end of the that paragraph.
+    handleToken:
+      blockCapsuleHandlerOr(
+        blockCapsuleParagraphTokenHandler(kEscapedRmdChunkBlockCapsuleType),
+        blockCapsuleStrTokenHandler(kEscapedRmdChunkBlockCapsuleType)
+      ),
 
     // write the node
     writeNode: (schema: Schema, writer: ProsemirrorWriter, capsule: PandocBlockCapsule) => {
@@ -377,8 +385,12 @@ export function escapedRmdChunkBlockCapsuleFilter(): PandocBlockCapsuleFilter {
       const sourceLines = lines(source);
       sourceLines[0] = sourceLines[0].replace(/^(```+)\{(\{+[^}]+\}+)\}([ \t]*)$/, "$1$2$3");
 
-      // write the node
+      const isWritingInsideParagraph = writer.isNodeOpen(schema.nodes.paragraph);
+      // We can't write code blocks inside of paragraphs, so let's temporarily leave the paragraph
+      // before reopening it after writing the code block
+      if (isWritingInsideParagraph) writer.closeNode();
       writer.addNode(schema.nodes.code_block, {}, [schema.text(sourceLines.join("\n"))]);
+      if (isWritingInsideParagraph) writer.openNode(schema.nodes.paragraph, {});
     },
   };
 }

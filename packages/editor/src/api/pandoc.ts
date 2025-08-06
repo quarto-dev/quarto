@@ -24,7 +24,7 @@ import { kLinkChildren } from './link';
 
 import { BibliographyResult, PandocServer, PandocApiVersion, PandocAst, PandocToken } from 'editor-types';
 import { PandocExtensions } from './pandoc-types';
-export type { BibliographyResult, PandocServer,PandocApiVersion, PandocAst, PandocToken, PandocExtensions };
+export type { BibliographyResult, PandocServer, PandocApiVersion, PandocAst, PandocToken, PandocExtensions };
 
 
 export function imageAttributesAvailable(pandocExtensions: PandocExtensions) {
@@ -257,44 +257,65 @@ export function stringifyTokens(c: PandocToken[], unemoji = false): string {
 }
 
 export function forEachToken(tokens: PandocToken[], f: (tok: PandocToken) => void) {
-  mapTokens(tokens, (tok: PandocToken) => {
+  mapTokensRecursive(tokens, (tok: PandocToken) => {
     f(tok);
     return tok;
   });
 }
 
-export function mapTokens(tokens: PandocToken[], f: (tok: PandocToken) => PandocToken) {
-  function isToken(val: unknown) {
-    if (val !== null && typeof val === 'object') {
-      return Object.prototype.hasOwnProperty.call(val, 't');
-    } else {
-      return false;
-    }
-  }
+const isObject = (val: unknown): val is object =>
+  val !== null &&
+  typeof val === 'object';
 
-  function tokenHasChildren(tok: PandocToken) {
-    return tok !== null && typeof tok === 'object' && Array.isArray(tok.c);
-  }
+const isToken = (val: unknown): val is PandocToken =>
+  isObject(val) &&
+  val.hasOwnProperty('t');
 
-  function mapValue(val: unknown): unknown {
-    if (isToken(val)) {
-      return mapToken(val as PandocToken);
-    } else if (Array.isArray(val)) {
-      return val.map(mapValue);
-    } else {
-      return val;
-    }
-  }
+/**
+ * @param f A function to be enhanced.
+ * @returns An enhanced function. If the input to the enhanced function is a
+ * non-array value, then `f` is simply applied to it.
+ * If the input to the enhanced function is an array, optionally of recursively nested arrays,
+ * then `f` is applied to all non-array values in the array and all recursively nested arrays.
+ */
+const mapRecursiveArray = (f: (v: unknown) => any) => {
 
-  function mapToken(tok: PandocToken): PandocToken {
+  const mappedF = (val: unknown): any =>
+    Array.isArray(val) ?
+      val.map(mappedF) : f(val);
+
+  return mappedF;
+};
+
+/**
+ * @param f A function from PandocToken to PandocToken to be enhanced.
+ * @returns An enhanced function that applies `f` to an input token, and
+ * then applies itself to any tokens in the output's content i.e. `mappedTok.c`,
+ * even if token is inside nested arrays in the output's content.
+ */
+const mapTokenAndContentTokensRecursively = (f: (tok: PandocToken) => PandocToken) => {
+  const mappedF = (tok: PandocToken) => {
     const mappedTok = f(tok);
-    if (tokenHasChildren(mappedTok)) {
-      mappedTok.c = mappedTok.c.map(mapValue);
-    }
-    return mappedTok;
-  }
 
-  return tokens.map(mapToken);
+    const recursiveMappedF = mapRecursiveArray((v) => isToken(v) ? mappedF(v) : v);
+    mappedTok.c = recursiveMappedF(mappedTok.c);
+
+    return mappedTok;
+  };
+
+  return mappedF;
+};
+
+/**
+ *
+ * @param tokens An array of `PandocToken`s
+ * @param f A function to be applied to each token that returns a new or modified token
+ * @returns The array of tokens resulting from applying `f` to each token in `token`s, and
+ * also recursively applying `f` to any tokens in the resulting token's content (even if the content
+ * consists of recursively nested arrays, and the tokens are in the nested arrays).
+ */
+export function mapTokensRecursive(tokens: PandocToken[], f: (tok: PandocToken) => PandocToken) {
+  return tokens.map(mapTokenAndContentTokensRecursively(f));
 }
 
 export function tokenTextEscaped(t: PandocToken) {
@@ -302,7 +323,7 @@ export function tokenTextEscaped(t: PandocToken) {
 }
 
 // sort marks by priority (in descending order)
-export function marksByPriority(marks: readonly Mark[], markWriters: { [key: string]: PandocMarkWriter }) {
+export function marksByPriority(marks: readonly Mark[], markWriters: { [key: string]: PandocMarkWriter; }) {
   return Array.prototype.sort.call(marks, (a: Mark, b: Mark) => {
     const aPriority = markWriters[a.type.name].priority;
     const bPriority = markWriters[b.type.name].priority;

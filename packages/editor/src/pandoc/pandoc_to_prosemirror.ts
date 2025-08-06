@@ -24,7 +24,7 @@ import {
   PandocInlineHTMLReaderFn,
   PandocTokensFilterFn,
   PandocTokenType,
-  mapTokens,
+  mapTokensRecursive,
   stringifyTokens,
   PandocExtensions,
   forEachToken,
@@ -33,8 +33,7 @@ import {
   pandocAttrReadAST,
   kCodeBlockAttr,
   kCodeBlockText,
-  kPandocAttrClasses,
-  kPandocAttrKeyvalue,
+  kPandocAttrId,
 } from '../api/pandoc_attr';
 import {
   PandocBlockCapsuleFilter,
@@ -44,8 +43,8 @@ import {
 } from '../api/pandoc_capsule';
 
 import { PandocToProsemirrorResult, PandocLineWrapping } from './pandoc_converter';
-import { kLinkTarget, kLinkTargetUrl, kLinkChildren, kLinkAttr, kLinkTargetTitle } from '../api/link';
-import { kHeadingAttr, kHeadingLevel, kHeadingChildren } from '../api/heading';
+import { kLinkTarget, kLinkTargetUrl, kLinkChildren } from '../api/link';
+import { kHeadingAttr } from '../api/heading';
 import { pandocAutoIdentifier, gfmAutoIdentifier } from '../api/pandoc_id';
 import { hasShortcutHeadingLinks } from '../api/pandoc_format';
 import { equalsIgnoreCase } from 'core';
@@ -78,7 +77,7 @@ class Parser {
   private readonly tokensFilters: readonly PandocTokensFilterFn[];
   private readonly inlineHTMLReaders: readonly PandocInlineHTMLReaderFn[];
   private readonly blockCapsuleFilters: readonly PandocBlockCapsuleFilter[];
-  private readonly handlers: { [token: string]: ParserTokenHandlerCandidate[] };
+  private readonly handlersByTokenType: { [token: string]: ParserTokenHandlerCandidate[]; };
 
   constructor(
     schema: Schema,
@@ -94,8 +93,8 @@ class Parser {
     this.tokensFilters = tokensFilters;
     this.inlineHTMLReaders = inlineHTMLReaders;
     // apply block capsule filters in reverse order
-    this.blockCapsuleFilters = blockCapsuleFilters.slice().reverse();
-    this.handlers = this.createHandlers(readers, blockReaders);
+    this.blockCapsuleFilters = [...blockCapsuleFilters].reverse();
+    this.handlersByTokenType = this.createHandlers(readers, blockReaders);
   }
 
   public parse(ast: PandocAst) {
@@ -164,39 +163,38 @@ class Parser {
 
   private writeToken(writer: ProsemirrorWriter, tok: PandocToken) {
     // process block-level capsules
-    for (const filter of this.blockCapsuleFilters) {
-      const capsuleText = filter.handleToken?.(tok);
-      if (capsuleText) {
-        const blockCapsule = parsePandocBlockCapsule(capsuleText);
-        // run all of the text filters in case there was nesting
-        blockCapsule.source = decodeBlockCapsuleText(blockCapsule.source, tok, this.blockCapsuleFilters);
-        filter.writeNode(this.schema, writer, blockCapsule);
-        return;
-      }
-    }
+    const didWriteBlockCapsule = this.blockCapsuleFilters.some(filter =>
+      this.tryFilterWriteBlockCapsule(writer, filter, tok)
+    );
+    if (didWriteBlockCapsule) return;
 
     // look for a handler.match function that wants to handle this token
-    const handlers = this.handlers[tok.t] || [];
-    for (const handler of handlers) {
-      // It's not enough for a pandoc reader's preferred token to match the
-      // current token; it's possible based on the `match` method for the
-      // reader to decline to handle it.
-      if (handler.match && handler.match(tok)) {
-        handler.handler(writer, tok);
-        return;
-      }
-    }
+    const tokenHandlers = this.handlersByTokenType[tok.t] ?? [];
+
+    // It's not enough for a pandoc reader's preferred token to match the
+    // current token; it's possible based on the `match` method for the
+    // reader to decline to handle it.
+    const matchedHandler = tokenHandlers.find(handler => handler.match?.(tok));
+    if (matchedHandler) return matchedHandler.handler(writer, tok);
 
     // if we didn't find one, look for the default handler
-    for (const handler of handlers) {
-      if (!handler.match) {
-        handler.handler(writer, tok);
-        return;
-      }
-    }
+    const defaultHandler = tokenHandlers.find(handler => handler.match === undefined);
+    if (defaultHandler) return defaultHandler.handler(writer, tok);
 
-    // log unrecognized token
+    // if we didn't return by now, log unrecognized token
     writer.logUnrecognized(tok.t);
+  }
+
+  private tryFilterWriteBlockCapsule(writer: ProsemirrorWriter, filter: PandocBlockCapsuleFilter, tok: PandocToken) {
+    const capsuleText = filter.handleToken?.(tok);
+    if (capsuleText) {
+      const blockCapsule = parsePandocBlockCapsule(capsuleText);
+      // run all of the text filters in case there was nesting
+      blockCapsule.source = decodeBlockCapsuleText(blockCapsule.source, tok, this.blockCapsuleFilters);
+      filter.writeNode(this.schema, writer, blockCapsule);
+      return true;
+    }
+    return false;
   }
 
   private hasInlineHTMLWriter(html: string) {
@@ -218,109 +216,97 @@ class Parser {
 
   // create parser token handler functions based on the passed readers
   private createHandlers(readers: readonly PandocTokenReader[], blockReaders: readonly PandocBlockReaderFn[]) {
-    const handlers: { [token: string]: ParserTokenHandlerCandidate[] } = {};
+    const handlers: { [token: string]: ParserTokenHandlerCandidate[]; } = {};
 
     for (const reader of readers) {
-      // resolve children (provide default impl)
-      const getChildren = reader.getChildren || ((tok: PandocToken) => tok.c);
-
-      // resolve getAttrs (provide default imple)
-      const getAttrs = reader.getAttrs ? reader.getAttrs : () => ({});
-
-      let handler: ParserTokenHandler;
-
-      // see if there is a low-level handler
-      if (reader.handler) {
-        handler = reader.handler(this.schema);
-      }
-
-      // text
-      else if (reader.text) {
-        handler = (writer: ProsemirrorWriter, tok: PandocToken) => {
-          if (reader.getText) {
-            const text = reader.getText(tok);
-            writer.writeText(text);
-          }
-        };
-
-        // marks
-      } else if (reader.mark) {
-        handler = (writer: ProsemirrorWriter, tok: PandocToken) => {
-          const markType = this.schema.marks[reader.mark as string];
-          const mark = markType.create(getAttrs(tok));
-          writer.openMark(mark);
-          if (reader.getText) {
-            writer.writeText(reader.getText(tok));
-          } else {
-            writer.writeTokens(getChildren(tok));
-          }
-          writer.closeMark(mark);
-        };
-
-        // blocks
-      } else if (reader.block) {
-        const nodeType = this.schema.nodes[reader.block];
-        handler = (writer: ProsemirrorWriter, tok: PandocToken) => {
-          // give the block readers first crack (e.g. handle a paragraph node with
-          // a single image as a figure node)
-          for (const blockReader of blockReaders) {
-            if (blockReader(this.schema, tok, writer)) {
-              return;
-            }
-          }
-
-          writer.openNode(nodeType, getAttrs(tok));
-          if (reader.getText) {
-            writer.writeText(reader.getText(tok));
-          } else {
-            writer.writeTokens(getChildren(tok));
-          }
-          writer.closeNode();
-        };
-
-        // nodes
-      } else if (reader.node) {
-        const nodeType = this.schema.nodes[reader.node];
-        handler = (writer: ProsemirrorWriter, tok: PandocToken) => {
-          if (reader.getChildren) {
-            writer.openNode(nodeType, getAttrs(tok));
-            writer.writeTokens(getChildren(tok));
-            writer.closeNode();
-          } else {
-            let content: ProsemirrorNode[] = [];
-            if (reader.getText) {
-              content = [this.schema.text(reader.getText(tok))];
-            }
-            writer.addNode(nodeType, getAttrs(tok), content);
-          }
-        };
-
-        // code blocks
-      } else if (reader.code_block) {
-        handler = (writer: ProsemirrorWriter, tok: PandocToken) => {
-          // type/attr/text
-          const nodeType = this.schema.nodes.code_block;
-          const attr = pandocAttrReadAST(tok, kCodeBlockAttr);
-          const text = tok.c[kCodeBlockText] as string;
-
-          // write node
-          writer.openNode(nodeType, attr);
-          writer.writeText(text);
-          writer.closeNode();
-        };
-      } else {
-        throw new Error('pandoc reader was malformed or unrecognized');
-      }
-
-      // Ensure an array exists
-      handlers[reader.token] = handlers[reader.token] || [];
-
-      handlers[reader.token].push({
+      handlers[reader.token] = [...(handlers[reader.token] ?? []), {
         match: reader.match,
-        handler,
-      });
+        handler: this.createHandler(reader, blockReaders),
+      }];
     }
+
     return handlers;
+  }
+
+  private createHandler(reader: PandocTokenReader, blockReaders: readonly PandocBlockReaderFn[]) {
+    // resolve children (provide default impl)
+    const getChildren = reader.getChildren ?? ((tok: PandocToken) => tok.c);
+
+    // resolve getAttrs (provide default imple)
+    const getAttrs = reader.getAttrs ?? (() => ({}));
+
+    // see if there is a low-level handler
+    if (reader.handler) {
+      return reader.handler(this.schema);
+    }
+    else if (reader.text) {
+      return (writer: ProsemirrorWriter, tok: PandocToken) => {
+        if (reader.getText) {
+          const text = reader.getText(tok);
+          writer.writeText(text);
+        }
+      };
+    } else if (reader.mark) {
+      return (writer: ProsemirrorWriter, tok: PandocToken) => {
+        const markType = this.schema.marks[reader.mark as string];
+        const mark = markType.create(getAttrs(tok));
+        writer.openMark(mark);
+        if (reader.getText) {
+          writer.writeText(reader.getText(tok));
+        } else {
+          writer.writeTokens(getChildren(tok));
+        }
+        writer.closeMark(mark);
+      };
+    } else if (reader.block) {
+      const nodeType = this.schema.nodes[reader.block];
+      return (writer: ProsemirrorWriter, tok: PandocToken) => {
+        // give the block readers first crack (e.g. handle a paragraph node with
+        // a single image as a figure node)
+        for (const blockReader of blockReaders) {
+          if (blockReader(this.schema, tok, writer)) {
+            return;
+          }
+        }
+
+        writer.openNode(nodeType, getAttrs(tok));
+        if (reader.getText) {
+          writer.writeText(reader.getText(tok));
+        } else {
+          writer.writeTokens(getChildren(tok));
+        }
+        writer.closeNode();
+      };
+    } else if (reader.node) {
+      const nodeType = this.schema.nodes[reader.node];
+      return (writer: ProsemirrorWriter, tok: PandocToken) => {
+        if (reader.getChildren) {
+          writer.openNode(nodeType, getAttrs(tok));
+          writer.writeTokens(getChildren(tok));
+          writer.closeNode();
+        } else {
+          let content: ProsemirrorNode[] = [];
+          if (reader.getText) {
+            content = [this.schema.text(reader.getText(tok))];
+          }
+          writer.addNode(nodeType, getAttrs(tok), content);
+        }
+      };
+    } else if (reader.code_block) {
+      return (writer: ProsemirrorWriter, tok: PandocToken) => {
+        // type/attr/text
+        const nodeType = this.schema.nodes.code_block;
+        const attr = pandocAttrReadAST(tok, kCodeBlockAttr);
+        const text = tok.c[kCodeBlockText] as string;
+
+        // write node
+        writer.openNode(nodeType, attr);
+        writer.writeText(text);
+        writer.closeNode();
+      };
+    } else {
+      throw new Error('pandoc reader was malformed or unrecognized');
+    }
   }
 }
 
@@ -378,7 +364,7 @@ class ParserState {
     if (!node) {
       return null;
     }
-    if (this.stack.length) {
+    if (this.stack.length > 0) {
       if (type === this.schema.nodes.note) {
         this.notes.push(node);
       } else {
@@ -437,11 +423,9 @@ class ParserState {
   }
 
   private maybeMerge(a: ProsemirrorNode, b: ProsemirrorNode): ProsemirrorNode | undefined {
-    if (a && a.isText && b.isText && Mark.sameSet(a.marks, b.marks)) {
-      return this.schema.text(((a.text as string) + b.text) as string, a.marks);
-    } else {
-      return undefined;
-    }
+    return a?.isText && b?.isText && Mark.sameSet(a.marks, b.marks) ?
+      this.schema.text((a.text as string) + b.text, a.marks) :
+      undefined;
   }
 }
 
@@ -487,10 +471,10 @@ function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
   const autoIdentifier = extensions.gfm_auto_identifiers ? gfmAutoIdentifier : pandocAutoIdentifier;
 
   // start with ids we know are valid (i.e. ones the user added to the doc)
-  const headingIds = new Set<string>((ast.heading_ids || []).map(id => id.toLocaleLowerCase()));
+  const headingIds = new Set<string>((ast.heading_ids ?? []).map(id => id.toLocaleLowerCase()));
 
   // find ids referenced in links
-  let astBlocks = mapTokens(ast.blocks, tok => {
+  let astBlocks = mapTokensRecursive(ast.blocks, tok => {
     if (tok.t === PandocTokenType.Link) {
       const target = tok.c[kLinkTarget];
       const href = target[kLinkTargetUrl] as string;
@@ -506,11 +490,9 @@ function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
           !headingIds.has(href.toLocaleLowerCase())
         ) {
           // return a version of the link w/o the target
-          return {
-            t: PandocTokenType.Link,
-            c: [tok.c[kLinkAttr], tok.c[kLinkChildren], ['#', tok.c[kLinkTarget][kLinkTargetTitle]]],
-          };
-
+          const newTok = structuredClone(tok);
+          newTok.c[kLinkTarget][kLinkTargetUrl] = '#';
+          return newTok;
           // otherwise note that it's a valid id
         } else {
           headingIds.add(href.toLocaleLowerCase());
@@ -522,18 +504,13 @@ function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
   });
 
   // remove any heading ids not created by the user or required by a link
-  astBlocks = mapTokens(ast.blocks, tok => {
+  astBlocks = mapTokensRecursive(ast.blocks, tok => {
     if (tok.t === PandocTokenType.Header) {
       const attr = pandocAttrReadAST(tok, kHeadingAttr);
       if (attr.id && !headingIds.has('#' + attr.id.toLocaleLowerCase())) {
-        return {
-          t: PandocTokenType.Header,
-          c: [
-            tok.c[kHeadingLevel],
-            ['', tok.c[kHeadingAttr][kPandocAttrClasses], tok.c[kHeadingAttr][kPandocAttrKeyvalue]],
-            tok.c[kHeadingChildren],
-          ],
-        };
+        const newTok = structuredClone(tok);
+        newTok.c[kHeadingAttr][kPandocAttrId] = '';
+        return newTok;
       }
     }
     // default to just reflecting back the token
@@ -550,7 +527,7 @@ function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
 
 interface ParserStackElement {
   type: NodeType;
-  attrs: Record<string,unknown>;
+  attrs: Record<string, unknown>;
   content: ProsemirrorNode[];
 }
 

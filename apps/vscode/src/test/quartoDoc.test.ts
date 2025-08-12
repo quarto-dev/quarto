@@ -1,10 +1,8 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { WORKSPACE_PATH, examplesOutUri, wait } from "./test-utils";
+import { WORKSPACE_PATH, readOrCreateSnapshot, examplesOutUri, wait, roundtrip, openAndShowTextDocument } from "./test-utils";
 import { isQuartoDoc } from "../core/doc";
-import { extension } from "./extension";
 
-const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
 
 suite("Quarto basics", function () {
   // Before running tests, copy `./examples` to a new folder `./examples-out`.
@@ -15,8 +13,7 @@ suite("Quarto basics", function () {
   });
 
   test("Can open a Quarto document", async function () {
-    const doc = await vscode.workspace.openTextDocument(examplesOutUri("hello.qmd"));
-    const editor = await vscode.window.showTextDocument(doc);
+    const { editor } = await openAndShowTextDocument("hello.qmd");
 
     assert.strictEqual(editor?.document.languageId, "quarto");
     assert.strictEqual(isQuartoDoc(editor?.document), true);
@@ -26,40 +23,38 @@ suite("Quarto basics", function () {
   //       test. That's okay for this test, but could cause issues if you expect a qmd to look how it
   //       does in `/examples`.
   test("Roundtrip doesn't change hello.qmd", async function () {
-    const doc = await vscode.workspace.openTextDocument(examplesOutUri("hello.qmd"));
-    const editor = await vscode.window.showTextDocument(doc);
+    const { doc } = await openAndShowTextDocument("hello.qmd");
 
     const { before, after } = await roundtrip(doc);
 
     assert.equal(before, after);
   });
 
-  test("Roundtrip does change roundtrip-failures.qmd", async function () {
+  test("Roundtrip changes roundtrip-changes.qmd", async function () {
     // We want this test to fail locally so that we can reference the
     // before/affter diff that Mocha logs, but we dont wan't CI to fail.
     if (process.env['CI']) this.skip();
 
-    const doc = await vscode.workspace.openTextDocument(examplesOutUri("roundtrip-failures.qmd"));
-    const editor = await vscode.window.showTextDocument(doc);
+    const { doc } = await openAndShowTextDocument("roundtrip-changes.qmd");
 
     const { before, after } = await roundtrip(doc);
 
     assert.equal(before, after);
   });
+
+  test("Roundtripped valid-basics.qmd matches snapshot", async function () {
+    const { doc } = await openAndShowTextDocument("valid-basics.qmd");
+
+    const { after } = await roundtrip(doc);
+
+    assert.equal(after, await readOrCreateSnapshot("roundtripped-valid-basics.qmd", after));
+  });
+
+  test("Roundtripped invalid.qmd matches snapshot", async function () {
+    const { doc } = await openAndShowTextDocument("invalid.qmd");
+
+    const { after } = await roundtrip(doc);
+
+    assert.equal(after, await readOrCreateSnapshot("roundtripped-invalid.qmd", after));
+  });
 });
-
-async function roundtrip(doc: vscode.TextDocument) {
-  const before = doc.getText();
-
-  // switch to visual editor and back
-  await vscode.commands.executeCommand("quarto.test_setkVisualModeConfirmedTrue");
-  await wait(300);
-  await vscode.commands.executeCommand("quarto.editInVisualMode");
-  await wait(APPROX_TIME_TO_OPEN_VISUAL_EDITOR);
-  await vscode.commands.executeCommand("quarto.editInSourceMode");
-  await wait(300);
-
-  const after = doc.getText();
-
-  return { before, after };
-}

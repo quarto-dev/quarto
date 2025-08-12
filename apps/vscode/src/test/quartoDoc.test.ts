@@ -57,4 +57,11 @@ suite("Quarto basics", function () {
 
     assert.equal(after, await readOrCreateSnapshot("roundtripped-invalid.qmd", after));
   });
+  test("Roundtripped capsule-leak.qmd matches snapshot", async function () {
+    const { doc } = await openAndShowTextDocument("capsule-leak.qmd");
+
+    const { after } = await roundtrip(doc);
+
+    assert.equal(after, await readOrCreateSnapshot("roundtripped-capsule-leak.qmd", after));
+  });
 });

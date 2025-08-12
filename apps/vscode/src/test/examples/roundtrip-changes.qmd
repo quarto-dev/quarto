@@ -4,13 +4,6 @@ hi
 ```
 ``````
 
-kBlockCapsuleSentinel uuid sentinel leak during SE→VE
-``````{{python}}
-```
-dog
-```
-``````
-
 `````
 ```{python}
 a = 3

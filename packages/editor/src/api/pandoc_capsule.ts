@@ -186,12 +186,14 @@ export function decodeBlockCapsuleText(text: string, tok: PandocToken, filters: 
   });
   return text;
 }
-const resolveTokenBlockCapsuleText = (token: PandocToken, filters: readonly PandocBlockCapsuleFilter[]) => ({
-  t: token.t,
-  c: token.t !== PandocTokenType.Str && typeof token.c === 'string' ?
-    decodeBlockCapsuleText(token.c, token, filters) :
-    token.c
-});
+
+const decodeContent = (token: PandocToken, filters: readonly PandocBlockCapsuleFilter[]) => {
+  if (token.t !== PandocTokenType.Str && typeof token.c === 'string') {
+    return decodeBlockCapsuleText(token.c, token, filters);
+  } else {
+    return token.c;
+  }
+};
 // block capsules can also end up not as block tokens, but rather as text within another
 // token (e.g. within a backtick code block or raw_block). this function takes a set
 // of pandoc tokens and recursively converts block capsules that aren't of type
@@ -199,7 +201,12 @@ const resolveTokenBlockCapsuleText = (token: PandocToken, filters: readonly Pand
 export const resolvePandocBlockCapsuleText = (
   tokens: PandocToken[],
   filters: readonly PandocBlockCapsuleFilter[],
-) => mapTokensRecursive(tokens, token => resolveTokenBlockCapsuleText(token, filters));
+) => mapTokensRecursive(tokens, token => {
+  return {
+    t: token.t,
+    c: decodeContent(token, filters)
+  };
+});
 
 export function blockCapsuleTextHandler(type: string, pattern: RegExp, textFilter?: (text: string) => string) {
   return (text: string, tok: PandocToken): string => {

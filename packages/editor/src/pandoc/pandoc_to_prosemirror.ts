@@ -423,9 +423,11 @@ class ParserState {
   }
 
   private maybeMerge(a: ProsemirrorNode, b: ProsemirrorNode): ProsemirrorNode | undefined {
-    return a?.isText && b?.isText && Mark.sameSet(a.marks, b.marks) ?
-      this.schema.text((a.text as string) + b.text, a.marks) :
-      undefined;
+    if (a?.isText && b?.isText && Mark.sameSet(a.marks, b.marks)) {
+      return this.schema.text(a.text! + b.text, a.marks);
+    } else {
+      return undefined;
+    }
   }
 }
 

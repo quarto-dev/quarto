@@ -30,38 +30,34 @@ suite("Quarto basics", function () {
     assert.equal(before, after);
   });
 
-  test("Roundtrip changes roundtrip-changes.qmd", async function () {
-    // We want this test to fail locally so that we can reference the
-    // before/affter diff that Mocha logs, but we dont wan't CI to fail.
-    if (process.env['CI']) this.skip();
+  roundtripSnapshotTest('valid-basics.qmd');
 
-    const { doc } = await openAndShowTextDocument("roundtrip-changes.qmd");
+  roundtripSnapshotTest('valid-basics-2.qmd');
 
-    const { before, after } = await roundtrip(doc);
+  roundtripSnapshotTest('valid-nesting.qmd');
 
-    assert.equal(before, after);
-  });
+  roundtripSnapshotTest('invalid.qmd');
 
-  test("Roundtripped valid-basics.qmd matches snapshot", async function () {
-    const { doc } = await openAndShowTextDocument("valid-basics.qmd");
-
-    const { after } = await roundtrip(doc);
-
-    assert.equal(after, await readOrCreateSnapshot("roundtripped-valid-basics.qmd", after));
-  });
-
-  test("Roundtripped invalid.qmd matches snapshot", async function () {
-    const { doc } = await openAndShowTextDocument("invalid.qmd");
-
-    const { after } = await roundtrip(doc);
-
-    assert.equal(after, await readOrCreateSnapshot("roundtripped-invalid.qmd", after));
-  });
-  test("Roundtripped capsule-leak.qmd matches snapshot", async function () {
-    const { doc } = await openAndShowTextDocument("capsule-leak.qmd");
-
-    const { after } = await roundtrip(doc);
-
-    assert.equal(after, await readOrCreateSnapshot("roundtripped-capsule-leak.qmd", after));
-  });
+  roundtripSnapshotTest('capsule-leak.qmd');
 });
+
+/**
+ *
+ * When the test is run on the dev's machine for the first time, saves the roundtripped file as a snapshot.
+ * All subsequent runs of the test compare the roundtripped file to that snapshot.
+ *
+ * Useful for capturing the behaviour of roundtripping at a point in time and testing against that.
+ *
+ * @param filename A .qmd file in the examples folder to snapshot test
+ */
+function roundtripSnapshotTest(filename: string) {
+  const snapshotFileName = `roundtripped-${filename}`;
+
+  test(`Roundtripped ${filename} matches snapshot`, async function () {
+    const { doc } = await openAndShowTextDocument(filename);
+
+    const { after } = await roundtrip(doc);
+
+    assert.equal(after, await readOrCreateSnapshot(snapshotFileName, after));
+  });
+}

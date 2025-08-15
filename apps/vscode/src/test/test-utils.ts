@@ -49,15 +49,28 @@ export async function roundtrip(doc: vscode.TextDocument) {
   return { before, after };
 }
 
+const YELLOW_COLOR_ESCAPE_CODE = '\x1b[33m';
+const RESET_COLOR_ESCAPE_CODE = '\x1b[0m';
+
 export async function readOrCreateSnapshot(fileName: string, content: string) {
   const snapshotUri = examplesUri(path.join('generated_snapshots', fileName));
   try {
     const doc = await vscode.workspace.openTextDocument(snapshotUri);
     return doc.getText();
   } catch {
+    if (process.env['CI']) throw 'Attempted to create snapshot in CI!';
+
+    console.warn(`${YELLOW_COLOR_ESCAPE_CODE}
+⚠︎ Created snapshot in file:
+${snapshotUri}
+  Please take a look at the snapshot file and ensure it is what you expect
+  If it looks good to you, please commit the generated snapshot along with your test code
+  If you did not intend to create a snapshot, please carefully check your test code and delete the snapshot file
+${RESET_COLOR_ESCAPE_CODE}`);
+
     await vscode.workspace.fs.writeFile(
       snapshotUri,
-      Buffer.from(content, 'utf8')
+      Buffer.from(content, 'utf8') as Uint8Array
     );
     return content;
   }

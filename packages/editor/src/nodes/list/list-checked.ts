@@ -20,7 +20,7 @@ import { findParentNodeOfType, NodeWithPos, setTextSelection } from 'prosemirror
 import { InputRule, wrappingInputRule } from 'prosemirror-inputrules';
 
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { PandocToken, mapTokens } from '../../api/pandoc';
+import { PandocToken, mapTokensRecursive } from '../../api/pandoc';
 
 // custom NodeView that accomodates display / interaction with item check boxes
 export class CheckedListItemNodeView implements NodeView {
@@ -28,7 +28,7 @@ export class CheckedListItemNodeView implements NodeView {
   public readonly contentDOM: HTMLElement;
 
   constructor(node: ProsemirrorNode, view: EditorView, getPos: () => number) {
-    
+
     // create root li element
     this.dom = window.document.createElement('li');
     if (node.attrs.tight) {
@@ -167,7 +167,7 @@ export function checkedListItemInputRule() {
 }
 
 export interface InputRuleWithHandler extends InputRule {
-  handler: (state: EditorState, match: RegExpMatchArray, start: number, end: number) => Transaction
+  handler: (state: EditorState, match: RegExpMatchArray, start: number, end: number) => Transaction;
 }
 
 // allow users to begin a new checked list by typing [x] or [ ] at the beginning of a line
@@ -212,13 +212,13 @@ export function fragmentWithCheck(schema: Schema, fragment: Fragment, checked: b
 const kCheckedChar = '☒';
 const kUncheckedChar = '☐';
 
-export function tokensWithChecked(tokens: PandocToken[]): { checked: null | boolean; tokens: PandocToken[] } {
+export function tokensWithChecked(tokens: PandocToken[]): { checked: null | boolean; tokens: PandocToken[]; } {
   // will set this flag based on inspecting the first Str token
   let checked: null | boolean | undefined;
   let lastWasChecked = false;
 
   // map tokens
-  const mappedTokens = mapTokens(tokens, tok => {
+  const mappedTokens = mapTokensRecursive(tokens, tok => {
     // if the last token was checked then strip the next space
     if (tok.t === 'Space' && lastWasChecked) {
       lastWasChecked = false;

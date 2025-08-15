@@ -105,12 +105,12 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
       // if this is Positron, no visual editor completions
       // TODO: fix LSP issues for visual editor in Positron:
       // https://github.com/posit-dev/positron/issues/1805
-      if (hasHooks()) {
-        return {
-          items: [],
-          isIncomplete: false
-        };
-      }
+      // if (hasHooks()) {
+      //   return {
+      //     items: [],
+      //     isIncomplete: false
+      //   };
+      // }
 
       // otherwise delegate to vscode completion system
       const vdoc = virtualDocForCode(context.code, language);

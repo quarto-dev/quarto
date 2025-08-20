@@ -1,7 +1,8 @@
 # Changelog
 
-## 1.124.0 (unreleased)
+## 1.124.0 (Release on 2025-08-20)
 
+- Fix Base64 leak when no empty line between text and code block (<https://github.com/quarto-dev/quarto/pull/780>).
 - Add yaml frontmatter validation to visual editor (<https://github.com/quarto-dev/quarto/pull/744>).
 - Do not prepend path delimiter to path when Quarto is detected (<https://github.com/quarto-dev/quarto/pull/778>).
 

@@ -44,7 +44,7 @@ Here is the process:
 
 You can find [the releases of this repository here](https://github.com/quarto-dev/quarto/releases).
 
-The VSCode extension is published on the [Microsoft Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=quarto.quarto) as well as the [open VSX registry](https://open-vsx.org/extension/quarto/quarto).
+The VSCode extension is published on the [Microsoft Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=quarto.quarto) as well as the [Open VSX Registry](https://open-vsx.org/extension/quarto/quarto).
 
 Here are the steps for making a release and publishing:
 

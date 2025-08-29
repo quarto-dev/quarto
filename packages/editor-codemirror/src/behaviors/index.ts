@@ -27,7 +27,7 @@ import { CodeViewOptions, ExtensionContext } from "editor";
 import { langModeBehavior } from './langmode';
 import { keyboardBehavior } from './keyboard';
 import { findBehavior } from './find';
-import { indentBehavior } from './indent';
+import { tabBehavior } from './indent';
 import { trackSelectionBehavior } from './trackselection';
 import { themeBehavior } from './theme';
 import { prefsBehavior } from './prefs';
@@ -63,7 +63,7 @@ export function createBehaviors(context: BehaviorContext): Behavior[] {
     langModeBehavior(context),
     completionBehavior(context),
     findBehavior(context),
-    indentBehavior(),
+    tabBehavior(),
     themeBehavior(context),
     prefsBehavior(context),
     trackSelectionBehavior(context),

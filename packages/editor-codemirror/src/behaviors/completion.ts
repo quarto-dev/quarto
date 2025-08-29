@@ -225,12 +225,15 @@ async function getCompletions(
   const token = context.matchBefore(/\S+/)?.text;
 
   const filteredItems = items.filter(item => {
+    // no namespaces
+    if (vsKindToType(item.kind) === 'namespace') return false;
+
     // no text completions that aren't snippets
     if (item.kind === CompletionItemKind.Text &&
       item.insertTextFormat !== InsertTextFormat.Snippet) return false;
 
     // only allow non-text edits if we have no token
-    if (!item.textEdit && token) return false;
+    if (item.textEdit === undefined && token) return false;
 
     // require at least inclusion
     const replaceText = getReplaceText(context, item).toLowerCase();

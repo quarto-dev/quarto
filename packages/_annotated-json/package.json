@@ -18,10 +18,10 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
-    "tsconfig": "*",
-    "typescript": "^5.4.2",
     "@quarto/_mapped-string": "*",
-    "@quarto/_tidyverse-errors": "*"
+    "@quarto/_tidyverse-errors": "*",
+    "tsconfig": "*",
+    "typescript": "^5.4.2"
   },
   "devDependencies": {
     "tsx": "^4.7.1"

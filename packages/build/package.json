@@ -10,6 +10,5 @@
     "esbuild-plugin-copy": "^2.0.1",
     "tsconfig": "*",
     "typescript": "^4.5.2"
-  },
-  "dependencies": {}
+  }
 }

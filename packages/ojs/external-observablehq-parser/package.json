@@ -4,7 +4,7 @@
   "version": "6.0.2",
   "author": {
     "name": "quarto-dev (RStudio PBC).",
-    "url": "https://quarto.org"  
+    "url": "https://quarto.org"
   },
   "license": "ISC",
   "type": "module",

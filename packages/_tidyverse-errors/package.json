@@ -10,9 +10,9 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "ansi-colors": "^4.1.3",
     "tsconfig": "*",
-    "typescript": "^5.4.2",
-    "ansi-colors": "^4.1.3"
+    "typescript": "^5.4.2"
   },
   "devDependencies": {
     "tsx": "^4.7.1"

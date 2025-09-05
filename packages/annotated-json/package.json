@@ -16,12 +16,14 @@
   },
   "main": "dist/cjs/index.js",
   "types": "dist/cjs/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "tsconfig": "*",
-    "typescript": "^5.4.2",
     "@quarto/mapped-string": "^0.1.8",
-    "@quarto/tidyverse-errors": "^0.1.9"
+    "@quarto/tidyverse-errors": "^0.1.9",
+    "tsconfig": "*",
+    "typescript": "^5.4.2"
   },
   "devDependencies": {
     "tsx": "^4.7.1"

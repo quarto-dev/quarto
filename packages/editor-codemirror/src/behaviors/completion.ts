@@ -110,34 +110,52 @@ const compareBySortText = (a: CompletionItem, b: CompletionItem) => {
   }
 };
 
-// compute from
-const itemFrom = (item: CompletionItem, contextPos: number) => {
-  // compute from
-  return item.textEdit
-    ? InsertReplaceEdit.is(item.textEdit)
-      ? contextPos - (item.textEdit.insert.end.character - item.textEdit.insert.start.character)
-      : TextEdit.is(item.textEdit)
-        ? contextPos - (item.textEdit.range.end.character - item.textEdit.range.start.character)
-        : contextPos
-    : contextPos;
+/**
+ * returns the offset into the document of the beginning of a completion item.
+ */
+const itemFrom = (item: CompletionItem, cvContext: CodeViewCompletionContext, contextPos: number) => {
+  if (item.textEdit !== undefined) {
+    if (InsertReplaceEdit.is(item.textEdit)) {
+      const endLine = cvContext.code[item.textEdit.insert.end.line];
+      // we have to "snap" (Math.min) the end of the insertion to the end of the line
+      // because completions give positions past the end of the line.
+      // e.g. typing `lib` gives completion `library` with start.character = 0, end.character = 7
+      // but we only expect it to replace characters 0 thru 3.
+      const end = Math.min(item.textEdit.insert.end.character, endLine.length);
+
+      const replaceLength = end - item.textEdit.insert.start.character;
+      return contextPos - replaceLength;
+    }
+    if (TextEdit.is(item.textEdit)) {
+      const endLine = cvContext.code[item.textEdit.range.end.line];
+      // see comment above for an explanation of why we use Math.min here.
+      const end = Math.min(item.textEdit.range.end.character, endLine.length);
+
+      const replaceLength = end - item.textEdit.range.start.character;
+
+      return contextPos - replaceLength;
+    }
+  }
+  return contextPos;
 };
 
 /**
  * replaceText for a given CompletionItem is the text that is already in the document
  * that that CompletionItem will replace.
  *
+ *
  * Example 1: if you are typing `lib` and get the completion `library`, then this function
  *   will give `lib`.
  * Example 2: if you are typing `os.a` and get the completion `abc`, then this function
  *   will give `a`.
  */
-const getReplaceText = (context: CompletionContext, item: CompletionItem) =>
-  context.state.sliceDoc(itemFrom(item, context.pos), context.pos);
+const getReplaceText = (context: CompletionContext, cvContext: CodeViewCompletionContext, item: CompletionItem) =>
+  context.state.sliceDoc(itemFrom(item, cvContext, context.pos), context.pos);
 
-const makeCompletionItemApplier = (item: CompletionItem, context: CompletionContext) =>
+const makeCompletionItemApplier = (item: CompletionItem, cvContext: CodeViewCompletionContext, context: CompletionContext) =>
   (view: EditorView, completion: Completion) => {
     // compute from
-    const from = itemFrom(item, context.pos);
+    const from = itemFrom(item, cvContext, context.pos);
 
     // handle snippets
     const insertText = item.textEdit?.newText ?? (item.insertText || item.label);
@@ -156,11 +174,11 @@ const makeCompletionItemApplier = (item: CompletionItem, context: CompletionCont
     }
   };
 
-const sortTextItemsBoostScore = (context: CompletionContext, items: CompletionItem[], index: number) => {
+const sortTextItemsBoostScore = (context: CompletionContext, cvContext: CodeViewCompletionContext, items: CompletionItem[], index: number) => {
   const total = items.length;
   const item = items[index];
   // compute replaceText
-  const replaceText = getReplaceText(context, item);
+  const replaceText = getReplaceText(context, cvContext, item);
 
   // if the replaceText doesn't start with "." then bury items that do
   if (!replaceText.startsWith(".") && item.label.startsWith(".")) {
@@ -177,14 +195,14 @@ const sortTextItemsBoostScore = (context: CompletionContext, items: CompletionIt
   }
 };
 
-const defaultBoostScore = (context: CompletionContext, items: CompletionItem[], index: number) => {
+const defaultBoostScore = (context: CompletionContext, cvContext: CodeViewCompletionContext, items: CompletionItem[], index: number) => {
   const item = items[index];
 
-  const replaceText = getReplaceText(context, item);
+  const replaceText = getReplaceText(context, cvContext, item);
 
   // if you haven't typed into the completions yet (for example after a `.`) then
-  // score items starting with non-alphabetic characters -1, everything else 0.
-  if (replaceText.length === 0) return isLetter(item.label[0]) ? 0 : -1;
+  // score items starting with non-alphabetic characters -100, everything else 0.
+  if (replaceText.length === 0) return isLetter(item.label[0]) ? 0 : -100;
 
   // We filter items by replaceText inclusion before scoring,
   // so i is garaunteed to be an index into `item.label`...
@@ -233,7 +251,7 @@ async function getCompletions(
     if (item.textEdit === undefined && token) return false;
 
     // require at least inclusion
-    const replaceText = getReplaceText(context, item).toLowerCase();
+    const replaceText = getReplaceText(context, cvContext, item).toLowerCase();
     return item.label.toLowerCase().includes(replaceText) ||
       item.insertText?.toLowerCase().includes(replaceText);
   });
@@ -249,8 +267,8 @@ async function getCompletions(
         detail: !item.documentation ? item.detail : undefined,
         type: vsKindToType(item.kind),
         info: () => infoNodeForItem(item),
-        apply: makeCompletionItemApplier(item, context),
-        boost: boostScore(context, filteredItems, index)
+        apply: makeCompletionItemApplier(item, cvContext, context),
+        boost: boostScore(context, cvContext, filteredItems, index)
       };
     });
 

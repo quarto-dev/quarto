@@ -29,8 +29,6 @@ import { editorThemeFromStore } from "./theme";
 import "editor-ui/src/styles";
 import "./styles.scss"
 
- import main from "./wasm-qmd-parser/";
-
 async function runEditor() {
   try {
     // init localization
@@ -56,10 +54,7 @@ async function runEditor() {
     setEditorTheme(editorThemeFromStore(store));
     root.render(<App store={store} editorId={editorId} host={host} context={context} request={request}/>);
 
-    console.log('hello!!!')
-    let m = await main();
-    let parsed = m.parse_qmd("# Hello\n");
-    console.log('parsed', parsed);
+
   } catch (error) {
     console.error('error',error);
   }

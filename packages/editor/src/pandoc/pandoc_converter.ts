@@ -44,6 +44,7 @@ import { pandocFromProsemirror } from './pandoc_from_prosemirror';
 import { isParagraphNode } from '../api/paragraph';
 import { PandocFormat, PandocWriterOptions } from '../api/pandoc-types';
 import { escapeRegExpCharacters, lines, normalizeNewlines } from 'core';
+import main from "../../../../apps/vscode-editor/src/wasm-qmd-parser";
 
 export type PandocLineWrapping = 'none' | 'column' | 'sentence';
 
@@ -69,6 +70,7 @@ export class PandocConverter {
   private readonly markdownPostProcessors: readonly PandocMarkdownPostProcessorFn[];
   private readonly pandoc: PandocServer;
   private readonly pandocCapabilities: PandocCapabilities;
+  private m: any;
 
   constructor(
     schema: Schema,
@@ -91,6 +93,9 @@ export class PandocConverter {
 
     this.pandoc = pandoc;
     this.pandocCapabilities = pandocCapabilities;
+
+    const me = this
+    main().then(result => { me.m = result })
   }
 
   public async toProsemirror(markdown: string, format: PandocFormat): Promise<PandocToProsemirrorResult> {
@@ -104,20 +109,20 @@ export class PandocConverter {
     // that's how preprocessors hoist content through pandoc into our prosemirror token parser.
     // we always need to read with auto_identifiers so we can catch any auto-generated ids
     // required to fulfill links inside the document (we will strip out heading ids that
-    // aren't explicit or a link target using the heading_ids returned with the ast). 
+    // aren't explicit or a link target using the heading_ids returned with the ast).
     //
     // we always read all forms of tables (since they can always be written back out as raw_html)
     //
     // we also always read math (since it can always be output as 'asciimath')
-    
+
     // determine type of auto_ids
     const autoIds = format.extensions.gfm_auto_identifiers ? 'gfm_auto_identifiers' : 'auto_identifiers';
     const targetFormat = adjustedFormat(
       format.fullName,
-      ['raw_html', 'raw_attribute', 'backtick_code_blocks', autoIds, 
-      'grid_tables', 'pipe_tables', 'multiline_tables', 'simple_tables',
-      'tex_math_dollars'],
-       ['smart'],
+      ['raw_html', 'raw_attribute', 'backtick_code_blocks', autoIds,
+        'grid_tables', 'pipe_tables', 'multiline_tables', 'simple_tables',
+        'tex_math_dollars'],
+      ['smart'],
     );
 
     // run preprocessors
@@ -131,8 +136,15 @@ export class PandocConverter {
     });
 
     const ast = await this.pandoc.markdownToAst(markdown, targetFormat, []);
+
+    const wasmProducedASTString = this.m?.parse_qmd(markdown);
+    const wasmProducedAST = JSON.parse(wasmProducedASTString)
+
+    console.log(JSON.stringify(ast))
+    console.log(JSON.stringify(wasmProducedAST))
+
     const result = pandocToProsemirror(
-      ast,
+      wasmProducedAST,
       this.schema,
       format.extensions,
       this.readers,
@@ -274,8 +286,8 @@ function disabledFormatOptions(format: string, pandocFormat: PandocFormat, doc: 
 
   // if there are tables with inline R code then disable grid tables (as the inline
   // R code will mess up the column boundaries)
-  if (haveTableCellsWithInlineRcode(doc) || 
-     (!gridTablesRequired(doc) && pandocFormat.extensions.pipe_tables)) {
+  if (haveTableCellsWithInlineRcode(doc) ||
+    (!gridTablesRequired(doc) && pandocFormat.extensions.pipe_tables)) {
     disabledTableTypes += '-grid_tables';
   }
 
@@ -309,7 +321,7 @@ function gridTablesRequired(doc: ProsemirrorNode) {
     // paragraph with hard break
     const paraNode = cell.node.firstChild!;
     return findChildren(paraNode, node => node.type === schema.nodes.hard_break).length > 0;
-  }); 
+  });
 }
 
 function wrapOptions(options: PandocWriterOptions) {

@@ -39,6 +39,8 @@ suite("Quarto basics", function () {
   roundtripSnapshotTest('invalid.qmd');
 
   roundtripSnapshotTest('capsule-leak.qmd');
+
+  roundtripSnapshotTest('attr-equals.qmd');
 });
 
 /**

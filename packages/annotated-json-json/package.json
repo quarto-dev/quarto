@@ -1,0 +1,38 @@
+{
+  "name": "@quarto/annotated-json-json",
+  "version": "0.1.0",
+  "description": "Parse JSON objects into @quarto/annotated-json's AnnotatedParse format.",
+  "license": "MIT",
+  "author": {
+    "name": "Posit PBC"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quarto-dev/quarto.git"
+  },
+  "main": "dist/cjs/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "files": ["dist"],
+  "dependencies": {
+    "tsconfig": "*",
+    "typescript": "^5.4.2",
+    "web-tree-sitter": "^0.25.0",
+    "@quarto/annotated-json": "^0.1.4",
+    "@quarto/mapped-string": "^0.1.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1"
+  },
+  "scripts": {
+    "build-assets": "node scripts/convert-wasm-to-module.js",
+    "build": "npm run build:cjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "test": "node --import tsx --test test/*.test.ts",
+    "clean": "rm -rf dist",
+    "prepublish": "npm run clean && npm run build-assets && npm run build"
+  }
+}

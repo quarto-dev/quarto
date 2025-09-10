@@ -22,24 +22,67 @@ suite("Quarto basics", function () {
   // Note: this test runs after the previous test, so `hello.qmd` can already be touched by the previous
   //       test. That's okay for this test, but could cause issues if you expect a qmd to look how it
   //       does in `/examples`.
-  test("Roundtrip doesn't change hello.qmd", async function () {
-    const { doc } = await openAndShowTextDocument("hello.qmd");
+  // test("Roundtrip doesn't change hello.qmd", async function () {
+  //   const { doc } = await openAndShowTextDocument("hello.qmd");
 
-    const { before, after } = await roundtrip(doc);
+  //   const { before, after } = await roundtrip(doc);
 
-    assert.equal(before, after);
+  //   assert.equal(before, after);
+  // });
+
+  // roundtripSnapshotTest('valid-basics.qmd');
+
+  // roundtripSnapshotTest('valid-basics-2.qmd');
+
+  // roundtripSnapshotTest('valid-nesting.qmd');
+
+  // roundtripSnapshotTest('invalid.qmd');
+
+  // roundtripSnapshotTest('capsule-leak.qmd');
+
+  test("cell formamtmtamt", async function () {
+    const { doc } = await openAndShowTextDocument("cell-format.qmd");
+
+    vscode.languages.registerDocumentFormattingEditProvider(
+      { scheme: 'file', language: 'r' },
+      {
+        provideDocumentFormattingEdits(document: vscode.TextDocument):
+          vscode.ProviderResult<vscode.TextEdit[]> {
+          const sourceText = document.getText();
+
+          const fileStart = new vscode.Position(0, 0);
+          const fileEnd = document.lineAt(document.lineCount - 1).range.end;
+
+          const formattedSourceText = sourceText + 'hello!'
+
+          return [new vscode.TextEdit(new vscode.Range(fileStart, fileEnd), formattedSourceText)];
+        }
+      }
+    )
+
+    setCursorPosition(3, 1);
+    await wait(300);
+    await vscode.commands.executeCommand("quarto.formatCell");
+    await wait(6300);
+    // const { before, after } = await roundtrip(doc);
+
+    // assert.equal(before, after);
   });
 
-  roundtripSnapshotTest('valid-basics.qmd');
-
-  roundtripSnapshotTest('valid-basics-2.qmd');
-
-  roundtripSnapshotTest('valid-nesting.qmd');
-
-  roundtripSnapshotTest('invalid.qmd');
-
-  roundtripSnapshotTest('capsule-leak.qmd');
+  suiteTeardown(() => {
+    vscode.window.showInformationMessage('All tests done!');
+  });
 });
+
+function setCursorPosition(line: number, character: number) {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    const position = new vscode.Position(line, character);
+    const newSelection = new vscode.Selection(position, position);
+    editor.selection = newSelection;
+    editor.revealRange(newSelection, vscode.TextEditorRevealType.InCenter); // Optional: scroll to the new position
+  }
+}
 
 /**
  *

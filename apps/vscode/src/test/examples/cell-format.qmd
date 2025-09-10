@@ -1,0 +1,11 @@
+See https://github.com/quarto-dev/quarto/issues/745 "Reformating R cell in VSCODE with air does not correctly close chunk."
+
+```{r}
+list(foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar)
+```
+
+```{r}
+
+list(foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar, foobar)
+
+```

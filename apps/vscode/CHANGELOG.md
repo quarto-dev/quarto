@@ -2,6 +2,8 @@
 
 ## 1.125.0 (Unreleased)
 
+- Fixed an issue where attribute values containing '='s could be truncated in some scenarios (<https://github.com/quarto-dev/quarto/pull/814>).
+
 ## 1.124.0 (Release on 2025-08-20)
 
 - Fix Base64 leak when no empty line between text and code block (<https://github.com/quarto-dev/quarto/pull/780>).

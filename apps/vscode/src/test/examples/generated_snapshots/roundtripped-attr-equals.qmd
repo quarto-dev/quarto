@@ -2,6 +2,8 @@
 
 This test document validates that equals signs in attribute values are handled correctly.
 
+This prose contains some equals signs, just in case. A=B=C. D=E=F. =
+
 ## Basic examples
 
 -   Basic link with equals in value: [Link text](https://example.com){key="value=with=equals"}
@@ -9,6 +11,8 @@ This test document validates that equals signs in attribute values are handled c
 -   Link with URL parameter: [Query link](https://example.com?param=value){.class key="query=param"}
 
 -   Span with complex value: [Span text]{#id .class key="complex=value"}
+
+-   Other weird examples: [Span text](key=) [Span](===)
 
 ## More complex examples
 

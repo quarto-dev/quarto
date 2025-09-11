@@ -206,7 +206,7 @@ function scanForQuarto(additionalSearchPaths?: string[]): QuartoInstallation | u
     }
     scanPaths.push("C:\\Program Files\\RStudio\\bin\\quarto\\bin");
   } else if (os.platform() === "darwin") {
-    scanPaths.push("/Applications/quarto/bin/");
+    scanPaths.push("/Applications/quarto/bin");
     const home = process.env.HOME;
     if (home) {
       scanPaths.push(path.join(home, "Applications", "quarto", "bin"));

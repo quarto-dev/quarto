@@ -574,6 +574,7 @@ class PreviewManager {
         }
       }
     }
+    this.progressDismiss()
   }
 
   private progressShow(uri: Uri) {

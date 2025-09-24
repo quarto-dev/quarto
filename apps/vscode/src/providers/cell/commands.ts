@@ -51,6 +51,10 @@ import { ExtensionHost } from "../../host";
 import { hasHooks } from "../../host/hooks";
 import { isKnitrDocument } from "../../host/executors";
 import { commands } from "vscode";
+import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
+import { embeddedLanguage } from "../../vdoc/languages";
+import { Uri } from "vscode";
+import { StatementRange } from "positron";
 
 export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
@@ -348,15 +352,38 @@ class RunCurrentCommand extends RunCommand implements Command {
           await activateIfRequired(editor);
         }
       }
-
     } else {
-      // if the selection is empty take the whole line, otherwise take the selected text exactly
       let action: CodeViewSelectionAction | undefined;
-      if (selection.length <= 0) {
-        if (activeBlock) {
-          selection = lines(activeBlock.code)[context.selection.start.line];
+
+      // if the selection is empty and we are in Positron:
+      //   try to get the statement's range and use that as the selection
+      if (selection.length <= 0 && activeBlock && hasHooks()) {
+        const language = embeddedLanguage(activeBlock.language);
+        const vdoc = virtualDocForCode(lines(activeBlock.code), language!);
+        const parentUri = Uri.file(editor.document.fileName);
+        if (vdoc) {
+          const result = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
+            return await commands.executeCommand<StatementRange>(
+              "vscode.executeStatementRangeProvider",
+              uri,
+              context.selection.start
+            );
+          });
+          const { range: { start, end } } = result
+          const slicedLines = lines(activeBlock.code).slice(start.line, end.line + 1)
+          slicedLines[0] = slicedLines[0].slice(start.character)
+          slicedLines[slicedLines.length - 1] = slicedLines[slicedLines.length - 1].slice(0, end.character)
+
+          selection = slicedLines.join('\n')
           action = "nextline";
         }
+      }
+
+      // if the selection is still empty:
+      //   take the whole line as the selection
+      if (selection.length <= 0 && activeBlock) {
+        selection = lines(activeBlock.code)[context.selection.start.line];
+        action = "nextline";
       }
 
       // run code

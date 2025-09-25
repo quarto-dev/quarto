@@ -41,38 +41,57 @@ suite("Quarto basics", function () {
   // roundtripSnapshotTest('capsule-leak.qmd');
 
   test("cell formamtmtamt", async function () {
-    const { doc } = await openAndShowTextDocument("cell-format.qmd");
 
-    vscode.languages.registerDocumentFormattingEditProvider(
-      { scheme: 'file', language: 'r' },
-      {
-        provideDocumentFormattingEdits(document: vscode.TextDocument):
-          vscode.ProviderResult<vscode.TextEdit[]> {
-          const sourceText = document.getText();
+    async function testFormatter(filename: string, [line, character]: [number, number], format: (sourceText: string) => string) {
+      const { doc } = await openAndShowTextDocument(filename);
 
-          const fileStart = new vscode.Position(0, 0);
-          const fileEnd = document.lineAt(document.lineCount - 1).range.end;
+      const formattingEditProvider = vscode.languages.registerDocumentFormattingEditProvider(
+        { scheme: 'file', language: 'r' },
+        createFormatterFromStringFunc(format)
+      )
 
-          const formattedSourceText = sourceText + 'hello!'
+      setCursorPosition(line, character);
+      await wait(300);
+      await vscode.commands.executeCommand("quarto.formatCell");
+      await wait(300)
 
-          return [new vscode.TextEdit(new vscode.Range(fileStart, fileEnd), formattedSourceText)];
-        }
-      }
+      const result = doc.getText()
+
+      formattingEditProvider.dispose()
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+
+      return result
+    }
+
+    const newlineFormatterResult = await testFormatter(
+      "cell-format.qmd",
+      [3, 1],
+      (sourceText) => sourceText + '\n'
+    )
+    const noopFormatterResult = await testFormatter(
+      "cell-format.qmd",
+      [3, 1],
+      (sourceText) => sourceText
     )
 
-    setCursorPosition(3, 1);
-    await wait(300);
-    await vscode.commands.executeCommand("quarto.formatCell");
-    await wait(6300);
-    // const { before, after } = await roundtrip(doc);
-
-    // assert.equal(before, after);
+    assert.equal(newlineFormatterResult, noopFormatterResult)
   });
 
   suiteTeardown(() => {
     vscode.window.showInformationMessage('All tests done!');
   });
 });
+
+function createFormatterFromStringFunc(format: (sourceText: string) => string) {
+  return {
+    provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.ProviderResult<vscode.TextEdit[]> {
+      const fileStart = new vscode.Position(0, 0);
+      const fileEnd = document.lineAt(document.lineCount - 1).range.end;
+
+      return [new vscode.TextEdit(new vscode.Range(fileStart, fileEnd), format(document.getText()))];
+    }
+  }
+}
 
 function setCursorPosition(line: number, character: number) {
   const editor = vscode.window.activeTextEditor;

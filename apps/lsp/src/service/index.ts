@@ -209,7 +209,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
   const diagnosticOnSaveComputer = new DiagnosticOnSaveComputer(init.quarto);
   const diagnosticsComputer = new DiagnosticComputer(config, init.workspace, linkProvider, tocProvider, logger);
   const docSymbolProvider = new MdDocumentSymbolProvider(tocProvider, linkProvider, logger);
-  const workspaceSymbolProvider = new MdWorkspaceSymbolProvider(init.workspace, docSymbolProvider);
+  const workspaceSymbolProvider = new MdWorkspaceSymbolProvider(init.workspace, init.config, docSymbolProvider);
   const documentHighlightProvider = new MdDocumentHighlightProvider(config, tocProvider, linkProvider);
 
   return Object.freeze<IMdLanguageService>({

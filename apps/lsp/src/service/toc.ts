@@ -36,6 +36,7 @@ import {
   getLine,
   Document,
   Parser,
+  isDiv,
 
 } from 'quarto-core';
 
@@ -140,7 +141,7 @@ export class TableOfContents {
     }
 
     // compute restricted ranges (ignore headings in these ranges)
-    const isWithinIgnoredRange = isWithinRange(tokens, token => isCallout(token) || isTheorem(token) || isProof(token));
+    const isWithinIgnoredRange = isWithinRange(tokens, isDiv);
     const isWithinTabset = isWithinRange(tokens, isTabset);
 
     const existingSlugEntries = new Map<string, { count: number }>();

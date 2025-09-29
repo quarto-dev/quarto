@@ -3,7 +3,8 @@
 ## 1.125.0 (Unreleased)
 
 - Fixed an issue where attribute values containing '='s could be truncated in some scenarios (<https://github.com/quarto-dev/quarto/pull/814>).
-- Fixed an issue where a loading spinner for qmd previews wasn't dismissed on preview errors (<https://github.com/quarto-dev/quarto/pull/823>)
+- Fixed an issue where a loading spinner for qmd previews wasn't dismissed on preview errors (<https://github.com/quarto-dev/quarto/pull/823>).
+- Fixed switching to visual mode for untitled documents in Positron (<https://github.com/quarto-dev/quarto/pull/831>).
 
 ## 1.124.0 (Release on 2025-08-20)
 

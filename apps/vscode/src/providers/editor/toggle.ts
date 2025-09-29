@@ -123,6 +123,11 @@ export async function reopenEditorInVisualMode(
   if (hasHooks()) {
     // note pending switch to visual
     VisualEditorProvider.recordPendingSwitchToVisual(document);
+    // if document is untitled, force user to save first
+    if (document.isUntitled) {
+      await commands.executeCommand("workbench.action.files.save");
+    }
+    // reopen in visual mode
     commands.executeCommand('positron.reopenWith', document.uri, 'quarto.visualEditor');
   } else {
     // save then close

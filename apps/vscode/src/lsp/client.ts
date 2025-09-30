@@ -348,12 +348,11 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
 /**
  * Creates a diagnostic handler middleware that filters out diagnostics from virtual documents
  *
- * @param enabled Whether filtering is enabled
  * @returns A handler function for the middleware
  */
-function createDiagnosticFilter() {
+export function createDiagnosticFilter() {
   return (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
-    // If filtering is disabled or this is not a virtual document, pass through all diagnostics
+    // If this is not a virtual document, pass through all diagnostics
     if (!isVirtualDoc(uri)) {
       next(uri, diagnostics);
       return;

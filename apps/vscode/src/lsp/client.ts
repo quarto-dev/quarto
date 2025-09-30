@@ -23,7 +23,8 @@ import {
   LocationLink,
   Definition,
   LogOutputChannel,
-  Uri
+  Uri,
+  Diagnostic
 } from "vscode";
 import {
   LanguageClient,
@@ -46,6 +47,7 @@ import {
   ProvideHoverSignature,
   ProvideSignatureHelpSignature,
   State,
+  HandleDiagnosticsSignature
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
@@ -53,6 +55,7 @@ import {
   unadjustedRange,
   virtualDoc,
   withVirtualDocUri,
+  isVirtualDoc,
 } from "../vdoc/vdoc";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
@@ -111,6 +114,9 @@ export async function activateLsp(
   }
   if (config.get("cells.signatureHelp.enabled", true)) {
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
+  }
+  if (config.get("vdoc.hideDiagnostics", true)) {
+    middleware.handleDiagnostics = createDiagnosticFilter();
   }
   extensionHost().registerStatementRangeProvider(engine);
   extensionHost().registerHelpTopicProvider(engine);
@@ -337,4 +343,23 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
 function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;
   return !!line.match(/^\s*#\s*\| /);
+}
+
+/**
+ * Creates a diagnostic handler middleware that filters out diagnostics from virtual documents
+ *
+ * @param enabled Whether filtering is enabled
+ * @returns A handler function for the middleware
+ */
+function createDiagnosticFilter() {
+  return (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
+    // If filtering is disabled or this is not a virtual document, pass through all diagnostics
+    if (!isVirtualDoc(uri)) {
+      next(uri, diagnostics);
+      return;
+    }
+
+    // For virtual documents, filter out all diagnostics
+    next(uri, []);
+  };
 }

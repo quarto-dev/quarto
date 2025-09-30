@@ -15,6 +15,7 @@
 
 import { Position, TextDocument, Uri, Range } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+import * as path from "path";
 
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
@@ -51,6 +52,17 @@ export async function virtualDoc(
   } else {
     return undefined;
   }
+}
+
+export function isVirtualDoc(uri: Uri): boolean {
+  // Check for tempfile virtual docs
+  if (uri.scheme === "file") {
+    const filename = path.basename(uri.fsPath);
+    // Virtual docs have a specific filename pattern .vdoc.[uuid].[extension]
+    return filename.startsWith(".vdoc.") && filename.split(".").length > 3;
+  }
+
+  return false;
 }
 
 export function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {

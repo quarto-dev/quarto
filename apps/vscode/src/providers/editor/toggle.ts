@@ -140,7 +140,7 @@ export async function reopenEditorInVisualMode(
       );
     });
     // save, which will trigger `onDidSaveTextDocument`
-    await commands.executeCommand("workbench.action.files.save")
+    await commands.executeCommand("workbench.action.files.save");
   }
 }
 

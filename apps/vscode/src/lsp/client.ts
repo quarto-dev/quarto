@@ -55,8 +55,8 @@ import {
   unadjustedRange,
   virtualDoc,
   withVirtualDocUri,
-  isVirtualDoc,
 } from "../vdoc/vdoc";
+import { isVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
@@ -102,6 +102,7 @@ export async function activateLsp(
   const config = workspace.getConfiguration("quarto");
   activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
+    handleDiagnostics: createDiagnosticFilter(),
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
     provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
@@ -114,9 +115,6 @@ export async function activateLsp(
   }
   if (config.get("cells.signatureHelp.enabled", true)) {
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
-  }
-  if (config.get("vdoc.hideDiagnostics", true)) {
-    middleware.handleDiagnostics = createDiagnosticFilter();
   }
   extensionHost().registerStatementRangeProvider(engine);
   extensionHost().registerHelpTopicProvider(engine);

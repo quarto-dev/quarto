@@ -1045,13 +1045,6 @@
           "default": true,
           "markdownDescription": "Use reticulate to execute Python cells within Knitr engine documents."
         },
-        "quarto.vdoc.hideDiagnostics": {
-          "order": 26,
-          "scope": "window",
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Hide diagnostics (problems) reported for internal virtual document files. These are temporary files used to provide language features in code blocks."
-        },
         "quarto.mathjax.scale": {
           "order": 15,
           "scope": "window",

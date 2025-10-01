@@ -150,3 +150,14 @@ function createVirtualDoc(filepath: string, content: string): void {
 function generateVirtualDocFilepath(directory: string, extension: string): string {
   return path.join(directory, ".vdoc." + uuid.v4() + "." + extension);
 }
+
+export function isVirtualDoc(uri: Uri): boolean {
+  // Check for tempfile virtual docs
+  if (uri.scheme === "file") {
+    const filename = path.basename(uri.fsPath);
+    // Virtual docs have a specific filename pattern .vdoc.[uuid].[extension]
+    return filename.startsWith(".vdoc.") && filename.split(".").length > 3;
+  }
+
+  return false;
+}

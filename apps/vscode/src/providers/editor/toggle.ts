@@ -13,12 +13,11 @@
  *
  */
 
-import { commands, window, workspace, TextDocument, ViewColumn } from "vscode";
+import { Uri, commands, window, workspace, TextDocument, ViewColumn } from "vscode";
 import * as quarto from "quarto-core";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
-import { Uri } from "vscode";
 import { hasHooks } from "../../host/hooks";
 import { toggleEditMode, toggleRenderOnSaveOverride } from "../context-keys";
 
@@ -130,18 +129,18 @@ export async function reopenEditorInVisualMode(
     // reopen in visual mode
     commands.executeCommand('positron.reopenWith', document.uri, 'quarto.visualEditor');
   } else {
-    // save then close
-    await commands.executeCommand("workbench.action.files.save");
-    await commands.executeCommand('workbench.action.closeActiveEditor');
-    VisualEditorProvider.recordPendingSwitchToVisual(document);
-    // open in visual mode
-    await commands.executeCommand("vscode.openWith",
-      document.uri,
-      VisualEditorProvider.viewType,
-      {
-        viewColumn
-      }
-    );
+    workspace.onDidSaveTextDocument(async (doc: TextDocument) => {
+      // open in visual mode
+      VisualEditorProvider.recordPendingSwitchToVisual(doc);
+      await commands.executeCommand('workbench.action.closeActiveEditor');
+      await commands.executeCommand("vscode.openWith",
+        doc.uri,
+        VisualEditorProvider.viewType,
+        { viewColumn }
+      );
+    });
+    // save, which will trigger `onDidSaveTextDocument`
+    await commands.executeCommand("workbench.action.files.save")
   }
 }
 

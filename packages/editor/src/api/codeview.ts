@@ -211,15 +211,17 @@ export function codeViewSetBlockSelection(
     if (typeof action === 'object') {
       // convert action line and character in code block space to pos in prosemirror space
       const block = context.blocks[activeIndex]
+      // asummes the meta line looks like this:
+      const metaLine = '{' + block.language + '}\n'
       const code = lines(block.code)
       if (action.line > code.length) throw 'trying to move cursor outside block!'
-      let pos = block.pos
-      for (let i = 0; i <= action.line; i++) {
-        pos += code[i].length
+      let pos = block.pos + metaLine.length
+      for (let i = 0; i < action.line; i++) {
+        pos += code[i].length + 1
       }
       pos += action.character
 
-      console.log('yoooo', pos, navigateToPos(view, pos, false));
+      navigateToPos(view, pos, false)
     }
     else if (action === "nextline") {
       const tr = view.state.tr;

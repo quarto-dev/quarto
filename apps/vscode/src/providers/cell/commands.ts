@@ -377,28 +377,26 @@ class RunCurrentCommand extends RunCommand implements Command {
           selection = slicedLines.join('\n')
           action = "nextline";
 
-          // ref: https://github.com/posit-dev/positron/blob/main/src/vs/workbench/contrib/positronConsole/browser/positronConsoleActions.ts#L428
+          // BEGIN ref: https://github.com/posit-dev/positron/blob/main/src/vs/workbench/contrib/positronConsole/browser/positronConsoleActions.ts#L428
+          // strategy from Positron using `StatementRangeProvider` to find range of next statement
+          // and move cursor based on that.
           if (end.line + 1 <= codeLines.length) {
             const nextStatementRange = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
               return await commands.executeCommand<StatementRange>(
                 "vscode.executeStatementRangeProvider",
                 uri,
-                new Position(end.line + 1, 1)
+                new Position(end.line + 1, 1) // look for statement at line after current statement
               );
             });
             const nextStatement = nextStatementRange.range;
             if (nextStatement.start.line > end.line) {
-              // If the next statement's start is after this statement's end,
-              // then move to the start of the next statement.
               action = nextStatement.start
+              // the nextStatement may start before & end after the current statement if e.g. inside a function:
             } else if (nextStatement.end.line > end.line) {
-              // If the above condition failed, but the next statement's end
-              // is after this statement's end, assume we are exiting some
-              // nested scope (like running an individual line of an R
-              // function) and move to the end of the next statement.
               action = nextStatement.end
             }
           }
+          // END ref.
         }
       }
 

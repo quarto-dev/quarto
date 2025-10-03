@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.126.0 (Unreleased)
+
 ## 1.125.0 (Release on 2025-09-03)
 
 - Fixed an issue where attribute values containing '='s could be truncated in some scenarios (<https://github.com/quarto-dev/quarto/pull/814>).

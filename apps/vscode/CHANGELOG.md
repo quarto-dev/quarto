@@ -1,11 +1,13 @@
 # Changelog
 
-## 1.125.0 (Unreleased)
+## 1.125.0 (Release on 2025-09-03)
 
 - Fixed an issue where attribute values containing '='s could be truncated in some scenarios (<https://github.com/quarto-dev/quarto/pull/814>).
 - Fixed an issue where a loading spinner for qmd previews wasn't dismissed on preview errors (<https://github.com/quarto-dev/quarto/pull/823>).
 - Diagnostics are no longer reported for internal temporary virtual document files (<https://github.com/quarto-dev/quarto/pull/832>).
 - Fixed switching to visual mode for untitled documents in Positron (<https://github.com/quarto-dev/quarto/pull/831>).
+- Use environment variable `QUARTO_PANDOC`, to use a custom path to Pandoc for the extension (<https://github.com/quarto-dev/quarto/pull/740>)
+- Re-enable completions in visual mode in Positron, with fixes (<https://github.com/quarto-dev/quarto/pull/798>)
 
 ## 1.124.0 (Release on 2025-08-20)
 

@@ -358,10 +358,10 @@ class RunCurrentCommand extends RunCommand implements Command {
       // if the selection is empty and we are in Positron:
       //   try to get the statement's range and use that as the selection
       if (selection.length <= 0 && activeBlock && hasHooks()) {
-        const language = embeddedLanguage(activeBlock.language);
-        const vdoc = virtualDocForCode(lines(activeBlock.code), language!);
-        const parentUri = Uri.file(editor.document.fileName);
+        const codeLines = lines(activeBlock.code)
+        const vdoc = virtualDocForCode(codeLines, embeddedLanguage(activeBlock.language)!);
         if (vdoc) {
+          const parentUri = Uri.file(editor.document.fileName);
           const result = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
             return await commands.executeCommand<StatementRange>(
               "vscode.executeStatementRangeProvider",
@@ -376,6 +376,29 @@ class RunCurrentCommand extends RunCommand implements Command {
 
           selection = slicedLines.join('\n')
           action = "nextline";
+
+          // ref: https://github.com/posit-dev/positron/blob/main/src/vs/workbench/contrib/positronConsole/browser/positronConsoleActions.ts#L428
+          if (end.line + 1 <= codeLines.length) {
+            const nextStatementRange = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
+              return await commands.executeCommand<StatementRange>(
+                "vscode.executeStatementRangeProvider",
+                uri,
+                new Position(end.line + 1, 1)
+              );
+            });
+            const nextStatement = nextStatementRange.range;
+            if (nextStatement.start.line > end.line) {
+              // If the next statement's start is after this statement's end,
+              // then move to the start of the next statement.
+              action = nextStatement.start
+            } else if (nextStatement.end.line > end.line) {
+              // If the above condition failed, but the next statement's end
+              // is after this statement's end, assume we are exiting some
+              // nested scope (like running an individual line of an R
+              // function) and move to the end of the next statement.
+              action = nextStatement.end
+            }
+          }
         }
       }
 
@@ -392,8 +415,10 @@ class RunCurrentCommand extends RunCommand implements Command {
         await executeInteractive(executor, [selection], editor.document);
 
         // advance cursor if necessary
+        //
         if (action) {
-          editor.setBlockSelection(context, "nextline");
+          console.log('action!!!', action, this.id)
+          await editor.setBlockSelection(context, action);
         }
       }
     }

@@ -205,12 +205,23 @@ export function codeViewSetBlockSelection(
   context: CodeViewActiveBlockContext,
   action: CodeViewSelectionAction
 ) {
-
-
   const activeIndex = context.blocks.findIndex(block => block.active);
 
   if (activeIndex !== -1) {
-    if (action === "nextline") {
+    if (typeof action === 'object') {
+      // convert action line and character in code block space to pos in prosemirror space
+      const block = context.blocks[activeIndex]
+      const code = lines(block.code)
+      if (action.line > code.length) throw 'trying to move cursor outside block!'
+      let pos = block.pos
+      for (let i = 0; i <= action.line; i++) {
+        pos += code[i].length
+      }
+      pos += action.character
+
+      console.log('yoooo', pos, navigateToPos(view, pos, false));
+    }
+    else if (action === "nextline") {
       const tr = view.state.tr;
       tr.setMeta(kCodeViewNextLineTransaction, true);
       view.dispatch(tr);
@@ -222,13 +233,11 @@ export function codeViewSetBlockSelection(
         navigatePos = context.blocks[activeIndex - 1]?.pos;
       }
       if (navigatePos) {
+        console.log('yoooo22', navigatePos)
         navigateToPos(view, navigatePos!, false);
       }
     }
   }
-
-
-
 }
 
 

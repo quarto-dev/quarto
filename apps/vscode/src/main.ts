@@ -129,7 +129,45 @@ export async function activate(context: vscode.ExtensionContext) {
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
 
+  // Register configuration change listener for Quarto path settings
+  registerQuartoPathConfigListener(context, outputChannel);
+
   outputChannel.info("Activated Quarto extension.");
+}
+
+/**
+ * Register a listener for changes to Quarto path settings that require a restart
+ */
+function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outputChannel: vscode.LogOutputChannel) {
+  // List of settings that require restart when changed
+  const quartoPathSettings = [
+    'quarto.path',
+    'quarto.usePipQuarto',
+    'quarto.useBundledQuartoInPositron'
+  ];
+
+  // Listen for configuration changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(event => {
+      // Check if any of our path settings changed
+      const requiresRestart = quartoPathSettings.some(setting => event.affectsConfiguration(setting));
+
+      if (requiresRestart) {
+        outputChannel.info(`Quarto path settings changed, restart required: ${quartoPathSettings.filter(setting =>
+          event.affectsConfiguration(setting)).join(', ')}`);
+
+        // Prompt user to restart
+        vscode.window.showInformationMessage(
+          'Quarto path settings have changed. Please reload the window for changes to take effect.',
+          'Reload Window'
+        ).then(selection => {
+          if (selection === 'Reload Window') {
+            vscode.commands.executeCommand('workbench.action.reloadWindow');
+          }
+        });
+      }
+    })
+  );
 }
 
 export async function deactivate() {

@@ -11,10 +11,10 @@ suite("Code Block Formatting", function () {
 
     const { doc, editor } = await openAndShowTextDocument("format-python.qmd");
 
-    // const position = new vscode.Position(7, 2); // Line with "1+1"
-    // editor.selection = new vscode.Selection(position, position);
-    // await vscode.commands.executeCommand("quarto.formatCell");
-    await vscode.commands.executeCommand("vscode.executeFormatDocumentProvider", doc.uri);
+    const position = new vscode.Position(7, 2); // Line with "1+1"
+    editor.selection = new vscode.Selection(position, position);
+    await vscode.commands.executeCommand("quarto.formatCell");
+    // await vscode.commands.executeCommand("vscode.executeFormatDocumentProvider", doc.uri);
 
     await wait(500);
 

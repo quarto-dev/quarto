@@ -5,8 +5,6 @@ import { openAndShowTextDocument, wait, WORKSPACE_PATH } from "./test-utils";
 
 suite("Code Block Formatting", function () {
   test("Format Python code block", async function () {
-    this.timeout(30000); // Increase timeout to 30 seconds for extension installation and formatting
-    
     // Ensure Black formatter extension is installed
     // await vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-python.black-formatter");
     // await wait(1000);

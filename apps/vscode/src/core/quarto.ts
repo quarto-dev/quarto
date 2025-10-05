@@ -17,6 +17,7 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 
 import { window, env, workspace, Uri } from "vscode";
+import { tryAcquirePositronApi } from '@posit-dev/positron';
 import { QuartoContext } from "quarto-core";
 import { activePythonInterpreter, pythonIsCondaEnv, pythonIsVenv } from "./python";
 import { isWindows } from "./platform";
@@ -33,6 +34,38 @@ export async function configuredQuartoPath() {
   const quartoPath = config.get("path") as string | undefined;
   if (quartoPath) {
     return quartoPath;
+  }
+
+  // check if we should use bundled Quarto in Positron
+  const useBundledQuarto = config.get("useBundledQuartoInPositron", false); // Default is now false
+  if (useBundledQuarto) {
+    // Check if we're in Positron
+    const isPositron = tryAcquirePositronApi();
+
+    if (isPositron) {
+      // Use path relative to the application root for Positron's bundled Quarto
+      const rootPath = env.appRoot; // Use vscode.env.appRoot as the application root path
+      const positronQuartoPath = path.join(
+        rootPath,
+        'quarto',
+        'bin',
+        isWindows() ? "quarto.exe" : "quarto"
+      );
+
+      if (fs.existsSync(positronQuartoPath)) {
+        return positronQuartoPath;
+      } else {
+        // Log error when bundled Quarto can't be found
+        console.error(
+          `useBundledQuartoInPositron is enabled but bundled Quarto not found at expected path: ${positronQuartoPath}. ` +
+          `Verify Quarto is bundled in the Positron installation.`
+        );
+
+        window.showWarningMessage(
+          "Unable to find bundled Quarto in Positron; falling back to system installation"
+        );
+      }
+    }
   }
 
   // if we can use pip quarto then look for it within the currently python (if its a venv/condaenv)

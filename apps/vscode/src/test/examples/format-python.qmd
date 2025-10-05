@@ -1,0 +1,9 @@
+---
+title: Formatting Python Code Cells
+format: html
+---
+
+```{python}
+#| label: my-code
+1+1
+```

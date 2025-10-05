@@ -17,7 +17,7 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 
 import { window, env, workspace, Uri } from "vscode";
-import { tryAcquirePositronApi } from '@posit-dev/positron';
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { QuartoContext } from "quarto-core";
 import { activePythonInterpreter, pythonIsCondaEnv, pythonIsVenv } from "./python";
 import { isWindows } from "./platform";
@@ -47,8 +47,8 @@ export async function configuredQuartoPath() {
       const rootPath = env.appRoot; // Use vscode.env.appRoot as the application root path
       const positronQuartoPath = path.join(
         rootPath,
-        'quarto',
-        'bin',
+        "quarto",
+        "bin",
         isWindows() ? "quarto.exe" : "quarto"
       );
 

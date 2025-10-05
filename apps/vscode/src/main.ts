@@ -60,7 +60,7 @@ export async function activate(context: vscode.ExtensionContext) {
     quartoPath,
     workspaceFolder,
     // Look for quarto in the app root; this is where Positron installs it
-    [path.join(vscode.env.appRoot, 'quarto', 'bin')],
+    [path.join(vscode.env.appRoot, "quarto", "bin")],
     vscode.window.showWarningMessage
   );
   if (quartoContext.available) {
@@ -141,9 +141,9 @@ export async function activate(context: vscode.ExtensionContext) {
 function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outputChannel: vscode.LogOutputChannel) {
   // List of settings that require restart when changed
   const quartoPathSettings = [
-    'quarto.path',
-    'quarto.usePipQuarto',
-    'quarto.useBundledQuartoInPositron'
+    "quarto.path",
+    "quarto.usePipQuarto",
+    "quarto.useBundledQuartoInPositron"
   ];
 
   // Listen for configuration changes
@@ -154,15 +154,15 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
 
       if (requiresRestart) {
         outputChannel.info(`Quarto path settings changed, restart required: ${quartoPathSettings.filter(setting =>
-          event.affectsConfiguration(setting)).join(', ')}`);
+          event.affectsConfiguration(setting)).join(", ")}`);
 
         // Prompt user to restart
         vscode.window.showInformationMessage(
-          'Quarto path settings have changed. Please reload the window for changes to take effect.',
-          'Reload Window'
+          "Quarto path settings have changed. Please reload the window for changes to take effect.",
+          "Reload Window"
         ).then(selection => {
-          if (selection === 'Reload Window') {
-            vscode.commands.executeCommand('workbench.action.reloadWindow');
+          if (selection === "Reload Window") {
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
           }
         });
       }

@@ -17,16 +17,17 @@ import { CompletionList } from 'vscode-languageserver-types';
 
 import { SkinTone } from './emoji';
 
-import { 
-  EditorUISpelling, 
-  EditorDialogs, 
-  EditorDisplay, 
-  EditorUIImageResolver, 
-  CodeViewCompletionContext, 
-  CodeViewExecute, 
-  CodeViewActiveBlockContext, 
-  DiagramState, 
-  CodeViewCellContext
+import {
+  EditorUISpelling,
+  EditorDialogs,
+  EditorDisplay,
+  EditorUIImageResolver,
+  CodeViewCompletionContext,
+  CodeViewExecute,
+  CodeViewActiveBlockContext,
+  DiagramState,
+  CodeViewCellContext,
+  LintItem
 } from 'editor-types';
 
 export * from './spelling';
@@ -122,7 +123,7 @@ export interface EditorUIContext extends EditorUIImageResolver {
   reopenInSourceMode?: () => void,
 
   // executable languages
-  executableLanguges?: () => string[]
+  executableLanguges?: () => string[];
 }
 
 export interface EditorUIMath {
@@ -133,6 +134,7 @@ export interface EditorUICodeView {
   codeViewAssist: (context: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
+  codeViewDiagnostics: (context: CodeViewCellContext) => Promise<LintItem[] | undefined>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
 }
 
@@ -162,7 +164,7 @@ export interface EditorUIPrefs {
   lineNumbers: () => boolean,
   showWhitespace: () => boolean,
   blinkingCursor: () => boolean,
-  quickSuggestions: () => boolean
+  quickSuggestions: () => boolean;
 }
 
 
@@ -319,4 +321,3 @@ export interface EditorUIImages {
     tag_edit: string;
   };
 }
-

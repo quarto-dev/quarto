@@ -24,165 +24,165 @@ import { isEmptyOrWhitespace } from '../util/string';
 const rangeLimit = 5000;
 
 interface RegionMarker {
-	readonly line: number;
-	readonly isStart: boolean;
+  readonly line: number;
+  readonly isStart: boolean;
 }
 
 export class MdFoldingProvider {
 
-	readonly #parser: Parser;
-	readonly #tocProvider: MdTableOfContentsProvider;
-	readonly #logger: ILogger;
+  readonly #parser: Parser;
+  readonly #tocProvider: MdTableOfContentsProvider;
+  readonly #logger: ILogger;
 
-	constructor(
-		parser: Parser,
-		tocProvider: MdTableOfContentsProvider,
-		logger: ILogger,
-	) {
-		this.#parser = parser;
-		this.#tocProvider = tocProvider;
-		this.#logger = logger;
-	}
+  constructor(
+    parser: Parser,
+    tocProvider: MdTableOfContentsProvider,
+    logger: ILogger,
+  ) {
+    this.#parser = parser;
+    this.#tocProvider = tocProvider;
+    this.#logger = logger;
+  }
 
-	public async provideFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		this.#logger.log(LogLevel.Debug, 'MdFoldingProvider.provideFoldingRanges', { document: document.uri, version: document.version });
+  public async provideFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+    this.#logger.logDebug('MdFoldingProvider.provideFoldingRanges', { document: document.uri, version: document.version });
 
-		if (token.isCancellationRequested) {
-			return [];
-		}
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		const foldables = await Promise.all([
-			this.#getRegions(document, token),
-			this.#getBlockFoldingRanges(document, token),
-			this.#getHeaderFoldingRanges(document, token),
-		
-		]);
-		const result = foldables.flat();
-		return result.length > rangeLimit ? result.slice(0, rangeLimit) : result;
-	}
+    const foldables = await Promise.all([
+      this.#getRegions(document, token),
+      this.#getBlockFoldingRanges(document, token),
+      this.#getHeaderFoldingRanges(document, token),
 
-	async #getRegions(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = this.#parser(document);
-		if (token.isCancellationRequested) {
-			return [];
-		}
+    ]);
+    const result = foldables.flat();
+    return result.length > rangeLimit ? result.slice(0, rangeLimit) : result;
+  }
 
-		return Array.from(this.#getRegionsFromTokens(tokens));
-	}
+  async #getRegions(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+    const tokens = this.#parser(document);
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-	*#getRegionsFromTokens(tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
-		const nestingStack: RegionMarker[] = [];
-		for (const token of tokens) {
-			const marker = asRegionMarker(token);
-			if (marker) {
-				if (marker.isStart) {
-					nestingStack.push(marker);
-				} else if (nestingStack.length && nestingStack[nestingStack.length - 1].isStart) {
-					yield { startLine: nestingStack.pop()!.line, endLine: marker.line, kind: lsp.FoldingRangeKind.Region };
-				} else {
-					// noop: invalid nesting (i.e. [end, start] or [start, end, end])
-				}
-			}
-		}
-	}
+    return Array.from(this.#getRegionsFromTokens(tokens));
+  }
 
-	async #getHeaderFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const toc = await this.#tocProvider.getForDocument(document);
-		if (token.isCancellationRequested) {
-			return [];
-		}
+  *#getRegionsFromTokens(tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
+    const nestingStack: RegionMarker[] = [];
+    for (const token of tokens) {
+      const marker = asRegionMarker(token);
+      if (marker) {
+        if (marker.isStart) {
+          nestingStack.push(marker);
+        } else if (nestingStack.length && nestingStack[nestingStack.length - 1].isStart) {
+          yield { startLine: nestingStack.pop()!.line, endLine: marker.line, kind: lsp.FoldingRangeKind.Region };
+        } else {
+          // noop: invalid nesting (i.e. [end, start] or [start, end, end])
+        }
+      }
+    }
+  }
 
-		return toc.entries.filter(entry => isTocHeaderEntry(entry)).map((entry): lsp.FoldingRange => {
-			let endLine = entry.sectionLocation.range.end.line;
-			if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= entry.line + 1) {
-				endLine = endLine - 1;
-			}
-			return { startLine: entry.line, endLine };
-		});
-	}
+  async #getHeaderFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+    const toc = await this.#tocProvider.getForDocument(document);
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-	async #getBlockFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
-		const tokens = this.#parser(document);
-		if (token.isCancellationRequested) {
-			return [];
-		}
-		return Array.from(this.#getBlockFoldingRangesFromTokens(document, tokens));
-	}
+    return toc.entries.filter(entry => isTocHeaderEntry(entry)).map((entry): lsp.FoldingRange => {
+      let endLine = entry.sectionLocation.range.end.line;
+      if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= entry.line + 1) {
+        endLine = endLine - 1;
+      }
+      return { startLine: entry.line, endLine };
+    });
+  }
 
-	*#getBlockFoldingRangesFromTokens(document: Document, tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
-		for (const token of tokens) {
-			if (isFoldableToken(token)) {
-				const startLine = token.range.start.line;
-				let endLine = token.range.end.line;
-				if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= startLine + 1) {
-					endLine = endLine - 1;
-				}
+  async #getBlockFoldingRanges(document: Document, token: CancellationToken): Promise<lsp.FoldingRange[]> {
+    const tokens = this.#parser(document);
+    if (token.isCancellationRequested) {
+      return [];
+    }
+    return Array.from(this.#getBlockFoldingRangesFromTokens(document, tokens));
+  }
 
-				if (endLine > startLine) {
-					yield { startLine, endLine, kind: this.#getFoldingRangeKind(token) };
-				}
-			}
-		}
-	}
+  *#getBlockFoldingRangesFromTokens(document: Document, tokens: readonly Token[]): Iterable<lsp.FoldingRange> {
+    for (const token of tokens) {
+      if (isFoldableToken(token)) {
+        const startLine = token.range.start.line;
+        let endLine = token.range.end.line;
+        if (isEmptyOrWhitespace(getLine(document, endLine)) && endLine >= startLine + 1) {
+          endLine = endLine - 1;
+        }
 
-	#getFoldingRangeKind(listItem: Token): lsp.FoldingRangeKind | undefined {
-		const html = asHtmlBlock(listItem);
-		return html && html.startsWith('!--') ? lsp.FoldingRangeKind.Comment : undefined;
-	}
+        if (endLine > startLine) {
+          yield { startLine, endLine, kind: this.#getFoldingRangeKind(token) };
+        }
+      }
+    }
+  }
+
+  #getFoldingRangeKind(listItem: Token): lsp.FoldingRangeKind | undefined {
+    const html = asHtmlBlock(listItem);
+    return html && html.startsWith('!--') ? lsp.FoldingRangeKind.Comment : undefined;
+  }
 }
 
 function isStartRegion(t: string) { return /^\s*<!--\s*#?region\b.*-->/.test(t); }
 function isEndRegion(t: string) { return /^\s*<!--\s*#?endregion\b.*-->/.test(t); }
 
 function asRegionMarker(token: Token): RegionMarker | undefined {
-	const html = asHtmlBlock(token);
-	if (html === undefined) {
-		return undefined;
-	}
-	
-	if (isStartRegion(html)) {
-		return { line: token.range.start.line, isStart: true };
-	}
+  const html = asHtmlBlock(token);
+  if (html === undefined) {
+    return undefined;
+  }
 
-	if (isEndRegion(html)) {
-		return { line: token.range.start.line, isStart: false };
-	}
+  if (isStartRegion(html)) {
+    return { line: token.range.start.line, isStart: true };
+  }
 
-	return undefined;
+  if (isEndRegion(html)) {
+    return { line: token.range.start.line, isStart: false };
+  }
+
+  return undefined;
 }
 
-function asHtmlBlock(token: Token) : string | undefined {
-	if (!(isRawBlock(token))) {
-		return undefined;
-	}
-	if (token.data.format !== "html") {
-		return undefined;
-	}
-	return token.data.text;
+function asHtmlBlock(token: Token): string | undefined {
+  if (!(isRawBlock(token))) {
+    return undefined;
+  }
+  if (token.data.format !== "html") {
+    return undefined;
+  }
+  return token.data.text;
 }
 
 function isFoldableToken(token: Token) {
 
-	switch (token.type) {
-	  case 'FrontMatter':
-		case 'CodeBlock':
-		case 'Div':
-		case 'BlockQuote':
-		case 'Table':
-		case 'OrderedList':
-		case 'BulletList':
-			return token.range.end.line > token.range.start.line;
+  switch (token.type) {
+    case 'FrontMatter':
+    case 'CodeBlock':
+    case 'Div':
+    case 'BlockQuote':
+    case 'Table':
+    case 'OrderedList':
+    case 'BulletList':
+      return token.range.end.line > token.range.start.line;
 
-		case 'Math':
-			return isDisplayMath(token) && token.range.end.line > token.range.start.line;
+    case 'Math':
+      return isDisplayMath(token) && token.range.end.line > token.range.start.line;
 
-		case 'RawBlock':
-			if (asRegionMarker(token)) {
-				return false;
-			}
-			return token.range.end.line > token.range.start.line + 1;	
+    case 'RawBlock':
+      if (asRegionMarker(token)) {
+        return false;
+      }
+      return token.range.end.line > token.range.start.line + 1;
 
-		default:
-			return false;
-	}
+    default:
+      return false;
+  }
 }

@@ -5,7 +5,6 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-    
 		{
 			"name": "Run VS Code Extension",
 			"type": "extensionHost",
@@ -23,7 +22,9 @@
       "name": "Attach to VS Code LSP Server",
       "port": 6009,
       "restart": true,
-      "outFiles": ["${workspaceRoot}/out/**/*.js"]
-    },
-	]
+      "outFiles": [
+        "${workspaceFolder}/apps/vscode/out/lsp/**/*.js"
+      ]
+    }
+  ]
 }

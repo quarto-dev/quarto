@@ -32,7 +32,7 @@ export async function refsCompletions(
   context: EditorContext,
   documents: TextDocuments<Document>,
 ): Promise<CompletionItem[] | null> {
- 
+
   // validate trigger
   if (context.trigger && !["@"].includes(context.trigger)) {
     return null;
@@ -60,7 +60,7 @@ export async function refsCompletions(
         // construct path
         const path = filePathForDoc(doc);
         const projectDir = projectDirForDocument(path);
-        const biblioItems = await biblioCompletions(quarto, parser,  tokenText, doc);
+        const biblioItems = await biblioCompletions(quarto, parser, tokenText, doc);
         const crossrefItems = await crossrefCompletions(
           quarto,
           tokenText,

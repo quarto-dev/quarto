@@ -30,11 +30,10 @@ import { Position, Range, TextDocument } from "vscode-languageserver-textdocumen
 
 import { Document, isQuartoDoc } from "quarto-core";
 
-import { 
-  FileStat, 
-  ILogger, 
-  LogLevel, 
-  LsConfiguration, 
+import {
+  FileStat,
+  ILogger,
+  LsConfiguration,
   IWorkspace,
   IWorkspaceWithWatching,
   FileWatcherOptions
@@ -48,10 +47,10 @@ export function languageServiceWorkspace(
   workspaceFolders: URI[],
   documents: TextDocuments<Document>,
   connection: Connection,
-  capabilities: ClientCapabilities, 
+  capabilities: ClientCapabilities,
   config: LsConfiguration,
   logger: ILogger
-) :  IWorkspace | IWorkspaceWithWatching {
+): IWorkspace | IWorkspaceWithWatching {
 
   // track changes to workspace folders
   connection.workspace.onDidChangeWorkspaceFolders(async () => {
@@ -62,52 +61,52 @@ export function languageServiceWorkspace(
   const documentCache = new ResourceMap<VsCodeDocument>();
 
   const openMarkdownDocumentFromFs = async (resource: URI): Promise<Document | undefined> => {
-		if (!looksLikeMarkdownPath(config, resource)) {
-			return undefined;
-		}
+    if (!looksLikeMarkdownPath(config, resource)) {
+      return undefined;
+    }
 
-		try {
+    try {
       const text = await fspromises.readFile(resource.fsPath, { encoding: "utf-8" });
       const doc = new VsCodeDocument(resource.toString(), {
-				onDiskDoc: TextDocument.create(resource.toString(), 'markdown', 0, text)
-			});
-			documentCache.set(resource, doc);
-			return doc;
+        onDiskDoc: TextDocument.create(resource.toString(), 'markdown', 0, text)
+      });
+      documentCache.set(resource, doc);
+      return doc;
 
-		} catch (e) {
-			return undefined;
-		}
-	}
+    } catch (e) {
+      return undefined;
+    }
+  }
 
   const statBypassingCache = (resource: URI): FileStat | undefined => {
-		const uri = resource.toString();
-		if (documents.get(uri)) {
-			return { isDirectory: false };
-		}
+    const uri = resource.toString();
+    if (documents.get(uri)) {
+      return { isDirectory: false };
+    }
     try {
       const stat = fs.statSync(resource.fsPath);
       return { isDirectory: stat.isDirectory() };
     } catch {
       return undefined;
     }
-	}
+  }
 
   // track changes to documents
   const onDidChangeMarkdownDocument = new Emitter<Document>();
-  const onDidCreateMarkdownDocument =  new Emitter<Document>();
+  const onDidCreateMarkdownDocument = new Emitter<Document>();
   const onDidDeleteMarkdownDocument = new Emitter<URI>();
 
   const doDeleteDocument = (uri: URI) => {
-		logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.deleteDocument', { document: uri.toString() });
-		documentCache.delete(uri);
-		onDidDeleteMarkdownDocument.fire(uri);
-	}
+    logger.logTrace('VsCodeClientWorkspace.deleteDocument', { document: uri.toString() });
+    documentCache.delete(uri);
+    onDidDeleteMarkdownDocument.fire(uri);
+  }
 
   documents.onDidOpen(e => {
     if (!isRelevantMarkdownDocument(e.document)) {
       return;
     }
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.TextDocument.onDidOpen', { document: e.document.uri });
+    logger.logNotification('onDidOpen', { document: e.document.uri });
 
     const uri = URI.parse(e.document.uri);
     const doc = documentCache.get(uri);
@@ -132,7 +131,7 @@ export function languageServiceWorkspace(
       return;
     }
 
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.TextDocument.onDidChanceContent', { document: e.document.uri });
+    logger.logNotification('onDidChangeContent', { document: e.document.uri });
 
     const uri = URI.parse(e.document.uri);
     const entry = documentCache.get(uri);
@@ -147,7 +146,7 @@ export function languageServiceWorkspace(
       return;
     }
 
-    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.TextDocument.onDidClose', { document: e.document.uri });
+    logger.logNotification('onDidClose', { document: e.document.uri });
 
     const uri = URI.parse(e.document.uri);
     const doc = documentCache.get(uri);
@@ -179,7 +178,7 @@ export function languageServiceWorkspace(
     onDidChangeMarkdownDocument.fire(doc);
   });
 
-  const workspace : IWorkspace = {
+  const workspace: IWorkspace = {
 
     get workspaceFolders(): readonly URI[] {
       return workspaceFolders;
@@ -199,13 +198,13 @@ export function languageServiceWorkspace(
         allDocs.set(URI.parse(doc.uri), doc);
       }
 
-      // And then add files on disk 
+      // And then add files on disk
       for (const workspaceFolder of this.workspaceFolders) {
         const mdFileGlob = `**/*.{${config.markdownFileExtensions.join(',')}}`;
-        const ignore = [...config.excludePaths]; 
-        const resources = (await glob(mdFileGlob, { ignore, cwd: workspaceFolder.toString() } ))
+        const ignore = [...config.excludePaths];
+        const resources = (await glob(mdFileGlob, { ignore, cwd: workspaceFolder.toString() }))
           .map(resource => URI.file(path.join(workspaceFolder.fsPath, resource)))
-        
+
 
         // (read max 20 at a time)
         const maxConcurrent = 20;
@@ -226,7 +225,7 @@ export function languageServiceWorkspace(
 
       return allDocs.values();
     },
-    
+
     hasMarkdownDocument(resource: URI): boolean {
       return !!documents.get(resource.toString());
     },
@@ -251,10 +250,10 @@ export function languageServiceWorkspace(
       }
 
       return openMarkdownDocumentFromFs(resource);
-	  },
-    
+    },
+
     async stat(resource: URI): Promise<FileStat | undefined> {
-      logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.stat', { resource: resource.toString() });
+      logger.logTrace('VsCodeClientWorkspace.stat', { resource: resource.toString() });
       if (documentCache.has(resource)) {
         return { isDirectory: false };
       }
@@ -262,12 +261,12 @@ export function languageServiceWorkspace(
     },
 
     async readDirectory(resource: URI): Promise<Iterable<readonly [string, FileStat]>> {
-      logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.readDirectory', { resource: resource.toString() });
+      logger.logTrace('VsCodeClientWorkspace.readDirectory', { resource: resource.toString() });
       const result = await fspromises.readdir(resource.fsPath, { withFileTypes: true });
-      return result.map(value => [value.name, { isDirectory: value.isDirectory( )}]);
+      return result.map(value => [value.name, { isDirectory: value.isDirectory() }]);
     },
 
-    
+
   };
 
   // add file watching if supported on the client
@@ -312,51 +311,51 @@ export function languageServiceWorkspace(
 
       // keep document cache up to date and notify clients
       for (const change of changes) {
-				const resource = URI.parse(change.uri);
-				logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.onDidChangeWatchedFiles', { type: change.type, resource: resource.toString() });
-				switch (change.type) {
-					case FileChangeType.Changed: {
-						const entry = documentCache.get(resource);
-						if (entry) {
-							// Refresh the on-disk state
-							const document = await openMarkdownDocumentFromFs(resource);
-							if (document) {
-								onDidChangeMarkdownDocument.fire(document);
-							}
-						}
-						break;
-					}
-					case FileChangeType.Created: {
+        const resource = URI.parse(change.uri);
+        logger.logTrace('VsCodeClientWorkspace.onDidChangeWatchedFiles', { type: change.type, resource: resource.toString() });
+        switch (change.type) {
+          case FileChangeType.Changed: {
+            const entry = documentCache.get(resource);
+            if (entry) {
+              // Refresh the on-disk state
+              const document = await openMarkdownDocumentFromFs(resource);
+              if (document) {
+                onDidChangeMarkdownDocument.fire(document);
+              }
+            }
+            break;
+          }
+          case FileChangeType.Created: {
             console.log("FileChangeType.Created");
-						const entry = documentCache.get(resource);
-						if (entry) {
-							// Create or update the on-disk state
-							const document = await openMarkdownDocumentFromFs(resource);
-							if (document) {
-								onDidCreateMarkdownDocument.fire(document);
-							}
-						}
-						break;
-					}
-					case FileChangeType.Deleted: {
-						const entry = documentCache.get(resource);
-						if (entry) {
-							entry.setOnDiskDoc(undefined);
-							if (entry.isDetached()) {
-								doDeleteDocument(resource);
-							}
-						}
-						break;
-					}
-				}
-			}
-		});
-  
+            const entry = documentCache.get(resource);
+            if (entry) {
+              // Create or update the on-disk state
+              const document = await openMarkdownDocumentFromFs(resource);
+              if (document) {
+                onDidCreateMarkdownDocument.fire(document);
+              }
+            }
+            break;
+          }
+          case FileChangeType.Deleted: {
+            const entry = documentCache.get(resource);
+            if (entry) {
+              entry.setOnDiskDoc(undefined);
+              if (entry.isDetached()) {
+                doDeleteDocument(resource);
+              }
+            }
+            break;
+          }
+        }
+      }
+    });
+
     // add watching to workspace
     const fsWorkspace: IWorkspaceWithWatching = {
       ...workspace,
       watchFile(resource, options) {
-		    logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.watchFile', { resource: resource.toString() });
+        logger.logTrace('VsCodeClientWorkspace.watchFile', { resource: resource.toString() });
 
         const entry = {
           resource,
@@ -365,13 +364,13 @@ export function languageServiceWorkspace(
           onDidChange: new Emitter<URI>(),
           onDidDelete: new Emitter<URI>(),
         };
-		    watchers.set(entry.resource.toString(), entry);
+        watchers.set(entry.resource.toString(), entry);
         return {
           onDidCreate: entry.onDidCreate.event,
           onDidChange: entry.onDidChange.event,
           onDidDelete: entry.onDidDelete.event,
           dispose: () => {
-            logger.log(LogLevel.Trace, 'VsCodeClientWorkspace.disposeWatcher', { resource: resource.toString() });
+            logger.logTrace('VsCodeClientWorkspace.disposeWatcher', { resource: resource.toString() });
             watchers.delete(entry.resource.toString());
           }
         };
@@ -379,8 +378,8 @@ export function languageServiceWorkspace(
       },
     }
     return fsWorkspace;
-  
-  // return vanilla workspace w/o watching
+
+    // return vanilla workspace w/o watching
   } else {
     return workspace;
   }
@@ -388,78 +387,78 @@ export function languageServiceWorkspace(
 }
 
 function isRelevantMarkdownDocument(doc: Document) {
-	return isQuartoDoc(doc) && URI.parse(doc.uri).scheme !== 'vscode-bulkeditpreview';	
+  return isQuartoDoc(doc) && URI.parse(doc.uri).scheme !== 'vscode-bulkeditpreview';
 }
 
 
 function looksLikeMarkdownPath(config: LsConfiguration, resolvedHrefPath: URI) {
-	return config.markdownFileExtensions.includes(path.extname(resolvedHrefPath.fsPath).toLowerCase().replace('.', ''));
+  return config.markdownFileExtensions.includes(path.extname(resolvedHrefPath.fsPath).toLowerCase().replace('.', ''));
 }
 
 class VsCodeDocument implements Document {
 
-	private inMemoryDoc?: Document;
-	private onDiskDoc?: Document;
+  private inMemoryDoc?: Document;
+  private onDiskDoc?: Document;
 
-	readonly uri: string;
+  readonly uri: string;
 
-	constructor(uri: string, init: { inMemoryDoc: Document });
-	constructor(uri: string, init: { onDiskDoc: Document });
-	constructor(uri: string, init: { inMemoryDoc?: Document; onDiskDoc?: Document }) {
-		this.uri = uri;
-		this.inMemoryDoc = init?.inMemoryDoc;
-		this.onDiskDoc = init?.onDiskDoc;
-	}
+  constructor(uri: string, init: { inMemoryDoc: Document });
+  constructor(uri: string, init: { onDiskDoc: Document });
+  constructor(uri: string, init: { inMemoryDoc?: Document; onDiskDoc?: Document }) {
+    this.uri = uri;
+    this.inMemoryDoc = init?.inMemoryDoc;
+    this.onDiskDoc = init?.onDiskDoc;
+  }
 
-  get languageId() : string | undefined {
+  get languageId(): string | undefined {
     return this.inMemoryDoc?.languageId ?? this.onDiskDoc?.languageId;
   }
 
-	get version(): number {
-		return this.inMemoryDoc?.version ?? this.onDiskDoc?.version ?? 0;
-	}
+  get version(): number {
+    return this.inMemoryDoc?.version ?? this.onDiskDoc?.version ?? 0;
+  }
 
-	get lineCount(): number {
-		return this.inMemoryDoc?.lineCount ?? this.onDiskDoc?.lineCount ?? 0;
-	}
+  get lineCount(): number {
+    return this.inMemoryDoc?.lineCount ?? this.onDiskDoc?.lineCount ?? 0;
+  }
 
-	getText(range?: Range): string {
-		if (this.inMemoryDoc) {
-			return this.inMemoryDoc.getText(range);
-		}
+  getText(range?: Range): string {
+    if (this.inMemoryDoc) {
+      return this.inMemoryDoc.getText(range);
+    }
 
-		if (this.onDiskDoc) {
-			return this.onDiskDoc.getText(range);
-		}
+    if (this.onDiskDoc) {
+      return this.onDiskDoc.getText(range);
+    }
 
-		throw new Error('Document has been closed');
-	}
+    throw new Error('Document has been closed');
+  }
 
-	positionAt(offset: number): Position {
-		if (this.inMemoryDoc) {
-			return this.inMemoryDoc.positionAt(offset);
-		}
+  positionAt(offset: number): Position {
+    if (this.inMemoryDoc) {
+      return this.inMemoryDoc.positionAt(offset);
+    }
 
-		if (this.onDiskDoc) {
-			return this.onDiskDoc.positionAt(offset);
-		}
+    if (this.onDiskDoc) {
+      return this.onDiskDoc.positionAt(offset);
+    }
 
-		throw new Error('Document has been closed');
-	}
+    throw new Error('Document has been closed');
+  }
 
-	hasInMemoryDoc(): boolean {
-		return !!this.inMemoryDoc;
-	}
+  hasInMemoryDoc(): boolean {
+    return !!this.inMemoryDoc;
+  }
 
-	isDetached(): boolean {
-		return !this.onDiskDoc && !this.inMemoryDoc;
-	}
+  isDetached(): boolean {
+    return !this.onDiskDoc && !this.inMemoryDoc;
+  }
 
-	setInMemoryDoc(doc: Document | undefined) {
-		this.inMemoryDoc = doc;
-	}
+  setInMemoryDoc(doc: Document | undefined) {
+    this.inMemoryDoc = doc;
+  }
 
-	setOnDiskDoc(doc: TextDocument | undefined) {
-		this.onDiskDoc = doc;
-	}
+  setOnDiskDoc(doc: TextDocument | undefined) {
+    this.onDiskDoc = doc;
+  }
 }

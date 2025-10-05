@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.122.0",
+  "version": "1.126.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -28,7 +28,8 @@
   ],
   "private": true,
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.75.0",
+    "positron": "^2025.6.0"
   },
   "main": "./out/main.js",
   "browser": "./browser.js",
@@ -296,8 +297,13 @@
       },
       {
         "command": "quarto.insertCodeCell",
+        "icon": "$(insert)",
         "title": "Insert Code Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.runSelection",
@@ -448,7 +454,7 @@
         "enablement": "editorLangId == quarto",
         "actionBarOptions": {
           "controlType": "checkbox",
-          "checked": "((activeCustomEditorId == 'quarto.visualEditor' || quarto.editor.type == quarto) && quarto.editor.renderOnSave) || ((activeCustomEditorId == 'quarto.visualEditor' || quarto.editor.type == 'quarto-shiny') && quarto.editor.renderOnSaveShiny)"
+          "checked": "(quarto.editor.type == quarto && quarto.editor.renderOnSave) || (quarto.editor.type == 'quarto-shiny' && quarto.editor.renderOnSaveShiny)"
         }
       },
       {
@@ -634,16 +640,28 @@
       }
     ],
     "menus": {
-      "editor/actions/right": [
+      "editor/actions/left": [
+        {
+          "command": "quarto.preview",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
+        },
         {
           "command": "quarto.toggleRenderOnSave",
-          "when": "(activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto) && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
-          "group": "Quarto"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
         },
         {
           "command": "quarto.toggleEditMode",
-          "when": "(activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto) && (quarto.editor.type == quarto || quarto.editor.type == 'quarto-shiny')",
-          "group": "Quarto"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "1_editor_mode"
+        }
+      ],
+      "editor/actions/right": [
+        {
+          "command": "quarto.insertCodeCell",
+          "when": "editorLangId == quarto",
+          "group": "2_execute"
         }
       ],
       "editor/context": [
@@ -1288,6 +1306,19 @@
             "type": "string"
           },
           "uniqueItems": true
+        },
+        "quarto.server.logLevel": {
+          "scope": "window",
+          "type": "string",
+          "default": "warn",
+          "enum": [
+            "trace",
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "markdownDescription": "Log level for the Quarto language server."
         }
       }
     },
@@ -1390,10 +1421,13 @@
   },
   "scripts": {
     "vscode:prepublish": "rm -rf ./out/markdownit && cd ../.. && turbo run build --force --filter quarto...",
+    "install-vscode": "rm -rf *.vsix && vsce package && code --install-extension *.vsix",
+    "install-positron": "rm -rf *.vsix && vsce package && positron --install-extension *.vsix",
     "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
-    "build-lang": "node syntaxes/build-lang"
+    "build-lang": "node syntaxes/build-lang",
+    "test": "yarn run build test && vscode-test"
   },
   "dependencies": {
     "axios": "^1.2.1",
@@ -1402,6 +1436,7 @@
     "editor-core": "*",
     "editor-server": "*",
     "editor-types": "*",
+    "glob": "^11.0.3",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",
@@ -1439,7 +1474,8 @@
     "@types/which": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
-    "@vscode/test-electron": "^2.2.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^2.15.0",
     "build": "*",
     "esbuild": "^0.16.7",

@@ -18,21 +18,7 @@ import { CompletionItem, Position } from "vscode-languageserver-types";
 import { QuartoContext, Document, filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml, isQuartoDashboardDoc } from "quarto-core";
 
 import { lines } from "core";
-
-
-export const kStartRow = "start.row";
-export const kStartColumn = "start.column";
-export const kEndRow = "end.row";
-export const kEndColumn = "end.column";
-
-export interface LintItem {
-  [kStartRow]: number;
-  [kStartColumn]: number;
-  [kEndRow]: number;
-  [kEndColumn]: number;
-  text: string;
-  type: string;
-}
+import { LintItem } from "editor-types";
 
 export interface CompletionResult {
   token: string;
@@ -111,7 +97,7 @@ export function codeEditorContext(
   embedded: boolean,
   explicit?: boolean,
   trigger?: string
-) : EditorContext {
+): EditorContext {
   const line = lines(code)[pos.line];
   const position = { row: pos.line, column: pos.character };
 
@@ -145,14 +131,14 @@ export function docEditorContext(
   pos: Position,
   explicit: boolean,
   trigger?: string
-) : EditorContext {
+): EditorContext {
   const path = filePathForDoc(doc);
   const filetype = isQuartoDoc(doc)
     ? "markdown"
     : isQuartoYaml(doc)
-    ? "yaml"
-    : "markdown"; // should never get here
- 
+      ? "yaml"
+      : "markdown"; // should never get here
+
   const code = doc.getText();
 
   return codeEditorContext(
@@ -165,5 +151,3 @@ export function docEditorContext(
     trigger
   )
 }
-
-

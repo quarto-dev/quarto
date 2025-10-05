@@ -11,11 +11,16 @@
     "build": "turbo run build",
     "dev-writer": "turbo run dev --filter writer*",
     "dev-vscode": "turbo run dev --filter quarto...",
+    "build-vscode": "turbo run build --filter quarto...",
+    "test-vscode": "cd apps/vscode && yarn test",
+    "install-vscode": "cd apps/vscode && yarn install-vscode",
+    "install-positron": "cd apps/vscode && yarn install-positron",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "watch": "concurrently 'tsc --watch --noEmit --project apps/writer/tsconfig.json' 'tsc --watch --noEmit  --project packages/writer-server/tsconfig.json'"
   },
   "devDependencies": {
+    "@vscode/test-cli": "^0.0.11",
     "concurrently": "^7.5.0",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",

@@ -4,8 +4,12 @@
         "editor.formatOnSave": true
     },
     "typescript.tsdk": "node_modules/typescript/lib",
+    "editor.detectIndentation": false,
     "editor.tabSize": 2,
+    "editor.insertSpaces": true,
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "javascript.format.semicolons": "insert",
+    "typescript.format.semicolons": "insert"
 }

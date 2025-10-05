@@ -66,7 +66,10 @@ export function activateContextKeySetter(
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {
       debounce(
-        () => setLanguageContextKeys(activeEditor, engine),
+        () => {
+          setEditorContextKeys(activeEditor, engine)
+          setLanguageContextKeys(activeEditor, engine)
+        },
         debounceOnDidChangeDocumentMs
       )();
     }

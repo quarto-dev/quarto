@@ -18,7 +18,8 @@ import { AssetPair, copy } from 'esbuild-plugin-copy';
 
 export interface BuildOptions {
   entryPoints: string[];
-  outfile: string;
+  outfile?: string;
+  outdir?: string;
   assets?: Array<AssetPair>;
   bundle?: boolean;    // true
   minify?: boolean;    // false
@@ -32,6 +33,7 @@ export async function runBuild(options: BuildOptions) {
   const {
     entryPoints,
     outfile,
+    outdir,
     assets,
     bundle = true,
     minify = false,
@@ -44,6 +46,7 @@ export async function runBuild(options: BuildOptions) {
   await build({
     entryPoints,
     outfile,
+    outdir,
     bundle,
     minify,
     format,

@@ -24,14 +24,10 @@ import {
 import { Document } from "quarto-core";
 
 import {
-  kEndColumn,
-  kEndRow,
-  kStartColumn,
-  kStartRow,
-  LintItem,
   Quarto,
   docEditorContext
 } from "../quarto";
+import { kEndColumn, kEndRow, kStartColumn, kStartRow, LintItem } from "editor-types";
 
 export async function provideYamlDiagnostics(
   quarto: Quarto,
@@ -53,7 +49,7 @@ export async function provideYamlDiagnostics(
       source: "quarto",
     };
   });
-  
+
 }
 
 function lintSeverity(item: LintItem) {

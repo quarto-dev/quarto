@@ -15,20 +15,20 @@
  */
 
 import { lines } from "core";
-import { 
-  Range, 
-  TextEdit, 
-  Command, 
-  CompletionItem, 
-  CompletionItemKind, 
-  MarkupKind 
+import {
+  Range,
+  TextEdit,
+  Command,
+  CompletionItem,
+  CompletionItemKind,
+  MarkupKind
 } from "vscode-languageserver-types";
 
 
 import { EditorContext, Quarto } from "../../quarto";
 
 export async function yamlCompletions(quarto: Quarto, context: EditorContext, stripPadding: boolean) {
- 
+
   // don't do completions from trigger characters (yaml has none)
   if (context.trigger) {
     return null;

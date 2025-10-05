@@ -15,3 +15,5 @@ public/dist
 .luarc.json
 .ipynb_checkpoints
 /.luarc.json
+.vscode-test
+*.vsix

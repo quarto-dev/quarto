@@ -1105,7 +1105,7 @@
           "order": 11,
           "type": "boolean",
           "default": true,
-          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#` or the bundled Quarto when `#quarto.useBundledQuarto#` is enabled."
+          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#` or the bundled Quarto when `#quarto.useBundledQuartoInPositron#` is enabled."
         },
         "quarto.useBundledQuartoInPositron": {
           "order": 11,

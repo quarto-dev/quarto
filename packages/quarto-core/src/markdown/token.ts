@@ -33,29 +33,29 @@ export type TokenType =
 export const kAttrIdentifier = 0;
 export const kAttrClasses = 1;
 export const kAttrAttributes = 2;
-export type TokenAttr = [string, Array<string>, Array<[string,string]>];
+export type TokenAttr = [string, Array<string>, Array<[string, string]>];
 
 
 export interface Token<T = unknown> {
   type: TokenType;
   range: Range;
-  attr?: TokenAttr; 
+  attr?: TokenAttr;
   data: T;
-    // FrontMatter: yaml
-    // Header: { level: number, text: string }
-    // Math: { type: string, text: string }
-    // CodeBlock: text
-    // RawBlock: { format: string, text: string }
-    // (Other): null
+  // FrontMatter: yaml
+  // Header: { level: number, text: string }
+  // Math: { type: string, text: string }
+  // CodeBlock: text
+  // RawBlock: { format: string, text: string }
+  // (Other): null
 }
 
 export type TokenFrontMatter = Token<string>;
-export function isFrontMatter(token: Token) : token is TokenFrontMatter {
+export function isFrontMatter(token: Token): token is TokenFrontMatter {
   return token.type === "FrontMatter";
 }
 
 export type TokenHeader = Token<{ level: number, text: string }>;
-export function isHeader(token: Token) : token is TokenHeader {
+export function isHeader(token: Token): token is TokenHeader {
   return token.type === "Header";
 }
 
@@ -72,6 +72,10 @@ export function isCodeBlock(token: Token): token is TokenCodeBlock {
 export type TokenRawBlock = Token<{ format: string, text: string }>;
 export function isRawBlock(token: Token): token is TokenRawBlock {
   return token.type === "RawBlock";
+}
+
+export function isDiv(token: Token) {
+  return token.type === "Div"
 }
 
 export function isCallout(token: Token) {

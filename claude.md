@@ -7,7 +7,7 @@ Quarto is an open-source scientific and technical publishing system built on [Pa
 ### Main Components
 
 - **VS Code Extension**: The primary VS Code extension for working with Quarto documents
-- **Writer**: A web-based editor for Quarto documents
+- **Writer**: An experimental web-based editor for Quarto documents (not used in production yet)
 - **LSP**: Language server for Quarto documents
 - **Core Packages**: Shared libraries used across multiple components
 

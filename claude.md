@@ -11,6 +11,12 @@ Quarto is an open-source scientific and technical publishing system built on [Pa
 - **LSP**: Language server for Quarto documents
 - **Core Packages**: Shared libraries used across multiple components
 
+## Development Workflow
+
+Each component has specific development guidelines. Refer to the corresponding CONTRIBUTING.md files:
+
+- VS Code extension: [apps/vscode/CONTRIBUTING.md](apps/vscode/CONTRIBUTING.md) - Contains detailed instructions for building, debugging, and releasing the extension
+
 ## Repository Structure
 
 The repository is organized as a monorepo using Yarn workspaces and Turborepo for build orchestration:
@@ -39,6 +45,13 @@ Quarto uses [turborepo](https://turbo.build/) to manage the monorepo build proce
   - `yarn build-vscode`: Builds only the VS Code extension and its dependencies
 
 The turborepo pipeline helps optimize build times by caching build artifacts and respecting the dependency graph between packages.
+
+## Testing
+
+Testing procedures vary by component:
+
+- VS Code extension: Run `yarn test-vscode` to compile test files and run them with the vscode-test CLI
+- Other components have specific test commands defined in their respective package.json files
 
 
 ## Additional Resources

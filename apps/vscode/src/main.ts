@@ -15,6 +15,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
@@ -139,10 +140,15 @@ export async function activate(context: vscode.ExtensionContext) {
  * Register a listener for changes to Quarto path settings that require a restart
  */
 function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outputChannel: vscode.LogOutputChannel) {
+  // Check if we're in Positron
+  const isPositron = tryAcquirePositronApi();
+
   // List of settings that require restart when changed
   const quartoPathSettings = [
     "quarto.path",
     "quarto.usePipQuarto",
+  ];
+  const positronPathSettings = [
     "quarto.useBundledQuartoInPositron"
   ];
 
@@ -151,8 +157,9 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
     vscode.workspace.onDidChangeConfiguration(event => {
       // Check if any of our path settings changed
       const requiresRestart = quartoPathSettings.some(setting => event.affectsConfiguration(setting));
+      const requiresPositronRestart = isPositron && positronPathSettings.some(setting => event.affectsConfiguration(setting));
 
-      if (requiresRestart) {
+      if (requiresRestart || requiresPositronRestart) {
         outputChannel.info(`Quarto path settings changed, restart required: ${quartoPathSettings.filter(setting =>
           event.affectsConfiguration(setting)).join(", ")}`);
 

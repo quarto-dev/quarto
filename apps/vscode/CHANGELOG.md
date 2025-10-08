@@ -1,10 +1,10 @@
 # Changelog
 
-## 1.126.0 (Unreleased)
+## 1.126.0 (Release on 2025-10-08)
 
 - Fixed a bug opening non-Quarto files in visual mode on saving (<https://github.com/quarto-dev/quarto/pull/848>).
 
-## 1.125.0 (Release on 2025-09-03)
+## 1.125.0 (Release on 2025-10-03)
 
 - Fixed an issue where attribute values containing '='s could be truncated in some scenarios (<https://github.com/quarto-dev/quarto/pull/814>).
 - Fixed an issue where a loading spinner for qmd previews wasn't dismissed on preview errors (<https://github.com/quarto-dev/quarto/pull/823>).

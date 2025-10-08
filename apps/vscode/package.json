@@ -1105,7 +1105,13 @@
           "order": 11,
           "type": "boolean",
           "default": true,
-          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#`."
+          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#` or the bundled Quarto when `#quarto.useBundledQuartoInPositron#` is enabled."
+        },
+        "quarto.useBundledQuartoInPositron": {
+          "order": 11,
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When in Positron, prefer the bundled Quarto CLI provided by the IDE. This will override Quarto CLI from `quarto.usePipQuarto` and in the `PATH`, but not an explicitly configured `#quarto.path#`. Note that this setting has no effect outside of Positron."
         },
         "quarto.render.renderOnSave": {
           "order": 12,
@@ -1446,6 +1452,7 @@
     "nanoid": "^4.0.0",
     "p-queue": "^8.0.1",
     "picomatch": "^2.3.1",
+    "@posit-dev/positron": "^0.1.0",
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-vscode-editor": "*",

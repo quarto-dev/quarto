@@ -2,6 +2,7 @@
 
 ## 1.127.0 (Unreleased)
 
+- Added a new setting `quarto.useBundledQuartoInPositron` to prefer the Quarto CLI bundled with Positron when available. This setting has precedence _between_ `quarto.path` and `quarto.usePipQuarto`, and has no effect outside of Positron (<https://github.com/quarto-dev/quarto/pull/841>).
 
 ## 1.126.0 (Release on 2025-10-08)
 

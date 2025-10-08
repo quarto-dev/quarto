@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.127.0 (Unreleased)
+
+
 ## 1.126.0 (Release on 2025-10-08)
 
 - Fixed a bug opening non-Quarto files in visual mode on saving (<https://github.com/quarto-dev/quarto/pull/848>).

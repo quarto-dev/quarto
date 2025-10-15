@@ -27,7 +27,7 @@ import { DispatchEvent, codeViewCellContext, kCodeViewNextLineTransaction } from
 import { Behavior, BehaviorContext, State } from ".";
 
 // track the selection in prosemirror
-export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
+export function trackSelectionBehavior(context: BehaviorContext): Behavior {
 
   let unsubscribe: VoidFunction;
 
@@ -50,32 +50,32 @@ export function trackSelectionBehavior(context: BehaviorContext) : Behavior {
       unsubscribe = context.pmContext.events.subscribe(DispatchEvent, (tr: Transaction | undefined) => {
         if (tr) {
           // track selection changes that occur when we don't have focus
-          if (!cmView.hasFocus && tr.selectionSet && !tr.docChanged && (tr.selection instanceof TextSelection)) {
+          if (tr.selectionSet && !tr.docChanged && (tr.selection instanceof TextSelection)) {
             const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
             context.withState(State.Updating, () => {
               if (cmSelection) {
                 cmView.dispatch({ selection: cmSelection });
               } else {
-                cmView.dispatch({ selection: EditorSelection.single(0)})
-              } 
+                cmView.dispatch({ selection: EditorSelection.single(0) })
+              }
             })
           } else if (tr.getMeta(kCodeViewNextLineTransaction) === true) {
             // NOTE: this is a special directive to advance to the next line. as distinct
             // from the block above it is not a reporting of a change in the PM selection
-            // but rather an instruction to move the CM selection to the next line. as 
+            // but rather an instruction to move the CM selection to the next line. as
             // such we do not encose the code in State.Updating, because we want an update
             // to the PM selection to occur
             const cmSelection = asCodeMirrorSelection(context.view, cmView, context.getPos);
             if (cmSelection) {
               if (cursorLineDown(cmView)) {
                 cursorLineStart(cmView);
-              } 
+              }
             }
-          // for other selection changes 
+            // for other selection changes
           } else if (cmView.hasFocus && tr.selectionSet && (tr.selection instanceof TextSelection)) {
             codeViewAssist();
           }
-        } 
+        }
       });
     },
 
@@ -91,7 +91,7 @@ export const asCodeMirrorSelection = (
   cmView: EditorView,
   getPos: (() => number) | boolean
 ) => {
-  if (typeof(getPos) === "function") {
+  if (typeof (getPos) === "function") {
     const offset = getPos() + 1;
     const node = pmView.state.doc.nodeAt(getPos());
     if (node) {
@@ -104,7 +104,7 @@ export const asCodeMirrorSelection = (
       } else if (selection.from <= cmRange.from && selection.to >= cmRange.to) {
         return EditorSelection.single(0, cmView.state.doc.length);
       }
-      
+
     }
   }
   return undefined;

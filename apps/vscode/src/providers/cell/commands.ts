@@ -49,6 +49,10 @@ import { ExtensionHost } from "../../host";
 import { hasHooks } from "../../host/hooks";
 import { isKnitrDocument } from "../../host/executors";
 import { commands } from "vscode";
+import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
+import { embeddedLanguage } from "../../vdoc/languages";
+import { Uri } from "vscode";
+import { StatementRange } from "positron";
 
 export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
@@ -345,15 +349,59 @@ class RunCurrentCommand extends RunCommand implements Command {
           await activateIfRequired(editor);
         }
       }
-
     } else {
-      // if the selection is empty take the whole line, otherwise take the selected text exactly
       let action: CodeViewSelectionAction | undefined;
-      if (selection.length <= 0) {
-        if (activeBlock) {
-          selection = lines(activeBlock.code)[context.selection.start.line];
+
+      // if the selection is empty and we are in Positron:
+      //   try to get the statement's range and use that as the selection
+      if (selection.length <= 0 && activeBlock && hasHooks()) {
+        const codeLines = lines(activeBlock.code)
+        const vdoc = virtualDocForCode(codeLines, embeddedLanguage(activeBlock.language)!);
+        if (vdoc) {
+          const parentUri = Uri.file(editor.document.fileName);
+          const result = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
+            return await commands.executeCommand<StatementRange>(
+              "vscode.executeStatementRangeProvider",
+              uri,
+              context.selection.start
+            );
+          });
+          const { range: { start, end } } = result
+          const slicedLines = lines(activeBlock.code).slice(start.line, end.line + 1)
+          slicedLines[0] = slicedLines[0].slice(start.character)
+          slicedLines[slicedLines.length - 1] = slicedLines[slicedLines.length - 1].slice(0, end.character)
+
+          selection = slicedLines.join('\n')
           action = "nextline";
+
+          // BEGIN ref: https://github.com/posit-dev/positron/blob/main/src/vs/workbench/contrib/positronConsole/browser/positronConsoleActions.ts#L428
+          // strategy from Positron using `StatementRangeProvider` to find range of next statement
+          // and move cursor based on that.
+          if (end.line + 1 <= codeLines.length) {
+            const nextStatementRange = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
+              return await commands.executeCommand<StatementRange>(
+                "vscode.executeStatementRangeProvider",
+                uri,
+                new Position(end.line + 1, 1) // look for statement at line after current statement
+              );
+            });
+            const nextStatement = nextStatementRange.range;
+            if (nextStatement.start.line > end.line) {
+              action = nextStatement.start
+              // the nextStatement may start before & end after the current statement if e.g. inside a function:
+            } else if (nextStatement.end.line > end.line) {
+              action = nextStatement.end
+            }
+          }
+          // END ref.
         }
+      }
+
+      // if the selection is still empty:
+      //   take the whole line as the selection
+      if (selection.length <= 0 && activeBlock) {
+        selection = lines(activeBlock.code)[context.selection.start.line];
+        action = "nextline";
       }
 
       // run code
@@ -362,8 +410,10 @@ class RunCurrentCommand extends RunCommand implements Command {
         await executeInteractive(executor, [selection], editor.document);
 
         // advance cursor if necessary
+        //
         if (action) {
-          editor.setBlockSelection(context, "nextline");
+          console.log('action!!!', action, this.id)
+          await editor.setBlockSelection(context, action);
         }
       }
     }

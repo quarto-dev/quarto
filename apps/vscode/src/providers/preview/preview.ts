@@ -74,7 +74,6 @@ import {
   haveNotebookSaveEvents,
   isQuartoShinyDoc,
   isQuartoShinyKnitrDoc,
-  isRPackage,
   renderOnSave,
 } from "./preview-util";
 
@@ -88,6 +87,7 @@ import {
   yamlErrorLocation,
 } from "./preview-errors";
 import { ExtensionHost } from "../../host";
+import { isRPackage } from "../../r-utils";
 
 tmp.setGracefulCleanup();
 

@@ -5,5 +5,7 @@ format: html
 
 ```{python}
 #| label: my-code
-1 + 1
+x = 1
+y = 2
+z = x+y
 ```

@@ -41,6 +41,20 @@ suite("Quarto basics", function () {
   roundtripSnapshotTest('capsule-leak.qmd');
 
   roundtripSnapshotTest('attr-equals.qmd');
+
+  // a test to prevent situations like https://github.com/quarto-dev/quarto/issues/845
+  test("Can open a non-qmd file normally", async function () {
+    const { editor, doc } = await openAndShowTextDocument("hello.lua");
+
+    editor.edit((editBuilder) => {
+      editBuilder.insert(new vscode.Position(0, 0), 'print("hiyo")\n');
+    });
+    doc.save();
+
+    await wait(1700); // approximate time to open visual editor, just in case
+
+    assert.equal(vscode.window.activeTextEditor, editor, 'quarto extension interferes with other files opened in VSCode!');
+  });
 });
 
 /**

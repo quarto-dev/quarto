@@ -129,18 +129,18 @@ export async function reopenEditorInVisualMode(
     // reopen in visual mode
     commands.executeCommand('positron.reopenWith', document.uri, 'quarto.visualEditor');
   } else {
-    workspace.onDidSaveTextDocument(async (doc: TextDocument) => {
-      // open in visual mode
-      VisualEditorProvider.recordPendingSwitchToVisual(doc);
-      await commands.executeCommand('workbench.action.closeActiveEditor');
-      await commands.executeCommand("vscode.openWith",
-        doc.uri,
-        VisualEditorProvider.viewType,
-        { viewColumn }
-      );
-    });
-    // save, which will trigger `onDidSaveTextDocument`
+    // save then close
     await commands.executeCommand("workbench.action.files.save");
+    await commands.executeCommand('workbench.action.closeActiveEditor');
+    VisualEditorProvider.recordPendingSwitchToVisual(document);
+
+    // open in visual mode
+    await commands.executeCommand(
+      "vscode.openWith",
+      document.uri,
+      VisualEditorProvider.viewType,
+      { viewColumn }
+    );
   }
 }
 

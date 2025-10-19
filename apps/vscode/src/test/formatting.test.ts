@@ -3,6 +3,11 @@ import * as assert from "assert";
 import * as path from "path";
 import { openAndShowTextDocument, wait } from "./test-utils";
 
+/**
+ * Creates a document formatting provider from a formatting function.
+ * @param format - Function that transforms source text
+ * @returns Document formatting edit provider
+ */
 function createFormatterFromStringFunc(
   format: (sourceText: string) => string
 ): vscode.DocumentFormattingEditProvider {
@@ -23,7 +28,12 @@ function createFormatterFromStringFunc(
   };
 }
 
-function setCursorPosition(line: number, character: number) {
+/**
+ * Sets the cursor position in the active editor.
+ * @param line - Line number
+ * @param character - Character position
+ */
+function setCursorPosition(line: number, character: number): void {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     const position = new vscode.Position(line, character);
@@ -33,21 +43,18 @@ function setCursorPosition(line: number, character: number) {
 
 suite("Code Block Formatting", function () {
   test("Format Python code block protects options from formatting", async function () {
-    // Ensure Black formatter extension is installed
-    await vscode.commands.executeCommand("workbench.extensions.installExtension", "ms-python.black-formatter");
-    await wait(1000);
-    const blackFormatterExtension = vscode.extensions.getExtension("ms-python.black-formatter");
-    assert.notStrictEqual(
-      blackFormatterExtension,
-      undefined,
-      "ms-python.black-formatter extension must be installed"
-    );
-
+    /**
+     * Tests formatter on a file at a given cursor position.
+     * @param filename - Name of test file
+     * @param position - Tuple of line and character position
+     * @param format - Formatting function
+     * @returns Formatted document text
+     */
     async function testFormatter(
       filename: string,
       [line, character]: [number, number],
       format: (sourceText: string) => string
-    ) {
+    ): Promise<string> {
       const { doc, editor } = await openAndShowTextDocument(filename);
 
       const formattingEditProvider = vscode.languages.registerDocumentFormattingEditProvider(
@@ -70,15 +77,10 @@ suite("Code Block Formatting", function () {
     const formattedResult = await testFormatter(
       "format-python.qmd",
       [7, 0],
-      (sourceText) => sourceText.trim() + "\n"
+      (sourceText: string): string => sourceText.trim() + "\n"
     );
 
-    // assert.ok(
-    //   formattedResult.includes("x = 1\ny = 2\nz = x+y"),
-    //   "Python code cell should be formatted"
-    // );
-
-    const { doc, editor } = await openAndShowTextDocument("format-python-expected.qmd");
+    const { doc } = await openAndShowTextDocument("format-python-expected.qmd");
     const expected = doc.getText();
 
     assert.strictEqual(formattedResult, expected, "Python code cell options should not be altered after formatting");

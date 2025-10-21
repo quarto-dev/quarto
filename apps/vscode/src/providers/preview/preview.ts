@@ -531,7 +531,7 @@ class PreviewManager {
         // capture preview command url and preview url
         this.previewCommandUrl_ = match[1];
         const browseMatch = this.previewOutput_.match(
-          /(Browse at|Listening on) (https?:\/\/[^\n]*)/
+          /(Browse at|Listening on)\s+(https?:\/\/[^\n]*)/
         );
         if (browseMatch) {
           // earlier versions of quarto serve didn't print out vscode urls

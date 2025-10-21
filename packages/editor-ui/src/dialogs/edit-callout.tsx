@@ -15,7 +15,18 @@
 
 import React, { useRef, useState } from "react"
 
-import { Button, Checkbox, Field, Input, Select, SelectTabData, SelectTabEvent, Tab, TabValue, makeStyles } from "@fluentui/react-components"
+import {
+  Button,
+  Checkbox,
+  Field,
+  Select,
+  SelectTabData,
+  SelectTabEvent,
+  Tab,
+  TabValue,
+  makeStyles,
+  Textarea,
+} from "@fluentui/react-components";
 
 import { AttrEditInput, CalloutEditProps, CalloutEditResult, CalloutProps, PandocAttr, UIToolsAttr } from "editor-types";
 
@@ -32,10 +43,10 @@ import { useEffect } from "react";
 
 export function editCallout(attrUITools: UIToolsAttr) {
   return async (props: CalloutEditProps, removeEnabled: boolean): Promise<CalloutEditResult | null> => {
-    
-    const values: EditCalloutDialogValues = { 
-      values: {...attrUITools.propsToInput(props.attr), ...props.callout}, 
-      action: "edit" 
+
+    const values: EditCalloutDialogValues = {
+      values: {...attrUITools.propsToInput(props.attr), ...props.callout},
+      action: "edit"
     };
 
     const result = await showValueEditorDialog(EditCalloutDialog, values, {
@@ -65,7 +76,7 @@ interface EditCalloutDialogOptions {
   removeEnabled: boolean;
 }
 
-const EditCalloutDialog: React.FC<{ 
+const EditCalloutDialog: React.FC<{
   values: EditCalloutDialogValues,
   options: EditCalloutDialogOptions,
   onClosed: (values?: EditCalloutDialogValues) => void }
@@ -93,7 +104,7 @@ const EditCalloutDialog: React.FC<{
     }
   }
 
-  const removeButton = 
+  const removeButton =
     <Button onClick={() => close({ ...props.values, action: 'remove' })}>
       {t("Unwrap Div")}
     </Button>;
@@ -128,32 +139,36 @@ const EditCalloutDialog: React.FC<{
         </Field>
       </div>
       <Field label={t("Caption")} placeholder={t("(Optional)")}>
-        <Input value={caption} onChange={(_ev, data) => setCaption(data.value)}/>
+        <Textarea
+          value={caption}
+          onChange={(_ev, data) => setCaption(data.value)}
+          resize="vertical"
+        />
       </Field>
-      <Checkbox label={t("Display icon alongside callout")} checked={icon} onChange={(_ev, data) => setIcon(!!data.checked)}/> 
+      <Checkbox label={t("Display icon alongside callout")} checked={icon} onChange={(_ev, data) => setIcon(!!data.checked)}/>
     </EditAttrPanel>;
 
-  const attributesPanel = 
+  const attributesPanel =
     <EditAttrPanel>
       <EditAttr value={attr} onChange={setAttr} />
     </EditAttrPanel>;
 
   return (
     <ModalDialog
-      title={t("Callout")} 
+      title={t("Callout")}
       theme={fluentTheme()}
-      isOpen={isOpen} 
+      isOpen={isOpen}
       leftButtons={props.options.removeEnabled ? removeButton : undefined}
       onOK={() => close({ values: { ...attr, type, appearance, caption, icon}, action: 'edit'})}
       onCancel={() => close() }
     >
       <ModalDialogTabList
-        id="edit-callout" 
-        selectedValue={selectedTab} 
+        id="edit-callout"
+        selectedValue={selectedTab}
         onTabSelect={onTabSelect}
       >
         <Tab id="callout" value="callout">{t("Callout")}</Tab>
-        <Tab id="attributes" value="attributes">{t("Attributes")}</Tab> 
+        <Tab id="attributes" value="attributes">{t("Attributes")}</Tab>
       </ModalDialogTabList>
       <div>
         {selectedTab === "callout" && calloutPanel}

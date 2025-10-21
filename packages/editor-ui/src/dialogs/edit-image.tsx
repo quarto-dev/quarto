@@ -28,7 +28,8 @@ import {
   useId, 
   RadioGroup, 
   Label, 
-  Radio 
+  Radio,
+  Textarea
 } from "@fluentui/react-components";
 
 import { ModalDialog, ModalDialogTabList, showValueEditorDialog} from "ui-widgets";
@@ -153,19 +154,21 @@ const imagePanel =
       : null
     }
     <Field label={t("Caption")}>
-      <Input 
+      <Textarea
         value={caption} 
         onChange={(_ev, data) => setCaption(data.value)}
         placeholder={t("(Optional)")}
+        resize="vertical"
       />
     </Field>
   
     {alt !== undefined
       ?  <Field label={t("Alternative text")}>
-          <Input 
-            value={alt} 
+          <Textarea
+            value={alt}
             onChange={(_ev, data) => setAlt(data.value)}
             placeholder={t("(Optional)")}
+            resize="vertical"
           />
         </Field>
       : null
@@ -288,6 +291,3 @@ const useStyles = makeStyles({
     gridRowGap: tokens.spacingVerticalS,
   }
 })
-
-
-

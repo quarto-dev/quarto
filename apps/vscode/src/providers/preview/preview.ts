@@ -204,13 +204,13 @@ export async function previewDoc(
     previewManager.setOnShow(onShow);
   }
 
-  // activate the editor
-  if (!isNotebook(editor.document)) {
-    await editor.activate();
-  }
-
-  // if this wasn't a renderOnSave then save
+  // if this wasn't a renderOnSave then activate the editor and save
   if (!renderOnSave) {
+    // activate the editor
+    if (!isNotebook(editor.document)) {
+      await editor.activate();
+    }
+
     await commands.executeCommand("workbench.action.files.save");
     if (editor.document.isDirty) {
       return;
@@ -247,8 +247,10 @@ export async function previewDoc(
     );
 
     // focus the editor (sometimes the terminal steals focus)
-    if (!isNotebook(previewEditor.document)) {
-      await previewEditor.activate();
+    if (!renderOnSave) {
+      if (!isNotebook(previewEditor.document)) {
+        await previewEditor.activate();
+      }
     }
   }
 }
@@ -572,6 +574,7 @@ class PreviewManager {
         }
       }
     }
+    this.progressDismiss()
   }
 
   private progressShow(uri: Uri) {

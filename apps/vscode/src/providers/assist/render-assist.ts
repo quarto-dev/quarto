@@ -35,7 +35,7 @@ import {
 import { JsonRpcRequestTransport, escapeRegExpCharacters } from "core";
 import { CodeViewCellContext, kCodeViewAssist } from "editor-types";
 import { embeddedLanguage } from "../../vdoc/languages";
-import { virtualDocForCode, virtualDocUri, withVirtualDocUri } from "../../vdoc/vdoc";
+import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
 import { getHover, getSignatureHelpHover } from "../../core/hover";
 import { Hover as LspHover, MarkupKind } from "vscode-languageserver-types";
 import { MarkupContent } from "vscode-languageclient";

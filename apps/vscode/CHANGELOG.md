@@ -1,11 +1,57 @@
 # Changelog
 
-## 1.119.0 (unreleased)
+## 1.127.0 (Unreleased)
+
+- Added a new setting `quarto.useBundledQuartoInPositron` to prefer the Quarto CLI bundled with Positron when available. This setting has precedence _between_ `quarto.path` and `quarto.usePipQuarto`, and has no effect outside of Positron (<https://github.com/quarto-dev/quarto/pull/841>).
+- Visual Editor: uses a text box for alternative text and captions in callouts, images, and tables interface. (<https://github.com/quarto-dev/quarto/pull/644>)
+
+## 1.126.0 (Release on 2025-10-08)
+
+- Fixed a bug opening non-Quarto files in visual mode on saving (<https://github.com/quarto-dev/quarto/pull/848>).
+
+## 1.125.0 (Release on 2025-10-03)
+
+- Fixed an issue where attribute values containing '='s could be truncated in some scenarios (<https://github.com/quarto-dev/quarto/pull/814>).
+- Fixed an issue where a loading spinner for qmd previews wasn't dismissed on preview errors (<https://github.com/quarto-dev/quarto/pull/823>).
+- Diagnostics are no longer reported for internal temporary virtual document files (<https://github.com/quarto-dev/quarto/pull/832>).
+- Fixed switching to visual mode for untitled documents in Positron (<https://github.com/quarto-dev/quarto/pull/831>).
+- Use environment variable `QUARTO_PANDOC`, to use a custom path to Pandoc for the extension (<https://github.com/quarto-dev/quarto/pull/740>)
+- Re-enable completions in visual mode in Positron, with fixes (<https://github.com/quarto-dev/quarto/pull/798>)
+
+## 1.124.0 (Release on 2025-08-20)
+
+- Fix Base64 leak when no empty line between text and code block (<https://github.com/quarto-dev/quarto/pull/780>).
+- Add yaml frontmatter validation to visual editor (<https://github.com/quarto-dev/quarto/pull/744>).
+- Do not prepend path delimiter to path when Quarto is detected (<https://github.com/quarto-dev/quarto/pull/778>).
+
+## 1.123.0 (Release on 2025-06-17)
+
+- Fixed a bug with switching between source and visual editors in Positron (<https://github.com/quarto-dev/quarto/pull/732>).
+
+## 1.122.0 (Release on 2025-05-26)
+
+- Language server temporary files are now permanently deleted, bypassing the trash can (<https://github.com/quarto-dev/quarto/pull/714>).
+- Change controls on Positron editor action bar and fix "Render on Save" behavior (<https://github.com/quarto-dev/quarto/pull/706>).
+- Add additional new control ("Insert Code Cell") to Positron editor action bar (<https://github.com/quarto-dev/quarto/pull/709>).
+- Turn off completions in visual mode in Positron, as a temporary stopgap until we can invest more in LSP features in the visual editor (<https://github.com/quarto-dev/quarto/pull/710>).
+
+## 1.121.0 (Release on 2025-05-02)
+
+- Add new controls for Positron editor action bar (<https://github.com/quarto-dev/quarto/pull/698>).
+- Improve editor focus preservation behavior (<https://github.com/quarto-dev/quarto/pull/699>).
+
+## 1.120.0 (Release on 2025-04-07)
+
+- Fix issue where format on save could overwrite the contents of a document with incorrect results (<https://github.com/quarto-dev/quarto/pull/688>).
+
+## 1.119.0 (Release on 2025-03-21)
 
 - Use `QUARTO_VISUAL_EDITOR_CONFIRMED` > `PW_TEST` > `CI` to bypass (`true`) or force (`false`) the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
 - Fix behavior in Positron when running a cell containing invalid/incomplete code (<https://github.com/quarto-dev/quarto/pull/664>).
-- Visual Editor: uses a text box for alternative text and captions in callouts, images, and tables interface. (<https://github.com/quarto-dev/quarto/pull/644>)
+- Ensure `#|` is added only at the beginning of a new line (<https://github.com/quarto-dev/quarto/pull/649>).
 - Fix `language` typos throughout the codebase (<https://github.com/quarto-dev/quarto/pull/650>)
+- Update cell background configuration to add the ability to use the appropriate theme color. The `quarto.cells.background` settings have changed names so you may need to update your configuration (<https://github.com/quarto-dev/quarto/pull/679>).
+- Use new command to switch between source and visual editors in Positron (<https://github.com/quarto-dev/quarto/pull/684>).
 
 ## 1.118.0 (Release on 2024-11-26)
 

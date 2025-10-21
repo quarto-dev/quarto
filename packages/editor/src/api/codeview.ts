@@ -19,7 +19,7 @@ import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
 import { EditorState } from 'prosemirror-state';
 
-import { Position } from "vscode-languageserver-types"
+import { Position } from "vscode-languageserver-types";
 
 import zenscroll from 'zenscroll';
 
@@ -36,7 +36,7 @@ import { navigateToPos } from './navigation';
 
 export const kCodeViewNextLineTransaction = "codeViewNextLine";
 
-export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions }) => ExtensionFn;
+export type CodeViewExtensionFn = (codeViews: { [key: string]: CodeViewOptions; }) => ExtensionFn;
 
 export interface CodeViewOptions {
   lang: (attrs: ProsemirrorNode, content: string) => string | null;
@@ -56,7 +56,7 @@ export interface CodeViewOptions {
  */
 
 export interface CodeEditorNodeView {
-  isFocused() : boolean;
+  isFocused(): boolean;
   getPos(): number;
   dom: HTMLElement;
   setGapCursorPending(pending: boolean): void;
@@ -79,7 +79,7 @@ export class CodeEditorNodeViews {
     }
   }
 
-  public activeNodeView() : CodeEditorNodeView | undefined {
+  public activeNodeView(): CodeEditorNodeView | undefined {
     return this.nodeViews.find(view => view.isFocused());
   }
 
@@ -169,8 +169,7 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
     // offset parent against which we need to compute scroll position.
     let scrollParent = codeViewDom;
     while (scrollParent.offsetParent != null &&
-           !scrollParent.offsetParent.classList.contains("pm-content"))
-    {
+      !scrollParent.offsetParent.classList.contains("pm-content")) {
       top += scrollParent.offsetTop;
       scrollParent = scrollParent.offsetParent as HTMLElement;
     }
@@ -202,11 +201,11 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
 }
 
 export function codeViewSetBlockSelection(
-  view: EditorView, 
-  context: CodeViewActiveBlockContext, 
-  action: CodeViewSelectionAction 
+  view: EditorView,
+  context: CodeViewActiveBlockContext,
+  action: CodeViewSelectionAction
 ) {
-  
+
 
   const activeIndex = context.blocks.findIndex(block => block.active);
 
@@ -216,29 +215,29 @@ export function codeViewSetBlockSelection(
       tr.setMeta(kCodeViewNextLineTransaction, true);
       view.dispatch(tr);
     } else {
-      let navigatePos : number | undefined;
+      let navigatePos: number | undefined;
       if (action === "nextblock") {
         navigatePos = context.blocks[activeIndex + 1]?.pos;
       } else if (action === "prevblock") {
         navigatePos = context.blocks[activeIndex - 1]?.pos;
-      } 
-      if (navigatePos) { 
+      }
+      if (navigatePos) {
         navigateToPos(view, navigatePos!, false);
       }
     }
   }
 
 
-  
+
 }
 
 
-export function codeViewActiveBlockContext(state: EditorState) : CodeViewActiveBlockContext | undefined {
+export function codeViewActiveBlockContext(state: EditorState): CodeViewActiveBlockContext | undefined {
   return codeViewBlockContext(state, false, [state.schema.nodes.rmd_chunk]);
 }
 
 
-function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, nodeTypes?: NodeType[]) : CodeViewActiveBlockContext | undefined {
+function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, nodeTypes?: NodeType[]): CodeViewActiveBlockContext | undefined {
 
   // alias schema
   const schema = state.schema;
@@ -255,7 +254,7 @@ function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, no
         code: code || node.textContent,
         metaLine
       };
-    }
+    };
     if (nodeTypes?.includes(node.type)) {
       if (node.type === schema.nodes.yaml_metadata) {
         return languageCodeBlock('yaml');
@@ -285,13 +284,13 @@ function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, no
 
     // compute start index (skip over meta line if there is one)
     const startIndex = activeBlock.metaLine
-      ? lines(parent.textContent)[0].length + 1 
+      ? lines(parent.textContent)[0].length + 1
       : 0;
 
     // compute position within the active block
     const positionForOffset = (offset: number) => {
       let line = 0, character = 0;
-      for (let i=startIndex; i<offset; i++) {
+      for (let i = startIndex; i < offset; i++) {
         const ch = parent.textContent.at(i);
         if (!ch) {
           break;
@@ -304,13 +303,13 @@ function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, no
         }
       }
       return Position.create(line, character);
-    }
+    };
 
 
     // collect all the blocks with this language
-    const blocks: Array<{ pos: number, language: string, code: string; active: boolean }> = [];
+    const blocks: Array<{ pos: number, language: string, code: string; active: boolean; }> = [];
     state.doc.descendants((node, pos) => {
-      const languageBlock = nodeAsLanguageCodeBlock(node, pos+1);
+      const languageBlock = nodeAsLanguageCodeBlock(node, pos + 1);
       if (languageBlock) {
         if (!activeLanguageOnly || (languageBlock.language === activeBlock.language)) {
           blocks.push({
@@ -329,17 +328,17 @@ function codeViewBlockContext(state: EditorState, activeLanguageOnly = false, no
         end: positionForOffset(toParentOffset)
       },
       selectedText: state.doc.textBetween(
-        activeBlock.pos + Math.max(parentOffset, startIndex), 
+        activeBlock.pos + Math.max(parentOffset, startIndex),
         activeBlock.pos + toParentOffset
       )
-    }
+    };
   } else {
     return undefined;
   }
 }
 
 
-export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean) : CodeViewCompletionContext | undefined {
+export function codeViewCompletionContext(filepath: string, state: EditorState, explicit: boolean): CodeViewCompletionContext | undefined {
   const context = codeViewCellContext(filepath, state);
   if (context) {
     return { ...context, explicit };
@@ -348,16 +347,20 @@ export function codeViewCompletionContext(filepath: string, state: EditorState, 
   }
 }
 
-export function codeViewCellContext(filepath: string, state: EditorState) : CodeViewCellContext | undefined {
+export function stripYamlFrontmatterDelimiters(lines: string[]): string[] {
+  return lines.map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
+}
+
+export function codeViewCellContext(filepath: string, state: EditorState): CodeViewCellContext | undefined {
 
   // get blocks (for active language only)
   const activeBlockContext = codeViewBlockContext(state, true);
 
   if (activeBlockContext) {
-     // if this is yaml we strip the delimiters and use only the active block
-     if (activeBlockContext.activeLanguage === "yaml") {
+    // if this is yaml we strip the delimiters and use only the active block
+    if (activeBlockContext.activeLanguage === "yaml") {
       const activeBlock = activeBlockContext.blocks.find(block => block.active) || activeBlockContext.blocks[0];
-      const codeLines = lines(activeBlock.code).map(line => !/^(---|\.\.\.)\s*$/.test(line) ? line : "");
+      const codeLines = stripYamlFrontmatterDelimiters(lines(activeBlock.code));
       return {
         filepath,
         language: activeBlockContext.activeLanguage,
@@ -365,8 +368,8 @@ export function codeViewCellContext(filepath: string, state: EditorState) : Code
         cellBegin: 0,
         cellEnd: codeLines.length - 1,
         selection: activeBlockContext.selection,
-      }
-    // concatenate together all of the code, and indicate start/end lines of active block
+      };
+      // concatenate together all of the code, and indicate start/end lines of active block
     } else {
       const code: string[] = [];
       let cellBegin = -1, cellEnd = -1;
@@ -376,7 +379,7 @@ export function codeViewCellContext(filepath: string, state: EditorState) : Code
           cellBegin = code.length;
           cellEnd = code.length + blockLines.length - 1;
         }
-        if (blockLines[blockLines.length-1].trim().length !== 0) {
+        if (blockLines[blockLines.length - 1].trim().length !== 0) {
           blockLines.push("");
         }
         code.push(...blockLines);
@@ -387,22 +390,19 @@ export function codeViewCellContext(filepath: string, state: EditorState) : Code
         code,
         cellBegin,
         cellEnd,
-        selection: { 
+        selection: {
           start: {
-            line: cellBegin + activeBlockContext.selection.start.line, 
-            character: activeBlockContext.selection.start.character 
+            line: cellBegin + activeBlockContext.selection.start.line,
+            character: activeBlockContext.selection.start.character
           },
           end: {
             line: cellBegin + activeBlockContext?.selection.end.line,
             character: activeBlockContext?.selection.end.character
           }
         },
-      }
+      };
     }
   } else {
     return undefined;
   }
 }
-
-
-

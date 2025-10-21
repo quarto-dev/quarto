@@ -25,82 +25,82 @@ import { HrefKind, LinkDefinitionSet, MdLink, MdLinkKind } from './document-link
 
 export class MdDefinitionProvider {
 
-	readonly #configuration: LsConfiguration;
-	readonly #workspace: IWorkspace;
-	readonly #tocProvider: MdTableOfContentsProvider;
-	readonly #linkCache: MdWorkspaceInfoCache<readonly MdLink[]>;
+  readonly #configuration: LsConfiguration;
+  readonly #workspace: IWorkspace;
+  readonly #tocProvider: MdTableOfContentsProvider;
+  readonly #linkCache: MdWorkspaceInfoCache<readonly MdLink[]>;
 
-	constructor(
-		configuration: LsConfiguration,
-		workspace: IWorkspace,
-		tocProvider: MdTableOfContentsProvider,
-		linkCache: MdWorkspaceInfoCache<readonly MdLink[]>,
-	) {
-		this.#configuration = configuration;
-		this.#workspace = workspace;
-		this.#tocProvider = tocProvider;
-		this.#linkCache = linkCache;
-	}
+  constructor(
+    configuration: LsConfiguration,
+    workspace: IWorkspace,
+    tocProvider: MdTableOfContentsProvider,
+    linkCache: MdWorkspaceInfoCache<readonly MdLink[]>,
+  ) {
+    this.#configuration = configuration;
+    this.#workspace = workspace;
+    this.#tocProvider = tocProvider;
+    this.#linkCache = linkCache;
+  }
 
-	async provideDefinition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
-		
-		if (token.isCancellationRequested) {
-			return [];
-		}
+  async provideDefinition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
 
-		const toc = await this.#tocProvider.getForDocument(document);
-		
-		if (token.isCancellationRequested) {
-			return [];
-		}
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-		const header = toc.entries.find(entry => entry.line === position.line);
-		if (isTocHeaderEntry(header)) {
-			return header.headerLocation;
-		}
+    const toc = await this.#tocProvider.getForDocument(document);
 
-		return this.#getDefinitionOfLinkAtPosition(document, position, token);
-	}
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
-	async #getDefinitionOfLinkAtPosition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
-		const docLinks = (await this.#linkCache.getForDocs([document]))[0];
+    const header = toc.entries.find(entry => entry.line === position.line);
+    if (isTocHeaderEntry(header)) {
+      return header.headerLocation;
+    }
 
-		for (const link of docLinks) {
-			if (link.kind === MdLinkKind.Definition && rangeContains(link.ref.range, position)) {
-				return this.#getDefinitionOfRef(link.ref.text, docLinks);
-			}
-			if (rangeContains(link.source.hrefRange, position)) {
-				return this.#getDefinitionOfLink(link, docLinks, token);
-			}
-		}
+    return this.#getDefinitionOfLinkAtPosition(document, position, token);
+  }
 
-		return undefined;
-	}
+  async #getDefinitionOfLinkAtPosition(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.Definition | undefined> {
+    const docLinks = (await this.#linkCache.getForDocs([document]))[0];
 
-	async #getDefinitionOfLink(sourceLink: MdLink, allLinksInFile: readonly MdLink[], token: CancellationToken): Promise<lsp.Definition | undefined> {
-		if (sourceLink.href.kind === HrefKind.Reference) {
-			return this.#getDefinitionOfRef(sourceLink.href.ref, allLinksInFile);
-		}
+    for (const link of docLinks) {
+      if (link.kind === MdLinkKind.Definition && rangeContains(link.ref.range, position)) {
+        return this.#getDefinitionOfRef(link.ref.text, docLinks);
+      }
+      if (rangeContains(link.source.hrefRange, position)) {
+        return this.#getDefinitionOfLink(link, docLinks, token);
+      }
+    }
 
-		if (sourceLink.href.kind === HrefKind.External || !sourceLink.href.fragment) {
-			return undefined;
-		}
+    return undefined;
+  }
 
-		const resolvedResource = await statLinkToMarkdownFile(this.#configuration, this.#workspace, sourceLink.href.path);
-		if (!resolvedResource || token.isCancellationRequested) {
-			return undefined;
-		}
+  async #getDefinitionOfLink(sourceLink: MdLink, allLinksInFile: readonly MdLink[], token: CancellationToken): Promise<lsp.Definition | undefined> {
+    if (sourceLink.href.kind === HrefKind.Reference) {
+      return this.#getDefinitionOfRef(sourceLink.href.ref, allLinksInFile);
+    }
 
-		const toc = await this.#tocProvider.get(resolvedResource);
-		const entry = toc.lookup(sourceLink.href.fragment);
-		if (isTocHeaderEntry(entry)) {
-			return entry.headerLocation;
-		}
-	}
+    if (sourceLink.href.kind === HrefKind.External || !sourceLink.href.fragment) {
+      return undefined;
+    }
 
-	#getDefinitionOfRef(ref: string, allLinksInFile: readonly MdLink[]) {
-		const allDefinitions = new LinkDefinitionSet(allLinksInFile);
-		const def = allDefinitions.lookup(ref);
-		return def ? { range: def.source.range, uri: def.source.resource.toString() } : undefined;
-	}
+    const resolvedResource = await statLinkToMarkdownFile(this.#configuration, this.#workspace, sourceLink.href.path);
+    if (!resolvedResource || token.isCancellationRequested) {
+      return undefined;
+    }
+
+    const toc = await this.#tocProvider.get(resolvedResource);
+    const entry = toc.lookup(sourceLink.href.fragment);
+    if (isTocHeaderEntry(entry)) {
+      return entry.headerLocation;
+    }
+  }
+
+  #getDefinitionOfRef(ref: string, allLinksInFile: readonly MdLink[]) {
+    const allDefinitions = new LinkDefinitionSet(allLinksInFile);
+    const def = allDefinitions.lookup(ref);
+    return def ? { range: def.source.range, uri: def.source.resource.toString() } : undefined;
+  }
 }

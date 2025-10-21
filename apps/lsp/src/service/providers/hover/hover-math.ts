@@ -39,10 +39,10 @@ export function mathHover(parser: Parser, doc: Document, pos: Position, config?:
 
 
 function mathjaxTypesetToMarkdown(
-  tex: string, 
+  tex: string,
   docText: string,
   config?: LsConfiguration | undefined
-) :  MarkupContent | null  {
+): MarkupContent | null {
   const options: MathjaxTypesetOptions = {
     format: "data-uri",
     theme: config?.colorTheme || "dark",
@@ -62,4 +62,3 @@ function mathjaxTypesetToMarkdown(
     };
   }
 }
-

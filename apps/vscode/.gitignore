@@ -1,2 +1,4 @@
 out/
 *.vsix
+test-out/
+examples-out/

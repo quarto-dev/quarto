@@ -311,8 +311,14 @@ export function pandocAttrKeyvalueFromText(text: string, separator: ' ' | '\n'):
 
   const lines = text.trim().split('\n');
   return lines.map(line => {
-    const parts = line.trim().split('=');
-    return [parts[0], (parts[1] || '').replace(/^"/, '').replace(/"$/, '')];
+    const idx = line.indexOf('=');
+    if (idx === -1) {
+      return [line.trim(), ""]
+    } else {
+      const lhs = line.substring(0, idx).trim();
+      const rhs = line.substring(idx + 1).trim();
+      return [lhs, rhs.replace(/^"/, '').replace(/"$/, '')];
+    }
   });
 }
 

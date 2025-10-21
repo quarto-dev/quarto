@@ -30,19 +30,19 @@ import {
 
 import { QuartoContext } from "quarto-core";
 
-import { 
+import {
   Quarto,
-  CompletionResult, 
-  EditorContext, 
-  HoverResult, 
-  LintItem,
-  AttrContext, 
-  AttrToken, 
-  kContextDiv, 
-  kContextDivSimple 
+  CompletionResult,
+  EditorContext,
+  HoverResult,
+  AttrContext,
+  AttrToken,
+  kContextDiv,
+  kContextDivSimple
 } from "./service/quarto";
+import { LintItem } from "editor-types";
 
-export async function initializeQuarto(context: QuartoContext) : Promise<Quarto> {
+export async function initializeQuarto(context: QuartoContext): Promise<Quarto> {
   const quartoModule = await initializeQuartoYamlModule(context.resourcePath) as QuartoYamlModule;
   return {
     ...context,
@@ -53,7 +53,7 @@ export async function initializeQuarto(context: QuartoContext) : Promise<Quarto>
     getYamlDiagnostics: quartoModule.getLint,
     getHover: quartoModule.getHover
   };
-    
+
 }
 
 interface Attr {

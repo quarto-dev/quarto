@@ -15,6 +15,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
@@ -37,6 +38,10 @@ import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 
 export async function activate(context: vscode.ExtensionContext) {
+  // create output channel for extension logs and lsp client logs
+  const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
+
+  outputChannel.info("Activating Quarto extension.");
 
   // create extension host
   const host = extensionHost();
@@ -56,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext) {
     quartoPath,
     workspaceFolder,
     // Look for quarto in the app root; this is where Positron installs it
-    [path.join(vscode.env.appRoot, 'quarto', 'bin')],
+    [path.join(vscode.env.appRoot, "quarto", "bin")],
     vscode.window.showWarningMessage
   );
   if (quartoContext.available) {
@@ -71,7 +76,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // ensure quarto is on the path
     context.environmentVariableCollection.prepend(
       "PATH",
-      path.delimiter + quartoContext.binPath + path.delimiter
+      quartoContext.binPath + path.delimiter
     );
 
     // status bar
@@ -84,7 +89,7 @@ export async function activate(context: vscode.ExtensionContext) {
     activateDenoConfig(context, engine);
 
     // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine);
+    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
@@ -98,7 +103,6 @@ export async function activate(context: vscode.ExtensionContext) {
     const assistCommands = activateQuartoAssistPanel(context, engine);
     commands.push(...assistCommands);
   }
-
   // walkthough
   commands.push(...walkthroughCommands(host, quartoContext));
 
@@ -125,6 +129,52 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // activate providers common to browser/node
   activateCommon(context, host, engine, commands);
+
+  // Register configuration change listener for Quarto path settings
+  registerQuartoPathConfigListener(context, outputChannel);
+
+  outputChannel.info("Activated Quarto extension.");
+}
+
+/**
+ * Register a listener for changes to Quarto path settings that require a restart
+ */
+function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outputChannel: vscode.LogOutputChannel) {
+  // Check if we're in Positron
+  const isPositron = tryAcquirePositronApi();
+
+  // List of settings that require restart when changed
+  const quartoPathSettings = [
+    "quarto.path",
+    "quarto.usePipQuarto",
+  ];
+  const positronPathSettings = [
+    "quarto.useBundledQuartoInPositron"
+  ];
+
+  // Listen for configuration changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(event => {
+      // Check if any of our path settings changed
+      const requiresRestart = quartoPathSettings.some(setting => event.affectsConfiguration(setting));
+      const requiresPositronRestart = isPositron && positronPathSettings.some(setting => event.affectsConfiguration(setting));
+
+      if (requiresRestart || requiresPositronRestart) {
+        outputChannel.info(`Quarto path settings changed, restart required: ${quartoPathSettings.filter(setting =>
+          event.affectsConfiguration(setting)).join(", ")}`);
+
+        // Prompt user to restart
+        vscode.window.showInformationMessage(
+          "Quarto path settings have changed. Please reload the window for changes to take effect.",
+          "Reload Window"
+        ).then(selection => {
+          if (selection === "Reload Window") {
+            vscode.commands.executeCommand("workbench.action.reloadWindow");
+          }
+        });
+      }
+    })
+  );
 }
 
 export async function deactivate() {

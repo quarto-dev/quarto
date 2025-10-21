@@ -16,7 +16,7 @@
 import { AttrContext, AttrToken, EditorContext, Quarto } from "../../quarto";
 
 export async function attrCompletions(quarto: Quarto, context: EditorContext) {
-  
+
   // validate trigger
   if (context.trigger && !["="].includes(context.trigger)) {
     return null;
@@ -48,8 +48,8 @@ function blockCompletionToken(context: EditorContext): AttrToken | undefined {
     return type.indexOf(":") !== -1
       ? "div"
       : type.indexOf("#") !== -1
-      ? "heading"
-      : "codeblock";
+        ? "heading"
+        : "codeblock";
   });
 }
 

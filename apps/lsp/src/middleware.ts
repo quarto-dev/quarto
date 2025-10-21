@@ -18,7 +18,7 @@ import { Connection, ServerCapabilities } from "vscode-languageserver"
 
 
 // capabilities provided just so we can intercept them w/ middleware on the client
-export function middlewareCapabilities() : ServerCapabilities {
+export function middlewareCapabilities(): ServerCapabilities {
   return {
     signatureHelpProvider: {
       // assume for now that these cover all languages (we can introduce
@@ -34,15 +34,15 @@ export function middlewareCapabilities() : ServerCapabilities {
 
 // methods provided just so we can intercept them w/ middleware on the client
 export function middlewareRegister(connection: Connection) {
-   
+
   connection.onSignatureHelp(async () => {
     return null;
   });
-  
+
   connection.onDocumentFormatting(async () => {
     return null;
   });
-  
+
   connection.onDocumentRangeFormatting(async () => {
     return null;
   });
@@ -52,4 +52,3 @@ export function middlewareRegister(connection: Connection) {
   });
 
 }
-

@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.119.0",
+  "version": "1.127.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -28,7 +28,8 @@
   ],
   "private": true,
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.75.0",
+    "positron": "^2025.6.0"
   },
   "main": "./out/main.js",
   "browser": "./browser.js",
@@ -253,7 +254,11 @@
         "command": "quarto.preview",
         "title": "Preview",
         "icon": "$(preview)",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.previewScript",
@@ -292,8 +297,13 @@
       },
       {
         "command": "quarto.insertCodeCell",
+        "icon": "$(insert)",
         "title": "Insert Code Cell",
-        "category": "Quarto"
+        "category": "Quarto",
+        "actionBarOptions": {
+          "controlType": "button",
+          "displayTitle": true
+        }
       },
       {
         "command": "quarto.runSelection",
@@ -424,6 +434,28 @@
         "title": "Toggle Code",
         "category": "Quarto",
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
+      },
+      {
+        "command": "quarto.toggleEditMode",
+        "title": "Edit Mode",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "toggle",
+          "leftTitle": "Source",
+          "rightTitle": "Visual",
+          "toggled": "activeCustomEditorId == 'quarto.visualEditor'"
+        }
+      },
+      {
+        "command": "quarto.toggleRenderOnSave",
+        "title": "Render on Save",
+        "category": "Quarto",
+        "enablement": "editorLangId == quarto",
+        "actionBarOptions": {
+          "controlType": "checkbox",
+          "checked": "(quarto.editor.type == quarto && quarto.editor.renderOnSave) || (quarto.editor.type == 'quarto-shiny' && quarto.editor.renderOnSaveShiny)"
+        }
       },
       {
         "command": "quarto.zoteroConfigureLibrary",
@@ -608,6 +640,30 @@
       }
     ],
     "menus": {
+      "editor/actions/left": [
+        {
+          "command": "quarto.preview",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
+        },
+        {
+          "command": "quarto.toggleRenderOnSave",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "0_preview"
+        },
+        {
+          "command": "quarto.toggleEditMode",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "1_editor_mode"
+        }
+      ],
+      "editor/actions/right": [
+        {
+          "command": "quarto.insertCodeCell",
+          "when": "editorLangId == quarto",
+          "group": "2_execute"
+        }
+      ],
       "editor/context": [
         {
           "command": "quarto.formatCell",
@@ -938,27 +994,42 @@
           "markdownDescription": "Show parameter help when editing function calls."
         },
         "quarto.cells.background.enabled": {
+          "type": "boolean",
+          "description": "Enable coloring the background of executable code cells.",
+          "deprecationMessage": "Deprecated: Please use quarto.cells.background.color instead."
+        },
+        "quarto.cells.background.color": {
           "order": 19,
           "scope": "window",
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Enable coloring the background of executable code cells."
+          "type": "string",
+          "markdownDescription": "Control the background coloring of executable code cells.",
+          "default": "default",
+          "enum": [
+            "default",
+            "useTheme",
+            "off"
+          ],
+          "markdownEnumDescriptions": [
+            "Use the default light and dark background colors. Specify these colors with `quarto.cells.background.lightDefault` and `quarto.cells.background.darkDefault`.",
+            "Use the `notebook.selectedCellBackground` color from the current VS Code theme.",
+            "Disable background coloring of executable code cells."
+          ]
         },
-        "quarto.cells.background.light": {
+        "quarto.cells.background.lightDefault": {
           "order": 20,
           "scope": "window",
           "type": "string",
           "format": "color",
           "default": "#E1E1E166",
-          "markdownDescription": "CSS color for background of executable code cells on light themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
+          "markdownDescription": "CSS color for background of executable code cells on light themes.\n\n*Note that this color should include an alpha channel, like #RRGGBBAA, so that selections show up against the background.*"
         },
-        "quarto.cells.background.dark": {
+        "quarto.cells.background.darkDefault": {
           "order": 21,
           "scope": "window",
           "type": "string",
           "format": "color",
           "default": "#40404066",
-          "markdownDescription": "CSS color for background of executable code cells on dark themes.\n\n*Note that this color should include an alpha channel so that selections show up against the background.*"
+          "markdownDescription": "CSS color for background of executable code cells on dark themes.\n\n*Note that this color should include an alpha channel, like #RRGGBBAA, so that selections show up against the background.*"
         },
         "quarto.cells.background.delay": {
           "order": 22,
@@ -1034,7 +1105,13 @@
           "order": 11,
           "type": "boolean",
           "default": true,
-          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#`."
+          "markdownDescription": "When using a venv or conda environment, prefer Quarto CLI installed with pip in that environment. This will override Quarto CLI in the `PATH`, but not an explicitly configured `#quarto.path#` or the bundled Quarto when `#quarto.useBundledQuartoInPositron#` is enabled."
+        },
+        "quarto.useBundledQuartoInPositron": {
+          "order": 11,
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When in Positron, prefer the bundled Quarto CLI provided by the IDE. This will override Quarto CLI from `quarto.usePipQuarto` and in the `PATH`, but not an explicitly configured `#quarto.path#`. Note that this setting has no effect outside of Positron."
         },
         "quarto.render.renderOnSave": {
           "order": 12,
@@ -1235,6 +1312,19 @@
             "type": "string"
           },
           "uniqueItems": true
+        },
+        "quarto.server.logLevel": {
+          "scope": "window",
+          "type": "string",
+          "default": "warn",
+          "enum": [
+            "trace",
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "markdownDescription": "Log level for the Quarto language server."
         }
       }
     },
@@ -1337,10 +1427,13 @@
   },
   "scripts": {
     "vscode:prepublish": "rm -rf ./out/markdownit && cd ../.. && turbo run build --force --filter quarto...",
+    "install-vscode": "rm -rf *.vsix && vsce package && code --install-extension *.vsix",
+    "install-positron": "rm -rf *.vsix && vsce package && positron --install-extension *.vsix",
     "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
-    "build-lang": "node syntaxes/build-lang"
+    "build-lang": "node syntaxes/build-lang",
+    "test": "yarn run build test && vscode-test"
   },
   "dependencies": {
     "axios": "^1.2.1",
@@ -1349,6 +1442,7 @@
     "editor-core": "*",
     "editor-server": "*",
     "editor-types": "*",
+    "glob": "^11.0.3",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",
@@ -1358,6 +1452,7 @@
     "nanoid": "^4.0.0",
     "p-queue": "^8.0.1",
     "picomatch": "^2.3.1",
+    "@posit-dev/positron": "^0.1.0",
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-vscode-editor": "*",
@@ -1386,7 +1481,8 @@
     "@types/which": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
-    "@vscode/test-electron": "^2.2.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^2.15.0",
     "build": "*",
     "esbuild": "^0.16.7",

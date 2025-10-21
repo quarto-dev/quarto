@@ -1,0 +1,29 @@
+{
+  "name": "@quarto/_annotated-json",
+  "version": "0.1.4",
+  "private": true,
+  "description": "A data structure for storing and manipulation a JSON object together with source locations of its constituent parts.",
+  "license": "MIT",
+  "author": {
+    "name": "Posit PBC"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quarto-dev/quarto.git"
+  },
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "tsconfig": "*",
+    "typescript": "^5.4.2",
+    "@quarto/_mapped-string": "*",
+    "@quarto/_tidyverse-errors": "*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1"
+  }
+}

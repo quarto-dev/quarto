@@ -14,7 +14,7 @@
  */
 
 import path, { extname, win32 } from "path";
-import { determineMode } from "./toggle"
+import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
 import {
@@ -62,10 +62,14 @@ import { JsonRpcRequestTransport } from "core";
 import {
   editInSourceModeCommand,
   editInVisualModeCommand,
+  toggleEditModeCommand,
+  toggleRenderOnSaveCommand,
   reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 import { TabInputCustom } from "vscode";
+
+const kVisualModeConfirmed = "visualModeConfirmed";
 
 export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus(): Promise<boolean>;
@@ -84,7 +88,24 @@ export function activateEditor(
   context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
 
   // return commands
-  return [editInVisualModeCommand(), editInSourceModeCommand()];
+  return [
+    {
+      id: 'quarto.test_setkVisualModeConfirmedTrue',
+      execute() {
+        context.globalState.update(kVisualModeConfirmed, true);
+      }
+    },
+    {
+      id: 'quarto.test_isInVisualEditor',
+      execute() {
+        return VisualEditorProvider.activeEditor() !== undefined;
+      }
+    },
+    editInVisualModeCommand(),
+    editInSourceModeCommand(),
+    toggleEditModeCommand(),
+    toggleRenderOnSaveCommand()
+  ];
 }
 
 
@@ -92,7 +113,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   // track the last contents of any active untitled docs (used
   // for recovering from attempt to edit )
-  private static activeUntitled?: { uri: Uri, content: string };
+  private static activeUntitled?: { uri: Uri, content: string; };
 
   // track the last edited line of code in text editors (used for syncing position)
   private static editorLastSourcePos = new Map<string, number>();
@@ -168,7 +189,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             // as the tab in `window.tabGroups`, so if we try and close `tab` we
             // get a "tab not found" error. The one we care about does exist, but we have
             // manually find it via URI, which is a stable field to match on.
-            if (editorMode && editorMode != viewType && !isSwitch) {
+            if (editorMode && editorMode !== viewType && !isSwitch) {
               const allTabs = window.tabGroups.all.flatMap(group => group.tabs);
 
               // find tab to close if swapping editor type
@@ -305,7 +326,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     private readonly lspRequest: JsonRpcRequestTransport,
     private readonly engine: MarkdownEngine) { }
 
-
   public async resolveCustomTextEditor(
     document: TextDocument,
     webviewPanel: WebviewPanel,
@@ -326,7 +346,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     };
 
     // prompt the user
-    const kVisualModeConfirmed = "visualModeConfirmed";
 
     // Check for environment variables to force the state of the visual editor confirmation modal
     // QUARTO_VISUAL_EDITOR_CONFIRMED > PW_TEST > CI

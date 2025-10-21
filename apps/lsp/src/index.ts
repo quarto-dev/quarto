@@ -29,9 +29,9 @@ import {
   WorkspaceSymbol
 } from "vscode-languageserver";
 
-import { CompletionItem, Hover, Location } from "vscode-languageserver-types"
+import { CompletionItem, Hover, Location } from "vscode-languageserver-types";
 
-import { createConnection } from "vscode-languageserver/node"
+import { createConnection } from "vscode-languageserver/node";
 
 import { URI } from "vscode-uri";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -40,7 +40,7 @@ import { registerCustomMethods } from "./custom";
 import { isWindows, LspConnection } from "core-node";
 import { initQuartoContext, Document, markdownitParser, LspInitializationOptions } from "quarto-core";
 import { ConfigurationManager, lsConfiguration } from "./config";
-import { LogFunctionLogger } from "./logging";
+import { Logger } from "./logging";
 import { languageServiceWorkspace } from "./workspace";
 import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService } from "./service";
@@ -48,52 +48,74 @@ import { initializeQuarto } from "./quarto";
 import { registerDiagnostics } from "./diagnostics";
 
 
+
+
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
+
+// Initialize logger
+const logger = new Logger(console.log.bind(console));
 
 // Create text document manager
 const documents: TextDocuments<Document> = new TextDocuments(TextDocument);
 documents.listen(connection);
 
 // Configuration
-const configManager = new ConfigurationManager(connection);
+const configManager = new ConfigurationManager(connection, logger);
 const config = lsConfiguration(configManager);
 
-// Capabilities 
+// Capabilities
 let capabilities: ClientCapabilities | undefined;
 
 // Initialization options
 let initializationOptions: LspInitializationOptions | undefined;
 
-// Markdowdn language service
+// Markdown language service
 let mdLs: IMdLanguageService | undefined;
 
 connection.onInitialize((params: InitializeParams) => {
+  // Set log level from initialization options if provided so that we use the
+  // expected level as soon as possible
+  const initLogLevel = Logger.parseLogLevel(
+    params.initializationOptions?.logLevel ?? "warn"
+  );
+  logger.init(initLogLevel);
+  configManager.init(initLogLevel);
+
+  // We're connected, log messages via LSP
+  logger.setConnection(connection);
+  logger.logRequest('initialize');
 
   // alias options and capabilities
   initializationOptions = params.initializationOptions;
   capabilities = params.capabilities;
 
   connection.onCompletion(async (params, token): Promise<CompletionItem[]> => {
+    logger.logRequest('completion');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
     }
 
     return mdLs?.getCompletionItems(document, params.position, params.context, config, token) || [];
-  })
+  });
 
-  connection.onHover(async (params, token) : Promise<Hover | null | undefined> => {
+  connection.onHover(async (params, token): Promise<Hover | null | undefined> => {
+    logger.logRequest('hover');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return null;
     }
     return mdLs?.getHover(document, params.position, config, token);
-  })
+  });
 
 
   connection.onDocumentLinks(async (params, token): Promise<DocumentLink[]> => {
+    logger.logRequest('documentLinks');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
@@ -102,10 +124,13 @@ connection.onInitialize((params: InitializeParams) => {
   });
 
   connection.onDocumentLinkResolve(async (link, token): Promise<DocumentLink | undefined> => {
+    logger.logRequest('documentLinksResolve');
     return mdLs?.resolveDocumentLink(link, token);
   });
 
   connection.onDocumentSymbol(async (params, token): Promise<DocumentSymbol[]> => {
+    logger.logRequest('documentSymbol');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
@@ -114,6 +139,8 @@ connection.onInitialize((params: InitializeParams) => {
   });
 
   connection.onFoldingRanges(async (params, token): Promise<FoldingRange[]> => {
+    logger.logRequest('foldingRanges');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
@@ -122,6 +149,8 @@ connection.onInitialize((params: InitializeParams) => {
   });
 
   connection.onSelectionRanges(async (params, token): Promise<SelectionRange[] | undefined> => {
+    logger.logRequest('selectionRanges');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
@@ -130,10 +159,13 @@ connection.onInitialize((params: InitializeParams) => {
   });
 
   connection.onWorkspaceSymbol(async (params, token): Promise<WorkspaceSymbol[]> => {
+    logger.logRequest('workspaceSymbol');
     return mdLs?.getWorkspaceSymbols(params.query, token) || [];
   });
 
   connection.onReferences(async (params, token): Promise<Location[]> => {
+    logger.logRequest('references');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
@@ -142,6 +174,8 @@ connection.onInitialize((params: InitializeParams) => {
   });
 
   connection.onDefinition(async (params, token): Promise<Definition | undefined> => {
+    logger.logRequest('definition');
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return undefined;
@@ -151,7 +185,7 @@ connection.onInitialize((params: InitializeParams) => {
 
   // register no-op methods to enable client middleware
   middlewareRegister(connection);
-   
+
   return {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -181,11 +215,13 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 // further config dependent initialization
-connection.onInitialized(async () => {  
+connection.onInitialized(async () => {
+  logger.logNotification('initialized');
 
   // sync config if possible
   if (capabilities?.workspace?.configuration) {
     await configManager.subscribe();
+    logger.setConfigurationManager(configManager);
   }
 
   // initialize connection to quarto
@@ -193,35 +229,29 @@ connection.onInitialized(async () => {
   const workspaceDir = workspaceFolders?.length
     ? URI.parse(workspaceFolders[0].uri).fsPath
     : undefined;
-   
+
   // if we were passed a quarto bin path then use that
-  let quartoBinPath : string | undefined;
+  let quartoBinPath: string | undefined;
   if (initializationOptions?.quartoBinPath) {
     quartoBinPath = path.join(initializationOptions?.quartoBinPath, isWindows() ? "quarto.exe" : "quarto");
   }
 
   // initialize quarto
   const quartoContext = initQuartoContext(
-    quartoBinPath || configManager.getSettings().quarto.path, 
+    quartoBinPath || configManager.getSettings().quarto.path,
     workspaceDir
   );
   const quarto = await initializeQuarto(quartoContext);
-
-  // initialize logger
-  const logger = new LogFunctionLogger(
-    console.log.bind(console), 
-    configManager
-  );
 
   // initialize workspace
   const workspace = languageServiceWorkspace(
     workspaceFolders?.map(value => URI.parse(value.uri)) || [],
     documents,
     connection,
-    capabilities!, 
+    capabilities!,
     config,
     logger
-  )
+  );
 
   // initialize parser
   const parser = markdownitParser();
@@ -232,7 +262,7 @@ connection.onInitialized(async () => {
     quarto,
     workspace,
     documents,
-    parser, 
+    parser,
     logger
   });
 
@@ -246,21 +276,20 @@ connection.onInitialized(async () => {
     logger
   );
 
-  // create lsp connection (jsonrpc bridge) 
+  // create lsp connection (jsonrpc bridge)
   const lspConnection: LspConnection = {
     onRequest(method: string, handler: (params: unknown[]) => Promise<unknown>) {
       return connection.onRequest(method, handler);
     }
-  }
+  };
 
   // register custom methods
   registerCustomMethods(quarto, lspConnection, documents);
-
 });
 
 
 // ensure that the deno runtime won't exit b/c of the event queue being empty
 setInterval(() => { /* */ }, 1000);
 
-// listen 
+// listen
 connection.listen();

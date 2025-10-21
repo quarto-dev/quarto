@@ -259,6 +259,28 @@ export function blockCapsuleParagraphTokenHandler(type: string) {
   };
 }
 
+export function blockCapsuleStrTokenHandler(type: string) {
+  const tokenRegex = encodedBlockCapsuleRegex('^', '$');
+  return (tok: PandocToken) => {
+    if (tok.t === PandocTokenType.Str) {
+      const text = tok.c as string;
+      const match = text.match(tokenRegex);
+      if (match) {
+        const capsuleRecord = parsePandocBlockCapsule(match[0]);
+        if (capsuleRecord.type === type) {
+          return match[0];
+        }
+      }
+    }
+    return null;
+  };
+}
+
+export const blockCapsuleHandlerOr = (
+  handler1: (tok: PandocToken) => string | null,
+  handler2: (tok: PandocToken) => string | null
+) => (tok: PandocToken) => handler1(tok) ?? handler2(tok);
+
 // create a regex that can be used to match a block capsule
 export function encodedBlockCapsuleRegex(prefix?: string, suffix?: string, flags?: string) {
   return new RegExp(

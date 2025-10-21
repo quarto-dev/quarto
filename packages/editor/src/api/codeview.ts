@@ -235,7 +235,6 @@ export function codeViewSetBlockSelection(
         navigatePos = context.blocks[activeIndex - 1]?.pos;
       }
       if (navigatePos) {
-        console.log('yoooo22', navigatePos)
         navigateToPos(view, navigatePos!, false);
       }
     }

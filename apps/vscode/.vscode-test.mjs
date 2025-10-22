@@ -8,4 +8,13 @@ export default defineConfig([
       timeout: 5000,
     },
   },
+  // R project workspace
+  {
+    label: 'r-project',
+    files: 'test-out/r-project.test.js',
+    workspaceFolder: 'src/test/examples/r-project',
+    mocha: {
+      timeout: 5000,
+    },
+  },
 ]);

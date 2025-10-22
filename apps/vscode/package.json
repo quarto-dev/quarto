@@ -1444,7 +1444,8 @@
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang",
-    "test": "yarn run build test && vscode-test"
+    "build-test": "yarn run build test",
+    "test": "yarn build-test && vscode-test"
   },
   "dependencies": {
     "axios": "^1.2.1",
@@ -1483,6 +1484,7 @@
     "@types/lodash.debounce": "^4.0.7",
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-highlightjs": "^3.3.1",
+    "@types/mocha": "^9.1.0",
     "@types/node": "16.x",
     "@types/picomatch": "^2.3.0",
     "@types/semver": "^7.3.13",
@@ -1498,6 +1500,7 @@
     "build": "*",
     "esbuild": "^0.16.7",
     "eslint": "^8.28.0",
+    "mocha": "^9.2.1",
     "plist": "^3.0.6",
     "tsx": "^3.12.1",
     "typescript": "^4.9.3",

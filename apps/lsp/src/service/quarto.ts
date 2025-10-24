@@ -13,12 +13,11 @@
  *
  */
 
-import { CompletionItem, Position } from "vscode-languageserver-types";
+import { Position } from "vscode-languageserver-types";
 
-import { QuartoContext, Document, filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml, isQuartoDashboardDoc } from "quarto-core";
+import { Document, filePathForDoc, isQuartoDoc, isQuartoRevealDoc, isQuartoYaml, isQuartoDashboardDoc } from "quarto-core";
 
 import { lines } from "core";
-import { LintItem } from "editor-types";
 
 export interface CompletionResult {
   token: string;
@@ -28,7 +27,7 @@ export interface CompletionResult {
 
 export interface HoverResult {
   content: string;
-  range: { start: Position; end: Position };
+  range: { start: Position; end: Position; };
 }
 
 export interface Completion {
@@ -77,17 +76,6 @@ export interface AttrToken {
   attr: string;
   token: string;
 }
-
-export interface Quarto extends QuartoContext {
-  getYamlCompletions(context: EditorContext): Promise<CompletionResult>;
-  getAttrCompletions(
-    token: AttrToken,
-    context: EditorContext
-  ): Promise<CompletionItem[]>;
-  getYamlDiagnostics(context: EditorContext): Promise<LintItem[]>;
-  getHover?: (context: EditorContext) => Promise<HoverResult | null>;
-}
-
 
 export function codeEditorContext(
   path: string,
@@ -149,5 +137,5 @@ export function docEditorContext(
     false,
     explicit,
     trigger
-  )
+  );
 }

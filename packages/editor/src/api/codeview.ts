@@ -205,12 +205,25 @@ export function codeViewSetBlockSelection(
   context: CodeViewActiveBlockContext,
   action: CodeViewSelectionAction
 ) {
-
-
   const activeIndex = context.blocks.findIndex(block => block.active);
 
   if (activeIndex !== -1) {
-    if (action === "nextline") {
+    if (typeof action === 'object') {
+      // convert action line and character in code block space to pos in prosemirror space
+      const block = context.blocks[activeIndex]
+      // asummes the meta line looks like this:
+      const metaLine = '{' + block.language + '}\n'
+      const code = lines(block.code)
+      if (action.line > code.length) throw 'trying to move cursor outside block!'
+      let pos = block.pos + metaLine.length
+      for (let i = 0; i < action.line; i++) {
+        pos += code[i].length + 1
+      }
+      pos += action.character
+
+      navigateToPos(view, pos, false)
+    }
+    else if (action === "nextline") {
       const tr = view.state.tr;
       tr.setMeta(kCodeViewNextLineTransaction, true);
       view.dispatch(tr);
@@ -226,9 +239,6 @@ export function codeViewSetBlockSelection(
       }
     }
   }
-
-
-
 }
 
 

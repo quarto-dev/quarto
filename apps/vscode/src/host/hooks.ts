@@ -1,6 +1,8 @@
 /*
  * hooks.ts
  *
+ * Positron-specific functionality.
+ *
  * Copyright (C) 2022 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -21,7 +23,6 @@ import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocu
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
-import { EmbeddedLanguage } from '../vdoc/languages';
 
 declare global {
   function acquirePositronApi(): hooks.PositronApi;
@@ -76,7 +77,7 @@ export function hooksExtensionHost(): ExtensionHost {
                 for (const block of blocks) {
                   await runtime.executeCode(language, block, false, true);
                 }
-              }
+              };
 
               await ExecuteQueue.instance.add(language, callback);
             },
@@ -164,30 +165,16 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine);
     if (vdoc) {
-      return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
-        return getStatementRange(
-          uri,
-          adjustedPosition(vdoc.language, position),
-          vdoc.language
-        );
-      });
+      const result = await vscode.commands.executeCommand<hooks.StatementRange>(
+        "vscode.executeStatementRangeProvider",
+        document.uri,
+        adjustedPosition(vdoc.language, position)
+      );
+      return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
     } else {
       return undefined;
     }
   };
-}
-
-async function getStatementRange(
-  uri: vscode.Uri,
-  position: vscode.Position,
-  language: EmbeddedLanguage
-) {
-  const result = await vscode.commands.executeCommand<hooks.StatementRange>(
-    "vscode.executeStatementRangeProvider",
-    uri,
-    position
-  );
-  return { range: unadjustedRange(language, result.range), code: result.code };
 }
 
 class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {

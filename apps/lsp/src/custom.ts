@@ -31,7 +31,8 @@ import { Hover, Position, TextDocuments } from "vscode-languageserver";
 import { CodeViewCellContext, CodeViewCompletionContext, kCodeViewAssist, kCodeViewGetDiagnostics, kCodeViewGetCompletions, LintItem } from "editor-types";
 import { yamlCompletions } from "./service/providers/completion/completion-yaml";
 import { yamlHover } from "./service/providers/hover/hover-yaml";
-import { EditorContext, Quarto, codeEditorContext } from "./service/quarto";
+import { EditorContext, codeEditorContext } from "./service/quarto";
+import { Quarto } from "./quarto";
 
 export function registerCustomMethods(
   quarto: Quarto,

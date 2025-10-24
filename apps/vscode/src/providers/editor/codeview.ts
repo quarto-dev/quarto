@@ -47,13 +47,14 @@ import {
   LintItem
 } from "editor-types";
 
-import { hasHooks } from "../../host/hooks";
 import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode } from "../../vdoc/vdoc";
 import { vdocCompletions } from "../../vdoc/vdoc-completion";
 import { MarkdownEngine } from "../../markdown/engine";
 
-
+/**
+ * In the host, this initializes functions that can be called by the client (the visual editor) for doing code cell things.
+ */
 export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocument, lspRequest: JsonRpcRequestTransport): CodeViewServer {
   return {
     async codeViewAssist(context: CodeViewCellContext) {

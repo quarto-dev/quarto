@@ -22,7 +22,6 @@ import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
-import { activateCommon } from "./extension";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
 import { activateStatusBar } from "./providers/statusbar";
@@ -31,12 +30,24 @@ import { activateLuaTypes } from "./providers/lua-types";
 import { activateCreate } from "./providers/create/create";
 import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
-import { activateZotero } from "./providers/zotero/zotero";;
+import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
 import { initQuartoContext } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
+import { textFormattingCommands } from "./providers/text-format";
+import { newDocumentCommands } from "./providers/newdoc";
+import { insertCommands } from "./providers/insert";
+import { activateDiagram } from "./providers/diagram/diagram";
+import { activateCodeFormatting } from "./providers/format";
+import { activateOptionEnterProvider } from "./providers/option";
+import { activateBackgroundHighlighter } from "./providers/background";
+import { activateContextKeySetter } from "./providers/context-keys";
+import { CommandManager } from "./core/command";
 
+/**
+ * Entry point for the entire extension! This initializes the LSP, quartoContext, extension host, and more...
+ */
 export async function activate(context: vscode.ExtensionContext) {
   // create output channel for extension logs and lsp client logs
   const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
@@ -118,6 +129,16 @@ export async function activate(context: vscode.ExtensionContext) {
   const createCommands = await activateCreate(context, quartoContext);
   commands.push(...createCommands);
 
+  commands.push(...textFormattingCommands());
+
+  commands.push(...newDocumentCommands());
+
+  commands.push(...insertCommands(engine));
+
+  commands.push(...activateDiagram(context, host, engine));
+
+  commands.push(...activateCodeFormatting(engine));
+
   // provide code lens
   vscode.languages.registerCodeLensProvider(
     kQuartoDocSelector,
@@ -127,8 +148,21 @@ export async function activate(context: vscode.ExtensionContext) {
   // provide file copy/drop handling
   activateCopyFiles(context);
 
-  // activate providers common to browser/node
-  activateCommon(context, host, engine, commands);
+  // option enter handler
+  activateOptionEnterProvider(context, engine);
+
+  // background highlighter
+  activateBackgroundHighlighter(context, engine);
+
+  // context setter
+  activateContextKeySetter(context, engine);
+
+  // commands
+  const commandManager = new CommandManager();
+  for (const cmd of commands) {
+    commandManager.register(cmd);
+  }
+  context.subscriptions.push(commandManager);
 
   // Register configuration change listener for Quarto path settings
   registerQuartoPathConfigListener(context, outputChannel);

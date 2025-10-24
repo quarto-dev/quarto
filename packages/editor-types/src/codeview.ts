@@ -20,6 +20,9 @@ export const kCodeViewAssist = 'code_view_assist';
 export const kCodeViewGetCompletions = 'code_view_get_completions';
 export const kCodeViewExecute = 'code_view_execute';
 export const kCodeViewPreviewDiagram = 'code_view_preview_diagram';
+/**
+ * for calling [`codeViewDiagnostics` in custom.ts](../../../apps/lsp/src/custom.ts)
+ */
 export const kCodeViewGetDiagnostics = 'code_view_get_diagnostics';
 
 export type CodeViewExecute = "selection" | "cell" | "cell+advance" | "above" | "below";
@@ -59,6 +62,9 @@ export interface CodeViewCompletionContext extends CodeViewCellContext {
   explicit: boolean;
 }
 
+/**
+ * Constructed by `vscodeCodeViewServer` in [codeview.ts](../../../apps/vscode/src/providers/editor/codeview.ts).
+ */
 export interface CodeViewServer {
   codeViewAssist: (contxt: CodeViewCellContext) => Promise<void>;
   codeViewExecute: (execute: CodeViewExecute, context: CodeViewActiveBlockContext) => Promise<void>;

@@ -13,15 +13,16 @@
  *
  */
 
-import vscode, { DocumentSelector, Disposable, WebviewPanelOptions, WebviewOptions } from "vscode";
+import vscode, { DocumentSelector, Disposable, WebviewPanelOptions, WebviewOptions, window } from "vscode";
 
 
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument } from "./executors";
 import { EditorToolbarProvider } from "./toolbar";
-import { createPreviewPanel } from "./preview";
 import { hasHooks, hooksExtensionHost } from "./hooks";
 import { TextDocument } from "vscode";
 import { MarkdownEngine } from "../markdown/engine";
+import { WebviewPanel } from "vscode";
+import { ViewColumn } from "vscode";
 
 export type { CellExecutor };
 export type { EditorToolbarProvider, ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
@@ -55,6 +56,11 @@ export interface HostHelpTopicProvider {
   ): vscode.ProviderResult<string>;
 }
 
+/**
+ * There are currently two extension hosts:
+ * - [`hooksExtensionHost`](./hooks.ts) for Positron
+ * - [`defaultExtensionHost`](./index.ts) otherwise
+ */
 export interface ExtensionHost {
 
   // code execution
@@ -112,13 +118,20 @@ function defaultExtensionHost(): ExtensionHost {
       return languages.filter(language => knitr || !visualMode || (language !== "python"));
     },
     cellExecutorForLanguage,
-    // in the default extension host, both of these are just a noop:
-    registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      return new vscode.Disposable(() => { });
-    },
-    registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      return new vscode.Disposable(() => { });
-    },
-    createPreviewPanel,
+    // In contrast to the Positron-specific `hooksExtensionHost`, here in the default host we
+    // do not have statement range or help topic functionality
+    registerStatementRangeProvider: doNothing,
+    registerHelpTopicProvider: doNothing,
+    createPreviewPanel: (
+      viewType: string,
+      title: string,
+      preserveFocus?: boolean,
+      options?: WebviewPanelOptions & WebviewOptions
+    ): WebviewPanel => {
+      return window.createWebviewPanel(viewType, title, { viewColumn: ViewColumn.Beside, preserveFocus, }, options);
+    }
   };
 }
+
+const doNothing = (engine: MarkdownEngine): vscode.Disposable =>
+  new vscode.Disposable(() => { });

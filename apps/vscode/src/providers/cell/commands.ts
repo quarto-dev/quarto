@@ -1,6 +1,8 @@
 /*
  * commands.ts
  *
+ * commands for executing code in cells, both in the Source Editor and Visual Editor.
+ *
  * Copyright (C) 2022 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -73,7 +75,6 @@ abstract class RunCommand {
   ) { }
 
   public async execute(line?: number): Promise<void> {
-
     // see if this is for the visual or the source editor
     const visualEditor = VisualEditorProvider.activeEditor();
     if (visualEditor) {
@@ -145,6 +146,8 @@ abstract class RunCommand {
   }
 
   private async hasExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
+    // TODO: this is incorrect right? `cellExecutorForLanguage` returns a promise, and a promise will always be truthy?
+    // We should have to await it before doing `!!`
     return !!this.cellExecutorForLanguage(language, document, engine);
   }
 

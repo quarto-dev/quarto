@@ -60,34 +60,6 @@ export function isQuartoShinyKnitrDoc(
 
 }
 
-export async function isRPackage(): Promise<boolean> {
-  const descriptionLines = await parseRPackageDescription();
-  if (!descriptionLines) {
-    return false;
-  }
-  const packageLines = descriptionLines.filter(line => line.startsWith('Package:'));
-  const typeLines = descriptionLines.filter(line => line.startsWith('Type:'));
-  const typeIsPackage = (typeLines.length > 0
-    ? typeLines[0].toLowerCase().includes('package')
-    : false);
-  const typeIsPackageOrMissing = typeLines.length === 0 || typeIsPackage;
-  return packageLines.length > 0 && typeIsPackageOrMissing;
-}
-
-async function parseRPackageDescription(): Promise<string[]> {
-  if (vscode.workspace.workspaceFolders !== undefined) {
-    const folderUri = vscode.workspace.workspaceFolders[0].uri;
-    const fileUri = vscode.Uri.joinPath(folderUri, 'DESCRIPTION');
-    try {
-      const bytes = await vscode.workspace.fs.readFile(fileUri);
-      const descriptionText = Buffer.from(bytes).toString('utf8');
-      const descriptionLines = descriptionText.split(/(\r?\n)/);
-      return descriptionLines;
-    } catch { }
-  }
-  return [''];
-}
-
 export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
   // if its a notebook and we don't have a save hook for notebooks then don't
   // allow renderOnSave (b/c we can't detect the saves)

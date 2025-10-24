@@ -24,7 +24,8 @@ const testFiles = glob.sync("src/test/*.ts");
 const testBuildOptions = {
   entryPoints: testFiles,
   outdir: 'test-out',
-  external: ['vscode'],
+  external: ['vscode', 'mocha', 'glob'],
+  sourcemap: true,
 };
 
 const defaultBuildOptions = {

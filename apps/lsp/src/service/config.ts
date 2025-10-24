@@ -79,6 +79,7 @@ export interface LsConfiguration {
   readonly colorTheme: 'light' | 'dark';
   readonly mathjaxScale: number;
   readonly mathjaxExtensions: readonly MathjaxSupportedExtension[];
+  readonly exportSymbolsToWorkspace: 'default' | 'all' | 'none';
 }
 
 export const defaultMarkdownFileExtension = 'qmd';
@@ -109,7 +110,8 @@ const defaultConfig: LsConfiguration = {
   includeWorkspaceHeaderCompletions: 'never',
   colorTheme: 'light',
   mathjaxScale: 1,
-  mathjaxExtensions: []
+  mathjaxExtensions: [],
+  exportSymbolsToWorkspace: 'all'
 };
 
 export function defaultLsConfiguration(): LsConfiguration {

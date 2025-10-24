@@ -13,13 +13,18 @@
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}"
     },
-    {
-      "type": "node",
-      "request": "attach",
-      "name": "Attach to Server",
-      "port": 6009,
-      "restart": true,
-      "outFiles": ["${workspaceRoot}/out/**/*.js"]
-    }
+		{
+			"name": "Extension Tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/test-out",
+				"${workspaceFolder}/src/test/examples"
+			],
+			"outFiles": ["${workspaceFolder}/test-out/**/*.js"],
+      "preLaunchTask": "yarn: build-test"
+		}
   ]
 }

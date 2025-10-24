@@ -21,17 +21,24 @@ import { Document } from 'quarto-core';
 import { IWorkspace } from '../workspace';
 import { MdWorkspaceInfoCache } from '../workspace-cache';
 import { MdDocumentSymbolProvider } from './document-symbols';
+import { LsConfiguration } from '../config';
+import { isRPackage } from '../../r-utils';
 
 export class MdWorkspaceSymbolProvider extends Disposable {
-
+  readonly #config: LsConfiguration;
   readonly #cache: MdWorkspaceInfoCache<readonly lsp.SymbolInformation[]>;
   readonly #symbolProvider: MdDocumentSymbolProvider;
+  readonly #workspace: IWorkspace;
 
   constructor(
     workspace: IWorkspace,
+    config: LsConfiguration,
     symbolProvider: MdDocumentSymbolProvider,
   ) {
     super();
+
+    this.#workspace = workspace;
+    this.#config = config;
     this.#symbolProvider = symbolProvider;
 
     this.#cache = this._register(new MdWorkspaceInfoCache(workspace, (doc, token) => this.provideDocumentSymbolInformation(doc, token)));
@@ -40,6 +47,12 @@ export class MdWorkspaceSymbolProvider extends Disposable {
   public async provideWorkspaceSymbols(query: string, token: CancellationToken): Promise<lsp.WorkspaceSymbol[]> {
     if (token.isCancellationRequested) {
       return [];
+    }
+
+    switch (this.#config.exportSymbolsToWorkspace) {
+      case 'all': break;
+      case 'default': if (await shouldExportSymbolsToWorkspace(this.#workspace)) return []; else break;
+      case 'none': return [];
     }
 
     const allSymbols = await this.#cache.values();
@@ -72,4 +85,8 @@ export class MdWorkspaceSymbolProvider extends Disposable {
       }
     }
   }
+}
+
+async function shouldExportSymbolsToWorkspace(workspace: IWorkspace): Promise<boolean> {
+  return await isRPackage(workspace);
 }

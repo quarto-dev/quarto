@@ -43,6 +43,9 @@ export interface Settings {
       readonly scale: number;
       readonly extensions: MathjaxSupportedExtension[];
     }
+    readonly symbols: {
+      readonly exportToWorkspace: 'default' | 'all' | 'none';
+    };
   };
   readonly markdown: {
     readonly preferredMdPathExtensionStyle: 'auto' | 'includeExtension' | 'removeExtension';
@@ -88,6 +91,9 @@ function defaultSettings(): Settings {
       mathjax: {
         scale: 1,
         extensions: []
+      },
+      symbols: {
+        exportToWorkspace: 'all'
       }
     },
     markdown: {
@@ -165,6 +171,9 @@ export class ConfigurationManager extends Disposable {
         mathjax: {
           scale: settings.quarto.mathjax.scale,
           extensions: settings.quarto.mathjax.extensions
+        },
+        symbols: {
+          exportToWorkspace: settings.quarto.symbols.exportToWorkspace
         }
       }
     };
@@ -225,11 +234,12 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
     },
     get mathjaxExtensions(): readonly MathjaxSupportedExtension[] {
       return configManager.getSettings().quarto.mathjax.extensions;
+    },
+    get exportSymbolsToWorkspace(): 'default' | 'all' | 'none' {
+      return configManager.getSettings().quarto.symbols.exportToWorkspace;
     }
   }
 }
-
-
 
 export function getDiagnosticsOptions(configManager: ConfigurationManager): DiagnosticOptions {
   const settings = configManager.getSettings();

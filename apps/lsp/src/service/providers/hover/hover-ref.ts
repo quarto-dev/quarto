@@ -19,7 +19,7 @@ import { cslRefs, CslRef } from "editor-server";
 import { bypassRefIntelligence } from "../../util/refs";
 
 import { Document, Parser, filePathForDoc, documentFrontMatter } from "quarto-core";
-import { Quarto } from "../../quarto";
+import { Quarto } from "../../../quarto";
 
 
 // cache the last ref lookup

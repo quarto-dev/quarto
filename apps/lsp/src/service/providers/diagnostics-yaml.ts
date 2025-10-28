@@ -24,9 +24,9 @@ import {
 import { Document } from "quarto-core";
 
 import {
-  Quarto,
   docEditorContext
 } from "../quarto";
+import { Quarto } from "../../quarto";
 import { kEndColumn, kEndRow, kStartColumn, kStartRow, LintItem } from "editor-types";
 
 export async function provideYamlDiagnostics(

@@ -31,7 +31,7 @@ import { ResourceMap } from '../util/resource-maps';
 import { FileStat, IWorkspace, IWorkspaceWithWatching, statLinkToMarkdownFile } from '../workspace';
 import { HrefKind, InternalHref, LinkDefinitionSet, MdLink, MdLinkDefinition, MdLinkKind, MdLinkProvider, MdLinkSource, parseLocationInfoFromFragment, ReferenceLinkMap } from './document-links';
 import { ILogger, LogLevel } from '../logging';
-import { Quarto } from '../quarto';
+import { Quarto } from '../../quarto';
 import { provideYamlDiagnostics } from './diagnostics-yaml';
 
 /**
@@ -208,12 +208,12 @@ export class DiagnosticComputer {
   ): Promise<{
     readonly diagnostics: lsp.Diagnostic[];
     readonly links: readonly MdLink[];
-    readonly statCache: ResourceMap<{ readonly exists: boolean }>;
+    readonly statCache: ResourceMap<{ readonly exists: boolean; }>;
   }> {
     this.#logger.logDebug('DiagnosticComputer.compute', { document: doc.uri, version: doc.version });
 
     const { links, definitions } = await this.#linkProvider.getLinks(doc);
-    const statCache = new ResourceMap<{ readonly exists: boolean }>();
+    const statCache = new ResourceMap<{ readonly exists: boolean; }>();
     if (token.isCancellationRequested) {
       return { links, diagnostics: [], statCache };
     }
@@ -381,7 +381,7 @@ export class DiagnosticComputer {
   async #validateFileLinks(
     options: DiagnosticOptions,
     links: readonly MdLink[],
-    statCache: ResourceMap<{ readonly exists: boolean }>,
+    statCache: ResourceMap<{ readonly exists: boolean; }>,
     token: CancellationToken,
   ): Promise<lsp.Diagnostic[]> {
     const pathErrorSeverity = toSeverity(options.validateFileLinks);
@@ -551,8 +551,8 @@ class FileLinkState extends Disposable {
   /**
    * Set the known links in a markdown document, adding and removing file watchers as needed
    */
-  updateLinksForDocument(document: URI, links: readonly MdLink[], statCache: ResourceMap<{ readonly exists: boolean }>) {
-    const linkedToResource = new Set<{ path: URI; exists: boolean }>(
+  updateLinksForDocument(document: URI, links: readonly MdLink[], statCache: ResourceMap<{ readonly exists: boolean; }>) {
+    const linkedToResource = new Set<{ path: URI; exists: boolean; }>(
       links
         .filter(link => link.href.kind === HrefKind.Internal)
         .map(link => ({ path: (link.href as InternalHref).path, exists: !!(statCache.get((link.href as InternalHref).path)?.exists) })));
@@ -590,7 +590,7 @@ class FileLinkState extends Disposable {
     this.updateLinksForDocument(resource, [], new ResourceMap());
   }
 
-  public tryStatFileLink(link: URI): { exists: boolean } | undefined {
+  public tryStatFileLink(link: URI): { exists: boolean; } | undefined {
     const entry = this.#linkedToFile.get(link);
     if (!entry) {
       return undefined;

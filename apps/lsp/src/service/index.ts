@@ -17,7 +17,7 @@
 import type { CancellationToken, CompletionContext, TextDocuments } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { Document, Parser } from "quarto-core"
+import { Document, Parser } from "quarto-core";
 import { LsConfiguration } from './config';
 import { MdDefinitionProvider } from './providers/definitions';
 import { DiagnosticComputer, DiagnosticOnSaveComputer, DiagnosticOptions, DiagnosticsManager, IPullDiagnosticsManager } from './providers/diagnostics';
@@ -33,7 +33,7 @@ import { MdTableOfContentsProvider } from './toc';
 import { isWorkspaceWithFileWatching, IWorkspace } from './workspace';
 import { MdHoverProvider } from './providers/hover/hover';
 import { MdCompletionProvider } from './providers/completion/completion';
-import { Quarto } from './quarto';
+import { Quarto } from '../quarto';
 
 export { IncludeWorkspaceHeaderCompletions } from './providers/completion/completion';
 export type { MdCompletionProvider } from './providers/completion/completion';
@@ -44,7 +44,7 @@ export { DiagnosticCode, DiagnosticLevel } from './providers/diagnostics';
 export type { ResolvedDocumentLinkTarget } from './providers/document-links';
 export type { ILogger } from './logging';
 export { LogLevel } from './logging';
-export type { ISlugifier } from './slugify'
+export type { ISlugifier } from './slugify';
 export { Slug, pandocSlugifier } from './slugify';
 export type { ContainingDocumentContext, FileStat, FileWatcherOptions, IFileSystemWatcher, IWorkspace, IWorkspaceWithWatching } from './workspace';
 
@@ -84,7 +84,7 @@ export interface IMdLanguageService {
    *
    * @returns The headers and optionally also the link definitions in the file
    */
-  getDocumentSymbols(document: Document, options: { readonly includeLinkDefinitions?: boolean }, token: CancellationToken): Promise<lsp.DocumentSymbol[]>;
+  getDocumentSymbols(document: Document, options: { readonly includeLinkDefinitions?: boolean; }, token: CancellationToken): Promise<lsp.DocumentSymbol[]>;
 
   /**
    * Get the folding ranges of a markdown file.
@@ -238,7 +238,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
       return documentHighlightProvider.getDocumentHighlights(document, position, token);
     },
     computeOnSaveDiagnostics: async (doc: Document) => {
-      return (await diagnosticOnSaveComputer.compute(doc))
+      return (await diagnosticOnSaveComputer.compute(doc));
     },
     computeDiagnostics: async (doc: Document, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]> => {
       return (await diagnosticsComputer.compute(doc, options, token))?.diagnostics;

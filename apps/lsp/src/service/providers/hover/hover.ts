@@ -21,7 +21,7 @@ import { mathHover } from "./hover-math";
 import { refHover } from "./hover-ref";
 import { Document, Parser } from "quarto-core";
 import { LsConfiguration } from "../../config";
-import { Quarto } from "../../quarto";
+import { Quarto } from "../../../quarto";
 import { docEditorContext } from "../../quarto";
 import { IWorkspace } from "../../workspace";
 

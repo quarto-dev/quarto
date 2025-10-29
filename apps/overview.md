@@ -101,7 +101,7 @@ which passes through `VisualEditorPovider`, `visualEditorClient`,
 
 ## Examples of Getting server-side info from the Visual Editor
 
-### Example: Getting diagnostics
+### Example: Getting diagnostics for YAML front matter
 
 For example in
 [diagnostics.ts](../packages/editor-codemirror/src/behaviors/diagnostics.ts)

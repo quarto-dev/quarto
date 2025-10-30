@@ -1,3 +1,7 @@
+## Diagram
+
+[<img width="300" src="./overview.png"/>](./overview.png)
+
 ## Terminology
 
 - Source Editor

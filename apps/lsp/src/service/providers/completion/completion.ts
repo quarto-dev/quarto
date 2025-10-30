@@ -23,7 +23,7 @@ import {
   CompletionTriggerKind,
   TextDocuments
 } from "vscode-languageserver";
-import { Quarto } from "../../quarto";
+import { Quarto } from "../../../quarto";
 import { attrCompletions } from "./completion-attrs";
 import { latexCompletions } from "./completion-latex";
 import { yamlCompletions } from "./completion-yaml";

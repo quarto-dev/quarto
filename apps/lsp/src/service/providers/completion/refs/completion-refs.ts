@@ -18,7 +18,8 @@ import { Range, Position } from "vscode-languageserver-types";
 import { CompletionItem, TextDocuments } from "vscode-languageserver";
 import { bypassRefIntelligence } from "../../../util/refs";
 
-import { EditorContext, Quarto } from "../../../quarto";
+import { EditorContext } from "../../../quarto";
+import { Quarto } from "../../../../quarto";
 import { projectDirForDocument, filePathForDoc, Document, Parser } from "quarto-core";
 import { biblioCompletions } from "./completion-biblio";
 import { crossrefCompletions } from "./completion-crossref";

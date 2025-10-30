@@ -13,7 +13,8 @@
  *
  */
 
-import { AttrContext, AttrToken, EditorContext, Quarto } from "../../quarto";
+import { AttrContext, AttrToken, EditorContext } from "../../quarto";
+import { Quarto } from "../../../quarto";
 
 export async function attrCompletions(quarto: Quarto, context: EditorContext) {
 

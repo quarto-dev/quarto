@@ -21,7 +21,7 @@ import {
 import { cslRefs } from "editor-server";
 
 import { Document, Parser, filePathForDoc, documentFrontMatter } from "quarto-core";
-import { Quarto } from "../../../quarto";
+import { Quarto } from "../../../../quarto";
 
 export async function biblioCompletions(
   quarto: Quarto,

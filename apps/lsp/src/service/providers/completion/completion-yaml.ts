@@ -25,7 +25,8 @@ import {
 } from "vscode-languageserver-types";
 
 
-import { EditorContext, Quarto } from "../../quarto";
+import { EditorContext } from "../../quarto";
+import { Quarto } from "../../../quarto";
 
 export async function yamlCompletions(quarto: Quarto, context: EditorContext, stripPadding: boolean) {
 
@@ -67,7 +68,7 @@ export async function yamlCompletions(quarto: Quarto, context: EditorContext, st
               .replace(/(<([^>]+)>)/gi, "")
               .replace(/\n/g, " ")
           )
-        }
+        };
       }
 
       // strip padding if requested (vscode doesn't seem to need indentation padding)

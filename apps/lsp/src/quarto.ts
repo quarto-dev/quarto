@@ -31,7 +31,6 @@ import {
 import { QuartoContext } from "quarto-core";
 
 import {
-  Quarto,
   CompletionResult,
   EditorContext,
   HoverResult,
@@ -41,6 +40,16 @@ import {
   kContextDivSimple
 } from "./service/quarto";
 import { LintItem } from "editor-types";
+
+export interface Quarto extends QuartoContext {
+  getYamlCompletions(context: EditorContext): Promise<CompletionResult>;
+  getAttrCompletions(
+    token: AttrToken,
+    context: EditorContext
+  ): Promise<CompletionItem[]>;
+  getYamlDiagnostics(context: EditorContext): Promise<LintItem[]>;
+  getHover?: (context: EditorContext) => Promise<HoverResult | null>;
+}
 
 export async function initializeQuarto(context: QuartoContext): Promise<Quarto> {
   const quartoModule = await initializeQuartoYamlModule(context.resourcePath) as QuartoYamlModule;

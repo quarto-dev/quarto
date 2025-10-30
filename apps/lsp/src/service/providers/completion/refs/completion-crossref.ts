@@ -23,7 +23,7 @@ import {
 import { XRef } from "editor-types";
 
 import { EditorServerDocuments, xrefsForFile } from "editor-server";
-import { Quarto } from "../../../quarto";
+import { Quarto } from "../../../../quarto";
 
 export async function crossrefCompletions(
   quarto: Quarto,

@@ -257,6 +257,7 @@ connection.onInitialized(async () => {
   const parser = markdownitParser();
 
   // create language service
+  // note that `mdLs` is referenced in `connection.onInitialize` above
   mdLs = createLanguageService({
     config,
     quarto,

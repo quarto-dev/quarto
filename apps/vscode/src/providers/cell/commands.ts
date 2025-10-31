@@ -263,7 +263,19 @@ class RunPreviousCellCommand extends RunCommand implements Command {
   }
 }
 
+// More permissive type than `Position` so its easier to construct via a literal
+type LineAndCharPos = { line: number, character: number }
+// More permissive type than `Range` so its easier to construct via a literal
+type LineAndCharRange = { start: LineAndCharPos, end: LineAndCharPos }
 
+function extractRangeFromCode(code: string, range: LineAndCharRange): string {
+  const extractedRange = lines(code).slice(range.start.line, range.end.line + 1)
+  extractedRange[0] = extractedRange[0].slice(range.start.character)
+  extractedRange[extractedRange.length - 1] = extractedRange[extractedRange.length - 1].slice(0, range.end.character)
+  return extractedRange.join('\n')
+}
+
+// Run the code at the cursor
 class RunCurrentCommand extends RunCommand implements Command {
   constructor(
     host: ExtensionHost,
@@ -340,95 +352,85 @@ class RunCurrentCommand extends RunCommand implements Command {
     context: CodeViewActiveBlockContext
   ): Promise<void> {
     // get selection and active block
-    let selection = context.selectedText;
+    const selection = context.selectedText;
     const activeBlock = context.blocks.find(block => block.active);
 
-    // idea: first check that we are in Positron
-    // and leave the others untouched
-
-    // if the selection is empty and this isn't a knitr document then it resolves to run cell
-    if (false) {
-      if (activeBlock) {
-        const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-        if (executor) {
-          await executeInteractive(executor, [activeBlock.code], editor.document);
-          await activateIfRequired(editor);
-        }
+    const exec = async (action: CodeViewSelectionAction, selection: string) => {
+      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+      if (executor) {
+        await executeInteractive(executor, [selection], editor.document);
+        await editor.setBlockSelection(context, action);
       }
-    } else {
-      let action: CodeViewSelectionAction | undefined;
+    }
 
-      // if the selection is empty and we are in Positron:
-      //   try to get the statement's range and use that as the selection
-      if (selection.length <= 0 && activeBlock && hasHooks()) {
+    // if in Positron
+    if (hasHooks()) {
+      if (activeBlock && selection.length <= 0) {
         const codeLines = lines(activeBlock.code)
         const vdoc = virtualDocForCode(codeLines, embeddedLanguage(activeBlock.language)!);
         if (vdoc) {
           const parentUri = Uri.file(editor.document.fileName);
           const injectedLines = (vdoc.language?.inject?.length ?? 0)
 
-          const positionIntoVdoc = (p: { line: number, character: number }) =>
+          const positionIntoVdoc = (p: LineAndCharPos) =>
             new Position(p.line + injectedLines, p.character)
-          const positionOutOfVdoc = (p: { line: number, character: number }) =>
+          const positionOutOfVdoc = (p: LineAndCharPos) =>
             new Position(p.line - injectedLines, p.character)
+          const rangeOutOfVdoc = (r: Range): LineAndCharRange => ({
+            start: positionOutOfVdoc(r.start),
+            end: positionOutOfVdoc(r.end)
+          })
+          const getStatementRange = async (pos: LineAndCharPos) => {
+            const result = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
+              return await commands.executeCommand<StatementRange>(
+                "vscode.executeStatementRangeProvider",
+                uri,
+                positionIntoVdoc(pos)
+              );
+            });
+            return rangeOutOfVdoc(result.range)
+          }
 
-          const result = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
-            return await commands.executeCommand<StatementRange>(
-              "vscode.executeStatementRangeProvider",
-              uri,
-              positionIntoVdoc(context.selection.start)
-            );
-          });
-          const { range, code } = result
-          if (code === undefined) return
-          const adjustedEnd = positionOutOfVdoc(range.end)
-
-          selection = code
-          action = "nextline";
+          const range = await getStatementRange(context.selection.start)
+          const code = extractRangeFromCode(activeBlock.code, range)
 
           // BEGIN ref: https://github.com/posit-dev/positron/blob/main/src/vs/workbench/contrib/positronConsole/browser/positronConsoleActions.ts#L428
           // strategy from Positron using `StatementRangeProvider` to find range of next statement
           // and move cursor based on that.
-          if (adjustedEnd.line + 1 <= codeLines.length) {
-            const nextStatementRange = await withVirtualDocUri(vdoc, parentUri, "statementRange", async (uri) => {
-              return await commands.executeCommand<StatementRange>(
-                "vscode.executeStatementRangeProvider",
-                uri,
-                positionIntoVdoc(new Position(adjustedEnd.line + 1, 1)) // look for statement at line after current statement
-              );
-            });
-            const nextStatement = {
-              start: positionOutOfVdoc(nextStatementRange.range.start),
-              end: positionOutOfVdoc(nextStatementRange.range.end)
-            };
-            if (nextStatement.start.line > adjustedEnd.line) {
-              action = nextStatement.start
-              // the nextStatement may start before & end after the current statement if e.g. inside a function:
-            } else if (nextStatement.end.line > adjustedEnd.line) {
-              action = nextStatement.end
+          if (range.end.line + 1 <= codeLines.length) {
+            // get range of statement at line after current statement)
+            const nextRange = await getStatementRange(new Position(range.end.line + 1, 1))
+
+            if (nextRange.start.line > range.end.line) {
+              exec(nextRange.start, code)
+              // the next statement range may start before & end after the current statement if e.g. inside a function:
+            } else if (nextRange.end.line > range.end.line) {
+              exec(nextRange.end, code)
+            } else {
+              exec("nextline", code)
             }
+          } else {
+            exec("nextline", code)
           }
           // END ref.
         }
       }
-
-      // if the selection is still empty:
-      //   take the whole line as the selection
-      if (selection.length <= 0 && activeBlock) {
-        selection = lines(activeBlock.code)[context.selection.start.line];
-        action = "nextline";
-      }
-
-      // run code
-      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [selection], editor.document);
-
-        // advance cursor if necessary
-        //
-        if (action) {
-          console.log('action!!!', action, this.id)
-          await editor.setBlockSelection(context, action);
+      // if not in Positron
+    } else {
+      // if the selection is empty and this isn't a knitr document then it resolves to run cell
+      if (selection.length <= 0 && !isKnitrDocument(editor.document, this.engine_)) {
+        if (activeBlock) {
+          const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
+          if (executor) {
+            await executeInteractive(executor, [activeBlock.code], editor.document);
+            await activateIfRequired(editor);
+          }
+        }
+      } else {
+        if (selection.length > 0) {
+          exec("nextline", selection)
+        } else if (activeBlock) { // if the selection is empty take the whole line as the selection
+          exec("nextline", lines(activeBlock.code)[context.selection.start.line])
         }
       }
     }
@@ -444,7 +446,7 @@ class RunSelectionCommand extends RunCurrentCommand implements Command {
 
 }
 
-
+// Run Cell and Advance
 class RunCurrentAdvanceCommand extends RunCommand implements Command {
   constructor(host: ExtensionHost, engine: MarkdownEngine) {
     super(host, engine);

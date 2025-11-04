@@ -137,6 +137,7 @@ export class ConfigurationManager extends Disposable {
   private _settings: Settings;
   private _logger: ILogger;
   private _activeColorThemeKind: "light" | "dark" = "dark";
+  private _themeExplicitlySet = false;
 
   constructor(
     private readonly connection_: Connection,
@@ -181,11 +182,13 @@ export class ConfigurationManager extends Disposable {
     
     // Fallback: try to detect theme from name if we haven't received an explicit notification yet
     // This is a best-effort approach for compatibility, but won't work with autoDetectColorScheme
-    // Default to dark theme if neither Light nor Dark is in the theme name
-    if (settings.workbench.colorTheme.includes("Light")) {
-      this._activeColorThemeKind = "light";
-    } else if (settings.workbench.colorTheme.includes("Dark")) {
-      this._activeColorThemeKind = "dark";
+    // Only apply fallback if theme hasn't been explicitly set via notification
+    if (!this._themeExplicitlySet) {
+      if (settings.workbench.colorTheme.includes("Light")) {
+        this._activeColorThemeKind = "light";
+      } else if (settings.workbench.colorTheme.includes("Dark")) {
+        this._activeColorThemeKind = "dark";
+      }
     }
     
     this._onDidChangeConfiguration.fire(this._settings);
@@ -217,6 +220,7 @@ export class ConfigurationManager extends Disposable {
   public setActiveColorThemeKind(kind: "light" | "dark") {
     if (this._activeColorThemeKind !== kind) {
       this._activeColorThemeKind = kind;
+      this._themeExplicitlySet = true;
       this._onDidChangeConfiguration.fire(this._settings);
     }
   }

@@ -156,6 +156,8 @@ export async function activateLsp(
   // Helper to send current theme to LSP server
   const sendThemeNotification = () => {
     if (client) {
+      // Map VS Code theme kinds to light/dark. HighContrast themes are treated as dark
+      // since they typically have light text on dark backgrounds
       const kind = window.activeColorTheme.kind === ColorThemeKind.Light ? "light" : "dark";
       client.sendNotification("quarto/didChangeActiveColorTheme", { kind });
     }

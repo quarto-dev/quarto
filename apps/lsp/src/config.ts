@@ -136,6 +136,7 @@ export class ConfigurationManager extends Disposable {
 
   private _settings: Settings;
   private _logger: ILogger;
+  private _activeColorThemeKind: "light" | "dark" = "dark";
 
   constructor(
     private readonly connection_: Connection,
@@ -177,6 +178,13 @@ export class ConfigurationManager extends Disposable {
         }
       }
     };
+    
+    // Fallback: try to detect theme from name if we haven't received an explicit notification yet
+    // This is a best-effort approach for compatibility, but won't work with autoDetectColorScheme
+    if (settings.workbench.colorTheme.includes("Light")) {
+      this._activeColorThemeKind = "light";
+    }
+    
     this._onDidChangeConfiguration.fire(this._settings);
   }
 
@@ -202,6 +210,15 @@ export class ConfigurationManager extends Disposable {
   public getSettings(): Settings {
     return this._settings;
   }
+
+  public setActiveColorThemeKind(kind: "light" | "dark") {
+    this._activeColorThemeKind = kind;
+    this._onDidChangeConfiguration.fire(this._settings);
+  }
+
+  public getActiveColorThemeKind(): "light" | "dark" {
+    return this._activeColorThemeKind;
+  }
 }
 
 export function lsConfiguration(configManager: ConfigurationManager): LsConfiguration {
@@ -226,8 +243,7 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
       }
     },
     get colorTheme(): "light" | "dark" {
-      const settings = configManager.getSettings();
-      return settings.workbench.colorTheme.includes("Light") ? "light" : "dark";
+      return configManager.getActiveColorThemeKind();
     },
     get mathjaxScale(): number {
       return configManager.getSettings().quarto.mathjax.scale;

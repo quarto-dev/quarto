@@ -224,6 +224,12 @@ connection.onInitialized(async () => {
     logger.setConfigurationManager(configManager);
   }
 
+  // listen for color theme changes from the client
+  connection.onNotification("quarto/didChangeActiveColorTheme", (params: { kind: "light" | "dark" }) => {
+    logger.logNotification('didChangeActiveColorTheme');
+    configManager.setActiveColorThemeKind(params.kind);
+  });
+
   // initialize connection to quarto
   const workspaceFolders = await connection.workspace.getWorkspaceFolders();
   const workspaceDir = workspaceFolders?.length

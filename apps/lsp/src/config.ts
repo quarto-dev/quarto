@@ -181,8 +181,11 @@ export class ConfigurationManager extends Disposable {
     
     // Fallback: try to detect theme from name if we haven't received an explicit notification yet
     // This is a best-effort approach for compatibility, but won't work with autoDetectColorScheme
+    // Default to dark theme if neither Light nor Dark is in the theme name
     if (settings.workbench.colorTheme.includes("Light")) {
       this._activeColorThemeKind = "light";
+    } else if (settings.workbench.colorTheme.includes("Dark")) {
+      this._activeColorThemeKind = "dark";
     }
     
     this._onDidChangeConfiguration.fire(this._settings);
@@ -212,8 +215,10 @@ export class ConfigurationManager extends Disposable {
   }
 
   public setActiveColorThemeKind(kind: "light" | "dark") {
-    this._activeColorThemeKind = kind;
-    this._onDidChangeConfiguration.fire(this._settings);
+    if (this._activeColorThemeKind !== kind) {
+      this._activeColorThemeKind = kind;
+      this._onDidChangeConfiguration.fire(this._settings);
+    }
   }
 
   public getActiveColorThemeKind(): "light" | "dark" {

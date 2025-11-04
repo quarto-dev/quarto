@@ -158,7 +158,7 @@ export async function activateLsp(
     if (client) {
       // Map VS Code theme kinds to light/dark. HighContrast themes are treated as dark
       // since they typically have light text on dark backgrounds
-      const kind = window.activeColorTheme.kind === ColorThemeKind.Light ? "light" : "dark";
+      const kind = (window.activeColorTheme.kind === ColorThemeKind.Light || window.activeColorTheme.kind === ColorThemeKind.HighContrastLight) ? "light" : "dark";
       client.sendNotification("quarto/didChangeActiveColorTheme", { kind });
     }
   };

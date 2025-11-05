@@ -177,7 +177,9 @@ export async function activateLsp(
       if (e.newState === State.Running) {
         handler.dispose();
         // Send initial theme on startup
-        sendThemeNotification();
+        setTimeout(() => {
+          sendThemeNotification();
+        }, 50);
         resolve(client);
       } else if (e.newState === State.Stopped) {
         reject(new Error("Failed to start Quarto LSP Server"));

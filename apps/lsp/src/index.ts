@@ -225,7 +225,7 @@ connection.onInitialized(async () => {
   }
 
   // listen for color theme changes from the client
-  connection.onNotification("quarto/didChangeActiveColorTheme", (params: { kind: string }) => {
+  connection.onNotification("quarto/didChangeActiveColorTheme", (params: { kind: string; }) => {
     logger.logNotification('didChangeActiveColorTheme');
     // Validate the theme kind before using it
     if (params.kind === "light" || params.kind === "dark") {

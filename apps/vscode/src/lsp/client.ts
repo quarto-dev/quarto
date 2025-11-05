@@ -176,7 +176,7 @@ export async function activateLsp(
     const handler = client.onDidChangeState(e => {
       if (e.newState === State.Running) {
         handler.dispose();
-        // Send initial theme on startup
+        // Send initial theme on startup, slightly delayed to ensure server is ready
         setTimeout(() => {
           sendThemeNotification();
         }, 50);

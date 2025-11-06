@@ -169,7 +169,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         const result = await vscode.commands.executeCommand<hooks.StatementRange>(
           "vscode.executeStatementRangeProvider",
           uri,
-          position
+          adjustedPosition(vdoc.language, position)
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       });

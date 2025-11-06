@@ -1467,7 +1467,7 @@
     "@posit-dev/positron": "^0.1.0",
     "quarto-core": "*",
     "quarto-lsp": "*",
-    "vscode-quarto-utils": "*",
+    "quarto-utils": "*",
     "quarto-vscode-editor": "*",
     "quarto-vscode-markdownit": "*",
     "semver": "^7.3.8",

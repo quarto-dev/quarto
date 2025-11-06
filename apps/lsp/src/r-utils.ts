@@ -13,7 +13,7 @@
  *
  */
 
-import { isRPackage as isRPackageImpl } from "vscode-quarto-utils";
+import { isRPackage as isRPackageImpl } from "quarto-utils";
 import { IWorkspace } from './service';
 
 // Version that selects workspace folder

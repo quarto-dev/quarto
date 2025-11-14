@@ -93,9 +93,9 @@ export async function executeInteractive(
 }
 
 
-export async function executionSelectionAtPositionInteractive(executor: CellExecutor, uri: Uri, position: Position) {
-  if (executor?.executeSelectionAtPosition) {
-    return await executor.executeSelectionAtPosition(uri, position);
+export async function executeAtPositionInteractive(executor: CellExecutor, uri: Uri, position: Position) {
+  if (executor?.executeAtPosition) {
+    return await executor.executeAtPosition(uri, position);
   }
 }
 // attempt language aware execution of current selection (returns false

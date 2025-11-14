@@ -86,7 +86,7 @@ export function hooksExtensionHost(): ExtensionHost {
             executeSelection: async (): Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
             },
-            executeSelectionAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
+            executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
               return await vscode.commands.executeCommand(
                 'workbench.action.positronConsole.executeCode',
                 { languageId: language, uri, position }

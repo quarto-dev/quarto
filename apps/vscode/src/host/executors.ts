@@ -27,7 +27,7 @@ import { Position } from "vscode";
 export interface CellExecutor {
   execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
   executeSelection?: () => Promise<void>;
-  executeSelectionAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
+  executeAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
 }
 
 export function executableLanguages() {

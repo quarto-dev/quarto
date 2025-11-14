@@ -46,7 +46,7 @@ import {
   codeWithoutOptionsFromBlock,
   executeInteractive,
   executeSelectionInteractive,
-  executionSelectionAtPositionInteractive,
+  executeAtPositionInteractive,
 } from "./executors";
 import { ExtensionHost } from "../../host";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
@@ -368,7 +368,7 @@ class RunCurrentCommand extends RunCommand implements Command {
               vdoc,
               parentUri,
               "executeSelectionAtPositionInteractive",
-              (uri) => executionSelectionAtPositionInteractive(
+              (uri) => executeAtPositionInteractive(
                 executor,
                 uri,
                 positionIntoVdoc(context.selection.start)

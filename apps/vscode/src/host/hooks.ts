@@ -23,6 +23,8 @@ import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocu
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
+import { Position } from 'vscode';
+import { Uri } from 'vscode';
 
 declare global {
   function acquirePositronApi(): hooks.PositronApi;
@@ -83,6 +85,12 @@ export function hooksExtensionHost(): ExtensionHost {
             },
             executeSelection: async (): Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
+            },
+            executeSelectionAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
+              return await vscode.commands.executeCommand(
+                'workbench.action.positronConsole.executeCode',
+                { languageId: language, uri, position }
+              );
             }
           };
 

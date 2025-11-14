@@ -22,10 +22,12 @@ import { documentFrontMatter } from "../markdown/document";
 import { isExecutableLanguageBlockOf } from "quarto-core";
 import { workspace } from "vscode";
 import { JupyterKernelspec } from "core";
+import { Position } from "vscode";
 
 export interface CellExecutor {
   execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
   executeSelection?: () => Promise<void>;
+  executeSelectionAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
 }
 
 export function executableLanguages() {

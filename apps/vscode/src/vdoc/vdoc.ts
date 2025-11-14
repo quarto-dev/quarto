@@ -118,9 +118,10 @@ export type VirtualDocAction =
   "definition" |
   "format" |
   "statementRange" |
-  "helpTopic";
+  "helpTopic" |
+  "executeSelectionAtPositionInteractive";
 
-export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void> };
+export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void>; };
 
 /**
  * Execute a callback on a virtual document's temporary URI

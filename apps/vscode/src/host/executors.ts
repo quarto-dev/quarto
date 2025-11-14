@@ -32,6 +32,9 @@ export function executableLanguages() {
   return kCellExecutors.map((executor) => executor.language);
 }
 
+// This function is always used by the `defaultExtensionHost`, and is used
+// by the `hooksExtensionHost` as a backup. Please see `hooksExtensionHost`
+// how executors are retrieved in Positron.
 export async function cellExecutorForLanguage(
   language: string,
   document: TextDocument,

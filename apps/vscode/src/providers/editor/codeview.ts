@@ -60,6 +60,11 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
     async codeViewAssist(context: CodeViewCellContext) {
       await commands.executeCommand("quarto.codeViewAssist", context, lspRequest);
     },
+    // This execute command is used when the user clicks an execute button on a cell in the visual editor.
+    //
+    // Note: this is NOT used when the user uses a keyboard command to execute a cell,
+    // that goes through VSCode commands (commands are registered in package.json),
+    // the keyboard command code is in apps/vscode/src/providers/cell/commands.ts.
     async codeViewExecute(execute: CodeViewExecute) {
       switch (execute) {
         case "cell":

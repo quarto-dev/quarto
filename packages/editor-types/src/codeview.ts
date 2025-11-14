@@ -34,7 +34,7 @@ export interface CodeViewActiveBlockContext {
   selectedText: string;
 }
 
-export type CodeViewSelectionAction = "nextline" | "nextblock" | "prevblock";
+export type CodeViewSelectionAction = "nextline" | "nextblock" | "prevblock" | { line: number, character: number };
 
 export interface CodeViewCellContext {
   filepath: string;

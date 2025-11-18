@@ -34,6 +34,8 @@ import { cellOptionsForToken, kExecuteEval } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
 import { executableLanguages } from "../../host/executors";
+import { Position } from "vscode";
+import { Uri } from "vscode";
 
 
 export function hasExecutor(_host: ExtensionHost, language: string) {
@@ -90,6 +92,12 @@ export async function executeInteractive(
   return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
 }
 
+
+export async function executeAtPositionInteractive(executor: CellExecutor, uri: Uri, position: Position) {
+  if (executor?.executeAtPosition) {
+    return await executor.executeAtPosition(uri, position);
+  }
+}
 // attempt language aware execution of current selection (returns false
 // if the executor doesn't support this, in which case generic
 // executeInteractive will be called)

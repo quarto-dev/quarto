@@ -88,8 +88,10 @@ export function hooksExtensionHost(): ExtensionHost {
             },
             executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
               return await vscode.commands.executeCommand(
-                'workbench.action.positronConsole.executeCode',
-                { languageId: language, uri, position }
+                'positron.executeCodeInConsole',
+                language,
+                uri,
+                position
               );
             }
           };

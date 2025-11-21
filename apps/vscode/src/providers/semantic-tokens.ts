@@ -27,7 +27,7 @@ import { DocumentSemanticsTokensSignature } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import { isQuartoDoc } from "../core/doc";
 import { unadjustedSemanticTokens, virtualDoc, withVirtualDocUri } from "../vdoc/vdoc";
-import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-core";
+import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
  * Decode semantic tokens from delta-encoded format to absolute positions

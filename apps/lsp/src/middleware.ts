@@ -15,7 +15,7 @@
  */
 
 import { Connection, ServerCapabilities } from "vscode-languageserver";
-import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-core";
+import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 
 // capabilities provided just so we can intercept them w/ middleware on the client

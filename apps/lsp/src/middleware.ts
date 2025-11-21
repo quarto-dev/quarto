@@ -1,7 +1,7 @@
 /*
  * middleware.ts
  *
- * Copyright (C) 2023 by Posit Software, PBC
+ * Copyright (C) 2023-2025 by Posit Software, PBC
  * Copyright (c) Microsoft Corporation. All rights reserved.
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -14,7 +14,8 @@
  *
  */
 
-import { Connection, ServerCapabilities } from "vscode-languageserver"
+import { Connection, ServerCapabilities } from "vscode-languageserver";
+import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-core";
 
 
 // capabilities provided just so we can intercept them w/ middleware on the client
@@ -28,8 +29,12 @@ export function middlewareCapabilities(): ServerCapabilities {
     },
     documentFormattingProvider: true,
     documentRangeFormattingProvider: true,
-    definitionProvider: true
-  }
+    definitionProvider: true,
+    semanticTokensProvider: {
+      legend: QUARTO_SEMANTIC_TOKEN_LEGEND,
+      full: true
+    }
+  };
 };
 
 // methods provided just so we can intercept them w/ middleware on the client
@@ -49,6 +54,10 @@ export function middlewareRegister(connection: Connection) {
 
   connection.onDefinition(async () => {
     return null;
+  });
+
+  connection.languages.semanticTokens.on(async () => {
+    return { data: [] };
   });
 
 }

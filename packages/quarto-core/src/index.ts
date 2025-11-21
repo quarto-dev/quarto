@@ -24,3 +24,4 @@ export * from './position';
 export * from './range';
 export * from './document';
 export * from './lsp';
+export * from './semantic-tokens-legend';

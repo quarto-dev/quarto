@@ -159,7 +159,7 @@ function remapModifierBitfield(
  * Remap token type/modifier indices from source legend to target legend
  * Only maps types that exist in both legends (standard types only)
  */
-function remapTokenIndices(
+export function remapTokenIndices(
   tokens: SemanticTokens,
   sourceLegend: { tokenTypes: string[]; tokenModifiers: string[]; },
   targetLegend: { tokenTypes: string[]; tokenModifiers: string[]; }

@@ -26,7 +26,14 @@ import {
 import { DocumentSemanticsTokensSignature } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import { isQuartoDoc } from "../core/doc";
-import { unadjustedSemanticTokens, virtualDoc, withVirtualDocUri } from "../vdoc/vdoc";
+import {
+  unadjustedSemanticTokens,
+  virtualDocForLanguage,
+  withVirtualDocUri,
+  languageAtPosition,
+  mainLanguage
+} from "../vdoc/vdoc";
+import { EmbeddedLanguage } from "../vdoc/languages";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
@@ -185,6 +192,7 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
       return await next(document, token);
     }
 
+    // Ensure we are dealing with the active document
     const editor = window.activeTextEditor;
     const activeDocument = editor?.document;
     if (!editor || activeDocument?.uri.toString() !== document.uri.toString()) {
@@ -192,13 +200,24 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
       return await next(document, token);
     }
 
+    // Parse the document to get all tokens
+    const tokens = engine.parse(document);
+
+    // Try to find language at cursor position, otherwise use main language
     const line = editor.selection.active.line;
     const position = new Position(line, 0);
-    const vdoc = await virtualDoc(document, position, engine);
+    let language = languageAtPosition(tokens, position);
+    if (!language) {
+      language = mainLanguage(tokens);
+    }
 
-    if (!vdoc) {
+    if (!language) {
+      // No language found, delegate to default
       return await next(document, token);
     }
+
+    // Create virtual doc for all blocks of this language
+    const vdoc = virtualDocForLanguage(document, tokens, language);
 
     return await withVirtualDocUri(vdoc, document.uri, "semanticTokens", async (uri: Uri) => {
       try {

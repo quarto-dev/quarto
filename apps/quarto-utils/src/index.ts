@@ -14,3 +14,4 @@
  */
 
 export * from './r-utils';
+export * from './semantic-tokens-legend';

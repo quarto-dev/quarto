@@ -18,9 +18,8 @@ import { XRef } from "./xref";
 
 export interface EditorDisplay {
   openURL: (url: string) => void;
+  getThemeData: (name: string) => Promise<any>;
   navigateToXRef: (file: string, xref: XRef) => void;
   navigateToFile: (file: string) => void;
   showContextMenu?: (items: EditorMenuItem[], clientX: number, clientY: number) => Promise<boolean>;
 }
-
-

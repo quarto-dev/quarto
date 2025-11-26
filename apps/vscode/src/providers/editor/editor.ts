@@ -13,7 +13,7 @@
  *
  */
 
-import path, { extname, win32 } from "path";
+import path, { dirname, extname, win32 } from "path";
 import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
@@ -67,9 +67,64 @@ import {
   reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
-import { TabInputCustom } from "vscode";
+import { TabInputCustom, extensions } from "vscode";
+import { readFileSync } from "fs";
 
 const kVisualModeConfirmed = "visualModeConfirmed";
+
+function getThemePath(themeName: string | undefined) {
+  for (const extension of extensions.all) {
+    const themes = extension.packageJSON.contributes && extension.packageJSON.contributes.themes;
+
+    const currentTheme = themes?.find((theme: any) => theme.id === themeName || theme.label === themeName);
+    if (currentTheme) {
+      return path.join(extension.extensionPath, currentTheme.path);
+    }
+  }
+}
+
+// reference: https://github.com/microsoft/vscode/issues/32813#issuecomment-524174937
+// reference: https://github.com/textX/textX-LS/blob/master/client/src/utils.ts
+// reference: https://macromates.com/blog/2005/introduction-to-scopes/
+export function getTokenColorsForTheme(themeName: string | undefined) {
+  const tokenColors: { [key: string]: Object } = {};
+  let colors: { [key: string]: Object } = {};
+  if (!themeName) return tokenColors;
+
+  const currentThemePath = getThemePath(themeName)
+  const themePaths = [];
+  if (currentThemePath) { themePaths.push(currentThemePath); }
+  while (themePaths.length > 0) {
+    const themePath = themePaths.pop();
+    if (themePath === undefined) continue;
+    const theme = loadJSON(themePath);
+    if (theme) {
+      if (theme.include) {
+        themePaths.push(path.join(dirname(themePath), theme.include));
+      }
+      if (theme.colors) {
+        colors = { ...colors, ...theme.colors }
+      }
+      for (const { scope, settings } of theme.tokenColors ?? []) {
+        const scopes = typeof scope === 'string' ?
+          scope.split(',').map(s => s.trim()).filter(s => s.length > 0) :
+          Array.isArray(scope) ?
+            scope :
+            [];
+
+        scopes.forEach((scope) => {
+          tokenColors[scope] ??= settings
+        })
+      }
+    }
+  }
+  return { colors, tokenColors };
+}
+export function loadJSON(path: string): any {
+  try {
+    return JSON.parse(readFileSync(path).toString());
+  } catch { }
+}
 
 export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus(): Promise<boolean>;
@@ -510,6 +565,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       },
       navigateToFile: function (file: string): void {
         navigateToFile(document, file);
+      },
+      async getThemeData(themeName: string): Promise<any> {
+        return getTokenColorsForTheme(themeName)
       },
 
       ...documentImageResolver(document, projectDir)

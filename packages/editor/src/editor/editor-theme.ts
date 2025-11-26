@@ -58,7 +58,7 @@ export interface EditorTheme {
   suggestWidgetHighlightForegroundColor: string;
   suggestWidgetSelectedBackgroundColor: string;
   suggestWidgetSelectedForegroundColor: string;
-  suggestWidgetSelectedIconForegroundColor: string; 
+  suggestWidgetSelectedIconForegroundColor: string;
   symbolIconClassForegroundColor: string;
   symbolIconConstantForegroundColor: string;
   symbolIconEnumForegroundColor: string;
@@ -141,7 +141,7 @@ export function defaultTheme(): EditorTheme {
     suggestWidgetHighlightForegroundColor: "#0066bf",
     suggestWidgetSelectedBackgroundColor: "#0060c0",
     suggestWidgetSelectedForegroundColor: "#ffffff",
-    suggestWidgetSelectedIconForegroundColor: "#ffffff", 
+    suggestWidgetSelectedIconForegroundColor: "#ffffff",
     symbolIconClassForegroundColor: '#D67E00',
     symbolIconConstantForegroundColor: "#616161",
     symbolIconEnumForegroundColor: '#D67E00',
@@ -178,6 +178,7 @@ export function defaultTheme(): EditorTheme {
 }
 
 export function applyTheme(theme: EditorTheme) {
+  console.log('APPLY THEME INTERNAL')
   // merge w/ defaults
   const defaults = defaultTheme();
   theme = {
@@ -244,7 +245,7 @@ export function applyTheme(theme: EditorTheme) {
     .pm-default-theme .pm-list-item-selected,
     .pm-default-theme .pm-grid-item-selected {
       background-color: ${defaults.findTextBackgroundColor} !important;
-      box-shadow: 0 0 0 1px ${defaults.findTextBorderColor}; 
+      box-shadow: 0 0 0 1px ${defaults.findTextBorderColor};
       border-radius: 3px;
     }
     .pm-default-theme .pm-rstudio-button {
@@ -311,7 +312,7 @@ export function applyTheme(theme: EditorTheme) {
     .pm-list-item-selected,
     .pm-grid-item-selected {
       background-color: ${theme.findTextBackgroundColor} !important;
-      box-shadow: 0 0 0 1px ${theme.findTextBorderColor}; 
+      box-shadow: 0 0 0 1px ${theme.findTextBorderColor};
       border-radius: 3px;
     }
     .pm-selected-text {

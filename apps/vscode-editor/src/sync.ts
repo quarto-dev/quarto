@@ -19,24 +19,24 @@ import throttle from "lodash.throttle";
 
 import { WebviewApi } from "vscode-webview";
 
-import { 
-  jsonRpcPostMessageRequestTransport, 
-  jsonRpcPostMessageServer, 
-  JsonRpcPostMessageTarget, 
-  JsonRpcRequestTransport 
+import {
+  jsonRpcPostMessageRequestTransport,
+  jsonRpcPostMessageServer,
+  JsonRpcPostMessageTarget,
+  JsonRpcRequestTransport
 } from "core";
 
 import { windowJsonRpcPostMessageTarget } from "core-browser";
 
-import { 
-  VSC_VE_ApplyExternalEdit, 
+import {
+  VSC_VE_ApplyExternalEdit,
   VSC_VE_PrefsChanged,
   VSC_VE_ImageChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_GetSlideIndex,
   VSC_VE_GetActiveBlockContext,
   VSC_VE_SetBlockSelection,
-  VSC_VE_Init, 
+  VSC_VE_Init,
   VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
   VSC_VEH_SaveDocument,
@@ -47,14 +47,15 @@ import {
   VSC_VEH_ReopenSourceMode,
   VSC_VEH_OnEditorUpdated,
   VSC_VEH_OnEditorStateChanged,
-  VSC_VEH_OnEditorReady, 
+  VSC_VEH_OnEditorReady,
   VSC_VEH_OpenURL,
+  VSC_VEH_GetThemeData,
   VSC_VEH_NavigateToXRef,
   VSC_VEH_NavigateToFile,
   VSC_VEH_ResolveImageUris,
   VSC_VEH_ResolveBase64Images,
-  VSCodeVisualEditor, 
-  VSCodeVisualEditorHost, 
+  VSCodeVisualEditor,
+  VSCodeVisualEditorHost,
   EditorServer,
   EditorServices,
   XRef,
@@ -66,17 +67,17 @@ import {
   CodeViewSelectionAction
 } from "editor-types";
 
-import { 
-  editorJsonRpcServer, 
-  editorJsonRpcServices 
+import {
+  editorJsonRpcServer,
+  editorJsonRpcServices
 } from "editor-core";
 
-import { 
-  EditorOperations, 
-  EditorTheme, 
-  PandocWriterOptions, 
-  StateChangeEvent, 
-  UpdateEvent 
+import {
+  EditorOperations,
+  EditorTheme,
+  PandocWriterOptions,
+  StateChangeEvent,
+  UpdateEvent
 } from "editor";
 
 import { Command, EditorUIStore, readPrefsApi, t, updatePrefsApi } from "editor-ui";
@@ -98,9 +99,9 @@ export function visualEditorJsonRpcRequestTransport(vscode: WebviewApi<unknown>)
 
 // interface to visual editor host (vs code extension)
 export function visualEditorHostClient(
-  vscode: WebviewApi<unknown>, 
+  vscode: WebviewApi<unknown>,
   request: JsonRpcRequestTransport
-) : VisualEditorHostClient {
+): VisualEditorHostClient {
   return {
     vscode,
     server: editorJsonRpcServer(request),
@@ -114,12 +115,12 @@ export interface ImageChangeSink {
 }
 
 export async function syncEditorToHost(
-  editor: EditorOperations, 
+  editor: EditorOperations,
   imageChange: ImageChangeSink,
   host: VisualEditorHostClient,
   store: EditorUIStore,
   applyTheme: (theme: EditorTheme) => void
-)  {
+) {
 
   // get the current prefs
   const readPrefs = () => readPrefsApi(store);
@@ -128,8 +129,8 @@ export async function syncEditorToHost(
   const writerOptions = () => {
     const prefs = readPrefs();
     const options: PandocWriterOptions = {};
-    options.wrap = prefs.markdownWrap === "column" 
-      ? String(prefs.markdownWrapColumn) 
+    options.wrap = prefs.markdownWrap === "column"
+      ? String(prefs.markdownWrapColumn)
       : prefs.markdownWrap;
     options.references = {
       location: prefs.markdownReferences,
@@ -162,7 +163,7 @@ export async function syncEditorToHost(
       .finally(() => {
         // done
       });
-  }, kThrottleDelayMs, { leading: false, trailing: true});
+  }, kThrottleDelayMs, { leading: false, trailing: true });
 
   // setup communication channel for host
   visualEditorHostServer(host.vscode, {
@@ -178,11 +179,11 @@ export async function syncEditorToHost(
 
           // focus editor
           editor.focus(navigation);
-            
+
           // visual editor => text editor (just send the state, host will call back for markdown)
           editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
-          editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos())); 
-            
+          editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos()));
+
 
           // return canonical markdown
           return result.canonical;
@@ -191,18 +192,19 @@ export async function syncEditorToHost(
           return null;
 
         }
-      } catch(error) {
+      } catch (error) {
         editor.onLoadFailed(error);
         return null;
       }
-     
+
     },
 
     async prefsChanged(prefs: Prefs): Promise<void> {
+      console.log('prefs changed!!!')
 
       // save existing writer options (for comparison)
       const prevOptions = writerOptions();
-    
+
       // update prefs
       await updatePrefsApi(store, prefs);
 
@@ -212,10 +214,10 @@ export async function syncEditorToHost(
       // if markdown writing options changed then force a refresh
       const options = writerOptions();
       if (prevOptions.wrap !== options.wrap ||
-          prevOptions.references?.location !== options.references?.location ||
-          prevOptions.references?.prefix !== options.references?.prefix) {
+        prevOptions.references?.location !== options.references?.location ||
+        prevOptions.references?.prefix !== options.references?.prefix) {
         await host.onEditorUpdated(editor.getStateJson());
-        await host.flushEditorUpdates();      
+        await host.flushEditorUpdates();
       }
     },
 
@@ -256,7 +258,7 @@ export async function syncEditorToHost(
   })
 
   // let the host know we are ready
-  await host.onEditorReady();  
+  await host.onEditorReady();
 }
 
 export enum EditorHostCommands {
@@ -340,7 +342,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
 }
 
 
-function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisualEditorHost {
+function editorJsonRpcContainer(request: JsonRpcRequestTransport): VSCodeVisualEditorHost {
   return {
     getHostContext: () => request(VSC_VEH_GetHostContext, []),
     reopenSourceMode: () => request(VSC_VEH_ReopenSourceMode, []),
@@ -352,6 +354,11 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     renderDocument: () => request(VSC_VEH_RenderDocument, []),
     editorResourceUri: (path: string) => request(VSC_VEH_EditorResourceUri, [path]),
     openURL: (url: string) => request(VSC_VEH_OpenURL, [url]),
+    getThemeData: async (name: string) => {
+      const dog = await request(VSC_VEH_GetThemeData, [name])
+      // console.log('sync.ts ASHHDAHJASDJASDJ dog', name, dog)
+      return dog
+    },
     navigateToXRef: (file: string, xref: XRef) => request(VSC_VEH_NavigateToXRef, [file, xref]),
     navigateToFile: (file: string) => request(VSC_VEH_NavigateToFile, [file]),
     resolveImageUris: (uris: string[]) => request(VSC_VEH_ResolveImageUris, [uris]),
@@ -359,4 +366,3 @@ function editorJsonRpcContainer(request: JsonRpcRequestTransport) : VSCodeVisual
     selectImage: () => request(VSC_VEH_SelectImage, [])
   };
 }
-

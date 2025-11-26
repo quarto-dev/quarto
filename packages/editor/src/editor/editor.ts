@@ -36,9 +36,9 @@ import {
   UIToolsAttr,
   UIToolsImage,
   EditorMenus,
-  EditorServer, 
-  EditingOutlineLocation, 
-  EditorOutline, 
+  EditorServer,
+  EditingOutlineLocation,
+  EditorOutline,
   SourcePos,
   NavLocation,
   CodeViewActiveBlockContext,
@@ -177,7 +177,7 @@ export interface EditorSetMarkdownResult {
   // unparsed meta
   unparsed_meta: { [key: string]: unknown };
 
-  // updated outline 
+  // updated outline
   location: EditingOutlineLocation;
 }
 
@@ -292,30 +292,30 @@ export interface EditorOperations {
   ): Promise<EditorSetMarkdownResult | null>;
 
   // get content
-  getStateJson() : unknown;
-  getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions) : Promise<string>;
-  getMarkdown(options: PandocWriterOptions) : Promise<EditorCode>;
+  getStateJson(): unknown;
+  getMarkdownFromStateJson(stateJson: unknown, options: PandocWriterOptions): Promise<string>;
+  getMarkdown(options: PandocWriterOptions): Promise<EditorCode>;
   getEditorSourcePos(): SourcePos;
   getSlideIndex(): number;
 
   // codeviews
-  getCodeViewActiveBlockContext() : CodeViewActiveBlockContext | undefined;
-  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : void;
+  getCodeViewActiveBlockContext(): CodeViewActiveBlockContext | undefined;
+  setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): void;
 
   // subsystems
-  getFindReplace() : EditorFindReplace | undefined
+  getFindReplace(): EditorFindReplace | undefined
 
   // activation/navigation
   blur(): void;
   focus(navigation?: NavLocation): void;
   hasFocus(): boolean;
   navigate(type: NavigationType, id: string, recordCurrent: boolean, animate?: boolean): void;
-  navigateToSourcePos(pos: SourcePos) : void;
+  navigateToSourcePos(pos: SourcePos): void;
 
   // theme/content
   applyTheme(theme: EditorTheme): void;
   setMaxContentWidth(maxWidth: number, minPadding?: number): void;
- 
+
   // events
   subscribe<TDetail>(event: EventType<TDetail> | string, handler: EventHandler<TDetail>): VoidFunction;
 
@@ -326,7 +326,7 @@ export interface EditorOperations {
   onLoadFailed(error: unknown): void;
 }
 
-export class Editor  {
+export class Editor {
   // core context passed from client
   private readonly parent: HTMLElement;
   private readonly context: EditorContext;
@@ -416,7 +416,7 @@ export class Editor  {
       docTypes: format.docTypes || [],
     };
 
-  
+
 
     // provide context defaults
     const defaultImages = defaultEditorUIImages();
@@ -470,7 +470,7 @@ export class Editor  {
     this.format = format;
     this.keybindings = {};
     this.pandocFormat = pandocFormat;
-    this.pandocCapabilities = pandocCapabilities;   
+    this.pandocCapabilities = pandocCapabilities;
 
     // create core extensions
     this.extensions = this.initExtensions();
@@ -601,7 +601,7 @@ export class Editor  {
 
     // provide option defaults
     options = pandocWriterOptions(options);
-   
+
     // get the result
     const result = await this.pandocConverter.toProsemirror(markdown, this.pandocFormat);
     const { doc, line_wrapping, unrecognized, example_lists, unparsed_meta } = result;
@@ -638,7 +638,7 @@ export class Editor  {
         try {
           setTextSelection(loc.pos)(tr);
         } catch (e) {
-          // do-nothing, this error can happen and shouldn't result in 
+          // do-nothing, this error can happen and shouldn't result in
           // a failure to setMarkdown
         }
       }
@@ -680,7 +680,7 @@ export class Editor  {
     return this.state.doc.attrs.initial;
   }
 
-  public getStateJson() : unknown {
+  public getStateJson(): unknown {
     return this.state.toJSON();
   }
 
@@ -843,7 +843,7 @@ export class Editor  {
   }
 
   public hasFocus() {
-    return this.view.hasFocus() || 
+    return this.view.hasFocus() ||
       (window.document.hasFocus() && this.parent.contains(window.document.activeElement))
   }
 
@@ -851,12 +851,12 @@ export class Editor  {
     (this.view.dom as HTMLElement).blur();
   }
 
-  public getCodeViewActiveBlockContext() : CodeViewActiveBlockContext | undefined {
+  public getCodeViewActiveBlockContext(): CodeViewActiveBlockContext | undefined {
     return codeViewActiveBlockContext(this.state);
   }
 
   public setBlockSelection(
-    context: CodeViewActiveBlockContext, 
+    context: CodeViewActiveBlockContext,
     action: CodeViewSelectionAction) {
     codeViewSetBlockSelection(this.view, context, action);
   }
@@ -880,11 +880,11 @@ export class Editor  {
     }
   }
 
-  public navigateToSourcePos(pos: SourcePos)  {
-   
+  public navigateToSourcePos(pos: SourcePos) {
+
     // find the index
     let cursorIndex = -1;
-    for (let i=(pos.locations.length-1); i>=0; i--) {
+    for (let i = (pos.locations.length - 1); i >= 0; i--) {
       if (pos.pos >= pos.locations[i].pos) {
         cursorIndex = i;
         break;
@@ -895,11 +895,11 @@ export class Editor  {
     let targetPos = editingRootNode(this.view.state.selection)!.pos;
     if (cursorIndex !== -1) {
       const locations = this.getEditorSourcePos().locations;
-      targetPos = (locations[cursorIndex] || locations[locations.length-1]).pos;
+      targetPos = (locations[cursorIndex] || locations[locations.length - 1]).pos;
     }
 
     // navigate
-    this.navigate(NavigationType.Pos, String(targetPos), false, false); 
+    this.navigate(NavigationType.Pos, String(targetPos), false, false);
   }
 
   public resize() {
@@ -944,7 +944,7 @@ export class Editor  {
     // set global mode classes
     this.parent.classList.toggle('pm-dark-mode', !!theme.darkMode);
     this.parent.classList.toggle('pm-solarized-mode', !!theme.solarizedMode);
-    
+
     // apply the rest of the theme
     applyTheme(theme);
 
@@ -989,7 +989,7 @@ export class Editor  {
   // note that calling this may put the editor in an 'ignore selection changes'
   // state so anyone calling this must also call contextMenuDismissed when
   // the menu is no longer in play (either ignored or dismissed)
-  public contextMenu(event: Event) : ContextMenuSource | undefined {
+  public contextMenu(event: Event): ContextMenuSource | undefined {
     if (event.target && event.target instanceof Node) {
       const pos = this.view.posAtDOM(event.target, 0);
       if (pos !== -1) {
@@ -1088,13 +1088,13 @@ export class Editor  {
     );
   }
 
-  private createEditorMarkdown() : EditorMarkdown {
+  private createEditorMarkdown(): EditorMarkdown {
     const markdownFilter = markInputRuleFilter(this.schema, this.extensions.pandocMarks());
     return {
       allowMarkdownPaste(state) {
         return markdownFilter(state);
       },
-      markdownToSlice: async (markdown) : Promise<Slice> => {
+      markdownToSlice: async (markdown): Promise<Slice> => {
         // convert markdown to prosemirror
         const result = await this.pandocConverter.toProsemirror(markdown, this.pandocFormat);
 
@@ -1114,7 +1114,7 @@ export class Editor  {
 
   // this.editorMarkdown is not yet created when we call this so we setup a
   // proxy (chicken/egg: EditorMarkdown needs the initialized extensions)
-  private editorMarkdownProxy() : EditorMarkdown {
+  private editorMarkdownProxy(): EditorMarkdown {
     return {
       allowMarkdownPaste: (state) => {
         return this.editorMarkdown.allowMarkdownPaste(state);
@@ -1144,10 +1144,10 @@ export class Editor  {
     if (this.context.ui.spelling !== undefined) {
       this.extensions.registerPlugins(
         [realtimeSpellingPlugin(
-          this.schema, 
-          this.extensions.pandocMarks(), 
-          this.context.ui.spelling, 
-          this.context.ui.prefs, 
+          this.schema,
+          this.extensions.pandocMarks(),
+          this.context.ui.spelling,
+          this.context.ui.prefs,
           this.events
         )],
         true,
@@ -1155,7 +1155,7 @@ export class Editor  {
       this.extensions.register([{
         contextMenuHandlers: () => [
           spellingContextMenuHandler(
-            this.context.ui.spelling!, 
+            this.context.ui.spelling!,
             this.context.ui.context.translateText
           )
         ]
@@ -1206,7 +1206,7 @@ export class Editor  {
       return handleTextInput(view, from, to, text);
     };
 
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugin.props.handleTextInput = customHandleTextInput;
     return plugin;
@@ -1234,7 +1234,7 @@ export class Editor  {
             }
           },
           contextmenu: (_view: EditorView, event: Event) => {
-            
+
             // don't handle if there is no imperative context menu handler
             if (!this.context.ui.display.showContextMenu) {
               return false;
@@ -1266,7 +1266,7 @@ export class Editor  {
     });
   }
 
-  private preventSelectionChangePlugin() : Plugin {
+  private preventSelectionChangePlugin(): Plugin {
     return new Plugin({
       filterTransaction: (tr: Transaction, state: EditorState) => {
         if (this.preventSelectionChange?.(state)) {
@@ -1278,12 +1278,12 @@ export class Editor  {
     })
   }
 
-  private clipboardToDOMPlugin() : Plugin {
+  private clipboardToDOMPlugin(): Plugin {
     const schema = this.schema;
     return new Plugin({
       key: new PluginKey('clipboard-to-dom'),
-      props: { 
-        transformCopied(slice: Slice) : Slice {
+      props: {
+        transformCopied(slice: Slice): Slice {
           const newSlice = mapSlice(slice, node => {
             if (node.isText) {
               const clipboardMark = node.marks.find(mark => !!mark.type.spec.attrs?.clipboard);
@@ -1292,17 +1292,17 @@ export class Editor  {
                 const attrs = { ...clipboardMark.attrs, clipboard: true };
                 const newMark = clipboardMark.type.create(attrs);
                 marks = newMark.addToSet(marks);
-                return  schema.text(node.textContent, marks);
+                return schema.text(node.textContent, marks);
               } else {
                 return null;
               }
             } else {
               return null;
             }
-          }); 
+          });
           return newSlice;
         }
-       }
+      }
     });
   }
 
@@ -1345,7 +1345,7 @@ export class Editor  {
         handleKeyDown: (view: EditorView, event: KeyboardEvent) => {
           // workaround for Ctrl+ keys on windows desktop
           if (this.context.ui.context.isWindowsDesktop() &&
-              qtWebEngineVersion() !== undefined) {
+            qtWebEngineVersion() !== undefined) {
             const keyEvent = event as KeyboardEvent;
             if (keyEvent.ctrlKey) {
               const keyCommand = ctrlKeyCodes[keyEvent.code];
@@ -1455,7 +1455,7 @@ function navigationIdForSelection(state: EditorState): string | null {
   }
 }
 
-function pandocWriterOptions(options: PandocWriterOptions) : PandocWriterOptions {
+function pandocWriterOptions(options: PandocWriterOptions): PandocWriterOptions {
   return {
     atxHeaders: true,
     ...options

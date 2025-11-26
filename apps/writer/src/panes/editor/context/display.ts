@@ -19,8 +19,12 @@ import { EditorDisplay, EditorMenuItem, XRef } from "editor";
 
 import { Commands, showContextMenu } from "editor-ui";
 
-export function editorDisplay(commands: () => Commands) : EditorDisplay {
+export function editorDisplay(commands: () => Commands): EditorDisplay {
   return {
+    async getThemeData(_name) {
+      console.log('getThemeData UH OH')
+      //
+    },
     openURL(_url: string) {
       //
     },

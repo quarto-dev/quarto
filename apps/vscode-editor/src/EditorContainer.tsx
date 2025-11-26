@@ -23,13 +23,13 @@ import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
 
 import { useHotkeys } from "ui-widgets";
 
-import { 
-  commandHotkeys, 
-  CommandManagerContext, 
-  Commands, 
-  Editor,  
-  EditorUIStore,  
-  setEditorTheme, 
+import {
+  commandHotkeys,
+  CommandManagerContext,
+  Commands,
+  Editor,
+  EditorUIStore,
+  setEditorTheme,
   fluentTheme,
   showContextMenu
 } from 'editor-ui';
@@ -46,13 +46,13 @@ import styles from './Editor.module.scss';
 export interface EditorContainerProps {
   context: HostContext;
   host: VisualEditorHostClient;
-  request: JsonRpcRequestTransport;  
+  request: JsonRpcRequestTransport;
   store: EditorUIStore;
   editorId: string;
 }
 
 const EditorContainer: React.FC<EditorContainerProps> = (props) => {
-  
+
   // register keyboard shortcuts and get handlers
   const [cmState, cmDispatch] = useContext(CommandManagerContext);
   const hotkeys = useMemo(() => { return commandHotkeys(cmState.commands); }, [cmState.commands]);
@@ -62,13 +62,14 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   useEffect(() => {
     cmDispatch({ type: "ADD_COMMANDS", payload: editorHostCommands(props.host) });
   }, []);
- 
+
   // one time creation of editorUIContext
   const [uiContext] = useState(() => new HostEditorUIContext(props.context, props.host));
 
   // setup state for theme
   const [activeFluentTheme, setActiveFluentTheme] = useState(fluentTheme());
   const applyTheme = useCallback((theme: EditorTheme) => {
+    console.log('applyTheme in EditorContainer', theme)
     // set editor theme
     setEditorTheme(theme);
 
@@ -85,7 +86,7 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
   // ensure that keys we handle aren't propagated to vscode
   const keyboardEventHandler = (handler: React.KeyboardEventHandler) => {
     return (event: React.KeyboardEvent<HTMLElement>) => {
-      
+
       // call handler
       handler(event);
 
@@ -99,18 +100,18 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
       }
     };
   }
-  
+
   return (
     <FluentProvider theme={activeFluentTheme}>
-      <div 
-        className={styles.editorParent} 
-        onKeyDown={keyboardEventHandler(handleKeyDown)} 
+      <div
+        className={styles.editorParent}
+        onKeyDown={keyboardEventHandler(handleKeyDown)}
         onKeyUp={keyboardEventHandler(handleKeyUp)}
       >
         <EditorToolbar editorId={props.editorId}/>
         <Editor
           id={props.editorId}
-          className={styles.editorFrame} 
+          className={styles.editorFrame}
           request={props.request}
           uiContext={uiContext}
           display={editorDisplay(props.host)}
@@ -118,12 +119,12 @@ const EditorContainer: React.FC<EditorContainerProps> = (props) => {
           options={{
             cannotEditUntitled: true,
             defaultCellTypePython: true,
-            initialTheme: editorThemeFromVSCode() 
+            initialTheme: editorThemeFromVSCode()
           }}
         />
       </div>
     </FluentProvider>
-   
+
   );
 }
 
@@ -132,6 +133,9 @@ function editorDisplay(host: VisualEditorHostClient)  {
     return {
       openURL(url: string) {
         host.openURL(url);
+      },
+      getThemeData(name:string) {
+        return host.getThemeData(name)
       },
       navigateToXRef(file: string, xref: XRef) {
         host.navigateToXRef(file, xref);
@@ -152,13 +156,13 @@ function editorDisplay(host: VisualEditorHostClient)  {
 
 
 class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
-  
+
   constructor(
-    private readonly context: HostContext, 
-    private readonly host: VisualEditorHostClient) 
+    private readonly context: HostContext,
+    private readonly host: VisualEditorHostClient)
   {
   }
-  
+
   // check if we are the active tab
   public isActiveTab(): boolean {
     return true;
@@ -238,7 +242,7 @@ class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
   public async clipboardImage(): Promise<string | null> {
     return null;
   }
-  
+
   private resolvePath(path: string): string {
     if (path.startsWith("/") && this.context.projectDir) {
       return `${this.context.projectDir}/${path.slice(1)}`;

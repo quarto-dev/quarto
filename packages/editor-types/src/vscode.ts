@@ -43,6 +43,7 @@ export const VSC_VEH_RenderDocument = 'vsc_veh_render_document';
 export const VSC_VEH_EditorResourceUri = 'vsc_veh_editor_resource_url';
 
 export const VSC_VEH_OpenURL = 'vsc_veh_open_url';
+export const VSC_VEH_GetThemeData = 'vsc_veh_get_theme_data'
 export const VSC_VEH_NavigateToXRef = 'vsc_veh_navigate_to_xref';
 export const VSC_VEH_NavigateToFile = 'vsc_veh_navigate_to_file';
 
@@ -53,7 +54,7 @@ export const VSC_VEH_SelectImage = 'vsc_veh_select_image';
 export type NavLocation = XRef | SourcePos;
 
 export interface VSCodeVisualEditor {
-  init: (markdown: string, navigation?: NavLocation) => Promise<string | null>; 
+  init: (markdown: string, navigation?: NavLocation) => Promise<string | null>;
   focus: (navigation?: NavLocation) => Promise<void>;
   isFocused: () => Promise<boolean>;
   getMarkdownFromState: (state: unknown) => Promise<string>;
@@ -76,14 +77,12 @@ export interface HostContext {
 export interface VSCodeVisualEditorHost extends EditorDisplay, EditorUIImageResolver {
   getHostContext: () => Promise<HostContext>;
   reopenSourceMode: () => Promise<void>;
-  onEditorReady: () => Promise<void>; 
+  onEditorReady: () => Promise<void>;
   onEditorUpdated: (state: unknown) => Promise<void>;
   onEditorStateChanged: (sourcePos: SourcePos) => Promise<void>;
   flushEditorUpdates: () => Promise<void>;
   saveDocument: () => Promise<void>;
   renderDocument: () => Promise<void>;
   editorResourceUri: (path: string) => Promise<string>;
+  getThemeData: (themeName: string) => Promise<any>
 }
-
-
-

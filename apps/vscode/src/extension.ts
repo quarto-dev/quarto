@@ -87,8 +87,25 @@ export function activateCommon(
   console.log(
     'HELLO getCurrentTheme',
     getActiveThemeName(),
-    [...getTokenColorsForTheme(getActiveThemeName()).entries()].map(([k, v]) => [k, Object.entries(v)])
+    //[...getTokenColorsForTheme(getActiveThemeName()).entries()].map(([k, v]) => [k, Object.entries(v)])
   );
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveColorTheme((e) => {
+      const name = getActiveThemeName()
+      //const a = getTokenColorsForTheme(getActiveThemeName()).get('variable')
+      //console.log('YOYOLO theme changed!', e, name, a)
+    })
+  );
+  vscode.workspace.onDidChangeConfiguration(e => {
+    if (e.affectsConfiguration('workbench.colorTheme')) {
+      // Theme has changed
+      const currentTheme = vscode.workspace.getConfiguration().get('workbench.colorTheme');
+      console.log(`Active theme changed to: ${currentTheme}`);
+      // You can now use 'currentTheme' for your extension's logic
+    }
+  });
+
   // option enter handler
   activateOptionEnterProvider(context, engine);
 

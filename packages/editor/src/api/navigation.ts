@@ -81,14 +81,7 @@ export function navigateToXRef(view: EditorView, editorFormat: EditorFormat, xre
   }
 }
 
-export function navigateToPos(view: EditorView, pos: number, animate = true): Navigation | null {
-  // get previous position
-  const prevPos = view.state.selection.from;
-
-  // need to target at least the body
-  pos = Math.max(pos, 2);
-
-  // set selection (detect node selection)
+export function setSelection(view: EditorView, pos: number) {
   const tr = view.state.tr;
   const pmNode = view.state.doc.nodeAt(pos);
   if (pmNode?.type.spec.selectable) {
@@ -98,6 +91,12 @@ export function navigateToPos(view: EditorView, pos: number, animate = true): Na
   }
   tr.setMeta(kNavigationTransaction, true);
   view.dispatch(tr);
+}
+export function navigateToPos(view: EditorView, pos: number, animate = true): Navigation | null {
+  // need to target at least the body
+  pos = Math.max(pos, 2);
+
+  setSelection(view, pos);
 
   // find a targetable dom node at the position
   const node = findDomRefAtPos(pos, view.domAtPos.bind(view));
@@ -132,7 +131,7 @@ export function navigateToPos(view: EditorView, pos: number, animate = true): Na
       }
     }, 200);
 
-    return { pos, prevPos };
+    return { pos, prevPos: view.state.selection.from };
   } else {
     return null;
   }

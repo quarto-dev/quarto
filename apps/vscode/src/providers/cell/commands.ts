@@ -374,6 +374,7 @@ class RunCurrentCommand extends RunCommand implements Command {
                 positionIntoVdoc(context.selection.start)
               )
             );
+
             if (nextStatementPos !== undefined) {
               await editor.setBlockSelection(context, positionOutOfVdoc(nextStatementPos));
             }

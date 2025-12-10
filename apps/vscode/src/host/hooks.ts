@@ -87,12 +87,18 @@ export function hooksExtensionHost(): ExtensionHost {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
             },
             executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
-              return await vscode.commands.executeCommand(
-                'positron.executeCodeInConsole',
-                language,
-                uri,
-                position
-              );
+              try {
+                return await vscode.commands.executeCommand(
+                  'positron.executeCodeFromPosition',
+                  language,
+                  uri,
+                  position
+                ) as Position;
+              } catch (e) {
+                // an error can happen, we think, if the statementRangeProvider errors
+                console.error('error when using `positron.executeCodeFromPosition`');
+              }
+              return position;
             }
           };
 

@@ -1,7 +1,7 @@
 /*
  * vdoc.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2025 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -13,7 +13,7 @@
  *
  */
 
-import { Position, TextDocument, Uri, Range } from "vscode";
+import { Position, TextDocument, Uri, Range, SemanticTokens } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 import { isQuartoDoc } from "../core/doc";
@@ -21,6 +21,7 @@ import { MarkdownEngine } from "../markdown/engine";
 import { embeddedLanguage, EmbeddedLanguage } from "./languages";
 import { virtualDocUriFromEmbeddedContent } from "./vdoc-content";
 import { virtualDocUriFromTempFile } from "./vdoc-tempfile";
+import { decodeSemanticTokens, encodeSemanticTokens } from "../providers/semantic-tokens";
 
 export interface VirtualDoc {
   language: EmbeddedLanguage;
@@ -119,7 +120,8 @@ export type VirtualDocAction =
   "format" |
   "statementRange" |
   "helpTopic" |
-  "executeSelectionAtPositionInteractive";
+  "executeSelectionAtPositionInteractive" |
+  "semanticTokens";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void>; };
 
@@ -232,4 +234,36 @@ export function unadjustedRange(language: EmbeddedLanguage, range: Range) {
     unadjustedPosition(language, range.start),
     unadjustedPosition(language, range.end)
   );
+}
+
+/**
+ * Adjust semantic tokens from virtual document coordinates to real document coordinates
+ *
+ * This function decodes the tokens, adjusts each token's position using unadjustedRange,
+ * and re-encodes them back to delta format.
+ */
+export function unadjustedSemanticTokens(
+  language: EmbeddedLanguage,
+  tokens: SemanticTokens
+): SemanticTokens {
+  // Decode tokens to absolute positions
+  const decoded = decodeSemanticTokens(tokens);
+
+  // Adjust each token's position
+  const adjusted = decoded.map(t => {
+    const range = unadjustedRange(language, new Range(
+      new Position(t.line, t.startChar),
+      new Position(t.line, t.startChar + t.length)
+    ));
+    return {
+      line: range.start.line,
+      startChar: range.start.character,
+      length: range.end.character - range.start.character,
+      tokenType: t.tokenType,
+      tokenModifiers: t.tokenModifiers
+    };
+  });
+
+  // Re-encode to delta format
+  return encodeSemanticTokens(adjusted, tokens.resultId);
 }

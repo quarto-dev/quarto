@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.127.0 (Unreleased)
+## 1.127.0 (Release on 2025-12-17)
 
 - By default, headers from markdown files _in R projects_ (projects with a `DESCRIPTION` file such as R package) are no longer exported as workspace symbols. They remain exported as usual in other projects. This behaviour can be controlled manually with the new `quarto.symbols.exportToWorkspace` setting.
 - Added a new setting `quarto.useBundledQuartoInPositron` to prefer the Quarto CLI bundled with Positron when available. This setting has precedence _between_ `quarto.path` and `quarto.usePipQuarto`, and has no effect outside of Positron (<https://github.com/quarto-dev/quarto/pull/841>).

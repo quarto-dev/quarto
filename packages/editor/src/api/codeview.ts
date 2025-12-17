@@ -31,8 +31,8 @@ import { editingRootNode } from './node';
 import { editorScrollContainer } from './scroll';
 
 import { rmdChunk } from './rmd';
-import { CodeViewActiveBlockContext, CodeViewCellContext, CodeViewCompletionContext, CodeViewSelectionAction } from 'editor-types';
-import { navigateToPos } from './navigation';
+import { CodeViewActiveBlockContext, CodeViewBlock, CodeViewCellContext, CodeViewCompletionContext, CodeViewSelectionAction } from 'editor-types';
+import { navigateToPos, setSelection } from './navigation';
 
 export const kCodeViewNextLineTransaction = "codeViewNextLine";
 
@@ -200,17 +200,42 @@ export function scrollCodeViewElementIntoView(ele: HTMLElement, codeViewDom: HTM
   }
 }
 
+// convert action line and character in code block space to pos in prosemirror space
+function codeBlockPositionToViewPos(block: CodeViewBlock, action: { line: number, character: number; }) {
+  // asummes the meta line looks like this:
+  const metaLine = '{' + block.language + '}\n';
+  // block.code always has a trailing newline, resulting in an empty line here that is not in the actual editor
+  // so we slice it off
+  const code = lines(block.code).slice(0, -1);
+
+  if (action.line >= code.length) {
+    const endOfBlockPos = block.pos + metaLine.length + block.code.length - 1;
+    return endOfBlockPos;
+  }
+
+  let pos = block.pos + metaLine.length;
+  for (let i = 0; i < action.line; i++) {
+    pos += code[i].length + 1;
+  }
+  pos += action.character;
+
+  return pos;
+}
+
 export function codeViewSetBlockSelection(
   view: EditorView,
   context: CodeViewActiveBlockContext,
   action: CodeViewSelectionAction
 ) {
-
-
   const activeIndex = context.blocks.findIndex(block => block.active);
 
   if (activeIndex !== -1) {
-    if (action === "nextline") {
+    if (typeof action === 'object') {
+      // action is of type `{ line: number, character: number }`
+      view.focus();
+      setSelection(view, codeBlockPositionToViewPos(context.blocks[activeIndex], action));
+    }
+    else if (action === "nextline") {
       const tr = view.state.tr;
       tr.setMeta(kCodeViewNextLineTransaction, true);
       view.dispatch(tr);
@@ -226,9 +251,6 @@ export function codeViewSetBlockSelection(
       }
     }
   }
-
-
-
 }
 
 

@@ -46,11 +46,18 @@ import {
   codeWithoutOptionsFromBlock,
   executeInteractive,
   executeSelectionInteractive,
+  executeAtPositionInteractive,
 } from "./executors";
 import { ExtensionHost } from "../../host";
-import { hasHooks } from "../../host/hooks";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { isKnitrDocument } from "../../host/executors";
 import { commands } from "vscode";
+import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
+import { embeddedLanguage } from "../../vdoc/languages";
+import { Uri } from "vscode";
+import { StatementRange } from "positron";
+
+const isPositron = tryAcquirePositronApi();
 
 export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Command[] {
   return [
@@ -146,9 +153,7 @@ abstract class RunCommand {
   }
 
   private async hasExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
-    // TODO: this is incorrect right? `cellExecutorForLanguage` returns a promise, and a promise will always be truthy?
-    // We should have to await it before doing `!!`
-    return !!this.cellExecutorForLanguage(language, document, engine);
+    return undefined !== (await this.cellExecutorForLanguage(language, document, engine));
   }
 
 }
@@ -259,7 +264,11 @@ class RunPreviousCellCommand extends RunCommand implements Command {
   }
 }
 
+// More permissive type than `Position` so its easier to construct via a literal
+type LineAndCharPos = { line: number, character: number; };
 
+
+// Run the code at the cursor
 class RunCurrentCommand extends RunCommand implements Command {
   constructor(
     host: ExtensionHost,
@@ -292,7 +301,7 @@ class RunCurrentCommand extends RunCommand implements Command {
       const resolveToRunCell = editor.selection.isEmpty &&
         !this.runSelection_ &&
         !isKnitrDocument(editor.document, this.engine_) &&
-        (!hasHooks() && (language === "python" || language === "r"));
+        (!isPositron && (language === "python" || language === "r"));
 
       if (resolveToRunCell) {
         const code = codeWithoutOptionsFromBlock(block);
@@ -336,38 +345,66 @@ class RunCurrentCommand extends RunCommand implements Command {
     context: CodeViewActiveBlockContext
   ): Promise<void> {
     // get selection and active block
-    let selection = context.selectedText;
+    const selection = context.selectedText;
     const activeBlock = context.blocks.find(block => block.active);
 
-    // if the selection is empty and this isn't a knitr document then it resolves to run cell
-    if (selection.length <= 0 && !isKnitrDocument(editor.document, this.engine_)) {
-      if (activeBlock) {
-        const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-        if (executor) {
-          await executeInteractive(executor, [activeBlock.code], editor.document);
-          await activateIfRequired(editor);
+    // if in Positron
+    if (isPositron) {
+      if (activeBlock && selection.length <= 0) {
+        const codeLines = lines(activeBlock.code);
+        const vdoc = virtualDocForCode(codeLines, embeddedLanguage(activeBlock.language)!);
+        if (vdoc) {
+          const parentUri = Uri.file(editor.document.fileName);
+          const injectedLines = (vdoc.language?.inject?.length ?? 0);
+
+          const positionIntoVdoc = (p: LineAndCharPos) =>
+            new Position(p.line + injectedLines, p.character);
+          const positionOutOfVdoc = (p: LineAndCharPos) =>
+            new Position(p.line - injectedLines, p.character);
+
+          const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+          if (executor) {
+            const nextStatementPos = await withVirtualDocUri(
+              vdoc,
+              parentUri,
+              "executeSelectionAtPositionInteractive",
+              (uri) => executeAtPositionInteractive(
+                executor,
+                uri,
+                positionIntoVdoc(context.selection.start)
+              )
+            );
+
+            if (nextStatementPos !== undefined) {
+              await editor.setBlockSelection(context, positionOutOfVdoc(nextStatementPos));
+            }
+          }
         }
       }
-
+      // if not in Positron
     } else {
-      // if the selection is empty take the whole line, otherwise take the selected text exactly
-      let action: CodeViewSelectionAction | undefined;
-      if (selection.length <= 0) {
+      // if the selection is empty and this isn't a knitr document then it resolves to run cell
+      if (selection.length <= 0 && !isKnitrDocument(editor.document, this.engine_)) {
         if (activeBlock) {
-          selection = lines(activeBlock.code)[context.selection.start.line];
-          action = "nextline";
+          const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
+          if (executor) {
+            await executeInteractive(executor, [activeBlock.code], editor.document);
+            await activateIfRequired(editor);
+          }
         }
-      }
+      } else {
+        const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+        if (executor) {
+          if (selection.length > 0) {
+            await executeInteractive(executor, [selection], editor.document);
+            await editor.setBlockSelection(context, "nextline");
+          } else if (activeBlock) { // if the selection is empty take the whole line as the selection
+            await executeInteractive(executor, [lines(activeBlock.code)[context.selection.start.line]], editor.document);
+            await editor.setBlockSelection(context, "nextline");
+          }
 
-      // run code
-      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [selection], editor.document);
-
-        // advance cursor if necessary
-        if (action) {
-          editor.setBlockSelection(context, "nextline");
         }
+
       }
     }
   }
@@ -382,7 +419,7 @@ class RunSelectionCommand extends RunCurrentCommand implements Command {
 
 }
 
-
+// Run Cell and Advance
 class RunCurrentAdvanceCommand extends RunCommand implements Command {
   constructor(host: ExtensionHost, engine: MarkdownEngine) {
     super(host, engine);

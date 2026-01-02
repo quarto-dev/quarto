@@ -32,7 +32,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
-import { initQuartoContext } from "quarto-core";
+import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 import { textFormattingCommands } from "./providers/text-format";
@@ -64,17 +64,30 @@ export async function activate(context: vscode.ExtensionContext) {
   const commands = cellCommands(host, engine);
 
   // get quarto context (some features conditional on it)
-  const quartoPath = await configuredQuartoPath();
+  // Create a logger function for verbose discovery output
+  const discoveryLogger = (msg: string) => outputChannel.info(msg);
+
+  outputChannel.info("Searching for Quarto CLI...");
+  const quartoPathResult = await configuredQuartoPath(discoveryLogger);
   const workspaceFolder = vscode.workspace.workspaceFolders?.length
     ? vscode.workspace.workspaceFolders[0].uri.fsPath
     : undefined;
   const quartoContext = initQuartoContext(
-    quartoPath,
+    quartoPathResult?.path,
     workspaceFolder,
     // Look for quarto in the app root; this is where Positron installs it
     [path.join(vscode.env.appRoot, "quarto", "bin")],
-    vscode.window.showWarningMessage
+    vscode.window.showWarningMessage,
+    { logger: discoveryLogger, source: quartoPathResult?.source }
   );
+
+  // Log the final discovery result
+  if (quartoContext.available) {
+    const sourceDescription = getSourceDescription(quartoContext.source);
+    outputChannel.info(`Using Quarto ${quartoContext.version} from ${quartoContext.binPath}${sourceDescription}`);
+  } else {
+    outputChannel.info("Quarto CLI not found. Some features will be unavailable.");
+  }
   if (quartoContext.available) {
 
     // enable commands conditional on quarto installation

@@ -21,6 +21,39 @@ import { ExecFileSyncOptions } from "node:child_process";
 import * as semver from "semver";
 import { execProgram, isArm_64 } from "core-node";
 
+/**
+ * Describes where Quarto was discovered from.
+ */
+export type QuartoSource =
+  | "setting"           // quarto.path setting
+  | "positron-bundled"  // Positron's bundled Quarto
+  | "pip-venv"          // pip-installed in venv/conda
+  | "path"              // Found on system PATH
+  | "known-location"    // Known install location
+  | "additional-path";  // Additional search path (Positron fallback)
+
+/**
+ * Get a human-readable description of the Quarto source for logging.
+ */
+export function getSourceDescription(source: QuartoSource | undefined): string {
+  switch (source) {
+    case "setting":
+      return " (configured via quarto.path setting)";
+    case "positron-bundled":
+      return " (Positron bundled)";
+    case "pip-venv":
+      return " (pip-installed in Python environment)";
+    case "path":
+      return " (found on system PATH)";
+    case "known-location":
+      return " (found in known installation location)";
+    case "additional-path":
+      return " (found in additional search path)";
+    default:
+      return "";
+  }
+}
+
 export interface QuartoContext {
   available: boolean;
   version: string;
@@ -29,6 +62,7 @@ export interface QuartoContext {
   pandocPath: string;
   workspaceDir?: string;
   useCmd: boolean;
+  source?: QuartoSource;
   runQuarto: (options: ExecFileSyncOptions, ...args: string[]) => string;
   runPandoc: (options: ExecFileSyncOptions, ...args: string[]) => string;
 }
@@ -51,10 +85,13 @@ export function initQuartoContext(
   quartoPath?: string,
   workspaceFolder?: string,
   additionalSearchPaths?: string[],
-  showWarning?: (msg: string) => void
+  showWarning?: (msg: string) => void,
+  options?: { logger?: (msg: string) => void; source?: QuartoSource }
 ): QuartoContext {
   // default warning to log
   showWarning = showWarning || console.log;
+  const logger = options?.logger;
+  let source = options?.source;
 
   // check for user setting (resolving workspace relative paths)
   let quartoInstall: QuartoInstallation | undefined;
@@ -63,16 +100,32 @@ export function initQuartoContext(
       quartoPath = path.join(workspaceFolder, quartoPath);
     }
     quartoInstall = detectUserSpecifiedQuarto(quartoPath, showWarning);
+    // If a source wasn't provided and we have a path, assume it's from a setting
+    if (quartoInstall && !source) {
+      source = "setting";
+    }
   }
 
   // next look on the path
   if (!quartoInstall) {
+    logger?.("  Checking system PATH...");
     quartoInstall = detectQuarto("quarto");
+    if (quartoInstall) {
+      logger?.(`  Found Quarto ${quartoInstall.version} on system PATH`);
+      source = "path";
+    } else {
+      logger?.("  Not found on system PATH");
+    }
   }
 
   // if still not found, scan for versions of quarto in known locations
   if (!quartoInstall) {
-    quartoInstall = scanForQuarto(additionalSearchPaths);
+    logger?.("  Scanning known installation locations...");
+    const result = scanForQuartoWithSource(additionalSearchPaths, logger);
+    quartoInstall = result.install;
+    if (result.install) {
+      source = result.source;
+    }
   }
 
   // return if we got them
@@ -96,6 +149,7 @@ export function initQuartoContext(
       pandocPath,
       workspaceDir: workspaceFolder,
       useCmd,
+      source,
       runQuarto: (options: ExecFileSyncOptions, ...args: string[]) =>
         execProgram(
           path.join(quartoInstall!.binPath, "quarto" + (useCmd ? ".cmd" : "")),
@@ -110,6 +164,7 @@ export function initQuartoContext(
         ),
     };
   } else {
+    logger?.("  Quarto CLI not found");
     return quartoContextUnavailable();
   }
 }
@@ -190,44 +245,58 @@ function detectUserSpecifiedQuarto(
 }
 
 /**
- * Scan for Quarto in known locations.
+ * Scan for Quarto in known locations, returning the source.
  *
  * @param additionalSearchPaths Additional paths to search for Quarto (optional)
+ * @param logger Optional logger for verbose output
  *
- * @returns A Quarto installation if found, otherwise undefined
+ * @returns An object containing the installation (if found) and the source
  */
-function scanForQuarto(additionalSearchPaths?: string[]): QuartoInstallation | undefined {
-  const scanPaths: string[] = [];
+function scanForQuartoWithSource(
+  additionalSearchPaths?: string[],
+  logger?: (msg: string) => void
+): { install: QuartoInstallation | undefined; source: QuartoSource | undefined } {
+  const knownPaths: string[] = [];
   if (os.platform() === "win32") {
-    scanPaths.push("C:\\Program Files\\Quarto\\bin");
+    knownPaths.push("C:\\Program Files\\Quarto\\bin");
     const localAppData = process.env["LOCALAPPDATA"];
     if (localAppData) {
-      scanPaths.push(path.join(localAppData, "Programs", "Quarto", "bin"));
+      knownPaths.push(path.join(localAppData, "Programs", "Quarto", "bin"));
     }
-    scanPaths.push("C:\\Program Files\\RStudio\\bin\\quarto\\bin");
+    knownPaths.push("C:\\Program Files\\RStudio\\bin\\quarto\\bin");
   } else if (os.platform() === "darwin") {
-    scanPaths.push("/Applications/quarto/bin");
+    knownPaths.push("/Applications/quarto/bin");
     const home = process.env.HOME;
     if (home) {
-      scanPaths.push(path.join(home, "Applications", "quarto", "bin"));
+      knownPaths.push(path.join(home, "Applications", "quarto", "bin"));
     }
-    scanPaths.push("/Applications/RStudio.app/Contents/MacOS/quarto/bin");
+    knownPaths.push("/Applications/RStudio.app/Contents/MacOS/quarto/bin");
   } else if (os.platform() === "linux") {
-    scanPaths.push("/opt/quarto/bin");
-    scanPaths.push("/usr/lib/rstudio/bin/quarto/bin");
-    scanPaths.push("/usr/lib/rstudio-server/bin/quarto/bin");
+    knownPaths.push("/opt/quarto/bin");
+    knownPaths.push("/usr/lib/rstudio/bin/quarto/bin");
+    knownPaths.push("/usr/lib/rstudio-server/bin/quarto/bin");
   }
 
-  if (additionalSearchPaths) {
-    scanPaths.push(...additionalSearchPaths);
-  }
-
-  for (const scanPath of scanPaths.filter(fs.existsSync)) {
+  // Check known locations first
+  for (const scanPath of knownPaths.filter(fs.existsSync)) {
     const install = detectQuarto(path.join(scanPath, "quarto"));
     if (install) {
-      return install;
+      logger?.(`  Found Quarto ${install.version} at ${scanPath}`);
+      return { install, source: "known-location" };
     }
   }
 
-  return undefined;
+  // Then check additional search paths (e.g., Positron bundled location)
+  if (additionalSearchPaths) {
+    for (const scanPath of additionalSearchPaths.filter(fs.existsSync)) {
+      const install = detectQuarto(path.join(scanPath, "quarto"));
+      if (install) {
+        logger?.(`  Found Quarto ${install.version} at ${scanPath} (additional search path)`);
+        return { install, source: "additional-path" };
+      }
+    }
+  }
+
+  logger?.("  Not found in known installation locations");
+  return { install: undefined, source: undefined };
 }

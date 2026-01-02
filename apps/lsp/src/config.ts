@@ -158,22 +158,27 @@ export class ConfigurationManager extends Disposable {
 
   public async update() {
     this._logger.logTrace('Sending \'configuration\' request');
-    const settings = await this.connection_.workspace.getConfiguration();
+    // Request only the specific sections we need to avoid warnings about
+    // language-scoped settings like [markdown], [python], etc.
+    const [workbench, quarto] = await this.connection_.workspace.getConfiguration([
+      { section: 'workbench' },
+      { section: 'quarto' }
+    ]);
 
     this._settings = {
       ...defaultSettings(),
       workbench: {
-        colorTheme: settings.workbench.colorTheme
+        colorTheme: workbench?.colorTheme ?? this._settings.workbench.colorTheme
       },
       quarto: {
-        logLevel: Logger.parseLogLevel(settings.quarto.server.logLevel),
-        path: settings.quarto.path,
+        logLevel: Logger.parseLogLevel(quarto?.server?.logLevel),
+        path: quarto?.path ?? this._settings.quarto.path,
         mathjax: {
-          scale: settings.quarto.mathjax.scale,
-          extensions: settings.quarto.mathjax.extensions
+          scale: quarto?.mathjax?.scale ?? this._settings.quarto.mathjax.scale,
+          extensions: quarto?.mathjax?.extensions ?? this._settings.quarto.mathjax.extensions
         },
         symbols: {
-          exportToWorkspace: settings.quarto.symbols.exportToWorkspace
+          exportToWorkspace: quarto?.symbols?.exportToWorkspace ?? this._settings.quarto.symbols.exportToWorkspace
         }
       }
     };

@@ -2,6 +2,8 @@
 
 ## 1.128.0 (Unreleased)
 
+- Added a public API that other extensions can query to get the Quarto CLI path, version, and availability (<https://github.com/quarto-dev/quarto/pull/879>).
+
 ## 1.127.0 (Release on 2025-12-17)
 
 - By default, headers from markdown files _in R projects_ (projects with a `DESCRIPTION` file such as R package) are no longer exported as workspace symbols. They remain exported as usual in other projects. This behaviour can be controlled manually with the new `quarto.symbols.exportToWorkspace` setting.

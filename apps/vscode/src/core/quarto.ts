@@ -60,9 +60,8 @@ export async function configuredQuartoPath(
   const isPositron = tryAcquirePositronApi();
 
   if (useBundledQuarto) {
-    logger?.("  Checking Positron bundled Quarto: enabled");
-
     if (isPositron) {
+      logger?.("  Checking Positron bundled Quarto: enabled");
       // Use path relative to the application root for Positron's bundled Quarto
       const rootPath = env.appRoot; // Use vscode.env.appRoot as the application root path
       const positronQuartoPath = path.join(

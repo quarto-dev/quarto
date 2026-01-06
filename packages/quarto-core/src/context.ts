@@ -30,7 +30,8 @@ export type QuartoSource =
   | "pip-venv"          // pip-installed in venv/conda
   | "path"              // Found on system PATH
   | "known-location"    // Known install location
-  | "additional-path";  // Additional search path (Positron fallback)
+  | "additional-path"   // Additional search path (Positron fallback)
+  | "unknown";          // Source not specified by caller
 
 /**
  * Get a human-readable description of the Quarto source for logging.
@@ -49,6 +50,8 @@ export function getSourceDescription(source: QuartoSource | undefined): string {
       return " (found in known installation location)";
     case "additional-path":
       return " (found in additional search path)";
+    case "unknown":
+      return " (source not specified)";
     default:
       return "";
   }
@@ -100,9 +103,9 @@ export function initQuartoContext(
       quartoPath = path.join(workspaceFolder, quartoPath);
     }
     quartoInstall = detectUserSpecifiedQuarto(quartoPath, showWarning);
-    // If a source wasn't provided and we have a path, assume it's from a setting
+    // If a source wasn't provided and we have a path, mark as unknown
     if (quartoInstall && !source) {
-      source = "setting";
+      source = "unknown";
     }
   }
 

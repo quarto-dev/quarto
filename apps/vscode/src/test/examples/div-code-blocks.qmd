@@ -1,0 +1,158 @@
+---
+title: "Div Code Blocks"
+format: html
+---
+
+## Code blocks in divs without blank lines
+
+This tests the fix for issue #521 where closing `:::` without a preceding
+blank line would cause code blocks to not be detected.
+
+## A slide with code
+
+```{r}
+library(tidyverse)
+head(mtcars)
+```
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+$$
+\mathbf{y} = \mathbf{X}^\top\beta + \varepsilon
+$$
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+```{r}
+head(mtcars)
+```
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+$$
+\mathbf{y} = \mathbf{X}^\top\beta + \varepsilon
+$$
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with code
+
+Did not previously display properly:
+
+```{r}
+head(mtcars)
+```
+
+::: {.notes}
+- test notes
+:::
+
+## A slide with math
+
+Did not previously display properly:
+
+$$
+\mathbf{y} = \mathbf{X}^\top\beta + \varepsilon
+$$
+
+::: {.notes}
+- test notes
+:::

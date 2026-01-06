@@ -139,7 +139,7 @@ export const divPlugin = (md: MarkdownIt) => {
         return false;
       }
     },
-    { alt: [] }
+    { alt: ["paragraph"] }
   )
 
   md.renderer.rules[kTokDivOpen] = renderStartDiv

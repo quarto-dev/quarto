@@ -44,11 +44,12 @@ import { activateOptionEnterProvider } from "./providers/option";
 import { activateBackgroundHighlighter } from "./providers/background";
 import { activateContextKeySetter } from "./providers/context-keys";
 import { CommandManager } from "./core/command";
+import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
 
 /**
  * Entry point for the entire extension! This initializes the LSP, quartoContext, extension host, and more...
  */
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<QuartoExtensionApi> {
   // create output channel for extension logs and lsp client logs
   const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
 
@@ -181,6 +182,9 @@ export async function activate(context: vscode.ExtensionContext) {
   registerQuartoPathConfigListener(context, outputChannel);
 
   outputChannel.info("Activated Quarto extension.");
+
+  // Return the public API for other extensions to use
+  return createQuartoExtensionApi(quartoContext);
 }
 
 /**

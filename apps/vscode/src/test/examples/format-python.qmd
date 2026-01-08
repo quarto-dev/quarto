@@ -1,0 +1,10 @@
+---
+title: Formatting Python Code Cells
+subtitle: https://github.com/quarto-dev/quarto/pull/655
+format: html
+---
+
+```{python}
+#| label: my-code
+x=1;y=2;z=x+y
+```

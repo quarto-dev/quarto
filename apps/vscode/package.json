@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.127.0",
+  "version": "1.128.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -29,7 +29,7 @@
   "private": true,
   "engines": {
     "vscode": "^1.75.0",
-    "positron": "^2025.6.0"
+    "positron": "^2025.12.0"
   },
   "main": "./out/main.js",
   "browser": "./browser.js",
@@ -1467,6 +1467,7 @@
     "@posit-dev/positron": "^0.1.0",
     "quarto-core": "*",
     "quarto-lsp": "*",
+    "quarto-utils": "*",
     "quarto-vscode-editor": "*",
     "quarto-vscode-markdownit": "*",
     "semver": "^7.3.8",

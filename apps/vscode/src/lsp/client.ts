@@ -1,7 +1,7 @@
 /*
  * client.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2025 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -66,6 +66,7 @@ import {
   embeddedDocumentFormattingProvider,
   embeddedDocumentRangeFormattingProvider,
 } from "../providers/format";
+import { embeddedSemanticTokensProvider } from "../providers/semantic-tokens";
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
@@ -111,6 +112,7 @@ export async function activateLsp(
     provideDocumentRangeFormattingEdits: embeddedDocumentRangeFormattingProvider(
       engine
     ),
+    provideDocumentSemanticTokens: embeddedSemanticTokensProvider(engine),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);

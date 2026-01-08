@@ -32,7 +32,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
-import { initQuartoContext } from "quarto-core";
+import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 import { textFormattingCommands } from "./providers/text-format";
@@ -44,11 +44,12 @@ import { activateOptionEnterProvider } from "./providers/option";
 import { activateBackgroundHighlighter } from "./providers/background";
 import { activateContextKeySetter } from "./providers/context-keys";
 import { CommandManager } from "./core/command";
+import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
 
 /**
  * Entry point for the entire extension! This initializes the LSP, quartoContext, extension host, and more...
  */
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<QuartoExtensionApi> {
   // create output channel for extension logs and lsp client logs
   const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
 
@@ -64,17 +65,30 @@ export async function activate(context: vscode.ExtensionContext) {
   const commands = cellCommands(host, engine);
 
   // get quarto context (some features conditional on it)
-  const quartoPath = await configuredQuartoPath();
+  // Create a logger function for verbose discovery output
+  const discoveryLogger = (msg: string) => outputChannel.info(msg);
+
+  outputChannel.info("Searching for Quarto CLI...");
+  const quartoPathResult = await configuredQuartoPath(discoveryLogger);
   const workspaceFolder = vscode.workspace.workspaceFolders?.length
     ? vscode.workspace.workspaceFolders[0].uri.fsPath
     : undefined;
   const quartoContext = initQuartoContext(
-    quartoPath,
+    quartoPathResult?.path,
     workspaceFolder,
     // Look for quarto in the app root; this is where Positron installs it
     [path.join(vscode.env.appRoot, "quarto", "bin")],
-    vscode.window.showWarningMessage
+    vscode.window.showWarningMessage,
+    { logger: discoveryLogger, source: quartoPathResult?.source }
   );
+
+  // Log the final discovery result
+  if (quartoContext.available) {
+    const sourceDescription = getSourceDescription(quartoContext.source);
+    outputChannel.info(`Using Quarto ${quartoContext.version} from ${quartoContext.binPath}${sourceDescription}`);
+  } else {
+    outputChannel.info("Quarto CLI not found. Some features will be unavailable.");
+  }
   if (quartoContext.available) {
 
     // enable commands conditional on quarto installation
@@ -168,6 +182,9 @@ export async function activate(context: vscode.ExtensionContext) {
   registerQuartoPathConfigListener(context, outputChannel);
 
   outputChannel.info("Activated Quarto extension.");
+
+  // Return the public API for other extensions to use
+  return createQuartoExtensionApi(quartoContext);
 }
 
 /**

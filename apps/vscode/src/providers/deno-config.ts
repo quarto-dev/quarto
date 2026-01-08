@@ -24,7 +24,7 @@ export function activateDenoConfig(context: ExtensionContext, engine: MarkdownEn
   if (extensions.getExtension("denoland.vscode-deno")) {
     const ensureDenoConfig = async (doc: TextDocument) => {
       if (isQuartoDoc(doc)) {
-        const config = workspace.getConfiguration();
+        const config = workspace.getConfiguration(undefined, doc.uri);
         const inspectDenoEnable = config.inspect("deno.enable");
         if (
           !inspectDenoEnable?.globalValue &&

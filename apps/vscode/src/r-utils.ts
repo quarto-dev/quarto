@@ -14,7 +14,7 @@
  */
 
 import * as vscode from 'vscode';
-import { isRPackage as isRPackageImpl } from "@utils/r-utils";
+import { isRPackage as isRPackageImpl } from "quarto-utils";
 
 // Version that selects workspace folder
 export async function isRPackage(): Promise<boolean> {

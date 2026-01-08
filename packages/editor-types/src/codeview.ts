@@ -27,14 +27,15 @@ export const kCodeViewGetDiagnostics = 'code_view_get_diagnostics';
 
 export type CodeViewExecute = "selection" | "cell" | "cell+advance" | "above" | "below";
 
+export type CodeViewBlock = { pos: number, language: string, code: string; active: boolean; };
 export interface CodeViewActiveBlockContext {
   activeLanguage: string;
-  blocks: Array<{ pos: number, language: string, code: string; active: boolean; }>;
+  blocks: Array<CodeViewBlock>;
   selection: Range;
   selectedText: string;
 }
 
-export type CodeViewSelectionAction = "nextline" | "nextblock" | "prevblock";
+export type CodeViewSelectionAction = "nextline" | "nextblock" | "prevblock" | { line: number, character: number; };
 
 export interface CodeViewCellContext {
   filepath: string;

@@ -1,11 +1,19 @@
 # Changelog
 
-## 1.127.0 (Unreleased)
+## 1.128.0 (Unreleased)
+
+- Fixed a bug where code blocks inside complex div structures (e.g., many `::: {.notes}` divs without preceding blank lines) were not detected as executable cells (<https://github.com/quarto-dev/quarto/pull/875>).
+- Added a public API that other extensions can query to get the Quarto CLI path, version, and availability (<https://github.com/quarto-dev/quarto/pull/879>).
+
+
+## 1.127.0 (Release on 2025-12-17)
 
 - By default, headers from markdown files _in R projects_ (projects with a `DESCRIPTION` file such as R package) are no longer exported as workspace symbols. They remain exported as usual in other projects. This behaviour can be controlled manually with the new `quarto.symbols.exportToWorkspace` setting.
 - Added a new setting `quarto.useBundledQuartoInPositron` to prefer the Quarto CLI bundled with Positron when available. This setting has precedence _between_ `quarto.path` and `quarto.usePipQuarto`, and has no effect outside of Positron (<https://github.com/quarto-dev/quarto/pull/841>).
-- Visual Editor: uses a text box for alternative text and captions in callouts, images, and tables interface. (<https://github.com/quarto-dev/quarto/pull/644>)
+- Visual Editor: uses a text box for alternative text and captions in callouts, images, and tables interface. (<https://github.com/quarto-dev/quarto/pull/644>).
 - Fixed a bug where previewing showed "Not Found" on Quarto files with spaces in the name in subfolders of projects (<https://github.com/quarto-dev/quarto/pull/853>).
+- Added support for semantic highlighting in Quarto documents, when using an LSP that supports it (for example, Pylance) (<https://github.com/quarto-dev/quarto/pull/868>).
+- Visual Editor: in Positron, add support for statement execution (<https://github.com/quarto-dev/quarto/pull/867/>).
 
 ## 1.126.0 (Release on 2025-10-08)
 

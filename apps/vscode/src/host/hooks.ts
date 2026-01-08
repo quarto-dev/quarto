@@ -23,6 +23,8 @@ import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocu
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
+import { Position } from 'vscode';
+import { Uri } from 'vscode';
 
 declare global {
   function acquirePositronApi(): hooks.PositronApi;
@@ -83,6 +85,20 @@ export function hooksExtensionHost(): ExtensionHost {
             },
             executeSelection: async (): Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
+            },
+            executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
+              try {
+                return await vscode.commands.executeCommand(
+                  'positron.executeCodeFromPosition',
+                  language,
+                  uri,
+                  position
+                ) as Position;
+              } catch (e) {
+                // an error can happen, we think, if the statementRangeProvider errors
+                console.error('error when using `positron.executeCodeFromPosition`');
+              }
+              return position;
             }
           };
 
@@ -169,7 +185,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         const result = await vscode.commands.executeCommand<hooks.StatementRange>(
           "vscode.executeStatementRangeProvider",
           uri,
-          position
+          adjustedPosition(vdoc.language, position)
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       });

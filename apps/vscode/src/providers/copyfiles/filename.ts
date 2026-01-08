@@ -41,7 +41,7 @@ export async function getNewFileName(document: vscode.TextDocument, file: vscode
 
 function getDesiredNewFilePath(document: vscode.TextDocument, file: vscode.DataTransferFile): vscode.Uri {
   const docUri = getParentDocumentUri(document);
-  const config = vscode.workspace.getConfiguration('markdown').get<Record<string, string>>('experimental.copyFiles.destination') ?? {};
+  const config = vscode.workspace.getConfiguration('markdown', docUri).get<Record<string, string>>('experimental.copyFiles.destination') ?? {};
   for (const [rawGlob, rawDest] of Object.entries(config)) {
     for (const glob of parseGlob(rawGlob)) {
       if (picomatch.isMatch(docUri.path, glob)) {

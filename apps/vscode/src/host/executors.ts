@@ -22,16 +22,21 @@ import { documentFrontMatter } from "../markdown/document";
 import { isExecutableLanguageBlockOf } from "quarto-core";
 import { workspace } from "vscode";
 import { JupyterKernelspec } from "core";
+import { Position } from "vscode";
 
 export interface CellExecutor {
   execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
   executeSelection?: () => Promise<void>;
+  executeAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
 }
 
 export function executableLanguages() {
   return kCellExecutors.map((executor) => executor.language);
 }
 
+// This function is always used by the `defaultExtensionHost`, and is used
+// by the `hooksExtensionHost` as a backup. Please see `hooksExtensionHost`
+// how executors are retrieved in Positron.
 export async function cellExecutorForLanguage(
   language: string,
   document: TextDocument,

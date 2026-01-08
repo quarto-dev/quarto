@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.128.0 (Unreleased)
+## 1.128.0 (Release on 2026-01-08)
 
 - Fixed a bug where code blocks inside complex div structures (e.g., many `::: {.notes}` divs without preceding blank lines) were not detected as executable cells (<https://github.com/quarto-dev/quarto/pull/875>).
 - Added a public API that other extensions can query to get the Quarto CLI path, version, and availability (<https://github.com/quarto-dev/quarto/pull/879>).

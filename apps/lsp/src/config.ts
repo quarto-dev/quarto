@@ -42,7 +42,7 @@ export interface Settings {
     readonly mathjax: {
       readonly scale: number;
       readonly extensions: MathjaxSupportedExtension[];
-    }
+    };
     readonly symbols: {
       readonly exportToWorkspace: 'default' | 'all' | 'none';
     };
@@ -125,7 +125,7 @@ function defaultSettings(): Settings {
         }
       }
     }
-  }
+  };
 }
 
 
@@ -184,18 +184,18 @@ export class ConfigurationManager extends Disposable {
         }
       }
     };
-    
+
     // Fallback: try to detect theme from name if we haven't received an explicit notification yet
     // This is a best-effort approach for compatibility, but won't work with autoDetectColorScheme
     // Only apply fallback if theme hasn't been explicitly set via notification
     if (!this._themeExplicitlySet) {
-      if (settings.workbench.colorTheme.includes("Light")) {
+      if (this._settings.workbench.colorTheme.includes("Light")) {
         this._activeColorThemeKind = "light";
-      } else if (settings.workbench.colorTheme.includes("Dark")) {
+      } else if (this._settings.workbench.colorTheme.includes("Dark")) {
         this._activeColorThemeKind = "dark";
       }
     }
-    
+
     this._onDidChangeConfiguration.fire(this._settings);
   }
 
@@ -268,7 +268,7 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
     get exportSymbolsToWorkspace(): 'default' | 'all' | 'none' {
       return configManager.getSettings().quarto.symbols.exportToWorkspace;
     }
-  }
+  };
 }
 
 export function getDiagnosticsOptions(configManager: ConfigurationManager): DiagnosticOptions {

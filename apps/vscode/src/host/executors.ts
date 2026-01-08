@@ -153,7 +153,11 @@ const csharpCellExecutor: VSCodeCellExecutor = {
 const bashCellExecutor: VSCodeCellExecutor = {
   language: "bash",
   execute: async (blocks: string[]) => {
-    const terminal = window.activeTerminal || window.createTerminal();
+    // todo: this should probably check that the terminal isn't an interactive terminal for languages
+    // other than R as well...
+    const terminal = window.activeTerminal && window.activeTerminal?.name !== 'R Interactive' ?
+      window.activeTerminal : window.createTerminal();
+
     terminal.show();
     terminal.sendText(blocks.join("\n"));
   },
@@ -283,7 +287,7 @@ export async function ensureRequiredExtension(
       }
     }
   } else {
-    return false;
+    return true;
   }
 }
 

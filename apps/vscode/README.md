@@ -1,6 +1,4 @@
-# quarto-vscode
-
-[![Supported by Posit](https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/img/badge.svg)](https://posit.co)
+# quarto-vscode <a href="https://posit.co"><img src="https://cdn.jsdelivr.net/gh/posit-dev/supported-by-posit/img/supported-by-posit-hex-small.png" height="130" alt="Supported by Posit" align="right" /></a>
 
 VS Code extension for the [Quarto](https://quarto.org) scientific and technical publishing system. This extension provides language support for Quarto `.qmd` files, including:
 

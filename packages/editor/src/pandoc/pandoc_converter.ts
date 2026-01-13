@@ -53,7 +53,7 @@ export interface PandocToProsemirrorResult {
   line_wrapping: PandocLineWrapping;
   unrecognized: string[];
   example_lists: boolean;
-  unparsed_meta: { [key: string]: unknown };
+  unparsed_meta: { [key: string]: unknown; };
 }
 
 export class PandocConverter {
@@ -94,8 +94,8 @@ export class PandocConverter {
     this.pandoc = pandoc;
     this.pandocCapabilities = pandocCapabilities;
 
-    const me = this
-    main().then(result => { me.m = result })
+    const me = this;
+    main().then(result => { me.m = result; });
   }
 
   public async toProsemirror(markdown: string, format: PandocFormat): Promise<PandocToProsemirrorResult> {
@@ -137,11 +137,11 @@ export class PandocConverter {
 
     const ast = await this.pandoc.markdownToAst(markdown, targetFormat, []);
 
-    const wasmProducedASTString = this.m?.parse_qmd(markdown);
-    const wasmProducedAST = JSON.parse(wasmProducedASTString)
+    const wasmProducedASTString = this.m?.parse_qmd(markdown, "true");
+    const wasmProducedAST = JSON.parse(wasmProducedASTString);
 
-    console.log(JSON.stringify(ast))
-    console.log(JSON.stringify(wasmProducedAST))
+    console.log(JSON.stringify(ast));
+    console.log(JSON.stringify(wasmProducedAST));
 
     const result = pandocToProsemirror(
       wasmProducedAST,

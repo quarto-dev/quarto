@@ -6,7 +6,6 @@
         <script type="module">
             import main from "./wasm_qmd_parser.js";
             let m = await main();
-            debugger;
             let parsed = m.parse_qmd("# Hello\n");
             console.log(parsed);
         </script>

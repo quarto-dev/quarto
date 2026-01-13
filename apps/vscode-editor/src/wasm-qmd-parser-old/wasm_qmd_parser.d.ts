@@ -1,36 +1,16 @@
 /* tslint:disable */
 /* eslint-disable */
 export function run(): void;
-export function parse_qmd(input: any, include_resolved_locations: any): any;
-export function write_qmd(input: any): any;
-export function convert(document: any, input_format: any, output_format: any): any;
-/**
- * Render a QMD document with a template bundle.
- *
- * # Arguments
- * * `input` - QMD source text
- * * `bundle_json` - Template bundle as JSON string
- * * `body_format` - "html" or "plaintext"
- *
- * # Returns
- * JSON object with `{ "output": "..." }` or `{ "error": "...", "diagnostics": [...] }`
- */
-export function render_with_template(input: any, bundle_json: any, body_format: any): any;
-/**
- * Get a built-in template as a JSON bundle.
- *
- * # Arguments
- * * `name` - Template name ("html5" or "plain")
- *
- * # Returns
- * Template bundle JSON or `{ "error": "..." }`
- */
-export function get_builtin_template(name: any): any;
+export function parse_qmd(input: any): any;
+export function greet(): void;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly parse_qmd: (a: any) => any;
+  readonly run: () => void;
+  readonly greet: () => void;
   readonly abort: () => void;
   readonly calloc: (a: number, b: number) => number;
   readonly clock: () => bigint;
@@ -55,16 +35,10 @@ export interface InitOutput {
   readonly strncmp: (a: number, b: number, c: number) => number;
   readonly towlower: (a: number) => number;
   readonly vsnprintf: (a: number, b: number, c: number, d: number) => number;
-  readonly convert: (a: any, b: any, c: any) => any;
-  readonly get_builtin_template: (a: any) => any;
-  readonly parse_qmd: (a: any, b: any) => any;
-  readonly render_with_template: (a: any, b: any, c: any) => any;
-  readonly write_qmd: (a: any) => any;
-  readonly run: () => void;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
-  readonly __wbindgen_externrefs: WebAssembly.Table;
+  readonly __wbindgen_export_3: WebAssembly.Table;
   readonly __wbindgen_start: () => void;
 }
 

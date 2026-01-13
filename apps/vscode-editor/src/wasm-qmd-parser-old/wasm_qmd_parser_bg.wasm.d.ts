@@ -1,6 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const parse_qmd: (a: any) => any;
+export const run: () => void;
+export const greet: () => void;
 export const abort: () => void;
 export const calloc: (a: number, b: number) => number;
 export const clock: () => bigint;
@@ -25,14 +28,8 @@ export const realloc: (a: number, b: number) => number;
 export const strncmp: (a: number, b: number, c: number) => number;
 export const towlower: (a: number) => number;
 export const vsnprintf: (a: number, b: number, c: number, d: number) => number;
-export const convert: (a: any, b: any, c: any) => any;
-export const get_builtin_template: (a: any) => any;
-export const parse_qmd: (a: any, b: any) => any;
-export const render_with_template: (a: any, b: any, c: any) => any;
-export const write_qmd: (a: any) => any;
-export const run: () => void;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-export const __wbindgen_free: (a: number, b: number, c: number) => void;
-export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_export_3: WebAssembly.Table;
 export const __wbindgen_start: () => void;

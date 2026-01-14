@@ -9,7 +9,7 @@ This extension provides language support for Quarto `.qmd` files for both [VS Co
 Use the functionality provided in this extension to:
 
 - Author Quarto documents with enhanced editing features such as syntax highlighting, code completion, diagnostics, specialized code snippets, and document navigation
-- Use the Visual Editor for WYSIWYG editing of Quarto documents.
+- Use the Visual Editor for WYSIWYG editing of Quarto documents
 - Execute code cells interactively
 - Render and preview Quarto documents, to multiple formats
 
@@ -30,3 +30,7 @@ To use Quarto in VS Code, install both this extension and the [Quarto command li
 [Read more](https://quarto.org/docs/tools/vscode/) about using Quarto with VS Code, including how to author [`.ipynb` notebooks](https://quarto.org/docs/tools/vscode/notebook.html).
 
 ![](https://quarto.org/docs/tools/images/vscode-notebook.png)
+
+## Getting Help
+
+If you have questions or need help with Quarto, you can check out the [Quarto discussion forum](https://github.com/orgs/quarto-dev/discussions). If you have a bug report or feature request for this extension, you can use its [GitHub repository](https://github.com/quarto-dev/quarto).

@@ -158,8 +158,6 @@ export async function activateLsp(
   // Helper to send current theme to LSP server
   const sendThemeNotification = () => {
     if (client) {
-      // Map VS Code theme kinds to light/dark. HighContrast themes are treated as dark
-      // since they typically have light text on dark backgrounds
       const kind = (window.activeColorTheme.kind === ColorThemeKind.Light || window.activeColorTheme.kind === ColorThemeKind.HighContrastLight) ? "light" : "dark";
       client.sendNotification("quarto/didChangeActiveColorTheme", { kind });
     }
@@ -178,10 +176,8 @@ export async function activateLsp(
     const handler = client.onDidChangeState(e => {
       if (e.newState === State.Running) {
         handler.dispose();
-        // Send initial theme on startup, slightly delayed to ensure server is ready
-        setTimeout(() => {
-          sendThemeNotification();
-        }, 100);
+        // Send computed theme on startup
+        sendThemeNotification();
         resolve(client);
       } else if (e.newState === State.Stopped) {
         reject(new Error("Failed to start Quarto LSP Server"));

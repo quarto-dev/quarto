@@ -214,6 +214,10 @@ connection.onInitialize((params: InitializeParams) => {
   };
 });
 
+// listen for color theme changes from the client
+connection.onNotification("quarto/didChangeActiveColorTheme", (params: { kind: 'light' | 'dark'; }) => {
+  configManager.setComputedThemeKind(params.kind);
+});
 // further config dependent initialization
 connection.onInitialized(async () => {
   logger.logNotification('initialized');
@@ -224,16 +228,6 @@ connection.onInitialized(async () => {
     logger.setConfigurationManager(configManager);
   }
 
-  // listen for color theme changes from the client
-  connection.onNotification("quarto/didChangeActiveColorTheme", (params: { kind: string; }) => {
-    logger.logNotification('didChangeActiveColorTheme');
-    // Validate the theme kind before using it
-    if (params.kind === "light" || params.kind === "dark") {
-      configManager.setActiveColorThemeKind(params.kind);
-    } else {
-      logger.logError(`Invalid theme kind received: ${params.kind}`);
-    }
-  });
 
   // initialize connection to quarto
   const workspaceFolders = await connection.workspace.getWorkspaceFolders();

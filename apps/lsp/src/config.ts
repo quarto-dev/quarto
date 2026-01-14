@@ -36,6 +36,8 @@ export interface Settings {
   readonly workbench: {
     readonly colorTheme: string;
   };
+  // from the host, not from a user setting. undefined if not yet received computed value.
+  computedThemeKind?: 'dark' | 'light';
   readonly quarto: {
     readonly logLevel: LogLevel;
     readonly path: string;
@@ -83,8 +85,9 @@ export interface Settings {
 function defaultSettings(): Settings {
   return {
     workbench: {
-      colorTheme: 'Dark+'
+      colorTheme: 'Dark+',
     },
+    computedThemeKind: undefined,
     quarto: {
       logLevel: LogLevel.Warn,
       path: "",
@@ -136,8 +139,6 @@ export class ConfigurationManager extends Disposable {
 
   private _settings: Settings;
   private _logger: ILogger;
-  private _activeColorThemeKind: "light" | "dark" = "dark";
-  private _themeExplicitlySet = false;
 
   constructor(
     private readonly connection_: Connection,
@@ -185,17 +186,6 @@ export class ConfigurationManager extends Disposable {
       }
     };
 
-    // Fallback: try to detect theme from name if we haven't received an explicit notification yet
-    // This is a best-effort approach for compatibility, but won't work with autoDetectColorScheme
-    // Only apply fallback if theme hasn't been explicitly set via notification
-    if (!this._themeExplicitlySet) {
-      if (this._settings.workbench.colorTheme.includes("Light")) {
-        this._activeColorThemeKind = "light";
-      } else if (this._settings.workbench.colorTheme.includes("Dark")) {
-        this._activeColorThemeKind = "dark";
-      }
-    }
-
     this._onDidChangeConfiguration.fire(this._settings);
   }
 
@@ -222,16 +212,11 @@ export class ConfigurationManager extends Disposable {
     return this._settings;
   }
 
-  public setActiveColorThemeKind(kind: "light" | "dark") {
-    if (this._activeColorThemeKind !== kind) {
-      this._activeColorThemeKind = kind;
-      this._themeExplicitlySet = true;
+  public setComputedThemeKind(kind: "light" | "dark") {
+    if (this._settings.computedThemeKind !== kind) {
+      this._settings.computedThemeKind = kind;
       this._onDidChangeConfiguration.fire(this._settings);
     }
-  }
-
-  public getActiveColorThemeKind(): "light" | "dark" {
-    return this._activeColorThemeKind;
   }
 }
 
@@ -257,7 +242,13 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
       }
     },
     get colorTheme(): "light" | "dark" {
-      return configManager.getActiveColorThemeKind();
+      const settings = configManager.getSettings();
+      if (settings.computedThemeKind !== undefined) {
+        return settings.computedThemeKind;
+      }
+      else {
+        return settings.workbench.colorTheme.includes("Light") ? "light" : "dark";
+      }
     },
     get mathjaxScale(): number {
       return configManager.getSettings().quarto.mathjax.scale;

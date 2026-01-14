@@ -9,6 +9,7 @@ This extension provides language support for Quarto `.qmd` files for both [VS Co
 Use the functionality provided in this extension to:
 
 - Author Quarto documents with enhanced editing features such as syntax highlighting, code completion, diagnostics, specialized code snippets, and document navigation
+- Use the Visual Editor for WYSIWYG editing of Quarto documents.
 - Execute code cells interactively
 - Render and preview Quarto documents, to multiple formats
 
@@ -22,7 +23,7 @@ Use the functionality provided in this extension to:
 
 To use Quarto in VS Code, install both these extension and the [Quarto command line interface](https://quarto.org/docs/get-started/). To use enhanced features for embedded languages such as completion and code execution, additionally install the VS Code extension for your language(s) of choice:
 
-- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) (for code execution)
 - [R](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r)
 - [Julia](https://marketplace.visualstudio.com/items?itemName=julialang.language-julia)
 

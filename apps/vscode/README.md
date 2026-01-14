@@ -21,7 +21,7 @@ Use the functionality provided in this extension to:
 
 ## VS Code
 
-To use Quarto in VS Code, install both these extension and the [Quarto command line interface](https://quarto.org/docs/get-started/). To use enhanced features for embedded languages such as completion and code execution, additionally install the VS Code extension for your language(s) of choice:
+To use Quarto in VS Code, install both this extension and the [Quarto command line interface](https://quarto.org/docs/get-started/). To use enhanced features for embedded languages such as completion and code execution, additionally install the VS Code extension for your language(s) of choice:
 
 - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) (for code execution)
 - [R](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r)

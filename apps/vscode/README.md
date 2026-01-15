@@ -9,7 +9,7 @@ This extension provides language support for Quarto `.qmd` files for both [VS Co
 Use the functionality provided in this extension to:
 
 - Author Quarto documents with enhanced editing features such as syntax highlighting, code completion, diagnostics, specialized code snippets, and document navigation
-- Use the Visual Editor for WYSIWYG editing of Quarto documents
+- Use the Visual Editor for [WYSIWYM](https://en.wikipedia.org/wiki/WYSIWYM) editing of Quarto documents
 - Execute code cells interactively
 - Render and preview Quarto documents to multiple formats
 

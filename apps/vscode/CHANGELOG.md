@@ -3,7 +3,7 @@
 ## 1.129.0 (Unreleased)
 
 - Fixed Copilot completions in `.qmd` documents (<https://github.com/quarto-dev/quarto/pull/887>).
-- Fixed a bug where the `autoDetectColorScheme` setting could cause equation previews to have a dark text on dark background and vice versa (<https://github.com/quarto-dev/quarto/pull/864/changes>).
+- Fixed a bug where the `autoDetectColorScheme` setting could cause equation previews to have a dark text on dark background and vice versa (<https://github.com/quarto-dev/quarto/pull/864>).
 
 ## 1.128.0 (Release on 2026-01-08)
 

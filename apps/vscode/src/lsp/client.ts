@@ -24,7 +24,9 @@ import {
   Definition,
   LogOutputChannel,
   Uri,
-  Diagnostic
+  Diagnostic,
+  window,
+  ColorThemeKind
 } from "vscode";
 import {
   LanguageClient,
@@ -153,12 +155,29 @@ export async function activateLsp(
     clientOptions
   );
 
+  // Helper to send current theme to LSP server
+  const sendThemeNotification = () => {
+    if (client) {
+      const kind = (window.activeColorTheme.kind === ColorThemeKind.Light || window.activeColorTheme.kind === ColorThemeKind.HighContrastLight) ? "light" : "dark";
+      client.sendNotification("quarto/didChangeActiveColorTheme", { kind });
+    }
+  };
+
+  // Listen for theme changes and notify the server
+  context.subscriptions.push(
+    window.onDidChangeActiveColorTheme(() => {
+      sendThemeNotification();
+    })
+  );
+
   // return once the server is running
   return new Promise<LanguageClient>((resolve, reject) => {
 
     const handler = client.onDidChangeState(e => {
       if (e.newState === State.Running) {
         handler.dispose();
+        // Send computed theme on startup
+        sendThemeNotification();
         resolve(client);
       } else if (e.newState === State.Stopped) {
         reject(new Error("Failed to start Quarto LSP Server"));

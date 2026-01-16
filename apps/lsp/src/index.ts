@@ -214,6 +214,10 @@ connection.onInitialize((params: InitializeParams) => {
   };
 });
 
+// listen for color theme changes from the client
+connection.onNotification("quarto/didChangeActiveColorTheme", (params: { kind: 'light' | 'dark'; }) => {
+  configManager.setComputedThemeKind(params.kind);
+});
 // further config dependent initialization
 connection.onInitialized(async () => {
   logger.logNotification('initialized');
@@ -223,6 +227,7 @@ connection.onInitialized(async () => {
     await configManager.subscribe();
     logger.setConfigurationManager(configManager);
   }
+
 
   // initialize connection to quarto
   const workspaceFolders = await connection.workspace.getWorkspaceFolders();

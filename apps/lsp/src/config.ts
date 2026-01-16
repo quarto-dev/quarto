@@ -36,13 +36,15 @@ export interface Settings {
   readonly workbench: {
     readonly colorTheme: string;
   };
+  // from the host, not from a user setting. undefined if not yet received computed value.
+  computedThemeKind?: 'dark' | 'light';
   readonly quarto: {
     readonly logLevel: LogLevel;
     readonly path: string;
     readonly mathjax: {
       readonly scale: number;
       readonly extensions: MathjaxSupportedExtension[];
-    }
+    };
     readonly symbols: {
       readonly exportToWorkspace: 'default' | 'all' | 'none';
     };
@@ -83,8 +85,9 @@ export interface Settings {
 function defaultSettings(): Settings {
   return {
     workbench: {
-      colorTheme: 'Dark+'
+      colorTheme: 'Dark+',
     },
+    computedThemeKind: undefined,
     quarto: {
       logLevel: LogLevel.Warn,
       path: "",
@@ -125,7 +128,7 @@ function defaultSettings(): Settings {
         }
       }
     }
-  }
+  };
 }
 
 
@@ -182,6 +185,7 @@ export class ConfigurationManager extends Disposable {
         }
       }
     };
+
     this._onDidChangeConfiguration.fire(this._settings);
   }
 
@@ -206,6 +210,13 @@ export class ConfigurationManager extends Disposable {
 
   public getSettings(): Settings {
     return this._settings;
+  }
+
+  public setComputedThemeKind(kind: "light" | "dark") {
+    if (this._settings.computedThemeKind !== kind) {
+      this._settings.computedThemeKind = kind;
+      this._onDidChangeConfiguration.fire(this._settings);
+    }
   }
 }
 
@@ -232,7 +243,12 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
     },
     get colorTheme(): "light" | "dark" {
       const settings = configManager.getSettings();
-      return settings.workbench.colorTheme.includes("Light") ? "light" : "dark";
+      if (settings.computedThemeKind !== undefined) {
+        return settings.computedThemeKind;
+      }
+      else {
+        return settings.workbench.colorTheme.includes("Light") ? "light" : "dark";
+      }
     },
     get mathjaxScale(): number {
       return configManager.getSettings().quarto.mathjax.scale;
@@ -243,7 +259,7 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
     get exportSymbolsToWorkspace(): 'default' | 'all' | 'none' {
       return configManager.getSettings().quarto.symbols.exportToWorkspace;
     }
-  }
+  };
 }
 
 export function getDiagnosticsOptions(configManager: ConfigurationManager): DiagnosticOptions {

@@ -1,10 +1,12 @@
 import path from 'path'
 import { defineConfig, normalizePath } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 
 export default defineConfig(env => {
-  
+
   const dev = env.mode === "development";
 
   return {
@@ -22,7 +24,9 @@ export default defineConfig(env => {
             dest: normalizePath(path.resolve(__dirname, '../vscode/assets/www/editor'))
           }
         ]
-      })
+      }),
+      wasm(),
+      topLevelAwait()
     ],
     build: {
       watch: dev ? {} : null,
@@ -30,7 +34,7 @@ export default defineConfig(env => {
         entry: 'src/index.tsx',
         formats: ['umd'],
         name: "QuartoVisualEditor",
-        fileName: () => 'index.js' 
+        fileName: () => 'index.js'
       },
       rollupOptions: {
         external: ['vscode-webview'],
@@ -38,5 +42,5 @@ export default defineConfig(env => {
       sourcemap: dev ? 'inline' : false
     }
   };
- 
+
 });

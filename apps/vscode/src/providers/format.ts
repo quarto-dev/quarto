@@ -46,6 +46,7 @@ import {
   virtualDocForLanguage,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
+import { languageOptionComment } from "./option";
 
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
@@ -204,7 +205,18 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
 }
 
 async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
+  const optionComment = languageOptionComment(language.ids[0]) + "| ";
   const blockLines = lines(codeForExecutableLanguageBlock(block));
+  let optionLines = 0;
+  if (optionComment) {
+    for (const line of blockLines) {
+      if (line.startsWith(optionComment)) {
+        optionLines++;
+      } else {
+        break;
+      }
+    }
+  }
   blockLines.push("");
   const vdoc = virtualDocForCode(blockLines, language);
   const edits = await executeFormatDocumentProvider(
@@ -225,7 +237,7 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
         );
         return new TextEdit(range, edit.newText);
       })
-      .filter(edit => blockRange.contains(edit.range));
+      .filter(edit => blockRange.contains(edit.range) && edit.range.start.line > block.range.start.line + optionLines);
     return adjustedEdits;
   }
 }

@@ -60,6 +60,8 @@
 
 - Fix issue where format on save could overwrite the contents of a document with incorrect results (<https://github.com/quarto-dev/quarto/pull/688>).
 
+- Protect code cell options from formatting (<https://github.com/quarto-dev/quarto/pull/655>).
+
 ## 1.119.0 (Release on 2025-03-21)
 
 - Use `QUARTO_VISUAL_EDITOR_CONFIRMED` > `PW_TEST` > `CI` to bypass (`true`) or force (`false`) the Visual Editor confirmation dialogue (<https://github.com/quarto-dev/quarto/pull/654>).
@@ -68,6 +70,8 @@
 - Fix `language` typos throughout the codebase (<https://github.com/quarto-dev/quarto/pull/650>)
 - Update cell background configuration to add the ability to use the appropriate theme color. The `quarto.cells.background` settings have changed names so you may need to update your configuration (<https://github.com/quarto-dev/quarto/pull/679>).
 - Use new command to switch between source and visual editors in Positron (<https://github.com/quarto-dev/quarto/pull/684>).
+
+- Protect code cell options from formatting (<https://github.com/quarto-dev/quarto/pull/655>).
 
 ## 1.118.0 (Release on 2024-11-26)
 

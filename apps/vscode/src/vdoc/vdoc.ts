@@ -98,17 +98,13 @@ function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
   }
 }
 
-export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
-
-  const lines = [...code];
-
-  if (language.inject) {
-    lines.unshift(...language.inject);
-  }
-
+export function virtualDocForCode(code: string[], language: EmbeddedLanguage, appendNewline: boolean = true) {
   return {
     language,
-    content: lines.join("\n") + "\n",
+    content: [
+      ...(language?.inject ?? []),
+      ...code
+    ].join("\n") + (appendNewline ? '\n' : ''),
   };
 }
 

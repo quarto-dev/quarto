@@ -210,7 +210,7 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
 async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
   // Create virtual document containing the block
   const blockLines = lines(codeForExecutableLanguageBlock(block, false));
-  const vdoc = virtualDocForCode(blockLines, language);
+  const vdoc = virtualDocForCode(blockLines, language, false);
 
   const edits = await executeFormatDocumentProvider(
     vdoc,
@@ -237,7 +237,7 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
 
     // Bail if any edit is out of range. We used to filter these edits out but
     // this could bork the cell.
-    if (edits.some(edit => !blockRange.contains(edit.range))) {
+    if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
       window.showInformationMessage(
         "Formatting edits were out of range and could not be applied to the code cell."
       );

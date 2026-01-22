@@ -20,7 +20,7 @@ import { findParentNodeOfType, NodeWithPos, setTextSelection } from 'prosemirror
 import { InputRule, wrappingInputRule } from 'prosemirror-inputrules';
 
 import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
-import { PandocToken, mapTokens } from '../../api/pandoc';
+import { PandocToken } from '../../api/pandoc';
 
 // custom NodeView that accomodates display / interaction with item check boxes
 export class CheckedListItemNodeView implements NodeView {
@@ -28,7 +28,7 @@ export class CheckedListItemNodeView implements NodeView {
   public readonly contentDOM: HTMLElement;
 
   constructor(node: ProsemirrorNode, view: EditorView, getPos: () => number) {
-    
+
     // create root li element
     this.dom = window.document.createElement('li');
     if (node.attrs.tight) {
@@ -167,7 +167,7 @@ export function checkedListItemInputRule() {
 }
 
 export interface InputRuleWithHandler extends InputRule {
-  handler: (state: EditorState, match: RegExpMatchArray, start: number, end: number) => Transaction
+  handler: (state: EditorState, match: RegExpMatchArray, start: number, end: number) => Transaction;
 }
 
 // allow users to begin a new checked list by typing [x] or [ ] at the beginning of a line
@@ -212,50 +212,43 @@ export function fragmentWithCheck(schema: Schema, fragment: Fragment, checked: b
 const kCheckedChar = '☒';
 const kUncheckedChar = '☐';
 
-export function tokensWithChecked(tokens: PandocToken[]): { checked: null | boolean; tokens: PandocToken[] } {
-  // will set this flag based on inspecting the first Str token
-  let checked: null | boolean | undefined;
-  let lastWasChecked = false;
+/**
+ * example of `tokens`:
+ * ```json
+ * {t:"Para",c:[{t:"Str",c:"☒"},{t:"Space"},{t:"Str",c:"example"}]}
+ * ```
+ *
+ * this function takes that and returns:
+ *
+ * ```json
+ * {
+ *   checked: true,
+ *   tokens: {t:"Para",c:[{t:"Str",c:""},{t:"Space"},{t:"Str",c:"example"}]},
+ * }
+ * ```
+ *
+ * notice that the `☒` character was removed from the first "Str" node.
+ */
+export function tokensWithChecked(tokens: PandocToken[]): { checked: null | boolean; tokens: PandocToken[]; } {
+  const checkNode = tokens[0]?.c?.[0];
+  const checkChar = checkNode?.t === 'Str' ? checkNode.c.charAt(0) : '';
+  const checked = checkChar === kCheckedChar ?
+    true : checkChar === kUncheckedChar
+      ? false :
+      null;
 
-  // map tokens
-  const mappedTokens = mapTokens(tokens, tok => {
-    // if the last token was checked then strip the next space
-    if (tok.t === 'Space' && lastWasChecked) {
-      lastWasChecked = false;
-      return {
-        t: 'Str',
-        c: '',
-      };
-    }
-
-    // derive 'checked' from first chraracter of first Str token encountered
-    // if we find checked or unchecked then set the flag and strip off
-    // the first 2 chraracters (the check and the space after it)
-    else if (tok.t === 'Str' && checked === undefined) {
-      let text = tok.c as string;
-      if (text.charAt(0) === kCheckedChar) {
-        checked = true;
-        lastWasChecked = true;
-        text = text.slice(1);
-      } else if (text.charAt(0) === kUncheckedChar) {
-        checked = false;
-        lastWasChecked = true;
-        text = text.slice(1);
-      } else {
-        checked = null;
-      }
-      return {
-        t: 'Str',
-        c: text,
-      };
+  const modifiedTokens = structuredClone(tokens);
+  // if checked, then strip the `☒` or `☐` from the first node and remove the following space (if there is one)
+  if (checked === true || checked === false) {
+    if (modifiedTokens[0].c[1].t === 'Space') {
+      modifiedTokens[0].c.splice(0, 2); // remove the first two tokens
     } else {
-      return tok;
+      modifiedTokens[0].c.splice(0, 1); // remove the first token
     }
-  });
+  }
 
-  // return
   return {
-    checked: checked !== undefined ? checked : null,
-    tokens: mappedTokens,
+    checked,
+    tokens: modifiedTokens,
   };
 }

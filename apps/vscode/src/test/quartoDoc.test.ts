@@ -55,6 +55,14 @@ suite("Quarto basics", function () {
 
     assert.equal(vscode.window.activeTextEditor, editor, 'quarto extension interferes with other files opened in VSCode!');
   });
+
+  test("Roundtrip doesn't change nested-checked-list.qmd", async function () {
+    const { doc } = await openAndShowTextDocument("nested-checked-list.qmd");
+
+    const { before, after } = await roundtrip(doc);
+
+    assert.equal(before, after);
+  });
 });
 
 /**

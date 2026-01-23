@@ -1,4 +1,4 @@
--
+-   
 
     -   [x] hello
 
@@ -6,8 +6,7 @@
 
     -   hello
 
-This is what you get from the Visual Editor when you create a nested list
-in it:
+This is what you get from the Visual Editor when you create a nested list in it:
 
 -   <div>
 

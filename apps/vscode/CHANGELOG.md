@@ -4,8 +4,9 @@
 
 - Fixed Copilot completions in `.qmd` documents (<https://github.com/quarto-dev/quarto/pull/887>).
 - Fixed a bug where the `autoDetectColorScheme` setting could cause equation previews to have a dark text on dark background and vice versa (<https://github.com/quarto-dev/quarto/pull/864>).
-- Fix a regression where bash cell execution does not work (<https://github.com/quarto-dev/quarto/pull/826>).
-- Fix cell formatting sometimes deleting code at the end of the cell (<https://github.com/quarto-dev/quarto/pull/754>).
+- Fixed a regression where bash cell execution does not work (<https://github.com/quarto-dev/quarto/pull/826>).
+- Fixed cell formatting sometimes deleting code at the end of the cell (<https://github.com/quarto-dev/quarto/pull/754>).
+- Removed visual/source toggle button from Positron editor action bar. You can still switch between editing modes using the command palette or context menu (<https://github.com/quarto-dev/quarto/pull/896>)
 
 ## 1.128.0 (Release on 2026-01-08)
 

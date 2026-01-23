@@ -6,8 +6,8 @@
 - Fixed a bug where the `autoDetectColorScheme` setting could cause equation previews to have a dark text on dark background and vice versa (<https://github.com/quarto-dev/quarto/pull/864>).
 - Fixed a regression where bash cell execution does not work (<https://github.com/quarto-dev/quarto/pull/826>).
 - Fixed cell formatting sometimes deleting code at the end of the cell (<https://github.com/quarto-dev/quarto/pull/754>).
-- Removed visual/source toggle button from Positron editor action bar. You can still switch between editing modes using the command palette or context menu (<https://github.com/quarto-dev/quarto/pull/896>)
-- Improve checkbox list item appearance in the Visual Editor (<https://github.com/quarto-dev/quarto/pull/893>).
+- Removed visual/source toggle button from Positron editor action bar. You can still switch between editing modes using the command palette or context menu (<https://github.com/quarto-dev/quarto/pull/896>).
+- Improved checkbox list item appearance in the Visual Editor (<https://github.com/quarto-dev/quarto/pull/893>).
 
 ## 1.128.0 (Release on 2026-01-08)
 

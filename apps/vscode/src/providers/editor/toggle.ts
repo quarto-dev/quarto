@@ -19,7 +19,7 @@ import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
 import { hasHooks } from "../../host/hooks";
-import { toggleEditMode, toggleRenderOnSaveOverride } from "../context-keys";
+import { toggleRenderOnSaveOverride } from "../context-keys";
 
 export function determineMode(text: string, uri: Uri): string | undefined {
   let editorOpener = undefined;
@@ -93,15 +93,6 @@ export function editInSourceModeCommand(): Command {
       if (activeVisual) {
         reopenEditorInSourceMode(activeVisual.document, '', activeVisual.viewColumn);
       }
-    }
-  };
-}
-
-export function toggleEditModeCommand(): Command {
-  return {
-    id: 'quarto.toggleEditMode',
-    execute() {
-      toggleEditMode();
     }
   };
 }

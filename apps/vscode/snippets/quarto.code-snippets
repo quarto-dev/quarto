@@ -141,7 +141,8 @@
       "::: {.column}",
       ":::",
 
-      "::: <!-- end columns -->"
+      ":::",
+      "<!-- end columns -->"
 
     ],
     "description": "Insert two columns"
@@ -160,7 +161,8 @@
       "::: {.column}",
       ":::",
 
-      "::: <!-- end columns -->"
+      ":::",
+      "<!-- end columns -->"
     ],
     "description": "Insert three columns"
   }

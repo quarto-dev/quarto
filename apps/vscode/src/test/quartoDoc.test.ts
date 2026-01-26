@@ -55,7 +55,71 @@ suite("Quarto basics", function () {
 
     assert.equal(vscode.window.activeTextEditor, editor, 'quarto extension interferes with other files opened in VSCode!');
   });
+
+  test("quarto.formatCell deals with formatters that do or don't add trailing newline consistently", async function () {
+
+    async function testFormatter(filename: string, [line, character]: [number, number], format: (sourceText: string) => string) {
+      const { doc } = await openAndShowTextDocument(filename);
+
+      const formattingEditProvider = vscode.languages.registerDocumentFormattingEditProvider(
+        { scheme: 'file', language: 'r' },
+        createFormatterFromStringFunc(format)
+      );
+
+      setCursorPosition(line, character);
+      await wait(450);
+      await vscode.commands.executeCommand("quarto.formatCell");
+      await wait(450);
+
+      const result = doc.getText();
+      formattingEditProvider.dispose();
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+
+      return result;
+    }
+
+    const newlineFormatterResult = await testFormatter(
+      "cell-format.qmd",
+      [3, 1],
+      (sourceText) => sourceText + 'FORMAT SUCCESS\n'
+    );
+    const noopFormatterResult = await testFormatter(
+      "cell-format.qmd",
+      [3, 1],
+      (sourceText) => sourceText + 'FORMAT SUCCESS'
+    );
+
+    assert.ok(newlineFormatterResult.includes('FORMAT SUCCESS'), 'newlineFormatter failed');
+    assert.ok(noopFormatterResult.includes('FORMAT SUCCESS'), 'noopFormatter failed');
+
+    assert.equal(newlineFormatterResult, noopFormatterResult);
+  });
+
+  suiteTeardown(() => {
+    vscode.window.showInformationMessage('All tests done!');
+  });
 });
+
+function createFormatterFromStringFunc(format: (sourceText: string) => string) {
+  return {
+    provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.ProviderResult<vscode.TextEdit[]> {
+      const fileStart = new vscode.Position(0, 0);
+      const fileEnd = document.lineAt(document.lineCount - 1).range.end;
+
+      return [new vscode.TextEdit(new vscode.Range(fileStart, fileEnd), format(document.getText()))];
+    }
+  };
+}
+
+function setCursorPosition(line: number, character: number) {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    const position = new vscode.Position(line, character);
+    const newSelection = new vscode.Selection(position, position);
+    editor.selection = newSelection;
+    editor.revealRange(newSelection, vscode.TextEditorRevealType.InCenter); // Optional: scroll to the new position
+  }
+}
 
 /**
  *

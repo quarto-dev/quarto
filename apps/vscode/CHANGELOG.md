@@ -6,6 +6,7 @@
 - Fixed a bug where the `autoDetectColorScheme` setting could cause equation previews to have a dark text on dark background and vice versa (<https://github.com/quarto-dev/quarto/pull/864>).
 - Fix a regression where bash cell execution does not work (<https://github.com/quarto-dev/quarto/pull/826>).
 - Fix cell formatting sometimes deleting code at the end of the cell (<https://github.com/quarto-dev/quarto/pull/754>).
+- Fix columns2 and columns3 snippets leaving `:::` in the document (<https://github.com/quarto-dev/quarto/pull/899>).
 
 ## 1.128.0 (Release on 2026-01-08)
 

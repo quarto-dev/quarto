@@ -67,8 +67,8 @@ export function activateContextKeySetter(
     if (activeEditor) {
       debounce(
         () => {
-          setEditorContextKeys(activeEditor, engine)
-          setLanguageContextKeys(activeEditor, engine)
+          setEditorContextKeys(activeEditor, engine);
+          setLanguageContextKeys(activeEditor, engine);
         },
         debounceOnDidChangeDocumentMs
       )();
@@ -91,17 +91,7 @@ export function getRenderOnSaveShiny() {
   return renderOnSaveShinyOverride === undefined
     ? readRenderOnSaveShinyConfiguration()
     : renderOnSaveShinyOverride;
-}
-
-// toggles edit mode
-export function toggleEditMode() {
-  const quartoVisualEditor = VisualEditorProvider.activeEditor();
-  if (quartoVisualEditor !== undefined) {
-    vscode.commands.executeCommand('quarto.editInSourceMode');
-  } else {
-    vscode.commands.executeCommand('quarto.editInVisualMode');
-  }
-}
+};
 
 // toggles render on save override
 export function toggleRenderOnSaveOverride() {

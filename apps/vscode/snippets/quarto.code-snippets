@@ -116,6 +116,11 @@
     "body": ["::: {.${1:class}}", "${TM_SELECTED_TEXT}$0", ":::"],
     "description": "Insert div block"
   },
+  "Insert fragment block": {
+    "prefix": "fragment",
+    "body": ["::: {.fragment}", "${TM_SELECTED_TEXT}$0", ":::"],
+    "description": "Insert fragment block"
+  },
   "Insert span": {
     "prefix": "span",
     "body": "[${TM_SELECTED_TEXT:${1:text}}]{.${2:class}}$0",
@@ -141,7 +146,8 @@
       "::: {.column}",
       ":::",
 
-      "::: <!-- end columns -->"
+      ":::",
+      "<!-- end columns -->"
 
     ],
     "description": "Insert two columns"
@@ -160,7 +166,8 @@
       "::: {.column}",
       ":::",
 
-      "::: <!-- end columns -->"
+      ":::",
+      "<!-- end columns -->"
     ],
     "description": "Insert three columns"
   }

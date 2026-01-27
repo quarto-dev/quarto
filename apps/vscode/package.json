@@ -436,18 +436,6 @@
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
       },
       {
-        "command": "quarto.toggleEditMode",
-        "title": "Edit Mode",
-        "category": "Quarto",
-        "enablement": "editorLangId == quarto",
-        "actionBarOptions": {
-          "controlType": "toggle",
-          "leftTitle": "Source",
-          "rightTitle": "Visual",
-          "toggled": "activeCustomEditorId == 'quarto.visualEditor'"
-        }
-      },
-      {
         "command": "quarto.toggleRenderOnSave",
         "title": "Render on Save",
         "category": "Quarto",
@@ -650,11 +638,6 @@
           "command": "quarto.toggleRenderOnSave",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "0_preview"
-        },
-        {
-          "command": "quarto.toggleEditMode",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "1_editor_mode"
         }
       ],
       "editor/actions/right": [

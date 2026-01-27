@@ -1,0 +1,19 @@
+-   
+
+    -   [x] hello
+
+    -   [x] hello
+
+    -   hello
+
+This is what you get from the Visual Editor when you create a nested list in it:
+
+-   <div>
+
+    -   [x] hello
+
+    -   [x] hello
+
+    -   hello
+
+    </div>

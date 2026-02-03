@@ -42,6 +42,7 @@ import { activateDiagram } from "./providers/diagram/diagram";
 import { activateCodeFormatting } from "./providers/format";
 import { activateOptionEnterProvider } from "./providers/option";
 import { activateBackgroundHighlighter } from "./providers/background";
+import { activateYamlLinks } from "./providers/yaml-links";
 import { activateContextKeySetter } from "./providers/context-keys";
 import { CommandManager } from "./core/command";
 import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
@@ -167,6 +168,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   // background highlighter
   activateBackgroundHighlighter(context, engine);
+
+  // yaml document links
+  activateYamlLinks(context);
 
   // context setter
   activateContextKeySetter(context, engine);

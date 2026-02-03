@@ -153,11 +153,49 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   commands.push(...activateCodeFormatting(engine));
 
-  // provide code lens
-  vscode.languages.registerCodeLensProvider(
-    kQuartoDocSelector,
-    quartoCellExecuteCodeLensProvider(host, engine)
-  );
+  // provide code lens (conditionally in Positron based on inline output setting)
+  const isPositron = tryAcquirePositronApi();
+  if (isPositron) {
+    // In Positron, only show code lens when inline output is disabled
+    let codeLensDisposable: vscode.Disposable | undefined;
+
+    const updateCodeLens = () => {
+      const inlineOutputEnabled = vscode.workspace
+        .getConfiguration("positron.quarto.inlineOutput")
+        .get<boolean>("enabled", false);
+
+      if (inlineOutputEnabled && codeLensDisposable) {
+        // Dispose existing code lens when inline output is enabled
+        codeLensDisposable.dispose();
+        codeLensDisposable = undefined;
+      } else if (!inlineOutputEnabled && !codeLensDisposable) {
+        // Register code lens when inline output is disabled
+        codeLensDisposable = vscode.languages.registerCodeLensProvider(
+          kQuartoDocSelector,
+          quartoCellExecuteCodeLensProvider(host, engine)
+        );
+        context.subscriptions.push(codeLensDisposable);
+      }
+    };
+
+    // Initial setup
+    updateCodeLens();
+
+    // Listen for setting changes
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("positron.quarto.inlineOutput.enabled")) {
+          updateCodeLens();
+        }
+      })
+    );
+  } else {
+    // In VS Code, always register the code lens
+    vscode.languages.registerCodeLensProvider(
+      kQuartoDocSelector,
+      quartoCellExecuteCodeLensProvider(host, engine)
+    );
+  }
 
   // provide file copy/drop handling
   activateCopyFiles(context);

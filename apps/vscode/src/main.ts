@@ -32,6 +32,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
+import { isInlineOutputEnabled } from "./host/hooks";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
@@ -160,9 +161,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     let codeLensDisposable: vscode.Disposable | undefined;
 
     const updateCodeLens = () => {
-      const inlineOutputEnabled = vscode.workspace
-        .getConfiguration("positron.quarto.inlineOutput")
-        .get<boolean>("enabled", false);
+      const inlineOutputEnabled = isInlineOutputEnabled();
 
       if (inlineOutputEnabled && codeLensDisposable) {
         // Dispose existing code lens when inline output is enabled

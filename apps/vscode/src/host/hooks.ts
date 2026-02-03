@@ -23,8 +23,18 @@ import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocu
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
-import { Position } from 'vscode';
+import { Position, Range } from 'vscode';
 import { Uri } from 'vscode';
+
+/**
+ * Check if inline output is enabled in Positron settings.
+ * This helper is shared with main.ts for code lens visibility.
+ */
+export function isInlineOutputEnabled(): boolean {
+  return vscode.workspace
+    .getConfiguration("positron.quarto.inlineOutput")
+    .get<boolean>("enabled", false);
+}
 
 declare global {
   function acquirePositronApi(): hooks.PositronApi;
@@ -61,7 +71,7 @@ export function hooksExtensionHost(): ExtensionHost {
         case "csharp":
         case "r":
           return {
-            execute: async (blocks: string[], _editorUri?: vscode.Uri): Promise<void> => {
+            execute: async (blocks: string[], editorUri?: vscode.Uri): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -99,6 +109,16 @@ export function hooksExtensionHost(): ExtensionHost {
                 console.error('error when using `positron.executeCodeFromPosition`');
               }
               return position;
+            },
+            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[]): Promise<void> => {
+              const runtime = hooksApi()?.runtime;
+
+              if (runtime === undefined) {
+                // Can't do anything without a runtime
+                return;
+              }
+
+              await runtime.executeInlineCell(documentUri, cellRanges);
             }
           };
 

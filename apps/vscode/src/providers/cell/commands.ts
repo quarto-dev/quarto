@@ -176,7 +176,8 @@ class RunCurrentCellCommand extends RunCommand implements Command {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
         const code = codeWithoutOptionsFromBlock(block);
-        await executeInteractive(executor, [code], editor.document);
+        const ranges = block.range ? [block.range] : undefined;
+        await executeInteractive(executor, [code], editor.document, ranges);
       }
     }
   }
@@ -499,16 +500,21 @@ class RunCellsAboveCommand extends RunCommand implements Command {
 
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        // accumulate code
+        // accumulate code and ranges
         const code: string[] = [];
-        for (const block of blocks.filter(
+        const ranges: Range[] = [];
+        for (const blk of blocks.filter(
           isExecutableLanguageBlockOf(language)
-        )) {
-          code.push(codeWithoutOptionsFromBlock(block));
+        ) as Array<TokenMath | TokenCodeBlock>) {
+          code.push(codeWithoutOptionsFromBlock(blk));
+          if (blk.range) {
+            ranges.push(blk.range);
+          }
         }
 
-        // execute
-        await executeInteractive(executor, code, editor.document);
+        // execute (only pass ranges if we collected the same number as code blocks)
+        const validRanges = ranges.length === code.length ? ranges : undefined;
+        await executeInteractive(executor, code, editor.document, validRanges);
       }
     }
   }
@@ -558,9 +564,10 @@ class RunCellsBelowCommand extends RunCommand implements Command {
       : undefined;
 
     const blocks: string[] = [];
+    const ranges: Range[] = [];
     for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
       // skip if the cell is above or at the cursor
-      if (line < blk.range.start.line) {
+      if (blk.range && line < blk.range.start.line) {
         // set language if needed
         const blockLanguage = languageNameFromBlock(blk);
         if (!language) {
@@ -569,14 +576,16 @@ class RunCellsBelowCommand extends RunCommand implements Command {
         // include blocks of this language
         if (blockLanguage === language) {
           blocks.push(codeWithoutOptionsFromBlock(blk));
+          ranges.push(blk.range);
         }
       }
     }
-    // execute
+    // execute (only pass ranges if we collected the same number as code blocks)
     if (language && blocks.length > 0) {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        await executeInteractive(executor, blocks, editor.document);
+        const validRanges = ranges.length === blocks.length ? ranges : undefined;
+        await executeInteractive(executor, blocks, editor.document, validRanges);
       }
     }
   }
@@ -622,19 +631,25 @@ class RunAllCellsCommand extends RunCommand implements Command {
   ) {
     let language: string | undefined;
     const blocks: string[] = [];
-    for (const block of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
-      const blockLanguage = languageNameFromBlock(block);
+    const ranges: Range[] = [];
+    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
+      const blockLanguage = languageNameFromBlock(blk);
       if (!language) {
         language = blockLanguage;
       }
       if (blockLanguage === language) {
-        blocks.push(codeWithoutOptionsFromBlock(block));
+        blocks.push(codeWithoutOptionsFromBlock(blk));
+        if (blk.range) {
+          ranges.push(blk.range);
+        }
       }
     }
     if (language && blocks.length > 0) {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        await executeInteractive(executor, blocks, editor.document);
+        // only pass ranges if we collected the same number as code blocks
+        const validRanges = ranges.length === blocks.length ? ranges : undefined;
+        await executeInteractive(executor, blocks, editor.document, validRanges);
       }
     }
   }
@@ -727,7 +742,8 @@ async function runAdjacentBlock(host: ExtensionHost, editor: TextEditor, engine:
   const language = languageNameFromBlock(block);
   const executor = await host.cellExecutorForLanguage(language, editor.document, engine);
   if (executor) {
-    await executeInteractive(executor, [codeWithoutOptionsFromBlock(block)], editor.document);
+    const ranges = block.range ? [block.range] : undefined;
+    await executeInteractive(executor, [codeWithoutOptionsFromBlock(block)], editor.document, ranges);
   }
 }
 

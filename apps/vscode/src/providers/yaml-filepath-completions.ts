@@ -1,5 +1,5 @@
 /*
- * yaml-completions.ts
+ * yaml-filepath-completions.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -36,21 +36,21 @@ import { isQuartoYaml } from "../core/doc";
 const FILE_EXTENSIONS = ['qmd', 'scss', 'css', 'html', 'js', 'bib', 'tex', 'md'];
 const IGNORE_PATTERNS = ['.git', 'node_modules', '_site', '_freeze', '.quarto'];
 
-export function activateYamlCompletions(context: ExtensionContext) {
+export function activateYamlFilepathCompletions(context: ExtensionContext) {
   const config = workspace.getConfiguration("quarto");
 
-  if (config.get<boolean>("yaml.completions.enabled", true)) {
+  if (config.get<boolean>("yaml.filepathCompletions.enabled", true)) {
     context.subscriptions.push(
       languages.registerCompletionItemProvider(
         { language: "yaml", scheme: "file" },
-        new QuartoYamlCompletionProvider(),
+        new QuartoYamlFilepathCompletionProvider(),
         "/", "." // Trigger on path separators
       )
     );
   }
 }
 
-class QuartoYamlCompletionProvider implements CompletionItemProvider {
+class QuartoYamlFilepathCompletionProvider implements CompletionItemProvider {
   async provideCompletionItems(
     document: TextDocument,
     position: Position,

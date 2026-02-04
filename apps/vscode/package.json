@@ -1265,7 +1265,7 @@
           "default": true,
           "markdownDescription": "Enable clickable file links in `_quarto.yml` files."
         },
-        "quarto.yaml.completions.enabled": {
+        "quarto.yaml.filepathCompletions.enabled": {
           "order": 46,
           "scope": "window",
           "type": "boolean",

@@ -1265,6 +1265,13 @@
           "default": true,
           "markdownDescription": "Enable clickable file links in `_quarto.yml` files."
         },
+        "quarto.yaml.completions.enabled": {
+          "order": 46,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable file path autocomplete in `_quarto.yml` files."
+        },
         "quarto.zotero.library": {
           "order": 50,
           "scope": "window",

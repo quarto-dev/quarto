@@ -29,8 +29,6 @@ import {
   workspace,
 } from "vscode";
 
-import { isQuartoYaml } from "../core/doc";
-
 const FILE_EXTENSIONS = ['qmd', 'scss', 'css', 'html', 'js', 'bib', 'tex', 'md'];
 const IGNORE_PATTERNS = ['.git', 'node_modules', '_site', '_freeze', '.quarto'];
 
@@ -40,7 +38,7 @@ export function activateYamlLinks(context: ExtensionContext) {
   if (config.get<boolean>("yaml.documentLinks.enabled", true)) {
     context.subscriptions.push(
       languages.registerDocumentLinkProvider(
-        { language: "yaml", scheme: "file" },
+        { scheme: "file", pattern: "**/_quarto.{yml,yaml}" },
         new QuartoYamlLinkProvider()
       )
     );
@@ -52,10 +50,6 @@ class QuartoYamlLinkProvider implements DocumentLinkProvider {
     document: TextDocument,
     _token: CancellationToken
   ): DocumentLink[] {
-    if (!isQuartoYaml(document)) {
-      return [];
-    }
-
     const links: DocumentLink[] = [];
     const text = document.getText();
     const lines = text.split('\n');

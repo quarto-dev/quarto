@@ -31,8 +31,6 @@ import {
   workspace,
 } from "vscode";
 
-import { isQuartoYaml } from "../core/doc";
-
 const FILE_EXTENSIONS = ['qmd', 'scss', 'css', 'html', 'js', 'bib', 'tex', 'md'];
 const IGNORE_PATTERNS = ['.git', 'node_modules', '_site', '_freeze', '.quarto'];
 
@@ -42,7 +40,7 @@ export function activateYamlFilepathCompletions(context: ExtensionContext) {
   if (config.get<boolean>("yaml.filepathCompletions.enabled", true)) {
     context.subscriptions.push(
       languages.registerCompletionItemProvider(
-        { language: "yaml", scheme: "file" },
+        { scheme: "file", pattern: "**/_quarto.{yml,yaml}" },
         new QuartoYamlFilepathCompletionProvider(),
         "/", "." // Trigger on path separators
       )
@@ -57,10 +55,6 @@ class QuartoYamlFilepathCompletionProvider implements CompletionItemProvider {
     _token: CancellationToken,
     _context: CompletionContext
   ): Promise<CompletionItem[]> {
-    if (!isQuartoYaml(document)) {
-      return [];
-    }
-
     const line = document.lineAt(position).text;
     const linePrefix = line.substring(0, position.character);
 

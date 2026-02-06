@@ -1,0 +1,15 @@
+project:
+  type: default
+
+metadata:
+  title: "Test Project"
+
+render:
+  - hello.qmd
+  - valid-basics.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    css: styles.css

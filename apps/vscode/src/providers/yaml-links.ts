@@ -13,6 +13,22 @@
  *
  */
 
+/**
+ * Document Link Provider for Quarto YAML Configuration Files
+ *
+ * This module provides clickable document links for file paths referenced in
+ * `_quarto.yml` and `_quarto.yaml` configuration files. When a file path is
+ * detected in the YAML content (e.g., `render: hello.qmd` or `css: styles.css`),
+ * it becomes a clickable link that navigates directly to that file.
+ *
+ * The provider:
+ * - Scans YAML content for file paths after `: ` (key-value) or `- ` (list items)
+ * - Verifies that referenced files exist before creating links
+ * - Resolves relative paths from the location of the _quarto.yml file
+ *
+ * Can be disabled via the `quarto.yaml.documentLinks.enabled` setting.
+ */
+
 import path from "node:path";
 import fs from "node:fs";
 

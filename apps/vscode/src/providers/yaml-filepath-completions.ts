@@ -13,6 +13,22 @@
  *
  */
 
+/**
+ * Filepath Completion Provider for Quarto YAML Configuration Files
+ *
+ * This module provides filepath autocompletion for `_quarto.yml` and `_quarto.yaml`
+ * configuration files. When editing YAML values (after `: ` or `- `), the extension
+ * suggests project files that match what you're typing.
+ *
+ * The provider:
+ * - Triggers completions after `: ` (key-value pairs) or `- ` (list items)
+ * - Scans the project directory for matching files
+ * - Filters suggestions based on current input
+ * - Ignores common non-content directories (.git, node_modules, _site, _freeze, .quarto)
+ *
+ * Can be disabled via the `quarto.yaml.filepathCompletions.enabled` setting.
+ */
+
 import * as path from "path";
 
 import { glob } from "glob";

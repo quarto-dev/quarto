@@ -302,7 +302,7 @@
         "category": "Quarto",
         "actionBarOptions": {
           "controlType": "button",
-          "displayTitle": true
+          "displayTitle": false
         }
       },
       {

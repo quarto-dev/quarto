@@ -32,6 +32,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
+import { isInlineOutputEnabled } from "./host/hooks";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
@@ -153,11 +154,47 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   commands.push(...activateCodeFormatting(engine));
 
-  // provide code lens
-  vscode.languages.registerCodeLensProvider(
-    kQuartoDocSelector,
-    quartoCellExecuteCodeLensProvider(host, engine)
-  );
+  // provide code lens (conditionally in Positron based on inline output setting)
+  const isPositron = tryAcquirePositronApi();
+  if (isPositron) {
+    // In Positron, only show code lens when inline output is disabled
+    let codeLensDisposable: vscode.Disposable | undefined;
+
+    const updateCodeLens = () => {
+      const inlineOutputEnabled = isInlineOutputEnabled();
+
+      if (inlineOutputEnabled && codeLensDisposable) {
+        // Dispose existing code lens when inline output is enabled
+        codeLensDisposable.dispose();
+        codeLensDisposable = undefined;
+      } else if (!inlineOutputEnabled && !codeLensDisposable) {
+        // Register code lens when inline output is disabled
+        codeLensDisposable = vscode.languages.registerCodeLensProvider(
+          kQuartoDocSelector,
+          quartoCellExecuteCodeLensProvider(host, engine)
+        );
+        context.subscriptions.push(codeLensDisposable);
+      }
+    };
+
+    // Initial setup
+    updateCodeLens();
+
+    // Listen for setting changes
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("positron.quarto.inlineOutput.enabled")) {
+          updateCodeLens();
+        }
+      })
+    );
+  } else {
+    // In VS Code, always register the code lens
+    vscode.languages.registerCodeLensProvider(
+      kQuartoDocSelector,
+      quartoCellExecuteCodeLensProvider(host, engine)
+    );
+  }
 
   // provide file copy/drop handling
   activateCopyFiles(context);

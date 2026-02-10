@@ -19,6 +19,11 @@ declare module 'positron' {
 			focus: boolean,
 			allowIncomplete: boolean
 		): Thenable<boolean>;
+
+		executeInlineCell(
+			documentUri: vscode.Uri,
+			cellRanges: vscode.Range[]
+		): Thenable<void>;
 	}
 
 	export interface PositronLanguages {

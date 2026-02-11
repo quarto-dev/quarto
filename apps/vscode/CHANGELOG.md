@@ -2,6 +2,8 @@
 
 ## 1.130.0 (Unreleased)
 
+- Fixed a bug where a parse error in one chunk meant you could not perform statement execution in another chunk (<https://github.com/quarto-dev/quarto/pull/914>).
+
 ## 1.129.0 (Release on 2026-01-29)
 
 - Fixed Copilot completions in `.qmd` documents (<https://github.com/quarto-dev/quarto/pull/887>).

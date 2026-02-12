@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { WORKSPACE_PATH, readOrCreateSnapshot, examplesOutUri, wait, roundtrip, openAndShowTextDocument } from "./test-utils";
+import { WORKSPACE_PATH, readOrCreateSnapshot, examplesOutUri, wait, roundtrip, openAndShowExamplesOutTextDocument } from "./test-utils";
 import { isQuartoDoc } from "../core/doc";
 
 
@@ -13,7 +13,7 @@ suite("Quarto basics", function () {
   });
 
   test("Can open a Quarto document", async function () {
-    const { editor } = await openAndShowTextDocument("hello.qmd");
+    const { editor } = await openAndShowExamplesOutTextDocument("hello.qmd");
 
     assert.strictEqual(editor?.document.languageId, "quarto");
     assert.strictEqual(isQuartoDoc(editor?.document), true);
@@ -23,7 +23,7 @@ suite("Quarto basics", function () {
   //       test. That's okay for this test, but could cause issues if you expect a qmd to look how it
   //       does in `/examples`.
   test("Roundtrip doesn't change hello.qmd", async function () {
-    const { doc } = await openAndShowTextDocument("hello.qmd");
+    const { doc } = await openAndShowExamplesOutTextDocument("hello.qmd");
 
     const { before, after } = await roundtrip(doc);
 
@@ -44,7 +44,7 @@ suite("Quarto basics", function () {
 
   // a test to prevent situations like https://github.com/quarto-dev/quarto/issues/845
   test("Can open a non-qmd file normally", async function () {
-    const { editor, doc } = await openAndShowTextDocument("hello.lua");
+    const { editor, doc } = await openAndShowExamplesOutTextDocument("hello.lua");
 
     editor.edit((editBuilder) => {
       editBuilder.insert(new vscode.Position(0, 0), 'print("hiyo")\n');
@@ -57,7 +57,7 @@ suite("Quarto basics", function () {
   });
 
   test("Roundtrip doesn't change nested-checked-list.qmd", async function () {
-    const { doc } = await openAndShowTextDocument("nested-checked-list.qmd");
+    const { doc } = await openAndShowExamplesOutTextDocument("nested-checked-list.qmd");
 
     const { before, after } = await roundtrip(doc);
 
@@ -78,7 +78,7 @@ function roundtripSnapshotTest(filename: string) {
   const snapshotFileName = `roundtripped-${filename}`;
 
   test(`Roundtripped ${filename} matches snapshot`, async function () {
-    const { doc } = await openAndShowTextDocument(filename);
+    const { doc } = await openAndShowExamplesOutTextDocument(filename);
 
     const { after } = await roundtrip(doc);
 

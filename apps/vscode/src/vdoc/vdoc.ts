@@ -1,7 +1,7 @@
 /*
  * vdoc.ts
  *
- * Copyright (C) 2022-2025 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -28,11 +28,19 @@ export interface VirtualDoc {
   content: string;
 }
 
+export enum VirtualDocStyle {
+  /// Every block corresponding to the current position's language
+  Language,
+
+  /// Only the block corresponding to the current position
+  Block
+}
+
 export async function virtualDoc(
   document: TextDocument,
   position: Position,
   engine: MarkdownEngine,
-  block?: Token
+  style = VirtualDocStyle.Language
 ): Promise<VirtualDoc | undefined> {
   // make sure this is a quarto doc
   if (!isQuartoDoc(document)) {
@@ -41,20 +49,32 @@ export async function virtualDoc(
 
   // check if the cursor is in a fenced code block
   const tokens = engine.parse(document);
-  const language = languageAtPosition(tokens, position);
 
-  if (language) {
-    if (block) {
-      return virtualDocForBlock(document, block, language);
-    } else {
+  const block = languageBlockAtPosition(tokens, position);
+  if (!block) {
+    return undefined;
+  }
+
+  const language = languageFromBlock(block);
+  if (!language) {
+    return undefined;
+  }
+
+  switch (style) {
+    case VirtualDocStyle.Language: {
       return virtualDocForLanguage(document, tokens, language);
     }
-  } else {
-    return undefined;
+    case VirtualDocStyle.Block: {
+      return virtualDocForBlock(document, block, language);
+    }
+    default: {
+      // Should be unreachable
+      return undefined;
+    }
   }
 }
 
-export function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {
+function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {
   const lines = linesForLanguage(document, language);
   fillLinesFromBlock(lines, document, block);
   padLinesForLanguage(lines, language);

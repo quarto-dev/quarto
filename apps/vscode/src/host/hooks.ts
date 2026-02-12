@@ -3,7 +3,7 @@
  *
  * Positron-specific functionality.
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -22,7 +22,7 @@ import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTo
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
+import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle } from "../vdoc/vdoc";
 import { Position, Range } from 'vscode';
 import { Uri } from 'vscode';
 
@@ -199,7 +199,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     document: vscode.TextDocument,
     position: vscode.Position,
     token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
-    const vdoc = await virtualDoc(document, position, this._engine);
+    const vdoc = await virtualDoc(document, position, this._engine, VirtualDocStyle.Block);
     if (vdoc) {
       return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
         const result = await vscode.commands.executeCommand<hooks.StatementRange>(

@@ -24,14 +24,14 @@ const testFiles = glob.sync("src/test/*.ts");
 const testBuildOptions = {
   entryPoints: testFiles,
   outdir: 'test-out',
-  external: ['vscode', 'mocha', 'glob'],
+  external: ['vscode', 'positron', 'mocha', 'glob'],
   sourcemap: true,
 };
 
 const defaultBuildOptions = {
   entryPoints: ['./src/main.ts'],
   outfile: './out/main.js',
-  external: ['vscode'],
+  external: ['vscode', 'positron'],
   minify: !dev,
   dev
 };

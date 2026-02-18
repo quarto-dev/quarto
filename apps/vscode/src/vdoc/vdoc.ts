@@ -240,13 +240,21 @@ export function isBlockOfLanguage(language: EmbeddedLanguage) {
   };
 }
 
-// adjust position for inject
+// adjust line for inject
+export function adjustedLine(language: EmbeddedLanguage, line: number): number {
+  return line + (language.inject?.length || 0);
+}
+
+export function unadjustedLine(language: EmbeddedLanguage, line: number): number {
+  return line - (language.inject?.length || 0);
+}
+
 export function adjustedPosition(language: EmbeddedLanguage, pos: Position) {
-  return new Position(pos.line + (language.inject?.length || 0), pos.character);
+  return new Position(adjustedLine(language, pos.line), pos.character);
 }
 
 export function unadjustedPosition(language: EmbeddedLanguage, pos: Position) {
-  return new Position(pos.line - (language.inject?.length || 0), pos.character);
+  return new Position(unadjustedLine(language, pos.line), pos.character);
 }
 
 export function unadjustedRange(language: EmbeddedLanguage, range: Range) {

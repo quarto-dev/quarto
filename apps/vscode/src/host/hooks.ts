@@ -18,11 +18,12 @@
 import * as vscode from 'vscode';
 import * as hooks from 'positron';
 
+import semver from "semver";
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle } from "../vdoc/vdoc";
+import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle, unadjustedLine } from "../vdoc/vdoc";
 import { Position, Range } from 'vscode';
 import { Uri } from 'vscode';
 
@@ -200,18 +201,32 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     position: vscode.Position,
     token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine, VirtualDocStyle.Block);
-    if (vdoc) {
-      return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
+
+    if (!vdoc) {
+      return undefined;
+    }
+
+    return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
+      try {
         const result = await vscode.commands.executeCommand<hooks.StatementRange>(
           "vscode.executeStatementRangeProvider",
           uri,
           adjustedPosition(vdoc.language, position)
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
-      });
-    } else {
-      return undefined;
-    }
+      } catch (err) {
+        // TODO: Remove this once `apps/vscode/package.json` bumps to `"positron": "^2026.03.0"` or higher.
+        // For now we avoid aggressive bumping due to https://github.com/posit-dev/positron/issues/11321.
+        if (semver.gte(hooks.version, "2026.03.0")) {
+          if (err instanceof hooks.StatementRangeSyntaxError) {
+            // Rethrow syntax error with unadjusted line number, so Positron's notification will
+            // jump to the correct line
+            throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
+          }
+        }
+        throw err;
+      }
+    });
   };
 }
 

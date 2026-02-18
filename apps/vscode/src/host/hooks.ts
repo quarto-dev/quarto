@@ -18,6 +18,7 @@
 import * as vscode from 'vscode';
 import * as hooks from 'positron';
 
+import semver from "semver";
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
@@ -214,10 +215,14 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       } catch (err) {
-        if (err instanceof hooks.StatementRangeSyntaxError) {
-          // Rethrow syntax error with unadjusted line number, so Positron's notification will
-          // jump to the correct line
-          throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
+        // TODO: Remove this once `apps/vscode/package.json` bumps to `"positron": "^2026.03.0"` or higher.
+        // For now we avoid aggressive bumping due to https://github.com/posit-dev/positron/issues/11321.
+        if (semver.gte(hooks.version, "2026.03.0")) {
+          if (err instanceof hooks.StatementRangeSyntaxError) {
+            // Rethrow syntax error with unadjusted line number, so Positron's notification will
+            // jump to the correct line
+            throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
+          }
         }
         throw err;
       }

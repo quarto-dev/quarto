@@ -1,9 +1,10 @@
 # Changelog
 
-## 1.130.0 (Unreleased)
+## 1.130.0 (Release on 2026-02-18)
 
 - Fixed a bug where a parse error in one chunk meant you could not perform statement execution in another chunk (<https://github.com/quarto-dev/quarto/pull/914>).
 - Changed the title of commands to "New Quarto Document", "New Quarto Notebook (ipynb)", and "New Quarto Presentation" (<https://github.com/quarto-dev/quarto/pull/920>).
+- Made minimal changes to prepare the Quarto extension to work with Positron's upcoming inline output features (<https://github.com/quarto-dev/quarto/pull/907>).
 
 ## 1.129.0 (Release on 2026-01-29)
 

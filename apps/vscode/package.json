@@ -222,7 +222,7 @@
     "commands": [
       {
         "command": "quarto.newDocument",
-        "title": "New Quarto Document",
+        "title": "New Quarto Document (qmd)",
         "category": "Quarto"
       },
       {
@@ -232,7 +232,7 @@
       },
       {
         "command": "quarto.newPresentation",
-        "title": "New Quarto Presentation",
+        "title": "New Quarto Presentation (qmd)",
         "category": "Quarto"
       },
       {

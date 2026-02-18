@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.131.0 (Unreleased)
+
+
+
 ## 1.130.0 (Release on 2026-02-18)
 
 - Fixed a bug where a parse error in one chunk meant you could not perform statement execution in another chunk (<https://github.com/quarto-dev/quarto/pull/914>).

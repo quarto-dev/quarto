@@ -58,6 +58,11 @@ declare module 'positron' {
 		readonly code?: string;
 	}
 
+	export class StatementRangeSyntaxError extends Error {
+		readonly line?: number;
+		constructor(line?: number);
+	}
+
 	export interface PositronWindow {
 		createPreviewPanel(
 			viewType: string,

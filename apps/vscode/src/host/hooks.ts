@@ -215,16 +215,26 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       } catch (err) {
+        let hooks = hooksApi();
+
+        if (!hooks) {
+          throw err;
+        }
+
         // TODO: Remove this once `apps/vscode/package.json` bumps to `"positron": "^2026.03.0"` or higher.
         // For now we avoid aggressive bumping due to https://github.com/posit-dev/positron/issues/11321.
-        if (semver.gte(hooks.version, "2026.03.0")) {
-          if (err instanceof hooks.StatementRangeSyntaxError) {
-            // Rethrow syntax error with unadjusted line number, so Positron's notification will
-            // jump to the correct line
-            throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
-          }
+        if (semver.lt(hooks.version, "2026.03.0")) {
+          throw err;
         }
-        throw err;
+
+        if (err instanceof hooks.StatementRangeSyntaxError) {
+          // Rethrow syntax error with unadjusted line number, so Positron's notification will
+          // jump to the correct line
+          throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
+        } else {
+          // Rethrow unrecognized error
+          throw err;
+        }
       }
     });
   };

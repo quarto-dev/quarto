@@ -10,6 +10,7 @@ declare module 'positron' {
 		runtime: PositronRuntime;
 		languages: PositronLanguages;
 		window: PositronWindow;
+		StatementRangeSyntaxError: typeof StatementRangeSyntaxError;
 	}
 
 	export interface PositronRuntime {

@@ -146,10 +146,6 @@ class FormatCellCommand implements Command {
               editBuilder.replace(edit.range, edit.newText);
             });
         });
-      } else {
-        window.showInformationMessage(
-          "Editor selection is not within a code cell that supports formatting."
-        );
       }
     } else {
       window.showInformationMessage("Active editor is not a Quarto document");

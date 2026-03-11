@@ -182,7 +182,7 @@ async function executeFormatDocumentProvider(
   options: FormattingOptions
 ): Promise<TextEdit[] | undefined> {
   const edits = await withVirtualDocUri(vdoc, document.uri, "format", async (uri: Uri) => {
-    return await commands.executeCommand<TextEdit[]>(
+    return await commands.executeCommand<TextEdit[] | undefined>(
       "vscode.executeFormatDocumentProvider",
       uri,
       options
@@ -195,7 +195,7 @@ async function executeFormatDocumentProvider(
   }
 }
 
-async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
+async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine): Promise<TextEdit[] | undefined> {
   const doc = editor?.document;
   const tokens = engine.parse(doc);
   const line = editor.selection.start.line;
@@ -204,10 +204,12 @@ async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
   const block = languageBlockAtPosition(tokens, position, false);
   if (language?.canFormat && block) {
     return formatBlock(doc, block, language);
+  } else {
+    return undefined;
   }
 }
 
-async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
+async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage): Promise<TextEdit[] | undefined> {
   // Create virtual document containing the block
   const blockLines = lines(codeForExecutableLanguageBlock(block, false));
   const vdoc = virtualDocForCode(blockLines, language);
@@ -218,35 +220,39 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
     formattingOptions(doc.uri, vdoc.language)
   );
 
-  if (edits) {
-    // Because we format with the block code copied in an empty virtual
-    // document, we need to adjust the ranges to match the edits to the block
-    // cell in the original file.
-    const blockRange = new Range(
-      new Position(block.range.start.line, block.range.start.character),
-      new Position(block.range.end.line, block.range.end.character)
-    );
-    const adjustedEdits = edits
-      .map(edit => {
-        const range = new Range(
-          new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
-          new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
-        );
-        return new TextEdit(range, edit.newText);
-      });
-
-    // Bail if any edit is out of range. We used to filter these edits out but
-    // this could bork the cell.
-    if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
-      window.showInformationMessage(
-        "Formatting edits were out of range and could not be applied to the code cell."
-      );
-      return [];
-    }
-
-    return adjustedEdits;
+  if (!edits) {
+    // Either no formatter picked us up, or there were no edits required.
+    // We can't determine the difference though!
+    return undefined;
   }
-}
+
+  // Because we format with the block code copied in an empty virtual
+  // document, we need to adjust the ranges to match the edits to the block
+  // cell in the original file.
+  const blockRange = new Range(
+    new Position(block.range.start.line, block.range.start.character),
+    new Position(block.range.end.line, block.range.end.character)
+  );
+  const adjustedEdits = edits
+    .map(edit => {
+      const range = new Range(
+        new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
+        new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
+      );
+      return new TextEdit(range, edit.newText);
+    });
+
+  // Bail if any edit is out of range. We used to filter these edits out but
+  // this could bork the cell. Return `[]` to indicate that we tried.
+  if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
+    window.showInformationMessage(
+      "Formatting edits were out of range and could not be applied to the code cell."
+    );
+    return [];
+  }
+
+  return adjustedEdits;
+};
 
 
 function unadjustedEdits(

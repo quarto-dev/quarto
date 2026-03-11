@@ -223,7 +223,10 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
 
         // TODO: Remove this once `apps/vscode/package.json` bumps to `"positron": "^2026.03.0"` or higher.
         // For now we avoid aggressive bumping due to https://github.com/posit-dev/positron/issues/11321.
-        if (semver.lt(hooks.version, "2026.03.0")) {
+        // We can't use `semver.lt()` because calendar versioning isn't compatible with semver due to the
+        // leading `0` in `03`. Instead, we use lexicographic string comparison and rely on the year and
+        // month to be zero padded so sorting always works correctly.
+        if (hooks.version < "2026.03.0") {
           throw err;
         }
 

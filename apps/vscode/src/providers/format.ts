@@ -24,21 +24,20 @@ import {
   workspace,
   CancellationToken,
   Uri,
-  TextEditor,
 } from "vscode";
 import {
   ProvideDocumentFormattingEditsSignature,
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
 import { lines } from "core";
-import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtPosition } from "quarto-core";
+import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtLine } from "quarto-core";
 
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, languageCanFormatDocument } from "../vdoc/languages";
 import {
-  languageAtPosition,
+  languageFromBlock,
   mainLanguage,
   unadjustedRange,
   VirtualDoc,
@@ -46,7 +45,6 @@ import {
   virtualDocForLanguage,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
-
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
@@ -59,41 +57,54 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
     token: CancellationToken,
     next: ProvideDocumentFormattingEditsSignature
   ): Promise<TextEdit[] | null | undefined> => {
-    if (isQuartoDoc(document, true)) {
-      // ensure we are dealing w/ the active document
-      const editor = window.activeTextEditor;
-      const activeDocument = editor?.document;
-      if (
-        editor &&
-        activeDocument?.uri.toString() === document.uri.toString()
-      ) {
-        const line = editor.selection.active.line;
-        const position = new Position(line, 0);
-        const tokens = engine.parse(document);
-        let language = languageAtPosition(tokens, position);
-        if (!language || !language.canFormat) {
-          language = mainLanguage(tokens, (lang) => !!lang.canFormat);
-        }
-        if (language) {
-          if (languageCanFormatDocument(language)) {
-            const vdoc = virtualDocForLanguage(document, tokens, language);
-            if (vdoc) {
-              return executeFormatDocumentProvider(
-                vdoc,
-                document,
-                formattingOptions(document.uri, vdoc.language, options)
-              );
-            }
-          } else {
-            return (await formatActiveCell(editor, engine)) || [];
-          }
-        }
-      }
-      // ensure that other formatters don't ever run over qmd files
-      return [];
-    } else {
-      // delegate if we didn't handle it
+    if (!isQuartoDoc(document, true)) {
+      // Delegate if we don't handle it
       return next(document, options, token);
+    }
+
+    // Ensure we are dealing w/ the active document
+    const activeEditor = window.activeTextEditor;
+    if (!activeEditor) {
+      // Ensure that other formatters don't ever run over qmd files
+      return [];
+    }
+    if (activeEditor.document.uri.toString() !== document.uri.toString()) {
+      return [];
+    }
+
+    const tokens = engine.parse(document);
+
+    // Figure out language to use. Try selection's block, then fall back to main doc language.
+    const includeFence = false;
+    const line = activeEditor.selection.active.line;
+    const block = languageBlockAtLine(tokens, line, includeFence);
+
+    let language = block ? languageFromBlock(block) : undefined;
+
+    if (!language || !language.canFormat) {
+      language = mainLanguage(tokens, (lang) => !!lang.canFormat);
+    }
+
+    if (!language) {
+      // No language that can format in any way
+      return [];
+    }
+
+    if (languageCanFormatDocument(language)) {
+      // Full document formatting support
+      const vdoc = virtualDocForLanguage(document, tokens, language);
+      return executeFormatDocumentProvider(
+        vdoc,
+        document,
+        formattingOptions(document.uri, vdoc.language, options)
+      );
+    } else if (block) {
+      // Just format the selected block if there is one
+      const edits = await formatBlock(document, block);
+      return edits ? edits : [];
+    } else {
+      // Nothing we can format
+      return [];
     }
   };
 }
@@ -108,22 +119,38 @@ export function embeddedDocumentRangeFormattingProvider(
     token: CancellationToken,
     next: ProvideDocumentRangeFormattingEditsSignature
   ): Promise<TextEdit[] | null | undefined> => {
-    if (isQuartoDoc(document, true)) {
-      const tokens = engine.parse(document);
-      const beginBlock = languageBlockAtPosition(tokens, range.start, false);
-      const endBlock = languageBlockAtPosition(tokens, range.end, false);
-      if (beginBlock && (beginBlock.range.start.line === endBlock?.range.start.line)) {
-        const editor = window.activeTextEditor;
-        if (editor?.document?.uri.toString() === document.uri.toString()) {
-          return await formatActiveCell(editor, engine);
-        }
-      }
-      // ensure that other formatters don't ever run over qmd files
-      return [];
-    } else {
-      // if we don't perform any formatting, then call the next handler
+    if (!isQuartoDoc(document, true)) {
+      // If we don't perform any formatting, then call the next handler
       return next(document, range, options, token);
     }
+
+    const includeFence = false;
+    const tokens = engine.parse(document);
+
+    const block = languageBlockAtLine(tokens, range.start.line, includeFence);
+    if (!block) {
+      // Don't let anyone else format qmd files
+      return [];
+    }
+
+    const endBlock = languageBlockAtLine(tokens, range.end.line, includeFence);
+    if (!endBlock) {
+      // Selection extends outside of a single block and into ambiguous non-block editor space
+      // (possibly spanning multiple blocks in the process)
+      return [];
+    }
+
+    if (block.range.start.line !== endBlock.range.start.line) {
+      // Selection spans multiple blocks
+      return [];
+    }
+
+    const edits = await formatBlock(document, block);
+    if (!edits) {
+      return [];
+    }
+
+    return edits;
   };
 }
 
@@ -133,27 +160,41 @@ class FormatCellCommand implements Command {
 
   public async execute(): Promise<void> {
     const editor = window.activeTextEditor;
-    const doc = editor?.document;
-    if (doc && isQuartoDoc(doc)) {
-      const edits = await formatActiveCell(editor, this.engine_);
-      if (edits) {
-        editor.edit((editBuilder) => {
-          // Sort edits by descending start position to avoid range shifting issues
-          edits
-            .slice()
-            .sort((a, b) => b.range.start.compareTo(a.range.start))
-            .forEach((edit) => {
-              editBuilder.replace(edit.range, edit.newText);
-            });
-        });
-      } else {
-        window.showInformationMessage(
-          "Editor selection is not within a code cell that supports formatting."
-        );
-      }
-    } else {
-      window.showInformationMessage("Active editor is not a Quarto document");
+    if (!editor) {
+      // No active text editor
+      return;
     }
+
+    const document = editor.document;
+    if (!isQuartoDoc(document)) {
+      window.showInformationMessage("Active editor is not a Quarto document");
+      return;
+    }
+
+    const includeFence = false;
+
+    const tokens = this.engine_.parse(document);
+    const block = languageBlockAtLine(tokens, editor.selection.start.line, includeFence);
+    if (!block) {
+      window.showInformationMessage("Editor selection is not within a code cell.");
+      return;
+    }
+
+    const edits = await formatBlock(document, block);
+    if (!edits) {
+      // Nothing to do! Already formatted, or no formatter picked us up, or this language doesn't support formatting.
+      return;
+    }
+
+    editor.edit((editBuilder) => {
+      // Sort edits by descending start position to avoid range shifting issues
+      edits
+        .slice()
+        .sort((a, b) => b.range.start.compareTo(a.range.start))
+        .forEach((edit) => {
+          editBuilder.replace(edit.range, edit.newText);
+        });
+    });
   }
 }
 
@@ -175,14 +216,13 @@ function formattingOptions(
   };
 }
 
-
 async function executeFormatDocumentProvider(
   vdoc: VirtualDoc,
   document: TextDocument,
   options: FormattingOptions
 ): Promise<TextEdit[] | undefined> {
   const edits = await withVirtualDocUri(vdoc, document.uri, "format", async (uri: Uri) => {
-    return await commands.executeCommand<TextEdit[]>(
+    return await commands.executeCommand<TextEdit[] | undefined>(
       "vscode.executeFormatDocumentProvider",
       uri,
       options
@@ -195,19 +235,18 @@ async function executeFormatDocumentProvider(
   }
 }
 
-async function formatActiveCell(editor: TextEditor, engine: MarkdownEngine) {
-  const doc = editor?.document;
-  const tokens = engine.parse(doc);
-  const line = editor.selection.start.line;
-  const position = new Position(line, 0);
-  const language = languageAtPosition(tokens, position);
-  const block = languageBlockAtPosition(tokens, position, false);
-  if (language?.canFormat && block) {
-    return formatBlock(doc, block, language);
+async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock): Promise<TextEdit[] | undefined> {
+  // Extract language
+  const language = languageFromBlock(block);
+  if (!language) {
+    return undefined;
   }
-}
 
-async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock, language: EmbeddedLanguage) {
+  // Refuse to format if not supported by this language
+  if (!language.canFormat) {
+    return undefined;
+  }
+
   // Create virtual document containing the block
   const blockLines = lines(codeForExecutableLanguageBlock(block, false));
   const vdoc = virtualDocForCode(blockLines, language);
@@ -218,36 +257,39 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock,
     formattingOptions(doc.uri, vdoc.language)
   );
 
-  if (edits) {
-    // Because we format with the block code copied in an empty virtual
-    // document, we need to adjust the ranges to match the edits to the block
-    // cell in the original file.
-    const blockRange = new Range(
-      new Position(block.range.start.line, block.range.start.character),
-      new Position(block.range.end.line, block.range.end.character)
-    );
-    const adjustedEdits = edits
-      .map(edit => {
-        const range = new Range(
-          new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
-          new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
-        );
-        return new TextEdit(range, edit.newText);
-      });
-
-    // Bail if any edit is out of range. We used to filter these edits out but
-    // this could bork the cell.
-    if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
-      window.showInformationMessage(
-        "Formatting edits were out of range and could not be applied to the code cell."
-      );
-      return [];
-    }
-
-    return adjustedEdits;
+  if (!edits) {
+    // Either no formatter picked us up, or there were no edits required.
+    // We can't determine the difference though!
+    return undefined;
   }
-}
 
+  // Because we format with the block code copied in an empty virtual
+  // document, we need to adjust the ranges to match the edits to the block
+  // cell in the original file.
+  const blockRange = new Range(
+    new Position(block.range.start.line, block.range.start.character),
+    new Position(block.range.end.line, block.range.end.character)
+  );
+  const adjustedEdits = edits
+    .map(edit => {
+      const range = new Range(
+        new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
+        new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
+      );
+      return new TextEdit(range, edit.newText);
+    });
+
+  // Bail if any edit is out of range. We used to filter these edits out but
+  // this could bork the cell. Return `[]` to indicate that we tried.
+  if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
+    window.showInformationMessage(
+      "Formatting edits were out of range and could not be applied to the code cell."
+    );
+    return [];
+  }
+
+  return adjustedEdits;
+}
 
 function unadjustedEdits(
   edits: TextEdit[],

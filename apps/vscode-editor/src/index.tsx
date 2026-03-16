@@ -53,11 +53,11 @@ async function runEditor() {
     const root = createRoot(document.getElementById('root')!);
     setEditorTheme(editorThemeFromStore(store));
     root.render(<App store={store} editorId={editorId} host={host} context={context} request={request}/>);
+
+
   } catch (error) {
-    console.error(error);
+    console.error('error',error);
   }
 }
 
 runEditor();
-
-

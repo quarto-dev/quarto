@@ -43,6 +43,8 @@
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "vite": "^3.0.0",
-    "vite-plugin-static-copy": "^0.13.0"
+    "vite-plugin-static-copy": "^0.13.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0"
   }
 }

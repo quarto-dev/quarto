@@ -18,12 +18,17 @@ declare module 'positron' {
 			languageId: string,
 			code: string,
 			focus: boolean,
-			allowIncomplete: boolean
+			allowIncomplete: boolean,
+			mode?: string,
+			errorBehavior?: string,
+			codeLocation?: object,
+			executionMetadata?: Record<string, any>
 		): Thenable<boolean>;
 
 		executeInlineCell(
 			documentUri: vscode.Uri,
-			cellRanges: vscode.Range[]
+			cellRanges: vscode.Range[],
+			executionMetadata?: Record<string, any>[]
 		): Thenable<void>;
 	}
 

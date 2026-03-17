@@ -29,7 +29,7 @@
   "private": true,
   "engines": {
     "vscode": "^1.75.0",
-    "positron": "^2026.04.0"
+    "positron": "^2026.05.0"
   },
   "main": "./out/main.js",
   "browser": "./browser.js",

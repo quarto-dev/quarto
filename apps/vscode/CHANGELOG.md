@@ -4,6 +4,7 @@
 
 - Added support for Positron's statement execution feature that reports the approximate line number of the parse error (<https://github.com/quarto-dev/quarto/pull/919>).
 - Fixed a bug where `Quarto: Format Cell` would notify you that no formatter was available for code cells that were already formatted (<https://github.com/quarto-dev/quarto/pull/933>).
+- No longer claim `.typ` files. Typst syntax highlighting in Quarto documents is unaffected, but standalone Typst files are now left to dedicated extensions like Tinymist (<https://github.com/quarto-dev/quarto/pull/943>).
 
 ## 1.130.0 (Release on 2026-02-18)
 

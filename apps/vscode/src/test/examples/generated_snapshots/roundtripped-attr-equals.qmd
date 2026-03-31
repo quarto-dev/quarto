@@ -6,21 +6,21 @@ This prose contains some equals signs, just in case. A=B=C. D=E=F. =
 
 ## Basic examples
 
--   Basic link with equals in value: [Link text](https://example.com){key="value=with=equals"}
+- Basic link with equals in value: [Link text](https://example.com){key="value=with=equals"}
 
--   Link with URL parameter: [Query link](https://example.com?param=value){.class key="query=param"}
+- Link with URL parameter: [Query link](https://example.com?param=value){.class key="query=param"}
 
--   Span with complex value: [Span text]{#id .class key="complex=value"}
+- Span with complex value: [Span text]{#id .class key="complex=value"}
 
--   Other weird examples: [Span text](key=) [Span](===)
+- Other weird examples: [Span text](key=) [Span](===)
 
 ## More complex examples
 
--   CSS style with equals: [Styled text]{style="color:red;font-size=12px"}
+- CSS style with equals: [Styled text]{style="color:red;font-size=12px"}
 
--   Math expression value: [Math formula]{formula="E=mc^2"}
+- Math expression value: [Math formula]{formula="E=mc^2"}
 
--   Code with equals: `code sample`{lang="c++" key="value=val"}
+- Code with equals: `code sample`{lang="c++" key="value=val"}
 
 ## Code blocks
 
@@ -49,4 +49,4 @@ This is a div with multiple equals signs in attribute values.
 | A    | B    |
 | C    | D    |
 
-: Table caption {#tbl-id tbl-colwidths="\[50,50\]" key=value=with=equals}
+: Table caption

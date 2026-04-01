@@ -72,7 +72,7 @@ export function hooksExtensionHost(): ExtensionHost {
         case "csharp":
         case "r":
           return {
-            execute: async (blocks: string[], editorUri?: vscode.Uri): Promise<void> => {
+            execute: async (blocks: string[], editorUri?: vscode.Uri, executionMetadata?: Record<string, unknown>[]): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -87,8 +87,13 @@ export function hooksExtensionHost(): ExtensionHost {
 
               // Our callback executes each block sequentially
               const callback = async () => {
-                for (const block of blocks) {
-                  await runtime.executeCode(language, block, false, true);
+                for (let i = 0; i < blocks.length; i++) {
+                  const metadata = executionMetadata?.[i];
+                  await runtime.executeCode(
+                    language, blocks[i], false, true,
+                    undefined, undefined, undefined,
+                    metadata
+                  );
                 }
               };
 
@@ -111,7 +116,7 @@ export function hooksExtensionHost(): ExtensionHost {
               }
               return position;
             },
-            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[]): Promise<void> => {
+            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -119,7 +124,7 @@ export function hooksExtensionHost(): ExtensionHost {
                 return;
               }
 
-              await runtime.executeInlineCell(documentUri, cellRanges);
+              await runtime.executeInlineCell(documentUri, cellRanges, executionMetadata);
             }
           };
 

@@ -91,10 +91,7 @@
         "id": "typst",
         "aliases": [
           "Typst",
-          "mermaid"
-        ],
-        "extensions": [
-          ".typ"
+          "typst"
         ],
         "configuration": "./languages/typst/typst.configuration.json"
       }

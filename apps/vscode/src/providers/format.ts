@@ -37,15 +37,14 @@ import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, languageCanFormatDocument } from "../vdoc/languages";
 import {
+  isBlockOfLanguage,
   languageFromBlock,
   mainLanguage,
   unadjustedRange,
   VirtualDoc,
   virtualDocForCode,
-  virtualDocForLanguage,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
-import { languageOptionComment } from "./option";
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
@@ -91,22 +90,25 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
       return [];
     }
 
-    if (languageCanFormatDocument(language)) {
-      // Full document formatting support
-      const vdoc = virtualDocForLanguage(document, tokens, language);
-      return executeFormatDocumentProvider(
-        vdoc,
-        document,
-        formattingOptions(document.uri, vdoc.language, options)
-      );
-    } else if (block) {
-      // Just format the selected block if there is one
-      const edits = await formatBlock(document, block);
-      return edits ? edits : [];
-    } else {
-      // Nothing we can format
-      return [];
+    // If the selected language supports whole-document formatting, format
+    // every block of it; otherwise, format only the cell containing the
+    // cursor. Either way, each block is routed through `formatBlock` so
+    // that Quarto option directives are protected by the same
+    // strip-before-format path and can't leak to the language formatter.
+    const targetBlocks: (TokenMath | TokenCodeBlock)[] = languageCanFormatDocument(language)
+      ? (tokens.filter(isBlockOfLanguage(language)) as (TokenMath | TokenCodeBlock)[])
+      : block
+        ? [block]
+        : [];
+
+    const allEdits: TextEdit[] = [];
+    for (const target of targetBlocks) {
+      const edits = await formatBlock(document, target, options);
+      if (edits) {
+        allEdits.push(...edits);
+      }
     }
+    return allEdits;
   };
 }
 
@@ -236,7 +238,11 @@ async function executeFormatDocumentProvider(
   }
 }
 
-async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock): Promise<TextEdit[] | undefined> {
+async function formatBlock(
+  doc: TextDocument,
+  block: TokenMath | TokenCodeBlock,
+  defaultOptions?: FormattingOptions
+): Promise<TextEdit[] | undefined> {
   // Extract language
   const language = languageFromBlock(block);
   if (!language) {
@@ -253,13 +259,20 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock)
   // Count leading Quarto option directives (e.g. `#| label: foo`) so we can
   // hide them from the formatter entirely. Feeding these lines to formatters
   // like Black or styler risks reflowing or rewriting them, which would
-  // silently break the cell's behaviour on the next render.
-  const languageComment = languageOptionComment(language.ids[0]);
-  const optionPrefix = languageComment ? languageComment + "| " : undefined;
+  // silently break the cell's behaviour on the next render. The pattern
+  // mirrors Quarto's own cell-option parser in `cell/options.ts`, so every
+  // variant the executor recognises (`#| label`, `#|label`, `# | label`,
+  // `#|  label`, ...) is also protected here. `language.comment` is the
+  // canonical comment string from `editor-core` and covers every formatter
+  // language (including TypeScript, which was missing from the ad-hoc map
+  // the previous implementation used).
+  const optionPattern = language.comment
+    ? new RegExp("^" + escapeRegExp(language.comment) + "\\s*\\| ?")
+    : undefined;
   let optionLines = 0;
-  if (optionPrefix) {
+  if (optionPattern) {
     for (const line of blockLines) {
-      if (line.startsWith(optionPrefix)) {
+      if (optionPattern.test(line)) {
         optionLines++;
       } else {
         break;
@@ -280,7 +293,7 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock)
   const edits = await executeFormatDocumentProvider(
     vdoc,
     doc,
-    formattingOptions(doc.uri, vdoc.language)
+    formattingOptions(doc.uri, vdoc.language, defaultOptions)
   );
 
   if (!edits) {
@@ -326,4 +339,8 @@ function unadjustedEdits(
   return edits.map((edit) => {
     return new TextEdit(unadjustedRange(language, edit.range), edit.newText);
   });
+}
+
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

@@ -89,7 +89,7 @@ function handleOptionEnter(editor: TextEditor, comment: string) {
   }
 }
 
-export function languageOptionComment(language: string) {
+function languageOptionComment(language: string) {
   // some mappings
   if (language === "ojs") {
     language = "js";

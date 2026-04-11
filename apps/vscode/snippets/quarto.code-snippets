@@ -11,7 +11,7 @@
   },
   "Insert quoted text": {
     "prefix": "quote",
-    "body": "> ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "> ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert quoted text"
   },
   "Insert inline code": {
@@ -27,73 +27,86 @@
   "Insert fenced code block": {
     "prefix": "fenced codeblock",
     "body": [
-      "```${1|python,c,c++,c#,ruby,go,java,php,htm,css,javascript,json,markdown,console|}",
+      "",
+      "```${1|bash,c,cpp,csharp,css,go,html,java,javascript,json,markdown,php,python,r,ruby,rust,sql,toml,typescript,xml,yaml|}",
       "${TM_SELECTED_TEXT}$0",
-      "```"
+      "```",
+      ""
     ],
     "description": "Insert fenced code block"
   },
   "Insert executable code block": {
     "prefix": "executable codeblock",
     "body": [
+      "",
       "```{${1|python,r,julia,ojs,sql,bash,mermaid,dot|}}",
       "${TM_SELECTED_TEXT}$0",
-      "```"
+      "```",
+      ""
     ],
     "description": "Insert executable code block"
   },
   "Insert raw code block": {
     "prefix": "raw codeblock",
     "body": [
-      "```{${1|html,latex,openxml,opendocument,asciidoc,docbook,markdown,dokuwiki,fb2,gfm,haddock,icml,ipynb,jats,jira,json,man,mediawiki,ms,muse,opml,org,plain,rst,rtf,tei,texinfo,textile,xwiki,zimwiki,native|}}",
+      "",
+      "```{=${1|html,latex,typst,openxml,opendocument,asciidoc,docbook,markdown,dokuwiki,fb2,gfm,haddock,icml,ipynb,jats,jira,json,man,mediawiki,ms,muse,opml,org,plain,rst,rtf,tei,texinfo,textile,xwiki,zimwiki,native|}}",
       "${TM_SELECTED_TEXT}$0",
-      "```"
+      "```",
+      ""
     ],
     "description": "Insert raw code block"
   },
   "Insert heading level 1": {
     "prefix": "heading1",
-    "body": "# ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "# ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert heading level 1"
   },
   "Insert heading level 2": {
     "prefix": "heading2",
-    "body": "## ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "## ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert heading level 2"
   },
   "Insert heading level 3": {
     "prefix": "heading3",
-    "body": "### ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "### ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert heading level 3"
   },
   "Insert heading level 4": {
     "prefix": "heading4",
-    "body": "#### ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "#### ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert heading level 4"
   },
   "Insert heading level 5": {
     "prefix": "heading5",
-    "body": "##### ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "##### ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert heading level 5"
   },
   "Insert heading level 6": {
     "prefix": "heading6",
-    "body": "###### ${1:${TM_SELECTED_TEXT}}",
+    "body": ["", "###### ${1:${TM_SELECTED_TEXT}}", "", "$0"],
     "description": "Insert heading level 6"
   },
   "Insert unordered list": {
     "prefix": "unordered list",
-    "body": ["- ${1:first}", "- ${2:second}", "- ${3:third}", "$0"],
+    "body": ["", "- ${1:first}.", "- ${2:second}.", "- ${3:third}.", "", "$0"],
     "description": "Insert unordered list"
   },
   "Insert ordered list": {
     "prefix": "ordered list",
-    "body": ["1. ${1:first}", "2. ${2:second}", "3. ${3:third}", "$0"],
+    "body": [
+      "",
+      "1. ${1:first}.",
+      "2. ${2:second}.",
+      "3. ${3:third}.",
+      "",
+      "$0"
+    ],
     "description": "Insert ordered list"
   },
   "Insert horizontal rule": {
-    "prefix": ["horizontal rule", "horizontal line"]
-    "body": "----------\n",
+    "prefix": ["horizontal rule", "horizontal line"],
+    "body": ["", "---", "", "$0"],
     "description": "Insert horizontal line"
   },
   "Insert link": {
@@ -108,17 +121,25 @@
   },
   "Insert strikethrough": {
     "prefix": "strikethrough",
-    "body": "~~${1:${TM_SELECTED_TEXT}}~~",
+    "body": "~~${1:${TM_SELECTED_TEXT}}~~$0",
     "description": "Insert strikethrough"
   },
   "Insert div block": {
     "prefix": "div",
-    "body": ["::: {.${1:class}}", "${TM_SELECTED_TEXT}$0", ":::"],
+    "body": [
+      "",
+      "::: {${1:#id .class1 key=value}}",
+      "",
+      "${TM_SELECTED_TEXT}$0",
+      "",
+      ":::",
+      ""
+    ],
     "description": "Insert div block"
   },
   "Insert fragment block": {
     "prefix": "fragment",
-    "body": ["::: {.fragment}", "${TM_SELECTED_TEXT}$0", ":::"],
+    "body": ["", "::: {.fragment}", "", "${TM_SELECTED_TEXT}$0", "", ":::", ""],
     "description": "Insert fragment block"
   },
   "Insert span": {
@@ -129,46 +150,143 @@
   "Insert callout block": {
     "prefix": "callout",
     "body": [
+      "",
       "::: {.${1|callout,callout-note,callout-tip,callout-important,callout-caution,callout-warning|}}",
+      "",
       "${TM_SELECTED_TEXT}$0",
-      ":::"
+      "",
+      ":::",
+      ""
     ],
     "description": "Insert callout block"
   },
   "Insert two columns": {
     "prefix": "columns2",
     "body": [
+      "",
       "::: {.columns}",
-
+      "",
       "::: {.column}",
+      "",
+      "$1",
+      "",
       ":::",
-
+      "",
       "::: {.column}",
+      "",
+      "$2",
+      "",
       ":::",
-
+      "",
       ":::",
-      "<!-- end columns -->"
-
+      "",
+      "$0"
     ],
     "description": "Insert two columns"
   },
   "Insert three columns": {
     "prefix": "columns3",
     "body": [
+      "",
       "::: {.columns}",
-
+      "",
       "::: {.column}",
+      "",
+      "$1",
+      "",
       ":::",
-
+      "",
       "::: {.column}",
+      "",
+      "$2",
+      "",
       ":::",
-
+      "",
       "::: {.column}",
+      "",
+      "$3",
+      "",
       ":::",
-
+      "",
       ":::",
-      "<!-- end columns -->"
+      "",
+      "$0"
     ],
     "description": "Insert three columns"
+  },
+  "Insert YAML frontmatter": {
+    "prefix": "yaml",
+    "body": [
+      "---",
+      "title: ${1:title}",
+      "author: ${2:author}",
+      "format: ${3|html,pdf,docx,typst,revealjs|}",
+      "---",
+      "",
+      "$0"
+    ],
+    "description": "Insert YAML frontmatter"
+  },
+  "Insert figure": {
+    "prefix": "figure",
+    "body": "![${1:caption}](${2:path}){#fig-${3:id} fig-alt=\"${4:alt}\"}$0",
+    "description": "Insert figure with caption and alt text"
+  },
+  "Insert cross-reference div": {
+    "prefix": "xref",
+    "body": [
+      "",
+      "::: {#${1|fig-,tbl-,lst-|}${2:id}}",
+      "",
+      "${3:content}",
+      "",
+      "${4:caption}",
+      "",
+      ":::",
+      "",
+      "$0"
+    ],
+    "description": "Insert cross-reference div (figure, table, or listing)"
+  },
+  "Insert list table": {
+    "prefix": "list-table",
+    "body": [
+      "",
+      "::: {.list-table}",
+      "",
+      "- - ${1:header 1}",
+      "  - ${2:header 2}",
+      "",
+      "- - ${3:row 1 col 1}",
+      "  - ${4:row 1 col 2}",
+      "",
+      "- - ${5:row 2 col 1}",
+      "  - ${6:row 2 col 2}",
+      "",
+      ":::",
+      "",
+      "$0"
+    ],
+    "description": "Insert list table"
+  },
+  "Insert tabset panel": {
+    "prefix": "tabset",
+    "body": [
+      "",
+      "::: {.panel-tabset}",
+      "",
+      "## ${1:Tab 1}",
+      "",
+      "${2:content}",
+      "",
+      "## ${3:Tab 2}",
+      "",
+      "${4:content}",
+      "",
+      ":::",
+      "",
+      "$0"
+    ],
+    "description": "Insert tabset panel"
   }
 }

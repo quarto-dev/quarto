@@ -32,6 +32,43 @@ function createFormatterFromStringFunc(
 }
 
 /**
+ * Creates a document formatting provider that returns one `TextEdit` per
+ * non-empty line, instead of a single block-wide edit. This stresses the
+ * per-block loop with multiple discrete edits per cell so that any future
+ * regression in edit aggregation, sorting, or offset adjustment is caught.
+ */
+function createPerLineFormatter(
+  format: (line: string) => string
+): vscode.DocumentFormattingEditProvider {
+  return {
+    provideDocumentFormattingEdits(
+      document: vscode.TextDocument
+    ): vscode.TextEdit[] {
+      const edits: vscode.TextEdit[] = [];
+      for (let i = 0; i < document.lineCount; i++) {
+        const lineText = document.lineAt(i).text;
+        if (lineText.length === 0) {
+          continue;
+        }
+        const replaced = format(lineText);
+        if (replaced !== lineText) {
+          edits.push(
+            new vscode.TextEdit(
+              new vscode.Range(
+                new vscode.Position(i, 0),
+                new vscode.Position(i, lineText.length)
+              ),
+              replaced
+            )
+          );
+        }
+      }
+      return edits;
+    },
+  };
+}
+
+/**
  * Sets the cursor position in the active editor.
  * @param line - Line number
  * @param character - Character position
@@ -116,8 +153,7 @@ function spaceBinaryOperators(src: string): string {
  * Aggressive formatter that rewrites any line that looks remotely like a
  * Quarto option directive, regardless of whitespace around the pipe. If the
  * strip-before-format path is working, the formatter never sees a directive
- * line, so `# MANGLED` must not appear in the final result. Inject lines
- * like `# type: ignore` do not match and are therefore untouched.
+ * line, so `# MANGLED` must not appear in the final result.
  */
 function mangleHashPipeLines(sourceText: string): string {
   return spaceBinaryOperators(
@@ -381,77 +417,156 @@ suite("Code Block Formatting", function () {
   });
 
   test("document formatting protects options across every block", async function () {
-    const { doc } = await openAndShowExamplesTextDocument(
+    const { doc, editor } = await openAndShowExamplesTextDocument(
       "format-r-multiple-blocks.qmd"
     );
 
-    const formattingEditProvider =
+    // Register the embedded document formatter for `quarto` documents so
+    // VS Code routes `vscode.executeFormatDocumentProvider` through the
+    // real path the extension uses in production (validation, ordering,
+    // overlap checks, transactional application). In production this is
+    // wired as LSP middleware, but tests don't run the LSP — registering
+    // the provider directly is the closest stand-in.
+    const engine = new MarkdownEngine();
+    const provider = embeddedDocumentFormattingProvider(engine);
+    const quartoFormatter =
+      vscode.languages.registerDocumentFormattingEditProvider(
+        { scheme: "file", language: "quarto" },
+        {
+          provideDocumentFormattingEdits: async (document, options, token) =>
+            (await provider(document, options, token, async () => [])) ?? [],
+        }
+      );
+
+    const innerFormatter =
       vscode.languages.registerDocumentFormattingEditProvider(
         { scheme: "file", language: "r" },
         createFormatterFromStringFunc(hostileRFormatter)
       );
 
-    // Park the cursor on a markdown line so nothing in particular is
-    // selected. The document-formatting path should still visit every R
-    // block.
-    setCursorPosition(11, 0);
-    await wait(450);
+    try {
+      // Park the cursor on a markdown line so nothing in particular is
+      // selected. The document-formatting path should still visit every R
+      // block.
+      setCursorPosition(11, 0);
 
-    // Invoke the document-formatting provider directly. In the real
-    // extension this is wired as LSP middleware, but tests don't run
-    // the LSP, so calling the exported callback is the cleanest way to
-    // exercise the path without reimplementing VS Code's routing.
-    const engine = new MarkdownEngine();
-    const provider = embeddedDocumentFormattingProvider(engine);
-    const token: vscode.CancellationToken = {
-      isCancellationRequested: false,
-      onCancellationRequested: () => ({ dispose: () => { } }),
-    };
-    const edits = await provider(
-      doc,
-      { tabSize: 2, insertSpaces: true },
-      token,
-      async () => []
-    );
+      const edits = await vscode.commands.executeCommand<vscode.TextEdit[]>(
+        "vscode.executeFormatDocumentProvider",
+        doc.uri,
+        { tabSize: 2, insertSpaces: true }
+      );
 
-    assert.ok(edits, "Document-formatting provider should return edits");
+      assert.ok(edits, "Document-formatting provider should return edits");
+      assert.ok(edits.length > 0, "Expected at least one edit");
 
-    const editor = vscode.window.activeTextEditor!;
-    await editor.edit((eb) => {
-      (edits as vscode.TextEdit[])
-        .slice()
-        .sort((a, b) => b.range.start.compareTo(a.range.start))
-        .forEach((edit) => eb.replace(edit.range, edit.newText));
-    });
-    await wait(450);
+      // Verify the edits VS Code received are pairwise non-overlapping. This
+      // catches a class of regression where two block edits could collide
+      // because of a wrong offset or overlapping block range.
+      const sorted = edits.slice().sort((a, b) => a.range.start.compareTo(b.range.start));
+      for (let i = 1; i < sorted.length; i++) {
+        assert.ok(
+          sorted[i - 1].range.end.isBeforeOrEqual(sorted[i].range.start),
+          `Edits ${i - 1} and ${i} overlap`
+        );
+      }
 
-    const result = doc.getText();
-    formattingEditProvider.dispose();
-    await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+      await editor.edit((eb) => {
+        sorted
+          .slice()
+          .reverse()
+          .forEach((edit) => eb.replace(edit.range, edit.newText));
+      });
 
-    assert.ok(
-      result.includes("#| label: first"),
-      "First block's option directive must be preserved"
-    );
-    assert.ok(
-      result.includes("#| label: second"),
-      "Second block's option directive must be preserved"
-    );
-    assert.ok(
-      result.includes("#| echo: false"),
-      "`#| echo: false` must be preserved"
-    );
-    assert.ok(
-      !result.includes("# PIPE MANGLED"),
-      "Hostile rewrite of the hashpipe must not appear anywhere"
-    );
-    assert.ok(
-      result.includes("x <- 1"),
-      "First block's code should be reformatted"
-    );
-    assert.ok(
-      result.includes("y <- 2"),
-      "Second block's code should be reformatted"
-    );
+      const result = doc.getText();
+
+      assert.ok(
+        result.includes("#| label: first"),
+        "First block's option directive must be preserved"
+      );
+      assert.ok(
+        result.includes("#| label: second"),
+        "Second block's option directive must be preserved"
+      );
+      assert.ok(
+        result.includes("#| echo: false"),
+        "`#| echo: false` must be preserved"
+      );
+      assert.ok(
+        !result.includes("# PIPE MANGLED"),
+        "Hostile rewrite of the hashpipe must not appear anywhere"
+      );
+      assert.ok(
+        result.includes("x <- 1"),
+        "First block's code should be reformatted"
+      );
+      assert.ok(
+        result.includes("y <- 2"),
+        "Second block's code should be reformatted"
+      );
+    } finally {
+      innerFormatter.dispose();
+      quartoFormatter.dispose();
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+    }
   });
+
+  test("formatter returning multiple discrete edits is applied correctly", async function () {
+    const { doc } = await openAndShowExamplesTextDocument(
+      "format-python-multiple-options.qmd"
+    );
+
+    // Per-line formatter returns one TextEdit per non-empty line. After
+    // offset adjustment in `formatBlock` these must be reassembled in the
+    // correct order; if the offset or sort logic regressed this test
+    // would surface mis-ordered or duplicated lines.
+    const innerFormatter =
+      vscode.languages.registerDocumentFormattingEditProvider(
+        { scheme: "file", language: "python" },
+        createPerLineFormatter((line) =>
+          line.replace(/(\w)=(\w)/g, "$1 = $2").replace(/(\w)\+(\w)/g, "$1 + $2")
+        )
+      );
+
+    try {
+      setCursorPosition(10, 0);
+      await wait(450);
+      await vscode.commands.executeCommand("quarto.formatCell");
+      await wait(450);
+
+      const result = doc.getText();
+
+      assert.ok(
+        result.includes("#| label: multi"),
+        "Option directive should be preserved"
+      );
+      assert.ok(
+        result.includes("#| echo: false"),
+        "Option directive should be preserved"
+      );
+      assert.ok(
+        result.includes("#| warning: false"),
+        "Option directive should be preserved"
+      );
+      assert.ok(
+        result.includes("x = 1"),
+        "First assignment should be reformatted"
+      );
+      assert.ok(
+        result.includes("y = 2"),
+        "Second assignment should be reformatted"
+      );
+      assert.ok(
+        result.includes("z = x + y"),
+        "Third assignment should be reformatted"
+      );
+      assert.ok(
+        !result.includes("x=1"),
+        "Original unformatted source should be gone"
+      );
+    } finally {
+      innerFormatter.dispose();
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+    }
+  });
+
 });

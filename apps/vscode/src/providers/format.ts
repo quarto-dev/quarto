@@ -45,6 +45,7 @@ import {
   virtualDocForLanguage,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
+import { languageOptionComment } from "./option";
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
@@ -247,9 +248,34 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock)
     return undefined;
   }
 
-  // Create virtual document containing the block
   const blockLines = lines(codeForExecutableLanguageBlock(block, false));
-  const vdoc = virtualDocForCode(blockLines, language);
+
+  // Count leading Quarto option directives (e.g. `#| label: foo`) so we can
+  // hide them from the formatter entirely. Feeding these lines to formatters
+  // like Black or styler risks reflowing or rewriting them, which would
+  // silently break the cell's behaviour on the next render.
+  const languageComment = languageOptionComment(language.ids[0]);
+  const optionPrefix = languageComment ? languageComment + "| " : undefined;
+  let optionLines = 0;
+  if (optionPrefix) {
+    for (const line of blockLines) {
+      if (line.startsWith(optionPrefix)) {
+        optionLines++;
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Nothing to format if the block is entirely option directives.
+  if (optionLines === blockLines.length) {
+    return undefined;
+  }
+
+  // Create virtual document containing only the code portion of the block
+  // so the formatter never sees the option directives.
+  const codeLines = blockLines.slice(optionLines);
+  const vdoc = virtualDocForCode(codeLines, language);
 
   const edits = await executeFormatDocumentProvider(
     vdoc,
@@ -265,19 +291,21 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock)
 
   // Because we format with the block code copied in an empty virtual
   // document, we need to adjust the ranges to match the edits to the block
-  // cell in the original file.
+  // cell in the original file. The `+ 1` skips the opening fence line and
+  // `+ optionLines` skips the leading option directives we hid from the
+  // formatter.
+  const lineOffset = block.range.start.line + 1 + optionLines;
   const blockRange = new Range(
     new Position(block.range.start.line, block.range.start.character),
     new Position(block.range.end.line, block.range.end.character)
   );
-  const adjustedEdits = edits
-    .map(edit => {
-      const range = new Range(
-        new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
-        new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
-      );
-      return new TextEdit(range, edit.newText);
-    });
+  const adjustedEdits = edits.map(edit => {
+    const range = new Range(
+      new Position(edit.range.start.line + lineOffset, edit.range.start.character),
+      new Position(edit.range.end.line + lineOffset, edit.range.end.character)
+    );
+    return new TextEdit(range, edit.newText);
+  });
 
   // Bail if any edit is out of range. We used to filter these edits out but
   // this could bork the cell. Return `[]` to indicate that we tried.

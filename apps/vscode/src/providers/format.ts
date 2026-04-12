@@ -206,8 +206,10 @@ class FormatCellCommand implements Command {
       insertSpaces: typeof editor.options.insertSpaces === "boolean" ? editor.options.insertSpaces : true,
     };
     const edits = await formatBlock(document, block, editorOptions);
-    if (!edits) {
-      // Nothing to do! Already formatted, or no formatter picked us up, or this language doesn't support formatting.
+    if (!edits || edits.length === 0) {
+      // Nothing to do! Already formatted, no formatter picked us up, this
+      // language doesn't support formatting, or the edits were out of range
+      // (the user already saw a toast from formatBlock in that case).
       return;
     }
 
@@ -289,7 +291,10 @@ async function formatBlock(
   // ...) is automatically protected here. `language.comment` is the
   // canonical comment string from `editor-core` and covers every formatter
   // language (including TypeScript, which was missing from the ad-hoc map
-  // the previous implementation used).
+  // the previous implementation used). Note: block-comment languages (C,
+  // CSS, SAS) use a tuple comment-char in `cell/options.ts` with a suffix
+  // check; those languages do not have `canFormat: true` in
+  // `vdoc/languages.ts`, so they never reach this code path.
   const optionPattern = language.comment
     ? optionCommentPattern(language.comment)
     : undefined;
@@ -304,14 +309,16 @@ async function formatBlock(
     }
   }
 
-  // Nothing to format if the block is entirely option directives.
-  if (optionLines === blockLines.length) {
-    return undefined;
-  }
-
   // Create virtual document containing only the code portion of the block
   // so the formatter never sees the option directives.
   const codeLines = blockLines.slice(optionLines);
+
+  // Nothing to format if the block is entirely option directives (or only
+  // trailing whitespace after them, which `lines()` may produce from a
+  // final newline in `token.data`).
+  if (codeLines.every(l => l.trim() === "")) {
+    return undefined;
+  }
   const vdoc = virtualDocForCode(codeLines, language);
 
   const edits = await executeFormatDocumentProvider(
@@ -320,7 +327,7 @@ async function formatBlock(
     formattingOptions(doc.uri, vdoc.language, defaultOptions)
   );
 
-  if (!edits) {
+  if (!edits || edits.length === 0) {
     // Either no formatter picked us up, or there were no edits required.
     // We can't determine the difference though!
     return undefined;

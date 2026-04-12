@@ -103,16 +103,18 @@ async function testFormatter(
       createFormatterFromStringFunc(format)
     );
 
-  setCursorPosition(line, character);
-  await wait(450);
-  await vscode.commands.executeCommand("quarto.formatCell");
-  await wait(450);
+  try {
+    setCursorPosition(line, character);
+    await wait(450);
+    await vscode.commands.executeCommand("quarto.formatCell");
+    await wait(450);
 
-  const result = doc.getText();
-  formattingEditProvider.dispose();
-  await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-
-  return result;
+    const result = doc.getText();
+    return result;
+  } finally {
+    formattingEditProvider.dispose();
+    await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+  }
 }
 
 /**

@@ -5,6 +5,7 @@
 - Added support for Positron's statement execution feature that reports the approximate line number of the parse error (<https://github.com/quarto-dev/quarto/pull/919>).
 - Fixed a bug where `Quarto: Format Cell` would notify you that no formatter was available for code cells that were already formatted (<https://github.com/quarto-dev/quarto/pull/933>).
 - No longer claim `.typ` files. Typst syntax highlighting in Quarto documents is unaffected, but standalone Typst files are now left to dedicated extensions like Tinymist (<https://github.com/quarto-dev/quarto/pull/943>).
+- Preserve Quarto code cell option directives (e.g. `#| label: foo`) when formatting embedded code. The directives are now stripped from the virtual document before being handed to the language formatter, so formatters such as Black, autopep8, and styler can no longer reflow or rewrite them (<https://github.com/quarto-dev/quarto/pull/655>).
 - Fixed a bug where closing the Quarto Preview terminal via the trash icon did not clean up intermediate `.quarto_ipynb` files (<https://github.com/quarto-dev/quarto/pull/947>).
 
 ## 1.130.0 (Release on 2026-02-18)

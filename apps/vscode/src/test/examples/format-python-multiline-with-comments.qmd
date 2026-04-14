@@ -1,0 +1,14 @@
+---
+title: Formatting Multiline Python Code Cells with Comments
+subtitle: https://github.com/quarto-dev/quarto/pull/655
+format: html
+---
+
+```{python}
+#| label: multiline
+#| echo: false
+#standalone comment
+x=1  #inline comment
+y=2
+z=x+y
+```

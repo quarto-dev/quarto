@@ -282,6 +282,18 @@ class PreviewManager {
       this.outputSink_,
       this.renderToken_
     );
+
+    // When the user closes the preview terminal via the trash icon (or any
+    // external means), send the HTTP termination request so Quarto can clean
+    // up temp files (e.g. _ipynb files created during Python preview).
+    context.subscriptions.push(
+      vscode.window.onDidCloseTerminal(async (closedTerminal) => {
+        if (closedTerminal === this.terminal_) {
+          this.terminal_ = undefined;
+          await this.previewTerminateRequest();
+        }
+      })
+    );
   }
 
   dispose() {
@@ -416,6 +428,9 @@ class PreviewManager {
   }
 
   private async killPreview() {
+    // Clear this.terminal_ before disposing so the onDidCloseTerminal listener
+    // does not send a duplicate termination request.
+    this.terminal_ = undefined;
     await killTerminal(kPreviewWindowTitle, async () => await this.previewTerminateRequest());
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;

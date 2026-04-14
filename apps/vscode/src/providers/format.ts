@@ -35,14 +35,15 @@ import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBloc
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
+import { optionCommentPattern } from "./cell/options";
 import { EmbeddedLanguage, languageCanFormatDocument } from "../vdoc/languages";
 import {
+  isBlockOfLanguage,
   languageFromBlock,
   mainLanguage,
   unadjustedRange,
   VirtualDoc,
   virtualDocForCode,
-  virtualDocForLanguage,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
 
@@ -90,22 +91,42 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
       return [];
     }
 
-    if (languageCanFormatDocument(language)) {
-      // Full document formatting support
-      const vdoc = virtualDocForLanguage(document, tokens, language);
-      return executeFormatDocumentProvider(
-        vdoc,
-        document,
-        formattingOptions(document.uri, vdoc.language, options)
+    // If the selected language supports whole-document formatting, format
+    // every block of it; otherwise, format only the cell containing the
+    // cursor. Either way, each block is routed through `formatBlock` so
+    // that Quarto option directives are protected by the same
+    // strip-before-format path and can't leak to the language formatter.
+    const targetBlocks: (TokenMath | TokenCodeBlock)[] = languageCanFormatDocument(language)
+      ? (tokens.filter(isBlockOfLanguage(language)) as (TokenMath | TokenCodeBlock)[])
+      : block
+        ? [block]
+        : [];
+
+    // Document formatting is all-or-nothing: if any block fails the
+    // out-of-range guard, abort the whole operation rather than apply a
+    // partial format. We pass `silentOutOfRange: true` so per-block
+    // failures don't toast individually; a single aggregated message is
+    // shown below.
+    const allEdits: TextEdit[] = [];
+    let outOfRangeBlockFailures = 0;
+    for (const target of targetBlocks) {
+      const edits = await formatBlock(document, target, options, true);
+      if (edits === undefined) {
+        continue;
+      }
+      if (edits.length === 0) {
+        outOfRangeBlockFailures++;
+        continue;
+      }
+      allEdits.push(...edits);
+    }
+    if (outOfRangeBlockFailures > 0) {
+      window.showInformationMessage(
+        `Formatting edits were out of range in ${outOfRangeBlockFailures} code cell${outOfRangeBlockFailures === 1 ? "" : "s"}; document was not modified.`
       );
-    } else if (block) {
-      // Just format the selected block if there is one
-      const edits = await formatBlock(document, block);
-      return edits ? edits : [];
-    } else {
-      // Nothing we can format
       return [];
     }
+    return allEdits;
   };
 }
 
@@ -145,7 +166,7 @@ export function embeddedDocumentRangeFormattingProvider(
       return [];
     }
 
-    const edits = await formatBlock(document, block);
+    const edits = await formatBlock(document, block, options);
     if (!edits) {
       return [];
     }
@@ -180,9 +201,15 @@ class FormatCellCommand implements Command {
       return;
     }
 
-    const edits = await formatBlock(document, block);
-    if (!edits) {
-      // Nothing to do! Already formatted, or no formatter picked us up, or this language doesn't support formatting.
+    const editorOptions: FormattingOptions = {
+      tabSize: typeof editor.options.tabSize === "number" ? editor.options.tabSize : 4,
+      insertSpaces: typeof editor.options.insertSpaces === "boolean" ? editor.options.insertSpaces : true,
+    };
+    const edits = await formatBlock(document, block, editorOptions);
+    if (!edits || edits.length === 0) {
+      // Nothing to do! Already formatted, no formatter picked us up, this
+      // language doesn't support formatting, or the edits were out of range
+      // (the user already saw a toast from formatBlock in that case).
       return;
     }
 
@@ -235,7 +262,12 @@ async function executeFormatDocumentProvider(
   }
 }
 
-async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock): Promise<TextEdit[] | undefined> {
+async function formatBlock(
+  doc: TextDocument,
+  block: TokenMath | TokenCodeBlock,
+  defaultOptions?: FormattingOptions,
+  silentOutOfRange: boolean = false
+): Promise<TextEdit[] | undefined> {
   // Extract language
   const language = languageFromBlock(block);
   if (!language) {
@@ -247,17 +279,55 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock)
     return undefined;
   }
 
-  // Create virtual document containing the block
   const blockLines = lines(codeForExecutableLanguageBlock(block, false));
-  const vdoc = virtualDocForCode(blockLines, language);
+
+  // Count leading Quarto option directives (e.g. `#| label: foo`) so we can
+  // hide them from the formatter entirely. Feeding these lines to formatters
+  // like Black or styler risks reflowing or rewriting them, which would
+  // silently break the cell's behaviour on the next render. We reuse
+  // `optionCommentPattern` from `cell/options.ts` so this code path can
+  // never drift from Quarto's own cell-option parser: any variant the
+  // executor recognises (`#| label`, `#|label`, `# | label`, `#|  label`,
+  // ...) is automatically protected here. `language.comment` is the
+  // canonical comment string from `editor-core` and covers every formatter
+  // language (including TypeScript, which was missing from the ad-hoc map
+  // the previous implementation used). Note: block-comment languages (C,
+  // CSS, SAS) use a tuple comment-char in `cell/options.ts` with a suffix
+  // check; those languages do not have `canFormat: true` in
+  // `vdoc/languages.ts`, so they never reach this code path.
+  const optionPattern = language.comment
+    ? optionCommentPattern(language.comment)
+    : undefined;
+  let optionLines = 0;
+  if (optionPattern) {
+    for (const line of blockLines) {
+      if (optionPattern.test(line)) {
+        optionLines++;
+      } else {
+        break;
+      }
+    }
+  }
+
+  // Create virtual document containing only the code portion of the block
+  // so the formatter never sees the option directives.
+  const codeLines = blockLines.slice(optionLines);
+
+  // Nothing to format if the block is entirely option directives (or only
+  // trailing whitespace after them, which `lines()` may produce from a
+  // final newline in `token.data`).
+  if (codeLines.every(l => l.trim() === "")) {
+    return undefined;
+  }
+  const vdoc = virtualDocForCode(codeLines, language);
 
   const edits = await executeFormatDocumentProvider(
     vdoc,
     doc,
-    formattingOptions(doc.uri, vdoc.language)
+    formattingOptions(doc.uri, vdoc.language, defaultOptions)
   );
 
-  if (!edits) {
+  if (!edits || edits.length === 0) {
     // Either no formatter picked us up, or there were no edits required.
     // We can't determine the difference though!
     return undefined;
@@ -265,26 +335,30 @@ async function formatBlock(doc: TextDocument, block: TokenMath | TokenCodeBlock)
 
   // Because we format with the block code copied in an empty virtual
   // document, we need to adjust the ranges to match the edits to the block
-  // cell in the original file.
+  // cell in the original file. The `+ 1` skips the opening fence line and
+  // `+ optionLines` skips the leading option directives we hid from the
+  // formatter.
+  const lineOffset = block.range.start.line + 1 + optionLines;
   const blockRange = new Range(
     new Position(block.range.start.line, block.range.start.character),
     new Position(block.range.end.line, block.range.end.character)
   );
-  const adjustedEdits = edits
-    .map(edit => {
-      const range = new Range(
-        new Position(edit.range.start.line + block.range.start.line + 1, edit.range.start.character),
-        new Position(edit.range.end.line + block.range.start.line + 1, edit.range.end.character)
-      );
-      return new TextEdit(range, edit.newText);
-    });
+  const adjustedEdits = edits.map(edit => {
+    const range = new Range(
+      new Position(edit.range.start.line + lineOffset, edit.range.start.character),
+      new Position(edit.range.end.line + lineOffset, edit.range.end.character)
+    );
+    return new TextEdit(range, edit.newText);
+  });
 
   // Bail if any edit is out of range. We used to filter these edits out but
   // this could bork the cell. Return `[]` to indicate that we tried.
   if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
-    window.showInformationMessage(
-      "Formatting edits were out of range and could not be applied to the code cell."
-    );
+    if (!silentOutOfRange) {
+      window.showInformationMessage(
+        "Formatting edits were out of range and could not be applied to the code cell."
+      );
+    }
     return [];
   }
 

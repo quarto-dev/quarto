@@ -6,6 +6,7 @@
 - Fixed a bug where `Quarto: Format Cell` would notify you that no formatter was available for code cells that were already formatted (<https://github.com/quarto-dev/quarto/pull/933>).
 - No longer claim `.typ` files. Typst syntax highlighting in Quarto documents is unaffected, but standalone Typst files are now left to dedicated extensions like Tinymist (<https://github.com/quarto-dev/quarto/pull/943>).
 - Improved Quarto snippets: fixed invalid JSON, corrected the raw code block syntax, refreshed and alphabetised the fenced code block language list, added `typst` to raw code blocks, restored content and tab stops in the `columns2`/`columns3` snippets, ensured block-level snippets are surrounded by empty lines, and added `yaml`, `figure`, `xref`, `list-table`, and `tabset` snippets (<https://github.com/quarto-dev/quarto/pull/946>).
+- Fixed a bug where closing the Quarto Preview terminal via the trash icon did not clean up intermediate `.quarto_ipynb` files (<https://github.com/quarto-dev/quarto/pull/947>).
 
 ## 1.130.0 (Release on 2026-02-18)
 

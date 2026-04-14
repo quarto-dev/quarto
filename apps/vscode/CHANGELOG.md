@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.132.0 (Unreleased)
+
 ## 1.131.0 (Release on 2026-04-14)
 
 - Added support for Positron's statement execution feature that reports the approximate line number of the parse error (<https://github.com/quarto-dev/quarto/pull/919>).

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.131.0 (Unreleased)
+## 1.131.0 (Release on 2026-04-14)
 
 - Added support for Positron's statement execution feature that reports the approximate line number of the parse error (<https://github.com/quarto-dev/quarto/pull/919>).
 - Fixed a bug where `Quarto: Format Cell` would notify you that no formatter was available for code cells that were already formatted (<https://github.com/quarto-dev/quarto/pull/933>).

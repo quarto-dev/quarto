@@ -3,7 +3,7 @@
  *
  * Positron-specific functionality.
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -18,13 +18,24 @@
 import * as vscode from 'vscode';
 import * as hooks from 'positron';
 
+import semver from "semver";
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
-import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri } from "../vdoc/vdoc";
-import { Position } from 'vscode';
+import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle, unadjustedLine } from "../vdoc/vdoc";
+import { Position, Range } from 'vscode';
 import { Uri } from 'vscode';
+
+/**
+ * Check if inline output is enabled in Positron settings.
+ * This helper is shared with main.ts for code lens visibility.
+ */
+export function isInlineOutputEnabled(): boolean {
+  return vscode.workspace
+    .getConfiguration("positron.quarto.inlineOutput")
+    .get<boolean>("enabled", false);
+}
 
 declare global {
   function acquirePositronApi(): hooks.PositronApi;
@@ -61,7 +72,7 @@ export function hooksExtensionHost(): ExtensionHost {
         case "csharp":
         case "r":
           return {
-            execute: async (blocks: string[], _editorUri?: vscode.Uri): Promise<void> => {
+            execute: async (blocks: string[], editorUri?: vscode.Uri): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -99,6 +110,16 @@ export function hooksExtensionHost(): ExtensionHost {
                 console.error('error when using `positron.executeCodeFromPosition`');
               }
               return position;
+            },
+            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[]): Promise<void> => {
+              const runtime = hooksApi()?.runtime;
+
+              if (runtime === undefined) {
+                // Can't do anything without a runtime
+                return;
+              }
+
+              await runtime.executeInlineCell(documentUri, cellRanges);
             }
           };
 
@@ -179,19 +200,46 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
     document: vscode.TextDocument,
     position: vscode.Position,
     token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
-    const vdoc = await virtualDoc(document, position, this._engine);
-    if (vdoc) {
-      return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
+    const vdoc = await virtualDoc(document, position, this._engine, VirtualDocStyle.Block);
+
+    if (!vdoc) {
+      return undefined;
+    }
+
+    return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
+      try {
         const result = await vscode.commands.executeCommand<hooks.StatementRange>(
           "vscode.executeStatementRangeProvider",
           uri,
           adjustedPosition(vdoc.language, position)
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
-      });
-    } else {
-      return undefined;
-    }
+      } catch (err) {
+        let hooks = hooksApi();
+
+        if (!hooks) {
+          throw err;
+        }
+
+        // TODO: Remove this once `apps/vscode/package.json` bumps to `"positron": "^2026.03.0"` or higher.
+        // For now we avoid aggressive bumping due to https://github.com/posit-dev/positron/issues/11321.
+        // We can't use `semver.lt()` because calendar versioning isn't compatible with semver due to the
+        // leading `0` in `03`. Instead, we use lexicographic string comparison and rely on the year and
+        // month to be zero padded so sorting always works correctly.
+        if (hooks.version < "2026.03.0") {
+          throw err;
+        }
+
+        if (err instanceof hooks.StatementRangeSyntaxError) {
+          // Rethrow syntax error with unadjusted line number, so Positron's notification will
+          // jump to the correct line
+          throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
+        } else {
+          // Rethrow unrecognized error
+          throw err;
+        }
+      }
+    });
   };
 }
 

@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.130.0",
+  "version": "1.132.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -91,10 +91,7 @@
         "id": "typst",
         "aliases": [
           "Typst",
-          "mermaid"
-        ],
-        "extensions": [
-          ".typ"
+          "typst"
         ],
         "configuration": "./languages/typst/typst.configuration.json"
       }
@@ -222,7 +219,7 @@
     "commands": [
       {
         "command": "quarto.newDocument",
-        "title": "New Document",
+        "title": "New Quarto Document (qmd)",
         "category": "Quarto"
       },
       {
@@ -232,12 +229,12 @@
       },
       {
         "command": "quarto.newPresentation",
-        "title": "New Presentation",
+        "title": "New Quarto Presentation (qmd)",
         "category": "Quarto"
       },
       {
         "command": "quarto.newNotebook",
-        "title": "New Notebook (ipynb)",
+        "title": "New Quarto Notebook (ipynb)",
         "category": "Quarto"
       },
       {
@@ -302,7 +299,7 @@
         "category": "Quarto",
         "actionBarOptions": {
           "controlType": "button",
-          "displayTitle": true
+          "displayTitle": false
         }
       },
       {
@@ -404,7 +401,7 @@
       },
       {
         "command": "quarto.walkthrough.newDocument",
-        "title": "New Document (qmd)",
+        "title": "New Quarto Document (qmd)",
         "category": "Quarto"
       },
       {
@@ -1322,7 +1319,11 @@
         },
         "quarto.symbols.exportToWorkspace": {
           "type": "string",
-          "enum": ["default", "all", "none"],
+          "enum": [
+            "default",
+            "all",
+            "none"
+          ],
           "enumDescriptions": [
             "Depends on the project type: `\"none\"` in R packages, `\"all\"` otherwise.",
             "",

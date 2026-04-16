@@ -13,7 +13,7 @@
  *
  */
 
-import { Uri, commands, window, extensions } from "vscode";
+import { Uri, commands, window, extensions, Range } from "vscode";
 
 import semver from "semver";
 import { TextDocument } from "vscode";
@@ -28,6 +28,7 @@ export interface CellExecutor {
   execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
   executeSelection?: () => Promise<void>;
   executeAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
+  executeInlineCells?: (documentUri: Uri, cellRanges: Range[]) => Promise<void>;
 }
 
 export function executableLanguages() {

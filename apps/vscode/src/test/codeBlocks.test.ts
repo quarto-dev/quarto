@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { WORKSPACE_PATH, examplesOutUri, openAndShowTextDocument } from "./test-utils";
+import { WORKSPACE_PATH, examplesOutUri, openAndShowExamplesOutTextDocument } from "./test-utils";
 import { isExecutableLanguageBlock, languageNameFromBlock } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 
@@ -17,7 +17,7 @@ suite("Code block detection", function () {
   // doesn't have a preceding blank line. This real-world example has many
   // .notes divs which caused later code blocks to not be detected.
   test("Detects code blocks in document with many divs (issue #521)", async function () {
-    const { doc } = await openAndShowTextDocument("div-code-blocks.qmd");
+    const { doc } = await openAndShowExamplesOutTextDocument("div-code-blocks.qmd");
 
     const tokens = engine.parse(doc);
     const executableBlocks = tokens.filter(isExecutableLanguageBlock);
@@ -49,7 +49,7 @@ suite("Code block detection", function () {
   });
 
   test("Detects code block in simple document", async function () {
-    const { doc } = await openAndShowTextDocument("hello.qmd");
+    const { doc } = await openAndShowExamplesOutTextDocument("hello.qmd");
 
     const tokens = engine.parse(doc);
     const executableBlocks = tokens.filter(isExecutableLanguageBlock);

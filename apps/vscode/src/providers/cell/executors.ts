@@ -17,7 +17,7 @@
 // (e.g. see https://github.com/JeepShen/vscode-markdown-code-runner)
 
 
-import { TextDocument } from "vscode";
+import { TextDocument, Range } from "vscode";
 
 import {
   codeForExecutableLanguageBlock,
@@ -34,6 +34,7 @@ import { cellOptionsForToken, kExecuteEval } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
 import { executableLanguages } from "../../host/executors";
+import { isInlineOutputEnabled } from "../../host/hooks";
 import { Position } from "vscode";
 import { Uri } from "vscode";
 
@@ -87,8 +88,18 @@ export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
 export async function executeInteractive(
   executor: CellExecutor,
   blocks: string[],
-  document: TextDocument
+  document: TextDocument,
+  ranges?: Range[]
 ): Promise<void> {
+  // If inline output is enabled, the document has a URI, and the executor supports
+  // inline execution, use that instead of the standard console execution
+  if (isInlineOutputEnabled() &&
+      !document.isUntitled &&
+      ranges &&
+      ranges.length > 0 &&
+      executor.executeInlineCells) {
+    return await executor.executeInlineCells(document.uri, ranges);
+  }
   return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
 }
 

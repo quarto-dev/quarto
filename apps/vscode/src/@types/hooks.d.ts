@@ -10,6 +10,7 @@ declare module 'positron' {
 		runtime: PositronRuntime;
 		languages: PositronLanguages;
 		window: PositronWindow;
+		StatementRangeSyntaxError: typeof StatementRangeSyntaxError;
 	}
 
 	export interface PositronRuntime {
@@ -19,6 +20,11 @@ declare module 'positron' {
 			focus: boolean,
 			allowIncomplete: boolean
 		): Thenable<boolean>;
+
+		executeInlineCell(
+			documentUri: vscode.Uri,
+			cellRanges: vscode.Range[]
+		): Thenable<void>;
 	}
 
 	export interface PositronLanguages {
@@ -51,6 +57,11 @@ declare module 'positron' {
 	export interface StatementRange {
 		readonly range: vscode.Range;
 		readonly code?: string;
+	}
+
+	export class StatementRangeSyntaxError extends Error {
+		readonly line?: number;
+		constructor(line?: number);
 	}
 
 	export interface PositronWindow {

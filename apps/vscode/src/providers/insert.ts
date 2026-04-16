@@ -22,6 +22,8 @@ import {
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
+import type { PositronApi } from "positron";
 import { isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 
@@ -98,6 +100,17 @@ class InsertCodeCellCommand implements Command {
           }
         }
 
+        // if no language found in document, fall back to Positron's active runtime
+        const kSupportedLanguages = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
+        if (!language) {
+          const api = tryAcquirePositronApi() as unknown as PositronApi | undefined;
+          const session = await api?.runtime.getForegroundSession();
+          const sessionLang = session?.runtimeMetadata.languageId ?? "";
+          if (kSupportedLanguages.includes(sessionLang)) {
+            language = sessionLang;
+          }
+        }
+
         // if we have a known language, use it and put the cursor directly in the
         // code cell, otherwise let the user select the language first
         let header;
@@ -105,8 +118,7 @@ class InsertCodeCellCommand implements Command {
         if (language) {
           header = "```{" + language + "}";
         } else {
-          const languages = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
-          header = "```{${1|" + languages.join(",") + "|}}";
+          header = "```{${1|" + kSupportedLanguages.join(",") + "|}}";
         }
 
         // insert snippet

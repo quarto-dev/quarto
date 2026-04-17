@@ -62,6 +62,12 @@ export function blockIsExecutable(host: ExtensionHost, token?: Token): token is 
   }
 }
 
+// extract cell options as execution metadata (returns undefined if no options)
+export function cellMetadataForBlock(token: TokenMath | TokenCodeBlock): Record<string, unknown> | undefined {
+  const options = cellOptionsForToken(token);
+  return Object.keys(options).length > 0 ? options : undefined;
+}
+
 // skip yaml options for execution
 export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
   if (isExecutableLanguageBlock(token)) {
@@ -89,7 +95,8 @@ export async function executeInteractive(
   executor: CellExecutor,
   blocks: string[],
   document: TextDocument,
-  ranges?: Range[]
+  ranges?: Range[],
+  metadata?: Record<string, unknown>[]
 ): Promise<void> {
   // If inline output is enabled, the document has a URI, and the executor supports
   // inline execution, use that instead of the standard console execution
@@ -98,9 +105,9 @@ export async function executeInteractive(
       ranges &&
       ranges.length > 0 &&
       executor.executeInlineCells) {
-    return await executor.executeInlineCells(document.uri, ranges);
+    return await executor.executeInlineCells(document.uri, ranges, metadata);
   }
-  return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
+  return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined, metadata);
 }
 
 

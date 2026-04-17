@@ -100,11 +100,11 @@ class InsertCodeCellCommand implements Command {
         }
 
         // if no language found in document, fall back to Positron's active runtime
-        const kSupportedLanguages = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
+        const languages = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
         if (!language) {
           const session = await hooksApi()?.runtime.getForegroundSession();
           const sessionLang = session?.runtimeMetadata.languageId ?? "";
-          if (kSupportedLanguages.includes(sessionLang)) {
+          if (languages.includes(sessionLang)) {
             language = sessionLang;
           }
         }
@@ -116,7 +116,7 @@ class InsertCodeCellCommand implements Command {
         if (language) {
           header = "```{" + language + "}";
         } else {
-          header = "```{${1|" + kSupportedLanguages.join(",") + "|}}";
+          header = "
         }
 
         // insert snippet

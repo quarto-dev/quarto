@@ -116,7 +116,7 @@ class InsertCodeCellCommand implements Command {
         if (language) {
           header = "```{" + language + "}";
         } else {
-          header = "
+          header = "```{${1|" + languages.join(",") + "|}}";
         }
 
         // insert snippet

@@ -24,6 +24,7 @@ import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
+import { activateConvert } from "./providers/convert";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
@@ -137,6 +138,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   // provide render
   const renderCommands = activateRender(quartoContext, engine);
   commands.push(...renderCommands);
+
+  // provide convert (convert between .qmd and .ipynb)
+  const convertCommands = activateConvert(quartoContext, engine, outputChannel);
+  commands.push(...convertCommands);
 
   // provide preview
   const previewCommands = activatePreview(context, host, quartoContext, engine);

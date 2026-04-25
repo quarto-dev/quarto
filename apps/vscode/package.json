@@ -293,6 +293,16 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.convertToIpynb",
+        "title": "Convert Document to .ipynb",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.convertToQmd",
+        "title": "Convert Notebook to .qmd",
+        "category": "Notebook"
+      },
+      {
         "command": "quarto.insertCodeCell",
         "icon": "$(insert)",
         "title": "Insert Code Cell",
@@ -675,6 +685,11 @@
           "group": "q_execute"
         },
         {
+          "command": "quarto.convertToIpynb",
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "q_zzConvert"
+        },
+        {
           "command": "quarto.editInVisualMode",
           "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
           "group": "q_switch"
@@ -722,6 +737,11 @@
         {
           "command": "quarto.previewFormat",
           "group": "q_zPreview"
+        },
+        {
+          "command": "quarto.convertToQmd",
+          "when": "resourceExtname == .ipynb",
+          "group": "q_zzConvert"
         }
       ],
       "file/newFile": [
@@ -878,6 +898,14 @@
         {
           "command": "quarto.zoteroUnauthorized",
           "when": "false"
+        },
+        {
+          "command": "quarto.convertToIpynb",
+          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && activeCustomEditorId == 'quarto.visualEditor'"
+        },
+        {
+          "command": "quarto.convertToQmd",
+          "when": "activeEditor == 'workbench.editor.notebook' || activeEditor == 'workbench.editor.positronNotebook'"
         }
       ],
       "view/title": [

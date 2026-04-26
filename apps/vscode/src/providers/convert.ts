@@ -77,7 +77,9 @@ async function convertDocument(
 
   try {
     quartoContext.runQuarto(
-      {},
+      // Pipe so CLI output doesn't leak into the developer console,
+      // we capture output/errors ourselves.
+      { stdio: "pipe" },
       "convert",
       fsPath,
       // Always pass an explicit output path, using the same heuristic as the CLI.

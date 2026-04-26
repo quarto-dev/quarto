@@ -31,7 +31,7 @@ export function activateConvert(
 ): Command[] {
   return [
     new ConvertToIpynbCommand(quartoContext, engine, outputChannel),
-    new ConvertToQmdCommand(quartoContext, outputChannel),
+    new ConvertToQmdCommand(quartoContext, engine, outputChannel),
   ];
 }
 
@@ -127,14 +127,13 @@ async function convertDocument(
 }
 
 class ConvertToIpynbCommand implements Command {
-  private static readonly id = "quarto.convertToIpynb";
-  public readonly id = ConvertToIpynbCommand.id;
+  public readonly id = "quarto.convertToIpynb";
 
   constructor(
     private readonly quartoContext_: QuartoContext,
     private readonly engine_: MarkdownEngine,
     private readonly outputChannel_: LogOutputChannel
-  ) {}
+  ) { }
 
   async execute(): Promise<void> {
     if (!this.quartoContext_.available) {
@@ -144,34 +143,44 @@ class ConvertToIpynbCommand implements Command {
       return;
     }
 
-    const targetEditor = findQuartoEditor(
+    const sourceUri = this._getSourceUri();
+    if (!sourceUri) {
+      // Couldn't find a valid source document to convert
+      return;
+    }
+
+    await convertDocument(
+      this.quartoContext_,
+      this.outputChannel_,
+      sourceUri,
+      ".ipynb"
+    );
+  }
+
+  private _getSourceUri(): Uri | undefined {
+    const editor = findQuartoEditor(
       this.engine_,
       this.quartoContext_,
       // Quarto can convert all previewable markdown types (qmd, md, Rmd)
       canPreviewDoc,
     );
-    if (!targetEditor) {
-      // No active Quarto editor
-      return;
+    if (editor) {
+      return editor.document.uri;
     }
 
-    await convertDocument(
-      this.quartoContext_,
-      this.outputChannel_,
-      targetEditor.document.uri,
-      ".ipynb"
-    );
+    // No active Quarto editor
+    return undefined;
   }
 }
 
 class ConvertToQmdCommand implements Command {
-  private static readonly id = "quarto.convertToQmd";
-  public readonly id = ConvertToQmdCommand.id;
+  public readonly id = "quarto.convertToQmd";
 
   constructor(
     private readonly quartoContext_: QuartoContext,
+    private readonly engine_: MarkdownEngine,
     private readonly outputChannel_: LogOutputChannel
-  ) {}
+  ) { }
 
   async execute(): Promise<void> {
     if (!this.quartoContext_.available) {
@@ -181,22 +190,43 @@ class ConvertToQmdCommand implements Command {
       return;
     }
 
-    // Can only convert .ipynb files to .qmd, find the source notebook URI
-    // that this command was invoked from.
-    const notebookEditor = window.activeNotebookEditor;
-    if (!notebookEditor) {
-      return;
-    }
-    const notebookUri = notebookEditor.notebook.uri;
-    if (!notebookUri.fsPath.endsWith(".ipynb")) {
+    const sourceUri = this._getSourceUri();
+    if (!sourceUri) {
+      // Couldn't find a valid source document to convert
       return;
     }
 
     await convertDocument(
       this.quartoContext_,
       this.outputChannel_,
-      notebookUri,
+      sourceUri,
       ".qmd"
     );
+  }
+
+  private _getSourceUri(): Uri | undefined {
+    // Get the source notebook that this command was invoked from.
+    const notebookEditor = window.activeNotebookEditor;
+    if (notebookEditor) {
+      const notebookUri = notebookEditor.notebook.uri;
+      // Can only convert from .ipynb
+      if (notebookUri.fsPath.endsWith(".ipynb")) {
+        return notebookUri;
+      }
+    }
+
+    // Edge case: fall back to text editors
+    const quartoEditor = findQuartoEditor(
+      this.engine_,
+      this.quartoContext_,
+      // Can only convert from .ipynb
+      (doc) => doc.uri.fsPath.endsWith(".ipynb")
+    );
+    if (quartoEditor) {
+      return quartoEditor.document.uri;
+    }
+
+    // No active editor
+    return undefined;
   }
 }

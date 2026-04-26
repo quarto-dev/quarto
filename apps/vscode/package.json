@@ -686,7 +686,12 @@
         },
         {
           "command": "quarto.convertToIpynb",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "q_zzConvert"
+        },
+        {
+          "command": "quarto.convertToQmd",
+          "when": "resourceExtname == .ipynb",
           "group": "q_zzConvert"
         },
         {
@@ -901,11 +906,11 @@
         },
         {
           "command": "quarto.convertToIpynb",
-          "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
         },
         {
           "command": "quarto.convertToQmd",
-          "when": "activeEditor == 'workbench.editor.notebook' || activeEditor == 'workbench.editor.positronNotebook'"
+          "when": "resourceExtname == .ipynb"
         }
       ],
       "view/title": [

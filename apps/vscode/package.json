@@ -294,12 +294,12 @@
       },
       {
         "command": "quarto.convertToIpynb",
-        "title": "Convert Document to .ipynb",
+        "title": "Convert to .ipynb",
         "category": "Quarto"
       },
       {
         "command": "quarto.convertToQmd",
-        "title": "Convert Notebook to .qmd",
+        "title": "Convert to .qmd",
         "category": "Notebook"
       },
       {

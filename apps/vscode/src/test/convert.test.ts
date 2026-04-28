@@ -148,6 +148,35 @@ suite("Convert Commands", function () {
         fs.rmSync(convertedFile.fsPath, { recursive: true });
       }
     });
+
+    test("shows CLI errors in a human-readable format", async function () {
+      const invalidFile = examplesOutUri("convert-invalid-yaml.qmd");
+      const convertedFile = examplesOutUri("convert-invalid-yaml.ipynb");
+
+      const doc = await vscode.workspace.openTextDocument(invalidFile);
+      await vscode.window.showTextDocument(doc);
+
+      const original = vscode.window.showWarningMessage;
+      const messages: string[] = [];
+      vscode.window.showWarningMessage = async (msg: string) => {
+        messages.push(msg);
+        console.log("showWarningMessage:", msg);
+        return undefined;
+      };
+
+      try {
+        await vscode.commands.executeCommand("quarto.convertToIpynb");
+
+        // Check that there's no ANSI escape codes or stack traces
+        // (those are in the output channel logs, not the user-facing warning).
+        assert.deepStrictEqual(messages, [
+          'Quarto convert failed. Reason: ERROR: YAMLException: unexpected end of the stream within a double quoted scalar (4:1)'
+        ]);
+      } finally {
+        vscode.window.showWarningMessage = original;
+        fs.rmSync(convertedFile.fsPath, { force: true });
+      }
+    });
   });
 
   suite("Convert .ipynb to .qmd", function () {

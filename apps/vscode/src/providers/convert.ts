@@ -105,16 +105,18 @@ async function convertDocument(
     }
     outputChannel.error(e.stack || e.message);
 
-    // Strip Deno stack frames (lines starting with whitespace + "at ")
-    // that appear on uncaught exceptions — not useful in a UI dialog.
+    // Clean up the stderr for display in a UI dialog:
+    // 1. Strip ANSI escape codes (e.g. color codes from the CLI)
+    // 2. Extract just the first non-empty line — the rest is source context
+    //    and stack traces that belong in the output channel, not a dialog.
     const message = stderr
-      ? stderr.replace(/^\s+at .+$/gm, "").trim()
+      ? stderr.replace(/\x1B\[[0-9;]*m/g, "").split("\n").find(l => l.trim()) ?? stderr
       : e.message;
 
     // Show the error message.
     const showOutput = "Show Output";
     const action = await window.showWarningMessage(
-      `Quarto convert failed: ${message}`,
+      `Quarto convert failed. Reason: ${message}`,
       showOutput
     );
     if (action === showOutput) {

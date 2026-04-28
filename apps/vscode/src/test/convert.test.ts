@@ -160,7 +160,6 @@ suite("Convert Commands", function () {
       const messages: string[] = [];
       vscode.window.showWarningMessage = async (msg: string) => {
         messages.push(msg);
-        console.log("showWarningMessage:", msg);
         return undefined;
       };
 

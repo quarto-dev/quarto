@@ -40,6 +40,19 @@ suite("Convert Commands", function () {
       assert.ok(Array.isArray(content.cells), "should have a cells array");
     });
 
+    test("opens the converted .ipynb in the notebook editor", async function () {
+      const doc = await vscode.workspace.openTextDocument(sourceFile);
+      await vscode.window.showTextDocument(doc);
+
+      await vscode.commands.executeCommand("quarto.convertToIpynb");
+
+      assert.strictEqual(
+        vscode.window.activeNotebookEditor?.notebook.uri.toString(),
+        convertedFile.toString(),
+        "converted .ipynb opened in the text editor instead of the notebook editor"
+      );
+    });
+
     test("saves the file before converting", async function () {
       const doc = await vscode.workspace.openTextDocument(sourceFile);
       const editor = await vscode.window.showTextDocument(doc);
@@ -55,7 +68,7 @@ suite("Convert Commands", function () {
       assert.ok(!doc.isDirty, "Document should be saved after convert");
 
       const notebook = JSON.parse(fs.readFileSync(convertedFile.fsPath, "utf-8"));
-      const sources = notebook.cells.map((c: { source: string[] }) => c.source.join(""));
+      const sources = notebook.cells.map((c: { source: string[]; }) => c.source.join(""));
       assert.ok(
         sources.some((s: string) => s.includes("Added line")),
         "converted file should contain the added line"
@@ -155,6 +168,19 @@ suite("Convert Commands", function () {
 
       const content = fs.readFileSync(convertedFile.fsPath, "utf-8");
       assert.ok(content.startsWith("---"), ".qmd file should start with YAML front matter");
+    });
+
+    test("opens the converted .qmd in the text editor", async function () {
+      const notebook = await vscode.workspace.openNotebookDocument(sourceFile);
+      await vscode.window.showNotebookDocument(notebook);
+
+      await vscode.commands.executeCommand("quarto.convertToQmd");
+
+      assert.strictEqual(
+        vscode.window.activeTextEditor?.document.uri.toString(),
+        convertedFile.toString(),
+        "converted .qmd did not open in the text editor"
+      );
     });
 
     test("saves the notebook before converting", async function () {

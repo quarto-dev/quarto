@@ -16,7 +16,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import { commands, LogOutputChannel, Uri, window, workspace } from "vscode";
+import { commands, LogOutputChannel, Uri, window } from "vscode";
 import { QuartoContext } from "quarto-core";
 
 import { Command } from "../core/command";
@@ -123,9 +123,9 @@ async function convertDocument(
     return;
   }
 
-  // Open the converted file.
-  const doc = await workspace.openTextDocument(Uri.file(outputPath));
-  await window.showTextDocument(doc);
+  // Open the converted file in the default editor for its type
+  // (e.g. notebook editor for .ipynb, text editor for .qmd).
+  await commands.executeCommand("vscode.open", Uri.file(outputPath));
 }
 
 class ConvertToIpynbCommand implements Command {

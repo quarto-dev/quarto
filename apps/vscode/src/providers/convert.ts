@@ -42,7 +42,7 @@ export function activateConvert(
  * @param outputChannel Output channel for logging errors
  * @param sourceUri URI of the document to convert
  * @param targetExt Target extension for the converted file (e.g. ".ipynb", ".qmd")
- * @returns URI of the converted file if successful, otherwise `undefined`
+ * @returns Promise that resolves when conversion is complete and the converted file is opened.
  */
 async function convertDocument(
   quartoContext: QuartoContext,

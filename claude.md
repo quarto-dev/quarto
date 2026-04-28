@@ -50,7 +50,8 @@ The turborepo pipeline helps optimize build times by caching build artifacts and
 
 Testing procedures vary by component:
 
-- VS Code extension: Run `yarn test-vscode` to compile test files and run them with the vscode-test CLI
+- VS Code extension: Run `yarn test-vscode [--label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
+  - Read the [test configuration file](./apps/vscode/.vscode-test.mjs) for valid labels
 - Other components have specific test commands defined in their respective package.json files
 
 

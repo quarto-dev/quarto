@@ -17,8 +17,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
-import { kQuartoDocSelector } from "./core/doc";
+import { kQuartoDocSelector, isQuartoDoc } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
+import { EmbeddedDiagnosticsManager } from "./providers/embedded-diagnostics";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
@@ -116,8 +117,38 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // deno config
     activateDenoConfig(context, engine);
 
+    // Initialize diagnostic manager for code blocks
+    const diagnosticsManager = new EmbeddedDiagnosticsManager(engine);
+    context.subscriptions.push(diagnosticsManager);
+
+    // Register document listeners for diagnostic manager
+    context.subscriptions.push(
+      vscode.workspace.onDidOpenTextDocument((doc) => {
+        if (isQuartoDoc(doc)) {
+          diagnosticsManager.handleDocumentOpen(doc);
+        }
+      }),
+      vscode.workspace.onDidChangeTextDocument((e) => {
+        if (isQuartoDoc(e.document)) {
+          diagnosticsManager.handleDocumentChange(e.document);
+        }
+      }),
+      vscode.workspace.onDidCloseTextDocument((doc) => {
+        if (isQuartoDoc(doc)) {
+          diagnosticsManager.handleDocumentClose(doc);
+        }
+      })
+    );
+
+    // Process already-open documents
+    vscode.workspace.textDocuments.forEach((doc) => {
+      if (isQuartoDoc(doc)) {
+        diagnosticsManager.handleDocumentOpen(doc);
+      }
+    });
+
     // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
+    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel, diagnosticsManager);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);

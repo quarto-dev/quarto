@@ -5,11 +5,6 @@ import * as assert from "assert";
 // projects with a top-level `DESCRIPTION` file.
 
 suite("Workspace Symbols - R Project", function () {
-  // Return early if we're running with the regular test configuration
-  if (vscode.workspace.workspaceFolders?.[0]?.name !== "r-project") {
-    return;
-  }
-
   teardown(async function () {
     await vscode.workspace
       .getConfiguration("quarto")

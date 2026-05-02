@@ -26,7 +26,7 @@ import { QuartoContext } from "./context";
 
 export function projectDirForDocument(doc: string) {
   let dir = path.dirname(doc);
-  for (;;) {
+  for (; ;) {
     if (hasQuartoProject(dir)) {
       return dir;
     } else {
@@ -45,7 +45,7 @@ export function metadataFilesForDocument(doc: string) {
   const files: string[] = [];
 
   let dir = path.dirname(doc);
-  for (;;) {
+  for (; ;) {
     if (hasQuartoProject(dir)) {
       files.push(
         ...["_quarto.yml", "_quarto.yaml"]
@@ -107,12 +107,12 @@ export type QuartoProjectConfig = {
         serve: { /* */ };
       };
     };
-    format: Record<string,unknown> | string;
+    format: Record<string, unknown> | string;
     [key: string]: unknown;
   };
   files: {
     input: string[];
-    config: string[];
+    config?: string[];
   };
 };
 
@@ -133,17 +133,17 @@ export const revealjsFormat: QuartoFormatInfo = { name: "RevealJS", format: "rev
 export const standardFormats = [htmlFormat, typstFormat, pdfFormat, docxFormat];
 export const knownFormats = standardFormats.concat([dashboardFormat, revealjsFormat]);
 
-export type QuartoDocumentFormats = Record<string,QuartoFormatInfo>;
+export type QuartoDocumentFormats = Record<string, QuartoFormatInfo>;
 
 export function quartoDocumentFormats(
   context: QuartoContext,
   file: string,
   frontMatter: string,
   ensureFormats = standardFormats
-) : Array<QuartoFormatInfo> | undefined {
-  
-   // disqualifying conditions
-   if (!fs.existsSync(file)) {
+): Array<QuartoFormatInfo> | undefined {
+
+  // disqualifying conditions
+  if (!fs.existsSync(file)) {
     return undefined;
   }
   // lookup in cache
@@ -162,9 +162,9 @@ export function quartoDocumentFormats(
   }
 
   // run inspect (expensive)
-  const config = JSON.parse(context.runQuarto({ cwd: path.dirname(file) }, "inspect", path.basename(file))) as Record<string,unknown>;
+  const config = JSON.parse(context.runQuarto({ cwd: path.dirname(file) }, "inspect", path.basename(file))) as Record<string, unknown>;
   if (config["formats"]) {
-    const formatsRaw = config["formats"] as Record<string, { identifier: { ["display-name"]: string }}>;
+    const formatsRaw = config["formats"] as Record<string, { identifier: { ["display-name"]: string; }; }>;
     const formats = Object.keys(formatsRaw).map(format => {
       const formatInfo: QuartoFormatInfo = {
         name: formatsRaw[format].identifier["display-name"],
@@ -193,7 +193,7 @@ export function quartoDocumentFormats(
           ...format,
           name: knownFormat?.name || format.name
         };
-    });
+      });
   } else {
     return undefined;
   }
@@ -266,12 +266,12 @@ export async function quartoProjectConfig(
 // cache previously read configs (undefined means no project)
 const configCache = new Map<
   string,
-  { hash: string; config: QuartoProjectConfig } | undefined
+  { hash: string; config: QuartoProjectConfig; } | undefined
 >();
 
 // include modification times of referenced config files in cache key
 function configHash(config: QuartoProjectConfig) {
-  return config.files.config.reduce((hash, file) => {
+  return (config.files.config ?? []).reduce((hash, file) => {
     return hash + fs.statSync(file).mtimeMs.toLocaleString();
   }, "");
 }
@@ -280,7 +280,7 @@ function configHash(config: QuartoProjectConfig) {
 // cache previously read format lists
 const formatsCache = new Map<
   string,
-  { hash: string, formats: Array<QuartoFormatInfo> } | undefined
+  { hash: string, formats: Array<QuartoFormatInfo>; } | undefined
 >();
 
 function formatsHash(file: string, frontMatter: string) {

@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "acorn": "8",
-    "acorn-walk": "8"
+    "acorn-walk": "8.3.5"
   },
   "devDependencies": {
     "eslint": "8",

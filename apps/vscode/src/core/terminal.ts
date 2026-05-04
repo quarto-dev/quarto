@@ -169,7 +169,7 @@ function requiredTerminalDelay(env?: TerminalEnv): number {
   try {
     if (env?.QUARTO_PYTHON) {
       if (pythonIsVenv(env.QUARTO_PYTHON)) {
-        return 1000;
+        return 5000;
       } else if (pythonIsCondaEnv(env.QUARTO_PYTHON)) {
         return 5000;
       } else {

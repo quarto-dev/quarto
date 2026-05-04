@@ -6,7 +6,8 @@
 - Added filepath autocompletion in `_quarto.yml` files. When editing YAML values, the extension now suggests project files as you type (<https://github.com/quarto-dev/quarto/pull/906>).
 - In an empty document, Positron's active runtime is now used to choose the language for a new code cell (<https://github.com/quarto-dev/quarto/pull/951>).
 - Send cell figure options (width/height) to Positron to control sizing in its Plots pane (<https://github.com/quarto-dev/quarto/pull/938>).
-- Added "Convert to .ipynb" and "Convert to .qmd" commands for converting between Quarto documents and Jupyter notebooks (<https://github.com/quarto-dev/quarto/pull/955>).
+- Added "Convert to .ipynb" and "Convert to .qmd" commands for converting between Quarto documents and Jupyter notebooks (<https://github.com/quarto-dev/quarto/pull/955>)
+- Guard against empty `config` field in `quarto inspect` which might happen in some circumstances in Quarto 1.9 (<https://github.com/quarto-dev/quarto/pull/961>)
 
 ## 1.131.0 (Release on 2026-04-14)
 

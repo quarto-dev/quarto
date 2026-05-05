@@ -31,10 +31,7 @@ import {
 
 import { MarkdownEngine } from "../markdown/engine";
 import { embeddedLanguage, EmbeddedLanguage } from "../vdoc/languages";
-import { VirtualDoc } from "../vdoc/vdoc";
-import * as fs from "fs";
-import * as path from "path";
-import * as uuid from "uuid";
+import { VirtualDoc, withVirtualDocUri } from "../vdoc/vdoc";
 import { isQuartoDoc } from "../core/doc";
 
 interface VirtualDocInfo {
@@ -52,9 +49,6 @@ export class EmbeddedDiagnosticsManager implements Disposable {
   constructor(private engine: MarkdownEngine) {
     this.diagnosticCollection = languages.createDiagnosticCollection("quarto-embedded");
     this.disposables.push(this.diagnosticCollection);
-
-    // Clean up any leftover virtual docs from previous session
-    this.cleanupAllVirtualDocs();
 
     this.disposables.push(
       // TODO: can we listen more specifically to particular vdocs?
@@ -92,26 +86,6 @@ export class EmbeddedDiagnosticsManager implements Disposable {
         this.handleDocumentOpen(doc);
       }
     });
-  }
-
-  private async cleanupAllVirtualDocs(): Promise<void> {
-    const workspaceFolders = workspace.workspaceFolders;
-    if (!workspaceFolders) return;
-
-    for (const folder of workspaceFolders) {
-      try {
-        const quartoDir = Uri.joinPath(folder.uri, ".quarto");
-        const files = await workspace.fs.readDirectory(quartoDir);
-
-        for (const [filename, fileType] of files) {
-          if (fileType === 1 && filename.startsWith(".vdoc.")) {
-            await workspace.fs.delete(Uri.joinPath(quartoDir, filename), { useTrash: false });
-          }
-        }
-      } catch {
-        // Directory doesn't exist, that's fine
-      }
-    }
   }
 
   private async handleDocumentOpen(document: TextDocument): Promise<void> {
@@ -164,7 +138,7 @@ export class EmbeddedDiagnosticsManager implements Disposable {
   private async recreateVirtualDocs(document: TextDocument): Promise<void> {
     this.cleanupVirtualDocsForDocument(document.uri.toString());
     this.diagnosticCollection.delete(document.uri);
-    this.createVirtualDocs(document);
+    await this.createVirtualDocs(document);
   }
 
   private async createVirtualDocs(document: TextDocument): Promise<void> {
@@ -190,12 +164,23 @@ export class EmbeddedDiagnosticsManager implements Disposable {
 
       try {
         const vdocContent = this.createVirtualDocContent(document, tokens, language);
-        const { uri, cleanup } = await this.writeVirtualDocFile(vdocContent, document.uri, language);
 
-        this.vdocToReal.set(uri.toString(), {
-          realDocUri: document.uri,
-          tokens,
-          cleanup,
+        await withVirtualDocUri(vdocContent, document.uri, "diagnostics", async (uri: Uri) => {
+          // Create a deferred promise.
+          // It'll resolve when the vdoc info cleanup function is called
+          // e.g. after we receive the vdoc's diagnostics.
+          let resolve!: () => void;
+          const promise = new Promise<void>((res) => resolve = res);
+
+          this.vdocToReal.set(uri.toString(), {
+            realDocUri: document.uri,
+            tokens,
+            cleanup: resolve,
+          });
+
+          // Wait for the promise to resolve.
+          // Once this callback ends, the virtual document will be cleaned up.
+          await promise;
         });
       } catch (error) {
         console.debug(`Failed to create virtual doc for ${langName}:`, error);
@@ -234,48 +219,6 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     };
   }
 
-  // creates a virtual doc in the workspace under a `.quarto` folder.
-  // This probably isn't a good user experience,
-  // but its how I got it to work for now (LSPs don't seem to
-  // want to give diagnostics for files that aren't in the workspace).
-  private async writeVirtualDocFile(
-    vdocContent: VirtualDoc,
-    documentUri: Uri,
-    language: EmbeddedLanguage
-  ): Promise<{ uri: Uri; cleanup: () => void; }> {
-    const docDir = path.dirname(documentUri.fsPath);
-    const quartoDir = path.join(docDir, ".quarto");
-
-    if (!fs.existsSync(quartoDir)) {
-      fs.mkdirSync(quartoDir, { recursive: true });
-    }
-
-    const filename = `.vdoc.${uuid.v4()}.${language.extension}`;
-    const filepath = path.join(quartoDir, filename);
-
-    fs.writeFileSync(filepath, vdocContent.content);
-
-    const uri = Uri.file(filepath);
-    const doc = await workspace.openTextDocument(uri);
-
-    return {
-      uri,
-      cleanup: async () => {
-        try {
-          // First set the language to 'raw' so that the language client
-          // closes the text document in the language server, which clears
-          // diagnostics for the file. This stops diagnostics from building
-          // up even after virtual docs are cleaned up.
-          await languages.setTextDocumentLanguage(doc, "raw");
-
-          await workspace.fs.delete(uri, { useTrash: false });
-        } catch (error) {
-          console.debug(`Failed to delete virtual doc: ${filepath}`, error);
-        }
-      }
-    };
-  }
-
   private handleDiagnosticsForVirtualDoc(uri: Uri, vdocInfo: VirtualDocInfo): void {
     const diagnostics = languages.getDiagnostics(uri);
     const mappedDiagnostics: Diagnostic[] = [];
@@ -305,8 +248,6 @@ export class EmbeddedDiagnosticsManager implements Disposable {
       vdocInfo.cleanup();
     }
     this.vdocToReal.clear();
-
-    this.cleanupAllVirtualDocs();
 
     for (const disposable of this.disposables) {
       disposable.dispose();

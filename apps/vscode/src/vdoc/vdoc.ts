@@ -141,7 +141,8 @@ export type VirtualDocAction =
   "statementRange" |
   "helpTopic" |
   "executeSelectionAtPositionInteractive" |
-  "semanticTokens";
+  "semanticTokens" |
+  "diagnostics";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void>; };
 

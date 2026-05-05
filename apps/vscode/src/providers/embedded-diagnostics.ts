@@ -35,6 +35,7 @@ import { VirtualDoc } from "../vdoc/vdoc";
 import * as fs from "fs";
 import * as path from "path";
 import * as uuid from "uuid";
+import { isQuartoDoc } from "../core/doc";
 
 interface VirtualDocInfo {
   realDocUri: Uri;
@@ -55,9 +56,9 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     // Clean up any leftover virtual docs from previous session
     this.cleanupAllVirtualDocs();
 
-    // TODO: can we listen more specifically to particular vdocs?
-    // Listen to diagnostic changes from all language servers
     this.disposables.push(
+      // TODO: can we listen more specifically to particular vdocs?
+      // Listen to diagnostic changes from all language servers
       languages.onDidChangeDiagnostics((event) => {
         for (const uri of event.uris) {
           const vdocInfo = this.vdocToReal.get(uri.toString());
@@ -65,8 +66,32 @@ export class EmbeddedDiagnosticsManager implements Disposable {
             this.handleDiagnosticsForVirtualDoc(uri, vdocInfo);
           }
         }
+      }),
+
+      // Register document listeners
+      workspace.onDidOpenTextDocument((doc) => {
+        if (isQuartoDoc(doc)) {
+          this.handleDocumentOpen(doc);
+        }
+      }),
+      workspace.onDidChangeTextDocument((e) => {
+        if (isQuartoDoc(e.document)) {
+          this.handleDocumentChange(e.document);
+        }
+      }),
+      workspace.onDidCloseTextDocument((doc) => {
+        if (isQuartoDoc(doc)) {
+          this.handleDocumentClose(doc);
+        }
       })
     );
+
+    // Process already-open documents
+    workspace.textDocuments.forEach((doc) => {
+      if (isQuartoDoc(doc)) {
+        this.handleDocumentOpen(doc);
+      }
+    });
   }
 
   private async cleanupAllVirtualDocs(): Promise<void> {
@@ -89,14 +114,14 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     }
   }
 
-  async handleDocumentOpen(document: TextDocument): Promise<void> {
+  private async handleDocumentOpen(document: TextDocument): Promise<void> {
     if (!workspace.getConfiguration("quarto.cells.diagnostics").get("enabled", true)) {
       return;
     }
     this.createVirtualDocs(document);
   }
 
-  handleDocumentChange(document: TextDocument): void {
+  private handleDocumentChange(document: TextDocument): void {
     if (!workspace.getConfiguration("quarto.cells.diagnostics").get("enabled", true)) {
       return;
     }
@@ -114,7 +139,7 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     this.debounceTimers.set(docKey, timer);
   }
 
-  handleDocumentClose(document: TextDocument): void {
+  private handleDocumentClose(document: TextDocument): void {
     const docKey = document.uri.toString();
 
     const timer = this.debounceTimers.get(docKey);

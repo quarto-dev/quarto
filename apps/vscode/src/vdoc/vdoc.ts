@@ -13,7 +13,7 @@
  *
  */
 
-import { Position, TextDocument, Uri, Range, SemanticTokens } from "vscode";
+import { Position, TextDocument, Uri, Range, SemanticTokens, extensions, workspace } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 import { isQuartoDoc } from "../core/doc";
@@ -175,6 +175,37 @@ export async function withVirtualDocUri<T>(
   }
 }
 
+/**
+ * Whether to use a local temporary file for a given virtual document and action.
+ */
+function shouldUseLocalTempFile(virtualDoc: VirtualDoc, action: VirtualDocAction): boolean {
+  // Format and definition actions use a transient local vdoc
+  // (so they can get project-specific paths and formatting config)
+  if (["format", "definition"].includes(action)) {
+    return true;
+  }
+
+  // The vscode-R extension uses the languageserver R package
+  // which does not provide diagnostics for temp files.
+  // Use a local temp file in that case.
+  if (
+    virtualDoc.language.ids.includes("r") &&
+    action === "diagnostics" &&
+    extensions.getExtension("REditorSupport.r")?.isActive
+  ) {
+    const rLspConfig = workspace.getConfiguration("r.lsp");
+    if (
+      rLspConfig.get("enabled", false) &&
+      rLspConfig.get("diagnostics", false)
+    ) {
+        return true;
+    }
+  }
+
+  // Default to a non-local temp file - it's less invasive
+  return false;
+}
+
 // To be used through `withVirtualDocUri()`. Not safe to export on its own! The
 // cleanup hook must be called, and relying on the caller to do this is a huge
 // footgun.
@@ -184,9 +215,7 @@ async function virtualDocUri(
   action: VirtualDocAction
 ): Promise<VirtualDocUri> {
 
-  // format and definition actions use a transient local vdoc
-  // (so they can get project-specific paths and formatting config)
-  const local = ["format", "definition"].includes(action);
+  const local = shouldUseLocalTempFile(virtualDoc, action);
 
   return virtualDoc.language.type === "content"
     ? { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) }

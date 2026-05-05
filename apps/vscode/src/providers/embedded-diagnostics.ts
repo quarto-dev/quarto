@@ -288,6 +288,11 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     }
 
     this.diagnosticCollection.set(vdocInfo.realDocUri, mappedDiagnostics);
+
+    // We have diagnostics, so we can clean up the virtual doc.
+    // This ensures that the virtual doc's diagnostics don't show
+    // in the problems pane (or only show momentarily).
+    this.cleanupVirtualDocsForDocument(vdocInfo.realDocUri.toString());
   }
 
   dispose(): void {

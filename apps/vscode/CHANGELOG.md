@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.132.0 (Unreleased)
+## 1.132.0 (Release on 2026-05-05)
 
 - Added clickable document links for file paths in `_quarto.yml` files. File paths are now clickable and navigate directly to the referenced file (<https://github.com/quarto-dev/quarto/pull/906>).
 - Added filepath autocompletion in `_quarto.yml` files. When editing YAML values, the extension now suggests project files as you type (<https://github.com/quarto-dev/quarto/pull/906>).

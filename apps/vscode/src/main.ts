@@ -124,7 +124,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     context.subscriptions.push(diagnosticsManager);
 
     // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel, diagnosticsManager);
+    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);

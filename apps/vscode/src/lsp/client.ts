@@ -24,7 +24,6 @@ import {
   Definition,
   LogOutputChannel,
   Uri,
-  Diagnostic,
   window,
   ColorThemeKind
 } from "vscode";
@@ -49,7 +48,6 @@ import {
   ProvideHoverSignature,
   ProvideSignatureHelpSignature,
   State,
-  HandleDiagnosticsSignature
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
@@ -58,7 +56,6 @@ import {
   virtualDoc,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
-import { isVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
@@ -72,7 +69,6 @@ import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { extensionHost } from "../host";
 import semver from "semver";
-import { EmbeddedDiagnosticsManager } from "../providers/embedded-diagnostics";
 
 let client: LanguageClient;
 
@@ -81,7 +77,6 @@ export async function activateLsp(
   quartoContext: QuartoContext,
   engine: MarkdownEngine,
   outputChannel: LogOutputChannel,
-  diagnosticsManager?: EmbeddedDiagnosticsManager
 ) {
 
   // The server is implemented in node
@@ -107,7 +102,6 @@ export async function activateLsp(
   const config = workspace.getConfiguration("quarto");
   activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
-    handleDiagnostics: createDiagnosticFilter(diagnosticsManager),
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
     provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
@@ -364,26 +358,4 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
 function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;
   return !!line.match(/^\s*#\s*\| /);
-}
-
-/**
- * Creates a diagnostic handler middleware that filters out diagnostics from virtual documents
- *
- * @returns A handler function for the middleware
- */
-export function createDiagnosticFilter(diagnosticsManager?: EmbeddedDiagnosticsManager) {
-  return (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
-    // If this is not a virtual document, pass through all diagnostics
-    if (!isVirtualDoc(uri)) {
-      next(uri, diagnostics);
-      return;
-    }
-
-    // For virtual docs from Quarto LSP, let diagnostics manager handle them
-    // (but most diagnostics come from other language servers via onDidChangeDiagnostics)
-    const remapped = diagnosticsManager?.handleDiagnostics(uri, diagnostics);
-
-    // Suppress vdoc diagnostics from being published by the LSP
-    next(uri, remapped ?? []);
-  };
 }

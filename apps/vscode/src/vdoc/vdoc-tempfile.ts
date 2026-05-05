@@ -21,11 +21,11 @@ import * as uuid from "uuid";
 import {
   commands,
   Hover,
+  languages,
   Position,
   TextDocument,
   Uri,
   workspace,
-  WorkspaceEdit,
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
 
@@ -87,6 +87,12 @@ export async function virtualDocUriFromTempFile(
  */
 async function deleteDocument(doc: TextDocument) {
   try {
+    // First set the language to 'raw' so that the language client
+    // closes the text document in the language server, which clears
+    // diagnostics for the file. This stops diagnostics from building
+    // up even after virtual docs are cleaned up.
+    await languages.setTextDocumentLanguage(doc, "raw");
+
     await workspace.fs.delete(doc.uri, {
       useTrash: false
     });

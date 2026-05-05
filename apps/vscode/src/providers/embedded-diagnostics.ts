@@ -256,12 +256,18 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     fs.writeFileSync(filepath, vdocContent.content);
 
     const uri = Uri.file(filepath);
-    await workspace.openTextDocument(uri);
+    const doc = await workspace.openTextDocument(uri);
 
     return {
       uri,
       cleanup: async () => {
         try {
+          // First set the language to 'raw' so that the language client
+          // closes the text document in the language server, which clears
+          // diagnostics for the file. This stops diagnostics from building
+          // up even after virtual docs are cleaned up.
+          await languages.setTextDocumentLanguage(doc, "raw");
+
           await workspace.fs.delete(uri, { useTrash: false });
         } catch (error) {
           console.debug(`Failed to delete virtual doc: ${filepath}`, error);

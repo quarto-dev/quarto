@@ -26,7 +26,10 @@ import {
   Uri,
   Diagnostic,
   window,
-  ColorThemeKind
+  ColorThemeKind,
+  DocumentSymbol,
+  Range,
+  SymbolKind,
 } from "vscode";
 import {
   LanguageClient,
@@ -48,6 +51,7 @@ import {
   ProvideDefinitionSignature,
   ProvideHoverSignature,
   ProvideSignatureHelpSignature,
+  ProvideDocumentSymbolsSignature,
   State,
   HandleDiagnosticsSignature
 } from "vscode-languageclient";
@@ -57,6 +61,7 @@ import {
   unadjustedRange,
   virtualDoc,
   withVirtualDocUri,
+  VirtualDocStyle,
 } from "../vdoc/vdoc";
 import { isVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
@@ -72,6 +77,8 @@ import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { extensionHost } from "../host";
 import semver from "semver";
+import { EmbeddedLanguage } from "../vdoc/languages";
+import { SymbolInformation } from "vscode";
 
 let client: LanguageClient;
 
@@ -113,6 +120,7 @@ export async function activateLsp(
       engine
     ),
     provideDocumentSemanticTokens: embeddedSemanticTokensProvider(engine),
+    provideDocumentSymbols: embeddedDocumentSymbolProvider(engine),
   };
   if (config.get("cells.hoverHelp.enabled", true)) {
     middleware.provideHover = embeddedHoverProvider(engine);
@@ -362,6 +370,120 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
 function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;
   return !!line.match(/^\s*#\s*\| /);
+}
+
+const isDocumentSymbol = (a: Object): a is DocumentSymbol => {
+  return ('range' in a && 'selectionRange' in a);
+};
+
+/**
+ * Enhances document symbols by adding code symbols from embedded languages to code cells
+ */
+function embeddedDocumentSymbolProvider(engine: MarkdownEngine) {
+  return async (
+    document: TextDocument,
+    token: CancellationToken,
+    next: ProvideDocumentSymbolsSignature
+  ): Promise<DocumentSymbol[] | SymbolInformation[] | undefined> => {
+    // Get base symbols from LSP (headers, code cells, etc.)
+    const baseSymbols = await next(document, token);
+
+    if (!baseSymbols || token.isCancellationRequested) {
+      return baseSymbols ?? undefined;
+    }
+
+    // Check if we got DocumentSymbol[] (can be enhanced) or SymbolInformation[] (cannot)
+    // I don't think we actually ever get SymbolInformation[] here, but I'm not certain
+    // so this is defensively coded.
+    if (baseSymbols.length > 0 && isDocumentSymbol(baseSymbols[0])) {
+      return await enhanceSymbolsWithCodeCellContent(document, baseSymbols as DocumentSymbol[], engine, token);
+    }
+
+    return baseSymbols;
+  };
+}
+
+/**
+ * Finds code cell symbols, makes vdocs for them, gets symbols from the vdoc, and nests those symbols
+ * under the code cell's symbol.
+ */
+async function enhanceSymbolsWithCodeCellContent(
+  document: TextDocument,
+  symbols: DocumentSymbol[],
+  engine: MarkdownEngine,
+  token: CancellationToken
+): Promise<DocumentSymbol[]> {
+  const enhanced: DocumentSymbol[] = [];
+
+  for (const symbol of symbols) {
+    if (token.isCancellationRequested) return symbols;
+
+    // Check if this is a code cell symbol (SymbolKind.Function indicates code cells from toc.ts)
+    if (symbol.kind === SymbolKind.Function) {
+      symbol.children = [
+        ...symbol.children,
+        ...(await getCodeCellSymbols(document, symbol.range, engine) || [])
+      ];
+    } else {
+      symbol.children =
+        await enhanceSymbolsWithCodeCellContent(document, symbol.children, engine, token);
+    }
+
+    enhanced.push(symbol);
+  }
+
+  return enhanced;
+}
+
+/**
+ * Gets symbols from an embedded language for a code cell
+ */
+async function getCodeCellSymbols(
+  document: TextDocument,
+  cellRange: Range,
+  engine: MarkdownEngine
+): Promise<DocumentSymbol[] | undefined> {
+  try {
+    // Get position at the start of the code cell (skip the fence line)
+    const position = new Position(cellRange.start.line + 1, 0);
+
+    // Create virtual document for ONLY this code block (not all blocks of the language)
+    const vdoc = await virtualDoc(document, position, engine, VirtualDocStyle.Block);
+    if (!vdoc) return undefined;
+
+    // Get symbols from the embedded language server
+    return await withVirtualDocUri(vdoc, document.uri, "completion", async (uri: Uri) => {
+      try {
+        const result = await commands.executeCommand<DocumentSymbol[] | SymbolInformation[]>(
+          "vscode.executeDocumentSymbolProvider",
+          uri
+        );
+        if (result.length === 0) return undefined;
+
+        if (isDocumentSymbol(result[0])) {
+          return unadjustSymbolRanges(result as DocumentSymbol[], vdoc.language, cellRange.start.line);
+        }
+      } catch (error) { }
+    });
+  } catch (error) { }
+}
+
+/**
+ * Adjusts symbol ranges from virtual document to real document coordinates
+ */
+function unadjustSymbolRanges(
+  symbols: DocumentSymbol[],
+  language: EmbeddedLanguage,
+  baseLineOffset: number
+): DocumentSymbol[] {
+  return symbols.map(symbol => {
+    return {
+      ...symbol,
+      range: unadjustedRange(language, symbol.range),
+      selectionRange: unadjustedRange(language, symbol.selectionRange),
+      children: symbol.children ? unadjustSymbolRanges(symbol.children, language, baseLineOffset) : []
+    };
+  });
 }
 
 /**

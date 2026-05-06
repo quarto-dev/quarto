@@ -1,0 +1,39 @@
+name: Test VS Code Extension
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: 'npm'
+
+      - name: Update build environment and install XVFB
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install --fix-missing xvfb
+          
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: pre-release
+
+      - name: Build vscode extension
+        run: |
+          npm install
+          npm run build-vscode
+      - name: Compile and run tests
+        run: |
+          npm ci
+          xvfb-run npm run test-vscode

@@ -1469,11 +1469,11 @@
     "install-vscode": "rm -rf *.vsix && vsce package && code --install-extension *.vsix",
     "install-positron": "rm -rf *.vsix && vsce package && positron --install-extension *.vsix",
     "build": "tsx build.ts",
-    "dev": "yarn run build dev",
+    "dev": "npm run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang",
-    "build-test": "yarn run build test",
-    "test": "yarn build-test && vscode-test"
+    "build-test": "npm run build test",
+    "test": "npm run build-test && vscode-test"
   },
   "dependencies": {
     "axios": "^1.2.1",

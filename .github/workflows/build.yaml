@@ -26,14 +26,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-      - run: yarn install --immutable --immutable-cache --check-cache
+          cache: 'npm'
+      - run: npm ci
 
       - name: Package extension
         uses: HaaLeo/publish-vscode-extension@v2
         id: package_extension
         with:
           pat: not-a-real-pat
-          yarn: true
+          yarn: false
           dryRun: true
           preRelease: true
           packagePath: apps/vscode

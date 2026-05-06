@@ -1,23 +1,23 @@
 # Building the extension
 
-To develop the Quarto VS Code extension, clone the quarto mono-repo, run `yarn` at top level, then run the `yarn dev-vscode` command:
+To develop the Quarto VS Code extension, clone the quarto mono-repo, run `npm install` at top level, then run the `npm run dev-vscode` command:
 
 ```sh
-yarn             # install dependencies
-yarn dev-vscode  # run development/debug version of extension
+npm install             # install dependencies
+npm run dev-vscode      # run development/debug version of extension
 ```
 
 Run the extension tests with:
 
 ```sh
-yarn test-vscode # compile the test files and run them with the vscode-test CLI
+npm run test-vscode # compile the test files and run them with the vscode-test CLI
 ```
 
 Install the dev version of the extension in VS Code or Positron with:
 
 ```sh
-yarn install-vscode
-yarn install-positron
+npm run install-vscode
+npm run install-positron
 ```
 
 # Debugging the extension
@@ -30,7 +30,7 @@ The extension must have been built in dev mode (see the build section). The `dev
 
 Here is the process:
 
-- Let `yarn dev-vscode` run in the background somewhere.
+- Let `npm run dev-vscode` run in the background somewhere.
 
 - Open the `apps/vscode` folder in VS Code or Positron and go to the `Run and debug` pane.
 

@@ -1,4 +1,4 @@
-name: Test VS Code Extension on Quarto CLI pre-release version!
+name: Test VS Code Extension on Quarto CLI pre-release version
 
 on:
   push:

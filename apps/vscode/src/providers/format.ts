@@ -31,7 +31,7 @@ import {
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
 import { lines } from "core";
-import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtLine } from "quarto-core";
+import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtLine, rangeContains } from "quarto-core";
 
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
@@ -327,11 +327,6 @@ async function formatBlock(
   }
   const codeLines = blockLines.slice(optionLines + leadingEmptyLines);
 
-  const blockRange = new Range(
-    new Position(block.range.start.line, block.range.start.character),
-    new Position(block.range.end.line, block.range.end.character)
-  );
-
   // Collapsing multiple leading empty lines to one is a Quarto-level
   // formatting operation: it fires even when no language formatter is active,
   // so we build this edit before the early-returns below.
@@ -351,9 +346,6 @@ async function formatBlock(
   // trailing whitespace after them, which `lines()` may produce from a
   // final newline in `token.data`). Still apply normalizeEdit if present.
   if (codeLines.every(l => l.trim() === "")) {
-    if (normalizeEdit && !blockRange.contains(normalizeEdit.range)) {
-      return undefined;
-    }
     return normalizeEdit ? [normalizeEdit] : undefined;
   }
 
@@ -368,9 +360,6 @@ async function formatBlock(
   if (!edits || edits.length === 0) {
     // Either no formatter picked us up, or there were no edits required.
     // We can't determine the difference though!
-    if (normalizeEdit && !blockRange.contains(normalizeEdit.range)) {
-      return undefined;
-    }
     return normalizeEdit ? [normalizeEdit] : undefined;
   }
 
@@ -388,15 +377,13 @@ async function formatBlock(
     return new TextEdit(range, edit.newText);
   });
 
-  // Include normalizeEdit in the guard so it is validated along with formatter
-  // edits — all edits must be in range or none are applied.
   if (normalizeEdit) {
     adjustedEdits.push(normalizeEdit);
   }
 
   // Bail if any edit is out of range. We used to filter these edits out but
   // this could bork the cell. Return `[]` to indicate that we tried.
-  if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
+  if (adjustedEdits.some(edit => !rangeContains(block.range, edit.range))) {
     if (!silentOutOfRange) {
       window.showInformationMessage(
         "Formatting edits were out of range and could not be applied to the code cell."

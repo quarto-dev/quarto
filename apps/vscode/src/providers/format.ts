@@ -342,24 +342,24 @@ async function formatBlock(
       )
     : undefined;
 
-  // Nothing to format if the block is entirely option directives (or only
-  // trailing whitespace after them, which `lines()` may produce from a
-  // final newline in `token.data`). Still apply normalizeEdit if present.
+  // Skip the formatter if the block is entirely option directives (or only
+  // trailing whitespace after them, which `lines()` may produce from a final
+  // newline in `token.data`). The happy path below still emits normalizeEdit
+  // if needed.
+  let edits: TextEdit[] | undefined;
   if (codeLines.every(l => l.trim() === "")) {
-    return normalizeEdit ? [normalizeEdit] : undefined;
+    edits = [];
+  } else {
+    const vdoc = virtualDocForCode(codeLines, language);
+    edits = await executeFormatDocumentProvider(
+      vdoc,
+      doc,
+      formattingOptions(doc.uri, vdoc.language, defaultOptions)
+    );
   }
 
-  const vdoc = virtualDocForCode(codeLines, language);
-
-  const edits = await executeFormatDocumentProvider(
-    vdoc,
-    doc,
-    formattingOptions(doc.uri, vdoc.language, defaultOptions)
-  );
-
-  if (!edits || edits.length === 0) {
-    // Either no formatter picked us up, or there were no edits required.
-    // We can't determine the difference though!
+  if (!edits) {
+    // No formatter picked us up. Still emit the normalisation if we have one.
     return normalizeEdit ? [normalizeEdit] : undefined;
   }
 
@@ -379,6 +379,10 @@ async function formatBlock(
 
   if (normalizeEdit) {
     adjustedEdits.push(normalizeEdit);
+  }
+
+  if (adjustedEdits.length === 0) {
+    return undefined;
   }
 
   // Bail if any edit is out of range. We used to filter these edits out but

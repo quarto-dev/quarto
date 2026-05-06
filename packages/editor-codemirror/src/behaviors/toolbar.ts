@@ -38,8 +38,10 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
       },
       eq: () => false,
       updateDOM: () => false,
-      estimatedHeight: -1,
+      get estimatedHeight() { return -1; },
+      get lineBreaks() { return 0; },
       ignoreEvent: () => true,
+      coordsAt: () => null,
       destroy: () => { /* */ }
     },
     side: 0

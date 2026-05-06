@@ -19,7 +19,7 @@ Each component has specific development guidelines. Refer to the corresponding C
 
 ## Repository Structure
 
-The repository is organized as a monorepo using Yarn workspaces and Turborepo for build orchestration:
+The repository is organized as a monorepo using npm workspaces and Turborepo for build orchestration:
 
 - `apps/`: Contains standalone applications
   - `vscode/`: VS Code extension for Quarto
@@ -38,11 +38,11 @@ Quarto uses [turborepo](https://turbo.build/) to manage the monorepo build proce
 
 - `turbo.json`: Defines the pipeline configuration for common tasks
 - Common commands:
-  - `yarn build`: Builds all packages and applications
-  - `yarn dev-writer`: Runs the writer app in development mode
-  - `yarn dev-vscode`: Runs the VS Code extension in development mode
-  - `yarn lint`: Runs linters across all workspaces
-  - `yarn build-vscode`: Builds only the VS Code extension and its dependencies
+  - `npm run build`: Builds all packages and applications
+  - `npm run dev-writer`: Runs the writer app in development mode
+  - `npm run dev-vscode`: Runs the VS Code extension in development mode
+  - `npm run lint`: Runs linters across all workspaces
+  - `npm run build-vscode`: Builds only the VS Code extension and its dependencies
 
 The turborepo pipeline helps optimize build times by caching build artifacts and respecting the dependency graph between packages.
 
@@ -50,7 +50,7 @@ The turborepo pipeline helps optimize build times by caching build artifacts and
 
 Testing procedures vary by component:
 
-- VS Code extension: Run `yarn test-vscode [--label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
+- VS Code extension: Run `npm run test-vscode [--label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
   - Read the [test configuration file](./apps/vscode/.vscode-test.mjs) for valid labels
 - Other components have specific test commands defined in their respective package.json files
 

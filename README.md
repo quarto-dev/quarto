@@ -15,11 +15,11 @@ Here is where you can find the source code for various parts of the Quarto syste
 
 ### VS Code Extension
 
-To develop the Quarto VS Code extension, clone this repo, run `yarn`, then run the `yarn dev-vscode` command:
+To develop the Quarto VS Code extension, clone this repo, run `npm install`, then run the `npm run dev-vscode` command:
 
 ```bash
-yarn             # install dependencies
-yarn dev-vscode  # run development/debug version of extension
+npm install             # install dependencies
+npm run dev-vscode      # run development/debug version of extension
 ```
 
 Use the VS Code **Run and Debug** pane in the activity bar to run a version of VS Code with the development build of the extension.

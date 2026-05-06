@@ -19,6 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
+          cache: 'npm'
 
       - name: Update build environment and install XVFB
         run: |
@@ -29,10 +30,10 @@ jobs:
 
       - name: Build vscode extension
         run: |
-          yarn install
-          yarn run build-vscode
+          npm install
+          npm run build-vscode
 
       - name: Compile and run tests
         run: |
-          yarn install --immutable --immutable-cache --check-cache
-          xvfb-run yarn test-vscode
+          npm ci
+          xvfb-run npm run test-vscode

@@ -5,19 +5,19 @@ The Observable runtime is open source and released under the [ISC License](https
 Install dependencies:
 
 ```
-yarn
+npm install
 ```
 
 Run tests with Mocha:
 
 ```
-yarn test
+npm test
 ```
 
 Build with Rollup:
 
 ```
-yarn prepublishOnly
+npm run prepublishOnly
 ```
 
 ## For internal use

@@ -31,9 +31,10 @@ jobs:
 
       - name: Build vscode extension
         run: |
-          npm install
-          npm run build-vscode
+          yarn install
+          yarn run build-vscode
+
       - name: Compile and run tests
         run: |
-          npm ci
-          xvfb-run npm run test-vscode
+          yarn install --immutable --immutable-cache --check-cache
+          xvfb-run yarn test-vscode

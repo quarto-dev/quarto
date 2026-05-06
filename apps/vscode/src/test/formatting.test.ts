@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { openAndShowExamplesTextDocument, wait } from "./test-utils";
+import { openAndShowExamplesTextDocument, readOrCreateSnapshot, wait } from "./test-utils";
 import { embeddedDocumentFormattingProvider } from "../providers/format";
 import { MarkdownEngine } from "../markdown/engine";
 
@@ -95,26 +95,61 @@ async function testFormatter(
   format: (sourceText: string) => string,
   language: string = "python"
 ) {
+  return runFormatCell(filename, [line, character], format, language);
+}
+
+/**
+ * Opens a fixture, optionally registers a formatting provider, runs
+ * `quarto.formatCell` at the given cursor position, and returns the
+ * resulting document text. When `format` is `undefined`, no provider is
+ * registered (used to exercise the no-formatter path).
+ */
+async function runFormatCell(
+  filename: string,
+  [line, character]: [number, number],
+  format: ((sourceText: string) => string) | undefined,
+  language: string,
+) {
   const { doc } = await openAndShowExamplesTextDocument(filename);
 
-  const formattingEditProvider =
-    vscode.languages.registerDocumentFormattingEditProvider(
-      { scheme: "file", language },
-      createFormatterFromStringFunc(format)
-    );
+  const formattingEditProvider = format
+    ? vscode.languages.registerDocumentFormattingEditProvider(
+        { scheme: "file", language },
+        createFormatterFromStringFunc(format),
+      )
+    : undefined;
 
   try {
     setCursorPosition(line, character);
     await wait(450);
     await vscode.commands.executeCommand("quarto.formatCell");
     await wait(450);
-
-    const result = doc.getText();
-    return result;
+    return doc.getText();
   } finally {
-    formattingEditProvider.dispose();
+    formattingEditProvider?.dispose();
     await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
   }
+}
+
+/**
+ * Registers a snapshot test that formats a single cell and compares the
+ * resulting document against a snapshot file under `generated_snapshots/`.
+ */
+function snapshotFormatTest(
+  description: string,
+  snapshotFilename: string,
+  filename: string,
+  position: [number, number],
+  format: ((sourceText: string) => string) | undefined,
+  language: string = "python",
+) {
+  test(description, async function () {
+    const result = await runFormatCell(filename, position, format, language);
+    assert.equal(
+      result,
+      await readOrCreateSnapshot(snapshotFilename, result),
+    );
+  });
 }
 
 /**
@@ -525,182 +560,71 @@ suite("Code Block Formatting", function () {
     }
   });
 
-  test("single leading empty line in R cell is preserved after formatting", async function () {
-    const formattedResult = await testFormatter(
-      "format-r-leading-empty-lines.qmd",
-      [8, 0],
-      rAssignmentFormatter,
-      "r"
-    );
+  snapshotFormatTest(
+    "single leading empty line in R cell is preserved after formatting",
+    "formatting/r-one-empty-line-preserved.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [8, 0],
+    rAssignmentFormatter,
+    "r",
+  );
 
-    assert.ok(
-      formattedResult.includes("#| label: one-empty-line"),
-      "Option directive should be preserved"
-    );
-    assert.ok(
-      formattedResult.includes("x <- 1"),
-      "Code should be reformatted"
-    );
-    assert.ok(
-      /one-empty-line\n\n/.test(formattedResult),
-      "Single leading empty line should be preserved"
-    );
-    assert.ok(
-      !/one-empty-line\n\n\n/.test(formattedResult),
-      "No extra empty line should be introduced"
-    );
-  });
+  snapshotFormatTest(
+    "multiple leading empty lines in R cell are collapsed to one after formatting",
+    "formatting/r-multiple-collapsed-to-one.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [13, 0],
+    rAssignmentFormatter,
+    "r",
+  );
 
-  test("multiple leading empty lines in R cell are collapsed to one after formatting", async function () {
-    const formattedResult = await testFormatter(
-      "format-r-leading-empty-lines.qmd",
-      [13, 0],
-      rAssignmentFormatter,
-      "r"
-    );
+  snapshotFormatTest(
+    "no leading empty lines in R cell — unaffected by the normalisation",
+    "formatting/r-no-empty-lines-unchanged.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [20, 0],
+    rAssignmentFormatter,
+    "r",
+  );
 
-    assert.ok(
-      formattedResult.includes("#| label: two-empty-lines"),
-      "Option directive should be preserved"
-    );
-    assert.ok(
-      formattedResult.includes("x <- 2"),
-      "Code should be reformatted"
-    );
-    assert.ok(
-      /two-empty-lines\n\n/.test(formattedResult),
-      "Exactly one leading empty line should remain"
-    );
-    assert.ok(
-      !/two-empty-lines\n\n\n/.test(formattedResult),
-      "Second leading empty line should be collapsed"
-    );
-  });
+  snapshotFormatTest(
+    "leading empty lines in Python cell are preserved after formatting",
+    "formatting/python-one-empty-line-preserved.qmd",
+    "format-python-leading-empty-lines.qmd",
+    [8, 0],
+    spaceAssignments,
+  );
 
-  test("no leading empty lines in R cell — unaffected by the normalisation", async function () {
-    const formattedResult = await testFormatter(
-      "format-r-leading-empty-lines.qmd",
-      [20, 0],
-      rAssignmentFormatter,
-      "r"
-    );
+  snapshotFormatTest(
+    "multiple leading empty lines in Python cell are collapsed to one after formatting",
+    "formatting/python-multiple-collapsed-to-one.qmd",
+    "format-python-leading-empty-lines.qmd",
+    [13, 0],
+    spaceAssignments,
+  );
 
-    assert.ok(
-      formattedResult.includes("#| label: no-empty-lines"),
-      "Option directive should be preserved"
-    );
-    assert.ok(
-      formattedResult.includes("x <- 3"),
-      "Code should be reformatted"
-    );
-    assert.ok(
-      /no-empty-lines\nx <- 3/.test(formattedResult),
-      "No empty line should be introduced"
-    );
-  });
+  // The hostile `leadingNewlineMangler` would inject `LEAKED_EMPTY_LINE`
+  // if the leading empty lines reached the formatter. Snapshot proves it
+  // does not appear.
+  snapshotFormatTest(
+    "leading empty lines are hidden from the formatter",
+    "formatting/r-empty-lines-hidden-from-formatter.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [13, 0],
+    leadingNewlineMangler,
+    "r",
+  );
 
-  test("leading empty lines in Python cell are preserved after formatting", async function () {
-    const formattedResult = await testFormatter(
-      "format-python-leading-empty-lines.qmd",
-      [8, 0],
-      spaceAssignments
-    );
-
-    assert.ok(
-      formattedResult.includes("#| label: one-empty-line"),
-      "Option directive should be preserved"
-    );
-    assert.ok(
-      formattedResult.includes("x = 1"),
-      "Code should be reformatted"
-    );
-    assert.ok(
-      /one-empty-line\n\n/.test(formattedResult),
-      "Single leading empty line should be preserved"
-    );
-    assert.ok(
-      !/one-empty-line\n\n\n/.test(formattedResult),
-      "No extra empty line should be introduced"
-    );
-  });
-
-  test("multiple leading empty lines in Python cell are collapsed to one after formatting", async function () {
-    const formattedResult = await testFormatter(
-      "format-python-leading-empty-lines.qmd",
-      [13, 0],
-      spaceAssignments
-    );
-
-    assert.ok(
-      formattedResult.includes("#| label: two-empty-lines"),
-      "Option directive should be preserved"
-    );
-    assert.ok(
-      formattedResult.includes("x = 3"),
-      "Code should be reformatted"
-    );
-    assert.ok(
-      /two-empty-lines\n\n/.test(formattedResult),
-      "Exactly one leading empty line should remain"
-    );
-    assert.ok(
-      !/two-empty-lines\n\n\n/.test(formattedResult),
-      "Second leading empty line should be collapsed"
-    );
-  });
-
-  test("leading empty lines are hidden from the formatter", async function () {
-    // Target the two-empty-lines cell: without stripping, the virtual doc
-    // would start with "\n\nx<-2" and the mangler would inject LEAKED_EMPTY_LINE.
-    // With stripping, the virtual doc starts with "x<-2" and the mangler is silent.
-    const formattedResult = await testFormatter(
-      "format-r-leading-empty-lines.qmd",
-      [13, 0],
-      leadingNewlineMangler,
-      "r"
-    );
-
-    assert.ok(
-      !formattedResult.includes("LEAKED_EMPTY_LINE"),
-      "Leading empty lines must not be visible to the formatter"
-    );
-    assert.ok(
-      /two-empty-lines\n\n/.test(formattedResult),
-      "Exactly one leading empty line should remain in the cell after formatting"
-    );
-    assert.ok(
-      !/two-empty-lines\n\n\n/.test(formattedResult),
-      "Second leading empty line should be collapsed"
-    );
-  });
-
-  test("multiple leading empty lines are collapsed without a language formatter", async function () {
-    const { doc } = await openAndShowExamplesTextDocument(
-      "format-r-leading-empty-lines.qmd"
-    );
-
-    try {
-      // No formatter is registered for "r" — only the Quarto-level
-      // normalisation edit should fire.
-      setCursorPosition(13, 0);
-      await wait(450);
-      await vscode.commands.executeCommand("quarto.formatCell");
-      await wait(450);
-
-      const result = doc.getText();
-
-      assert.ok(
-        /two-empty-lines\n\n/.test(result),
-        "Exactly one leading empty line should remain"
-      );
-      assert.ok(
-        !/two-empty-lines\n\n\n/.test(result),
-        "Second leading empty line should be collapsed even without a formatter"
-      );
-    } finally {
-      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-    }
-  });
+  // No formatter registered for "r" — only the Quarto-level normalisation
+  // edit fires. Snapshot shows unformatted code with empty lines collapsed.
+  snapshotFormatTest(
+    "multiple leading empty lines are collapsed without a language formatter",
+    "formatting/r-collapsed-without-formatter.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [13, 0],
+    undefined,
+    "r",
+  );
 
   test("formatter returning multiple discrete edits is applied correctly", async function () {
     const { doc } = await openAndShowExamplesTextDocument(

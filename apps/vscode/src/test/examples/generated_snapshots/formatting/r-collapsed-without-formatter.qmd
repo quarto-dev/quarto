@@ -1,0 +1,21 @@
+---
+title: Leading Empty Lines in R Code Cells
+format: html
+---
+
+```{r}
+#| label: one-empty-line
+
+x<-1
+```
+
+```{r}
+#| label: two-empty-lines
+
+x<-2
+```
+
+```{r}
+#| label: no-empty-lines
+x<-3
+```

@@ -33,6 +33,7 @@ import { MarkdownEngine } from "../markdown/engine";
 import { embeddedLanguage, EmbeddedLanguage } from "../vdoc/languages";
 import { VirtualDoc, withVirtualDocUri } from "../vdoc/vdoc";
 import { isQuartoDoc } from "../core/doc";
+import { LogOutputChannel } from "vscode";
 
 interface VirtualDocInfo {
   realDocUri: Uri;
@@ -46,7 +47,10 @@ export class EmbeddedDiagnosticsManager implements Disposable {
   private disposables: Disposable[] = [];
   private debounceTimers = new Map<string, NodeJS.Timeout>();
 
-  constructor(private engine: MarkdownEngine) {
+  constructor(
+    private engine: MarkdownEngine,
+    private outputChannel: LogOutputChannel,
+  ) {
     this.diagnosticCollection = languages.createDiagnosticCollection("quarto-embedded");
     this.disposables.push(this.diagnosticCollection);
 
@@ -166,6 +170,16 @@ export class EmbeddedDiagnosticsManager implements Disposable {
         const vdocContent = this.createVirtualDocContent(document, tokens, language);
 
         await withVirtualDocUri(vdocContent, document.uri, "diagnostics", async (uri: Uri) => {
+          this.outputChannel.debug(
+            `[EmbeddedDiagnosticsManager] Created virtual document ${uri.toString()} ` +
+            `for document ${document.uri.toString()} ` +
+            `(language: ${langName})`
+          );
+          this.outputChannel.trace(
+            `[EmbeddedDiagnosticsManager] Virtual document content:\n` +
+            vdocContent.content
+          );
+
           // Create a deferred promise.
           // It'll resolve when the vdoc info cleanup function is called
           // e.g. after we receive the vdoc's diagnostics.
@@ -175,15 +189,25 @@ export class EmbeddedDiagnosticsManager implements Disposable {
           this.vdocToReal.set(uri.toString(), {
             realDocUri: document.uri,
             tokens,
-            cleanup: resolve,
+            cleanup: () => {
+              this.outputChannel.debug(
+                `[EmbeddedDiagnosticsManager] Cleaning up virtual document ${uri.toString()} ` +
+                `for document ${document.uri.toString()}`
+              );
+              resolve();
+            },
           });
 
           // Wait for the promise to resolve.
           // Once this callback ends, the virtual document will be cleaned up.
+          this.outputChannel.debug(
+            `[EmbeddedDiagnosticsManager] Waiting for diagnostics for virtual document ${uri.toString()} ` +
+            `for document ${document.uri.toString()} `
+          );
           await promise;
         });
       } catch (error) {
-        console.debug(`Failed to create virtual doc for ${langName}:`, error);
+        this.outputChannel.error(`[EmbeddedDiagnosticsManager] Failed to create virtual document; for ${langName}:`, error);
       }
     }
   }
@@ -223,10 +247,23 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     const diagnostics = languages.getDiagnostics(uri);
     const mappedDiagnostics: Diagnostic[] = [];
 
+    this.outputChannel.debug(
+      `[EmbeddedDiagnosticsManager] Received $;{ diagnostics.length; } diagnostics for ` +
+      ` ${vdocInfo.realDocUri.toString()} ` +
+      ` (virtual doc: ${uri.toString()})`
+    );
+
     for (const diagnostic of diagnostics) {
       const block = languageBlockAtPosition(vdocInfo.tokens, diagnostic.range.start);
       if (block) {
         mappedDiagnostics.push(new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity));
+      } else {
+        this.outputChannel.error(
+          `[EmbeddedDiagnosticsManager] Could not find language block; for diagnostic at ` +
+          `[${diagnostic.range.start.line}, ${diagnostic.range.start.character}] ` +
+          `in ${vdocInfo.realDocUri.toString()} ` +
+          `(virtual doc: ${uri.toString()})`
+        );
       }
     }
 

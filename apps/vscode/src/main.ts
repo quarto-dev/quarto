@@ -120,7 +120,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     activateDenoConfig(context, engine);
 
     // Initialize diagnostic manager for code blocks
-    const diagnosticsManager = new EmbeddedDiagnosticsManager(engine);
+    const diagnosticsManager = new EmbeddedDiagnosticsManager(engine, outputChannel);
     context.subscriptions.push(diagnosticsManager);
 
     // lsp

@@ -47,6 +47,7 @@ import { activateBackgroundHighlighter } from "./providers/background";
 import { activateYamlLinks } from "./providers/yaml-links";
 import { activateYamlFilepathCompletions } from "./providers/yaml-filepath-completions";
 import { activateContextKeySetter } from "./providers/context-keys";
+import { activateDivBracketDecorations } from "./providers/div-brackets";
 import { CommandManager } from "./core/command";
 import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
 
@@ -220,6 +221,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   // context setter
   activateContextKeySetter(context, engine);
+
+  // div bracket decorations
+  activateDivBracketDecorations(context);
 
   // commands
   const commandManager = new CommandManager();

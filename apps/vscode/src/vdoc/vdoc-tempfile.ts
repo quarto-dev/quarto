@@ -91,7 +91,7 @@ async function deleteDocument(doc: TextDocument) {
     // closes the text document in the language server, which clears
     // diagnostics for the file. This stops diagnostics from building
     // up even after virtual docs are cleaned up.
-    await languages.setTextDocumentLanguage(doc, "raw");
+    await languages.setTextDocumentLanguage(doc, "plaintext");
 
     await workspace.fs.delete(doc.uri, {
       useTrash: false

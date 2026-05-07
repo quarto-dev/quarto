@@ -34,7 +34,7 @@ export async function openAndShowExamplesOutTextDocument(fileName: string) {
   return openAndShowUri(examplesOutUri(fileName));
 }
 
-async function openAndShowUri(uri: vscode.Uri) {
+export async function openAndShowUri(uri: vscode.Uri) {
   const doc = await vscode.workspace.openTextDocument(uri);
   const editor = await vscode.window.showTextDocument(doc);
   return { doc, editor };

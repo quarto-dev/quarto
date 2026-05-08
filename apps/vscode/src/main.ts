@@ -40,6 +40,7 @@ import { activateDenoConfig } from "./providers/deno-config";
 import { textFormattingCommands } from "./providers/text-format";
 import { newDocumentCommands } from "./providers/newdoc";
 import { insertCommands } from "./providers/insert";
+import { symbolsCommands } from "./providers/symbols";
 import { activateDiagram } from "./providers/diagram/diagram";
 import { activateCodeFormatting } from "./providers/format";
 import { activateOptionEnterProvider } from "./providers/option";
@@ -156,6 +157,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   commands.push(...newDocumentCommands());
 
   commands.push(...insertCommands(engine));
+
+  commands.push(...symbolsCommands());
 
   commands.push(...activateDiagram(context, host, engine));
 

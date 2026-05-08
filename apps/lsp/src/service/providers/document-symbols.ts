@@ -16,9 +16,10 @@
 import { CancellationToken } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { isBefore, makeRange, Document } from 'quarto-core';
-import { ILogger, LogLevel } from '../logging';
+import { ILogger } from '../logging';
 import { MdTableOfContentsProvider, TableOfContents, TocEntry, TocEntryType } from '../toc';
 import { MdLinkDefinition, MdLinkKind, MdLinkProvider } from './document-links';
+import { LsConfiguration } from '../config';
 
 interface MarkdownSymbol {
   readonly level: number;
@@ -36,12 +37,15 @@ export class MdDocumentSymbolProvider {
   readonly #tocProvider: MdTableOfContentsProvider;
   readonly #linkProvider: MdLinkProvider;
   readonly #logger: ILogger;
+  readonly #config: LsConfiguration;
 
   constructor(
+    config: LsConfiguration,
     tocProvider: MdTableOfContentsProvider,
     linkProvider: MdLinkProvider,
     logger: ILogger,
   ) {
+    this.#config = config;
     this.#tocProvider = tocProvider;
     this.#linkProvider = linkProvider;
     this.#logger = logger;
@@ -75,7 +79,21 @@ export class MdDocumentSymbolProvider {
       range: makeRange(0, 0, document.lineCount + 1, 0),
     };
     const additionalSymbols = [...linkSymbols];
-    this.#buildTocSymbolTree(root, toc.entries.filter(entry => entry.type !== TocEntryType.Title), additionalSymbols);
+
+    // Filter out TOC entries based on configuration
+    const filteredEntries = toc.entries.filter(entry => {
+      // Always exclude title entries
+      if (entry.type === TocEntryType.Title) {
+        return false;
+      }
+      // Exclude all code cells if the setting is disabled
+      if (entry.type === TocEntryType.CodeCell && !this.#config.showCodeCellsInOutline) {
+        return false;
+      }
+      return true;
+    });
+
+    this.#buildTocSymbolTree(root, filteredEntries, additionalSymbols);
     // Put remaining link definitions into top level document instead of last header
     root.children.push(...additionalSymbols);
     return root.children;

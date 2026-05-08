@@ -47,6 +47,7 @@ export interface Settings {
     };
     readonly symbols: {
       readonly exportToWorkspace: 'default' | 'all' | 'none';
+      readonly showCodeCellsInOutline: boolean;
     };
   };
   readonly markdown: {
@@ -96,7 +97,8 @@ function defaultSettings(): Settings {
         extensions: []
       },
       symbols: {
-        exportToWorkspace: 'all'
+        exportToWorkspace: 'all',
+        showCodeCellsInOutline: true
       }
     },
     markdown: {
@@ -181,7 +183,8 @@ export class ConfigurationManager extends Disposable {
           extensions: quarto?.mathjax?.extensions ?? this._settings.quarto.mathjax.extensions
         },
         symbols: {
-          exportToWorkspace: quarto?.symbols?.exportToWorkspace ?? this._settings.quarto.symbols.exportToWorkspace
+          exportToWorkspace: quarto?.symbols?.exportToWorkspace ?? this._settings.quarto.symbols.exportToWorkspace,
+          showCodeCellsInOutline: quarto?.symbols?.showCodeCellsInOutline ?? this._settings.quarto.symbols.showCodeCellsInOutline
         }
       }
     };
@@ -258,6 +261,9 @@ export function lsConfiguration(configManager: ConfigurationManager): LsConfigur
     },
     get exportSymbolsToWorkspace(): 'default' | 'all' | 'none' {
       return configManager.getSettings().quarto.symbols.exportToWorkspace;
+    },
+    get showCodeCellsInOutline(): boolean {
+      return configManager.getSettings().quarto.symbols.showCodeCellsInOutline;
     }
   };
 }

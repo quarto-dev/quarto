@@ -293,6 +293,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.toggleCodeCellsInOutline",
+        "title": "Toggle Code Cells in Outline",
+        "category": "Quarto"
+      },
+      {
         "command": "quarto.convertToIpynb",
         "title": "Convert to .ipynb",
         "category": "Quarto"
@@ -1364,6 +1369,11 @@
           ],
           "default": "default",
           "description": "Whether Markdown elements like section headers are included in workspace symbol search."
+        },
+        "quarto.symbols.showCodeCellsInOutline": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show code cells in the document outline."
         }
       }
     },

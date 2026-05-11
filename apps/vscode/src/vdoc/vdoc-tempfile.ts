@@ -59,6 +59,7 @@ export async function virtualDocUriFromTempFile(
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
 
   if (!useLocal) {
+    // TODO: I think we can remove this. But maybe we can finish tests first
     // TODO: Reevaluate whether this is necessary. Old comment:
     // > if this is the first time getting a virtual doc for this
     // > language then execute a dummy request to cause it to load
@@ -103,7 +104,7 @@ async function deleteDocument(doc: TextDocument) {
 }
 
 tmp.setGracefulCleanup();
-const VIRTUAL_DOC_TEMP_DIRECTORY = tmp.dirSync().name;
+export const VIRTUAL_DOC_TEMP_DIRECTORY = tmp.dirSync().name;
 
 /**
  * Creates a virtual document in a temporary directory

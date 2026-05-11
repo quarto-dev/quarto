@@ -66,6 +66,13 @@ documents.onDidChangeContent(({ document }) => {
   publishDiagnostics(document);
 });
 
+// Clear diagnostics on document close.
+documents.onDidClose(({ document }) => {
+  console.log(`Document closed: ${document.uri}`);
+  console.log(`Publishing 0 diagnostics for ${document.uri}`);
+  connection.sendDiagnostics({ uri: document.uri, diagnostics: [] });
+});
+
 // Connect the text document manager.
 documents.listen(connection);
 

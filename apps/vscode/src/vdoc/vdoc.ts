@@ -84,7 +84,7 @@ function virtualDocForBlock(document: TextDocument, block: Token, language: Embe
 export function virtualDocForLanguage(
   document: TextDocument,
   tokens: Token[],
-  language: EmbeddedLanguage
+  language: EmbeddedLanguage,
 ): VirtualDoc {
   const lines = linesForLanguage(document, language);
   for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
@@ -198,7 +198,7 @@ function shouldUseLocalTempFile(virtualDoc: VirtualDoc, action: VirtualDocAction
       rLspConfig.get("enabled", false) &&
       rLspConfig.get("diagnostics", false)
     ) {
-        return true;
+      return true;
     }
   }
 

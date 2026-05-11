@@ -15,8 +15,7 @@
 
 import {
   Diagnostic,
-  DiagnosticCollection,
-  Disposable,
+  EventEmitter,
   TextDocument,
   Uri,
   languages,
@@ -31,60 +30,103 @@ import {
 
 import { MarkdownEngine } from "../markdown/engine";
 import { embeddedLanguage, EmbeddedLanguage } from "../vdoc/languages";
-import { VirtualDoc, withVirtualDocUri } from "../vdoc/vdoc";
+import { VirtualDoc, virtualDocForLanguage, withVirtualDocUri } from "../vdoc/vdoc";
 import { isQuartoDoc } from "../core/doc";
 import { LogOutputChannel } from "vscode";
+import path from "node:path";
+import { Disposable } from "core";
+import { ResourceMap } from "../core/resource-map";
 
-interface VirtualDocInfo {
-  realDocUri: Uri;
+interface DiagnosticsVirtualDocument {
+  uri: Uri;
+  language: string;
+  quartoDocumentUri: Uri;
   tokens: Token[];
   cleanup: () => void;
 }
 
-export class EmbeddedDiagnosticsManager implements Disposable {
-  private diagnosticCollection: DiagnosticCollection;
-  private vdocToReal = new Map<string, VirtualDocInfo>();
-  private disposables: Disposable[] = [];
-  private debounceTimers = new Map<string, NodeJS.Timeout>();
+/** Event fired when embedded diagnostics are updated for a document. */
+export interface DidUpdateDiagnosticsEvent {
+  /** The URI of the Quarto document for which diagnostics were updated. */
+  uri: Uri;
+
+  /** The updated diagnostics for the Quarto document. */
+  diagnostics: Diagnostic[];
+}
+
+export class EmbeddedDiagnosticsManager extends Disposable {
+  private readonly _onDidUpdateDiagnostics = this._register(
+    new EventEmitter<DidUpdateDiagnosticsEvent>()
+  );
+
+  /** Event fired when embedded diagnostics are updated for a document. */
+  public readonly onDidUpdateDiagnostics = this._onDidUpdateDiagnostics.event;
+
+  /** Diagnostic collection for Quarto documents. */
+  private readonly diagnosticCollection = this._register(
+    languages.createDiagnosticCollection("quarto-embedded")
+  );
+
+  /** Map of virtual document info keyed by virtual document URI. */
+  private readonly vdocToReal = new ResourceMap<DiagnosticsVirtualDocument>();
+
+  /**
+   * Map of debounce timers keyed by Quarto document URI.
+   * Document changes are debounced to avoid thrashing the language server
+   * with rapid updates as the user types.
+   */
+  private readonly changeDebounceTimers = new ResourceMap<NodeJS.Timeout>();
 
   constructor(
     private engine: MarkdownEngine,
     private outputChannel: LogOutputChannel,
   ) {
-    this.diagnosticCollection = languages.createDiagnosticCollection("quarto-embedded");
-    this.disposables.push(this.diagnosticCollection);
+    super();
 
-    this.disposables.push(
-      // TODO: can we listen more specifically to particular vdocs?
-      // Listen to diagnostic changes from all language servers
-      languages.onDidChangeDiagnostics((event) => {
-        for (const uri of event.uris) {
-          const vdocInfo = this.vdocToReal.get(uri.toString());
-          if (vdocInfo) {
-            this.handleDiagnosticsForVirtualDoc(uri, vdocInfo);
-          }
+    // Listen for diagnostics for known virtual documents.
+    this._register(languages.onDidChangeDiagnostics((event) => {
+      for (const uri of event.uris) {
+        const vdocInfo = this.vdocToReal.get(uri);
+        if (vdocInfo) {
+          this.handleDiagnosticsForVirtualDoc(uri, vdocInfo);
         }
-      }),
+      }
+    }));
 
-      // Register document listeners
-      workspace.onDidOpenTextDocument((doc) => {
-        if (isQuartoDoc(doc)) {
-          this.handleDocumentOpen(doc);
-        }
-      }),
-      workspace.onDidChangeTextDocument((e) => {
-        if (isQuartoDoc(e.document)) {
-          this.handleDocumentChange(e.document);
-        }
-      }),
-      workspace.onDidCloseTextDocument((doc) => {
-        if (isQuartoDoc(doc)) {
-          this.handleDocumentClose(doc);
-        }
-      })
-    );
+    // Listen for Quarto documents opening.
+    this._register(workspace.onDidOpenTextDocument((doc) => {
+      if (isQuartoDoc(doc)) {
+        this.outputChannel.debug(
+          `[EmbeddedDiagnosticsManager] Quarto document opened: ` +
+          `${formatQuartoDocUri(doc.uri)}`
+        );
+        this.handleDocumentOpen(doc);
+      }
+    }));
 
-    // Process already-open documents
+    // Listen for Quarto documents changing.
+    this._register(workspace.onDidChangeTextDocument((e) => {
+      if (isQuartoDoc(e.document)) {
+        this.outputChannel.debug(
+          `[EmbeddedDiagnosticsManager] Quarto document changed: ` +
+          `${formatQuartoDocUri(e.document.uri)}`
+        );
+        this.handleDocumentChange(e.document);
+      }
+    }));
+
+    // Listen for Quarto documents closing.
+    this._register(workspace.onDidCloseTextDocument((doc) => {
+      if (isQuartoDoc(doc)) {
+        this.outputChannel.debug(
+          `[EmbeddedDiagnosticsManager] Quarto document closed: ` +
+          `${formatQuartoDocUri(doc.uri)}`
+        );
+        this.handleDocumentClose(doc);
+      }
+    }));
+
+    // Process already-open documents.
     workspace.textDocuments.forEach((doc) => {
       if (isQuartoDoc(doc)) {
         this.handleDocumentOpen(doc);
@@ -93,46 +135,46 @@ export class EmbeddedDiagnosticsManager implements Disposable {
   }
 
   private async handleDocumentOpen(document: TextDocument): Promise<void> {
-    if (!workspace.getConfiguration("quarto.cells.diagnostics").get("enabled", true)) {
-      return;
-    }
+    // TODO: Could an open event fire again for a known document?
     this.createVirtualDocs(document);
   }
 
   private handleDocumentChange(document: TextDocument): void {
-    if (!workspace.getConfiguration("quarto.cells.diagnostics").get("enabled", true)) {
-      return;
+    const existingTimer = this.changeDebounceTimers.get(document.uri);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
     }
-
-    const docKey = document.uri.toString();
-    const existingTimer = this.debounceTimers.get(docKey);
-    if (existingTimer) clearTimeout(existingTimer);
 
     const debounceDelay = workspace.getConfiguration("quarto.cells.diagnostics").get("debounceDelay", 500);
     const timer = setTimeout(async () => {
-      this.debounceTimers.delete(docKey);
+      this.changeDebounceTimers.delete(document.uri);
       await this.recreateVirtualDocs(document);
     }, debounceDelay);
 
-    this.debounceTimers.set(docKey, timer);
+    this.changeDebounceTimers.set(document.uri, timer);
   }
 
   private handleDocumentClose(document: TextDocument): void {
-    const docKey = document.uri.toString();
-
-    const timer = this.debounceTimers.get(docKey);
+    const timer = this.changeDebounceTimers.get(document.uri);
     if (timer) {
       clearTimeout(timer);
-      this.debounceTimers.delete(docKey);
+      this.changeDebounceTimers.delete(document.uri);
     }
 
-    this.cleanupVirtualDocsForDocument(docKey);
-    this.diagnosticCollection.delete(document.uri);
+    this.cleanupVirtualDocsForDocument(document.uri);
+
+    // TODO: We shouldn't actually need to clear the diagnostic collection...
+    // Although it's arguably the right call.
+    // But we could also wait for the language server to clear the document's
+    // diagnostics.
+    this.deleteDiagnostics(document.uri);
   }
 
-  private cleanupVirtualDocsForDocument(docKey: string): void {
+  private cleanupVirtualDocsForDocument(uri: Uri): void {
+    const docKey = uri.toString();
+
     for (const [vdocKey, vdocInfo] of this.vdocToReal.entries()) {
-      if (vdocInfo.realDocUri.toString() === docKey) {
+      if (vdocInfo.quartoDocumentUri.toString() === docKey) {
         vdocInfo.cleanup();
         this.vdocToReal.delete(vdocKey);
       }
@@ -140,8 +182,8 @@ export class EmbeddedDiagnosticsManager implements Disposable {
   }
 
   private async recreateVirtualDocs(document: TextDocument): Promise<void> {
-    this.cleanupVirtualDocsForDocument(document.uri.toString());
-    this.diagnosticCollection.delete(document.uri);
+    this.cleanupVirtualDocsForDocument(document.uri);
+    // TODO: Should we delete the diagnostic collection between waiting?
     await this.createVirtualDocs(document);
   }
 
@@ -164,50 +206,60 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     // Create one virtual doc per language
     for (const [langName] of languageMap) {
       const language = embeddedLanguage(langName);
-      if (!language) continue;
+      if (!language) {
+        continue;
+      }
 
       try {
-        const vdocContent = this.createVirtualDocContent(document, tokens, language);
+        // const vdocContent = this.createVirtualDocContent(document, tokens, language);
+        const vdocContent = virtualDocForLanguage(document, tokens, language);
 
         await withVirtualDocUri(vdocContent, document.uri, "diagnostics", async (uri: Uri) => {
-          this.outputChannel.debug(
-            `[EmbeddedDiagnosticsManager] Created virtual document ${uri.toString()} ` +
-            `for document ${document.uri.toString()} ` +
-            `(language: ${langName})`
-          );
-          this.outputChannel.trace(
-            `[EmbeddedDiagnosticsManager] Virtual document content:\n` +
-            vdocContent.content
-          );
-
           // Create a deferred promise.
           // It'll resolve when the vdoc info cleanup function is called
           // e.g. after we receive the vdoc's diagnostics.
           let resolve!: () => void;
           const promise = new Promise<void>((res) => resolve = res);
 
-          this.vdocToReal.set(uri.toString(), {
-            realDocUri: document.uri,
+          const vdocInfo = {
+            uri,
+            language: langName,
+            quartoDocumentUri: document.uri,
             tokens,
             cleanup: () => {
               this.outputChannel.debug(
-                `[EmbeddedDiagnosticsManager] Cleaning up virtual document ${uri.toString()} ` +
-                `for document ${document.uri.toString()}`
+                "[EmbeddedDiagnosticsManager] Cleaning up virtual document: " +
+                formatVirtualDoc(vdocInfo)
               );
               resolve();
             },
-          });
+          };
+          this.vdocToReal.set(uri, vdocInfo);
+
+          this.outputChannel.debug(
+            `[EmbeddedDiagnosticsManager] Created virtual document: ` +
+            formatVirtualDoc(vdocInfo, true)
+          );
+          this.outputChannel.trace(
+            `[EmbeddedDiagnosticsManager] Virtual document content:\n` +
+            vdocContent.content
+          );
 
           // Wait for the promise to resolve.
           // Once this callback ends, the virtual document will be cleaned up.
           this.outputChannel.debug(
-            `[EmbeddedDiagnosticsManager] Waiting for diagnostics for virtual document ${uri.toString()} ` +
-            `for document ${document.uri.toString()} `
+            "[EmbeddedDiagnosticsManager] Waiting for diagnostics for virtual document: " +
+            formatVirtualDoc(vdocInfo)
           );
           await promise;
         });
       } catch (error) {
-        this.outputChannel.error(`[EmbeddedDiagnosticsManager] Failed to create virtual document; for ${langName}:`, error);
+        this.outputChannel.error(
+          `[EmbeddedDiagnosticsManager] Failed to create virtual document ` +
+          `for ${formatQuartoDocUri(document.uri)} ` +
+          `(language: ${langName}): ` +
+          JSON.stringify(error)
+        );
       }
     }
   }
@@ -243,14 +295,13 @@ export class EmbeddedDiagnosticsManager implements Disposable {
     };
   }
 
-  private handleDiagnosticsForVirtualDoc(uri: Uri, vdocInfo: VirtualDocInfo): void {
+  private handleDiagnosticsForVirtualDoc(uri: Uri, vdocInfo: DiagnosticsVirtualDocument): void {
     const diagnostics = languages.getDiagnostics(uri);
     const mappedDiagnostics: Diagnostic[] = [];
 
     this.outputChannel.debug(
-      `[EmbeddedDiagnosticsManager] Received $;{ diagnostics.length; } diagnostics for ` +
-      ` ${vdocInfo.realDocUri.toString()} ` +
-      ` (virtual doc: ${uri.toString()})`
+      `[EmbeddedDiagnosticsManager] Received ${diagnostics.length} diagnostics for ` +
+      `virtual document: ${formatVirtualDoc(vdocInfo)}`
     );
 
     for (const diagnostic of diagnostics) {
@@ -261,34 +312,54 @@ export class EmbeddedDiagnosticsManager implements Disposable {
         this.outputChannel.error(
           `[EmbeddedDiagnosticsManager] Could not find language block; for diagnostic at ` +
           `[${diagnostic.range.start.line}, ${diagnostic.range.start.character}] ` +
-          `in ${vdocInfo.realDocUri.toString()} ` +
-          `(virtual doc: ${uri.toString()})`
+          `in virtual document: ${formatVirtualDoc(vdocInfo)}`
         );
       }
     }
 
-    this.diagnosticCollection.set(vdocInfo.realDocUri, mappedDiagnostics);
+    this.setDiagnostics(vdocInfo.quartoDocumentUri, mappedDiagnostics);
 
     // We have diagnostics, so we can clean up the virtual doc.
     // This ensures that the virtual doc's diagnostics don't show
     // in the problems pane (or only show momentarily).
-    this.cleanupVirtualDocsForDocument(vdocInfo.realDocUri.toString());
+    this.cleanupVirtualDocsForDocument(vdocInfo.quartoDocumentUri);
+  }
+
+  private setDiagnostics(uri: Uri, diagnostics: Diagnostic[]): void {
+    this.diagnosticCollection.set(uri, diagnostics);
+    this._onDidUpdateDiagnostics.fire({
+      uri,
+      diagnostics,
+    });
+  }
+
+  private deleteDiagnostics(uri: Uri): void {
+    this.diagnosticCollection.delete(uri);
+    this._onDidUpdateDiagnostics.fire({
+      uri,
+      diagnostics: [],
+    });
   }
 
   dispose(): void {
-    for (const timer of this.debounceTimers.values()) {
+    for (const timer of this.changeDebounceTimers.values()) {
       clearTimeout(timer);
     }
-    this.debounceTimers.clear();
+    this.changeDebounceTimers.clear();
 
     for (const vdocInfo of this.vdocToReal.values()) {
       vdocInfo.cleanup();
     }
     this.vdocToReal.clear();
-
-    for (const disposable of this.disposables) {
-      disposable.dispose();
-    }
-    this.disposables = [];
   }
+}
+
+function formatVirtualDoc(info: DiagnosticsVirtualDocument, fullUri = false) {
+  return `${fullUri ? info.uri.toString() : path.basename(info.uri.fsPath)} ` +
+    `(language: ${info.language}, ` +
+    `quartoDocument: ${formatQuartoDocUri(info.quartoDocumentUri)})`;
+}
+
+function formatQuartoDocUri(uri: Uri) {
+  return workspace.asRelativePath(uri);
 }

@@ -1,20 +1,10 @@
 import path from "node:path";
-import { OutputChannel } from "vscode";
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from "vscode-languageclient/node";
+import { TestOutputChannel } from "./test-output-channel";
 
-function testOutputChannel(name: string): OutputChannel {
-  return {
-    name,
-    append: (value) => console.log(`[${name}] ${value}`),
-    appendLine: (value) => console.log(`[${name}] ${value}`),
-    clear: () => { },
-    show: () => { },
-    hide: () => { },
-    dispose: () => { },
-    replace: (_value) => { },
-  };
-}
-
+/**
+ * A {@link LanguageClient} for testing, which connects to `test-language-server.js`.
+ */
 export function testLanguageClient(): LanguageClient {
   const serverModule = path.join(__dirname, "test-language-server.js");
 
@@ -25,7 +15,7 @@ export function testLanguageClient(): LanguageClient {
 
   const clientOptions: LanguageClientOptions = {
     documentSelector: [{ language: "python" }],
-    outputChannel: testOutputChannel("Test Language Client"),
+    outputChannel: new TestOutputChannel("Test Language Client"),
   };
 
   return new LanguageClient(

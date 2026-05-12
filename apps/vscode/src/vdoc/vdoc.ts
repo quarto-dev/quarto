@@ -252,6 +252,18 @@ export function languageAtPosition(tokens: Token[], position: Position) {
   }
 }
 
+/** Get all languages with code blocks in a token stream. */
+export function allLanguages(tokens: Token[]): EmbeddedLanguage[] {
+  const names = new Set(
+    tokens.filter(isExecutableLanguageBlock)
+      .map(languageNameFromBlock)
+      .filter(Boolean)
+  );
+  return [...names]
+    .map(embeddedLanguage)
+    .filter((l): l is EmbeddedLanguage => l !== undefined);
+}
+
 export function mainLanguage(
   tokens: Token[],
   filter?: (language: EmbeddedLanguage) => boolean

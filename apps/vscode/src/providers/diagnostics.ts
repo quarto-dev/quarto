@@ -23,14 +23,12 @@ import {
 } from "vscode";
 import {
   Token,
-  isExecutableLanguageBlock,
   languageBlockAtPosition,
-  languageNameFromBlock,
 } from "quarto-core";
 
 import { MarkdownEngine } from "../markdown/engine";
-import { embeddedLanguage, EmbeddedLanguage } from "../vdoc/languages";
-import { VirtualDoc, virtualDocForLanguage, withVirtualDocUri } from "../vdoc/vdoc";
+import { EmbeddedLanguage } from "../vdoc/languages";
+import { allLanguages, virtualDocForLanguage, withVirtualDocUri } from "../vdoc/vdoc";
 import { isQuartoDoc } from "../core/doc";
 import { LogOutputChannel } from "vscode";
 import path from "node:path";
@@ -39,7 +37,7 @@ import { ResourceMap } from "../core/resource-map";
 
 interface DiagnosticsVirtualDocument {
   uri: Uri;
-  language: string;
+  language: EmbeddedLanguage;
   quartoDocumentUri: Uri;
   tokens: Token[];
   cleanup: () => void;
@@ -187,28 +185,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private async createVirtualDocs(document: TextDocument): Promise<void> {
+    // Create a virtual document per language.
     const tokens = this.engine.parse(document);
-
-    // Group code blocks by language
-    const languageMap = new Map<string, Token[]>();
-    for (const token of tokens) {
-      if (isExecutableLanguageBlock(token)) {
-        const lang = languageNameFromBlock(token);
-        if (lang) {
-          const blocks = languageMap.get(lang) ?? [];
-          blocks.push(token);
-          languageMap.set(lang, blocks);
-        }
-      }
-    }
-
-    // Create one virtual doc per language
-    for (const [langName] of languageMap) {
-      const language = embeddedLanguage(langName);
-      if (!language) {
-        continue;
-      }
-
+    const languages = allLanguages(tokens);
+    for (const language of languages) {
       try {
         const vdocContent = virtualDocForLanguage(document, tokens, language, "diagnostics");
 
@@ -221,7 +201,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
           const vdocInfo = {
             uri,
-            language: langName,
+            language,
             quartoDocumentUri: document.uri,
             tokens,
             cleanup: () => {
@@ -231,7 +211,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
               );
               resolve();
             },
-          };
+          } satisfies DiagnosticsVirtualDocument;
           this.vdocToReal.set(uri, vdocInfo);
 
           this.outputChannel.debug(
@@ -255,7 +235,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         this.outputChannel.error(
           `[EmbeddedDiagnosticsManager] Failed to create virtual document ` +
           `for ${formatQuartoDocUri(document.uri)} ` +
-          `(language: ${langName}): ` +
+          `(language: ${language.ids[0]}): ` +
           JSON.stringify(error)
         );
       }
@@ -324,7 +304,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
 function formatVirtualDoc(info: DiagnosticsVirtualDocument, fullUri = false) {
   return `${fullUri ? info.uri.toString() : path.basename(info.uri.fsPath)} ` +
-    `(language: ${info.language}, ` +
+    `(language: ${info.language.ids[0]}, ` +
     `quartoDocument: ${formatQuartoDocUri(info.quartoDocumentUri)})`;
 }
 

@@ -135,7 +135,6 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private async handleDocumentOpen(document: TextDocument): Promise<void> {
-    // TODO: Could an open event fire again for a known document?
     this.createVirtualDocs(document);
   }
 
@@ -211,8 +210,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       }
 
       try {
-        // const vdocContent = this.createVirtualDocContent(document, tokens, language);
-        const vdocContent = virtualDocForLanguage(document, tokens, language);
+        const vdocContent = virtualDocForLanguage(document, tokens, language, "diagnostics");
 
         await withVirtualDocUri(vdocContent, document.uri, "diagnostics", async (uri: Uri) => {
           // Create a deferred promise.
@@ -264,53 +262,23 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
   }
 
-  // TODO: this maybe shouldn't be implemented here,
-  //   this creates a virtual doc without the inject
-  //   lines that i.e. in python disable linting like
-  //  `# type: ignore`. We should co-locate this with
-  //   where vdoc content is usually created in `virtualDocForCode`
-  //   in vdoc.ts
-
-  private createVirtualDocContent(
-    document: TextDocument,
-    tokens: Token[],
-    language: EmbeddedLanguage
-  ): VirtualDoc {
-    const lines: string[] = [];
-    for (let i = 0; i < document.lineCount; i++) {
-      lines.push(language.emptyLine || "");
-    }
-
-    for (const block of tokens.filter(
-      (token) => isExecutableLanguageBlock(token) && languageNameFromBlock(token) === language.ids[0]
-    )) {
-      for (let line = block.range.start.line + 1; line < block.range.end.line && line < document.lineCount; line++) {
-        lines[line] = document.lineAt(line).text;
-      }
-    }
-
-    return {
-      language,
-      content: lines.join("\n") + "\n",
-    };
-  }
-
   private handleDiagnosticsForVirtualDoc(uri: Uri, vdocInfo: DiagnosticsVirtualDocument): void {
     const diagnostics = languages.getDiagnostics(uri);
-    const mappedDiagnostics: Diagnostic[] = [];
 
     this.outputChannel.debug(
       `[EmbeddedDiagnosticsManager] Received ${diagnostics.length} diagnostics for ` +
       `virtual document: ${formatVirtualDoc(vdocInfo)}`
     );
 
+    // Filter out diagnostics that don't map to a language block in the original document.
+    const mappedDiagnostics: Diagnostic[] = [];
     for (const diagnostic of diagnostics) {
       const block = languageBlockAtPosition(vdocInfo.tokens, diagnostic.range.start);
-      if (block) {
+      if (block !== undefined) {
         mappedDiagnostics.push(new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity));
       } else {
         this.outputChannel.error(
-          `[EmbeddedDiagnosticsManager] Could not find language block; for diagnostic at ` +
+          `[EmbeddedDiagnosticsManager] Could not find language block for diagnostic at ` +
           `[${diagnostic.range.start.line}, ${diagnostic.range.start.character}] ` +
           `in virtual document: ${formatVirtualDoc(vdocInfo)}`
         );

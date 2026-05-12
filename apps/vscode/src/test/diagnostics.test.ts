@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { examplesUri, raceTimeout } from "./test-utils";
 import { testLanguageClient } from "./fixtures/test-language-client";
-import { EmbeddedDiagnosticsManager } from "../providers/embedded-diagnostics";
+import { EmbeddedDiagnosticsManager } from "../providers/diagnostics";
 import { MarkdownEngine } from "../markdown/engine";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 import { assertNoLeakedVirtualDocs } from "./utils/vdoc";

@@ -12,6 +12,7 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { Position, TextDocument, Uri, Range, SemanticTokens, extensions, workspace } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
@@ -29,10 +30,10 @@ export interface VirtualDoc {
 }
 
 export enum VirtualDocStyle {
-  /// Every block corresponding to the current position's language
+  /** Every block corresponding to the current position's language */
   Language,
 
-  /// Only the block corresponding to the current position
+  /** Only the block corresponding to the current position */
   Block
 }
 
@@ -81,17 +82,25 @@ function virtualDocForBlock(document: TextDocument, block: Token, language: Embe
   return virtualDocForCode(lines, language);
 }
 
+/**
+ * Create a virtual document from a text document.
+ *
+ * @param document The text document to create a virtual document from
+ * @param language The language of the virtual document
+ * @param action The action for which the virtual document is being created, if known
+ */
 export function virtualDocForLanguage(
   document: TextDocument,
   tokens: Token[],
   language: EmbeddedLanguage,
+  action?: VirtualDocAction,
 ): VirtualDoc {
   const lines = linesForLanguage(document, language);
   for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
     fillLinesFromBlock(lines, document, languageBlock);
   }
   padLinesForLanguage(lines, language);
-  return virtualDocForCode(lines, language);
+  return virtualDocForCode(lines, language, action);
 }
 
 function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
@@ -118,11 +127,23 @@ function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
   }
 }
 
-export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
+/**
+ * Create a virtual document from code and language.
+ *
+ * @param code The lines of code to include in the virtual document
+ * @param language The language of the virtual document
+ * @param action The action for which the virtual document is being created, if known
+ */
+export function virtualDocForCode(
+  code: string[],
+  language: EmbeddedLanguage,
+  action?: VirtualDocAction,
+) {
 
   const lines = [...code];
 
-  if (language.inject) {
+  // For non-diagnostic actions, inject lines of code to disable diagnostics.
+  if (language.inject && action !== "diagnostics") {
     lines.unshift(...language.inject);
   }
 
@@ -195,8 +216,8 @@ function shouldUseLocalTempFile(virtualDoc: VirtualDoc, action: VirtualDocAction
   ) {
     const rLspConfig = workspace.getConfiguration("r.lsp");
     if (
-      rLspConfig.get("enabled", false) &&
-      rLspConfig.get("diagnostics", false)
+      rLspConfig.get<boolean>("enabled", false) &&
+      rLspConfig.get<boolean>("diagnostics", false)
     ) {
       return true;
     }

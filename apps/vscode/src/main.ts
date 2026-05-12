@@ -19,7 +19,7 @@ import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
-import { EmbeddedDiagnosticsManager } from "./providers/embedded-diagnostics";
+import { EmbeddedDiagnosticsManager } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";

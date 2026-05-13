@@ -30,18 +30,17 @@ import {
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
 
 /**
- * Create an on disk temporary file containing the contents of the virtual document
+ * Create a virtual document temp file and open it as a text document.
  *
- * @param virtualDoc The document to use when populating the temporary file
- * @param docPath The path to the original document the virtual document is
- *   based on. When `local` is `true`, this is used to determine the directory
- *   to create the temporary file in.
- * @param local Whether or not the temporary file should be created "locally" in
- *   the workspace next to `docPath` or in a temporary directory outside the
- *   workspace.
- * @returns A `VirtualDocUri`
+ * Unlike `virtualDocUriFromTempFile`, this does not perform a hover warmup.
+ * The returned `cleanup` function deletes the temp file and resets the
+ * document's language so the language server clears its diagnostics.
+ *
+ * @param virtualDoc The virtual document content
+ * @param docPath Path to the parent document (used for local file placement)
+ * @param local Whether to create the file alongside the parent document
  */
-export async function virtualDocUriFromTempFile(
+export async function createVirtualDocFile(
   virtualDoc: VirtualDoc,
   docPath: string,
   local: boolean
@@ -58,22 +57,42 @@ export async function virtualDocUriFromTempFile(
   const virtualDocUri = Uri.file(virtualDocFilepath);
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
 
+  return {
+    uri: virtualDocTextDocument.uri,
+    cleanup: async () => await deleteDocument(virtualDocTextDocument),
+  };
+}
+
+/**
+ * Create an on disk temporary file containing the contents of the virtual document
+ *
+ * @param virtualDoc The document to use when populating the temporary file
+ * @param docPath The path to the original document the virtual document is
+ *   based on. When `local` is `true`, this is used to determine the directory
+ *   to create the temporary file in.
+ * @param local Whether or not the temporary file should be created "locally" in
+ *   the workspace next to `docPath` or in a temporary directory outside the
+ *   workspace.
+ * @returns A `VirtualDocUri`
+ */
+export async function virtualDocUriFromTempFile(
+  virtualDoc: VirtualDoc,
+  docPath: string,
+  local: boolean
+): Promise<VirtualDocUri> {
+  const result = await createVirtualDocFile(virtualDoc, docPath, local);
+  const useLocal = local || virtualDoc.language.localTempFile;
+
   if (!useLocal) {
-    // TODO: I think we can remove this. But maybe we can finish tests first
-    // TODO: Reevaluate whether this is necessary. Old comment:
-    // > if this is the first time getting a virtual doc for this
-    // > language then execute a dummy request to cause it to load
+    // TODO: Reevaluate whether this warmup is necessary.
     await commands.executeCommand<Hover[]>(
       "vscode.executeHoverProvider",
-      virtualDocUri,
+      result.uri,
       new Position(0, 0)
     );
   }
 
-  return <VirtualDocUri>{
-    uri: virtualDocTextDocument.uri,
-    cleanup: async () => await deleteDocument(virtualDocTextDocument),
-  };
+  return result;
 }
 
 /**

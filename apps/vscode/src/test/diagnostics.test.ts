@@ -267,8 +267,6 @@ async function withEmbeddedDiagnostics(
     )
   );
 
-  console.log(`Waiting for ${action}...`);
-
   await callback();
 
   const result = await raceTimeout(promise, timeout);

@@ -50,7 +50,9 @@ The turborepo pipeline helps optimize build times by caching build artifacts and
 
 Testing procedures vary by component:
 
-- VS Code extension: Run `yarn test-vscode [--label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
+- VS Code extension: Run `QUIET=1 yarn test-vscode [--label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
+  - `QUIET=1` suppresses test log output; omit it when debugging failures
+  - The output is small enough to read directly — don't pipe through `tail` or `grep`
   - Read the [test configuration file](./apps/vscode/.vscode-test.mjs) for valid labels
 - Other components have specific test commands defined in their respective package.json files
 

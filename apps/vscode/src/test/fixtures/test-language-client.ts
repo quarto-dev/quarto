@@ -1,6 +1,6 @@
 import path from "node:path";
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from "vscode-languageclient/node";
-import { TestOutputChannel } from "./test-output-channel";
+import { TestLogOutputChannel } from "./test-log-output-channel";
 
 /**
  * A {@link LanguageClient} for testing, which connects to `test-language-server.js`.
@@ -18,7 +18,7 @@ export function testLanguageClient(): LanguageClient {
       { language: "python" },
       { language: "r" },
     ],
-    outputChannel: new TestOutputChannel("Test Language Client"),
+    outputChannel: new TestLogOutputChannel("Test Language Client"),
   };
 
   return new LanguageClient(

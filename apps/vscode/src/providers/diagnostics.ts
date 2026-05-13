@@ -48,6 +48,21 @@ export interface DidUpdateDiagnosticsEvent {
   diagnostics: Diagnostic[];
 }
 
+/** Why a virtual document was disposed. */
+export type VdocDisposeReason = 'diagnostics-received' | 'timeout' | 'session-removed';
+
+/** Event fired when a virtual document is disposed. */
+export interface DidDisposeVdocEvent {
+  /** The Quarto document the vdoc belonged to. */
+  docUri: Uri;
+  /** The language the vdoc was created for (e.g. "python", "r"). */
+  language: string;
+  /** The URI of the virtual document that was disposed. */
+  vdocUri: Uri;
+  /** Why the vdoc was disposed. */
+  reason: VdocDisposeReason;
+}
+
 /** A virtual document that is actively waiting for diagnostics from a language server. */
 interface ActiveVdoc {
   /** URI of the temp file opened as a text document. */
@@ -91,6 +106,13 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
   /** Event fired when embedded diagnostics are updated for a document. */
   public readonly onDidUpdateDiagnostics = this._onDidUpdateDiagnostics.event;
+
+  private readonly _onDidDisposeVdoc = this._register(
+    new EventEmitter<DidDisposeVdocEvent>()
+  );
+
+  /** Event fired when a virtual document is disposed (for any reason). */
+  public readonly onDidDisposeVdoc = this._onDidDisposeVdoc.event;
 
   /** Diagnostic collection for Quarto documents. */
   private readonly diagnosticCollection = this._register(
@@ -236,7 +258,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     const docKey = docUri.toString();
     for (let i = this.sessions.length - 1; i >= 0; i--) {
       if (this.sessions[i].docUri.toString() === docKey) {
-        await this.disposeActiveVdoc(this.sessions[i]);
+        await this.disposeActiveVdoc(this.sessions[i], 'session-removed');
         this.sessions.splice(i, 1);
       }
     }
@@ -260,7 +282,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
           `did not respond within ${this.timeoutMs}ms ` +
           `for ${workspace.asRelativePath(session.docUri)}`
         );
-        await this.disposeActiveVdoc(session);
+        await this.disposeActiveVdoc(session, 'timeout');
       }, this.timeoutMs);
 
       session.activeVdoc = { uri, cleanup: cleanup!, timeout };
@@ -305,7 +327,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
 
     session.diagnostics = mapped;
-    await this.disposeActiveVdoc(session);
+    await this.disposeActiveVdoc(session, 'diagnostics-received');
     this.publishDiagnostics(session.docUri);
   }
 
@@ -326,11 +348,24 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     return this.sessions.find(s => s.activeVdoc?.uri.toString() === key);
   }
 
-  private async disposeActiveVdoc(session: DiagnosticSession): Promise<void> {
+  private async disposeActiveVdoc(session: DiagnosticSession, reason: VdocDisposeReason): Promise<void> {
     if (session.activeVdoc) {
+      const vdocUri = session.activeVdoc.uri;
       clearTimeout(session.activeVdoc.timeout);
       await session.activeVdoc.cleanup();
       session.activeVdoc = undefined;
+
+      this.outputChannel.debug(
+        `[EmbeddedDiagnostics] Disposed vdoc for ` +
+        `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)} ` +
+        `(reason: ${reason})`
+      );
+      this._onDidDisposeVdoc.fire({
+        docUri: session.docUri,
+        language: session.language.ids[0],
+        vdocUri,
+        reason,
+      });
     }
   }
 
@@ -359,7 +394,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     this.debounceTimers.clear();
 
     for (const session of this.sessions) {
-      this.disposeActiveVdoc(session).catch((error) => {
+      this.disposeActiveVdoc(session, 'session-removed').catch((error) => {
         this.outputChannel.error(
           `[EmbeddedDiagnostics] Failed to dispose vdoc for ` +
           `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}: ` +

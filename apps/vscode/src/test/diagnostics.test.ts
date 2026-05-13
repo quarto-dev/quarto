@@ -10,18 +10,20 @@ import { assertNoLeakedVirtualDocs, deleteAllVirtualDocs } from "./utils/vdoc";
 import { eventToPromise, filterEvent } from "../core/event";
 import { DisposableStore } from "core";
 
+/** Create a diagnostics manager for tests, registered with the given disposable store. */
+function createTestManager(disposables: DisposableStore, timeoutMs?: number) {
+  return disposables.add(
+    new EmbeddedDiagnosticsManager(new MarkdownEngine(), new TestLogOutputChannel(), timeoutMs)
+  );
+}
+
 suite("Diagnostics", function () {
   const disposables = new DisposableStore();
   let client: LanguageClient;
   let manager: EmbeddedDiagnosticsManager;
 
   setup(async function () {
-    // Create our own diagnostics manager rather than using the extension's
-    // so that we can directly listen for diagnostics changed events
-    // and see the output channel logs in the test output.
-    const engine = new MarkdownEngine();
-    const outputChannel = new TestLogOutputChannel();
-    manager = disposables.add(new EmbeddedDiagnosticsManager(engine, outputChannel));
+    manager = createTestManager(disposables);
 
     // Start a test language server.
     client = testLanguageClient();
@@ -156,14 +158,14 @@ suite("Diagnostics", function () {
     );
   });
 
-  test("times out for unresponsive/missing language servers without blocking others", async function () {
+  test("times out for unresponsive language servers without blocking others", async function () {
     // Julia has no language server registered in tests, so it will time out.
     // Python should still get its diagnostics independently.
     const uri = examplesUri("diagnostics-timeout.qmd");
     const doc = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(doc);
 
-    // Wait for Python diagnostics to arrive (Julia will time out at 200ms).
+    // Wait for Python diagnostics to arrive; should not be blocked by Julia timing out
     const event = await withEmbeddedDiagnostics(
       manager,
       uri,
@@ -181,10 +183,34 @@ suite("Diagnostics", function () {
       event.diagnostics.some(d => d.message.includes("undefined_var")),
       "Expected Python diagnostic about undefined_var"
     );
+
+  });
+
+  test("cleans up vdoc after timeout when language server does not respond", async function () {
+    const shortTimeoutManager = createTestManager(disposables, 200);
+
+    const uri = examplesUri("diagnostics-julia-only.qmd");
+
+    // Listen for the timeout dispose event on Julia's vdoc.
+    const timeoutEvent = eventToPromise(
+      filterEvent(
+        shortTimeoutManager.onDidDisposeVdoc,
+        (e) => e.reason === "timeout" && e.language === "julia"
+      )
+    );
+
+    await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(uri);
+
+    const result = await raceTimeout(timeoutEvent, 2000);
+    assert.ok(result, "Expected Julia vdoc to be disposed via timeout");
+
+    // The vdoc temp file should no longer exist.
+    const exists = await vscode.workspace.fs.stat(result.vdocUri).then(() => true, () => false);
+    assert.strictEqual(exists, false, "Expected vdoc file to be deleted after timeout");
   });
 
   test("clears diagnostics when document is closed", async function () {
-    console.log("STARTING CLEAR DIAGNOSTICS TEST ****************");
     const uri = examplesUri("diagnostics-python-undefined.qmd");
     let doc!: vscode.TextDocument;
     await withEmbeddedDiagnostics(
@@ -198,8 +224,6 @@ suite("Diagnostics", function () {
     );
 
     // Close the document - the language server should clear diagnostics for the document.
-    // TODO: Delete files if diagnostics never arrive - first a test case
-    // TODO: Think of more test cases and ask Claude too
     const event = await withEmbeddedDiagnostics(
       manager,
       uri,

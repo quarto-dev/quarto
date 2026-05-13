@@ -1,0 +1,16 @@
+---
+title: "Timeout test"
+format: html
+---
+
+## Julia (no language server registered)
+
+```{julia}
+undefined_var = 1
+```
+
+## Python (has language server)
+
+```{python}
+x = undefined_var
+```

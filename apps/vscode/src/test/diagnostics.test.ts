@@ -153,6 +153,39 @@ suite("Diagnostics", function () {
     );
   });
 
+  test("times out for unresponsive language servers without blocking others", async function () {
+    // Use a separate manager with a short timeout so the test is fast.
+    disposables.clear();
+    const engine = new MarkdownEngine();
+    const outputChannel = new TestLogOutputChannel();
+    manager = disposables.add(new EmbeddedDiagnosticsManager(engine, outputChannel, 200));
+
+    // Julia has no language server registered in tests, so it will time out.
+    // Python should still get its diagnostics independently.
+    const uri = examplesUri("diagnostics-timeout.qmd");
+    const doc = await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(doc);
+
+    // Wait for Python diagnostics to arrive (Julia will time out at 200ms).
+    const event = await withEmbeddedDiagnostics(
+      manager,
+      uri,
+      async () => { /* doc already opened above */ },
+      "python diagnostics while julia times out",
+      2000,
+    );
+
+    // Python diagnostics should be present despite Julia timing out.
+    assert.ok(
+      event.diagnostics.length >= 1,
+      `Expected at least 1 diagnostic from Python, got ${event.diagnostics.length}`
+    );
+    assert.ok(
+      event.diagnostics.some(d => d.message.includes("undefined_var")),
+      "Expected Python diagnostic about undefined_var"
+    );
+  });
+
   test("clears diagnostics when document is closed", async function () {
     console.log("STARTING CLEAR DIAGNOSTICS TEST ****************");
     const uri = examplesUri("diagnostics-python-undefined.qmd");

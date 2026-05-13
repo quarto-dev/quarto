@@ -22,25 +22,29 @@ import {
   workspace,
 } from "vscode";
 import {
-  Token,
+  TokenCodeBlock,
+  TokenMath,
   languageBlockAtPosition,
 } from "quarto-core";
 
 import { MarkdownEngine } from "../markdown/engine";
-import { EmbeddedLanguage } from "../vdoc/languages";
-import { allLanguages, virtualDocForLanguage, withVirtualDocUri } from "../vdoc/vdoc";
+import { embeddedLanguage, EmbeddedLanguage } from "../vdoc/languages";
+import { languageBlocksByLanguage, virtualDocForLanguage, withVirtualDocUri } from "../vdoc/vdoc";
 import { isQuartoDoc } from "../core/doc";
 import { LogOutputChannel } from "vscode";
 import path from "node:path";
 import { Disposable } from "core";
 import { ResourceMap } from "../core/resource-map";
 
+/**
+ * An ephemeral virtual document for language diagnostics.
+ */
 interface DiagnosticsVirtualDocument {
   uri: Uri;
   language: EmbeddedLanguage;
   quartoDocumentUri: Uri;
-  tokens: Token[];
-  cleanup: () => void;
+  languageBlocks: (TokenMath | TokenCodeBlock)[];
+  dispose: () => void;
 }
 
 /** Event fired when embedded diagnostics are updated for a document. */
@@ -172,7 +176,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
     for (const [vdocKey, vdocInfo] of this.vdocToReal.entries()) {
       if (vdocInfo.quartoDocumentUri.toString() === docKey) {
-        vdocInfo.cleanup();
+        vdocInfo.dispose();
         this.vdocToReal.delete(vdocKey);
       }
     }
@@ -187,8 +191,13 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   private async createVirtualDocs(document: TextDocument): Promise<void> {
     // Create a virtual document per language.
     const tokens = this.engine.parse(document);
-    const languages = allLanguages(tokens);
-    for (const language of languages) {
+    const languageBlocksMap = languageBlocksByLanguage(tokens);
+    for (const [languageName, languageBlocks] of languageBlocksMap) {
+      const language = embeddedLanguage(languageName);
+      if (!language) {
+        continue;
+      }
+
       try {
         const vdocContent = virtualDocForLanguage(document, tokens, language, "diagnostics");
 
@@ -203,8 +212,8 @@ export class EmbeddedDiagnosticsManager extends Disposable {
             uri,
             language,
             quartoDocumentUri: document.uri,
-            tokens,
-            cleanup: () => {
+            languageBlocks,
+            dispose: () => {
               this.outputChannel.debug(
                 "[EmbeddedDiagnosticsManager] Cleaning up virtual document: " +
                 formatVirtualDoc(vdocInfo)
@@ -253,7 +262,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     // Filter out diagnostics that don't map to a language block in the original document.
     const mappedDiagnostics: Diagnostic[] = [];
     for (const diagnostic of diagnostics) {
-      const block = languageBlockAtPosition(vdocInfo.tokens, diagnostic.range.start);
+      const block = languageBlockAtPosition(vdocInfo.languageBlocks, diagnostic.range.start);
       if (block !== undefined) {
         mappedDiagnostics.push(new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity));
       } else {
@@ -296,7 +305,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     this.changeDebounceTimers.clear();
 
     for (const vdocInfo of this.vdocToReal.values()) {
-      vdocInfo.cleanup();
+      vdocInfo.dispose();
     }
     this.vdocToReal.clear();
   }

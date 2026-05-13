@@ -15,7 +15,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { Position, TextDocument, Uri, Range, SemanticTokens, extensions, workspace } from "vscode";
-import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+import { Token, TokenCodeBlock, TokenMath, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
@@ -262,6 +262,20 @@ export function allLanguages(tokens: Token[]): EmbeddedLanguage[] {
   return [...names]
     .map(embeddedLanguage)
     .filter((l): l is EmbeddedLanguage => l !== undefined);
+}
+
+export function languageBlocksByLanguage(tokens: Token[]): Map<string, (TokenMath | TokenCodeBlock)[]> {
+  const result = new Map<string, (TokenMath | TokenCodeBlock)[]>();
+  for (const token of tokens.filter(isExecutableLanguageBlock)) {
+    const language = languageNameFromBlock(token);
+    if (language) {
+      if (!result.has(language)) {
+        result.set(language, []);
+      }
+      result.get(language)?.push(token as TokenMath | TokenCodeBlock);
+    }
+  }
+  return result;
 }
 
 export function mainLanguage(

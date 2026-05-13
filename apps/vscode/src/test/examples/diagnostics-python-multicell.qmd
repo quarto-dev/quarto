@@ -1,0 +1,16 @@
+---
+title: "Multi-cell test"
+format: html
+---
+
+## First cell
+
+```{python}
+x = undefined_var
+```
+
+## Second cell
+
+```{python}
+y = undefined_var
+```

@@ -250,6 +250,20 @@ suite("Diagnostics", function () {
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after document close");
   });
 
+  test("reports diagnostics from multiple cells of the same language", async function () {
+    const { event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-multicell.qmd");
+
+    const diagnostics = event.diagnostics;
+    assert.strictEqual(diagnostics.length, 2, "Expected one diagnostic per cell");
+
+    const lines = diagnostics.map(d => d.range.start.line).sort((a, b) => a - b);
+    assert.deepStrictEqual(
+      lines,
+      [8, 14],
+      `Expected diagnostics on lines 8 and 14, got ${JSON.stringify(lines)}`
+    );
+  });
+
   test("maps diagnostic line numbers correctly with content above cell", async function () {
     const { event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd");
 

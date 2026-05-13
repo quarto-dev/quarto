@@ -1,0 +1,15 @@
+---
+title: "Line offset test"
+format: html
+---
+
+## Extra content above the code cell
+
+This paragraph adds lines above the cell so that `undefined_var`
+appears at a different line offset than in simpler fixtures.
+
+More lines to push the cell down.
+
+```{python}
+x = undefined_var
+```

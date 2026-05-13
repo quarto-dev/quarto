@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { examplesUri, raceTimeout } from "./test-utils";
 import { testLanguageClient } from "./fixtures/test-language-client";
-import { EmbeddedDiagnosticsManager } from "../providers/diagnostics";
+import { DidUpdateDiagnosticsEvent, EmbeddedDiagnosticsManager } from "../providers/diagnostics";
 import { MarkdownEngine } from "../markdown/engine";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 import { assertNoLeakedVirtualDocs } from "./utils/vdoc";
@@ -116,6 +116,40 @@ suite("Diagnostics", function () {
       event.diagnostics.length,
       1,
       `Expected one diagnostic after adding a cell, got ${event.diagnostics.length}`
+    );
+  });
+
+  test("receives diagnostics for multiple languages independently", async function () {
+    this.timeout(15000);
+
+    const uri = examplesUri("diagnostics-multilang.qmd");
+
+    // Subscribe before opening so we don't miss events fired during document open.
+    const events: DidUpdateDiagnosticsEvent[] = [];
+    const gotBoth = new Promise<true>((resolve) => {
+      const sub = manager.onDidUpdateDiagnostics((e) => {
+        if (isUriEqual(e.uri, uri)) {
+          events.push(e);
+          if (events.length >= 2) {
+            sub.dispose();
+            resolve(true);
+          }
+        }
+      });
+    });
+
+    // Open the document - should eventually get diagnostics for both languages.
+    const doc = await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(doc);
+
+    const result = await raceTimeout(gotBoth, 12000);
+    assert.strictEqual(result, true, "Timed out waiting for multi-language diagnostics");
+
+    // The final published diagnostics should contain entries from both languages.
+    const finalDiagnostics = vscode.languages.getDiagnostics(uri);
+    assert.ok(
+      finalDiagnostics.length >= 2,
+      `Expected at least 2 diagnostics (one per language), got ${finalDiagnostics.length}`
     );
   });
 

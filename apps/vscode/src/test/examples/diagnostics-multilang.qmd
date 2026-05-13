@@ -1,0 +1,16 @@
+---
+title: "Multi-language diagnostics"
+format: html
+---
+
+## Python
+
+```{python}
+x = undefined_var
+```
+
+## R
+
+```{r}
+y <- undefined_var
+```

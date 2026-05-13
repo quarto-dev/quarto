@@ -1,5 +1,5 @@
 /*
- * embedded-diagnostics.ts
+ * diagnostics.ts
  *
  * Copyright (C) 2022-2026 by Posit Software, PBC
  *
@@ -16,8 +16,10 @@
 import {
   Diagnostic,
   EventEmitter,
+  LogOutputChannel,
   TextDocument,
   Uri,
+  extensions,
   languages,
   workspace,
 } from "vscode";
@@ -28,24 +30,13 @@ import {
 } from "quarto-core";
 
 import { MarkdownEngine } from "../markdown/engine";
-import { embeddedLanguage, EmbeddedLanguage } from "../vdoc/languages";
-import { languageBlocksByLanguage, virtualDocForLanguage, withVirtualDocUri } from "../vdoc/vdoc";
+import { EmbeddedLanguage, embeddedLanguage } from "../vdoc/languages";
+import { languageBlocksByLanguage, virtualDocForLanguage } from "../vdoc/vdoc";
+import { createVirtualDocFile } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
-import { LogOutputChannel } from "vscode";
-import path from "node:path";
 import { Disposable } from "core";
-import { ResourceMap } from "../core/resource-map";
 
-/**
- * An ephemeral virtual document for language diagnostics.
- */
-interface DiagnosticsVirtualDocument {
-  uri: Uri;
-  language: EmbeddedLanguage;
-  quartoDocumentUri: Uri;
-  languageBlocks: (TokenMath | TokenCodeBlock)[];
-  dispose: () => void;
-}
+const DEFAULT_TIMEOUT_MS = 10_000;
 
 /** Event fired when embedded diagnostics are updated for a document. */
 export interface DidUpdateDiagnosticsEvent {
@@ -53,6 +44,20 @@ export interface DidUpdateDiagnosticsEvent {
   uri: Uri;
 
   /** The updated diagnostics for the Quarto document. */
+  diagnostics: Diagnostic[];
+}
+
+interface ActiveVdoc {
+  uri: Uri;
+  cleanup: () => Promise<void>;
+  timeout: NodeJS.Timeout;
+}
+
+interface DiagnosticSession {
+  docUri: Uri;
+  language: EmbeddedLanguage;
+  languageBlocks: (TokenMath | TokenCodeBlock)[];
+  activeVdoc?: ActiveVdoc;
   diagnostics: Diagnostic[];
 }
 
@@ -69,61 +74,43 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     languages.createDiagnosticCollection("quarto-embedded")
   );
 
-  /** Map of virtual document info keyed by virtual document URI. */
-  private readonly vdocToReal = new ResourceMap<DiagnosticsVirtualDocument>();
-
-  /**
-   * Map of debounce timers keyed by Quarto document URI.
-   * Document changes are debounced to avoid thrashing the language server
-   * with rapid updates as the user types.
-   */
-  private readonly changeDebounceTimers = new ResourceMap<NodeJS.Timeout>();
+  private readonly sessions: DiagnosticSession[] = [];
+  private readonly debounceTimers = new Map<string, NodeJS.Timeout>();
+  private readonly timeoutMs: number;
 
   constructor(
     private engine: MarkdownEngine,
     private outputChannel: LogOutputChannel,
+    timeoutMs?: number,
   ) {
     super();
+    this.timeoutMs = timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-    // Listen for diagnostics for known virtual documents.
+    // Listen for diagnostics arriving on virtual documents.
     this._register(languages.onDidChangeDiagnostics((event) => {
       for (const uri of event.uris) {
-        const vdocInfo = this.vdocToReal.get(uri);
-        if (vdocInfo) {
-          this.handleDiagnosticsForVirtualDoc(uri, vdocInfo);
+        const session = this.findSessionByVdocUri(uri);
+        if (session) {
+          this.handleDiagnosticsReceived(session, uri);
         }
       }
     }));
 
-    // Listen for Quarto documents opening.
+    // Document lifecycle.
     this._register(workspace.onDidOpenTextDocument((doc) => {
       if (isQuartoDoc(doc)) {
-        this.outputChannel.debug(
-          `[EmbeddedDiagnosticsManager] Quarto document opened: ` +
-          `${formatQuartoDocUri(doc.uri)}`
-        );
         this.handleDocumentOpen(doc);
       }
     }));
 
-    // Listen for Quarto documents changing.
     this._register(workspace.onDidChangeTextDocument((e) => {
       if (isQuartoDoc(e.document)) {
-        this.outputChannel.debug(
-          `[EmbeddedDiagnosticsManager] Quarto document changed: ` +
-          `${formatQuartoDocUri(e.document.uri)}`
-        );
         this.handleDocumentChange(e.document);
       }
     }));
 
-    // Listen for Quarto documents closing.
     this._register(workspace.onDidCloseTextDocument((doc) => {
       if (isQuartoDoc(doc)) {
-        this.outputChannel.debug(
-          `[EmbeddedDiagnosticsManager] Quarto document closed: ` +
-          `${formatQuartoDocUri(doc.uri)}`
-        );
         this.handleDocumentClose(doc);
       }
     }));
@@ -136,187 +123,213 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     });
   }
 
-  private async handleDocumentOpen(document: TextDocument): Promise<void> {
-    this.createVirtualDocs(document);
+  // --- Document lifecycle ---
+
+  private handleDocumentOpen(document: TextDocument): void {
+    this.createSessionsForDocument(document);
   }
 
   private handleDocumentChange(document: TextDocument): void {
-    const existingTimer = this.changeDebounceTimers.get(document.uri);
+    const key = document.uri.toString();
+    const existingTimer = this.debounceTimers.get(key);
     if (existingTimer) {
       clearTimeout(existingTimer);
     }
 
-    const debounceDelay = workspace.getConfiguration("quarto.cells.diagnostics").get("debounceDelay", 500);
-    const timer = setTimeout(async () => {
-      this.changeDebounceTimers.delete(document.uri);
-      await this.recreateVirtualDocs(document);
+    const debounceDelay = workspace
+      .getConfiguration("quarto.cells.diagnostics")
+      .get("debounceDelay", 500);
+
+    const timer = setTimeout(() => {
+      this.debounceTimers.delete(key);
+      this.recreateSessionsForDocument(document);
     }, debounceDelay);
 
-    this.changeDebounceTimers.set(document.uri, timer);
+    this.debounceTimers.set(key, timer);
   }
 
   private handleDocumentClose(document: TextDocument): void {
-    const timer = this.changeDebounceTimers.get(document.uri);
+    const key = document.uri.toString();
+
+    // Cancel pending debounce.
+    const timer = this.debounceTimers.get(key);
     if (timer) {
       clearTimeout(timer);
-      this.changeDebounceTimers.delete(document.uri);
+      this.debounceTimers.delete(key);
     }
 
-    this.cleanupVirtualDocsForDocument(document.uri);
+    // Dispose all sessions for this document.
+    this.removeSessionsForDocument(document.uri);
 
-    // TODO: We shouldn't actually need to clear the diagnostic collection...
-    // Although it's arguably the right call.
-    // But we could also wait for the language server to clear the document's
-    // diagnostics.
-    this.deleteDiagnostics(document.uri);
+    // Clear published diagnostics.
+    this.diagnosticCollection.delete(document.uri);
+    this._onDidUpdateDiagnostics.fire({ uri: document.uri, diagnostics: [] });
   }
 
-  private cleanupVirtualDocsForDocument(uri: Uri): void {
-    const docKey = uri.toString();
+  // --- Session management ---
 
-    for (const [vdocKey, vdocInfo] of this.vdocToReal.entries()) {
-      if (vdocInfo.quartoDocumentUri.toString() === docKey) {
-        vdocInfo.dispose();
-        this.vdocToReal.delete(vdocKey);
-      }
-    }
-  }
-
-  private async recreateVirtualDocs(document: TextDocument): Promise<void> {
-    this.cleanupVirtualDocsForDocument(document.uri);
-    // TODO: Should we delete the diagnostic collection between waiting?
-    await this.createVirtualDocs(document);
-  }
-
-  private async createVirtualDocs(document: TextDocument): Promise<void> {
-    // Create a virtual document per language.
+  private async createSessionsForDocument(document: TextDocument): Promise<void> {
     const tokens = this.engine.parse(document);
-    const languageBlocksMap = languageBlocksByLanguage(tokens);
-    for (const [languageName, languageBlocks] of languageBlocksMap) {
+    const blocksByLanguage = languageBlocksByLanguage(tokens);
+
+    for (const [languageName, languageBlocks] of blocksByLanguage) {
       const language = embeddedLanguage(languageName);
       if (!language) {
         continue;
       }
 
-      try {
-        const vdocContent = virtualDocForLanguage(document, tokens, language, "diagnostics");
+      const session: DiagnosticSession = {
+        docUri: document.uri,
+        language,
+        languageBlocks,
+        diagnostics: [],
+      };
+      this.sessions.push(session);
 
-        await withVirtualDocUri(vdocContent, document.uri, "diagnostics", async (uri: Uri) => {
-          // Create a deferred promise.
-          // It'll resolve when the vdoc info cleanup function is called
-          // e.g. after we receive the vdoc's diagnostics.
-          let resolve!: () => void;
-          const promise = new Promise<void>((res) => resolve = res);
+      await this.activateSession(session, document);
+    }
+  }
 
-          const vdocInfo = {
-            uri,
-            language,
-            quartoDocumentUri: document.uri,
-            languageBlocks,
-            dispose: () => {
-              this.outputChannel.debug(
-                "[EmbeddedDiagnosticsManager] Cleaning up virtual document: " +
-                formatVirtualDoc(vdocInfo)
-              );
-              resolve();
-            },
-          } satisfies DiagnosticsVirtualDocument;
-          this.vdocToReal.set(uri, vdocInfo);
+  private async recreateSessionsForDocument(document: TextDocument): Promise<void> {
+    // Dispose active vdocs but preserve stale diagnostics conceptually
+    // (we remove sessions but the new ones start empty — publishDiagnostics
+    // will use whatever the new sessions have).
+    this.removeSessionsForDocument(document.uri);
+    await this.createSessionsForDocument(document);
+  }
 
-          this.outputChannel.debug(
-            `[EmbeddedDiagnosticsManager] Created virtual document: ` +
-            formatVirtualDoc(vdocInfo, true)
-          );
-          this.outputChannel.trace(
-            `[EmbeddedDiagnosticsManager] Virtual document content:\n` +
-            vdocContent.content
-          );
-
-          // Wait for the promise to resolve.
-          // Once this callback ends, the virtual document will be cleaned up.
-          this.outputChannel.debug(
-            "[EmbeddedDiagnosticsManager] Waiting for diagnostics for virtual document: " +
-            formatVirtualDoc(vdocInfo)
-          );
-          await promise;
-        });
-      } catch (error) {
-        this.outputChannel.error(
-          `[EmbeddedDiagnosticsManager] Failed to create virtual document ` +
-          `for ${formatQuartoDocUri(document.uri)} ` +
-          `(language: ${language.ids[0]}): ` +
-          JSON.stringify(error)
-        );
+  private removeSessionsForDocument(docUri: Uri): void {
+    const docKey = docUri.toString();
+    for (let i = this.sessions.length - 1; i >= 0; i--) {
+      if (this.sessions[i].docUri.toString() === docKey) {
+        this.disposeActiveVdoc(this.sessions[i]);
+        this.sessions.splice(i, 1);
       }
     }
   }
 
-  private handleDiagnosticsForVirtualDoc(uri: Uri, vdocInfo: DiagnosticsVirtualDocument): void {
-    const diagnostics = languages.getDiagnostics(uri);
+  private async activateSession(session: DiagnosticSession, document: TextDocument): Promise<void> {
+    try {
+      const tokens = this.engine.parse(document);
+      const vdocContent = virtualDocForLanguage(
+        document, tokens, session.language, "diagnostics"
+      );
+
+      const shouldUseLocal = this.shouldUseLocalTempFile(session.language);
+      const { uri, cleanup } = await createVirtualDocFile(
+        vdocContent, document.uri.fsPath, shouldUseLocal
+      );
+
+      const timeout = setTimeout(() => {
+        this.handleTimeout(session);
+      }, this.timeoutMs);
+
+      session.activeVdoc = { uri, cleanup: cleanup!, timeout };
+
+      this.outputChannel.debug(
+        `[EmbeddedDiagnostics] Activated vdoc for ` +
+        `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}`
+      );
+    } catch (error) {
+      this.outputChannel.error(
+        `[EmbeddedDiagnostics] Failed to create vdoc for ` +
+        `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}: ` +
+        JSON.stringify(error)
+      );
+    }
+  }
+
+  // --- Diagnostics handling ---
+
+  private handleDiagnosticsReceived(session: DiagnosticSession, vdocUri: Uri): void {
+    const rawDiagnostics = languages.getDiagnostics(vdocUri);
 
     this.outputChannel.debug(
-      `[EmbeddedDiagnosticsManager] Received ${diagnostics.length} diagnostics for ` +
-      `virtual document: ${formatVirtualDoc(vdocInfo)}`
+      `[EmbeddedDiagnostics] Received ${rawDiagnostics.length} diagnostics for ` +
+      `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}`
     );
 
-    // Filter out diagnostics that don't map to a language block in the original document.
-    const mappedDiagnostics: Diagnostic[] = [];
-    for (const diagnostic of diagnostics) {
-      const block = languageBlockAtPosition(vdocInfo.languageBlocks, diagnostic.range.start);
+    // Filter: only keep diagnostics that map to a real language block.
+    const mapped: Diagnostic[] = [];
+    for (const diagnostic of rawDiagnostics) {
+      const block = languageBlockAtPosition(session.languageBlocks, diagnostic.range.start);
       if (block !== undefined) {
-        mappedDiagnostics.push(new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity));
+        mapped.push(new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity));
       } else {
         this.outputChannel.error(
-          `[EmbeddedDiagnosticsManager] Could not find language block for diagnostic at ` +
+          `[EmbeddedDiagnostics] Could not find language block for diagnostic at ` +
           `[${diagnostic.range.start.line}, ${diagnostic.range.start.character}] ` +
-          `in virtual document: ${formatVirtualDoc(vdocInfo)}`
+          `for ${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}`
         );
       }
     }
 
-    this.setDiagnostics(vdocInfo.quartoDocumentUri, mappedDiagnostics);
-
-    // We have diagnostics, so we can clean up the virtual doc.
-    // This ensures that the virtual doc's diagnostics don't show
-    // in the problems pane (or only show momentarily).
-    this.cleanupVirtualDocsForDocument(vdocInfo.quartoDocumentUri);
+    session.diagnostics = mapped;
+    this.disposeActiveVdoc(session);
+    this.publishDiagnostics(session.docUri);
   }
 
-  private setDiagnostics(uri: Uri, diagnostics: Diagnostic[]): void {
-    this.diagnosticCollection.set(uri, diagnostics);
-    this._onDidUpdateDiagnostics.fire({
-      uri,
-      diagnostics,
-    });
+  private handleTimeout(session: DiagnosticSession): void {
+    this.outputChannel.warn(
+      `[EmbeddedDiagnostics] Language server for ${session.language.ids[0]} ` +
+      `did not respond within ${this.timeoutMs}ms ` +
+      `for ${workspace.asRelativePath(session.docUri)}`
+    );
+    this.disposeActiveVdoc(session);
   }
 
-  private deleteDiagnostics(uri: Uri): void {
-    this.diagnosticCollection.delete(uri);
-    this._onDidUpdateDiagnostics.fire({
-      uri,
-      diagnostics: [],
-    });
+  private publishDiagnostics(docUri: Uri): void {
+    const docKey = docUri.toString();
+    const allDiagnostics = this.sessions
+      .filter(s => s.docUri.toString() === docKey)
+      .flatMap(s => s.diagnostics);
+
+    this.diagnosticCollection.set(docUri, allDiagnostics);
+    this._onDidUpdateDiagnostics.fire({ uri: docUri, diagnostics: allDiagnostics });
   }
 
-  dispose(): void {
-    for (const timer of this.changeDebounceTimers.values()) {
+  // --- Helpers ---
+
+  private findSessionByVdocUri(uri: Uri): DiagnosticSession | undefined {
+    const key = uri.toString();
+    return this.sessions.find(s => s.activeVdoc?.uri.toString() === key);
+  }
+
+  private disposeActiveVdoc(session: DiagnosticSession): void {
+    if (session.activeVdoc) {
+      clearTimeout(session.activeVdoc.timeout);
+      session.activeVdoc.cleanup();
+      session.activeVdoc = undefined;
+    }
+  }
+
+  private shouldUseLocalTempFile(language: EmbeddedLanguage): boolean {
+    if (language.ids.includes("r")) {
+      const rExt = extensions.getExtension("REditorSupport.r");
+      if (rExt?.isActive) {
+        const rLspConfig = workspace.getConfiguration("r.lsp");
+        if (
+          rLspConfig.get<boolean>("enabled", false) &&
+          rLspConfig.get<boolean>("diagnostics", false)
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public override dispose(): void {
+    super.dispose();
+
+    for (const timer of this.debounceTimers.values()) {
       clearTimeout(timer);
     }
-    this.changeDebounceTimers.clear();
+    this.debounceTimers.clear();
 
-    for (const vdocInfo of this.vdocToReal.values()) {
-      vdocInfo.dispose();
+    for (const session of this.sessions) {
+      this.disposeActiveVdoc(session);
     }
-    this.vdocToReal.clear();
+    this.sessions.length = 0;
   }
-}
-
-function formatVirtualDoc(info: DiagnosticsVirtualDocument, fullUri = false) {
-  return `${fullUri ? info.uri.toString() : path.basename(info.uri.fsPath)} ` +
-    `(language: ${info.language.ids[0]}, ` +
-    `quartoDocument: ${formatQuartoDocUri(info.quartoDocumentUri)})`;
-}
-
-function formatQuartoDocUri(uri: Uri) {
-  return workspace.asRelativePath(uri);
 }

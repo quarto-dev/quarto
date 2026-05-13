@@ -14,7 +14,10 @@ export function testLanguageClient(): LanguageClient {
   };
 
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ language: "python" }],
+    documentSelector: [
+      { language: "python" },
+      { language: "r" },
+    ],
     outputChannel: new TestOutputChannel("Test Language Client"),
   };
 

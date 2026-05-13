@@ -89,7 +89,7 @@ export async function virtualDocUriFromTempFile(
  */
 async function deleteDocument(doc: TextDocument) {
   try {
-    // First set the language to 'raw' so that the language client
+    // First set the language to 'plaintext' so that the language client
     // closes the text document in the language server, which clears
     // diagnostics for the file. This stops diagnostics from building
     // up even after virtual docs are cleaned up.

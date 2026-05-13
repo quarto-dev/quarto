@@ -110,49 +110,54 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     this.timeoutMs = timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
     // Listen for diagnostics arriving on virtual documents.
-    this._register(languages.onDidChangeDiagnostics((event) => {
+    this._register(languages.onDidChangeDiagnostics(async (event) => {
       for (const uri of event.uris) {
         const session = this.findSessionByVdocUri(uri);
         if (session) {
-          this.handleDiagnosticsReceived(session, uri);
+          await this.handleDiagnosticsReceived(session, uri);
         }
       }
     }));
 
     // Document lifecycle.
-    this._register(workspace.onDidOpenTextDocument((doc) => {
+    this._register(workspace.onDidOpenTextDocument(async (doc) => {
       if (isQuartoDoc(doc)) {
-        this.handleDocumentOpen(doc);
+        await this.handleDocumentOpen(doc);
       }
     }));
 
-    this._register(workspace.onDidChangeTextDocument((e) => {
+    this._register(workspace.onDidChangeTextDocument(async (e) => {
       if (isQuartoDoc(e.document)) {
-        this.handleDocumentChange(e.document);
+        await this.handleDocumentChange(e.document);
       }
     }));
 
-    this._register(workspace.onDidCloseTextDocument((doc) => {
+    this._register(workspace.onDidCloseTextDocument(async (doc) => {
       if (isQuartoDoc(doc)) {
-        this.handleDocumentClose(doc);
+        await this.handleDocumentClose(doc);
       }
     }));
 
     // Process already-open documents.
-    workspace.textDocuments.forEach((doc) => {
+    for (const doc of workspace.textDocuments) {
       if (isQuartoDoc(doc)) {
-        this.handleDocumentOpen(doc);
+        this.handleDocumentOpen(doc).catch((error) => {
+          this.outputChannel.error(
+            `[EmbeddedDiagnostics] Failed to initialize ${workspace.asRelativePath(doc.uri)}: ` +
+            JSON.stringify(error)
+          );
+        });
       }
-    });
+    }
   }
 
   // --- Document lifecycle ---
 
-  private handleDocumentOpen(document: TextDocument): void {
-    this.createSessionsForDocument(document);
+  private async handleDocumentOpen(document: TextDocument): Promise<void> {
+    await this.createSessionsForDocument(document);
   }
 
-  private handleDocumentChange(document: TextDocument): void {
+  private async handleDocumentChange(document: TextDocument): Promise<void> {
     const key = document.uri.toString();
     const existingTimer = this.debounceTimers.get(key);
     if (existingTimer) {
@@ -165,13 +170,19 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
     const timer = setTimeout(() => {
       this.debounceTimers.delete(key);
-      this.recreateSessionsForDocument(document);
+      this.recreateSessionsForDocument(document).catch((error) => {
+        this.outputChannel.error(
+          `[EmbeddedDiagnostics] Failed to recreate sessions for ` +
+          `${workspace.asRelativePath(document.uri)}: ` +
+          JSON.stringify(error)
+        );
+      });
     }, debounceDelay);
 
     this.debounceTimers.set(key, timer);
   }
 
-  private handleDocumentClose(document: TextDocument): void {
+  private async handleDocumentClose(document: TextDocument): Promise<void> {
     const key = document.uri.toString();
 
     // Cancel pending debounce.
@@ -182,7 +193,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
 
     // Dispose all sessions for this document.
-    this.removeSessionsForDocument(document.uri);
+    await this.removeSessionsForDocument(document.uri);
 
     // Clear published diagnostics.
     this.diagnosticCollection.delete(document.uri);
@@ -217,15 +228,15 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     // Dispose active vdocs but preserve stale diagnostics conceptually
     // (we remove sessions but the new ones start empty — publishDiagnostics
     // will use whatever the new sessions have).
-    this.removeSessionsForDocument(document.uri);
+    await this.removeSessionsForDocument(document.uri);
     await this.createSessionsForDocument(document);
   }
 
-  private removeSessionsForDocument(docUri: Uri): void {
+  private async removeSessionsForDocument(docUri: Uri): Promise<void> {
     const docKey = docUri.toString();
     for (let i = this.sessions.length - 1; i >= 0; i--) {
       if (this.sessions[i].docUri.toString() === docKey) {
-        this.disposeActiveVdoc(this.sessions[i]);
+        await this.disposeActiveVdoc(this.sessions[i]);
         this.sessions.splice(i, 1);
       }
     }
@@ -243,15 +254,21 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         vdocContent, document.uri.fsPath, shouldUseLocal, false
       );
 
-      const timeout = setTimeout(() => {
-        this.handleTimeout(session);
+      const timeout = setTimeout(async () => {
+        this.outputChannel.warn(
+          `[EmbeddedDiagnostics] Language server for ${session.language.ids[0]} ` +
+          `did not respond within ${this.timeoutMs}ms ` +
+          `for ${workspace.asRelativePath(session.docUri)}`
+        );
+        await this.disposeActiveVdoc(session);
       }, this.timeoutMs);
 
       session.activeVdoc = { uri, cleanup: cleanup!, timeout };
 
       this.outputChannel.debug(
         `[EmbeddedDiagnostics] Activated vdoc for ` +
-        `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}`
+        `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}: ` +
+        uri.toString()
       );
     } catch (error) {
       this.outputChannel.error(
@@ -264,7 +281,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
   // --- Diagnostics handling ---
 
-  private handleDiagnosticsReceived(session: DiagnosticSession, vdocUri: Uri): void {
+  private async handleDiagnosticsReceived(session: DiagnosticSession, vdocUri: Uri): Promise<void> {
     const rawDiagnostics = languages.getDiagnostics(vdocUri);
 
     this.outputChannel.debug(
@@ -288,17 +305,8 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
 
     session.diagnostics = mapped;
-    this.disposeActiveVdoc(session);
+    await this.disposeActiveVdoc(session);
     this.publishDiagnostics(session.docUri);
-  }
-
-  private handleTimeout(session: DiagnosticSession): void {
-    this.outputChannel.warn(
-      `[EmbeddedDiagnostics] Language server for ${session.language.ids[0]} ` +
-      `did not respond within ${this.timeoutMs}ms ` +
-      `for ${workspace.asRelativePath(session.docUri)}`
-    );
-    this.disposeActiveVdoc(session);
   }
 
   private publishDiagnostics(docUri: Uri): void {
@@ -318,10 +326,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     return this.sessions.find(s => s.activeVdoc?.uri.toString() === key);
   }
 
-  private disposeActiveVdoc(session: DiagnosticSession): void {
+  private async disposeActiveVdoc(session: DiagnosticSession): Promise<void> {
     if (session.activeVdoc) {
       clearTimeout(session.activeVdoc.timeout);
-      session.activeVdoc.cleanup();
+      await session.activeVdoc.cleanup();
       session.activeVdoc = undefined;
     }
   }
@@ -351,7 +359,13 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     this.debounceTimers.clear();
 
     for (const session of this.sessions) {
-      this.disposeActiveVdoc(session);
+      this.disposeActiveVdoc(session).catch((error) => {
+        this.outputChannel.error(
+          `[EmbeddedDiagnostics] Failed to dispose vdoc for ` +
+          `${session.language.ids[0]} in ${workspace.asRelativePath(session.docUri)}: ` +
+          JSON.stringify(error)
+        );
+      });
     }
     this.sessions.length = 0;
   }

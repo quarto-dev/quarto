@@ -99,8 +99,12 @@ async function deleteDocument(doc: TextDocument) {
       useTrash: false
     });
   } catch (error) {
+    // It's okay if the file is already deleted.
+    if (error instanceof Error && error.message.includes("ENOENT")) {
+      return;
+    }
     const msg = error instanceof Error ? error.message : JSON.stringify(error);
-    console.log(`Error removing vdoc at ${doc.fileName}: ${msg}`);
+    console.error(`Error removing vdoc at ${doc.fileName}: ${msg}`);
   }
 }
 

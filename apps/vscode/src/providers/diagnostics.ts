@@ -36,6 +36,7 @@ import { virtualDocUriFromTempFile } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
 import { Disposable } from "core";
 
+/** How long to wait for a language server to respond before giving up on a vdoc. */
 const DEFAULT_TIMEOUT_MS = 10_000;
 
 /** Event fired when embedded diagnostics are updated for a document. */
@@ -47,20 +48,42 @@ export interface DidUpdateDiagnosticsEvent {
   diagnostics: Diagnostic[];
 }
 
+/** A virtual document that is actively waiting for diagnostics from a language server. */
 interface ActiveVdoc {
+  /** URI of the temp file opened as a text document. */
   uri: Uri;
+  /** Deletes the temp file and resets its language so the LS clears diagnostics. */
   cleanup: () => Promise<void>;
+  /** Fires if the language server doesn't respond in time. */
   timeout: NodeJS.Timeout;
 }
 
+/**
+ * Tracks the diagnostic state for one embedded language in one Quarto document.
+ * Each language operates independently — its timeout, vdoc lifecycle, and stored
+ * diagnostics don't interfere with other languages in the same document.
+ */
 interface DiagnosticSession {
+  /** The Quarto document this session belongs to. */
   docUri: Uri;
+  /** The embedded language (Python, R, etc.). */
   language: EmbeddedLanguage;
+  /** Code blocks for this language, used to filter diagnostics by position. */
   languageBlocks: (TokenMath | TokenCodeBlock)[];
+  /** The active virtual document awaiting diagnostics, if any. */
   activeVdoc?: ActiveVdoc;
+  /** Last received diagnostics for this language (stale-until-replaced on edits). */
   diagnostics: Diagnostic[];
 }
 
+/**
+ * Surfaces language-server diagnostics from embedded code cells in Quarto documents.
+ *
+ * Creates a temporary virtual document per language, waits for the language server
+ * to publish diagnostics on it, then maps the diagnostics back onto the original
+ * `.qmd` file. Each language's lifecycle is independent — one slow or non-responsive
+ * language server won't block diagnostics from other languages.
+ */
 export class EmbeddedDiagnosticsManager extends Disposable {
   private readonly _onDidUpdateDiagnostics = this._register(
     new EventEmitter<DidUpdateDiagnosticsEvent>()

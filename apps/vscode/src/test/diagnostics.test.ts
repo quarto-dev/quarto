@@ -6,7 +6,7 @@ import { testLanguageClient } from "./fixtures/test-language-client";
 import { DidUpdateDiagnosticsEvent, EmbeddedDiagnosticsManager } from "../providers/diagnostics";
 import { MarkdownEngine } from "../markdown/engine";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
-import { assertNoLeakedVirtualDocs } from "./utils/vdoc";
+import { assertNoLeakedVirtualDocs, deleteAllVirtualDocs } from "./utils/vdoc";
 import { eventToPromise, filterEvent } from "../core/event";
 import { DisposableStore } from "core";
 
@@ -26,6 +26,9 @@ suite("Diagnostics", function () {
     // Start a test language server.
     client = testLanguageClient();
     await client.start();
+
+    // Delete all vdocs before starting tests.
+    await deleteAllVirtualDocs();
   });
 
   teardown(async function () {
@@ -153,13 +156,7 @@ suite("Diagnostics", function () {
     );
   });
 
-  test("times out for unresponsive language servers without blocking others", async function () {
-    // Use a separate manager with a short timeout so the test is fast.
-    disposables.clear();
-    const engine = new MarkdownEngine();
-    const outputChannel = new TestLogOutputChannel();
-    manager = disposables.add(new EmbeddedDiagnosticsManager(engine, outputChannel, 200));
-
+  test("times out for unresponsive/missing language servers without blocking others", async function () {
     // Julia has no language server registered in tests, so it will time out.
     // Python should still get its diagnostics independently.
     const uri = examplesUri("diagnostics-timeout.qmd");

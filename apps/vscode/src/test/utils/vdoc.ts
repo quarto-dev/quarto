@@ -3,6 +3,23 @@ import { Uri, workspace } from "vscode";
 import { VIRTUAL_DOC_TEMP_DIRECTORY } from "../../vdoc/vdoc-tempfile";
 
 
+/** Delete all virtual documents from both the workspace and temp directory. */
+export async function deleteAllVirtualDocs() {
+  const [workspaceVdocs, tempDir] = await Promise.all([
+    workspace.findFiles("**/.vdoc.*"),
+    workspace.fs.readDirectory(Uri.file(VIRTUAL_DOC_TEMP_DIRECTORY)),
+  ]);
+
+  const deletes = workspaceVdocs.map((uri) => workspace.fs.delete(uri));
+  for (const [name] of tempDir) {
+    if (name.startsWith(".vdoc.")) {
+      deletes.push(workspace.fs.delete(Uri.file(`${VIRTUAL_DOC_TEMP_DIRECTORY}/${name}`)));
+    }
+  }
+
+  await Promise.all(deletes);
+}
+
 /**
  * Assert that there are no virtual documents leaked after tests.
  */

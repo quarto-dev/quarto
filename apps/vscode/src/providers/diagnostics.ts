@@ -32,7 +32,7 @@ import {
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, embeddedLanguage } from "../vdoc/languages";
 import { languageBlocksByLanguage, virtualDocForLanguage } from "../vdoc/vdoc";
-import { createVirtualDocFile } from "../vdoc/vdoc-tempfile";
+import { virtualDocUriFromTempFile } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
 import { Disposable } from "core";
 
@@ -216,8 +216,8 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       );
 
       const shouldUseLocal = this.shouldUseLocalTempFile(session.language);
-      const { uri, cleanup } = await createVirtualDocFile(
-        vdocContent, document.uri.fsPath, shouldUseLocal
+      const { uri, cleanup } = await virtualDocUriFromTempFile(
+        vdocContent, document.uri.fsPath, shouldUseLocal, false
       );
 
       const timeout = setTimeout(() => {

@@ -1,7 +1,7 @@
 /*
  * background.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2026 by Posit Software, PBC
  * Copyright (c) [2021] [Chris Bain] (https://github.com/baincd/vscode-markdown-color-plus/)
  *
  * Unless you have received this program directly from Posit Software pursuant
@@ -16,12 +16,12 @@
 
 
 import * as vscode from "vscode";
-import debounce from "lodash.debounce";
 
 import { isQuartoDoc, kQuartoDocSelector } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { isExecutableLanguageBlock } from "quarto-core";
 import { vscRange } from "../core/range";
+import { createThrottle } from "../core/throttle";
 
 export function activateBackgroundHighlighter(
   context: vscode.ExtensionContext,
@@ -32,7 +32,7 @@ export function activateBackgroundHighlighter(
   vscode.workspace.onDidChangeConfiguration(
     () => {
       highlightingConfig.sync();
-      triggerUpdateAllEditorsDecorations(engine);
+      updateAllEditorsDecorationsThrottled(engine);
     },
     null,
     context.subscriptions
@@ -45,10 +45,9 @@ export function activateBackgroundHighlighter(
         if (!isQuartoDoc(doc)) {
           clearEditorHighlightDecorations(vscode.window.activeTextEditor);
         } else {
-          triggerUpdateActiveEditorDecorations(
+          updateActiveEditorDecorationsThrottled(
             vscode.window.activeTextEditor,
-            engine,
-            highlightingConfig.delayMs()
+            engine
           );
         }
       }
@@ -59,8 +58,13 @@ export function activateBackgroundHighlighter(
 
   // update highlighting when visible text editors change
   vscode.window.onDidChangeVisibleTextEditors(
-    (_editors) => {
-      triggerUpdateAllEditorsDecorations(engine);
+    (visibleEditors) => {
+      for (const editor of editorThrottledFunctions.keys()) {
+        if (!visibleEditors.includes(editor)) {
+          editorThrottledFunctions.delete(editor);
+        }
+      }
+      updateAllEditorsDecorationsThrottled(engine);
     },
     null,
     context.subscriptions
@@ -73,11 +77,9 @@ export function activateBackgroundHighlighter(
         return editor.document.uri.toString() === event.document.uri.toString();
       });
       if (visibleEditor) {
-        triggerUpdateActiveEditorDecorations(
+        updateActiveEditorDecorationsThrottled(
           visibleEditor,
           engine,
-          highlightingConfig.delayMs(),
-          true,
           event.contentChanges.length === 1
             ? event.contentChanges[0].range.start
             : undefined
@@ -97,11 +99,9 @@ export function activateBackgroundHighlighter(
         token: vscode.CancellationToken
       ) {
         if (document === vscode.window.activeTextEditor?.document) {
-          triggerUpdateActiveEditorDecorations(
+          updateActiveEditorDecorationsThrottled(
             vscode.window.activeTextEditor,
             engine,
-            highlightingConfig.delayMs(),
-            true,
             position,
             token
           );
@@ -112,32 +112,32 @@ export function activateBackgroundHighlighter(
   );
 
   // highlight all editors at activation time
-  triggerUpdateAllEditorsDecorations(engine);
+  updateAllEditorsDecorationsThrottled(engine);
 }
 
-function triggerUpdateActiveEditorDecorations(
+// Map of editors to their throttled update functions
+const editorThrottledFunctions = new Map<vscode.TextEditor, () => void>();
+function updateActiveEditorDecorationsThrottled(
   editor: vscode.TextEditor,
   engine: MarkdownEngine,
-  delay: number,
-  immediate?: boolean,
   pos?: vscode.Position,
   token?: vscode.CancellationToken
 ) {
-  debounce(
-    () => setEditorHighlightDecorations(editor, engine, pos, token),
-    delay,
-    {
-      leading: !!immediate,
-    }
-  )();
+  let throttled = editorThrottledFunctions.get(editor);
+  if (!throttled) {
+    throttled = createThrottle(
+      () => setEditorHighlightDecorations(editor, engine, pos, token),
+      () => highlightingConfig.delayMs()
+    );
+    editorThrottledFunctions.set(editor, throttled);
+  }
+  throttled();
 }
 
-function triggerUpdateAllEditorsDecorations(engine: MarkdownEngine) {
-  debounce(async () => {
-    for (const editor of vscode.window.visibleTextEditors) {
-      await setEditorHighlightDecorations(editor, engine);
-    }
-  }, highlightingConfig.delayMs())();
+function updateAllEditorsDecorationsThrottled(engine: MarkdownEngine) {
+  for (const editor of vscode.window.visibleTextEditors) {
+    updateActiveEditorDecorationsThrottled(editor, engine);
+  }
 }
 
 async function setEditorHighlightDecorations(

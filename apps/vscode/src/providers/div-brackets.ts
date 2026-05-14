@@ -1,7 +1,7 @@
 /*
  * div-brackets.ts
  *
- * Copyright (C) 2025 by Posit Software, PBC
+ * Copyright (C) 2026 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -15,6 +15,7 @@
 
 import * as vscode from 'vscode';
 import { markdownitParser, Token } from 'quarto-core';
+import { createThrottle } from '../core/throttle';
 
 /**
  * Provides colored decorations for div bracket pairs (:::)
@@ -25,11 +26,18 @@ import { markdownitParser, Token } from 'quarto-core';
 export function activateDivBracketDecorations(context: vscode.ExtensionContext) {
   const parser = markdownitParser();
 
+  // Read debounce delay from config
+  const getDelayMs = () =>
+    vscode.workspace.getConfiguration('quarto').get('cells.background.delay', 250);
+
   // Cache for parsed tokens
   const parseCache = new Map<string, {
     version: number;
     divTokens: Token[];
   }>();
+
+  // Map of editors to their throttled update functions
+  const editorThrottledFunctions = new Map<vscode.TextEditor, () => void>();
 
   // Define decoration types for different nesting levels (rotating colors)
   const decorationTypes = [
@@ -124,18 +132,21 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
     editor.setDecorations(matchHighlightDecorationType, matchHighlights);
   }
 
-  function triggerUpdateDecorations(editor: vscode.TextEditor | undefined) {
 
-    if (editor) {
-      updateDecorations(editor);
+  function updateDecorationsThrottled(editor: vscode.TextEditor) {
+    let throttled = editorThrottledFunctions.get(editor);
+    if (!throttled) {
+      throttled = createThrottle(() => updateDecorations(editor), getDelayMs);
+      editorThrottledFunctions.set(editor, throttled);
     }
+    throttled();
   }
 
   // Update decorations when active editor changes
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(editor => {
       if (editor) {
-        triggerUpdateDecorations(editor);
+        updateDecorationsThrottled(editor);
       }
     })
   );
@@ -145,7 +156,7 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
     vscode.workspace.onDidChangeTextDocument(event => {
       const editor = vscode.window.activeTextEditor;
       if (editor && event.document === editor.document) {
-        triggerUpdateDecorations(editor);
+        updateDecorationsThrottled(editor);
       }
     })
   );
@@ -153,15 +164,30 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
   // Update decorations when cursor moves
   context.subscriptions.push(
     vscode.window.onDidChangeTextEditorSelection(event => {
-      if (event.textEditor === vscode.window.activeTextEditor) {
-        triggerUpdateDecorations(event.textEditor);
+      updateDecorationsThrottled(event.textEditor);
+    })
+  );
+
+  // Clean up cache and throttle state when document is closed
+  context.subscriptions.push(
+    vscode.workspace.onDidCloseTextDocument(document => {
+      parseCache.delete(document.uri.toString());
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeVisibleTextEditors(visibleEditors => {
+      for (const editor of editorThrottledFunctions.keys()) {
+        if (!visibleEditors.includes(editor)) {
+          editorThrottledFunctions.delete(editor);
+        }
       }
     })
   );
 
   // Update decorations for the active editor now
-  if (vscode.window.activeTextEditor) {
-    triggerUpdateDecorations(vscode.window.activeTextEditor);
+  for (const editor of vscode.window.visibleTextEditors) {
+    updateDecorationsThrottled(editor);
   }
 
   // Clean up decoration types on deactivation

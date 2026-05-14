@@ -2,6 +2,9 @@
 
 ## 1.133.0
 
+- Add custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
+
+
 ## 1.132.0 (Release on 2026-05-05)
 
 - Added clickable document links for file paths in `_quarto.yml` files. File paths are now clickable and navigate directly to the referenced file (<https://github.com/quarto-dev/quarto/pull/906>).

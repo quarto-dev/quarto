@@ -30,6 +30,7 @@ suite("Diagnostics", function () {
     await client.start();
 
     // Delete all vdocs before starting tests.
+    // We check for leaked vdocs in teardown.
     await deleteAllVirtualDocs();
   });
 
@@ -41,25 +42,18 @@ suite("Diagnostics", function () {
   });
 
   test("receives diagnostics in the .qmd for embedded languages", async function () {
-    const { uri, event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-undefined.qmd");
+    const { event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-undefined.qmd");
 
+    assert.strictEqual(event.diagnostics.length, 1, "Expected one diagnostic");
     assert.strictEqual(
-      event.documentUri.toString(),
-      uri.toString(),
-      "Expected diagnostics for the opened document"
-    );
-
-    const diagnostics = event.diagnostics;
-    assert.strictEqual(diagnostics.length, 1, "Expected one diagnostic");
-    assert.strictEqual(
-      diagnostics[0].message,
+      event.diagnostics[0].message,
       "test-diagnostic: undefined_var is not defined",
       "Expected diagnostic message to match"
     );
     assert.strictEqual(
-      diagnostics[0].range.start.line,
+      event.diagnostics[0].range.start.line,
       8,
-      `Diagnostic should be on line 8, got line ${diagnostics[0].range.start.line}`
+      `Diagnostic should be on line 8, got line ${event.diagnostics[0].range.start.line}`
     );
   });
 
@@ -67,34 +61,18 @@ suite("Diagnostics", function () {
     const { uri, event, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-none.qmd");
 
     assert.strictEqual(
-      event.documentUri.toString(),
-      uri.toString(),
-      "Expected diagnostics for the opened document"
-    );
-
-    assert.strictEqual(
       event.diagnostics.length,
       0,
       `Expected no initial diagnostics, got ${JSON.stringify(event.diagnostics)}`
     );
 
-    const updatedEvent = await withEmbeddedDiagnostics(
-      manager,
-      uri,
-      async () => {
-        const editor = await vscode.window.showTextDocument(doc);
-        await editor.edit((editBuilder) => {
-          editBuilder.insert(new vscode.Position(0, 0), "```{python}\nundefined_var\n```\n");
-        });
-      },
-      "updated diagnostics on document change"
-    );
-
-    assert.strictEqual(
-      updatedEvent.documentUri.toString(),
-      uri.toString(),
-      "Expected diagnostics for the opened document"
-    );
+    const updated = nextDiagnostics(manager, uri);
+    const editor = await vscode.window.showTextDocument(doc);
+    await editor.edit((editBuilder) => {
+      editBuilder.insert(new vscode.Position(0, 0), "```{python}\nundefined_var\n```\n");
+    });
+    const updatedEvent = await raceTimeout(updated, 4000);
+    assert.ok(updatedEvent, "Timed out waiting for updated diagnostics");
 
     assert.strictEqual(
       updatedEvent.diagnostics.length,
@@ -155,24 +133,15 @@ suite("Diagnostics", function () {
 
   test("cleans up vdoc after timeout when language server does not respond", async function () {
     const shortTimeoutManager = createTestManager(disposables, 200);
-
     const uri = examplesUri("diagnostics-julia-only.qmd");
 
-    // Listen for the timeout dispose event on Julia's vdoc.
-    const timeoutEvent = eventToPromise(
-      filterEvent(
-        shortTimeoutManager.onDidDisposeVdoc,
-        (e) => e.reason === "timeout" && e.language === "julia"
-      )
-    );
-
+    const disposal = nextVdocDisposal(shortTimeoutManager, "timeout", "julia");
     await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(uri);
 
-    const result = await raceTimeout(timeoutEvent, 2000);
+    const result = await raceTimeout(disposal, 2000);
     assert.ok(result, "Expected Julia vdoc to be disposed via timeout");
 
-    // The vdoc temp file should no longer exist.
     const exists = await vscode.workspace.fs.stat(result.uri).then(() => true, () => false);
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after timeout");
   });
@@ -180,19 +149,14 @@ suite("Diagnostics", function () {
   test("clears diagnostics when error is fixed", async function () {
     const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-undefined.qmd");
 
-    // Replace `undefined_var` with a valid expression to fix the error.
-    const event = await withEmbeddedDiagnostics(
-      manager,
-      uri,
-      async () => {
-        const editor = await vscode.window.showTextDocument(doc);
-        const line = doc.lineAt(8);
-        await editor.edit((editBuilder) => {
-          editBuilder.replace(line.range, "x = 0");
-        });
-      },
-      "diagnostics cleared after fixing error"
-    );
+    const cleared = nextDiagnostics(manager, uri);
+    const editor = await vscode.window.showTextDocument(doc);
+    const line = doc.lineAt(8);
+    await editor.edit((editBuilder) => {
+      editBuilder.replace(line.range, "x = 0");
+    });
+    const event = await raceTimeout(cleared, 4000);
+    assert.ok(event, "Timed out waiting for diagnostics to clear");
 
     assert.strictEqual(
       event.diagnostics.length,
@@ -202,48 +166,30 @@ suite("Diagnostics", function () {
   });
 
   test("cleans up vdoc after diagnostics are received", async function () {
-    // Listen for vdoc disposal with reason "diagnostics-received".
-    const disposeEvent = eventToPromise(
-      filterEvent(
-        manager.onDidDisposeVdoc,
-        (e) => e.reason === "diagnostics-received" && e.language === "python"
-      )
-    );
-
     const uri = examplesUri("diagnostics-python-undefined.qmd");
+    const disposal = nextVdocDisposal(manager, "diagnostics-received", "python");
     await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(uri);
 
-    const result = await raceTimeout(disposeEvent, 4000);
+    const result = await raceTimeout(disposal, 4000);
     assert.ok(result, "Expected Python vdoc to be disposed after diagnostics received");
 
-    // The vdoc temp file should no longer exist.
     const exists = await vscode.workspace.fs.stat(result.uri).then(() => true, () => false);
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after diagnostics received");
   });
 
   test("cleans up vdoc when document is closed", async function () {
-    // Use a file with Julia only (no LS in tests) so the vdoc stays alive
-    // long enough to be disposed by closing the document rather than by
-    // receiving diagnostics.
+    // Julia (no LS in tests) so the vdoc stays alive long enough to be
+    // disposed by closing the document rather than by receiving diagnostics.
     const uri = examplesUri("diagnostics-julia-only.qmd");
-
-    // Listen for vdoc disposal with reason "session-removed".
-    const disposeEvent = eventToPromise(
-      filterEvent(
-        manager.onDidDisposeVdoc,
-        (e) => e.reason === "session-removed" && e.language === "julia"
-      )
-    );
+    const disposal = nextVdocDisposal(manager, "session-removed", "julia");
 
     const doc = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(doc);
-
-    // Close the document before the default timeout fires.
     await vscode.languages.setTextDocumentLanguage(doc, "plaintext");
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
 
-    const result = await raceTimeout(disposeEvent, 4000);
+    const result = await raceTimeout(disposal, 4000);
     assert.ok(result, "Expected vdoc to be disposed when document is closed");
 
     const exists = await vscode.workspace.fs.stat(result.uri).then(() => true, () => false);
@@ -279,22 +225,11 @@ suite("Diagnostics", function () {
   test("clears diagnostics when document is closed", async function () {
     const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd");
 
-    // Close the document - the manager should clear diagnostics for the document.
-    const event = await withEmbeddedDiagnostics(
-      manager,
-      uri,
-      async () => {
-        await vscode.languages.setTextDocumentLanguage(doc, "plaintext");
-        await vscode.commands.executeCommand("workbench.action.closeAllEditors");
-      },
-      "diagnostics cleared on document close"
-    );
-
-    assert.strictEqual(
-      event.documentUri.toString(),
-      uri.toString(),
-      "Expected diagnostics for the closed document"
-    );
+    const cleared = nextDiagnostics(manager, uri);
+    await vscode.languages.setTextDocumentLanguage(doc, "plaintext");
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    const event = await raceTimeout(cleared, 4000);
+    assert.ok(event, "Timed out waiting for diagnostics to clear on close");
 
     assert.strictEqual(
       event.diagnostics.length,
@@ -308,42 +243,33 @@ function isUriEqual(a: vscode.Uri, b: vscode.Uri) {
   return a.toString() === b.toString();
 }
 
+/** Subscribe to the next diagnostics event for a URI. Call before the triggering action. */
+function nextDiagnostics(manager: EmbeddedDiagnosticsManager, uri: vscode.Uri) {
+  return eventToPromise(
+    filterEvent(manager.onDidUpdateDiagnostics, (e) => isUriEqual(e.documentUri, uri))
+  );
+}
+
+/** Subscribe to the next vdoc disposal event matching reason and language. */
+function nextVdocDisposal(
+  manager: EmbeddedDiagnosticsManager,
+  reason: string,
+  language: string
+) {
+  return eventToPromise(
+    filterEvent(manager.onDidDisposeVdoc, (e) => e.reason === reason && e.language === language)
+  );
+}
+
 /** Open a .qmd fixture and wait for its first diagnostics event. */
 async function openAndAwaitDiagnostics(manager: EmbeddedDiagnosticsManager, fixture: string) {
   const uri = examplesUri(fixture);
-  let doc!: vscode.TextDocument;
-  const event = await withEmbeddedDiagnostics(
-    manager,
-    uri,
-    async () => {
-      doc = await vscode.workspace.openTextDocument(uri);
-      await vscode.window.showTextDocument(uri);
-    },
-    "initial diagnostics on document open"
-  );
-  return { uri, event, doc };
-}
-
-async function withEmbeddedDiagnostics(
-  manager: EmbeddedDiagnosticsManager,
-  uri: vscode.Uri,
-  callback: () => Promise<void>,
-  action: string,
-  timeout = 4000,
-) {
-  // Create a promise that resolves when diagnostics update for `uri`.
-  const promise = eventToPromise(
-    filterEvent(
-      manager.onDidUpdateDiagnostics,
-      (e) => isUriEqual(e.documentUri, uri)
-    )
-  );
-
-  await callback();
-
-  const result = await raceTimeout(promise, timeout);
-  if (!result) {
-    throw new Error(`Timed out waiting for ${action}`);
+  const diagnostics = nextDiagnostics(manager, uri);
+  const doc = await vscode.workspace.openTextDocument(uri);
+  await vscode.window.showTextDocument(doc);
+  const event = await raceTimeout(diagnostics, 4000);
+  if (!event) {
+    throw new Error(`Timed out waiting for diagnostics on ${fixture}`);
   }
-  return result;
+  return { uri, event, doc };
 }

@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
 import { examplesUri, raceTimeout } from "./test-utils";
 import { testLanguageClient } from "./fixtures/test-language-client";
-import { DidUpdateDiagnosticsEvent, EmbeddedDiagnosticsManager } from "../providers/diagnostics";
+import { DidUpdateDiagnosticsEvent, EmbeddedDiagnosticsManager, VdocDisposeReason } from "../providers/diagnostics";
 import { MarkdownEngine } from "../markdown/engine";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 import { assertNoLeakedVirtualDocs, deleteAllVirtualDocs } from "./utils/vdoc";
@@ -71,7 +71,7 @@ suite("Diagnostics", function () {
     await editor.edit((editBuilder) => {
       editBuilder.insert(new vscode.Position(0, 0), "```{python}\nundefined_var\n```\n");
     });
-    const updatedEvent = await raceTimeout(updated, 4000);
+    const updatedEvent = await raceTimeout(updated, 3000);
     assert.ok(updatedEvent, "Timed out waiting for updated diagnostics");
 
     assert.strictEqual(
@@ -89,11 +89,11 @@ suite("Diagnostics", function () {
     // Subscribe before opening so we don't miss events fired during document open.
     const events: DidUpdateDiagnosticsEvent[] = [];
     const gotBoth = new Promise<true>((resolve) => {
-      const sub = manager.onDidUpdateDiagnostics((e) => {
+      const listener = manager.onDidUpdateDiagnostics((e) => {
         if (isUriEqual(e.documentUri, uri)) {
           events.push(e);
           if (events.length >= 2) {
-            sub.dispose();
+            listener.dispose();
             resolve(true);
           }
         }
@@ -226,6 +226,10 @@ suite("Diagnostics", function () {
     const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd");
 
     const cleared = nextDiagnostics(manager, uri);
+    // We have to set the language to plaintext, since closing
+    // documents/editors from an extension doesn't necessarily
+    // trigger onDidCloseTextDocument therefore doesn't notify
+    // the language server that textDocument/didClose.
     await vscode.languages.setTextDocumentLanguage(doc, "plaintext");
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
     const event = await raceTimeout(cleared, 4000);
@@ -243,21 +247,33 @@ function isUriEqual(a: vscode.Uri, b: vscode.Uri) {
   return a.toString() === b.toString();
 }
 
-/** Subscribe to the next diagnostics event for a URI. Call before the triggering action. */
+/**
+ * Subscribe to the next diagnostics event for a URI.
+ * Call before the triggering action.
+ */
 function nextDiagnostics(manager: EmbeddedDiagnosticsManager, uri: vscode.Uri) {
   return eventToPromise(
-    filterEvent(manager.onDidUpdateDiagnostics, (e) => isUriEqual(e.documentUri, uri))
+    filterEvent(
+      manager.onDidUpdateDiagnostics,
+      (e) => isUriEqual(e.documentUri, uri)
+    )
   );
 }
 
-/** Subscribe to the next vdoc disposal event matching reason and language. */
+/**
+ * Subscribe to the next vdoc disposal event matching reason and language.
+ * Call before the triggering action.
+ */
 function nextVdocDisposal(
   manager: EmbeddedDiagnosticsManager,
-  reason: string,
+  reason: VdocDisposeReason,
   language: string
 ) {
   return eventToPromise(
-    filterEvent(manager.onDidDisposeVdoc, (e) => e.reason === reason && e.language === language)
+    filterEvent(
+      manager.onDidDisposeVdoc,
+      (e) => e.reason === reason && e.language === language
+    )
   );
 }
 

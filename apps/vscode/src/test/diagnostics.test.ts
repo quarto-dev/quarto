@@ -139,7 +139,7 @@ suite("Diagnostics", function () {
   test("times out for unresponsive language servers without blocking others", async function () {
     // Julia has no language server registered in tests, so it will time out.
     // Python should still get its diagnostics independently.
-    const { doc, event } = await openAndAwaitDiagnostics(manager, "diagnostics-timeout.qmd", toDelete);
+    const { event } = await openAndAwaitDiagnostics(manager, "diagnostics-timeout.qmd", toDelete);
 
     // Python diagnostics should be present despite Julia timing out.
     assert.ok(
@@ -215,7 +215,7 @@ suite("Diagnostics", function () {
   });
 
   test("reports diagnostics from multiple cells of the same language", async function () {
-    const { doc, event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-multicell.qmd", toDelete);
+    const { event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-multicell.qmd", toDelete);
 
     const diagnostics = event.diagnostics;
     assert.strictEqual(diagnostics.length, 2, "Expected one diagnostic per cell");
@@ -229,7 +229,7 @@ suite("Diagnostics", function () {
   });
 
   test("maps diagnostic line numbers correctly with content above cell", async function () {
-    const { doc, event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd", toDelete);
+    const { event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd", toDelete);
 
     const diagnostics = event.diagnostics;
     assert.strictEqual(diagnostics.length, 1, "Expected one diagnostic");
@@ -267,12 +267,7 @@ suite("Diagnostics", function () {
     const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd", toDelete);
 
     const cleared = nextDiagnostics(manager, uri);
-    // We have to set the language to plaintext, since closing
-    // documents/editors from an extension doesn't necessarily
-    // trigger onDidCloseTextDocument therefore doesn't notify
-    // the language server that textDocument/didClose.
-    await vscode.languages.setTextDocumentLanguage(doc, "plaintext");
-    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    await deleteDocument(doc);
     const event = await raceTimeout(cleared, 4000);
     assert.ok(event, "Timed out waiting for diagnostics to clear on close");
 
@@ -387,6 +382,7 @@ async function openAndAwaitDiagnostics(manager: EmbeddedDiagnosticsManager, fixt
   return { uri: doc.uri, event, doc };
 }
 
+/** Open a .qmd fixture and wait for its virtual document to activate for a given language. */
 async function openAndAwaitVdocActivation(manager: EmbeddedDiagnosticsManager, fixture: string, language: string, toDelete: vscode.TextDocument[]) {
   const doc = await openExampleTextDocument(fixture, toDelete);
   const activation = nextVdocActivation(manager, doc.uri, language);

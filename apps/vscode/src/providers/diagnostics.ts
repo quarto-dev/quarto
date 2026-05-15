@@ -139,7 +139,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   constructor(
     private readonly engine: MarkdownEngine,
     private readonly outputChannel: LogOutputChannel,
-    /** Debounce delay before triggering diagnostics after a document change. */
+    /** Timeout for waiting for the language server to publish diagnostics. */
     private readonly timeoutMs = DEFAULT_TIMEOUT_MS,
   ) {
     super();

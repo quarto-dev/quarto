@@ -24,6 +24,7 @@ import {
   workspace,
 } from "vscode";
 import {
+  Token,
   TokenCodeBlock,
   TokenMath,
   isExecutableLanguageBlock,
@@ -227,20 +228,21 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   // --- Session management ---
 
   private async createSessionsForDocument(document: TextDocument): Promise<void> {
-    // Create or append blocks to each language's session for the document.
     const tokens = this.engine.parse(document);
+
+    // Create or append blocks to each language's session for the document.
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
       const languageName = languageNameFromBlock(block);
-      if (!languageName) { continue; } // No language, should not happen for a language block.
+      if (!languageName) { continue; }
       const language = embeddedLanguage(languageName);
-      if (!language) { continue; } // Unknown language.
+      if (!language) { continue; }
       const session = this.getOrCreateSession(document.uri, language);
       session.languageBlocks.push(block);
     }
 
     // Activate sessions for this document concurrently.
     const docSessions = this.getSessionsForDocument(document.uri);
-    await Promise.all(docSessions.map(s => this.activateSession(s, document)));
+    await Promise.all(docSessions.map(s => this.activateSession(s, document, tokens)));
   }
 
   private async recreateSessionsForDocument(document: TextDocument): Promise<void> {
@@ -261,9 +263,12 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
   }
 
-  private async activateSession(session: DiagnosticSession, document: TextDocument): Promise<void> {
+  private async activateSession(
+    session: DiagnosticSession,
+    document: TextDocument,
+    tokens: Token[],
+  ): Promise<void> {
     try {
-      const tokens = this.engine.parse(document);
       const vdocContent = virtualDocForLanguage(
         document, tokens, session.language, "diagnostics"
       );

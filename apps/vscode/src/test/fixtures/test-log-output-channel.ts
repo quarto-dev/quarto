@@ -2,10 +2,12 @@ import { EventEmitter, LogLevel, LogOutputChannel } from "vscode";
 
 /**
  * A {@link LogOutputChannel} that logs to the console.
- * Set `QUIET=1` to suppress all output.
+ * Quiet by default when run by Claude Code; set `VERBOSE=1` to override.
  */
 export class TestLogOutputChannel implements LogOutputChannel {
-  logLevel: LogLevel = process.env.QUIET ? LogLevel.Off : LogLevel.Trace;
+  logLevel: LogLevel = (process.env.CLAUDE_CODE && !process.env.VERBOSE)
+    ? LogLevel.Off
+    : LogLevel.Trace;
   onDidChangeLogLevel = new EventEmitter<LogLevel>().event;
 
   constructor(public readonly name = "") { }

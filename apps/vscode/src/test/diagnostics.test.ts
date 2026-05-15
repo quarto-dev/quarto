@@ -8,7 +8,6 @@ import { DidUpdateDiagnosticsEvent, EmbeddedDiagnosticsManager, VdocDisposeReaso
 import { VIRTUAL_DOC_TEMP_DIRECTORY, deleteDocument, quartoVdocDir } from "../vdoc/vdoc-tempfile";
 import { MarkdownEngine } from "../markdown/engine";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
-import { assertNoLeakedVirtualDocs, deleteAllVirtualDocs } from "./utils/vdoc";
 import { DisposableStore } from "core";
 import { eventToPromise, filterEvent } from "./utils/event";
 import { Uri } from "vscode";
@@ -22,29 +21,46 @@ function createTestManager(disposables: DisposableStore, timeoutMs?: number) {
 
 suite("Diagnostics", function () {
   const disposables = new DisposableStore();
+
+  /** Test docs to be deleted during teardown. See the note on {@link openExampleTextDocument} */
   const toDelete: vscode.TextDocument[] = [];
+  /** All vdoc URIs created during tests, to check for leaks during teardown. */
+  const vdocUris: vscode.Uri[] = [];
   let client: LanguageClient;
   let manager: EmbeddedDiagnosticsManager;
 
   setup(async function () {
     manager = createTestManager(disposables);
 
+    // Track vdoc URIs for the leak check during teardown.
+    disposables.add(manager.onDidActivateVdoc((e) => {
+      vdocUris.push(e.uri);
+    }));
+
     // Start a test language server.
     client = testLanguageClient();
     await client.start();
-
-    // Delete all vdocs before starting tests.
-    // We check for leaked vdocs in teardown.
-    await deleteAllVirtualDocs();
   });
 
   teardown(async function () {
-    await Promise.all(toDelete.map(doc => deleteDocument(doc)));
-
     disposables.clear();
+    await Promise.all(toDelete.map(doc => deleteDocument(doc)));
     await client.stop();
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
-    await assertNoLeakedVirtualDocs();
+
+    // Check for leaked vdocs.
+    const leaked = (await Promise.all(
+      vdocUris.map(async (uri) => {
+        const exists = await vscode.workspace.fs.stat(uri).then(() => true, () => false);
+        return exists ? uri : null;
+      })
+    )).filter((uri): uri is vscode.Uri => uri !== null);
+    assert.strictEqual(
+      leaked.length,
+      0,
+      `Leaked vdocs:\n${leaked.map(u => u.fsPath).join("\n")}`
+    );
+    vdocUris.length = 0;
   });
 
   test("receives diagnostics in the .qmd for embedded languages", async function () {

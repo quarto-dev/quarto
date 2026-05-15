@@ -313,7 +313,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         JSON.stringify(error)
       );
     }
-  };
+  }
 
   // --- Diagnostics handling ---
 

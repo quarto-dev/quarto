@@ -7,8 +7,8 @@ import { DidUpdateDiagnosticsEvent, EmbeddedDiagnosticsManager, VdocDisposeReaso
 import { MarkdownEngine } from "../markdown/engine";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 import { assertNoLeakedVirtualDocs, deleteAllVirtualDocs } from "./utils/vdoc";
-import { eventToPromise, filterEvent } from "../core/event";
 import { DisposableStore } from "core";
+import { eventToPromise, filterEvent } from "./utils/event";
 
 /** Create a diagnostics manager for tests, registered with the given disposable store. */
 function createTestManager(disposables: DisposableStore, timeoutMs?: number) {

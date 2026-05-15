@@ -127,8 +127,11 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     languages.createDiagnosticCollection("quarto")
   );
 
-  /** Active diagnostic sessions, one per document and language. */
-  private readonly sessions: DiagnosticSession[] = [];
+  /** Sessions keyed by document URI string, then language ID. */
+  private readonly sessionsByDocument = new Map<string, Map<string, DiagnosticSession>>();
+
+  /** Reverse index: vdoc URI string → session. */
+  private readonly sessionByVdocUri = new Map<string, DiagnosticSession>();
 
   /** Debounce timers for document changes, keyed by URI string. */
   private readonly debounceTimers = new Map<string, NodeJS.Timeout>();
@@ -144,7 +147,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     // Listen for diagnostics arriving on virtual documents.
     this._register(languages.onDidChangeDiagnostics(async (event) => {
       for (const uri of event.uris) {
-        const session = this.getSessionForVdoc(uri);
+        const session = this.sessionByVdocUri.get(uri.toString());
         if (session) {
           await this.handleDiagnosticsReceived(session, uri);
         }
@@ -300,6 +303,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
           }
         },
       };
+      this.sessionByVdocUri.set(vdoc.uri.toString(), session);
 
       this.outputChannel.debug(
         `[EmbeddedDiagnostics] Activated vdoc for ` +
@@ -355,16 +359,17 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
   // --- Helpers ---
 
-  private getSession(uri: Uri, language: EmbeddedLanguage): DiagnosticSession | undefined {
-    const key = uri.toString();
-    return this.sessions.find(
-      s => s.documentUri.toString() === key &&
-        s.language.ids[0] === language.ids[0]
-    );
-  }
-
   private getOrCreateSession(documentUri: Uri, language: EmbeddedLanguage): DiagnosticSession {
-    let session = this.getSession(documentUri, language);
+    const docKey = documentUri.toString();
+    const langKey = language.ids[0];
+
+    let langMap = this.sessionsByDocument.get(docKey);
+    if (!langMap) {
+      langMap = new Map();
+      this.sessionsByDocument.set(docKey, langMap);
+    }
+
+    let session = langMap.get(langKey);
     if (!session) {
       session = {
         documentUri,
@@ -372,29 +377,25 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         languageBlocks: [],
         diagnostics: []
       };
-      this.sessions.push(session);
+      langMap.set(langKey, session);
     }
     return session;
   }
 
   private getSessionsForDocument(documentUri: Uri): DiagnosticSession[] {
-    const key = documentUri.toString();
-    return this.sessions.filter(s => s.documentUri.toString() === key);
-  }
-
-  private getSessionForVdoc(uri: Uri): DiagnosticSession | undefined {
-    const key = uri.toString();
-    return this.sessions.find(s => s.activeVdoc?.uri.toString() === key);
+    const langMap = this.sessionsByDocument.get(documentUri.toString());
+    return langMap ? [...langMap.values()] : [];
   }
 
   private async removeSessionsForDocument(documentUri: Uri, reason: VdocDisposeReason): Promise<void> {
-    const docKey = documentUri.toString();
-    for (let i = this.sessions.length - 1; i >= 0; i--) {
-      if (this.sessions[i].documentUri.toString() === docKey) {
-        await this.disposeActiveVdoc(this.sessions[i], reason);
-        this.sessions.splice(i, 1);
-      }
+    const key = documentUri.toString();
+    const langMap = this.sessionsByDocument.get(key);
+    if (!langMap) { return; }
+
+    for (const session of langMap.values()) {
+      await this.disposeActiveVdoc(session, reason);
     }
+    this.sessionsByDocument.delete(key);
   }
 
   private async disposeActiveVdoc(session: DiagnosticSession, reason: VdocDisposeReason): Promise<void> {
@@ -403,6 +404,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       // First unset the session's active vdoc so that we don't accidentally
       // process diagnostics that arrive while we're cleaning up the old vdoc.
       session.activeVdoc = undefined;
+      this.sessionByVdocUri.delete(activeVdoc.uri.toString());
 
       await activeVdoc.cleanup();
 
@@ -452,13 +454,18 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
     this.debounceTimers.clear();
 
+    const allSessions = [...this.sessionsByDocument.values()]
+      .flatMap(m => [...m.values()]);
+
     // Best-effort async cleanup — awaited via deactivate() during extension deactivation.
     this._disposePromise = Promise.allSettled(
-      this.sessions
+      allSessions
         .filter(s => s.activeVdoc)
         .map(s => this.disposeActiveVdoc(s, 'session-removed'))
     );
-    this.sessions.length = 0;
+
+    this.sessionsByDocument.clear();
+    this.sessionByVdocUri.clear();
   }
 
   /**

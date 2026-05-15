@@ -75,11 +75,8 @@ interface ActiveVdoc {
   /** URI of the temp file opened as a text document. */
   readonly uri: Uri;
 
-  /** Deletes the temp file and resets its language so the language server clears diagnostics. */
-  readonly cleanup?: () => Promise<void>;
-
-  /** Fires if the language server doesn't respond in time. */
-  readonly timeout: NodeJS.Timeout;
+  /** Clean up the virtual document. */
+  readonly cleanup: () => Promise<void>;
 }
 
 /**
@@ -281,7 +278,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       const dir = this.shouldUseLocalTempFile(session.language)
         ? quartoVdocDir(document.uri.fsPath)
         : VIRTUAL_DOC_TEMP_DIRECTORY;
-      const { uri, cleanup } = await virtualDocUriFromTempFile(
+      const vdoc = await virtualDocUriFromTempFile(
         vdocContent, dir, { warmup: false }
       );
 
@@ -294,12 +291,20 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         await this.disposeActiveVdoc(session, 'timeout');
       }, this.timeoutMs);
 
-      session.activeVdoc = { uri, cleanup, timeout };
+      session.activeVdoc = {
+        uri: vdoc.uri,
+        cleanup: async () => {
+          clearTimeout(timeout);
+          if (vdoc.cleanup) {
+            await vdoc.cleanup();
+          }
+        },
+      };
 
       this.outputChannel.debug(
         `[EmbeddedDiagnostics] Activated vdoc for ` +
         `${session.language.ids[0]} in ${workspace.asRelativePath(session.documentUri)}: ` +
-        uri.toString()
+        vdoc.uri.toString()
       );
     } catch (error) {
       this.outputChannel.error(
@@ -346,7 +351,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
     this.diagnosticCollection.set(documentUri, allDiagnostics);
     this._onDidUpdateDiagnostics.fire({ documentUri: documentUri, diagnostics: allDiagnostics });
-  };
+  }
 
   // --- Helpers ---
 
@@ -393,11 +398,13 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private async disposeActiveVdoc(session: DiagnosticSession, reason: VdocDisposeReason): Promise<void> {
-    if (session.activeVdoc) {
-      const vdocUri = session.activeVdoc.uri;
-      clearTimeout(session.activeVdoc.timeout);
-      await session.activeVdoc.cleanup?.();
+    const { activeVdoc } = session;
+    if (activeVdoc) {
+      // First unset the session's active vdoc so that we don't accidentally
+      // process diagnostics that arrive while we're cleaning up the old vdoc.
       session.activeVdoc = undefined;
+
+      await activeVdoc.cleanup();
 
       this.outputChannel.debug(
         `[EmbeddedDiagnostics] Disposed vdoc for ` +
@@ -407,7 +414,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       this._onDidDisposeVdoc.fire({
         documentUri: session.documentUri,
         language: session.language.ids[0],
-        uri: vdocUri,
+        uri: activeVdoc.uri,
         reason,
       });
     }

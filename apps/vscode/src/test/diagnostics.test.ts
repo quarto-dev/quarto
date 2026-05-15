@@ -44,7 +44,7 @@ suite("Diagnostics", function () {
     const { uri, event } = await openAndAwaitDiagnostics(manager, "diagnostics-python-undefined.qmd");
 
     assert.strictEqual(
-      event.uri.toString(),
+      event.documentUri.toString(),
       uri.toString(),
       "Expected diagnostics for the opened document"
     );
@@ -67,7 +67,7 @@ suite("Diagnostics", function () {
     const { uri, event, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-none.qmd");
 
     assert.strictEqual(
-      event.uri.toString(),
+      event.documentUri.toString(),
       uri.toString(),
       "Expected diagnostics for the opened document"
     );
@@ -91,7 +91,7 @@ suite("Diagnostics", function () {
     );
 
     assert.strictEqual(
-      updatedEvent.uri.toString(),
+      updatedEvent.documentUri.toString(),
       uri.toString(),
       "Expected diagnostics for the opened document"
     );
@@ -112,7 +112,7 @@ suite("Diagnostics", function () {
     const events: DidUpdateDiagnosticsEvent[] = [];
     const gotBoth = new Promise<true>((resolve) => {
       const sub = manager.onDidUpdateDiagnostics((e) => {
-        if (isUriEqual(e.uri, uri)) {
+        if (isUriEqual(e.documentUri, uri)) {
           events.push(e);
           if (events.length >= 2) {
             sub.dispose();
@@ -173,7 +173,7 @@ suite("Diagnostics", function () {
     assert.ok(result, "Expected Julia vdoc to be disposed via timeout");
 
     // The vdoc temp file should no longer exist.
-    const exists = await vscode.workspace.fs.stat(result.vdocUri).then(() => true, () => false);
+    const exists = await vscode.workspace.fs.stat(result.uri).then(() => true, () => false);
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after timeout");
   });
 
@@ -218,7 +218,7 @@ suite("Diagnostics", function () {
     assert.ok(result, "Expected Python vdoc to be disposed after diagnostics received");
 
     // The vdoc temp file should no longer exist.
-    const exists = await vscode.workspace.fs.stat(result.vdocUri).then(() => true, () => false);
+    const exists = await vscode.workspace.fs.stat(result.uri).then(() => true, () => false);
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after diagnostics received");
   });
 
@@ -246,7 +246,7 @@ suite("Diagnostics", function () {
     const result = await raceTimeout(disposeEvent, 4000);
     assert.ok(result, "Expected vdoc to be disposed when document is closed");
 
-    const exists = await vscode.workspace.fs.stat(result.vdocUri).then(() => true, () => false);
+    const exists = await vscode.workspace.fs.stat(result.uri).then(() => true, () => false);
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after document close");
   });
 
@@ -291,7 +291,7 @@ suite("Diagnostics", function () {
     );
 
     assert.strictEqual(
-      event.uri.toString(),
+      event.documentUri.toString(),
       uri.toString(),
       "Expected diagnostics for the closed document"
     );
@@ -335,7 +335,7 @@ async function withEmbeddedDiagnostics(
   const promise = eventToPromise(
     filterEvent(
       manager.onDidUpdateDiagnostics,
-      (e) => isUriEqual(e.uri, uri)
+      (e) => isUriEqual(e.documentUri, uri)
     )
   );
 

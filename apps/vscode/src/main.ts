@@ -119,7 +119,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // deno config
     activateDenoConfig(context, engine);
 
-    // Initialize diagnostic manager for code blocks
+    // embedded diagnostics
     context.subscriptions.push(activateEmbeddedDiagnostics(engine, outputChannel));
 
     // lsp

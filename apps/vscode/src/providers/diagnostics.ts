@@ -427,9 +427,9 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     const langMap = this.sessionsByDocument.get(key);
     if (!langMap) { return; }
 
-    for (const session of langMap.values()) {
-      await this.disposeActiveVdoc(session, reason);
-    }
+    await Promise.allSettled(
+      [...langMap.values()].map(session => this.disposeActiveVdoc(session, reason))
+    );
     this.sessionsByDocument.delete(key);
   }
 

@@ -29,40 +29,29 @@ import {
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
 
+interface VirtualDocTempFileOptions {
+  /** Fire a hover request to prime the language server before returning. */
+  warmup: boolean;
+}
+
 /**
- * Create an on disk temporary file containing the contents of the virtual document
+ * Create an on-disk temporary file for a virtual document and open it.
  *
- * @param virtualDoc The document to use when populating the temporary file
- * @param docPath The path to the original document the virtual document is
- *   based on. When `local` is `true`, this is used to determine the directory
- *   to create the temporary file in.
- * @param local Whether or not the temporary file should be created "locally" in
- *   the workspace next to `docPath` or in a temporary directory outside the
- *   workspace.
- * @param warmup Whether to fire a hover request to prime the language server.
- *   Defaults to `true` for non-local files. Set to `false` for diagnostics
- *   where the language server responds to the file being opened.
- * @returns A `VirtualDocUri`
+ * @param virtualDoc The virtual document content to write.
+ * @param directory The directory to create the file in.
  */
 export async function virtualDocUriFromTempFile(
   virtualDoc: VirtualDoc,
-  docPath: string,
-  local: boolean,
-  warmup = true,
+  directory: string,
+  options: VirtualDocTempFileOptions,
 ): Promise<VirtualDocUri> {
-  const useLocal = local || virtualDoc.language.localTempFile;
+  const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
+  createVirtualDoc(filepath, virtualDoc.content);
 
-  // If `useLocal`, then create the temporary document alongside the `docPath`
-  // so tools like formatters have access to workspace configuration. Otherwise,
-  // create it in a temp directory.
-  const virtualDocFilepath = useLocal
-    ? createVirtualDocLocalFile(virtualDoc, path.dirname(docPath))
-    : createVirtualDocTempfile(virtualDoc);
-
-  const virtualDocUri = Uri.file(virtualDocFilepath);
+  const virtualDocUri = Uri.file(filepath);
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
 
-  if (warmup && !useLocal) {
+  if (options.warmup) {
     // TODO: Reevaluate whether this is necessary. Old comment:
     // > if this is the first time getting a virtual doc for this
     // > language then execute a dummy request to cause it to load
@@ -123,30 +112,19 @@ tmp.setGracefulCleanup();
 export const VIRTUAL_DOC_TEMP_DIRECTORY = tmp.dirSync().name;
 
 /**
- * Creates a virtual document in a temporary directory
+ * Resolves the `.quarto/vdoc/` directory for the workspace containing `docPath`.
  *
- * The temporary directory is automatically cleaned up on process exit.
- *
- * @param virtualDoc The document to use when populating the temporary file
- * @returns The path to the temporary file
+ * Falls back to the source file's directory if no workspace folder is found
+ * (e.g., when working with a single file outside a workspace).
  */
-function createVirtualDocTempfile(virtualDoc: VirtualDoc): string {
-  const filepath = generateVirtualDocFilepath(VIRTUAL_DOC_TEMP_DIRECTORY, virtualDoc.language.extension);
-  createVirtualDoc(filepath, virtualDoc.content);
-  return filepath;
-}
-
-/**
- * Creates a virtual document in the provided directory
- *
- * @param virtualDoc The document to use when populating the temporary file
- * @param directory The directory to create the temporary file in
- * @returns The path to the temporary file
- */
-function createVirtualDocLocalFile(virtualDoc: VirtualDoc, directory: string): string {
-  const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
-  createVirtualDoc(filepath, virtualDoc.content);
-  return filepath;
+export function quartoVdocDir(docPath: string): string {
+  const sourceDirectory = path.dirname(docPath);
+  const workspaceFolder = workspace.workspaceFolders?.find(
+    (folder) => sourceDirectory.startsWith(folder.uri.fsPath)
+  );
+  return workspaceFolder
+    ? Uri.joinPath(workspaceFolder.uri, ".quarto", "vdoc").fsPath
+    : sourceDirectory;
 }
 
 /**
@@ -156,7 +134,7 @@ function createVirtualDoc(filepath: string, content: string): void {
   const directory = path.dirname(filepath);
 
   if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory);
+    fs.mkdirSync(directory, { recursive: true });
   }
 
   fs.writeFileSync(filepath, content);

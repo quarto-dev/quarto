@@ -13,6 +13,7 @@
  *
  */
 
+import * as path from "path";
 import { Position, TextDocument, Uri, Range, SemanticTokens } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
@@ -20,7 +21,7 @@ import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { embeddedLanguage, EmbeddedLanguage } from "./languages";
 import { virtualDocUriFromEmbeddedContent } from "./vdoc-content";
-import { virtualDocUriFromTempFile } from "./vdoc-tempfile";
+import { virtualDocUriFromTempFile, VIRTUAL_DOC_TEMP_DIRECTORY } from "./vdoc-tempfile";
 import { decodeSemanticTokens, encodeSemanticTokens } from "../providers/semantic-tokens";
 
 export interface VirtualDoc {
@@ -192,13 +193,16 @@ async function virtualDocUri(
   action: VirtualDocAction
 ): Promise<VirtualDocUri> {
 
-  // format and definition actions use a transient local vdoc
-  // (so they can get project-specific paths and formatting config)
-  const local = ["format", "definition"].includes(action);
+  if (virtualDoc.language.type === "content") {
+    return { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) };
+  }
 
-  return virtualDoc.language.type === "content"
-    ? { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) }
-    : await virtualDocUriFromTempFile(virtualDoc, parentUri.fsPath, local);
+  // format and definition actions use a local vdoc alongside the source
+  // so tools like formatters have access to workspace configuration
+  const local = ["format", "definition"].includes(action) || virtualDoc.language.localTempFile;
+  const dir = local ? path.dirname(parentUri.fsPath) : VIRTUAL_DOC_TEMP_DIRECTORY;
+
+  return await virtualDocUriFromTempFile(virtualDoc, dir, { warmup: !local });
 }
 
 export function languageAtPosition(tokens: Token[], position: Position) {

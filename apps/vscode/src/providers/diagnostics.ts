@@ -35,7 +35,7 @@ import {
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, embeddedLanguage } from "../vdoc/languages";
 import { virtualDocForLanguage } from "../vdoc/vdoc";
-import { virtualDocUriFromTempFile } from "../vdoc/vdoc-tempfile";
+import { virtualDocUriFromTempFile, quartoVdocDir, VIRTUAL_DOC_TEMP_DIRECTORY } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
 import { Disposable } from "core";
 
@@ -273,9 +273,11 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         document, tokens, session.language, "diagnostics"
       );
 
-      const shouldUseLocal = this.shouldUseLocalTempFile(session.language);
+      const dir = this.shouldUseLocalTempFile(session.language)
+        ? quartoVdocDir(document.uri.fsPath)
+        : VIRTUAL_DOC_TEMP_DIRECTORY;
       const { uri, cleanup } = await virtualDocUriFromTempFile(
-        vdocContent, document.uri.fsPath, shouldUseLocal, false
+        vdocContent, dir, { warmup: false }
       );
 
       const timeout = setTimeout(async () => {

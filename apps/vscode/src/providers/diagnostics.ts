@@ -512,6 +512,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
    * Resolves when all active vdocs have been disposed (or failed).
    */
   async deactivate(): Promise<void> {
+    this.dispose();
     await this._disposePromise;
   }
 }

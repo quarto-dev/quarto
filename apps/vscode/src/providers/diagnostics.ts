@@ -34,7 +34,7 @@ import {
 
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, embeddedLanguage } from "../vdoc/languages";
-import { languageBlocksByLanguage, virtualDocForLanguage } from "../vdoc/vdoc";
+import { virtualDocForLanguage } from "../vdoc/vdoc";
 import { virtualDocUriFromTempFile } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
 import { Disposable } from "core";
@@ -397,6 +397,9 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private shouldUseLocalTempFile(language: EmbeddedLanguage): boolean {
+    // The vscode-R extension uses the languageserver R package
+    // which does not provide diagnostics for files in the system
+    // temp directory. Use a local temp file in that case.
     if (language.ids.includes("r")) {
       const rExt = extensions.getExtension("REditorSupport.r");
       if (rExt?.isActive) {
@@ -409,6 +412,8 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         }
       }
     }
+
+    // Default to a non-local temp file - it's less invasive.
     return false;
   }
 

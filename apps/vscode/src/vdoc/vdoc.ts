@@ -14,8 +14,8 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { Position, TextDocument, Uri, Range, SemanticTokens, extensions, workspace } from "vscode";
-import { Token, TokenCodeBlock, TokenMath, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+import { Position, TextDocument, Uri, Range, SemanticTokens } from "vscode";
+import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
@@ -82,13 +82,6 @@ function virtualDocForBlock(document: TextDocument, block: Token, language: Embe
   return virtualDocForCode(lines, language);
 }
 
-/**
- * Create a virtual document from a text document.
- *
- * @param document The text document to create a virtual document from
- * @param language The language of the virtual document
- * @param action The action for which the virtual document is being created, if known
- */
 export function virtualDocForLanguage(
   document: TextDocument,
   tokens: Token[],
@@ -127,13 +120,6 @@ function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
   }
 }
 
-/**
- * Create a virtual document from code and language.
- *
- * @param code The lines of code to include in the virtual document
- * @param language The language of the virtual document
- * @param action The action for which the virtual document is being created, if known
- */
 export function virtualDocForCode(
   code: string[],
   language: EmbeddedLanguage,
@@ -196,37 +182,6 @@ export async function withVirtualDocUri<T>(
   }
 }
 
-/**
- * Whether to use a local temporary file for a given virtual document and action.
- */
-function shouldUseLocalTempFile(virtualDoc: VirtualDoc, action: VirtualDocAction): boolean {
-  // Format and definition actions use a transient local vdoc
-  // (so they can get project-specific paths and formatting config)
-  if (["format", "definition"].includes(action)) {
-    return true;
-  }
-
-  // The vscode-R extension uses the languageserver R package
-  // which does not provide diagnostics for temp files.
-  // Use a local temp file in that case.
-  if (
-    virtualDoc.language.ids.includes("r") &&
-    action === "diagnostics" &&
-    extensions.getExtension("REditorSupport.r")?.isActive
-  ) {
-    const rLspConfig = workspace.getConfiguration("r.lsp");
-    if (
-      rLspConfig.get<boolean>("enabled", false) &&
-      rLspConfig.get<boolean>("diagnostics", false)
-    ) {
-      return true;
-    }
-  }
-
-  // Default to a non-local temp file - it's less invasive
-  return false;
-}
-
 // To be used through `withVirtualDocUri()`. Not safe to export on its own! The
 // cleanup hook must be called, and relying on the caller to do this is a huge
 // footgun.
@@ -235,8 +190,9 @@ async function virtualDocUri(
   parentUri: Uri,
   action: VirtualDocAction
 ): Promise<VirtualDocUri> {
-
-  const local = shouldUseLocalTempFile(virtualDoc, action);
+  // format and definition actions use a transient local vdoc
+  // (so they can get project-specific paths and formatting config)
+  const local = ["format", "definition"].includes(action);
 
   return virtualDoc.language.type === "content"
     ? { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) }
@@ -250,32 +206,6 @@ export function languageAtPosition(tokens: Token[], position: Position) {
   } else {
     return undefined;
   }
-}
-
-/** Get all languages with code blocks in a token stream. */
-export function allLanguages(tokens: Token[]): EmbeddedLanguage[] {
-  const names = new Set(
-    tokens.filter(isExecutableLanguageBlock)
-      .map(languageNameFromBlock)
-      .filter(Boolean)
-  );
-  return [...names]
-    .map(embeddedLanguage)
-    .filter((l): l is EmbeddedLanguage => l !== undefined);
-}
-
-export function languageBlocksByLanguage(tokens: Token[]): Map<string, (TokenMath | TokenCodeBlock)[]> {
-  const result = new Map<string, (TokenMath | TokenCodeBlock)[]>();
-  for (const token of tokens.filter(isExecutableLanguageBlock)) {
-    const language = languageNameFromBlock(token);
-    if (language) {
-      if (!result.has(language)) {
-        result.set(language, []);
-      }
-      result.get(language)?.push(token as TokenMath | TokenCodeBlock);
-    }
-  }
-  return result;
 }
 
 export function mainLanguage(

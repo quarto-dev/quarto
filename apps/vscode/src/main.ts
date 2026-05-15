@@ -19,7 +19,7 @@ import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
-import { EmbeddedDiagnosticsManager } from "./providers/diagnostics";
+import { activateDiagnostics } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
@@ -120,8 +120,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     activateDenoConfig(context, engine);
 
     // Initialize diagnostic manager for code blocks
-    const diagnosticsManager = new EmbeddedDiagnosticsManager(engine, outputChannel);
-    context.subscriptions.push(diagnosticsManager);
+    context.subscriptions.push(activateDiagnostics(engine, outputChannel));
 
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);

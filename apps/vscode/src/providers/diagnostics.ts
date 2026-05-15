@@ -22,6 +22,7 @@ import {
   extensions,
   languages,
   workspace,
+  Disposable as VscodeDisposable,
 } from "vscode";
 import {
   Token,
@@ -438,4 +439,53 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
     this.sessions.length = 0;
   }
+}
+
+/**
+ * Activates cell diagnostics if enabled, and watches for setting changes
+ * to create/dispose the manager dynamically.
+ */
+export function activateDiagnostics(
+  engine: MarkdownEngine,
+  outputChannel: LogOutputChannel,
+): VscodeDisposable {
+  let manager: EmbeddedDiagnosticsManager | undefined;
+
+  function isEnabled(): boolean {
+    return workspace
+      .getConfiguration("quarto.cells.diagnostics")
+      .get<boolean>("enabled", true);
+  }
+
+  function createManager(): void {
+    if (!manager) {
+      manager = new EmbeddedDiagnosticsManager(engine, outputChannel);
+    }
+  }
+
+  function disposeManager(): void {
+    if (manager) {
+      manager.dispose();
+      manager = undefined;
+    }
+  }
+
+  if (isEnabled()) {
+    createManager();
+  }
+
+  const configListener = workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration("quarto.cells.diagnostics.enabled")) {
+      if (isEnabled()) {
+        createManager();
+      } else {
+        disposeManager();
+      }
+    }
+  });
+
+  return new VscodeDisposable(() => {
+    configListener.dispose();
+    disposeManager();
+  });
 }

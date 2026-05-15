@@ -445,7 +445,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
  * Activates cell diagnostics if enabled, and watches for setting changes
  * to create/dispose the manager dynamically.
  */
-export function activateDiagnostics(
+export function activateEmbeddedDiagnostics(
   engine: MarkdownEngine,
   outputChannel: LogOutputChannel,
 ): VscodeDisposable {

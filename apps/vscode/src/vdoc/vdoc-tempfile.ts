@@ -63,7 +63,9 @@ export async function virtualDocUriFromTempFile(
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
 
   if (warmup && !useLocal) {
-    // TODO: Reevaluate whether this warmup is necessary.
+    // TODO: Reevaluate whether this is necessary. Old comment:
+    // > if this is the first time getting a virtual doc for this
+    // > language then execute a dummy request to cause it to load
     await commands.executeCommand<Hover[]>(
       "vscode.executeHoverProvider",
       virtualDocUri,
@@ -93,6 +95,15 @@ async function deleteDocument(doc: TextDocument) {
     // closes the text document in the language server, which clears
     // diagnostics for the file. This stops diagnostics from building
     // up even after virtual docs are cleaned up.
+    //
+    // Unfortunately, workspace.fs.delete does not trigger the
+    // vscode.window.onDidCloseTextDocument event, which the language
+    // client relies on to send the textDocument/didClose notification
+    // to the language server.
+    //
+    // vscode.WorkspaceEdit *does* trigger onDidCloseTextDocument,
+    // but doesn't support skipping the trash - see the note above
+    // re #708.
     await languages.setTextDocumentLanguage(doc, "plaintext");
 
     await workspace.fs.delete(doc.uri, {

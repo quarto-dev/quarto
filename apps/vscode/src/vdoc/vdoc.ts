@@ -12,7 +12,6 @@
  * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
  *
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import { Position, TextDocument, Uri, Range, SemanticTokens } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
@@ -31,9 +30,11 @@ export interface VirtualDoc {
 
 export enum VirtualDocStyle {
   /** Every block corresponding to the current position's language */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Language,
 
   /** Only the block corresponding to the current position */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   Block
 }
 
@@ -190,6 +191,7 @@ async function virtualDocUri(
   parentUri: Uri,
   action: VirtualDocAction
 ): Promise<VirtualDocUri> {
+
   // format and definition actions use a transient local vdoc
   // (so they can get project-specific paths and formatting config)
   const local = ["format", "definition"].includes(action);

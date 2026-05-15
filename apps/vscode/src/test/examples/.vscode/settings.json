@@ -1,3 +1,6 @@
 {
-    "quarto.symbols.exportToWorkspace": "default"
+    "quarto.symbols.exportToWorkspace": "default",
+    // Disable the main diagnostics manager during tests,
+    // we test against a test-specific instance instead.
+    "quarto.cells.diagnostics.enabled": false
 }

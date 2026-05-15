@@ -48,7 +48,7 @@ function publishDiagnostics(document: TextDocument) {
 
 // Initialize the server.
 connection.onInitialize(() => {
-  console.log(`Initialized!`);;
+  console.log(`Initialized!`);
   return {
     capabilities: {},
   };

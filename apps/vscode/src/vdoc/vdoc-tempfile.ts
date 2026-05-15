@@ -78,7 +78,7 @@ export async function virtualDocUriFromTempFile(
  *
  * @param doc The `TextDocument` to delete
  */
-async function deleteDocument(doc: TextDocument) {
+export async function deleteDocument(doc: TextDocument) {
   try {
     // First set the language to 'plaintext' so that the language client
     // closes the text document in the language server, which clears

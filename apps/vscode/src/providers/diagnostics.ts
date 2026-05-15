@@ -52,6 +52,18 @@ export interface DidUpdateDiagnosticsEvent {
   readonly diagnostics: Diagnostic[];
 }
 
+/** Event fired when a virtual document is activated (created and opened). */
+export interface DidActivateVdocEvent {
+  /** The URI of the virtual document. */
+  readonly uri: Uri;
+
+  /** The document the vdoc belongs to. */
+  readonly documentUri: Uri;
+
+  /** The language the vdoc was created for (e.g. "python", "typescript"). */
+  readonly language: string;
+}
+
 /** Why a virtual document was disposed. */
 export type VdocDisposeReason = 'diagnostics-received' | 'timeout' | 'document-changed' | 'session-removed';
 
@@ -114,6 +126,13 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
   /** Event fired when embedded diagnostics are updated for a document. */
   public readonly onDidUpdateDiagnostics = this._onDidUpdateDiagnostics.event;
+
+  private readonly _onDidActivateVdoc = this._register(
+    new EventEmitter<DidActivateVdocEvent>()
+  );
+
+  /** Event fired when a virtual document is activated (created and opened). */
+  public readonly onDidActivateVdoc = this._onDidActivateVdoc.event;
 
   private readonly _onDidDisposeVdoc = this._register(
     new EventEmitter<DidDisposeVdocEvent>()
@@ -304,6 +323,11 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         },
       };
       this.sessionByVdocUri.set(vdoc.uri.toString(), session);
+      this._onDidActivateVdoc.fire({
+        uri: vdoc.uri,
+        documentUri: session.documentUri,
+        language: session.language.ids[0],
+      });
 
       this.outputChannel.debug(
         `[EmbeddedDiagnostics] Activated vdoc for ` +
@@ -346,6 +370,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
     session.diagnostics = mapped;
     await this.disposeActiveVdoc(session, 'diagnostics-received');
+    if (this.isDisposed) {
+      // Manager got disposed while disposing the vdoc.
+      return;
+    }
     this.publishDiagnostics(session.documentUri);
   }
 
@@ -423,6 +451,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private shouldUseLocalTempFile(language: EmbeddedLanguage): boolean {
+    if (language.localTempFile) {
+      return true;
+    }
+
     // The vscode-R extension uses the languageserver R package
     // which does not provide diagnostics for files in the system
     // temp directory. Use a local temp file in that case.
@@ -525,11 +557,15 @@ export function activateEmbeddedDiagnostics(
     }
   });
 
-  return Object.assign(
-    new VscodeDisposable(() => {
+  return {
+    dispose() {
       configListener.dispose();
       disposeManager();
-    }),
-    { deactivate: () => manager?.deactivate() ?? Promise.resolve() }
-  );
+    },
+    async deactivate() {
+      if (manager) {
+        await manager.deactivate();
+      }
+    },
+  };
 }

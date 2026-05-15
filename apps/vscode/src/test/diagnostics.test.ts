@@ -222,6 +222,29 @@ suite("Diagnostics", function () {
     );
   });
 
+  test("clears diagnostics when all executable cells are removed", async function () {
+    const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-undefined.qmd");
+
+    // Remove the entire code cell, leaving only markdown.
+    const cleared = nextDiagnostics(manager, uri);
+    const editor = await vscode.window.showTextDocument(doc);
+    const fullRange = new vscode.Range(
+      new vscode.Position(7, 0),
+      new vscode.Position(doc.lineCount, 0)
+    );
+    await editor.edit((editBuilder) => {
+      editBuilder.replace(fullRange, "No code here.\n");
+    });
+    const event = await raceTimeout(cleared, 4000);
+    assert.ok(event, "Timed out waiting for diagnostics to clear after removing all cells");
+
+    assert.strictEqual(
+      event.diagnostics.length,
+      0,
+      "Diagnostics should be cleared when no executable cells remain"
+    );
+  });
+
   test("clears diagnostics when document is closed", async function () {
     const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-offset.qmd");
 

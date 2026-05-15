@@ -250,15 +250,20 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       session.languageBlocks.push(block);
     }
 
-    // Concurrently activate sessions for this document.
     const docSessions = this.getSessionsForDocument(document.uri);
-    await Promise.all(docSessions.map(s => this.activateSession(s, document, tokens)));
+    if (docSessions.length === 0) {
+      // No executable cells - clear stale diagnostics that
+      // won't be superseded by a new vdoc round-trip.
+      this.diagnosticCollection.delete(document.uri);
+      this._onDidUpdateDiagnostics.fire({ documentUri: document.uri, diagnostics: [] });
+      return;
+    } else {
+      // Concurrently activate sessions for this document.
+      await Promise.all(docSessions.map(s => this.activateSession(s, document, tokens)));
+    }
   }
 
   private async recreateSessionsForDocument(document: TextDocument): Promise<void> {
-    // Dispose active vdocs but preserve diagnostics even though
-    // they may be stale, to avoid flickers. New diagnostics
-    // should arrive soon.
     await this.removeSessionsForDocument(document.uri, "document-changed");
     await this.createSessionsForDocument(document);
   }
@@ -335,12 +340,12 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     this.publishDiagnostics(session.documentUri);
   }
 
-  private publishDiagnostics(docUri: Uri): void {
-    const allDiagnostics = this.getSessionsForDocument(docUri)
+  private publishDiagnostics(documentUri: Uri): void {
+    const allDiagnostics = this.getSessionsForDocument(documentUri)
       .flatMap(s => s.diagnostics);
 
-    this.diagnosticCollection.set(docUri, allDiagnostics);
-    this._onDidUpdateDiagnostics.fire({ documentUri: docUri, diagnostics: allDiagnostics });
+    this.diagnosticCollection.set(documentUri, allDiagnostics);
+    this._onDidUpdateDiagnostics.fire({ documentUri: documentUri, diagnostics: allDiagnostics });
   };
 
   // --- Helpers ---
@@ -377,8 +382,8 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     return this.sessions.find(s => s.activeVdoc?.uri.toString() === key);
   }
 
-  private async removeSessionsForDocument(docUri: Uri, reason: VdocDisposeReason): Promise<void> {
-    const docKey = docUri.toString();
+  private async removeSessionsForDocument(documentUri: Uri, reason: VdocDisposeReason): Promise<void> {
+    const docKey = documentUri.toString();
     for (let i = this.sessions.length - 1; i >= 0; i--) {
       if (this.sessions[i].documentUri.toString() === docKey) {
         await this.disposeActiveVdoc(this.sessions[i], reason);

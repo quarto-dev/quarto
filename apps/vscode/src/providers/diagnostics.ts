@@ -26,7 +26,9 @@ import {
 import {
   TokenCodeBlock,
   TokenMath,
+  isExecutableLanguageBlock,
   languageBlockAtPosition,
+  languageNameFromBlock,
 } from "quarto-core";
 
 import { MarkdownEngine } from "../markdown/engine";
@@ -134,7 +136,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     // Listen for diagnostics arriving on virtual documents.
     this._register(languages.onDidChangeDiagnostics(async (event) => {
       for (const uri of event.uris) {
-        const session = this.findSessionByVdocUri(uri);
+        const session = this.getSessionByVdocUri(uri);
         if (session) {
           await this.handleDiagnosticsReceived(session, uri);
         }
@@ -225,25 +227,20 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   // --- Session management ---
 
   private async createSessionsForDocument(document: TextDocument): Promise<void> {
+    // Create or append blocks to each language's session for the document.
     const tokens = this.engine.parse(document);
-    const blocksByLanguage = languageBlocksByLanguage(tokens);
-
-    for (const [languageName, languageBlocks] of blocksByLanguage) {
+    for (const block of tokens.filter(isExecutableLanguageBlock)) {
+      const languageName = languageNameFromBlock(block);
+      if (!languageName) { continue; } // No language, should not happen for a language block.
       const language = embeddedLanguage(languageName);
-      if (!language) {
-        continue;
-      }
-
-      const session: DiagnosticSession = {
-        docUri: document.uri,
-        language,
-        languageBlocks,
-        diagnostics: [],
-      };
-      this.sessions.push(session);
-
-      await this.activateSession(session, document);
+      if (!language) { continue; } // Unknown language.
+      const session = this.getOrCreateSession(document.uri, language);
+      session.languageBlocks.push(block);
     }
+
+    // Activate sessions for this document concurrently.
+    const docSessions = this.getSessionsForDocument(document.uri);
+    await Promise.all(docSessions.map(s => this.activateSession(s, document)));
   }
 
   private async recreateSessionsForDocument(document: TextDocument): Promise<void> {
@@ -299,7 +296,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         JSON.stringify(error)
       );
     }
-  }
+  };
 
   // --- Diagnostics handling ---
 
@@ -332,18 +329,43 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private publishDiagnostics(docUri: Uri): void {
-    const docKey = docUri.toString();
-    const allDiagnostics = this.sessions
-      .filter(s => s.docUri.toString() === docKey)
+    const allDiagnostics = this.getSessionsForDocument(docUri)
       .flatMap(s => s.diagnostics);
 
     this.diagnosticCollection.set(docUri, allDiagnostics);
     this._onDidUpdateDiagnostics.fire({ uri: docUri, diagnostics: allDiagnostics });
-  }
+  };
 
   // --- Helpers ---
 
-  private findSessionByVdocUri(uri: Uri): DiagnosticSession | undefined {
+  private getSession(uri: Uri, language: EmbeddedLanguage): DiagnosticSession | undefined {
+    const key = uri.toString();
+    return this.sessions.find(
+      s => s.docUri.toString() === key &&
+        s.language.ids[0] === language.ids[0]
+    );
+  }
+
+  private getOrCreateSession(uri: Uri, language: EmbeddedLanguage): DiagnosticSession {
+    let session = this.getSession(uri, language);
+    if (!session) {
+      session = {
+        docUri: uri,
+        language,
+        languageBlocks: [],
+        diagnostics: []
+      };
+      this.sessions.push(session);
+    }
+    return session;
+  }
+
+  private getSessionsForDocument(uri: Uri): DiagnosticSession[] {
+    const key = uri.toString();
+    return this.sessions.filter(s => s.docUri.toString() === key);
+  }
+
+  private getSessionByVdocUri(uri: Uri): DiagnosticSession | undefined {
     const key = uri.toString();
     return this.sessions.find(s => s.activeVdoc?.uri.toString() === key);
   }

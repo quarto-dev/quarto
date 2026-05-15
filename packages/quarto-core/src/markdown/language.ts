@@ -15,7 +15,7 @@
 
 import { Position } from "../position";
 
-import { Token, TokenCodeBlock, TokenMath, isCodeBlock, isMath, kAttrClasses } from "./token";
+import { Token, TokenCodeBlock, TokenMath, isCodeBlock, isMath, kAttrClasses  } from "./token";
 
 export function isLanguageBlock(token: Token) {
   return isCodeBlock(token) || isDisplayMath(token);
@@ -24,7 +24,7 @@ export function isLanguageBlock(token: Token) {
 // a language block that will be executed with its results
 // inclued in the document (either by an engine or because
 // it is a raw or display math block)
-export function isExecutableLanguageBlock(token: Token): token is TokenMath | TokenCodeBlock {
+export function isExecutableLanguageBlock(token: Token) : token is TokenMath | TokenCodeBlock {
   if (isDisplayMath(token)) {
     return true;
   } else if (isCodeBlock(token) && token.attr?.[kAttrClasses].length) {
@@ -87,7 +87,7 @@ export function isDisplayMath(token: Token): token is TokenMath {
   }
 }
 
-export function isDiagram(token: Token): token is TokenCodeBlock {
+export function isDiagram(token: Token) : token is TokenCodeBlock {
   return (
     isExecutableLanguageBlockOf("mermaid")(token) ||
     isExecutableLanguageBlockOf("dot")(token)
@@ -110,7 +110,7 @@ export function languageNameFromBlock(token: Token) {
 }
 
 export function isExecutableLanguageBlockOf(language: string) {
-  return (token: Token): token is TokenMath | TokenCodeBlock => {
+  return (token: Token) : token is TokenMath | TokenCodeBlock => {
     return (
       isExecutableLanguageBlock(token) &&
       languageNameFromBlock(token) === language

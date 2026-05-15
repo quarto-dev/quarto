@@ -311,6 +311,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
           `for ${workspace.asRelativePath(session.documentUri)}`
         );
         await this.disposeActiveVdoc(session, 'timeout');
+        // The happy path (handleDiagnosticsReceived) replaces old diagnostics
+        // with fresh ones. On timeout, no replacement is coming - clear explicitly.
+        session.diagnostics = [];
+        this.publishDiagnostics(session.documentUri);
       }, this.timeoutMs);
 
       session.activeVdoc = {
@@ -340,6 +344,9 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         `${session.language.ids[0]} in ${workspace.asRelativePath(session.documentUri)}: ` +
         JSON.stringify(error)
       );
+      // Same as timeout - no replacement diagnostics are coming.
+      session.diagnostics = [];
+      this.publishDiagnostics(session.documentUri);
     }
   }
 

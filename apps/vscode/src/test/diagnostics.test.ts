@@ -166,6 +166,36 @@ suite("Diagnostics", function () {
     assert.strictEqual(exists, false, "Expected vdoc file to be deleted after timeout");
   });
 
+  test("clears stale diagnostics after timeout", async function () {
+    const shortTimeoutManager = createTestManager(disposables, 200);
+
+    const { uri, doc } = await openAndAwaitDiagnostics(
+      shortTimeoutManager, "diagnostics-timeout.qmd", toDelete
+    );
+    assert.ok(vscode.languages.getDiagnostics(uri).length >= 1, "Should have Python diagnostics initially");
+
+    // Wait for the initial Julia timeout before editing,
+    // otherwise nextDiagnostics catches that event instead.
+    await raceTimeout(nextVdocDisposal(shortTimeoutManager, "timeout", "julia"), 2000);
+
+    // Delete the Python cell, keeping only Julia (which will timeout).
+    const cleared = nextDiagnostics(shortTimeoutManager, uri);
+    const editor = await vscode.window.showTextDocument(doc);
+    await editor.edit((editBuilder) => {
+      editBuilder.delete(
+        new vscode.Range(
+          new vscode.Position(11, 0),
+          new vscode.Position(doc.lineCount, 0)
+        )
+      );
+    });
+
+    const event = await raceTimeout(cleared, 3000);
+    assert.ok(event, "Expected diagnostics update after timeout");
+    assert.strictEqual(event.diagnostics.length, 0,
+      "Stale Python diagnostics should be cleared after Julia-only timeout");
+  });
+
   test("clears diagnostics when error is fixed", async function () {
     const { uri, doc } = await openAndAwaitDiagnostics(manager, "diagnostics-python-undefined.qmd", toDelete);
 

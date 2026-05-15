@@ -26,6 +26,7 @@ const testBuildOptions = {
   outdir: 'test-out',
   external: ['vscode', 'mocha', 'glob'],
   sourcemap: true,
+  dev,
 };
 
 const defaultBuildOptions = {
@@ -36,4 +37,11 @@ const defaultBuildOptions = {
   dev
 };
 
-runBuild(test ? testBuildOptions : defaultBuildOptions);
+if (test) {
+  runBuild(testBuildOptions);
+} else if (dev) {
+  runBuild(defaultBuildOptions);
+  runBuild(testBuildOptions);
+} else {
+  runBuild(defaultBuildOptions);
+}

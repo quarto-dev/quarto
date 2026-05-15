@@ -71,7 +71,7 @@ interface ActiveVdoc {
   /** URI of the temp file opened as a text document. */
   uri: Uri;
   /** Deletes the temp file and resets its language so the LS clears diagnostics. */
-  cleanup: () => Promise<void>;
+  cleanup?: () => Promise<void>;
   /** Fires if the language server doesn't respond in time. */
   timeout: NodeJS.Timeout;
 }
@@ -287,7 +287,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         await this.disposeActiveVdoc(session, 'timeout');
       }, this.timeoutMs);
 
-      session.activeVdoc = { uri, cleanup: cleanup!, timeout };
+      session.activeVdoc = { uri, cleanup, timeout };
 
       this.outputChannel.debug(
         `[EmbeddedDiagnostics] Activated vdoc for ` +
@@ -379,7 +379,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     if (session.activeVdoc) {
       const vdocUri = session.activeVdoc.uri;
       clearTimeout(session.activeVdoc.timeout);
-      await session.activeVdoc.cleanup();
+      await session.activeVdoc.cleanup?.();
       session.activeVdoc = undefined;
 
       this.outputChannel.debug(

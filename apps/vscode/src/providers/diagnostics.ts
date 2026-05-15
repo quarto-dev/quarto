@@ -441,6 +441,9 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     return false;
   }
 
+  /** Settled when all active vdocs from dispose() have been cleaned up. */
+  private _disposePromise?: Promise<PromiseSettledResult<void>[]>;
+
   public override dispose(): void {
     super.dispose();
 
@@ -449,17 +452,27 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     }
     this.debounceTimers.clear();
 
-    for (const session of this.sessions) {
-      this.disposeActiveVdoc(session, 'session-removed').catch((error) => {
-        this.outputChannel.error(
-          `[EmbeddedDiagnostics] Failed to dispose vdoc for ` +
-          `${session.language.ids[0]} in ${workspace.asRelativePath(session.documentUri)}: ` +
-          JSON.stringify(error)
-        );
-      });
-    }
+    // Best-effort async cleanup — awaited via deactivate() during extension deactivation.
+    this._disposePromise = Promise.allSettled(
+      this.sessions
+        .filter(s => s.activeVdoc)
+        .map(s => this.disposeActiveVdoc(s, 'session-removed'))
+    );
     this.sessions.length = 0;
   }
+
+  /**
+   * Awaitable cleanup for use during extension deactivation.
+   * Resolves when all active vdocs have been disposed (or failed).
+   */
+  async deactivate(): Promise<void> {
+    await this._disposePromise;
+  }
+}
+
+export interface EmbeddedDiagnosticsService extends VscodeDisposable {
+  /** Awaitable cleanup for use during extension deactivation. */
+  deactivate(): Promise<void>;
 }
 
 /**
@@ -469,7 +482,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 export function activateEmbeddedDiagnostics(
   engine: MarkdownEngine,
   outputChannel: LogOutputChannel,
-): VscodeDisposable {
+): EmbeddedDiagnosticsService {
   let manager: EmbeddedDiagnosticsManager | undefined;
 
   function isEnabled(): boolean {
@@ -505,8 +518,11 @@ export function activateEmbeddedDiagnostics(
     }
   });
 
-  return new VscodeDisposable(() => {
-    configListener.dispose();
-    disposeManager();
-  });
+  return Object.assign(
+    new VscodeDisposable(() => {
+      configListener.dispose();
+      disposeManager();
+    }),
+    { deactivate: () => manager?.deactivate() ?? Promise.resolve() }
+  );
 }

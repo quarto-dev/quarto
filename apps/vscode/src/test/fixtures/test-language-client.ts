@@ -6,7 +6,10 @@ import { TestLogOutputChannel } from "./test-log-output-channel";
  * A {@link LanguageClient} for testing, which connects to `test-language-server.js`.
  */
 export function testLanguageClient(): LanguageClient {
-  const serverModule = path.join(__dirname, "test-language-server.js");
+  // This code runs from bundled test files in test-out/, so __dirname is
+  // apps/vscode/test-out/. The server is a standalone .js file (not part of
+  // the bundle) because the LanguageClient spawns it as a child process.
+  const serverModule = path.join(__dirname, "..", "src", "test", "fixtures", "test-language-server.js");
 
   const serverOptions: ServerOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },

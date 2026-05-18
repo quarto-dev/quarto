@@ -1,9 +1,11 @@
-import {
+// @ts-check
+
+const {
   createConnection,
   DiagnosticSeverity,
   TextDocuments,
-} from "vscode-languageserver/node";
-import { TextDocument } from "vscode-languageserver-textdocument";
+} = require("vscode-languageserver/node");
+const { TextDocument } = require("vscode-languageserver-textdocument");
 
 /**
  * This module defines a language server for testing.
@@ -17,8 +19,9 @@ const { console } = connection;
 
 /**
  * Publish diagnostics for a text document.
+ * @param {import("vscode-languageserver-textdocument").TextDocument} document
  */
-function publishDiagnostics(document: TextDocument) {
+function publishDiagnostics(document) {
   // Get the document's lines.
   const allText = document.getText();
   const lines = allText.split("\n");
@@ -75,6 +78,5 @@ documents.onDidClose(({ document }) => {
 
 // Connect the text document manager.
 documents.listen(connection);
-
 // Listen on the connection.
 connection.listen();

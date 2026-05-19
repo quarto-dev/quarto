@@ -17,6 +17,28 @@ import * as vscode from 'vscode';
 import { markdownitParser, Token } from 'quarto-core';
 import { createThrottle } from '../core/throttle';
 
+// Define decoration types for different nesting levels (rotating colors)
+const decorationTypes = [
+  vscode.window.createTextEditorDecorationType({
+    color: new vscode.ThemeColor('editorBracketHighlight.foreground1'),
+  }),
+  vscode.window.createTextEditorDecorationType({
+    color: new vscode.ThemeColor('editorBracketHighlight.foreground2'),
+  }),
+  vscode.window.createTextEditorDecorationType({
+    color: new vscode.ThemeColor('editorBracketHighlight.foreground3'),
+  }),
+];
+
+// Decoration type for matching pairs when cursor is on a bracket
+const matchHighlightDecorationType = vscode.window.createTextEditorDecorationType({
+  backgroundColor: new vscode.ThemeColor('editor.wordHighlightBackground'),
+  border: '1px solid',
+  borderRadius: '6px',
+  borderColor: new vscode.ThemeColor('editor.wordHighlightBorder'),
+  color: new vscode.ThemeColor('editor.foreground'),
+});
+
 /**
  * Provides colored decorations for div bracket pairs (:::)
  *
@@ -38,34 +60,6 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
 
   // Map of editors to their throttled update functions
   const editorThrottledFunctions = new Map<vscode.TextEditor, () => void>();
-
-  // Define decoration types for different nesting levels (rotating colors)
-  const decorationTypes = [
-    vscode.window.createTextEditorDecorationType({
-      color: new vscode.ThemeColor('editorBracketHighlight.foreground1'),
-    }),
-    vscode.window.createTextEditorDecorationType({
-      color: new vscode.ThemeColor('editorBracketHighlight.foreground2'),
-    }),
-    vscode.window.createTextEditorDecorationType({
-      color: new vscode.ThemeColor('editorBracketHighlight.foreground3'),
-    }),
-  ];
-
-  // Decoration type for matching pairs when cursor is on a bracket
-  const matchHighlightDecorationType = vscode.window.createTextEditorDecorationType({
-    backgroundColor: new vscode.ThemeColor('editor.wordHighlightBackground'),
-    border: '1px solid',
-    borderRadius: '6px',
-    borderColor: new vscode.ThemeColor('editor.wordHighlightBorder'),
-  });
-
-  // Helper to extract ::: range from a line
-  const getDivMarkerRange = (editor: vscode.TextEditor, line: number): vscode.Range | null => {
-    const lineText = editor.document.lineAt(line).text;
-    const match = lineText.match(/^(:::+)/);
-    return match ? new vscode.Range(line, 0, line, match[1].length) : null;
-  };
 
   function updateDecorations(editor: vscode.TextEditor) {
     if (editor.document.languageId !== 'quarto') return;
@@ -95,17 +89,7 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
     const decorationsByLevel = decorationTypes.map(() => [] as vscode.Range[]);
     const matchHighlights: vscode.Range[] = [];
 
-    // Calculate nesting depth for all divs in a single pass using a stack
-    const divDepth = new Map<Token, number>();
-    const stack: Token[] = [];
-    for (const divToken of divTokens) {
-      // Pop divs from stack that have ended before this div starts
-      while (stack.length > 0 && stack.at(-1)!.range.end.line < divToken.range.start.line) {
-        stack.pop();
-      }
-      divDepth.set(divToken, stack.length);
-      stack.push(divToken);
-    }
+    const divDepth = getDivDepths(divTokens);
 
     // Apply decorations
     for (const divToken of divTokens) {
@@ -131,7 +115,6 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
     );
     editor.setDecorations(matchHighlightDecorationType, matchHighlights);
   }
-
 
   function updateDecorationsThrottled(editor: vscode.TextEditor) {
     let throttled = editorThrottledFunctions.get(editor);
@@ -196,4 +179,43 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
       decorationTypes.forEach(type => type.dispose());
     }
   });
+}
+
+/**
+ * Helper to extract ::: range from a line
+ */
+export const getDivMarkerRange = (editor: vscode.TextEditor, line: number): vscode.Range | null => {
+  const lineText = editor.document.lineAt(line).text;
+  const match = lineText.match(/^(:::+)/);
+  return match ? new vscode.Range(line, 0, line, match[1].length) : null;
+};
+
+/**
+ * Helper to calculate the nesting depths of divs (how many divs a div is nested inside)
+ * e.g.
+ * ```
+ * ::::
+ * depth 0 ^
+ * :::
+ * depth 1 ^
+ * :::
+ * ::::
+ * :::
+ * depth 0 again
+ * :::
+ * ```
+ */
+export function getDivDepths(divTokens: Token[]): Map<Token, number> {
+  // Calculate nesting depth for all divs in a single pass using a stack
+  const divDepth = new Map<Token, number>();
+  const stack: Token[] = [];
+  for (const divToken of divTokens) {
+    // Pop divs from stack that have ended before this div starts
+    while (stack.length > 0 && stack.at(-1)!.range.end.line < divToken.range.start.line) {
+      stack.pop();
+    }
+    divDepth.set(divToken, stack.length);
+    stack.push(divToken);
+  }
+  return divDepth;
 }

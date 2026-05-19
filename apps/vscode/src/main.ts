@@ -292,22 +292,21 @@ function registerOutlineConfigListener(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (event.affectsConfiguration("quarto.symbols.showCodeCellsInOutline")) {
         // This edit triggers VS Code to re-request document symbols from the LSP,
-        // which will then use the updated configuration value. It is necessary
-        // because VSCode seems to have its own outline cache that we cannot otherwise
-        // invalidate from the extension side.
-        const editor = vscode.window.activeTextEditor;
-        if (editor && editor.document.languageId === "quarto") {
-          // The undoStopBefore/After: false options prevent these edits from creating undo stops,
-          // minimizing their impact on the undo history.
-          // See: https://code.visualstudio.com/api/references/vscode-api#TextEditorEdit
-          await editor.edit(
-            edit => edit.insert(new vscode.Position(0, 0), " "),
-            { undoStopBefore: false, undoStopAfter: false }
-          );
-          await editor.edit(
-            edit => edit.delete(new vscode.Range(0, 0, 0, 1)),
-            { undoStopBefore: false, undoStopAfter: false }
-          );
+        // which will then use the updated configuration value.
+        // The undoStopBefore/After: false options prevent these edits from creating undo stops,
+        // minimizing their impact on the undo history.
+        // See: https://code.visualstudio.com/api/references/vscode-api#TextEditorEdit
+        for (const editor of vscode.window.visibleTextEditors) {
+          if (editor.document.languageId === "quarto") {
+            await editor.edit(
+              edit => edit.insert(new vscode.Position(0, 0), " "),
+              { undoStopBefore: false, undoStopAfter: false }
+            );
+            await editor.edit(
+              edit => edit.delete(new vscode.Range(0, 0, 0, 1)),
+              { undoStopBefore: false, undoStopAfter: false }
+            );
+          }
         }
       }
     })

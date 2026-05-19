@@ -24,14 +24,8 @@ class ToggleCodeCellsInOutlineCommand implements Command {
     const currentValue = config.get<boolean>("symbols.showCodeCellsInOutline", true);
     const newValue = !currentValue;
 
+    // Update the configuration - the `registerOutlineConfigListener`config listener handles outline refresh
     await config.update("symbols.showCodeCellsInOutline", newValue, vscode.ConfigurationTarget.Global);
-
-    // Hack: trigger outline refresh by making a no-op edit
-    const editor = vscode.window.activeTextEditor;
-    if (editor && editor.document.languageId === "quarto") {
-      await editor.edit(edit => edit.insert(new vscode.Position(0, 0), " "));
-      await editor.edit(edit => edit.delete(new vscode.Range(0, 0, 0, 1)));
-    }
 
     vscode.window.showInformationMessage(
       `Code cells in outline will now be ${newValue ? "shown" : "hidden"}.`

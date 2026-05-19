@@ -121,6 +121,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
+    // Register configuration change listener for outline settings
+    registerOutlineConfigListener(context);
+
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
     commands.push(...editorCommands);
@@ -276,6 +279,36 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
             vscode.commands.executeCommand("workbench.action.reloadWindow");
           }
         });
+      }
+    })
+  );
+}
+
+/**
+ * Register a listener for changes to outline settings to refresh the outline
+ */
+function registerOutlineConfigListener(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(async (event) => {
+      if (event.affectsConfiguration("quarto.symbols.showCodeCellsInOutline")) {
+        // This edit triggers VS Code to re-request document symbols from the LSP,
+        // which will then use the updated configuration value. It is necessary
+        // because VSCode seems to have its own outline cache that we cannot otherwise
+        // invalidate from the extension side.
+        const editor = vscode.window.activeTextEditor;
+        if (editor && editor.document.languageId === "quarto") {
+          // The undoStopBefore/After: false options prevent these edits from creating undo stops,
+          // minimizing their impact on the undo history.
+          // See: https://code.visualstudio.com/api/references/vscode-api#TextEditorEdit
+          await editor.edit(
+            edit => edit.insert(new vscode.Position(0, 0), " "),
+            { undoStopBefore: false, undoStopAfter: false }
+          );
+          await editor.edit(
+            edit => edit.delete(new vscode.Range(0, 0, 0, 1)),
+            { undoStopBefore: false, undoStopAfter: false }
+          );
+        }
       }
     })
   );

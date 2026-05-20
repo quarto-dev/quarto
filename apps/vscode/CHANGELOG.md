@@ -2,7 +2,7 @@
 
 ## 1.133.0
 
-- Add custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
+- Added custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
 
 
 ## 1.132.0 (Release on 2026-05-05)

@@ -40,6 +40,7 @@ import { activateDenoConfig } from "./providers/deno-config";
 import { textFormattingCommands } from "./providers/text-format";
 import { newDocumentCommands } from "./providers/newdoc";
 import { insertCommands } from "./providers/insert";
+import { registerOutlineConfigListener, symbolsCommands } from "./providers/symbols";
 import { activateDiagram } from "./providers/diagram/diagram";
 import { activateCodeFormatting } from "./providers/format";
 import { activateOptionEnterProvider } from "./providers/option";
@@ -121,6 +122,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
+    // restore outline expansion after the LSP re-registers symbols on config change
+    registerOutlineConfigListener(context);
+
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
     commands.push(...editorCommands);
@@ -157,6 +161,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   commands.push(...newDocumentCommands());
 
   commands.push(...insertCommands(engine));
+
+  commands.push(...symbolsCommands());
 
   commands.push(...activateDiagram(context, host, engine));
 

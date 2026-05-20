@@ -1,0 +1,15 @@
+---
+title: "Simple Divs Test"
+---
+
+::: {.callout-note}
+A simple div
+:::
+
+Some text.
+
+:::: {.columns}
+::: {.column}
+Nested div
+:::
+::::

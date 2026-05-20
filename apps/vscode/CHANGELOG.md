@@ -2,6 +2,7 @@
 
 ## 1.133.0
 
+- Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>)
 - Added custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
 
 

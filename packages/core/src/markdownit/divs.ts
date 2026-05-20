@@ -69,7 +69,7 @@ export const divPlugin = (md: MarkdownIt) => {
       }
 
       // Three or more colons followed by a an optional brace with attributes
-      const divBraceRegex = /^(:::+)\s*(?:(\{[\s\S]+?\}))?$/;
+      const divBraceRegex = /^(:::+)\s*(?:(\{[\s\S]*?\}))?$/;
 
       // Three or more colons followed by a string with no braces
       const divNoBraceRegex = /^(:::+)\s*(?:([^{}\s]+?))?$/;

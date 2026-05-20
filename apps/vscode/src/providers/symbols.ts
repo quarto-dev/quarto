@@ -24,7 +24,8 @@ class ToggleCodeCellsInOutlineCommand implements Command {
     const currentValue = config.get<boolean>("symbols.showCodeCellsInOutline", true);
     const newValue = !currentValue;
 
-    // Update the configuration - the `registerOutlineConfigListener`config listener handles outline refresh
+    // The LSP re-registers its document symbol provider on config change, which triggers VS Code to re-query the outline.
+    // The VS Code extension restores outline expansion state after the re-query (see `registerOutlineConfigListener`).
     await config.update("symbols.showCodeCellsInOutline", newValue, vscode.ConfigurationTarget.Global);
 
     vscode.window.showInformationMessage(

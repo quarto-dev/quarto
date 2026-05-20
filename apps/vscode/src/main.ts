@@ -121,7 +121,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
 
-    // Register configuration change listener for outline settings
+    // restore outline expansion after the LSP re-registers symbols on config change
     registerOutlineConfigListener(context);
 
     // provide visual editor
@@ -285,29 +285,44 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
 }
 
 /**
- * Register a listener for changes to outline settings to refresh the outline
+ * Restore outline expansion state after settings that affect symbol output change.
+ *
+ * The LSP re-registers its document symbol provider whenever the relevant
+ * settings change, which forces VS Code to re-query and refresh the outline.
+ * That re-query rebuilds the tree from scratch, so VS Code's heuristic for
+ * symbols with newly-appearing children defaults them to collapsed (e.g.
+ * toggling on code cells leaves their parent headers collapsed).
+ *
+ * We expand the outline once a Quarto editor is active: immediately if the
+ * user already has one focused (e.g. they ran the toggle command), or on the
+ * next switch back if the setting was changed from the Settings UI.
  */
 function registerOutlineConfigListener(context: vscode.ExtensionContext) {
+  let expandPending = false;
+
+  const expandOutline = async () => {
+    // brief delay so the re-query and tree rebuild settle before expanding
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await vscode.commands.executeCommand("outline.expand");
+  };
+
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (event.affectsConfiguration("quarto.symbols.showCodeCellsInOutline")) {
-        // This edit triggers VS Code to re-request document symbols from the LSP,
-        // which will then use the updated configuration value.
-        // The undoStopBefore/After: false options prevent these edits from creating undo stops,
-        // minimizing their impact on the undo history.
-        // See: https://code.visualstudio.com/api/references/vscode-api#TextEditorEdit
-        for (const editor of vscode.window.visibleTextEditors) {
-          if (editor.document.languageId === "quarto") {
-            await editor.edit(
-              edit => edit.insert(new vscode.Position(0, 0), " "),
-              { undoStopBefore: false, undoStopAfter: false }
-            );
-            await editor.edit(
-              edit => edit.delete(new vscode.Range(0, 0, 0, 1)),
-              { undoStopBefore: false, undoStopAfter: false }
-            );
-          }
+        if (vscode.window.activeTextEditor?.document.languageId === "quarto") {
+          await expandOutline();
+        } else {
+          expandPending = true;
         }
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+      if (expandPending && editor?.document.languageId === "quarto") {
+        expandPending = false;
+        await expandOutline();
       }
     })
   );

@@ -37,3 +37,53 @@ class ToggleCodeCellsInOutlineCommand implements Command {
 export function symbolsCommands(): Command[] {
   return [new ToggleCodeCellsInOutlineCommand()];
 }
+
+
+
+const expandOutline = async (uri: vscode.Uri) => {
+  // make sure document can provide symbols (for the outline) before expanding the outline
+  await vscode.commands.executeCommand("vscode.executeDocumentSymbolProvider", uri);
+  await vscode.commands.executeCommand("outline.expand");
+};
+/**
+ * Executes `listener(editor)` ONCE, the next time the user switches their active text editor to a qmd.
+ */
+const onNextChangeActiveTextEditorToQmd = (listener: (editor: vscode.TextEditor) => any) => {
+  const listenForNextChangeToQmdDisposable =
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+      if (editor?.document.languageId === "quarto") {
+        // once we switch to a quarto file once, stop listening
+        listenForNextChangeToQmdDisposable.dispose();
+        listener(editor);
+      }
+    });
+};
+
+/**
+ * Restore outline expansion state after settings that affect symbol output change.
+ *
+ * The LSP re-registers its document symbol provider whenever the relevant
+ * settings change, which forces VS Code to re-query and refresh the outline.
+ * That re-query rebuilds the tree from scratch, so VS Code's heuristic for
+ * symbols with newly-appearing children defaults them to collapsed (e.g.
+ * toggling on code cells leaves their parent headers collapsed).
+ *
+ * We expand the outline once a Quarto editor is active: immediately if the
+ * user already has one focused (e.g. they ran the toggle command), or on the
+ * next switch back if the setting was changed from the Settings UI.
+ */
+export function registerOutlineConfigListener(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("quarto.symbols.showCodeCellsInOutline")) {
+        if (vscode.window.activeTextEditor?.document.languageId === "quarto") {
+          expandOutline(vscode.window.activeTextEditor.document.uri);
+        } else {
+          onNextChangeActiveTextEditorToQmd((editor) => {
+            expandOutline(editor.document.uri);
+          });
+        }
+      }
+    })
+  );
+}

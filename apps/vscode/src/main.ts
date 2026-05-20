@@ -40,7 +40,7 @@ import { activateDenoConfig } from "./providers/deno-config";
 import { textFormattingCommands } from "./providers/text-format";
 import { newDocumentCommands } from "./providers/newdoc";
 import { insertCommands } from "./providers/insert";
-import { symbolsCommands } from "./providers/symbols";
+import { registerOutlineConfigListener, symbolsCommands } from "./providers/symbols";
 import { activateDiagram } from "./providers/diagram/diagram";
 import { activateCodeFormatting } from "./providers/format";
 import { activateOptionEnterProvider } from "./providers/option";
@@ -279,50 +279,6 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
             vscode.commands.executeCommand("workbench.action.reloadWindow");
           }
         });
-      }
-    })
-  );
-}
-
-/**
- * Restore outline expansion state after settings that affect symbol output change.
- *
- * The LSP re-registers its document symbol provider whenever the relevant
- * settings change, which forces VS Code to re-query and refresh the outline.
- * That re-query rebuilds the tree from scratch, so VS Code's heuristic for
- * symbols with newly-appearing children defaults them to collapsed (e.g.
- * toggling on code cells leaves their parent headers collapsed).
- *
- * We expand the outline once a Quarto editor is active: immediately if the
- * user already has one focused (e.g. they ran the toggle command), or on the
- * next switch back if the setting was changed from the Settings UI.
- */
-function registerOutlineConfigListener(context: vscode.ExtensionContext) {
-  let expandPending = false;
-
-  const expandOutline = async () => {
-    // brief delay so the re-query and tree rebuild settle before expanding
-    await new Promise(resolve => setTimeout(resolve, 200));
-    await vscode.commands.executeCommand("outline.expand");
-  };
-
-  context.subscriptions.push(
-    vscode.workspace.onDidChangeConfiguration(async (event) => {
-      if (event.affectsConfiguration("quarto.symbols.showCodeCellsInOutline")) {
-        if (vscode.window.activeTextEditor?.document.languageId === "quarto") {
-          await expandOutline();
-        } else {
-          expandPending = true;
-        }
-      }
-    })
-  );
-
-  context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-      if (expandPending && editor?.document.languageId === "quarto") {
-        expandPending = false;
-        await expandOutline();
       }
     })
   );

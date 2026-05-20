@@ -3,8 +3,8 @@
 ## 1.133.0 (Unreleased)
 
 - Add code symbols into outline (<https://github.com/quarto-dev/quarto/pull/972>).
+- Added setting and command to show/hide cells in outline (<https://github.com/quarto-dev/quarto/pull/974>).
 - Added custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
-
 
 ## 1.132.0 (Release on 2026-05-05)
 

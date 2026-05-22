@@ -396,7 +396,31 @@ function embeddedDocumentSymbolProvider(engine: MarkdownEngine) {
     // I don't think we actually ever get SymbolInformation[] here, but I'm not certain
     // so this is defensively coded.
     if (baseSymbols.length > 0 && isDocumentSymbol(baseSymbols[0])) {
-      return await enhanceSymbolsWithCodeCellContent(document, baseSymbols as DocumentSymbol[], engine, token);
+      const enhanced = await enhanceSymbolsWithCodeCellContent(
+        document,
+        baseSymbols as DocumentSymbol[],
+        engine,
+        token
+      );
+
+      if (token.isCancellationRequested) return baseSymbols;
+
+      // If any embedded LSP returned undefined, retry once after a brief delay
+      if (enhanced !== 'HadUndefined') {
+        return enhanced;
+      } else {
+        await new Promise(r => setTimeout(r, 500));
+        if (token.isCancellationRequested) return baseSymbols;
+        const retried = await enhanceSymbolsWithCodeCellContent(
+          document,
+          baseSymbols as DocumentSymbol[],
+          engine,
+          token
+        );
+        if (token.isCancellationRequested) return baseSymbols;
+        return retried === 'HadUndefined' ? baseSymbols : retried;
+
+      }
     }
 
     return baseSymbols;
@@ -412,27 +436,42 @@ async function enhanceSymbolsWithCodeCellContent(
   symbols: DocumentSymbol[],
   engine: MarkdownEngine,
   token: CancellationToken
-): Promise<DocumentSymbol[]> {
+): Promise<DocumentSymbol[] | 'HadUndefined'> {
   const enhanced: DocumentSymbol[] = [];
+  let hadUndefined = false;
 
   for (const symbol of symbols) {
     if (token.isCancellationRequested) return symbols;
 
     // Check if this is a code cell symbol (SymbolKind.Function indicates code cells from toc.ts)
     if (symbol.kind === SymbolKind.Function) {
+      const cellSymbols = await getCodeCellSymbols(document, symbol.range, engine);
+      if (cellSymbols === undefined) {
+        hadUndefined = true;
+      }
       symbol.children = [
         ...symbol.children,
-        ...(await getCodeCellSymbols(document, symbol.range, engine) || [])
+        ...(cellSymbols || [])
       ];
     } else {
-      symbol.children =
-        await enhanceSymbolsWithCodeCellContent(document, symbol.children, engine, token);
+      const childResult = await enhanceSymbolsWithCodeCellContent(
+        document,
+        symbol.children,
+        engine,
+        token
+      );
+      if (childResult === 'HadUndefined') {
+        hadUndefined = true;
+        symbol.children = symbol.children; // Keep existing children
+      } else {
+        symbol.children = childResult;
+      }
     }
 
     enhanced.push(symbol);
   }
 
-  return enhanced;
+  return hadUndefined ? 'HadUndefined' : enhanced;
 }
 
 /**
@@ -470,11 +509,11 @@ async function getCodeCellSymbols(
     // Get symbols from the embedded language server
     return await withVirtualDocUri(vdoc, document.uri, "completion", async (uri: Uri) => {
       try {
-        const result = await commands.executeCommand<DocumentSymbol[] | SymbolInformation[]>(
+        const result = await commands.executeCommand<DocumentSymbol[] | SymbolInformation[] | undefined>(
           "vscode.executeDocumentSymbolProvider",
           uri
         );
-        if (result.length === 0) return undefined;
+        if (result === undefined || result.length === 0) return undefined;
 
         const documentSymbols = isDocumentSymbol(result[0]) ?
           result as DocumentSymbol[] :

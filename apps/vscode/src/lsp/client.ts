@@ -436,6 +436,22 @@ async function enhanceSymbolsWithCodeCellContent(
 }
 
 /**
+ * Converts SymbolInformation[] to DocumentSymbol[] format
+ * SymbolInformation is a flat list, so we convert each to a DocumentSymbol with no children
+ */
+function symbolInformationToDocumentSymbol(
+  symbol: SymbolInformation,
+): DocumentSymbol {
+  return new DocumentSymbol(
+    symbol.name,
+    symbol.containerName || '',
+    symbol.kind,
+    symbol.location.range,
+    symbol.location.range
+  );
+}
+
+/**
  * Gets symbols from an embedded language for a code cell
  */
 async function getCodeCellSymbols(
@@ -460,9 +476,11 @@ async function getCodeCellSymbols(
         );
         if (result.length === 0) return undefined;
 
-        if (isDocumentSymbol(result[0])) {
-          return unadjustSymbolRanges(result as DocumentSymbol[], vdoc.language, cellRange.start.line);
-        }
+        const documentSymbols = isDocumentSymbol(result[0]) ?
+          result as DocumentSymbol[] :
+          (result as SymbolInformation[]).map<DocumentSymbol>(symbolInformationToDocumentSymbol);
+
+        return unadjustSymbolRanges(documentSymbols, vdoc.language, cellRange.start.line);
       } catch (error) { }
     });
   } catch (error) { }

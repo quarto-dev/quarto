@@ -72,6 +72,7 @@ import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { extensionHost } from "../host";
 import semver from "semver";
+import { EmbeddedDiagnosticsManager } from "../providers/embedded-diagnostics";
 
 let client: LanguageClient;
 
@@ -79,7 +80,8 @@ export async function activateLsp(
   context: ExtensionContext,
   quartoContext: QuartoContext,
   engine: MarkdownEngine,
-  outputChannel: LogOutputChannel
+  outputChannel: LogOutputChannel,
+  diagnosticsManager?: EmbeddedDiagnosticsManager
 ) {
 
   // The server is implemented in node
@@ -105,7 +107,7 @@ export async function activateLsp(
   const config = workspace.getConfiguration("quarto");
   activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
-    handleDiagnostics: createDiagnosticFilter(),
+    handleDiagnostics: createDiagnosticFilter(diagnosticsManager),
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
     provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
@@ -369,7 +371,7 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
  *
  * @returns A handler function for the middleware
  */
-export function createDiagnosticFilter() {
+export function createDiagnosticFilter(diagnosticsManager?: EmbeddedDiagnosticsManager) {
   return (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
     // If this is not a virtual document, pass through all diagnostics
     if (!isVirtualDoc(uri)) {
@@ -377,7 +379,11 @@ export function createDiagnosticFilter() {
       return;
     }
 
-    // For virtual documents, filter out all diagnostics
-    next(uri, []);
+    // For virtual docs from Quarto LSP, let diagnostics manager handle them
+    // (but most diagnostics come from other language servers via onDidChangeDiagnostics)
+    const remapped = diagnosticsManager?.handleDiagnostics(uri, diagnostics);
+
+    // Suppress vdoc diagnostics from being published by the LSP
+    next(uri, remapped ?? []);
   };
 }

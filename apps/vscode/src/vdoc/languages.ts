@@ -25,7 +25,7 @@ export interface EmbeddedLanguage {
   trigger?: string[];
   /**
    * Lines of code to inject at the top of the virtual document.
-   * Used to disable diagnostics for virtual documents that were
+   * Used to add lines that hint to language LSPs to disable diagnostics for virtual documents that were
    * created for non-diagnostic actions.
    */
   inject?: string[];
@@ -95,7 +95,7 @@ interface LanguageOptions {
   emptyLine?: string;
   /**
    * Lines of code to inject at the top of the virtual document.
-   * Used to disable diagnostics for virtual documents that were
+   * Used to add lines that hint to language LSPs to disable diagnostics for virtual documents that were
    * created for non-diagnostic actions.
    */
   inject?: string[];

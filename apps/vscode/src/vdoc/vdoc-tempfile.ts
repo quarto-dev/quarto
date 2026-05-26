@@ -30,7 +30,7 @@ import {
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
 
 interface VirtualDocTempFileOptions {
-  /** Fire a hover request to prime the language server before returning. */
+  /** Fire a "dummy" hover request to cause the language server to start  */
   warmup: boolean;
 }
 

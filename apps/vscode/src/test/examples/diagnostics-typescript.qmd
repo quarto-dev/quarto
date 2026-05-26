@@ -1,0 +1,8 @@
+---
+title: "TypeScript diagnostics"
+format: html
+---
+
+```{typescript}
+const x: number = undefined_var;
+```

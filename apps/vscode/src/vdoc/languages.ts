@@ -23,6 +23,11 @@ export interface EmbeddedLanguage {
   emptyLine?: string;
   comment?: string;
   trigger?: string[];
+  /**
+   * Lines of code to inject at the top of the virtual document.
+   * Used to add lines that hint to language LSPs to disable diagnostics for virtual documents that were
+   * created for non-diagnostic actions.
+   */
   inject?: string[];
   canFormat?: boolean;
   canFormatDocument?: boolean;
@@ -88,6 +93,11 @@ interface LanguageOptions {
   type?: "content" | "tempfile";
   localTempFile?: boolean;
   emptyLine?: string;
+  /**
+   * Lines of code to inject at the top of the virtual document.
+   * Used to add lines that hint to language LSPs to disable diagnostics for virtual documents that were
+   * created for non-diagnostic actions.
+   */
   inject?: string[];
   canFormat?: boolean;
   canFormatDocument?: boolean;

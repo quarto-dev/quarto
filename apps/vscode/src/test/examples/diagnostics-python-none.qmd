@@ -1,0 +1,10 @@
+---
+title: "Diagnostics test"
+format: html
+---
+
+## Code
+
+```{python}
+x = 0
+```

@@ -24,7 +24,6 @@ import {
   Definition,
   LogOutputChannel,
   Uri,
-  Diagnostic,
   window,
   ColorThemeKind
 } from "vscode";
@@ -49,7 +48,6 @@ import {
   ProvideHoverSignature,
   ProvideSignatureHelpSignature,
   State,
-  HandleDiagnosticsSignature
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
@@ -58,7 +56,6 @@ import {
   virtualDoc,
   withVirtualDocUri,
 } from "../vdoc/vdoc";
-import { isVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
@@ -79,7 +76,7 @@ export async function activateLsp(
   context: ExtensionContext,
   quartoContext: QuartoContext,
   engine: MarkdownEngine,
-  outputChannel: LogOutputChannel
+  outputChannel: LogOutputChannel,
 ) {
 
   // The server is implemented in node
@@ -105,7 +102,6 @@ export async function activateLsp(
   const config = workspace.getConfiguration("quarto");
   activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
-    handleDiagnostics: createDiagnosticFilter(),
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
     provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
@@ -362,22 +358,4 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
 function isWithinYamlComment(doc: TextDocument, pos: Position) {
   const line = doc.lineAt(pos.line).text;
   return !!line.match(/^\s*#\s*\| /);
-}
-
-/**
- * Creates a diagnostic handler middleware that filters out diagnostics from virtual documents
- *
- * @returns A handler function for the middleware
- */
-export function createDiagnosticFilter() {
-  return (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
-    // If this is not a virtual document, pass through all diagnostics
-    if (!isVirtualDoc(uri)) {
-      next(uri, diagnostics);
-      return;
-    }
-
-    // For virtual documents, filter out all diagnostics
-    next(uri, []);
-  };
 }

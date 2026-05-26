@@ -1008,6 +1008,20 @@
           "default": true,
           "markdownDescription": "Show parameter help when editing function calls."
         },
+        "quarto.cells.diagnostics.enabled": {
+          "order": 25,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable diagnostics (linting) for code blocks from language servers."
+        },
+        "quarto.cells.diagnostics.debounceDelay": {
+          "order": 26,
+          "scope": "window",
+          "type": "number",
+          "default": 500,
+          "markdownDescription": "Delay in milliseconds before updating diagnostics after document changes."
+        },
         "quarto.cells.background.enabled": {
           "type": "boolean",
           "description": "Enable coloring the background of executable code cells.",
@@ -1054,7 +1068,7 @@
           "markdownDescription": "Millisecond delay between background color updates."
         },
         "quarto.cells.useReticulate": {
-          "order": 25,
+          "order": 27,
           "scope": "window",
           "type": "boolean",
           "default": true,

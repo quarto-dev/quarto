@@ -15,7 +15,9 @@
 
 import {
   Diagnostic,
+  DiagnosticRelatedInformation,
   EventEmitter,
+  Location,
   LogOutputChannel,
   TextDocument,
   Uri,
@@ -365,7 +367,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
     for (const diagnostic of rawDiagnostics) {
       const block = languageBlockAtPosition(session.languageBlocks, diagnostic.range.start);
       if (block !== undefined) {
-        mapped.push(new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity));
+        mapped.push(this.mapDiagnostic(diagnostic, session.documentUri, vdocUri));
       } else {
         this.outputChannel.error(
           `[EmbeddedDiagnostics] Could not find language block for diagnostic at ` +
@@ -393,6 +395,23 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   // --- Helpers ---
+
+  /** Map a raw diagnostic from vdoc-space to document-space, preserving all fields. */
+  private mapDiagnostic(diagnostic: Diagnostic, documentUri: Uri, vdocUri: Uri): Diagnostic {
+    const mapped = new Diagnostic(diagnostic.range, diagnostic.message, diagnostic.severity);
+    mapped.source = diagnostic.source;
+    mapped.code = diagnostic.code;
+    mapped.tags = diagnostic.tags;
+    if (diagnostic.relatedInformation) {
+      mapped.relatedInformation = diagnostic.relatedInformation.map(info => {
+        const uri = info.location.uri.toString() === vdocUri.toString()
+          ? documentUri
+          : info.location.uri;
+        return new DiagnosticRelatedInformation(new Location(uri, info.location.range), info.message);
+      });
+    }
+    return mapped;
+  }
 
   private getOrCreateSession(documentUri: Uri, language: EmbeddedLanguage): DiagnosticSession {
     const docKey = documentUri.toString();

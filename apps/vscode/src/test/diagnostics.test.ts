@@ -326,6 +326,45 @@ suite("Diagnostics", function () {
       );
     });
   });
+
+  // The fixture contains "rich_diagnostic" which triggers the test language
+  // server to emit a diagnostic with all optional fields populated: source,
+  // code, tags, and relatedInformation (one URI pointing at the vdoc file
+  // itself, one pointing at an external path).
+  test("maps all diagnostic fields from the language server", async function () {
+    const { uri, event } = await openAndAwaitDiagnostics(manager, "diagnostics-rich.qmd", toDelete);
+
+    const rich = event.diagnostics.find(d => d.message.includes("rich diagnostic"));
+    assert.ok(rich, "Expected a rich diagnostic");
+
+    assert.strictEqual(rich.source, "test-linter");
+    assert.strictEqual(rich.code, "rich-rule-001");
+    assert.deepStrictEqual(rich.tags, [vscode.DiagnosticTag.Unnecessary]);
+
+    assert.ok(rich.relatedInformation, "Expected relatedInformation");
+    assert.strictEqual(rich.relatedInformation.length, 2);
+
+    // First entry: URI should be rewritten from vdoc to the .qmd document.
+    const localInfo = rich.relatedInformation[0];
+    assert.strictEqual(
+      localInfo.location.uri.toString(),
+      uri.toString(),
+      "relatedInformation URI pointing at vdoc should be rewritten to document URI"
+    );
+    assert.strictEqual(localInfo.location.range.start.line, 5);
+    assert.strictEqual(localInfo.location.range.start.character, 0);
+    assert.strictEqual(localInfo.message, "related info in same file (should be rewritten)");
+
+    // Second entry: external URI should pass through unchanged.
+    const externalInfo = rich.relatedInformation[1];
+    assert.strictEqual(
+      externalInfo.location.uri.toString(),
+      "file:///usr/lib/python/typing.py",
+      "relatedInformation URI pointing at external file should pass through unchanged"
+    );
+    assert.strictEqual(externalInfo.location.range.start.line, 42);
+    assert.strictEqual(externalInfo.message, "related info in external file (should pass through)");
+  });
 });
 
 /**

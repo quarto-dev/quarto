@@ -3,6 +3,7 @@
 const {
   createConnection,
   DiagnosticSeverity,
+  DiagnosticTag,
   TextDocuments,
 } = require("vscode-languageserver/node");
 const { TextDocument } = require("vscode-languageserver-textdocument");
@@ -12,6 +13,7 @@ const { TextDocument } = require("vscode-languageserver-textdocument");
  */
 
 const undefinedVarRegExp = /undefined_var/;
+const richDiagnosticRegExp = /rich_diagnostic/;
 
 const connection = createConnection();
 const documents = new TextDocuments(TextDocument);
@@ -38,6 +40,44 @@ function publishDiagnostics(document) {
         },
         message: "test-diagnostic: undefined_var is not defined",
         severity: DiagnosticSeverity.Warning,
+      });
+    }
+
+    // Find instances of "rich_diagnostic" and create a diagnostic with all fields populated.
+    const richMatch = text.match(richDiagnosticRegExp);
+    if (richMatch && richMatch.index !== undefined) {
+      diagnostics.push({
+        range: {
+          start: { line, character: richMatch.index },
+          end: { line, character: richMatch.index + richMatch[0].length },
+        },
+        message: "test-diagnostic: rich diagnostic with all fields",
+        severity: DiagnosticSeverity.Error,
+        source: "test-linter",
+        code: "rich-rule-001",
+        tags: [DiagnosticTag.Unnecessary],
+        relatedInformation: [
+          {
+            location: {
+              uri: document.uri,
+              range: {
+                start: { line: 5, character: 0 },
+                end: { line: 5, character: 10 },
+              },
+            },
+            message: "related info in same file (should be rewritten)",
+          },
+          {
+            location: {
+              uri: "file:///usr/lib/python/typing.py",
+              range: {
+                start: { line: 42, character: 0 },
+                end: { line: 42, character: 20 },
+              },
+            },
+            message: "related info in external file (should pass through)",
+          },
+        ],
       });
     }
   }

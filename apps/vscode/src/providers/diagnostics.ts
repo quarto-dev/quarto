@@ -306,6 +306,12 @@ export class EmbeddedDiagnosticsManager extends Disposable {
         vdocContent, dir, { warmup: false }
       );
 
+      // A newer session may have replaced us while we were awaiting the temp file.
+      if (this.getSession(session.documentUri, session.language) !== session) {
+        await vdoc.cleanup?.();
+        return;
+      }
+
       const timeout = setTimeout(async () => {
         this.outputChannel.warn(
           `[EmbeddedDiagnostics] Language server for ${session.language.ids[0]} ` +
@@ -411,6 +417,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       });
     }
     return mapped;
+  }
+
+  private getSession(documentUri: Uri, language: EmbeddedLanguage): DiagnosticSession | undefined {
+    return this.sessionsByDocument.get(documentUri.toString())?.get(language.ids[0]);
   }
 
   private getOrCreateSession(documentUri: Uri, language: EmbeddedLanguage): DiagnosticSession {

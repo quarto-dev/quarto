@@ -109,6 +109,12 @@ interface DiagnosticSession {
   /** The active virtual document awaiting diagnostics, if any. */
   activeVdoc?: ActiveVdoc;
 
+  /** Resolves when activateSession finishes (success or failure). */
+  readonly activated: Promise<void>;
+
+  /** Call to signal that activation is complete. */
+  readonly resolveActivated: () => void;
+
   /** Last received diagnostics for this language (stale-until-replaced on edits). */
   diagnostics: Diagnostic[];
 }
@@ -355,6 +361,8 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       // Same as timeout - no replacement diagnostics are coming.
       session.diagnostics = [];
       this.publishDiagnostics(session.documentUri);
+    } finally {
+      session.resolveActivated();
     }
   }
 
@@ -435,10 +443,14 @@ export class EmbeddedDiagnosticsManager extends Disposable {
 
     let session = langMap.get(langKey);
     if (!session) {
+      let resolve: () => void;
+      const activated = new Promise<void>(r => { resolve = r; });
       session = {
         documentUri,
         language,
         languageBlocks: [],
+        activated,
+        resolveActivated: resolve!,
         diagnostics: []
       };
       langMap.set(langKey, session);
@@ -463,6 +475,10 @@ export class EmbeddedDiagnosticsManager extends Disposable {
   }
 
   private async disposeActiveVdoc(session: DiagnosticSession, reason: VdocDisposeReason): Promise<void> {
+    // Wait for the async vdoc creation to finish so activeVdoc is set
+    // before we try to clean it up.
+    await session.activated;
+
     const { activeVdoc } = session;
     if (activeVdoc) {
       // First unset the session's active vdoc so that we don't accidentally

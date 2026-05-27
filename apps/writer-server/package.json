@@ -18,7 +18,7 @@
     "jayson": "^4.0.0",
     "morgan": "^1.10.0",
     "quarto-core": "*",
-    "tmp": "^0.2.1"
+    "tmp": "^0.2.6"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",

@@ -19,6 +19,7 @@ import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
+import { activateEmbeddedDiagnostics, type EmbeddedDiagnosticsService } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
@@ -51,6 +52,8 @@ import { activateContextKeySetter } from "./providers/context-keys";
 import { activateDivBracketDecorations } from "./providers/div-brackets";
 import { CommandManager } from "./core/command";
 import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
+
+let embeddedDiagnostics: EmbeddedDiagnosticsService | undefined;
 
 /**
  * Entry point for the entire extension! This initializes the LSP, quartoContext, extension host, and more...
@@ -118,6 +121,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
     // deno config
     activateDenoConfig(context, engine);
+
+    // embedded diagnostics
+    embeddedDiagnostics = activateEmbeddedDiagnostics(engine, outputChannel);
+    context.subscriptions.push(embeddedDiagnostics);
 
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
@@ -289,5 +296,6 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
 }
 
 export async function deactivate() {
+  await embeddedDiagnostics?.deactivate();
   return deactivateLsp();
 }

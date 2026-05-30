@@ -24,7 +24,6 @@ import {
   Definition,
   LogOutputChannel,
   Uri,
-  Diagnostic,
   window,
   ColorThemeKind,
   DocumentSymbol,
@@ -53,7 +52,6 @@ import {
   ProvideSignatureHelpSignature,
   ProvideDocumentSymbolsSignature,
   State,
-  HandleDiagnosticsSignature
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
@@ -63,7 +61,6 @@ import {
   withVirtualDocUri,
   VirtualDocStyle,
 } from "../vdoc/vdoc";
-import { isVirtualDoc } from "../vdoc/vdoc-tempfile";
 import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 import { vdocCompletions } from "../vdoc/vdoc-completion";
 
@@ -86,7 +83,7 @@ export async function activateLsp(
   context: ExtensionContext,
   quartoContext: QuartoContext,
   engine: MarkdownEngine,
-  outputChannel: LogOutputChannel
+  outputChannel: LogOutputChannel,
 ) {
 
   // The server is implemented in node
@@ -112,7 +109,6 @@ export async function activateLsp(
   const config = workspace.getConfiguration("quarto");
   activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
-    handleDiagnostics: createDiagnosticFilter(),
     provideCompletionItem: embeddedCodeCompletionProvider(engine),
     provideDefinition: embeddedGoToDefinitionProvider(engine),
     provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),

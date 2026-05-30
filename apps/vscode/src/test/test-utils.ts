@@ -16,7 +16,7 @@ export const TEST_PATH = path.join(EXTENSION_ROOT_DIR, "src", "test");
 export const WORKSPACE_PATH = path.join(TEST_PATH, "examples");
 export const WORKSPACE_OUT_PATH = path.join(TEST_PATH, "examples-out");
 
-function examplesUri(fileName: string = ''): vscode.Uri {
+export function examplesUri(fileName: string = ''): vscode.Uri {
   return vscode.Uri.file(path.join(WORKSPACE_PATH, fileName));
 }
 export function examplesOutUri(fileName: string = ''): vscode.Uri {
@@ -35,7 +35,7 @@ export async function openAndShowExamplesOutTextDocument(fileName: string) {
   return openAndShowUri(examplesOutUri(fileName));
 }
 
-async function openAndShowUri(uri: vscode.Uri) {
+export async function openAndShowUri(uri: vscode.Uri) {
   const doc = await vscode.workspace.openTextDocument(uri);
   const editor = await vscode.window.showTextDocument(doc);
   return { doc, editor };
@@ -115,4 +115,19 @@ ${RESET_COLOR_ESCAPE_CODE}`);
     );
     return content;
   }
+}
+
+/**
+ * Races a promise against a timeout, returning `undefined` if
+ * the timeout is reached before the promise resolves.
+ */
+export async function raceTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
+  let timeout: NodeJS.Timeout;
+  const timeoutPromise = new Promise<undefined>((resolve) => {
+    timeout = setTimeout(() => resolve(undefined), ms);
+  });
+  return Promise.race([
+    promise.finally(() => clearTimeout(timeout)),
+    timeoutPromise
+  ]);
 }

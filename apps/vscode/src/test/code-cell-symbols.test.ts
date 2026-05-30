@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { openAndShowExamplesTextDocument, wait } from "./test-utils";
+import { openUniqueExampleDocument, wait } from "./test-utils";
 
 /**
  * Creates a fake document symbol provider that returns DocumentSymbol[] for virtual docs.
@@ -108,8 +108,8 @@ suite("Code Cell Symbols", function () {
     );
     await wait(100);
 
+    const { doc, cleanup } = await openUniqueExampleDocument("format/basics.qmd");
     try {
-      const { doc } = await openAndShowExamplesTextDocument("format/basics.qmd");
       await wait(800);
 
       const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
@@ -133,15 +133,11 @@ suite("Code Cell Symbols", function () {
     } finally {
       provider.dispose();
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-      await wait(500); // Long wait to ensure provider is fully disposed before next test
+      cleanup();
     }
   });
 
-  // TODO: this test passes in isolation, but not when run after the previous test
-  //       it seems like provider.dispose does not properly remove the previous provider
-  //       because it causes `my_function`, `my_variable` to show up in this test.
-  // TODO: this test, in isolation, shows duplicated code cell symbols!?
-  test.skip("handles SymbolInformation[] from embedded provider", async function () {
+  test("handles SymbolInformation[] from embedded provider", async function () {
     const symbolNames = ["info_function", "info_class"];
 
     // Register BEFORE opening the document
@@ -149,11 +145,11 @@ suite("Code Cell Symbols", function () {
       { scheme: "file", pattern: "**/.vdoc.*" },
       createFakeSymbolInformationProvider(symbolNames)
     );
-    await wait(500); // Wait longer for provider to fully register
+    await wait(100);
 
+    const { doc, cleanup } = await openUniqueExampleDocument("format/basics.qmd");
     try {
-      const { doc } = await openAndShowExamplesTextDocument("format/basics.qmd");
-      await wait(1200); // Wait longer to ensure LSPs are ready and retry logic completes
+      await wait(800);
 
       const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
         "vscode.executeDocumentSymbolProvider",
@@ -176,6 +172,7 @@ suite("Code Cell Symbols", function () {
     } finally {
       provider.dispose();
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+      cleanup();
     }
   });
 
@@ -187,8 +184,8 @@ suite("Code Cell Symbols", function () {
     );
     await wait(100);
 
+    const { doc, cleanup } = await openUniqueExampleDocument("format/basics.qmd");
     try {
-      const { doc } = await openAndShowExamplesTextDocument("format/basics.qmd");
       await wait(800);
 
       const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
@@ -204,6 +201,7 @@ suite("Code Cell Symbols", function () {
     } finally {
       provider.dispose();
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+      cleanup();
     }
   });
 });

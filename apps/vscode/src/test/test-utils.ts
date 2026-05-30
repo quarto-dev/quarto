@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
@@ -38,6 +39,38 @@ export async function openAndShowUri(uri: vscode.Uri) {
   const doc = await vscode.workspace.openTextDocument(uri);
   const editor = await vscode.window.showTextDocument(doc);
   return { doc, editor };
+}
+
+/**
+ * Opens a unique on-disk copy of an example file and returns it along with a
+ * `cleanup` function that deletes the copy.
+ *
+ * Use this instead of `openAndShowExamplesTextDocument` when a test exercises a
+ * provider command that caches results per document URI, such as
+ * `vscode.executeDocumentSymbolProvider` (VS Code's `OutlineModel` cache). If
+ * several tests reuse the same example file, a stale cached result from a
+ * previous test (or another suite that opened the same file) can be served
+ * instead of re-invoking the provider, leaking the previous test's results and
+ * dropping the current test's. A fresh URI per test guarantees the provider
+ * actually runs.
+ *
+ * The copy is created alongside the original example file so workspace-relative
+ * behavior (LSP, configuration) is preserved. Always call `cleanup()` in a
+ * `finally` block.
+ */
+export async function openUniqueExampleDocument(fileName: string) {
+  const sourcePath = path.join(WORKSPACE_PATH, fileName);
+  const extension = path.extname(fileName);
+  const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
+  const uniquePath = path.join(path.dirname(sourcePath), uniqueName);
+  fs.copyFileSync(sourcePath, uniquePath);
+
+  const { doc, editor } = await openAndShowUri(vscode.Uri.file(uniquePath));
+  return {
+    doc,
+    editor,
+    cleanup: () => fs.rmSync(uniquePath, { force: true }),
+  };
 }
 
 const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;

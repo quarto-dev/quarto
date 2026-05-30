@@ -5,7 +5,9 @@
 - Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>)
 - Added setting and command to show/hide cells in outline (<https://github.com/quarto-dev/quarto/pull/974>).
 - Added custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
+- Added code symbols into outline (<https://github.com/quarto-dev/quarto/pull/972>).
 - Updated the bundled Mermaid to match what is currently in the Quarto CLI (11.12.0) (<https://github.com/quarto-dev/quarto/pull/986>).
+
 
 ## 1.132.0 (Release on 2026-05-05)
 

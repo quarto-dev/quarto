@@ -20,7 +20,7 @@ import semver from "semver";
 
 import { initQuartoContext } from "quarto-core";
 
-import { EXTENSION_ROOT_DIR } from "./test-utils";
+import { EXTENSION_ROOT_DIR, emitActionsWarning } from "./test-utils";
 
 // The Mermaid build the Diagram preview webview loads.
 const bundledMermaidPath = path.join(
@@ -47,16 +47,6 @@ function readMermaidVersion(filePath: string): string | undefined {
   const contents = fs.readFileSync(filePath, "utf8");
   const match = contents.match(/name:"mermaid",version:"([^"]+)"/);
   return match?.[1];
-}
-
-/**
- * Emit a GitHub Actions warning annotation (surfaced on the PR and in the run
- * summary). Outside Actions it just prints a line, which is harmless.
- * See https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions
- */
-function emitActionsWarning(title: string, message: string): void {
-  const data = message.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
-  console.log(`::warning title=${title}::${data}`);
 }
 
 suite("Mermaid version", function () {

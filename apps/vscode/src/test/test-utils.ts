@@ -118,6 +118,16 @@ ${RESET_COLOR_ESCAPE_CODE}`);
 }
 
 /**
+ * Emit a GitHub Actions warning annotation (surfaced on the PR and in the run
+ * summary). Outside Actions it just prints a line, which is harmless.
+ * See https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions
+ */
+export function emitActionsWarning(title: string, message: string): void {
+  const data = message.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+  console.log(`::warning title=${title}::${data}`);
+}
+
+/**
  * Races a promise against a timeout, returning `undefined` if
  * the timeout is reached before the promise resolves.
  */

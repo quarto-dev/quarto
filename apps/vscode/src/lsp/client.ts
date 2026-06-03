@@ -33,15 +33,8 @@ import {
   State,
 } from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
-import { activateVirtualDocEmbeddedContent } from "../vdoc/vdoc-content";
 
-import {
-  embeddedDocumentFormattingProvider,
-  embeddedDocumentRangeFormattingProvider,
-} from "../providers/format";
-import { embeddedSemanticTokensProvider } from "../providers/semantic-tokens";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
-import { extensionHost } from "../host";
 import semver from "semver";
 
 let client: LanguageClient;
@@ -74,17 +67,8 @@ export async function activateLsp(
 
   // create middleware (respect disabling of selected features in config)
   const config = workspace.getConfiguration("quarto");
-  activateVirtualDocEmbeddedContent();
   const middleware: Middleware = {
-    // All code cell language services disabled (completions, hover, signature help, definition, symbols)
-    provideDocumentFormattingEdits: embeddedDocumentFormattingProvider(engine),
-    provideDocumentRangeFormattingEdits: embeddedDocumentRangeFormattingProvider(
-      engine
-    ),
-    provideDocumentSemanticTokens: embeddedSemanticTokensProvider(engine),
   };
-  extensionHost().registerStatementRangeProvider(engine);
-  extensionHost().registerHelpTopicProvider(engine);
 
   // create client options
   const initializationOptions: LspInitializationOptions = {
@@ -158,4 +142,3 @@ export function deactivate(): Thenable<void> | undefined {
   }
   return client.stop();
 }
-

@@ -578,9 +578,8 @@ export function activateEmbeddedDiagnostics(
   let manager: EmbeddedDiagnosticsManager | undefined;
 
   function isEnabled(): boolean {
-    return workspace
-      .getConfiguration("quarto.cells.diagnostics")
-      .get<boolean>("enabled", true);
+    // Diagnostics are disabled for code cells
+    return false;
   }
 
   function createManager(): void {

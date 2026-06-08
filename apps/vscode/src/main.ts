@@ -51,7 +51,7 @@ import { activateYamlFilepathCompletions } from "./providers/yaml-filepath-compl
 import { activateContextKeySetter } from "./providers/context-keys";
 import { activateDivBracketDecorations } from "./providers/div-brackets";
 import { CommandManager } from "./core/command";
-import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
+import { createQuartoExtensionApi, QuartoExtensionApi, VisualEditorSelection } from "./api";
 
 let embeddedDiagnostics: EmbeddedDiagnosticsService | undefined;
 
@@ -66,6 +66,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   // create extension host
   const host = extensionHost();
+
+  // emits visual editor selection changes to consumers of the public API
+  const visualEditorSelectionEmitter = new vscode.EventEmitter<VisualEditorSelection>();
+  context.subscriptions.push(visualEditorSelectionEmitter);
 
   // create markdown engine
   const engine = new MarkdownEngine();
@@ -133,7 +137,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     registerOutlineConfigListener(context);
 
     // provide visual editor
-    const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
+    const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine, visualEditorSelectionEmitter);
     commands.push(...editorCommands);
 
     // zotero
@@ -251,7 +255,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   outputChannel.info("Activated Quarto extension.");
 
   // Return the public API for other extensions to use
-  return createQuartoExtensionApi(quartoContext);
+  return createQuartoExtensionApi(quartoContext, visualEditorSelectionEmitter.event);
 }
 
 /**

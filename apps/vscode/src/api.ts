@@ -13,7 +13,19 @@
  *
  */
 
+import * as vscode from "vscode";
+
 import { QuartoContext } from "quarto-core";
+
+/**
+ * Payload for the {@link QuartoExtensionApi.onDidChangeVisualEditorSelection} event.
+ */
+export interface VisualEditorSelection {
+  /** The document whose visual editor selection changed. */
+  uri: vscode.Uri;
+  /** The currently selected text (empty string when nothing is selected). */
+  selectedText: string;
+}
 
 /**
  * Public API for the Quarto extension.
@@ -29,11 +41,16 @@ import { QuartoContext } from "quarto-core";
  * copy this interface definition into your own codebase:
  *
  * ```typescript
- * // Copy this interface into your extension
+ * // Copy these definitions into your extension
+ * interface VisualEditorSelection {
+ *   uri: vscode.Uri;
+ *   selectedText: string;
+ * }
  * interface QuartoExtensionApi {
  *   getQuartoPath(): string | undefined;
  *   getQuartoVersion(): string | undefined;
  *   isQuartoAvailable(): boolean;
+ *   onDidChangeVisualEditorSelection: vscode.Event<VisualEditorSelection>;
  * }
  *
  * // Then use it like this:
@@ -67,12 +84,27 @@ export interface QuartoExtensionApi {
    * Check if Quarto is available.
    */
   isQuartoAvailable(): boolean;
+
+  /**
+   * Fires when the text selection changes in a Quarto visual editor.
+   *
+   * The event carries the document URI and the currently selected text. An
+   * empty `selectedText` is a meaningful event (e.g. the selection was cleared),
+   * so consumers can use it to reset their UI. Events are de-duplicated against
+   * the previous selection for a given document, but not time-debounced — the
+   * underlying editor reports state changes on every cursor move, so consumers
+   * that need throttling should debounce themselves.
+   */
+  onDidChangeVisualEditorSelection: vscode.Event<VisualEditorSelection>;
 }
 
 /**
  * Create the public API for the Quarto extension.
  */
-export function createQuartoExtensionApi(quartoContext: QuartoContext): QuartoExtensionApi {
+export function createQuartoExtensionApi(
+  quartoContext: QuartoContext,
+  onDidChangeVisualEditorSelection: vscode.Event<VisualEditorSelection>
+): QuartoExtensionApi {
   return {
     getQuartoPath(): string | undefined {
       if (!quartoContext.available) {
@@ -91,5 +123,7 @@ export function createQuartoExtensionApi(quartoContext: QuartoContext): QuartoEx
     isQuartoAvailable(): boolean {
       return quartoContext.available;
     },
+
+    onDidChangeVisualEditorSelection,
   };
 }

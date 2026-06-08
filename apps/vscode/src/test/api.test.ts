@@ -16,6 +16,7 @@ suite("Quarto Extension API", function () {
     assert.strictEqual(typeof api.getQuartoPath, "function", "API should have getQuartoPath method");
     assert.strictEqual(typeof api.getQuartoVersion, "function", "API should have getQuartoVersion method");
     assert.strictEqual(typeof api.isQuartoAvailable, "function", "API should have isQuartoAvailable method");
+    assert.strictEqual(typeof api.onDidChangeVisualEditorSelection, "function", "API should have onDidChangeVisualEditorSelection event");
   });
 
   test("API methods return expected types", async function () {

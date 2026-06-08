@@ -35,7 +35,8 @@ import {
   Selection,
   TextEditorRevealType,
   GlobPattern,
-  TabInputText
+  TabInputText,
+  EventEmitter
 } from "vscode";
 
 import { LanguageClient } from "vscode-languageclient/node";
@@ -67,6 +68,7 @@ import {
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 import { TabInputCustom } from "vscode";
+import { VisualEditorSelection } from "../../api";
 
 const kVisualModeConfirmed = "visualModeConfirmed";
 
@@ -74,6 +76,7 @@ export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus(): Promise<boolean>;
   getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
+  getSelectedText(): Promise<string>;
 }
 
 export function activateEditor(
@@ -81,10 +84,11 @@ export function activateEditor(
   host: ExtensionHost,
   quartoContext: QuartoContext,
   lspClient: LanguageClient,
-  engine: MarkdownEngine
+  engine: MarkdownEngine,
+  selectionEmitter: EventEmitter<VisualEditorSelection>
 ): Command[] {
   // register the provider
-  context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
+  context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine, selectionEmitter));
 
   // return commands
   return [
@@ -98,6 +102,16 @@ export function activateEditor(
       id: 'quarto.test_isInVisualEditor',
       execute() {
         return VisualEditorProvider.activeEditor() !== undefined;
+      }
+    },
+    {
+      id: 'quarto.editor.getSelectedText',
+      async execute() {
+        const editor = VisualEditorProvider.activeEditor();
+        if (editor) {
+          return await editor.getSelectedText();
+        }
+        return '';
       }
     },
     editInVisualModeCommand(),
@@ -136,7 +150,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     host: ExtensionHost,
     quartoContext: QuartoContext,
     lspClient: LanguageClient,
-    engine: MarkdownEngine
+    engine: MarkdownEngine,
+    selectionEmitter: EventEmitter<VisualEditorSelection>
   ): Disposable {
 
     // setup request transport
@@ -260,7 +275,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       }
     }, 100)));
 
-    const provider = new VisualEditorProvider(context, host, quartoContext, lspRequest, engine);
+    const provider = new VisualEditorProvider(context, host, quartoContext, lspRequest, engine, selectionEmitter);
     const providerRegistration = window.registerCustomEditorProvider(
       VisualEditorProvider.viewType,
       provider,
@@ -303,6 +318,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         setBlockSelection: async (context, action) => {
           await editor.editor.setBlockSelection(context, action);
         },
+        getSelectedText: async () => {
+          return await editor.editor.getSelectedText();
+        },
         viewColumn: editor.webviewPanel.viewColumn
       };
     } else {
@@ -322,7 +340,21 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     private readonly extensionHost: ExtensionHost,
     private readonly quartoContext: QuartoContext,
     private readonly lspRequest: JsonRpcRequestTransport,
-    private readonly engine: MarkdownEngine) { }
+    private readonly engine: MarkdownEngine,
+    private readonly selectionEmitter: EventEmitter<VisualEditorSelection>) { }
+
+  // last selection emitted per document (used to de-duplicate selection-change events)
+  private readonly lastSelectedText = new Map<string, string>();
+
+  // fire the public selection-change event, de-duplicating against the previous selection
+  private fireSelectionChanged(uri: Uri, selectedText: string) {
+    const key = uri.toString();
+    if (this.lastSelectedText.get(key) === selectedText) {
+      return;
+    }
+    this.lastSelectedText.set(key, selectedText);
+    this.selectionEmitter.fire({ uri, selectedText });
+  }
 
   public async resolveCustomTextEditor(
     document: TextDocument,
@@ -478,8 +510,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       // notify sync manager when visual editor is updated
       onEditorUpdated: syncManager.onVisualEditorChanged,
 
-      onEditorStateChanged: async (sourcePos: SourcePos) => {
+      onEditorStateChanged: async (sourcePos: SourcePos, selectedText: string) => {
         VisualEditorProvider.visualEditorLastSourcePos.set(document.uri.toString(), sourcePos);
+        this.fireSelectionChanged(document.uri, selectedText);
       },
 
       // flush any pending updates

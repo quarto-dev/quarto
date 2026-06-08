@@ -2,6 +2,8 @@
 
 ## 1.134.0 (Unreleased)
 
+- Exposed the visual editor's text selection: added a `quarto.editor.getSelectedText` command and an `onDidChangeVisualEditorSelection` event on the public extension API (<https://github.com/stevehaigh/quarto/pull/1>).
+
 ## 1.133.0 (Release on 2026-06-03)
 
 - Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>).

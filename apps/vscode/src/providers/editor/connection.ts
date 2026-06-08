@@ -25,6 +25,7 @@ import {
   VSC_VE_ApplyExternalEdit,
   VSC_VE_GetActiveBlockContext,
   VSC_VE_SetBlockSelection,
+  VSC_VE_GetSelectedText,
   VSC_VEH_EditorResourceUri,
   VSC_VEH_GetHostContext,
   VSC_VEH_ReopenSourceMode,
@@ -88,6 +89,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
         context: CodeViewActiveBlockContext,
         action: CodeViewSelectionAction
       ) => request(VSC_VE_SetBlockSelection, [context, action]),
+      getSelectedText: () => request(VSC_VE_GetSelectedText, []),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
       prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
       imageChanged: (file: string) => request(VSC_VE_ImageChanged, [file])
@@ -144,7 +146,7 @@ function editorHostMethods(host: VSCodeVisualEditorHost): Record<string, JsonRpc
     [VSC_VEH_ReopenSourceMode]: () => host.reopenSourceMode(),
     [VSC_VEH_OnEditorReady]: () => host.onEditorReady(),
     [VSC_VEH_OnEditorUpdated]: args => host.onEditorUpdated(args[0]),
-    [VSC_VEH_OnEditorStateChanged]: args => host.onEditorStateChanged(args[0]),
+    [VSC_VEH_OnEditorStateChanged]: args => host.onEditorStateChanged(args[0], args[1]),
     [VSC_VEH_FlushEditorUpdates]: () => host.flushEditorUpdates(),
     [VSC_VEH_SaveDocument]: () => host.saveDocument(),
     [VSC_VEH_RenderDocument]: () => host.renderDocument(),

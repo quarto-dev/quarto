@@ -604,6 +604,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
       for (const disposable of disposables) {
         disposable.dispose();
       }
+      this.lastSelectedText.delete(document.uri.toString());
     });
 
   }

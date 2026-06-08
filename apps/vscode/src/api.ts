@@ -43,14 +43,14 @@ export interface VisualEditorSelection {
  * ```typescript
  * // Copy these definitions into your extension
  * interface VisualEditorSelection {
- *   uri: vscode.Uri;
+ *   uri: { toString(): string };
  *   selectedText: string;
  * }
  * interface QuartoExtensionApi {
  *   getQuartoPath(): string | undefined;
  *   getQuartoVersion(): string | undefined;
  *   isQuartoAvailable(): boolean;
- *   onDidChangeVisualEditorSelection: vscode.Event<VisualEditorSelection>;
+ *   onDidChangeVisualEditorSelection: (listener: (e: VisualEditorSelection) => unknown) => { dispose(): unknown };
  * }
  *
  * // Then use it like this:

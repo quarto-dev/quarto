@@ -31,6 +31,7 @@ export const VSC_VE_PrefsChanged = 'vsc_ve_prefs_changed';
 export const VSC_VE_ImageChanged = 'vsc_ve_image_changed';
 export const VSC_VE_GetActiveBlockContext = 'vsc_ve_get_active_block_context';
 export const VSC_VE_SetBlockSelection = 'vsc_ve_set_block_selection';
+export const VSC_VE_GetSelectedText = 'vsc_ve_get_selected_text';
 
 export const VSC_VEH_GetHostContext = 'vsc_ve_get_host_context';
 export const VSC_VEH_ReopenSourceMode = 'vsc_ve_reopen_source_mode';
@@ -60,6 +61,7 @@ export interface VSCodeVisualEditor {
   getSlideIndex: () => Promise<number>;
   getActiveBlockContext: () => Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection: (context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) => Promise<void>;
+  getSelectedText: () => Promise<string>;
   applyExternalEdit: (markdown: string) => Promise<void>;
   prefsChanged: (prefs: Prefs) => Promise<void>;
   imageChanged: (file: string) => Promise<void>;

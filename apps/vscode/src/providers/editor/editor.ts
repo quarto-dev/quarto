@@ -74,6 +74,7 @@ export interface QuartoVisualEditor extends QuartoEditor {
   hasFocus(): Promise<boolean>;
   getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
+  getSelectedText(): Promise<string>;
 }
 
 export function activateEditor(
@@ -98,6 +99,16 @@ export function activateEditor(
       id: 'quarto.test_isInVisualEditor',
       execute() {
         return VisualEditorProvider.activeEditor() !== undefined;
+      }
+    },
+    {
+      id: 'quarto.editor.getSelectedText',
+      async execute() {
+        const editor = VisualEditorProvider.activeEditor(true);
+        if (editor) {
+          return await editor.getSelectedText();
+        }
+        return '';
       }
     },
     editInVisualModeCommand(),
@@ -302,6 +313,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         },
         setBlockSelection: async (context, action) => {
           await editor.editor.setBlockSelection(context, action);
+        },
+        getSelectedText: async () => {
+          return await editor.editor.getSelectedText();
         },
         viewColumn: editor.webviewPanel.viewColumn
       };

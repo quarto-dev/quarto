@@ -302,6 +302,9 @@ export interface EditorOperations {
   getCodeViewActiveBlockContext() : CodeViewActiveBlockContext | undefined;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) : void;
 
+  // selection
+  getSelectedText() : string;
+
   // subsystems
   getFindReplace() : EditorFindReplace | undefined
 
@@ -791,7 +794,9 @@ export class Editor  {
   }
 
   public getSelectedText(): string {
-    return this.state.doc.textBetween(this.state.selection.from, this.state.selection.to);
+    const { from, to } = this.state.selection;
+    if (from === to) return '';
+    return this.state.doc.textBetween(from, to, '\n\n', '');
   }
 
   public replaceSelection(value: string): void {

@@ -36,6 +36,7 @@ import {
   VSC_VE_GetSlideIndex,
   VSC_VE_GetActiveBlockContext,
   VSC_VE_SetBlockSelection,
+  VSC_VE_GetSelectedText,
   VSC_VE_Init, 
   VSC_VE_Focus,
   VSC_VEH_FlushEditorUpdates,
@@ -252,6 +253,9 @@ export async function syncEditorToHost(
     },
     async setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction) {
       editor.setBlockSelection(context, action);
+    },
+    async getSelectedText(): Promise<string> {
+      return editor.getSelectedText();
     }
   })
 
@@ -334,6 +338,7 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_ApplyExternalEdit]: args => editor.applyExternalEdit(args[0]),
     [VSC_VE_GetActiveBlockContext]: () => editor.getActiveBlockContext(),
     [VSC_VE_SetBlockSelection]: args => editor.setBlockSelection(args[0], args[1]),
+    [VSC_VE_GetSelectedText]: () => editor.getSelectedText(),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
     [VSC_VE_ImageChanged]: args => editor.imageChanged(args[0])
   })

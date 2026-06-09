@@ -70,6 +70,7 @@ import behaviorTrailingP from '../behaviors/trailing_p';
 import behaviorEmptyMark from '../behaviors/empty_mark';
 import behaviorEscapeMark from '../behaviors/escape_mark';
 import behaviorOutline from '../behaviors/outline';
+import behaviorWordCount from '../behaviors/word_count';
 import beahviorCodeBlockInput from '../behaviors/code_block_input';
 import behaviorPasteText from '../behaviors/paste';
 import behaviorBottomPadding from '../behaviors/bottom_padding';
@@ -161,6 +162,7 @@ export function initExtensions(
     behaviorEmptyMark,
     behaviorEscapeMark,
     behaviorOutline,
+    behaviorWordCount,
     beahviorCodeBlockInput,
     behaviorPasteText,
     behaviorBottomPadding,

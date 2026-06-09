@@ -50,6 +50,7 @@ import { activateYamlLinks } from "./providers/yaml-links";
 import { activateYamlFilepathCompletions } from "./providers/yaml-filepath-completions";
 import { activateContextKeySetter } from "./providers/context-keys";
 import { activateDivBracketDecorations } from "./providers/div-brackets";
+import { activateWordCount } from "./providers/wordcount/wordcount";
 import { CommandManager } from "./core/command";
 import { createQuartoExtensionApi, QuartoExtensionApi, VisualEditorSelection } from "./api";
 
@@ -241,6 +242,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   // div bracket decorations
   activateDivBracketDecorations(context);
+
+  // word counts (per-section code lens + status bar total/selection)
+  activateWordCount(context, engine, visualEditorSelectionEmitter.event);
 
   // commands
   const commandManager = new CommandManager();

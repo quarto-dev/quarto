@@ -48,16 +48,26 @@ export function markdownitParser() : Parser {
   md.use(yamlPlugin);
   md.use(divPlugin);
 
-  // inline parser
-  const mdInline = MarkdownIt("commonmark");
-  const mdToText = (markdown: string ) => {
-    const tokens = mdInline.parseInline(markdown, {});
-    return tokensToText(tokens);
-  }
-
   return cachingParser((doc: Document) => {
-    return parseDocument(md, mdToText, doc.getText());
+    return parseDocument(md, markdownToText, doc.getText());
   })
+}
+
+// shared commonmark inline parser used to reduce a span of markdown to its plain
+// text (e.g. so that `[label](http://url)` becomes `label`). lazily constructed
+// so importers that only need the parser don't pay for it.
+let mdInline: MarkdownIt | undefined;
+
+/**
+ * Reduce a span of (inline) markdown to its plain text, discarding markup such
+ * as links, emphasis and code span delimiters. Used both when parsing headers
+ * and by consumers that need a markup-free string (e.g. word counting).
+ */
+export function markdownToText(markdown: string): string {
+  if (!mdInline) {
+    mdInline = MarkdownIt("commonmark");
+  }
+  return tokensToText(mdInline.parseInline(markdown, {}));
 }
 
 type MarkdownToPlainText = (markdown: string) => string;

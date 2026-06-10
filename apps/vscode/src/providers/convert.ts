@@ -44,7 +44,7 @@ export function activateConvert(
  * @param targetExt Target extension for the converted file (e.g. ".ipynb", ".qmd")
  * @returns Promise that resolves when conversion is complete and the converted file is opened.
  */
-async function convertDocument(
+export async function convertDocument(
   quartoContext: QuartoContext,
   outputChannel: LogOutputChannel,
   sourceUri: Uri,

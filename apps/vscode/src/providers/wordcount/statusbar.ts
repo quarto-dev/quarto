@@ -26,7 +26,8 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { isQuartoDoc } from "../../core/doc";
 import { VisualEditorProvider } from "../editor/editor";
 import { VisualEditorSelection } from "../../api";
-import { countDocument, countText } from "./count";
+import { Token } from "quarto-core";
+import { countDocument, countSelectionLines, countText } from "./count";
 import {
   affectsWordCount,
   formatWordCount,
@@ -50,16 +51,16 @@ export function activateWordCountStatusBar(
   // last reported visual editor selection text, keyed by document uri
   const visualSelection = new Map<string, string>();
 
-  // cache the document total (keyed by uri@version) so that selection / cursor
-  // changes don't re-count the whole document on every event
-  let totalCache: { key: string; total: number } | undefined;
-  const documentTotal = (document: TextDocument): number => {
+  // cache the document total and tokens (keyed by uri@version) so that
+  // selection / cursor changes don't re-count the whole document on every event
+  let totalCache: { key: string; total: number; tokens: Token[] } | undefined;
+  const documentTotals = (document: TextDocument): { total: number; tokens: Token[] } => {
     const key = `${document.uri.toString()}@${document.version}`;
     if (totalCache?.key !== key) {
       const tokens = engine.parse(document);
-      totalCache = { key, total: countDocument(tokens, document.getText(), wordCountOptions()) };
+      totalCache = { key, total: countDocument(tokens, document.getText(), wordCountOptions()), tokens };
     }
-    return totalCache.total;
+    return totalCache;
   };
 
   const update = () => {
@@ -92,10 +93,24 @@ export function activateWordCountStatusBar(
       return;
     }
 
-    const total = documentTotal(document);
+    const { total, tokens } = documentTotals(document);
+    const opts = wordCountOptions();
 
     if (selectedText) {
-      const selected = countText(selectedText);
+      let selected: number;
+      if (textEditor && !textEditor.selection.isEmpty) {
+        // source mode: use token-based exclusion over the selection's line range
+        selected = countSelectionLines(
+          tokens,
+          document.getText(),
+          textEditor.selection.start.line,
+          textEditor.selection.end.line,
+          opts
+        );
+      } else {
+        // visual mode: strip code blocks via regex (no line-range context available)
+        selected = countText(selectedText, opts);
+      }
       statusItem.text = `${selected.toLocaleString()} of ${formatWordCount(total)}`;
     } else {
       statusItem.text = formatWordCount(total);
@@ -119,7 +134,7 @@ export function activateWordCountStatusBar(
     }),
     workspace.onDidChangeConfiguration((e) => {
       if (affectsWordCount((section) => e.affectsConfiguration(section))) {
-        totalCache = undefined; // includeCodeCells may have changed
+        totalCache = undefined; // options changed, invalidate the cached counts
         update();
       }
     })

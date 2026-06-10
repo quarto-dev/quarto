@@ -56,13 +56,39 @@ export function countDocument(
 /**
  * Count the prose words in an arbitrary span of markdown text (e.g. the current
  * selection). Inline markup is reduced to plain text before counting.
+ * When options are provided, fenced code blocks and display math are stripped
+ * according to the same rules as countDocument/countSections.
  */
-export function countText(text: string): number {
+export function countText(text: string, options?: WordCountOptions): number {
   if (!text) {
     return 0;
   }
+  let processed = text;
+  if (options && !options.includeCodeCells) {
+    // strip fenced code blocks (executable or plain) and display math before counting
+    processed = processed
+      .replace(/^```[\s\S]*?^```[ \t]*$/gm, "")
+      .replace(/^\$\$[\s\S]*?^\$\$[ \t]*$/gm, "");
+  }
   // collapse line breaks to spaces first (see countLines)
-  return wb.breakWords(markdownToText(text.replace(/\r\n|\n|\r/g, " "))).length;
+  return wb.breakWords(markdownToText(processed.replace(/\r\n|\n|\r/g, " "))).length;
+}
+
+/**
+ * Count the prose words in a line range of a document, using the token list
+ * to apply the same code-block exclusion logic as countDocument.
+ * startLine and endLine are 0-based, inclusive.
+ */
+export function countSelectionLines(
+  tokens: Token[],
+  text: string,
+  startLine: number,
+  endLine: number,
+  options: WordCountOptions
+): number {
+  const lines = splitLines(text);
+  const excluded = excludedLines(tokens, lines.length, options);
+  return countLines(lines, excluded, startLine, endLine);
 }
 
 /**

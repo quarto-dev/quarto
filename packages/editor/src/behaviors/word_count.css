@@ -1,0 +1,12 @@
+.pm-word-count-badge {
+  float: right;
+  margin-left: 1em;
+  font-size: 0.7em;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1.6;
+  opacity: 0.65;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}

@@ -328,6 +328,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
     setBlockSelection(context, action) {
       editorRef.current!.setBlockSelection(context, action);
     },
+    getSelectedText() {
+      return editorRef.current!.getSelectedText();
+    },
     getFindReplace() {
       return editorRef.current?.getFindReplace();
     },

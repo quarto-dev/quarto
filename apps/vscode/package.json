@@ -233,6 +233,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.toggleWordCount",
+        "title": "Toggle Word Count",
+        "category": "Quarto"
+      },
+      {
         "command": "quarto.newNotebook",
         "title": "New Quarto Notebook (ipynb)",
         "category": "Quarto"
@@ -1073,6 +1078,20 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Use reticulate to execute Python cells within Knitr engine documents."
+        },
+        "quarto.wordCount.enabled": {
+          "order": 28,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show word counts (per-section code lens / visual editor badge, plus document total and selection count in the status bar)."
+        },
+        "quarto.wordCount.includeCodeCells": {
+          "order": 29,
+          "scope": "window",
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Include executable code cells, fenced code, and raw blocks in word counts. YAML front matter is always excluded."
         },
         "quarto.mathjax.scale": {
           "order": 15,

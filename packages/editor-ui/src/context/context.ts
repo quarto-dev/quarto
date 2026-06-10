@@ -147,6 +147,12 @@ function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
     equationPreview(): boolean {
       return provider().prefs().equationPreview;
     },
+    showWordCount(): boolean {
+      return provider().prefs().showWordCount;
+    },
+    wordCountIncludeCodeCells(): boolean {
+      return provider().prefs().wordCountIncludeCodeCells;
+    },
     packageListingEnabled(): boolean {
       return provider().prefs().packageListingEnabled;
     },

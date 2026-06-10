@@ -49,6 +49,10 @@ export interface Prefs extends MarkdownPrefs {
   readonly tabKeyMoveFocus: boolean;
   readonly equationPreview: boolean;
 
+  // word count
+  readonly showWordCount: boolean;
+  readonly wordCountIncludeCodeCells: boolean;
+
   // citations
   readonly zoteroUseBetterBibtex: boolean;
   readonly bibliographyDefaultType: 'bib' | 'yaml' | 'json';
@@ -100,6 +104,10 @@ export function defaultPrefs() : Prefs {
     listSpacing: 'spaced',
     tabKeyMoveFocus: false,
     equationPreview: true,
+
+    // word count
+    showWordCount: true,
+    wordCountIncludeCodeCells: false,
 
     // markdown
     ...defaultMarkdownPrefs(),

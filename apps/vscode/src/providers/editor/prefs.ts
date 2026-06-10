@@ -50,6 +50,8 @@ const kQuartoEditorMarkdownWrap = "quarto.visualEditor.markdownWrap";
 const kQuartoEditorMarkdownWrapColumn = "quarto.visualEditor.markdownWrapColumn";
 const kQuartoEditorMarkdownReferences = "quarto.visualEditor.markdownReferences";
 const kQuartoEditorMarkdownReferenceLinks = "quarto.visualEditor.markdownReferenceLinks";
+const kQuartoWordCountEnabled = "quarto.wordCount.enabled";
+const kQuartoWordCountIncludeCodeCells = "quarto.wordCount.includeCodeCells";
 
 const kMonitoredConfigurations = [
   kEditorAutoClosingBrackets,
@@ -71,6 +73,8 @@ const kMonitoredConfigurations = [
   kQuartoEditorMarkdownWrapColumn,
   kQuartoEditorMarkdownReferences,
   kQuartoEditorMarkdownReferenceLinks,
+  kQuartoWordCountEnabled,
+  kQuartoWordCountIncludeCodeCells,
   kEditorQuickSuggestions
 ];
 
@@ -108,6 +112,10 @@ export async function vscodePrefsServer(
 
       // quarto editor settings
       listSpacing: configuration.get<'spaced' | 'tight'>(kQuartoEditorDefaultListSpacing, defaults.listSpacing),
+
+      // word count settings
+      showWordCount: configuration.get<boolean>(kQuartoWordCountEnabled, defaults.showWordCount),
+      wordCountIncludeCodeCells: configuration.get<boolean>(kQuartoWordCountIncludeCodeCells, defaults.wordCountIncludeCodeCells),
 
       // markdown writer settings
       ...(await readMarkdownPrefs(context, engine, document)),

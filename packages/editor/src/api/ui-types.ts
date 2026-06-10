@@ -148,6 +148,8 @@ export interface EditorUIPrefs {
   darkMode: () => boolean;
   listSpacing: () => ListSpacing;
   equationPreview: () => boolean;
+  showWordCount: () => boolean;
+  wordCountIncludeCodeCells: () => boolean;
   packageListingEnabled: () => boolean;
   tabKeyMoveFocus: () => boolean;
   emojiSkinTone: () => SkinTone;

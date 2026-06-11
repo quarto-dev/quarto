@@ -52,8 +52,10 @@ import { activateContextKeySetter } from "./providers/context-keys";
 import { activateDivBracketDecorations } from "./providers/div-brackets";
 import { CommandManager } from "./core/command";
 import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
+import { activateNotebookExport, NotebookExportService } from "./providers/notebook-export";
 
-let embeddedDiagnostics: EmbeddedDiagnosticsService | undefined;
+let embeddedDiagnosticsService: EmbeddedDiagnosticsService | undefined;
+let notebookExportService: NotebookExportService | undefined;
 
 /**
  * Entry point for the entire extension! This initializes the LSP, quartoContext, extension host, and more...
@@ -123,8 +125,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     activateDenoConfig(context, engine);
 
     // embedded diagnostics
-    embeddedDiagnostics = activateEmbeddedDiagnostics(engine, outputChannel);
-    context.subscriptions.push(embeddedDiagnostics);
+    embeddedDiagnosticsService = activateEmbeddedDiagnostics(engine, outputChannel);
+    context.subscriptions.push(embeddedDiagnosticsService);
 
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
@@ -238,6 +240,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   // div bracket decorations
   activateDivBracketDecorations(context);
 
+  // notebook export (conditionally in Positron)
+  notebookExportService = activateNotebookExport(quartoContext, outputChannel);
+  if (notebookExportService) {
+    context.subscriptions.push(notebookExportService);
+  }
+
   // commands
   const commandManager = new CommandManager();
   for (const cmd of commands) {
@@ -296,6 +304,7 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
 }
 
 export async function deactivate() {
-  await embeddedDiagnostics?.deactivate();
+  await embeddedDiagnosticsService?.deactivate();
+  await notebookExportService?.deactivate();
   return deactivateLsp();
 }

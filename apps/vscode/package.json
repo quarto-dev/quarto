@@ -696,7 +696,7 @@
         },
         {
           "command": "quarto.convertToQmd",
-          "when": "resourceExtname == .ipynb",
+          "when": "resourceExtname == .ipynb && !quarto.hasNotebookExporter",
           "group": "q_zzConvert"
         },
         {
@@ -750,7 +750,7 @@
         },
         {
           "command": "quarto.convertToQmd",
-          "when": "resourceExtname == .ipynb",
+          "when": "resourceExtname == .ipynb && !quarto.hasNotebookExporter",
           "group": "q_zzConvert"
         }
       ],

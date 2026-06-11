@@ -798,7 +798,7 @@
         },
         {
           "command": "quarto.renderDocument",
-          "when": "editorLangId == quarto ||  editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto ||  editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewScript",

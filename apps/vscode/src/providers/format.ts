@@ -15,6 +15,7 @@
 
 import {
   commands,
+  EndOfLine,
   FormattingOptions,
   Position,
   Range,
@@ -30,7 +31,7 @@ import {
   ProvideDocumentRangeFormattingEditsSignature,
 } from "vscode-languageclient/node";
 import { lines } from "core";
-import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtLine } from "quarto-core";
+import { TokenCodeBlock, TokenMath, codeForExecutableLanguageBlock, languageBlockAtLine, rangeContains } from "quarto-core";
 
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
@@ -311,38 +312,63 @@ async function formatBlock(
 
   // Create virtual document containing only the code portion of the block
   // so the formatter never sees the option directives.
-  const codeLines = blockLines.slice(optionLines);
-
-  // Nothing to format if the block is entirely option directives (or only
-  // trailing whitespace after them, which `lines()` may produce from a
-  // final newline in `token.data`).
-  if (codeLines.every(l => l.trim() === "")) {
-    return undefined;
+  //
+  // Leading empty lines are also hidden: formatters like Air (R) strip empty
+  // lines at position 0 of a file, which would delete them from the cell.
+  // We track the count so formatter edits can be shifted past them and any
+  // excess collapsed to one (see normalizeEdit below).
+  let leadingEmptyLines = 0;
+  for (let i = optionLines; i < blockLines.length; i++) {
+    if (blockLines[i].trim() === "") {
+      leadingEmptyLines++;
+    } else {
+      break;
+    }
   }
-  const vdoc = virtualDocForCode(codeLines, language);
+  const codeLines = blockLines.slice(optionLines + leadingEmptyLines);
 
-  const edits = await executeFormatDocumentProvider(
-    vdoc,
-    doc,
-    formattingOptions(doc.uri, vdoc.language, defaultOptions)
-  );
+  // Collapsing multiple leading empty lines to one is a Quarto-level
+  // formatting operation: it fires even when no language formatter is active,
+  // so we build this edit before the early-returns below.
+  // Use the document's line ending to avoid introducing mixed EOL in CRLF files.
+  const eol = doc.eol === EndOfLine.CRLF ? "\r\n" : "\n";
+  const normalizeEdit: TextEdit | undefined = leadingEmptyLines > 1
+    ? new TextEdit(
+        new Range(
+          new Position(block.range.start.line + 1 + optionLines, 0),
+          new Position(block.range.start.line + 1 + optionLines + leadingEmptyLines, 0)
+        ),
+        eol
+      )
+    : undefined;
 
-  if (!edits || edits.length === 0) {
-    // Either no formatter picked us up, or there were no edits required.
-    // We can't determine the difference though!
-    return undefined;
+  // Skip the formatter if the block is entirely option directives (or only
+  // trailing whitespace after them, which `lines()` may produce from a final
+  // newline in `token.data`). The happy path below still emits normalizeEdit
+  // if needed.
+  let edits: TextEdit[] | undefined;
+  if (codeLines.every(l => l.trim() === "")) {
+    edits = [];
+  } else {
+    const vdoc = virtualDocForCode(codeLines, language);
+    edits = await executeFormatDocumentProvider(
+      vdoc,
+      doc,
+      formattingOptions(doc.uri, vdoc.language, defaultOptions)
+    );
+  }
+
+  if (!edits) {
+    // No formatter picked us up. Still emit the normalisation if we have one.
+    return normalizeEdit ? [normalizeEdit] : undefined;
   }
 
   // Because we format with the block code copied in an empty virtual
   // document, we need to adjust the ranges to match the edits to the block
-  // cell in the original file. The `+ 1` skips the opening fence line and
+  // cell in the original file. The `+ 1` skips the opening fence line,
   // `+ optionLines` skips the leading option directives we hid from the
-  // formatter.
-  const lineOffset = block.range.start.line + 1 + optionLines;
-  const blockRange = new Range(
-    new Position(block.range.start.line, block.range.start.character),
-    new Position(block.range.end.line, block.range.end.character)
-  );
+  // formatter, and `+ leadingEmptyLines` skips the leading empty lines.
+  const lineOffset = block.range.start.line + 1 + optionLines + leadingEmptyLines;
   const adjustedEdits = edits.map(edit => {
     const range = new Range(
       new Position(edit.range.start.line + lineOffset, edit.range.start.character),
@@ -351,9 +377,17 @@ async function formatBlock(
     return new TextEdit(range, edit.newText);
   });
 
+  if (normalizeEdit) {
+    adjustedEdits.push(normalizeEdit);
+  }
+
+  if (adjustedEdits.length === 0) {
+    return undefined;
+  }
+
   // Bail if any edit is out of range. We used to filter these edits out but
   // this could bork the cell. Return `[]` to indicate that we tried.
-  if (adjustedEdits.some(edit => !blockRange.contains(edit.range))) {
+  if (adjustedEdits.some(edit => !rangeContains(block.range, edit.range))) {
     if (!silentOutOfRange) {
       window.showInformationMessage(
         "Formatting edits were out of range and could not be applied to the code cell."

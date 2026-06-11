@@ -16,6 +16,7 @@
 
 ## 1.132.0 (Release on 2026-05-05)
 
+- Fixed a bug where formatting a code cell stripped leading empty lines. Leading empty lines between option directives and code are now preserved, and two or more leading empty lines are collapsed to one (<https://github.com/quarto-dev/quarto/pull/953>).
 - Added clickable document links for file paths in `_quarto.yml` files. File paths are now clickable and navigate directly to the referenced file (<https://github.com/quarto-dev/quarto/pull/906>).
 - Added filepath autocompletion in `_quarto.yml` files. When editing YAML values, the extension now suggests project files as you type (<https://github.com/quarto-dev/quarto/pull/906>).
 - In an empty document, Positron's active runtime is now used to choose the language for a new code cell (<https://github.com/quarto-dev/quarto/pull/951>).

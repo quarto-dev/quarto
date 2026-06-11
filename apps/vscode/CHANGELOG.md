@@ -2,6 +2,8 @@
 
 ## 1.134.0 (Unreleased)
 
+- The "Preview" and "Preview Format..." commands now show in the Positron Notebook Editor overflow menu (<https://github.com/quarto-dev/quarto/pull/1001>).
+
 ## 1.133.0 (Release on 2026-06-03)
 
 - Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>).

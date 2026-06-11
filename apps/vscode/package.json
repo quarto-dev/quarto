@@ -711,7 +711,7 @@
         },
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "q_zPreview"
         },
         {
@@ -721,7 +721,7 @@
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
           "group": "q_zPreview"
         }
       ],
@@ -806,11 +806,11 @@
         },
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewDiagram",

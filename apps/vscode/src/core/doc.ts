@@ -23,9 +23,7 @@ import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
 import { MarkdownEngine } from "../markdown/engine";
 import { QuartoContext, projectDirForDocument } from "quarto-core";
-import { TextDocument } from "vscode";
 import { workspace } from "vscode";
-import { NotebookDocument } from "vscode";
 import { isJupyterPercentScript, isKnitrSpinScript } from "core-node";
 
 export const kQuartoLanguageId = "quarto";
@@ -58,18 +56,23 @@ function isLanguageDoc(languageId: string, doc?: vscode.TextDocument) {
   return !!doc && doc.languageId === languageId;
 }
 
-export function isNotebook(doc?: vscode.TextDocument) {
-  return !!doc && isNotebookUri(doc.uri);
+export function isNotebook(doc?: vscode.TextDocument | vscode.NotebookDocument) {
+  return isNotebookDoc(doc) && isNotebookUri(doc.uri);
+}
+
+function isNotebookDoc(doc?: vscode.TextDocument | vscode.NotebookDocument): doc is vscode.NotebookDocument {
+  return !!doc && 'notebookType' in doc;
 }
 
 export function isNotebookUri(uri: Uri) {
   return extname(uri.fsPath).toLowerCase() === ".ipynb";
 }
 
-
-export function canPreviewDoc(doc?: TextDocument) {
+export function canPreviewDoc(doc?: vscode.TextDocument | vscode.NotebookDocument) {
   if (doc) {
-    if (isQuartoDoc(doc) || isNotebook(doc)) {
+    if (isNotebookDoc(doc)) {
+      return isNotebookUri(doc.uri);
+    } else if (isQuartoDoc(doc)) {
       return true;
     } else if (validatateQuartoCanRender(doc)) {
       return true;

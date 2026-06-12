@@ -169,3 +169,21 @@ export function editorFrontMatterYaml(editor: QuartoEditor, engine: MarkdownEngi
   }
   return documentFrontMatterYaml(engine, editor.document);
 }
+
+export function selectAndRevealRange(editor: QuartoEditor, range: vscode.Range): void {
+  if (isQuartoTextEditor(editor)) {
+    // if the current selection is outside of the error region then
+    // navigate to the top of the error region
+    const textEditor = editor.textEditor;
+    if (
+      textEditor.selection.active.isBefore(range.start) ||
+      textEditor.selection.active.isAfter(range.end)
+    ) {
+      textEditor.selection = new vscode.Selection(range.start, range.start);
+      textEditor.revealRange(
+        range,
+        vscode.TextEditorRevealType.InCenterIfOutsideViewport
+      );
+    }
+  }
+}

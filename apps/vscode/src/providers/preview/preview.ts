@@ -26,13 +26,11 @@ import vscode, {
   MessageItem,
   Terminal,
   TextDocument,
-  Selection,
   Range,
   Uri,
   ViewColumn,
   window,
   Position,
-  TextEditorRevealType,
   NotebookDocument,
   ProgressLocation,
   CancellationToken,
@@ -51,11 +49,11 @@ import {
   quartoCanRenderScript,
   validatateQuartoCanRender,
 } from "../../core/doc";
-import { preserveEditorFocus } from "../../core/quartoEditor";
+import { preserveEditorFocus, selectAndRevealRange } from "../../core/quartoEditor";
 import {
   findQuartoEditor,
   isQuartoNotebookEditor,
-  isQuartoTextEditor, QuartoEditor
+  QuartoEditor
 } from "../../core/quartoEditor";
 import { PreviewOutputSink } from "./preview-output";
 import { isHtmlContent, isTextContent, isPdfContent } from "core-node";
@@ -641,24 +639,12 @@ class PreviewManager {
         (doc) => doc.uri.fsPath === fileUri.fsPath
       );
       if (editor) {
-        // TODO: Should probably handle notebooks and visual editors here
-        if (isQuartoTextEditor(editor)) {
-          // if the current selection is outside of the error region then
-          // navigate to the top of the error region
-          const errPos = new Position(errorLoc.lineBegin - 1, 0);
-          const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
-          const textEditor = editor.textEditor;
-          if (
-            textEditor.selection.active.isBefore(errPos) ||
-            textEditor.selection.active.isAfter(errEndPos)
-          ) {
-            textEditor.selection = new Selection(errPos, errPos);
-            textEditor.revealRange(
-              new Range(errPos, errPos),
-              TextEditorRevealType.InCenterIfOutsideViewport
-            );
-          }
-        }
+        // if the current selection is outside of the error region then
+        // navigate to the top of the error region
+        const errPos = new Position(errorLoc.lineBegin - 1, 0);
+        const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
+        const errRange = new Range(errPos, errEndPos);
+        selectAndRevealRange(editor, errRange);
         preserveEditorFocus(editor);
       }
     }

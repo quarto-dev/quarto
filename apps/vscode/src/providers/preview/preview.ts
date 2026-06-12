@@ -200,9 +200,7 @@ export async function previewDoc(
   // if this wasn't a renderOnSave then activate the editor and save
   if (!renderOnSave) {
     // activate the editor
-    if (!isQuartoNotebookEditor(editor)) {
-      await editor.activate();
-    }
+    await editor.activate();
 
     await commands.executeCommand("workbench.action.files.save");
     if (editor.document.isDirty) {
@@ -240,9 +238,7 @@ export async function previewDoc(
 
     // focus the editor (sometimes the terminal steals focus)
     if (!renderOnSave) {
-      if (!isQuartoNotebookEditor(previewEditor)) {
-        await previewEditor.activate();
-      }
+      await previewEditor.activate();
     }
   }
 }

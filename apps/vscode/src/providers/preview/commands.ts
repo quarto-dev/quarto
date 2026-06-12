@@ -26,7 +26,7 @@ import {
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
 import { canPreviewDoc } from "../../core/doc";
-import { editorFrontMatterYaml, findQuartoEditor, isQuartoNotebookEditor } from "../../core/quartoEditor";
+import { editorFrontMatterYaml, findQuartoEditor } from "../../core/quartoEditor";
 import { renderOnSave } from "./preview-util";
 import { FormatQuickPickItem, RenderCommand } from "../render";
 import { QuickPickItemKind } from "vscode";
@@ -108,10 +108,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
         }
       } else {
         // show the editor
-        // TODO: Why can't we show notebooks too? Maybe because activate shows a cell's text editor?
-        if (!isQuartoNotebookEditor(targetEditor)) {
-          await targetEditor.activate();
-        }
+        await targetEditor.activate();
 
         // save (will trigger render b/c renderOnSave is enabled)
         await commands.executeCommand("workbench.action.files.save");

@@ -26,12 +26,10 @@ import {
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
 import { canPreviewDoc } from "../../core/doc";
-import { findQuartoEditor, isQuartoNotebookEditor } from "../../core/quartoEditor";
+import { editorFrontMatterYaml, findQuartoEditor, isQuartoNotebookEditor } from "../../core/quartoEditor";
 import { renderOnSave } from "./preview-util";
-import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";
 import { QuickPickItemKind } from "vscode";
-import { notebookFrontMatterYaml } from "../../markdown/notebook";
 
 export function previewCommands(
   quartoContext: QuartoContext,
@@ -66,9 +64,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
       if (render) {
         if (format === kChooseFormat) {
 
-          const frontMatter = isQuartoNotebookEditor(targetEditor)
-            ? notebookFrontMatterYaml(targetEditor.notebookEditor.notebook)
-            : documentFrontMatterYaml(this.engine_, targetEditor.document);
+          const frontMatter = editorFrontMatterYaml(targetEditor, this.engine_);
 
           const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);
           if (formats) {

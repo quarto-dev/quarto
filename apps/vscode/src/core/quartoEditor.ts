@@ -3,6 +3,8 @@ import { QuartoContext } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 import { revealSlideIndex } from "../markdown/reveal";
 import { QuartoVisualEditor, VisualEditorProvider } from "../providers/editor/editor";
+import { notebookFrontMatterYaml } from "../markdown/notebook";
+import { documentFrontMatterYaml } from "../markdown/document";
 
 export type QuartoEditor = QuartoTextEditor | QuartoNotebookEditor | QuartoVisualEditor;
 
@@ -158,4 +160,12 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
       }, 200);
     }
   }
+}
+
+
+export function editorFrontMatterYaml(editor: QuartoEditor, engine: MarkdownEngine): string {
+  if (isQuartoNotebookEditor(editor)) {
+    return notebookFrontMatterYaml(editor.notebookEditor.notebook);
+  }
+  return documentFrontMatterYaml(engine, editor.document);
 }

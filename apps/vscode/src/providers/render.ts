@@ -24,14 +24,12 @@ import { Command } from "../core/command";
 import { MarkdownEngine } from "../markdown/engine";
 import { promptForQuartoInstallation } from "../core/quarto";
 import { canPreviewDoc } from "../core/doc";
-import { QuartoEditor, findQuartoEditor, isQuartoNotebookEditor } from "../core/quartoEditor";
+import { QuartoEditor, editorFrontMatterYaml, findQuartoEditor, isQuartoNotebookEditor } from "../core/quartoEditor";
 import { commands } from "vscode";
 import { killTerminal, sendTerminalCommand, terminalCommand, terminalEnv, terminalOptions } from "../core/terminal";
 import { QuickPickItem } from "vscode";
-import { documentFrontMatterYaml } from "../markdown/document";
 import { QuickPickItemKind } from "vscode";
 import { Uri } from "vscode";
-import { notebookFrontMatterYaml } from "../markdown/notebook";
 
 export function activateRender(quartoContext: QuartoContext, engine: MarkdownEngine): Command[] {
 
@@ -136,9 +134,7 @@ class RenderDocumentCommand extends RenderCommand
   private async resolveFormat(targetEditor: QuartoEditor) {
     return new Promise<string | undefined>((resolve) => {
 
-      const frontMatter = isQuartoNotebookEditor(targetEditor)
-        ? notebookFrontMatterYaml(targetEditor.notebookEditor.notebook)
-        : documentFrontMatterYaml(this.engine_, targetEditor.document);
+      const frontMatter = editorFrontMatterYaml(targetEditor, this.engine_);
 
       const kDeclaredFormats = "Declared Formats";
       const kOtherFormats = "Other Formats";

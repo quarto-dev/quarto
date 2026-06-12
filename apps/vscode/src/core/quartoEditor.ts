@@ -19,6 +19,8 @@ export interface QuartoEditorBase {
    * slide parsing e.g. `QuartoNotebookEditor`.
    */
   slideIndex?: () => Promise<number>;
+
+  selectAndRevealRange: (range: vscode.Range) => void;
 }
 
 export interface QuartoTextEditor extends QuartoEditorBase {
@@ -113,6 +115,20 @@ export function quartoTextEditor(
         return 0;
       }
     },
+    selectAndRevealRange: (range: vscode.Range) => {
+      // if the current selection is outside of the error region then
+      // navigate to the top of the error region
+      if (
+        editor.selection.active.isBefore(range.start) ||
+        editor.selection.active.isAfter(range.end)
+      ) {
+        editor.selection = new vscode.Selection(range.start, range.start);
+        editor.revealRange(
+          range,
+          vscode.TextEditorRevealType.InCenterIfOutsideViewport
+        );
+      }
+    },
     textEditor: editor,
   };
 }
@@ -129,6 +145,9 @@ function quartoNotebookEditor(
         notebookEditor.notebook,
         { preserveFocus: false }
       );
+    },
+    selectAndRevealRange: (range: vscode.Range) => {
+      // Not implemented yet.
     },
     notebookEditor,
   };
@@ -168,22 +187,4 @@ export function editorFrontMatterYaml(editor: QuartoEditor, engine: MarkdownEngi
     return notebookFrontMatterYaml(editor.notebookEditor.notebook);
   }
   return documentFrontMatterYaml(engine, editor.document);
-}
-
-export function selectAndRevealRange(editor: QuartoEditor, range: vscode.Range): void {
-  if (isQuartoTextEditor(editor)) {
-    // if the current selection is outside of the error region then
-    // navigate to the top of the error region
-    const textEditor = editor.textEditor;
-    if (
-      textEditor.selection.active.isBefore(range.start) ||
-      textEditor.selection.active.isAfter(range.end)
-    ) {
-      textEditor.selection = new vscode.Selection(range.start, range.start);
-      textEditor.revealRange(
-        range,
-        vscode.TextEditorRevealType.InCenterIfOutsideViewport
-      );
-    }
-  }
 }

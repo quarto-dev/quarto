@@ -307,6 +307,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         setBlockSelection: async (context, action) => {
           await editor.editor.setBlockSelection(context, action);
         },
+        selectAndRevealRange: (range: Range) => {
+          // Not implemented yet.
+        },
         viewColumn: editor.webviewPanel.viewColumn
       };
     } else {

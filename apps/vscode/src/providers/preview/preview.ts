@@ -640,7 +640,7 @@ class PreviewManager {
         const errPos = new Position(errorLoc.lineBegin - 1, 0);
         const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
         const errRange = new Range(errPos, errEndPos);
-        selectAndRevealRange(editor, errRange);
+        editor.selectAndRevealRange(errRange);
         preserveEditorFocus(editor);
       }
     }

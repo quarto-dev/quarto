@@ -1500,7 +1500,7 @@
     "test": "yarn build-test && vscode-test"
   },
   "dependencies": {
-    "axios": "^1.2.1",
+    "axios": "^1.6.4",
     "core": "*",
     "core-node": "*",
     "editor-core": "*",

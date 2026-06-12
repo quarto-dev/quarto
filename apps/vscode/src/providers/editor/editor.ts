@@ -289,15 +289,19 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
+      const hasFocus = async () => {
+        return await editor.editor.isFocused();
+      };
+
+      const activate = async () => {
+        activateVisualEditor(editor);
+      };
+
       return {
         type: 'visual',
         document: editor.document,
-        hasFocus: async () => {
-          return await editor.editor.isFocused();
-        },
-        activate: async () => {
-          activateVisualEditor(editor);
-        },
+        hasFocus,
+        activate,
         slideIndex: async () => {
           return await editor.editor.getSlideIndex();
         },
@@ -309,6 +313,13 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         },
         selectAndRevealRange: (range: Range) => {
           // Not implemented yet.
+        },
+        preserveEditorFocus: () => {
+          setTimeout(async () => {
+            if (!(await hasFocus())) {
+              await activate();
+            }
+          }, 200);
         },
         viewColumn: editor.webviewPanel.viewColumn
       };

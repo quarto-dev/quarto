@@ -13,20 +13,19 @@
  *
  */
 
-import vscode, {
+import {
   Uri,
   WebviewPanel,
   window,
   ViewColumn,
   EventEmitter,
   ExtensionContext,
-  WebviewPanelOnDidChangeViewStateEvent,
 } from "vscode";
 
 import { Disposable } from "../core/dispose";
-import { preserveEditorFocus } from "../core/quartoEditor";
 import { getNonce } from "../core/nonce";
 import { ExtensionHost, HostWebviewPanel } from "../host";
+import { activeQuartoEditor } from "../core/quartoEditor";
 
 export interface ShowOptions {
   readonly preserveFocus?: boolean;
@@ -73,7 +72,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     }
     this.resolveOnShow();
     if (options?.preserveFocus) {
-      preserveEditorFocus();
+      activeQuartoEditor()?.preserveEditorFocus();
     }
   }
 

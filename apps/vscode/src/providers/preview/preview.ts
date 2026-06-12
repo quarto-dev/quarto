@@ -49,7 +49,6 @@ import {
   quartoCanRenderScript,
   validatateQuartoCanRender,
 } from "../../core/doc";
-import { preserveEditorFocus, selectAndRevealRange } from "../../core/quartoEditor";
 import {
   findQuartoEditor,
   isQuartoNotebookEditor,
@@ -641,7 +640,7 @@ class PreviewManager {
         const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
         const errRange = new Range(errPos, errEndPos);
         editor.selectAndRevealRange(errRange);
-        preserveEditorFocus(editor);
+        editor.preserveEditorFocus();
       }
     }
   }

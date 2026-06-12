@@ -9,6 +9,8 @@ import { documentFrontMatterYaml } from "../markdown/document";
 export type QuartoEditor = QuartoTextEditor | QuartoNotebookEditor | QuartoVisualEditor;
 
 export interface QuartoEditorBase {
+  // TODO: Can we remove `document: TextDocument` from QuartoNotebookEditor?
+  //  Many things use it for `uri` (easy) and `getText()` (harder).
   document: vscode.TextDocument;
   activate: () => Promise<void>;
 
@@ -23,6 +25,8 @@ export interface QuartoEditorBase {
   selectAndRevealRange: (range: vscode.Range) => void;
 
   preserveEditorFocus(): void;
+
+  frontMatterYaml(engine: MarkdownEngine): string;
 }
 
 export interface QuartoTextEditor extends QuartoEditorBase {
@@ -145,6 +149,7 @@ export function quartoTextEditor(
         activate();
       }, 200);
     },
+    frontMatterYaml: (engine) => documentFrontMatterYaml(engine, editor.document),
     textEditor: editor,
   };
 }
@@ -163,19 +168,13 @@ function quartoNotebookEditor(
         { preserveFocus: false }
       );
     },
-    selectAndRevealRange: (range: vscode.Range) => {
+    selectAndRevealRange: () => {
       // Not implemented yet.
     },
     preserveEditorFocus: () => {
       // Not implemented yet.
     },
+    frontMatterYaml: () => notebookFrontMatterYaml(notebookEditor.notebook),
     notebookEditor,
   };
-}
-
-export function editorFrontMatterYaml(editor: QuartoEditor, engine: MarkdownEngine): string {
-  if (isQuartoNotebookEditor(editor)) {
-    return notebookFrontMatterYaml(editor.notebookEditor.notebook);
-  }
-  return documentFrontMatterYaml(engine, editor.document);
 }

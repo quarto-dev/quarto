@@ -26,7 +26,7 @@ import {
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
 import { canPreviewDoc } from "../../core/doc";
-import { editorFrontMatterYaml, findQuartoEditor } from "../../core/quartoEditor";
+import { findQuartoEditor } from "../../core/quartoEditor";
 import { renderOnSave } from "./preview-util";
 import { FormatQuickPickItem, RenderCommand } from "../render";
 import { QuickPickItemKind } from "vscode";
@@ -64,7 +64,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
       if (render) {
         if (format === kChooseFormat) {
 
-          const frontMatter = editorFrontMatterYaml(targetEditor, this.engine_);
+          const frontMatter = targetEditor.frontMatterYaml(this.engine_);
 
           const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);
           if (formats) {

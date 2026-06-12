@@ -68,6 +68,7 @@ import {
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 import { TabInputCustom } from "vscode";
+import { documentFrontMatterYaml } from "../../markdown/document";
 
 const kVisualModeConfirmed = "visualModeConfirmed";
 
@@ -321,6 +322,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             }
           }, 200);
         },
+        frontMatterYaml: (engine) => documentFrontMatterYaml(engine, editor.document),
         viewColumn: editor.webviewPanel.viewColumn
       };
     } else {

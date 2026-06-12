@@ -68,6 +68,7 @@ export function hooksExtensionHost(): ExtensionHost {
       : Promise<CellExecutor | undefined> => {
       switch (language) {
         // use hooks for known runtimes
+        case "julia":
         case "python":
         case "csharp":
         case "r":

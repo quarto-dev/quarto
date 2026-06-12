@@ -1523,7 +1523,7 @@
     "quarto-vscode-editor": "*",
     "quarto-vscode-markdownit": "*",
     "semver": "^7.3.8",
-    "tmp": "^0.2.1",
+    "tmp": "^0.2.6",
     "uuid": "^9.0.0",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver-types": "^3.17.3",

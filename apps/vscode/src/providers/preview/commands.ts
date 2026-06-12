@@ -16,7 +16,7 @@
 import * as path from "path";
 import * as fs from "fs";
 
-import { TextDocument, window, Uri, workspace, commands, QuickPickItem } from "vscode";
+import { TextDocument, window, Uri, workspace, commands } from "vscode";
 import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 
 import { Command } from "../../core/command";
@@ -25,7 +25,7 @@ import {
   previewDoc,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { canPreviewDoc, findQuartoEditor, isNotebookCell } from "../../core/doc";
+import { canPreviewDoc, findQuartoEditor, isQuartoNotebookEditor } from "../../core/doc";
 import { renderOnSave } from "./preview-util";
 import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";
@@ -64,7 +64,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
       if (render) {
         if (format === kChooseFormat) {
 
-          const frontMatter = targetEditor.notebook
+          const frontMatter = isQuartoNotebookEditor(targetEditor)
             ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
             : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
@@ -111,7 +111,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
       } else {
         // show the editor
         // TODO: Why can't we show notebooks too? Maybe because activate shows a cell's text editor?
-        if (!isNotebookCell(targetEditor.document)) {
+        if (!isQuartoNotebookEditor(targetEditor)) {
           await targetEditor.activate();
         }
 

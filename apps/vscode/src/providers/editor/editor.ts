@@ -13,7 +13,7 @@
  *
  */
 
-import path, { extname, win32 } from "path";
+import path, { extname } from "path";
 import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
@@ -46,7 +46,7 @@ import { CodeViewActiveBlockContext, CodeViewSelectionAction, HostContext, NavLo
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, QuartoEditor } from "../../core/doc";
+import { isQuartoDoc, QuartoEditorBase } from "../../core/doc";
 import { Command } from "../../core/command";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
@@ -70,7 +70,8 @@ import { TabInputCustom } from "vscode";
 
 const kVisualModeConfirmed = "visualModeConfirmed";
 
-export interface QuartoVisualEditor extends QuartoEditor {
+export interface QuartoVisualEditor extends QuartoEditorBase {
+  type: 'visual';
   hasFocus(): Promise<boolean>;
   getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
@@ -287,6 +288,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
       return {
+        type: 'visual',
         document: editor.document,
         hasFocus: async () => {
           return await editor.editor.isFocused();

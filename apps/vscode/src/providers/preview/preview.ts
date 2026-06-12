@@ -49,6 +49,8 @@ import {
   canPreviewDoc,
   findQuartoEditor,
   isNotebookCell,
+  isQuartoNotebookEditor,
+  isQuartoTextEditor,
   preserveEditorFocus,
   previewDirForDocument,
   quartoCanRenderScript,
@@ -189,7 +191,7 @@ export async function previewDoc(
 ) {
   // set the slide index from the source editor so we can
   // navigate to it in the preview frame
-  const slideIndex = !isNotebookCell(editor.document)
+  const slideIndex = !isQuartoNotebookEditor(editor)
     ? await editor.slideIndex()
     : undefined;
   previewManager.setSlideIndex(slideIndex);
@@ -202,7 +204,7 @@ export async function previewDoc(
   // if this wasn't a renderOnSave then activate the editor and save
   if (!renderOnSave) {
     // activate the editor
-    if (!isNotebookCell(editor.document)) {
+    if (!isQuartoNotebookEditor(editor)) {
       await editor.activate();
     }
 
@@ -221,7 +223,7 @@ export async function previewDoc(
   if (previewEditor) {
     // error if we didn't save using a valid quarto extension
     if (
-      !isNotebookCell(previewEditor.document) &&
+      !isQuartoNotebookEditor(previewEditor) &&
       !validatateQuartoCanRender(previewEditor.document)
     ) {
       window.showErrorMessage("Unsupported File Extension", {
@@ -243,7 +245,7 @@ export async function previewDoc(
 
     // focus the editor (sometimes the terminal steals focus)
     if (!renderOnSave) {
-      if (!isNotebookCell(previewEditor.document)) {
+      if (!isQuartoNotebookEditor(previewEditor)) {
         await previewEditor.activate();
       }
     }
@@ -646,7 +648,8 @@ class PreviewManager {
         (doc) => doc.uri.fsPath === fileUri.fsPath
       );
       if (editor) {
-        if (editor.textEditor) {
+        // TODO: Should probably handle notebooks and visual editors here
+        if (isQuartoTextEditor(editor)) {
           // if the current selection is outside of the error region then
           // navigate to the top of the error region
           const errPos = new Position(errorLoc.lineBegin - 1, 0);

@@ -19,7 +19,7 @@ import fs from "node:fs";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { revealSlideIndex } from "../markdown/reveal";
-import { VisualEditorProvider } from "../providers/editor/editor";
+import { QuartoVisualEditor, VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
 import { MarkdownEngine } from "../markdown/engine";
 import { QuartoContext, projectDirForDocument } from "quarto-core";
@@ -172,14 +172,12 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
   editor =
     editor ||
     (vscode.window.activeTextEditor
-      ? quartoEditor(vscode.window.activeTextEditor)
+      ? quartoTextEditor(vscode.window.activeTextEditor)
       : undefined);
   if (editor) {
-    if (!isNotebookCell(editor?.document)) {
+    if (!isQuartoNotebookEditor(editor)) {
       setTimeout(() => {
-        if (editor) {
-          editor.activate();
-        }
+        editor.activate();
       }, 200);
     }
   } else {
@@ -195,13 +193,37 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
   }
 }
 
-export interface QuartoEditor {
+export type QuartoEditor = QuartoTextEditor | QuartoNotebookEditor | QuartoVisualEditor;
+
+export interface QuartoEditorBase {
   document: vscode.TextDocument;
   activate: () => Promise<void>;
-  slideIndex: () => Promise<number>;
   viewColumn?: vscode.ViewColumn;
-  textEditor?: vscode.TextEditor;
-  notebook?: vscode.NotebookDocument;
+  slideIndex: () => Promise<number>;
+}
+
+export interface QuartoTextEditor extends QuartoEditorBase {
+  type: 'text';
+  textEditor: vscode.TextEditor;
+}
+
+export interface QuartoNotebookEditor extends QuartoEditorBase {
+  type: 'notebook';
+  notebook: vscode.NotebookDocument;
+  // TODO: Need this one?
+  textEditor: vscode.TextEditor;
+}
+
+export function isQuartoNotebookEditor(editor: QuartoEditor): editor is QuartoNotebookEditor {
+  return editor.type === 'notebook';
+}
+
+export function isQuartoTextEditor(editor: QuartoEditor): editor is QuartoTextEditor {
+  return editor.type === 'text';
+}
+
+export function isQuartoVisualEditor(editor: QuartoEditor): editor is QuartoVisualEditor {
+  return editor.type === 'visual';
 }
 
 export function findQuartoEditor(
@@ -216,27 +238,21 @@ export function findQuartoEditor(
   }
 
   // then check for active notebook editor
-  const notebookEditor = (vscode.window as any).activeNotebookEditor as
-    | vscode.NotebookEditor
-    | undefined;
+  const notebookEditor = vscode.window.activeNotebookEditor;
   if (notebookEditor) {
-    const notebookDocument = (notebookEditor as any).notebook as
-      | vscode.NotebookDocument
-      | undefined;
-    if (notebookDocument) {
-      const textEditor = vscode.window.visibleTextEditors.find((editor) => {
-        return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
-      });
-      if (textEditor && filter(textEditor.document)) {
-        return quartoEditor(textEditor, engine, context, notebookDocument);
-      }
+    const notebookDocument = notebookEditor.notebook;
+    const textEditor = vscode.window.visibleTextEditors.find((editor) => {
+      return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
+    });
+    if (textEditor && filter(textEditor.document)) {
+      return quartoNotebookEditor(textEditor, notebookDocument, engine, context);
     }
   }
 
   // active text editor
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {
-    return quartoEditor(textEditor, engine, context);
+    return quartoTextEditor(textEditor, engine, context);
     // check visible text editors
   } else {
     // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
@@ -250,20 +266,53 @@ export function findQuartoEditor(
       filter(editor.document)
     );
     if (visibleEditor) {
-      return quartoEditor(visibleEditor, engine, context);
+      return quartoTextEditor(visibleEditor, engine, context);
     } else {
       return undefined;
     }
   }
 }
 
-export function quartoEditor(
+function quartoTextEditor(
   editor: vscode.TextEditor,
   engine?: MarkdownEngine,
   context?: QuartoContext,
-  notebook?: vscode.NotebookDocument
-) {
+): QuartoTextEditor {
   return {
+    type: 'text',
+    document: editor.document,
+    activate: async () => {
+      await vscode.window.showTextDocument(
+        editor.document,
+        editor.viewColumn,
+        false
+      );
+    },
+    slideIndex: async () => {
+      if (engine && context) {
+        return await revealSlideIndex(
+          editor.selection.active,
+          editor.document,
+          engine,
+          context
+        );
+      } else {
+        return 0;
+      }
+    },
+    viewColumn: editor.viewColumn,
+    textEditor: editor,
+  };
+}
+
+function quartoNotebookEditor(
+  editor: vscode.TextEditor,
+  notebook: vscode.NotebookDocument,
+  engine?: MarkdownEngine,
+  context?: QuartoContext,
+): QuartoNotebookEditor {
+  return {
+    type: 'notebook',
     document: editor.document,
     activate: async () => {
       await vscode.window.showTextDocument(

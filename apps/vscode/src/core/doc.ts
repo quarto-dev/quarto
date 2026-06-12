@@ -18,14 +18,9 @@ import fs from "node:fs";
 
 import * as vscode from "vscode";
 import { Uri } from "vscode";
-import { revealSlideIndex } from "../markdown/reveal";
-import { VisualEditorProvider } from "../providers/editor/editor";
 import { extname } from "./path";
-import { MarkdownEngine } from "../markdown/engine";
-import { QuartoContext, projectDirForDocument } from "quarto-core";
-import { TextDocument } from "vscode";
+import { projectDirForDocument } from "quarto-core";
 import { workspace } from "vscode";
-import { NotebookDocument } from "vscode";
 import { isJupyterPercentScript, isKnitrSpinScript } from "core-node";
 
 export const kQuartoLanguageId = "quarto";
@@ -58,18 +53,19 @@ function isLanguageDoc(languageId: string, doc?: vscode.TextDocument) {
   return !!doc && doc.languageId === languageId;
 }
 
-export function isNotebook(doc?: vscode.TextDocument) {
-  return !!doc && isNotebookUri(doc.uri);
+function isNotebook(doc?: vscode.TextDocument | vscode.NotebookDocument): doc is vscode.NotebookDocument {
+  return !!doc && 'notebookType' in doc;
 }
 
-export function isNotebookUri(uri: Uri) {
+function isIpynbUri(uri: Uri) {
   return extname(uri.fsPath).toLowerCase() === ".ipynb";
 }
 
-
-export function canPreviewDoc(doc?: TextDocument) {
+export function canPreviewDoc(doc?: vscode.TextDocument | vscode.NotebookDocument) {
   if (doc) {
-    if (isQuartoDoc(doc) || isNotebook(doc)) {
+    if (isNotebook(doc)) {
+      return isIpynbUri(doc.uri);
+    } else if (isQuartoDoc(doc)) {
       return true;
     } else if (validatateQuartoCanRender(doc)) {
       return true;
@@ -157,132 +153,6 @@ export function getWholeRange(doc: vscode.TextDocument) {
   const begin = new vscode.Position(0, 0);
   const end = doc.lineAt(doc.lineCount - 1).range.end;
   return new vscode.Range(begin, end);
-}
-
-export function preserveEditorFocus(editor?: QuartoEditor) {
-  // focus the editor (sometimes the terminal steals focus)
-  editor =
-    editor ||
-    (vscode.window.activeTextEditor
-      ? quartoEditor(vscode.window.activeTextEditor)
-      : undefined);
-  if (editor) {
-    if (!isNotebook(editor?.document)) {
-      setTimeout(() => {
-        if (editor) {
-          editor.activate();
-        }
-      }, 200);
-    }
-  } else {
-    // see if there is a visual editor we should be preserving focus for
-    const visualEditor = VisualEditorProvider.activeEditor();
-    if (visualEditor) {
-      setTimeout(async () => {
-        if (!(await visualEditor.hasFocus())) {
-          await visualEditor.activate();
-        }
-      }, 200);
-    }
-  }
-}
-
-export interface QuartoEditor {
-  document: vscode.TextDocument;
-  activate: () => Promise<void>;
-  slideIndex: () => Promise<number>;
-  viewColumn?: vscode.ViewColumn;
-  textEditor?: vscode.TextEditor;
-  notebook?: vscode.NotebookDocument;
-}
-
-export function findQuartoEditor(
-  engine: MarkdownEngine,
-  context: QuartoContext,
-  filter: (doc: vscode.TextDocument) => boolean,
-  includeVisible = true
-): QuartoEditor | undefined {
-  // first check for an active visual editor
-  const activeVisualEditor = VisualEditorProvider.activeEditor();
-  if (activeVisualEditor && filter(activeVisualEditor.document)) {
-    return activeVisualEditor;
-  }
-
-  // then check for active notebook editor
-  const notebookEditor = (vscode.window as any).activeNotebookEditor as
-    | vscode.NotebookEditor
-    | undefined;
-  if (notebookEditor) {
-    const notebookDocument = (notebookEditor as any).notebook as
-      | vscode.NotebookDocument
-      | undefined;
-    if (notebookDocument) {
-      const textEditor = vscode.window.visibleTextEditors.find((editor) => {
-        return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
-      });
-      if (textEditor && filter(textEditor.document)) {
-        return quartoEditor(textEditor, engine, context, notebookDocument);
-      }
-    }
-  }
-
-  // active text editor
-  const textEditor = vscode.window.activeTextEditor;
-  if (textEditor && filter(textEditor.document)) {
-    return quartoEditor(textEditor, engine, context);
-    // check visible text editors
-  } else if (includeVisible) {
-    // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
-    const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
-    if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
-      return visibleVisualEditor;
-    }
-
-    // visible text editors
-    const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
-      filter(editor.document)
-    );
-    if (visibleEditor) {
-      return quartoEditor(visibleEditor, engine, context);
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
-  }
-}
-
-export function quartoEditor(
-  editor: vscode.TextEditor,
-  engine?: MarkdownEngine,
-  context?: QuartoContext,
-  notebook?: NotebookDocument
-) {
-  return {
-    document: editor.document,
-    activate: async () => {
-      await vscode.window.showTextDocument(
-        editor.document,
-        editor.viewColumn,
-        false
-      );
-    },
-    slideIndex: async () => {
-      if (engine && context) {
-        return await revealSlideIndex(
-          editor.selection.active,
-          editor.document,
-          engine,
-          context
-        );
-      } else {
-        return 0;
-      }
-    },
-    viewColumn: editor.viewColumn,
-    textEditor: editor,
-    notebook,
-  };
 }
 
 async function tryResolveUriToQuartoDoc(

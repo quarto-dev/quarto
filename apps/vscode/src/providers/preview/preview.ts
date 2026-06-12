@@ -26,13 +26,11 @@ import vscode, {
   MessageItem,
   Terminal,
   TextDocument,
-  Selection,
   Range,
   Uri,
   ViewColumn,
   window,
   Position,
-  TextEditorRevealType,
   NotebookDocument,
   ProgressLocation,
   CancellationToken,
@@ -47,14 +45,15 @@ import { previewCommands } from "./commands";
 import { Command } from "../../core/command";
 import {
   canPreviewDoc,
-  findQuartoEditor,
-  isNotebook,
-  preserveEditorFocus,
   previewDirForDocument,
   quartoCanRenderScript,
-  QuartoEditor,
   validatateQuartoCanRender,
 } from "../../core/doc";
+import {
+  findQuartoEditor,
+  isQuartoNotebookEditor,
+  QuartoEditor
+} from "../../core/quartoEditor";
 import { PreviewOutputSink } from "./preview-output";
 import { isHtmlContent, isTextContent, isPdfContent } from "core-node";
 
@@ -71,7 +70,6 @@ import {
   QuartoPreviewWebviewManager,
 } from "./preview-webview";
 import {
-  haveNotebookSaveEvents,
   isQuartoShinyDoc,
   isQuartoShinyKnitrDoc,
   renderOnSave,
@@ -120,7 +118,7 @@ export function activatePreview(
     if (editor) {
       if (
         canPreviewDoc(editor.document) &&
-        (await renderOnSave(engine, editor.document)) &&
+        (await renderOnSave(engine, editor)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine, quartoContext);
@@ -132,17 +130,13 @@ export function activatePreview(
       await onSave(doc.uri);
     })
   );
-  // we use 1.66 as our minimum version (and type import) but
-  // onDidSaveNotebookDocument was introduced in 1.67
-  if (haveNotebookSaveEvents()) {
-    context.subscriptions.push(
-      (vscode.workspace as any).onDidSaveNotebookDocument(
-        async (notebook: NotebookDocument) => {
-          await onSave(notebook.uri);
-        }
-      )
-    );
-  }
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveNotebookDocument(
+      async (notebook: NotebookDocument) => {
+        await onSave(notebook.uri);
+      }
+    )
+  );
 
   // monitor active document to see whether it can be rendered by quarto
   const updateRenderDocActive = (editor?: vscode.TextEditor) => {
@@ -194,9 +188,7 @@ export async function previewDoc(
 ) {
   // set the slide index from the source editor so we can
   // navigate to it in the preview frame
-  const slideIndex = !isNotebook(editor.document)
-    ? await editor.slideIndex()
-    : undefined;
+  const slideIndex = editor.slideIndex && await editor.slideIndex();
   previewManager.setSlideIndex(slideIndex);
 
   //  set onShow if provided
@@ -207,9 +199,7 @@ export async function previewDoc(
   // if this wasn't a renderOnSave then activate the editor and save
   if (!renderOnSave) {
     // activate the editor
-    if (!isNotebook(editor.document)) {
-      await editor.activate();
-    }
+    await editor.activate();
 
     await commands.executeCommand("workbench.action.files.save");
     if (editor.document.isDirty) {
@@ -226,7 +216,7 @@ export async function previewDoc(
   if (previewEditor) {
     // error if we didn't save using a valid quarto extension
     if (
-      !isNotebook(previewEditor.document) &&
+      !isQuartoNotebookEditor(previewEditor) &&
       !validatateQuartoCanRender(previewEditor.document)
     ) {
       window.showErrorMessage("Unsupported File Extension", {
@@ -240,23 +230,16 @@ export async function previewDoc(
 
     // run the preview
     await previewManager.preview(
-      previewEditor.document.uri,
-      previewEditor.document,
+      previewEditor,
       format,
       slideIndex
     );
 
     // focus the editor (sometimes the terminal steals focus)
     if (!renderOnSave) {
-      if (!isNotebook(previewEditor.document)) {
-        await previewEditor.activate();
-      }
+      await previewEditor.activate();
     }
   }
-}
-
-export async function previewProject(target: Uri, format?: string) {
-  await previewManager.preview(target, undefined, format);
 }
 
 class PreviewManager {
@@ -302,12 +285,12 @@ class PreviewManager {
   }
 
   public async preview(
-    uri: Uri,
-    doc: TextDocument | undefined,
+    editor: QuartoEditor,
     format: string | null | undefined,
     slideIndex?: number
   ) {
     // resolve format if we need to
+    const uri = editor.document.uri;
     if (format === undefined) {
       format = this.previewFormats_.get(uri.fsPath) || null;
     } else {
@@ -317,8 +300,9 @@ class PreviewManager {
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;
     this.previewOutput_ = "";
-    this.previewDoc_ = doc;
+    this.previewEditor_ = editor;
     const previewEnv = await this.previewEnvManager_.previewEnv(uri);
+    const doc = editor?.document;
     if (doc && (await this.canReuseRunningPreview(doc, previewEnv))) {
       try {
         const response = await this.previewRenderRequest(doc, format);
@@ -551,7 +535,7 @@ class PreviewManager {
         if (browseMatch) {
           // earlier versions of quarto serve didn't print out vscode urls
           // correctly so we compenstate for that here
-          if (isQuartoShinyDoc(this.engine_, this.previewDoc_)) {
+          if (isQuartoShinyDoc(this.engine_, this.previewEditor_?.document)) {
             this.previewUrl_ = vsCodeWebUrl(browseMatch[2]);
           } else {
             this.previewUrl_ = browseMatch[2];
@@ -589,7 +573,7 @@ class PreviewManager {
         }
       }
     }
-    this.progressDismiss()
+    this.progressDismiss();
   }
 
   private progressShow(uri: Uri) {
@@ -620,16 +604,15 @@ class PreviewManager {
   }
 
   private async detectErrorNavigation(output: string) {
-    // bail if this is a notebook or we don't have a previewDoc
-    if (!this.previewDoc_ || isNotebook(this.previewDoc_)) {
+    // bail if this is a notebook or we don't have a previewEditor
+    if (!this.previewEditor_ || isQuartoNotebookEditor(this.previewEditor_)) {
       return;
     }
-
     // normalize
     output = normalizeNewlines(output);
 
     // run all of our tests
-    const previewFile = this.previewDoc_.uri.fsPath;
+    const previewFile = this.previewEditor_.document.uri.fsPath;
     const previewDir = this.previewDir_ || this.targetDir();
     const errorLoc =
       yamlErrorLocation(output, previewFile, previewDir) ||
@@ -651,24 +634,13 @@ class PreviewManager {
         (doc) => doc.uri.fsPath === fileUri.fsPath
       );
       if (editor) {
-        if (editor.textEditor) {
-          // if the current selection is outside of the error region then
-          // navigate to the top of the error region
-          const errPos = new Position(errorLoc.lineBegin - 1, 0);
-          const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
-          const textEditor = editor.textEditor;
-          if (
-            textEditor.selection.active.isBefore(errPos) ||
-            textEditor.selection.active.isAfter(errEndPos)
-          ) {
-            textEditor.selection = new Selection(errPos, errPos);
-            textEditor.revealRange(
-              new Range(errPos, errPos),
-              TextEditorRevealType.InCenterIfOutsideViewport
-            );
-          }
-        }
-        preserveEditorFocus(editor);
+        // if the current selection is outside of the error region then
+        // navigate to the top of the error region
+        const errPos = new Position(errorLoc.lineBegin - 1, 0);
+        const errEndPos = new Position(errorLoc.lineEnd - 1, 0);
+        const errRange = new Range(errPos, errEndPos);
+        editor.selectAndRevealRange(errRange);
+        editor.preserveEditorFocus();
       }
     }
   }
@@ -783,7 +755,7 @@ class PreviewManager {
   }
 
   private previewOutput_ = "";
-  private previewDoc_: TextDocument | undefined;
+  private previewEditor_: QuartoEditor | undefined;
   private previewEnv_: PreviewEnv | undefined;
   private previewTarget_: Uri | undefined;
   private previewUrl_: string | undefined;

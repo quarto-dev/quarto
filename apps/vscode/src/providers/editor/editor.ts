@@ -13,7 +13,7 @@
  *
  */
 
-import path, { extname, win32 } from "path";
+import path, { extname } from "path";
 import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
@@ -46,7 +46,8 @@ import { CodeViewActiveBlockContext, CodeViewSelectionAction, HostContext, NavLo
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, QuartoEditor } from "../../core/doc";
+import { isQuartoDoc } from "../../core/doc";
+import { QuartoEditorBase } from "../../core/quartoEditor";
 import { Command } from "../../core/command";
 
 import { visualEditorClient, visualEditorServer } from "./connection";
@@ -67,13 +68,16 @@ import {
 } from "./toggle";
 import { ExtensionHost } from "../../host";
 import { TabInputCustom } from "vscode";
+import { documentFrontMatterYaml } from "../../markdown/document";
 
 const kVisualModeConfirmed = "visualModeConfirmed";
 
-export interface QuartoVisualEditor extends QuartoEditor {
+export interface QuartoVisualEditor extends QuartoEditorBase {
+  type: 'visual';
   hasFocus(): Promise<boolean>;
   getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
+  viewColumn: ViewColumn | undefined;
 }
 
 export function activateEditor(
@@ -286,14 +290,19 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
+      const hasFocus = async () => {
+        return await editor.editor.isFocused();
+      };
+
+      const activate = async () => {
+        activateVisualEditor(editor);
+      };
+
       return {
+        type: 'visual',
         document: editor.document,
-        hasFocus: async () => {
-          return await editor.editor.isFocused();
-        },
-        activate: async () => {
-          activateVisualEditor(editor);
-        },
+        hasFocus,
+        activate,
         slideIndex: async () => {
           return await editor.editor.getSlideIndex();
         },
@@ -303,6 +312,17 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         setBlockSelection: async (context, action) => {
           await editor.editor.setBlockSelection(context, action);
         },
+        selectAndRevealRange: (range: Range) => {
+          // Not implemented yet.
+        },
+        preserveEditorFocus: () => {
+          setTimeout(async () => {
+            if (!(await hasFocus())) {
+              await activate();
+            }
+          }, 200);
+        },
+        frontMatterYaml: (engine) => documentFrontMatterYaml(engine, editor.document),
         viewColumn: editor.webviewPanel.viewColumn
       };
     } else {

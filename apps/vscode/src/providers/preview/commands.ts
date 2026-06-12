@@ -16,7 +16,7 @@
 import * as path from "path";
 import * as fs from "fs";
 
-import { TextDocument, window, Uri, workspace, commands, QuickPickItem } from "vscode";
+import { TextDocument, window, Uri, workspace, commands } from "vscode";
 import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 
 import { Command } from "../../core/command";
@@ -25,9 +25,9 @@ import {
   previewDoc,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { canPreviewDoc, findQuartoEditor, isNotebook } from "../../core/doc";
+import { canPreviewDoc } from "../../core/doc";
+import { findQuartoEditor } from "../../core/quartoEditor";
 import { renderOnSave } from "./preview-util";
-import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";
 import { QuickPickItemKind } from "vscode";
 
@@ -56,7 +56,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
   protected async renderFormat(format?: string | null, onShow?: () => void) {
     const targetEditor = findQuartoEditor(this.engine_, this.quartoContext(), canPreviewDoc);
     if (targetEditor) {
-      const hasRenderOnSave = await renderOnSave(this.engine_, targetEditor.document);
+      const hasRenderOnSave = await renderOnSave(this.engine_, targetEditor);
       const render =
         !hasRenderOnSave ||
         (hasRenderOnSave && format) ||
@@ -64,9 +64,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
       if (render) {
         if (format === kChooseFormat) {
 
-          const frontMatter = targetEditor.notebook
-            ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
-            : documentFrontMatterYaml(this.engine_, targetEditor.document);
+          const frontMatter = targetEditor.frontMatterYaml(this.engine_);
 
           const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);
           if (formats) {
@@ -110,9 +108,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
         }
       } else {
         // show the editor
-        if (!isNotebook(targetEditor.document)) {
-          await targetEditor.activate();
-        }
+        await targetEditor.activate();
 
         // save (will trigger render b/c renderOnSave is enabled)
         await commands.executeCommand("workbench.action.files.save");

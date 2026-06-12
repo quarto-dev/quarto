@@ -23,11 +23,11 @@ import { Command } from "../core/command";
 
 import { MarkdownEngine } from "../markdown/engine";
 import { promptForQuartoInstallation } from "../core/quarto";
-import { QuartoEditor, canPreviewDoc, findQuartoEditor, isNotebook } from "../core/doc";
+import { canPreviewDoc } from "../core/doc";
+import { QuartoEditor, findQuartoEditor } from "../core/quartoEditor";
 import { commands } from "vscode";
 import { killTerminal, sendTerminalCommand, terminalCommand, terminalEnv, terminalOptions } from "../core/terminal";
 import { QuickPickItem } from "vscode";
-import { documentFrontMatterYaml } from "../markdown/document";
 import { QuickPickItemKind } from "vscode";
 import { Uri } from "vscode";
 
@@ -93,9 +93,7 @@ class RenderDocumentCommand extends RenderCommand
     if (targetEditor) {
 
       // show the editor and save
-      if (!isNotebook(targetEditor.document)) {
-        await targetEditor.activate();
-      }
+      await targetEditor.activate();
       await commands.executeCommand("workbench.action.files.save");
 
       // kill any existing terminal
@@ -123,9 +121,7 @@ class RenderDocumentCommand extends RenderCommand
       await sendTerminalCommand(terminal, env, this.quartoContext(), cmd);
 
       // focus the editor (sometimes the terminal steals focus)
-      if (!isNotebook(targetEditor.document)) {
-        await targetEditor.activate();
-      }
+      await targetEditor.activate();
 
     }
   }
@@ -134,9 +130,7 @@ class RenderDocumentCommand extends RenderCommand
   private async resolveFormat(targetEditor: QuartoEditor) {
     return new Promise<string | undefined>((resolve) => {
 
-      const frontMatter = targetEditor.notebook
-        ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
-        : documentFrontMatterYaml(this.engine_, targetEditor.document);
+      const frontMatter = targetEditor.frontMatterYaml(this.engine_);
 
       const kDeclaredFormats = "Declared Formats";
       const kOtherFormats = "Other Formats";

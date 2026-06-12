@@ -20,7 +20,8 @@ import { commands, LogOutputChannel, Uri, window } from "vscode";
 import { QuartoContext } from "quarto-core";
 
 import { Command } from "../core/command";
-import { canPreviewDoc, findQuartoEditor } from "../core/doc";
+import { canPreviewDoc } from "../core/doc";
+import { findQuartoEditor } from "../core/quartoEditor";
 import { promptForQuartoInstallation } from "../core/quarto";
 import { MarkdownEngine } from "../markdown/engine";
 

@@ -30,6 +30,7 @@ import { renderOnSave } from "./preview-util";
 import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";
 import { QuickPickItemKind } from "vscode";
+import { notebookFrontMatterYaml } from "../../markdown/notebook";
 
 export function previewCommands(
   quartoContext: QuartoContext,
@@ -65,7 +66,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
         if (format === kChooseFormat) {
 
           const frontMatter = isQuartoNotebookEditor(targetEditor)
-            ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
+            ? notebookFrontMatterYaml(targetEditor.notebook)
             : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
           const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);

@@ -30,6 +30,7 @@ import { QuickPickItem } from "vscode";
 import { documentFrontMatterYaml } from "../markdown/document";
 import { QuickPickItemKind } from "vscode";
 import { Uri } from "vscode";
+import { notebookFrontMatterYaml } from "../markdown/notebook";
 
 export function activateRender(quartoContext: QuartoContext, engine: MarkdownEngine): Command[] {
 
@@ -135,7 +136,7 @@ class RenderDocumentCommand extends RenderCommand
     return new Promise<string | undefined>((resolve) => {
 
       const frontMatter = isQuartoNotebookEditor(targetEditor)
-        ? targetEditor.notebook.cellAt(0)?.document.getText() || ""
+        ? notebookFrontMatterYaml(targetEditor.notebook)
         : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
       const kDeclaredFormats = "Declared Formats";

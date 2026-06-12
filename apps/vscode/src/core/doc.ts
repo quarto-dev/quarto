@@ -56,7 +56,12 @@ function isLanguageDoc(languageId: string, doc?: vscode.TextDocument) {
   return !!doc && doc.languageId === languageId;
 }
 
-export function isNotebook(doc?: vscode.TextDocument | vscode.NotebookDocument) {
+// TODO: This should actually be called isNotebookCell and we should call it less often
+export function isNotebookCell(doc?: vscode.TextDocument) {
+  return !!doc && isNotebookUri(doc.uri);
+}
+
+function isNotebook(doc?: vscode.TextDocument | vscode.NotebookDocument) {
   return isNotebookDoc(doc) && isNotebookUri(doc.uri);
 }
 
@@ -170,7 +175,7 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
       ? quartoEditor(vscode.window.activeTextEditor)
       : undefined);
   if (editor) {
-    if (!isNotebook(editor?.document)) {
+    if (!isNotebookCell(editor?.document)) {
       setTimeout(() => {
         if (editor) {
           editor.activate();
@@ -256,7 +261,7 @@ export function quartoEditor(
   editor: vscode.TextEditor,
   engine?: MarkdownEngine,
   context?: QuartoContext,
-  notebook?: NotebookDocument
+  notebook?: vscode.NotebookDocument
 ) {
   return {
     document: editor.document,

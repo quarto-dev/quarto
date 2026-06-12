@@ -25,7 +25,7 @@ import {
   previewDoc,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { canPreviewDoc, findQuartoEditor, isNotebook } from "../../core/doc";
+import { canPreviewDoc, findQuartoEditor, isNotebookCell } from "../../core/doc";
 import { renderOnSave } from "./preview-util";
 import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";
@@ -110,7 +110,8 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
         }
       } else {
         // show the editor
-        if (!isNotebook(targetEditor.document)) {
+        // TODO: Why can't we show notebooks too? Maybe because activate shows a cell's text editor?
+        if (!isNotebookCell(targetEditor.document)) {
           await targetEditor.activate();
         }
 

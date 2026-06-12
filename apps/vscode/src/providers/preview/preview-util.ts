@@ -23,7 +23,7 @@ import {
   metadataFilesForDocument,
   yamlFromMetadataFile,
 } from "quarto-core";
-import { isNotebook } from "../../core/doc";
+import { isNotebookCell } from "../../core/doc";
 
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
@@ -61,14 +61,9 @@ export function isQuartoShinyKnitrDoc(
 }
 
 export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
-  // if its a notebook and we don't have a save hook for notebooks then don't
-  // allow renderOnSave (b/c we can't detect the saves)
-  if (isNotebook(document)) {
-    return false;
-  }
-
+  // TODO: Should notebooks be treated same as text documents?
   // notebooks automatically get renderOnSave
-  if (isNotebook(document)) {
+  if (isNotebookCell(document)) {
     return true;
   }
 

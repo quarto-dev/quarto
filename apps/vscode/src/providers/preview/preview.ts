@@ -48,7 +48,7 @@ import { Command } from "../../core/command";
 import {
   canPreviewDoc,
   findQuartoEditor,
-  isNotebook,
+  isNotebookCell,
   preserveEditorFocus,
   previewDirForDocument,
   quartoCanRenderScript,
@@ -189,7 +189,7 @@ export async function previewDoc(
 ) {
   // set the slide index from the source editor so we can
   // navigate to it in the preview frame
-  const slideIndex = !isNotebook(editor.document)
+  const slideIndex = !isNotebookCell(editor.document)
     ? await editor.slideIndex()
     : undefined;
   previewManager.setSlideIndex(slideIndex);
@@ -202,7 +202,7 @@ export async function previewDoc(
   // if this wasn't a renderOnSave then activate the editor and save
   if (!renderOnSave) {
     // activate the editor
-    if (!isNotebook(editor.document)) {
+    if (!isNotebookCell(editor.document)) {
       await editor.activate();
     }
 
@@ -221,7 +221,7 @@ export async function previewDoc(
   if (previewEditor) {
     // error if we didn't save using a valid quarto extension
     if (
-      !isNotebook(previewEditor.document) &&
+      !isNotebookCell(previewEditor.document) &&
       !validatateQuartoCanRender(previewEditor.document)
     ) {
       window.showErrorMessage("Unsupported File Extension", {
@@ -243,7 +243,7 @@ export async function previewDoc(
 
     // focus the editor (sometimes the terminal steals focus)
     if (!renderOnSave) {
-      if (!isNotebook(previewEditor.document)) {
+      if (!isNotebookCell(previewEditor.document)) {
         await previewEditor.activate();
       }
     }
@@ -616,7 +616,7 @@ class PreviewManager {
 
   private async detectErrorNavigation(output: string) {
     // bail if this is a notebook or we don't have a previewDoc
-    if (!this.previewDoc_ || isNotebook(this.previewDoc_)) {
+    if (!this.previewDoc_ || isNotebookCell(this.previewDoc_)) {
       return;
     }
 

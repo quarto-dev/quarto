@@ -23,7 +23,7 @@ import { Command } from "../core/command";
 
 import { MarkdownEngine } from "../markdown/engine";
 import { promptForQuartoInstallation } from "../core/quarto";
-import { QuartoEditor, canPreviewDoc, findQuartoEditor, isNotebook } from "../core/doc";
+import { QuartoEditor, canPreviewDoc, findQuartoEditor, isNotebookCell } from "../core/doc";
 import { commands } from "vscode";
 import { killTerminal, sendTerminalCommand, terminalCommand, terminalEnv, terminalOptions } from "../core/terminal";
 import { QuickPickItem } from "vscode";
@@ -93,7 +93,7 @@ class RenderDocumentCommand extends RenderCommand
     if (targetEditor) {
 
       // show the editor and save
-      if (!isNotebook(targetEditor.document)) {
+      if (!isNotebookCell(targetEditor.document)) {
         await targetEditor.activate();
       }
       await commands.executeCommand("workbench.action.files.save");
@@ -123,7 +123,7 @@ class RenderDocumentCommand extends RenderCommand
       await sendTerminalCommand(terminal, env, this.quartoContext(), cmd);
 
       // focus the editor (sometimes the terminal steals focus)
-      if (!isNotebook(targetEditor.document)) {
+      if (!isNotebookCell(targetEditor.document)) {
         await targetEditor.activate();
       }
 

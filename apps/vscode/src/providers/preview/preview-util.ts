@@ -63,7 +63,7 @@ export function isQuartoShinyKnitrDoc(
 export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
   // if its a notebook and we don't have a save hook for notebooks then don't
   // allow renderOnSave (b/c we can't detect the saves)
-  if (isNotebook(document) && !haveNotebookSaveEvents()) {
+  if (isNotebook(document)) {
     return false;
   }
 
@@ -100,13 +100,6 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
   return !isQuartoShinyDoc(engine, document)
     ? getRenderOnSave()
     : getRenderOnSaveShiny();
-}
-
-export function haveNotebookSaveEvents() {
-  return (
-    semver.gte(vscode.version, "1.67.0") &&
-    !!(workspace as any).onDidSaveNotebookDocument
-  );
 }
 
 function readRenderOnSave(yaml: Record<string, unknown>) {

@@ -71,7 +71,6 @@ import {
   QuartoPreviewWebviewManager,
 } from "./preview-webview";
 import {
-  haveNotebookSaveEvents,
   isQuartoShinyDoc,
   isQuartoShinyKnitrDoc,
   renderOnSave,
@@ -132,17 +131,13 @@ export function activatePreview(
       await onSave(doc.uri);
     })
   );
-  // we use 1.66 as our minimum version (and type import) but
-  // onDidSaveNotebookDocument was introduced in 1.67
-  if (haveNotebookSaveEvents()) {
-    context.subscriptions.push(
-      (vscode.workspace as any).onDidSaveNotebookDocument(
-        async (notebook: NotebookDocument) => {
-          await onSave(notebook.uri);
-        }
-      )
-    );
-  }
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveNotebookDocument(
+      async (notebook: NotebookDocument) => {
+        await onSave(notebook.uri);
+      }
+    )
+  );
 
   // monitor active document to see whether it can be rendered by quarto
   const updateRenderDocActive = (editor?: vscode.TextEditor) => {
@@ -589,7 +584,7 @@ class PreviewManager {
         }
       }
     }
-    this.progressDismiss()
+    this.progressDismiss();
   }
 
   private progressShow(uri: Uri) {

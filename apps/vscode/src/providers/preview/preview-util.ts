@@ -20,7 +20,7 @@ import {
   metadataFilesForDocument,
   yamlFromMetadataFile,
 } from "quarto-core";
-import { isQuartoNotebookEditor, QuartoEditor } from "../../core/doc";
+import { isQuartoNotebookEditor, QuartoEditor } from "../../core/quartoEditor";
 
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";

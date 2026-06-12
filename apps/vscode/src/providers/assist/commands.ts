@@ -15,7 +15,8 @@
 
 import { Position, Selection, window, commands } from "vscode";
 import { Command } from "../../core/command";
-import { isQuartoDoc, preserveEditorFocus } from "../../core/doc";
+import { isQuartoDoc } from "../../core/doc";
+import { preserveEditorFocus } from "../../core/quartoEditor";
 import { MarkdownEngine } from "../../markdown/engine";
 import { QuartoAssistViewProvider } from "./webview";
 import { CodeViewCellContext } from "editor-types";

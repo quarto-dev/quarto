@@ -25,7 +25,8 @@ import {
   previewDoc,
 } from "./preview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { canPreviewDoc, findQuartoEditor, isQuartoNotebookEditor } from "../../core/doc";
+import { canPreviewDoc } from "../../core/doc";
+import { findQuartoEditor, isQuartoNotebookEditor } from "../../core/quartoEditor";
 import { renderOnSave } from "./preview-util";
 import { documentFrontMatterYaml } from "../../markdown/document";
 import { FormatQuickPickItem, RenderCommand } from "../render";

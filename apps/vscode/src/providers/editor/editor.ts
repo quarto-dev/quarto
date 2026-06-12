@@ -46,7 +46,8 @@ import { CodeViewActiveBlockContext, CodeViewSelectionAction, HostContext, NavLo
 
 import { getNonce } from "../../core/nonce";
 import { isWindows } from "../../core/platform";
-import { isQuartoDoc, QuartoEditorBase } from "../../core/doc";
+import { isQuartoDoc } from "../../core/doc";
+import { QuartoEditorBase } from "../../core/quartoEditor";
 import { Command } from "../../core/command";
 
 import { visualEditorClient, visualEditorServer } from "./connection";

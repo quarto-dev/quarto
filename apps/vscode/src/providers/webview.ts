@@ -24,7 +24,7 @@ import vscode, {
 } from "vscode";
 
 import { Disposable } from "../core/dispose";
-import { preserveEditorFocus } from "../core/doc";
+import { preserveEditorFocus } from "../core/quartoEditor";
 import { getNonce } from "../core/nonce";
 import { ExtensionHost, HostWebviewPanel } from "../host";
 

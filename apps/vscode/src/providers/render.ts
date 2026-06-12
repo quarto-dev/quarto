@@ -23,7 +23,8 @@ import { Command } from "../core/command";
 
 import { MarkdownEngine } from "../markdown/engine";
 import { promptForQuartoInstallation } from "../core/quarto";
-import { QuartoEditor, canPreviewDoc, findQuartoEditor, isQuartoNotebookEditor } from "../core/doc";
+import { canPreviewDoc } from "../core/doc";
+import { QuartoEditor, findQuartoEditor, isQuartoNotebookEditor } from "../core/quartoEditor";
 import { commands } from "vscode";
 import { killTerminal, sendTerminalCommand, terminalCommand, terminalEnv, terminalOptions } from "../core/terminal";
 import { QuickPickItem } from "vscode";

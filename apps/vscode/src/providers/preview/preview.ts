@@ -47,15 +47,16 @@ import { previewCommands } from "./commands";
 import { Command } from "../../core/command";
 import {
   canPreviewDoc,
-  findQuartoEditor,
-  isQuartoNotebookEditor,
-  isQuartoTextEditor,
-  preserveEditorFocus,
   previewDirForDocument,
   quartoCanRenderScript,
-  QuartoEditor,
   validatateQuartoCanRender,
 } from "../../core/doc";
+import { preserveEditorFocus } from "../../core/quartoEditor";
+import {
+  findQuartoEditor,
+  isQuartoNotebookEditor,
+  isQuartoTextEditor, QuartoEditor
+} from "../../core/quartoEditor";
 import { PreviewOutputSink } from "./preview-output";
 import { isHtmlContent, isTextContent, isPdfContent } from "core-node";
 

@@ -200,7 +200,6 @@ export function findQuartoEditor(
   engine: MarkdownEngine,
   context: QuartoContext,
   filter: (doc: vscode.TextDocument) => boolean,
-  includeVisible = true
 ): QuartoEditor | undefined {
   // first check for an active visual editor
   const activeVisualEditor = VisualEditorProvider.activeEditor();
@@ -231,7 +230,7 @@ export function findQuartoEditor(
   if (textEditor && filter(textEditor.document)) {
     return quartoEditor(textEditor, engine, context);
     // check visible text editors
-  } else if (includeVisible) {
+  } else {
     // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
     const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
     if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
@@ -247,8 +246,6 @@ export function findQuartoEditor(
     } else {
       return undefined;
     }
-  } else {
-    return undefined;
   }
 }
 

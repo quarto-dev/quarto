@@ -76,6 +76,7 @@ export interface QuartoVisualEditor extends QuartoEditorBase {
   hasFocus(): Promise<boolean>;
   getActiveBlockContext(): Promise<CodeViewActiveBlockContext | null>;
   setBlockSelection(context: CodeViewActiveBlockContext, action: CodeViewSelectionAction): Promise<void>;
+  viewColumn: ViewColumn | undefined;
 }
 
 export function activateEditor(

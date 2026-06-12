@@ -9,7 +9,6 @@ export type QuartoEditor = QuartoTextEditor | QuartoNotebookEditor | QuartoVisua
 export interface QuartoEditorBase {
   document: vscode.TextDocument;
   activate: () => Promise<void>;
-  viewColumn?: vscode.ViewColumn;
 
   /**
    * Get the slide index for the current cursor position.
@@ -112,7 +111,6 @@ export function quartoTextEditor(
         return 0;
       }
     },
-    viewColumn: editor.viewColumn,
     textEditor: editor,
   };
 }
@@ -127,10 +125,9 @@ function quartoNotebookEditor(
     activate: async () => {
       await vscode.window.showNotebookDocument(
         notebookEditor.notebook,
-        { viewColumn: notebookEditor.viewColumn, preserveFocus: false }
+        { preserveFocus: false }
       );
     },
-    viewColumn: notebookEditor.viewColumn,
     notebook: notebookEditor.notebook,
   };
 }

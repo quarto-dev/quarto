@@ -56,27 +56,22 @@ function isLanguageDoc(languageId: string, doc?: vscode.TextDocument) {
   return !!doc && doc.languageId === languageId;
 }
 
-// TODO: This should actually be called isNotebookCell and we should call it less often
 export function isNotebookCell(doc?: vscode.TextDocument) {
-  return !!doc && isNotebookUri(doc.uri);
-}
-
-function isNotebook(doc?: vscode.TextDocument | vscode.NotebookDocument) {
-  return isNotebookDoc(doc) && isNotebookUri(doc.uri);
+  return !!doc && isIpynbUri(doc.uri);
 }
 
 function isNotebookDoc(doc?: vscode.TextDocument | vscode.NotebookDocument): doc is vscode.NotebookDocument {
   return !!doc && 'notebookType' in doc;
 }
 
-function isNotebookUri(uri: Uri) {
+function isIpynbUri(uri: Uri) {
   return extname(uri.fsPath).toLowerCase() === ".ipynb";
 }
 
 export function canPreviewDoc(doc?: vscode.TextDocument | vscode.NotebookDocument) {
   if (doc) {
     if (isNotebookDoc(doc)) {
-      return isNotebookUri(doc.uri);
+      return isIpynbUri(doc.uri);
     } else if (isQuartoDoc(doc)) {
       return true;
     } else if (validatateQuartoCanRender(doc)) {
@@ -177,7 +172,9 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
   if (editor) {
     if (!isQuartoNotebookEditor(editor)) {
       setTimeout(() => {
-        editor.activate();
+        if (editor) {
+          editor.activate();
+        }
       }, 200);
     }
   } else {
@@ -199,7 +196,7 @@ export interface QuartoEditorBase {
   document: vscode.TextDocument;
   activate: () => Promise<void>;
   viewColumn?: vscode.ViewColumn;
-  slideIndex: () => Promise<number>;
+  slideIndex?: () => Promise<number>;
 }
 
 export interface QuartoTextEditor extends QuartoEditorBase {
@@ -210,8 +207,6 @@ export interface QuartoTextEditor extends QuartoEditorBase {
 export interface QuartoNotebookEditor extends QuartoEditorBase {
   type: 'notebook';
   notebook: vscode.NotebookDocument;
-  // TODO: Need this one?
-  textEditor: vscode.TextEditor;
 }
 
 export function isQuartoNotebookEditor(editor: QuartoEditor): editor is QuartoNotebookEditor {
@@ -229,7 +224,7 @@ export function isQuartoVisualEditor(editor: QuartoEditor): editor is QuartoVisu
 export function findQuartoEditor(
   engine: MarkdownEngine,
   context: QuartoContext,
-  filter: (doc: vscode.TextDocument) => boolean,
+  filter: (doc: vscode.TextDocument | vscode.NotebookDocument) => boolean,
 ): QuartoEditor | undefined {
   // first check for an active visual editor
   const activeVisualEditor = VisualEditorProvider.activeEditor();
@@ -239,13 +234,11 @@ export function findQuartoEditor(
 
   // then check for active notebook editor
   const notebookEditor = vscode.window.activeNotebookEditor;
-  if (notebookEditor) {
-    const notebookDocument = notebookEditor.notebook;
-    const textEditor = vscode.window.visibleTextEditors.find((editor) => {
-      return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
-    });
-    if (textEditor && filter(textEditor.document)) {
-      return quartoNotebookEditor(textEditor, notebookDocument, engine, context);
+  if (notebookEditor && filter(notebookEditor.notebook)) {
+    // TODO: Why is cellAt always defined?...
+    const firstCellDoc = notebookEditor.notebook.cellAt(0)?.document;
+    if (firstCellDoc) {
+      return quartoNotebookEditor(notebookEditor, firstCellDoc);
     }
   }
 
@@ -306,36 +299,20 @@ function quartoTextEditor(
 }
 
 function quartoNotebookEditor(
-  editor: vscode.TextEditor,
-  notebook: vscode.NotebookDocument,
-  engine?: MarkdownEngine,
-  context?: QuartoContext,
+  notebookEditor: vscode.NotebookEditor,
+  firstCellDoc: vscode.TextDocument,
 ): QuartoNotebookEditor {
   return {
     type: 'notebook',
-    document: editor.document,
+    document: firstCellDoc,
     activate: async () => {
-      await vscode.window.showTextDocument(
-        editor.document,
-        editor.viewColumn,
-        false
+      await vscode.window.showNotebookDocument(
+        notebookEditor.notebook,
+        { viewColumn: notebookEditor.viewColumn, preserveFocus: false }
       );
     },
-    slideIndex: async () => {
-      if (engine && context) {
-        return await revealSlideIndex(
-          editor.selection.active,
-          editor.document,
-          engine,
-          context
-        );
-      } else {
-        return 0;
-      }
-    },
-    viewColumn: editor.viewColumn,
-    textEditor: editor,
-    notebook,
+    viewColumn: notebookEditor.viewColumn,
+    notebook: notebookEditor.notebook,
   };
 }
 

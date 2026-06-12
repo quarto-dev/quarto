@@ -56,11 +56,7 @@ function isLanguageDoc(languageId: string, doc?: vscode.TextDocument) {
   return !!doc && doc.languageId === languageId;
 }
 
-export function isNotebookCell(doc?: vscode.TextDocument) {
-  return !!doc && isIpynbUri(doc.uri);
-}
-
-function isNotebookDoc(doc?: vscode.TextDocument | vscode.NotebookDocument): doc is vscode.NotebookDocument {
+function isNotebook(doc?: vscode.TextDocument | vscode.NotebookDocument): doc is vscode.NotebookDocument {
   return !!doc && 'notebookType' in doc;
 }
 
@@ -70,7 +66,7 @@ function isIpynbUri(uri: Uri) {
 
 export function canPreviewDoc(doc?: vscode.TextDocument | vscode.NotebookDocument) {
   if (doc) {
-    if (isNotebookDoc(doc)) {
+    if (isNotebook(doc)) {
       return isIpynbUri(doc.uri);
     } else if (isQuartoDoc(doc)) {
       return true;

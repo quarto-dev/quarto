@@ -48,7 +48,6 @@ import { Command } from "../../core/command";
 import {
   canPreviewDoc,
   findQuartoEditor,
-  isNotebookCell,
   isQuartoNotebookEditor,
   isQuartoTextEditor,
   preserveEditorFocus,
@@ -289,10 +288,6 @@ class PreviewManager {
   dispose() {
     this.webviewManager_.dispose();
     this.outputSink_.dispose();
-  }
-
-  private get previewDoc_() {
-    return this.previewEditor_?.document;
   }
 
   public async preview(
@@ -546,7 +541,7 @@ class PreviewManager {
         if (browseMatch) {
           // earlier versions of quarto serve didn't print out vscode urls
           // correctly so we compenstate for that here
-          if (isQuartoShinyDoc(this.engine_, this.previewDoc_)) {
+          if (isQuartoShinyDoc(this.engine_, this.previewEditor_?.document)) {
             this.previewUrl_ = vsCodeWebUrl(browseMatch[2]);
           } else {
             this.previewUrl_ = browseMatch[2];
@@ -615,16 +610,15 @@ class PreviewManager {
   }
 
   private async detectErrorNavigation(output: string) {
-    // bail if this is a notebook or we don't have a previewDoc
-    if (!this.previewDoc_ || isNotebookCell(this.previewDoc_)) {
+    // bail if this is a notebook or we don't have a previewEditor
+    if (!this.previewEditor_ || isQuartoNotebookEditor(this.previewEditor_)) {
       return;
     }
-
     // normalize
     output = normalizeNewlines(output);
 
     // run all of our tests
-    const previewFile = this.previewDoc_.uri.fsPath;
+    const previewFile = this.previewEditor_.document.uri.fsPath;
     const previewDir = this.previewDir_ || this.targetDir();
     const errorLoc =
       yamlErrorLocation(output, previewFile, previewDir) ||

@@ -64,7 +64,7 @@ function isNotebookDoc(doc?: vscode.TextDocument | vscode.NotebookDocument): doc
   return !!doc && 'notebookType' in doc;
 }
 
-export function isNotebookUri(uri: Uri) {
+function isNotebookUri(uri: Uri) {
   return extname(uri.fsPath).toLowerCase() === ".ipynb";
 }
 

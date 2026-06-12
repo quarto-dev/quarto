@@ -121,7 +121,7 @@ export function activatePreview(
     if (editor) {
       if (
         canPreviewDoc(editor.document) &&
-        (await renderOnSave(engine, editor.document)) &&
+        (await renderOnSave(engine, editor)) &&
         (await previewManager.isPreviewRunningForDoc(editor.document))
       ) {
         await previewDoc(editor, undefined, true, engine, quartoContext);
@@ -191,9 +191,7 @@ export async function previewDoc(
 ) {
   // set the slide index from the source editor so we can
   // navigate to it in the preview frame
-  const slideIndex = !isQuartoNotebookEditor(editor)
-    ? await editor.slideIndex()
-    : undefined;
+  const slideIndex = editor.slideIndex && await editor.slideIndex();
   previewManager.setSlideIndex(slideIndex);
 
   //  set onShow if provided
@@ -237,8 +235,7 @@ export async function previewDoc(
 
     // run the preview
     await previewManager.preview(
-      previewEditor.document.uri,
-      previewEditor.document,
+      previewEditor,
       format,
       slideIndex
     );
@@ -250,10 +247,6 @@ export async function previewDoc(
       }
     }
   }
-}
-
-export async function previewProject(target: Uri, format?: string) {
-  await previewManager.preview(target, undefined, format);
 }
 
 class PreviewManager {
@@ -298,13 +291,17 @@ class PreviewManager {
     this.outputSink_.dispose();
   }
 
+  private get previewDoc_() {
+    return this.previewEditor_?.document;
+  }
+
   public async preview(
-    uri: Uri,
-    doc: TextDocument | undefined,
+    editor: QuartoEditor,
     format: string | null | undefined,
     slideIndex?: number
   ) {
     // resolve format if we need to
+    const uri = editor.document.uri;
     if (format === undefined) {
       format = this.previewFormats_.get(uri.fsPath) || null;
     } else {
@@ -314,8 +311,9 @@ class PreviewManager {
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;
     this.previewOutput_ = "";
-    this.previewDoc_ = doc;
+    this.previewEditor_ = editor;
     const previewEnv = await this.previewEnvManager_.previewEnv(uri);
+    const doc = editor?.document;
     if (doc && (await this.canReuseRunningPreview(doc, previewEnv))) {
       try {
         const response = await this.previewRenderRequest(doc, format);
@@ -781,7 +779,7 @@ class PreviewManager {
   }
 
   private previewOutput_ = "";
-  private previewDoc_: TextDocument | undefined;
+  private previewEditor_: QuartoEditor | undefined;
   private previewEnv_: PreviewEnv | undefined;
   private previewTarget_: Uri | undefined;
   private previewUrl_: string | undefined;

@@ -57,7 +57,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
   protected async renderFormat(format?: string | null, onShow?: () => void) {
     const targetEditor = findQuartoEditor(this.engine_, this.quartoContext(), canPreviewDoc);
     if (targetEditor) {
-      const hasRenderOnSave = await renderOnSave(this.engine_, targetEditor.document);
+      const hasRenderOnSave = await renderOnSave(this.engine_, targetEditor);
       const render =
         !hasRenderOnSave ||
         (hasRenderOnSave && format) ||

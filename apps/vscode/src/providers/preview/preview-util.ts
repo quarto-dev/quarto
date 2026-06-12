@@ -13,17 +13,14 @@
  *
  */
 
-import semver from "semver";
-
-import vscode from "vscode";
-import { TextDocument, Uri, workspace } from "vscode";
+import { TextDocument } from "vscode";
 
 import {
   projectDirForDocument,
   metadataFilesForDocument,
   yamlFromMetadataFile,
 } from "quarto-core";
-import { isNotebookCell } from "../../core/doc";
+import { isQuartoNotebookEditor, QuartoEditor } from "../../core/doc";
 
 import { MarkdownEngine } from "../../markdown/engine";
 import { documentFrontMatter } from "../../markdown/document";
@@ -60,14 +57,14 @@ export function isQuartoShinyKnitrDoc(
 
 }
 
-export async function renderOnSave(engine: MarkdownEngine, document: TextDocument) {
-  // TODO: Should notebooks be treated same as text documents?
+export async function renderOnSave(engine: MarkdownEngine, editor: QuartoEditor) {
   // notebooks automatically get renderOnSave
-  if (isNotebookCell(document)) {
+  if (isQuartoNotebookEditor(editor)) {
     return true;
   }
 
   // first look for document level editor setting
+  const { document } = editor;
   const docYaml = documentFrontMatter(engine, document);
   const docSetting = readRenderOnSave(docYaml);
   if (docSetting !== undefined) {

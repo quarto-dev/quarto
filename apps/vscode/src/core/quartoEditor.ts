@@ -26,7 +26,7 @@ export interface QuartoTextEditor extends QuartoEditorBase {
 
 export interface QuartoNotebookEditor extends QuartoEditorBase {
   type: 'notebook';
-  notebook: vscode.NotebookDocument;
+  notebookEditor: vscode.NotebookEditor;
 }
 
 export function isQuartoNotebookEditor(editor: QuartoEditor): editor is QuartoNotebookEditor {
@@ -128,7 +128,7 @@ function quartoNotebookEditor(
         { preserveFocus: false }
       );
     },
-    notebook: notebookEditor.notebook,
+    notebookEditor,
   };
 }
 

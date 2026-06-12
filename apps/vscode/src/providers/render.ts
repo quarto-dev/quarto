@@ -137,7 +137,7 @@ class RenderDocumentCommand extends RenderCommand
     return new Promise<string | undefined>((resolve) => {
 
       const frontMatter = isQuartoNotebookEditor(targetEditor)
-        ? notebookFrontMatterYaml(targetEditor.notebook)
+        ? notebookFrontMatterYaml(targetEditor.notebookEditor.notebook)
         : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
       const kDeclaredFormats = "Declared Formats";

@@ -67,7 +67,7 @@ abstract class PreviewDocumentCommandBase extends RenderCommand {
         if (format === kChooseFormat) {
 
           const frontMatter = isQuartoNotebookEditor(targetEditor)
-            ? notebookFrontMatterYaml(targetEditor.notebook)
+            ? notebookFrontMatterYaml(targetEditor.notebookEditor.notebook)
             : documentFrontMatterYaml(this.engine_, targetEditor.document);
 
           const formats = quartoDocumentFormats(this.quartoContext(), targetEditor.document.uri.fsPath, frontMatter);

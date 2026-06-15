@@ -16,9 +16,8 @@
  */
 
 import * as vscode from 'vscode';
-import * as hooks from 'positron';
+import * as positron from 'positron';
 
-import semver from "semver";
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
 import { ExecuteQueue } from './execute-queue';
@@ -26,6 +25,7 @@ import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle, unadjustedLine } from "../vdoc/vdoc";
 import { Position, Range } from 'vscode';
 import { Uri } from 'vscode';
+import { tryAcquirePositronApi } from '@posit-dev/positron';
 
 /**
  * Check if inline output is enabled in Positron settings.
@@ -37,16 +37,12 @@ export function isInlineOutputEnabled(): boolean {
     .get<boolean>("enabled", false);
 }
 
-declare global {
-  function acquirePositronApi(): hooks.PositronApi;
-}
+let api: typeof positron | null | undefined;
 
-let api: hooks.PositronApi | null | undefined;
-
-export function hooksApi(): hooks.PositronApi | null {
+export function hooksApi(): typeof api {
   if (api === undefined) {
     try {
-      api = acquirePositronApi();
+      api = tryAcquirePositronApi();
     } catch {
       api = null;
     }
@@ -98,7 +94,7 @@ export function hooksExtensionHost(): ExtensionHost {
                     undefined,  // The error behavior
                     undefined,  // An optional observer
                     undefined,  // The specific session ID in which to execute
-                    editorUri,  // The document URI 
+                    editorUri,  // The document URI
                     metadata
                   );
                 }
@@ -187,7 +183,7 @@ export function hooksExtensionHost(): ExtensionHost {
 
 
 class HookWebviewPanel implements HostWebviewPanel {
-  constructor(private readonly panel_: hooks.PreviewPanel) { }
+  constructor(private readonly panel_: positron.PreviewPanel) { }
 
   get webview() { return this.panel_.webview; };
   get visible() { return this.panel_.visible; };
@@ -211,7 +207,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
   async provideStatementRange(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken): Promise<hooks.StatementRange | undefined> {
+    token: vscode.CancellationToken): Promise<positron.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine, VirtualDocStyle.Block);
 
     if (!vdoc) {
@@ -220,7 +216,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
 
     return await withVirtualDocUri(vdoc, document.uri, "statementRange", async (uri: vscode.Uri) => {
       try {
-        const result = await vscode.commands.executeCommand<hooks.StatementRange>(
+        const result = await vscode.commands.executeCommand<positron.StatementRange>(
           "vscode.executeStatementRangeProvider",
           uri,
           adjustedPosition(vdoc.language, position)

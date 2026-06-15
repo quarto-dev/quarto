@@ -19,8 +19,6 @@ import * as vscode from 'vscode';
 import { Utils } from 'vscode-uri';
 import { getParentDocumentUri } from './drop';
 
-import './types';
-
 export async function getNewFileName(document: vscode.TextDocument, file: vscode.DataTransferFile): Promise<vscode.Uri> {
   const desiredPath = getDesiredNewFilePath(document, file);
 

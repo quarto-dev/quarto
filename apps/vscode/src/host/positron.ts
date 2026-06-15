@@ -1,5 +1,5 @@
 /*
- * hooks.ts
+ * positron.ts
  *
  * Positron-specific functionality.
  *
@@ -37,24 +37,7 @@ export function isInlineOutputEnabled(): boolean {
     .get<boolean>("enabled", false);
 }
 
-let api: typeof positron | null | undefined;
-
-export function hooksApi(): typeof api {
-  if (api === undefined) {
-    try {
-      api = tryAcquirePositronApi();
-    } catch {
-      api = null;
-    }
-  }
-  return api;
-}
-
-export function hasHooks() {
-  return !!hooksApi();
-}
-
-export function hooksExtensionHost(): ExtensionHost {
+export function positronExtensionHost(): ExtensionHost {
   return {
     // supported executable languages (we delegate to the default for langugaes
     // w/o runtimes so we support all languages)
@@ -63,13 +46,13 @@ export function hooksExtensionHost(): ExtensionHost {
     cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
       : Promise<CellExecutor | undefined> => {
       switch (language) {
-        // use hooks for known runtimes
+        // use positron api for known runtimes
         case "python":
         case "csharp":
         case "r":
           return {
             execute: async (blocks: string[], editorUri?: vscode.Uri, executionMetadata?: Record<string, unknown>[]): Promise<void> => {
-              const runtime = hooksApi()?.runtime;
+              const runtime = tryAcquirePositronApi()?.runtime;
 
               if (runtime === undefined) {
                 // Can't do anything without a runtime
@@ -120,7 +103,7 @@ export function hooksExtensionHost(): ExtensionHost {
               return position;
             },
             executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]): Promise<void> => {
-              const runtime = hooksApi()?.runtime;
+              const runtime = tryAcquirePositronApi()?.runtime;
 
               if (runtime === undefined) {
                 // Can't do anything without a runtime
@@ -138,18 +121,18 @@ export function hooksExtensionHost(): ExtensionHost {
     },
 
     registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      const hooks = hooksApi();
-      if (hooks) {
-        return hooks.languages.registerStatementRangeProvider('quarto',
+      const positronApi = tryAcquirePositronApi();
+      if (positronApi) {
+        return positronApi.languages.registerStatementRangeProvider('quarto',
           new EmbeddedStatementRangeProvider(engine));
       }
       return new vscode.Disposable(() => { });
     },
 
     registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      const hooks = hooksApi();
-      if (hooks) {
-        return hooks.languages.registerHelpTopicProvider('quarto',
+      const positronApi = tryAcquirePositronApi();
+      if (positronApi) {
+        return positronApi.languages.registerHelpTopicProvider('quarto',
           new EmbeddedHelpTopicProvider(engine));
       }
       return new vscode.Disposable(() => { });
@@ -163,7 +146,7 @@ export function hooksExtensionHost(): ExtensionHost {
     ): HostWebviewPanel => {
 
       // create preview panel
-      const panel = hooksApi()?.window.createPreviewPanel(
+      const panel = tryAcquirePositronApi()?.window.createPreviewPanel(
         viewType,
         title,
         preserveFocus,
@@ -176,13 +159,13 @@ export function hooksExtensionHost(): ExtensionHost {
       )!;
 
       // adapt to host interface
-      return new HookWebviewPanel(panel);
+      return new PositronWebviewPanel(panel);
     }
   };
 }
 
 
-class HookWebviewPanel implements HostWebviewPanel {
+class PositronWebviewPanel implements HostWebviewPanel {
   constructor(private readonly panel_: positron.PreviewPanel) { }
 
   get webview() { return this.panel_.webview; };
@@ -223,9 +206,9 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       } catch (err) {
-        let hooks = hooksApi();
+        let positronApi = tryAcquirePositronApi();
 
-        if (!hooks) {
+        if (!positronApi) {
           throw err;
         }
 
@@ -234,14 +217,14 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         // We can't use `semver.lt()` because calendar versioning isn't compatible with semver due to the
         // leading `0` in `03`. Instead, we use lexicographic string comparison and rely on the year and
         // month to be zero padded so sorting always works correctly.
-        if (hooks.version < "2026.03.0") {
+        if (positronApi.version < "2026.03.0") {
           throw err;
         }
 
-        if (err instanceof hooks.StatementRangeSyntaxError) {
+        if (err instanceof positronApi.StatementRangeSyntaxError) {
           // Rethrow syntax error with unadjusted line number, so Positron's notification will
           // jump to the correct line
-          throw new hooks.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
+          throw new positronApi.StatementRangeSyntaxError(err.line ? unadjustedLine(vdoc.language, err.line) : undefined);
         } else {
           // Rethrow unrecognized error
           throw err;

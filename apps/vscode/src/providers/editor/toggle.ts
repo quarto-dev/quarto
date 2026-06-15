@@ -18,8 +18,8 @@ import * as quarto from "quarto-core";
 import { Command } from "../../core/command";
 import { isQuartoDoc, kQuartoLanguageId } from "../../core/doc";
 import { VisualEditorProvider } from "./editor";
-import { hasHooks } from "../../host/hooks";
 import { toggleRenderOnSaveOverride } from "../context-keys";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 export function determineMode(text: string, uri: Uri): string | undefined {
   let editorOpener = undefined;
@@ -110,7 +110,7 @@ export async function reopenEditorInVisualMode(
   document: TextDocument,
   viewColumn?: ViewColumn
 ) {
-  if (hasHooks()) {
+  if (tryAcquirePositronApi()) {
     // note pending switch to visual
     VisualEditorProvider.recordPendingSwitchToVisual(document);
     // if document is untitled, force user to save first
@@ -140,7 +140,7 @@ export async function reopenEditorInSourceMode(
   untitledContent?: string,
   viewColumn?: ViewColumn
 ) {
-  if (hasHooks()) {
+  if (tryAcquirePositronApi()) {
     // note pending switch to source
     VisualEditorProvider.recordPendingSwitchToSource(document);
 

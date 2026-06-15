@@ -228,26 +228,34 @@ export function findQuartoEditor(
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {
     return quartoTextEditor(textEditor, engine, context);
-    // check visible text editors
-  } else if (includeVisible) {
-    // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
-    const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
-    if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
-      return visibleVisualEditor;
-    }
-
-    // visible text editors
-    const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
-      filter(editor.document)
-    );
-    if (visibleEditor) {
-      return quartoTextEditor(visibleEditor, engine, context);
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
   }
+
+  // check visible editors
+
+  // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
+  const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
+  if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
+    return visibleVisualEditor;
+  }
+
+  // visible notebook editors
+  const visibleNotebookEditor = vscode.window.visibleNotebookEditors.find((editor) =>
+    filter(editor.notebook.cellAt(0)?.document)
+  );
+  if (visibleNotebookEditor) {
+    const firstCellDocument = visibleNotebookEditor.notebook.cellAt(0).document;
+    return quartoNotebookEditor(visibleNotebookEditor, firstCellDocument);
+  }
+
+  // visible text editors
+  const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
+    filter(editor.document)
+  );
+  if (visibleEditor) {
+    return quartoTextEditor(visibleEditor, engine, context);
+  }
+
+  return undefined;
 }
 
 function quartoTextEditor(
@@ -293,8 +301,8 @@ function quartoNotebookEditor(
       // TODO: This should probably use showNotebookDocument.
       //  And we could probably also activate() notebook editors
       //  in many places where we currently skip notebooks.
-      //  We're leaving it as showTextDocument for now to focus
-      //  the current PR on fixing preview for notebooks.
+      //  We're leaving it as showTextDocument for now to minimize
+      //  the number of changes in this PR focused on #1006.
       await vscode.window.showTextDocument(
         firstCellDocument,
         editor.viewColumn,

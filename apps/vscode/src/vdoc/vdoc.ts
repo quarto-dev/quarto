@@ -79,7 +79,7 @@ export async function virtualDoc(
 
 function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {
   const lines = linesForLanguage(document, language);
-  fillLinesFromBlock(lines, document, block);
+  fillLinesFromBlock(lines, document, block, language);
   padLinesForLanguage(lines, language);
   return virtualDocForCode(lines, language);
 }
@@ -92,11 +92,17 @@ export function virtualDocForLanguage(
 ): VirtualDoc {
   const lines = linesForLanguage(document, language);
   for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
-    fillLinesFromBlock(lines, document, languageBlock);
+    fillLinesFromBlock(lines, document, languageBlock, language);
   }
   padLinesForLanguage(lines, language);
   return virtualDocForCode(lines, language, action);
 }
+
+// IPython line magics (`%`), cell magics (`%%`), and shell escapes (`!`) are not
+// valid Python, so they produce spurious diagnostics from Python language
+// servers. Comment these lines out in the virtual document, mirroring how
+// Jupyter tooling (e.g. the ruff_notebook crate) sanitizes notebook input.
+const kIPythonMagicPattern = /^\s*(%{1,2}|!)/;
 
 function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
   const lines: string[] = [];
@@ -106,13 +112,23 @@ function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
   return lines;
 }
 
-function fillLinesFromBlock(lines: string[], document: TextDocument, block: Token) {
+function fillLinesFromBlock(
+  lines: string[],
+  document: TextDocument,
+  block: Token,
+  language: EmbeddedLanguage
+) {
   for (
     let line = block.range.start.line + 1;
     line < block.range.end.line && line < document.lineCount;
     line++
   ) {
-    lines[line] = document.lineAt(line).text;
+    const text = document.lineAt(line).text;
+    if (language.commentMagics && kIPythonMagicPattern.test(text)) {
+      lines[line] = language.emptyLine || "";
+    } else {
+      lines[line] = text;
+    }
   }
 }
 

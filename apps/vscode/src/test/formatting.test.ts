@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { openAndShowExamplesTextDocument, wait } from "./test-utils";
+import { openAndShowExamplesTextDocument, readOrCreateSnapshot, wait } from "./test-utils";
 import { embeddedDocumentFormattingProvider } from "../providers/format";
 import { MarkdownEngine } from "../markdown/engine";
 
@@ -95,26 +95,61 @@ async function testFormatter(
   format: (sourceText: string) => string,
   language: string = "python"
 ) {
+  return runFormatCell(filename, [line, character], format, language);
+}
+
+/**
+ * Opens a fixture, optionally registers a formatting provider, runs
+ * `quarto.formatCell` at the given cursor position, and returns the
+ * resulting document text. When `format` is `undefined`, no provider is
+ * registered (used to exercise the no-formatter path).
+ */
+async function runFormatCell(
+  filename: string,
+  [line, character]: [number, number],
+  format: ((sourceText: string) => string) | undefined,
+  language: string,
+) {
   const { doc } = await openAndShowExamplesTextDocument(filename);
 
-  const formattingEditProvider =
-    vscode.languages.registerDocumentFormattingEditProvider(
-      { scheme: "file", language },
-      createFormatterFromStringFunc(format)
-    );
+  const formattingEditProvider = format
+    ? vscode.languages.registerDocumentFormattingEditProvider(
+        { scheme: "file", language },
+        createFormatterFromStringFunc(format),
+      )
+    : undefined;
 
   try {
     setCursorPosition(line, character);
     await wait(450);
     await vscode.commands.executeCommand("quarto.formatCell");
     await wait(450);
-
-    const result = doc.getText();
-    return result;
+    return doc.getText();
   } finally {
-    formattingEditProvider.dispose();
+    formattingEditProvider?.dispose();
     await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
   }
+}
+
+/**
+ * Registers a snapshot test that formats a single cell and compares the
+ * resulting document against a snapshot file under `generated_snapshots/`.
+ */
+function snapshotFormatTest(
+  description: string,
+  snapshotFilename: string,
+  filename: string,
+  position: [number, number],
+  format: ((sourceText: string) => string) | undefined,
+  language: string = "python",
+) {
+  test(description, async function () {
+    const result = await runFormatCell(filename, position, format, language);
+    assert.equal(
+      result,
+      await readOrCreateSnapshot(snapshotFilename, result),
+    );
+  });
 }
 
 /**
@@ -161,6 +196,19 @@ function mangleHashPipeLines(sourceText: string): string {
   return spaceBinaryOperators(
     sourceText.replace(/^#\s*\|.*$/gm, "# MANGLED")
   );
+}
+
+function rAssignmentFormatter(sourceText: string): string {
+  return sourceText.replace(/(\w)<-(\w)/g, "$1 <- $2");
+}
+
+/**
+ * Hostile formatter that mangles any leading newline in the virtual document.
+ * If leading empty lines leak into the virtual document, this formatter will
+ * corrupt the cell with a detectable marker.
+ */
+function leadingNewlineMangler(sourceText: string): string {
+  return sourceText.replace(/^\n/, "LEAKED_EMPTY_LINE\n");
 }
 
 /**
@@ -511,6 +559,72 @@ suite("Code Block Formatting", function () {
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     }
   });
+
+  snapshotFormatTest(
+    "single leading empty line in R cell is preserved after formatting",
+    "formatting/r-one-empty-line-preserved.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [8, 0],
+    rAssignmentFormatter,
+    "r",
+  );
+
+  snapshotFormatTest(
+    "multiple leading empty lines in R cell are collapsed to one after formatting",
+    "formatting/r-multiple-collapsed-to-one.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [13, 0],
+    rAssignmentFormatter,
+    "r",
+  );
+
+  snapshotFormatTest(
+    "no leading empty lines in R cell — unaffected by the normalisation",
+    "formatting/r-no-empty-lines-unchanged.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [20, 0],
+    rAssignmentFormatter,
+    "r",
+  );
+
+  snapshotFormatTest(
+    "leading empty lines in Python cell are preserved after formatting",
+    "formatting/python-one-empty-line-preserved.qmd",
+    "format-python-leading-empty-lines.qmd",
+    [8, 0],
+    spaceAssignments,
+  );
+
+  snapshotFormatTest(
+    "multiple leading empty lines in Python cell are collapsed to one after formatting",
+    "formatting/python-multiple-collapsed-to-one.qmd",
+    "format-python-leading-empty-lines.qmd",
+    [13, 0],
+    spaceAssignments,
+  );
+
+  // The hostile `leadingNewlineMangler` would inject `LEAKED_EMPTY_LINE`
+  // if the leading empty lines reached the formatter. Snapshot proves it
+  // does not appear.
+  snapshotFormatTest(
+    "leading empty lines are hidden from the formatter",
+    "formatting/r-empty-lines-hidden-from-formatter.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [13, 0],
+    leadingNewlineMangler,
+    "r",
+  );
+
+  // No formatter registered for "r" — only the Quarto-level normalisation
+  // edit fires. Snapshot shows unformatted code with empty lines collapsed.
+  snapshotFormatTest(
+    "multiple leading empty lines are collapsed without a language formatter",
+    "formatting/r-collapsed-without-formatter.qmd",
+    "format-r-leading-empty-lines.qmd",
+    [13, 0],
+    undefined,
+    "r",
+  );
 
   test("formatter returning multiple discrete edits is applied correctly", async function () {
     const { doc } = await openAndShowExamplesTextDocument(

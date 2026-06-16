@@ -4,6 +4,7 @@
 
 - The "Preview" and "Preview Format..." commands now show in the Positron Notebook Editor overflow menu (<https://github.com/quarto-dev/quarto/pull/1001>).
 - In Positron, Jupyter Notebooks (`.ipynb`) are now exported via the new unified "Export" command, rather than the "Quarto: Convert to .qmd" command (<https://github.com/quarto-dev/quarto/pull/999>).
+- Fixed a bug where formatting a code cell stripped leading empty lines. Leading empty lines between option directives and code are now preserved, and two or more leading empty lines are collapsed to one (<https://github.com/quarto-dev/quarto/pull/953>).
 
 ## 1.133.0 (Release on 2026-06-03)
 

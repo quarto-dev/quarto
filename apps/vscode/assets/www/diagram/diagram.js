@@ -25,30 +25,29 @@
     previewDiv.appendChild(noPreview);
   }
 
-  function updateMermaidPreview(src) {
+  async function updateMermaidPreview(src) {
     document.body.classList.add("with-preview");
     document.body.classList.add("mermaid");
     document.body.classList.remove("graphviz");
 
-    // validate first
+    // validate first (parse is async as of mermaid 10)
     try {
-      window.mermaid.parse(src);
+      await window.mermaid.parse(src);
     } catch (err) {
-      reportError(err.str);
+      reportError(err.str || err.message || String(err));
       return;
     }
 
-    // render
+    // render (render is async as of mermaid 10 and returns the svg markup)
     const kMermaidId = "mermaidSvg";
-    mermaidApi.render(kMermaidId, src, () => {
-      const mermaidEl = document.querySelector(`#${kMermaidId}`);
+    try {
+      const { svg } = await window.mermaid.render(kMermaidId, src);
       const previewDiv = document.querySelector("#mermaid-preview");
-      while (previewDiv.firstChild) {
-        previewDiv.removeChild(previewDiv.firstChild);
-      }
-      previewDiv.appendChild(mermaidEl);
+      previewDiv.innerHTML = svg;
       clearError();
-    });
+    } catch (err) {
+      reportError(err.str || err.message || String(err));
+    }
   }
 
   function updateGraphvizPreview(graphviz, dot) {
@@ -62,8 +61,7 @@
   clearPreview();
 
   // initialize mermaid
-  const mermaidApi = window.mermaid.mermaidAPI;
-  mermaidApi.initialize({ startOnLoad: false });
+  window.mermaid.initialize({ startOnLoad: false });
 
   // initialize graphvix
   const hpccWasm = window["@hpcc-js/wasm"];
@@ -87,7 +85,7 @@
     let lastMessage = undefined;
 
     // handle messages sent from the extension to the webview
-    window.addEventListener("message", (event) => {
+    window.addEventListener("message", async (event) => {
       // get the message
       const message = event.data;
 
@@ -110,7 +108,7 @@
         try {
           switch (message.engine) {
             case "mermaid": {
-              updateMermaidPreview(message.src);
+              await updateMermaidPreview(message.src);
               break;
             }
             case "graphviz": {

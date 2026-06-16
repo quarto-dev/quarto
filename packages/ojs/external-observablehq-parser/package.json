@@ -37,8 +37,8 @@
     "external-observablehq-parser": "./src/index.js"
   },
   "dependencies": {
-    "acorn": "8",
-    "acorn-walk": "8"
+    "acorn": "8.16.0",
+    "acorn-walk": "8.3.5"
   },
   "devDependencies": {
     "eslint": "8",

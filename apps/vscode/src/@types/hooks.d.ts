@@ -24,12 +24,19 @@ declare module 'positron' {
 			languageId: string,
 			code: string,
 			focus: boolean,
-			allowIncomplete: boolean
+			allowIncomplete: boolean,
+			mode?: string,
+			errorBehavior?: string,
+			observer?: object,
+			sessionId?: string,
+			documentUri?: vscode.Uri,
+			executionMetadata?: Record<string, any>
 		): Thenable<boolean>;
 
 		executeInlineCell(
 			documentUri: vscode.Uri,
-			cellRanges: vscode.Range[]
+			cellRanges: vscode.Range[],
+			executionMetadata?: Record<string, any>[]
 		): Thenable<void>;
 
 		getForegroundSession(): Thenable<LanguageRuntimeSession | undefined>;

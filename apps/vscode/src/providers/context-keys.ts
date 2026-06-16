@@ -65,6 +65,7 @@ export function activateContextKeySetter(
   vscode.workspace.onDidChangeTextDocument(event => {
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {
+      // TODO: this debounce is being created and called immediately, which is not correct.
       debounce(
         () => {
           setEditorContextKeys(activeEditor, engine);

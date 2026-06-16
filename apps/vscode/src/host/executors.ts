@@ -25,10 +25,10 @@ import { JupyterKernelspec } from "core";
 import { Position } from "vscode";
 
 export interface CellExecutor {
-  execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
+  execute: (blocks: string[], editorUri?: Uri, executionMetadata?: Record<string, unknown>[]) => Promise<void>;
   executeSelection?: () => Promise<void>;
   executeAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
-  executeInlineCells?: (documentUri: Uri, cellRanges: Range[]) => Promise<void>;
+  executeInlineCells?: (documentUri: Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]) => Promise<void>;
 }
 
 export function executableLanguages() {

@@ -72,7 +72,7 @@ export function hooksExtensionHost(): ExtensionHost {
         case "csharp":
         case "r":
           return {
-            execute: async (blocks: string[], editorUri?: vscode.Uri): Promise<void> => {
+            execute: async (blocks: string[], editorUri?: vscode.Uri, executionMetadata?: Record<string, unknown>[]): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -87,8 +87,20 @@ export function hooksExtensionHost(): ExtensionHost {
 
               // Our callback executes each block sequentially
               const callback = async () => {
-                for (const block of blocks) {
-                  await runtime.executeCode(language, block, false, true);
+                for (let i = 0; i < blocks.length; i++) {
+                  const metadata = executionMetadata?.[i];
+                  await runtime.executeCode(
+                    language,   // The language ID
+                    blocks[i],  // The code string to execute
+                    false,      // Whether to focus the console
+                    true,       // Whether to allow incomplete code to run
+                    undefined,  // The execution mode
+                    undefined,  // The error behavior
+                    undefined,  // An optional observer
+                    undefined,  // The specific session ID in which to execute
+                    editorUri,  // The document URI 
+                    metadata
+                  );
                 }
               };
 
@@ -111,7 +123,7 @@ export function hooksExtensionHost(): ExtensionHost {
               }
               return position;
             },
-            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[]): Promise<void> => {
+            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]): Promise<void> => {
               const runtime = hooksApi()?.runtime;
 
               if (runtime === undefined) {
@@ -119,7 +131,7 @@ export function hooksExtensionHost(): ExtensionHost {
                 return;
               }
 
-              await runtime.executeInlineCell(documentUri, cellRanges);
+              await runtime.executeInlineCell(documentUri, cellRanges, executionMetadata);
             }
           };
 

@@ -19,13 +19,14 @@ import * as glob from "glob";
 const args = process.argv;
 const dev = args[2] === "dev";
 const test = args[2] === "test";
-const testFiles = glob.sync("src/test/*.ts");
+const testFiles = glob.sync("src/test/{*.ts,fixtures/*.ts,utils/*.ts}");
 
 const testBuildOptions = {
   entryPoints: testFiles,
   outdir: 'test-out',
   external: ['vscode', 'mocha', 'glob'],
   sourcemap: true,
+  dev,
 };
 
 const defaultBuildOptions = {
@@ -36,4 +37,11 @@ const defaultBuildOptions = {
   dev
 };
 
-runBuild(test ? testBuildOptions : defaultBuildOptions);
+if (test) {
+  runBuild(testBuildOptions);
+} else if (dev) {
+  runBuild(defaultBuildOptions);
+  runBuild(testBuildOptions);
+} else {
+  runBuild(defaultBuildOptions);
+}

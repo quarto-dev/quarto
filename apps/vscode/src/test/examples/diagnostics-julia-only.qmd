@@ -1,0 +1,8 @@
+---
+title: "Julia only (no language server)"
+format: html
+---
+
+```{julia}
+undefined_var = 1
+```

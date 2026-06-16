@@ -1,11 +1,29 @@
 # Changelog
 
-## 1.132.0 (Unreleased)
+## 1.134.0 (Unreleased)
+
+- The "Preview" and "Preview Format..." commands now show in the Positron Notebook Editor overflow menu (<https://github.com/quarto-dev/quarto/pull/1001>).
+- In Positron, Jupyter Notebooks (`.ipynb`) are now exported via the new unified "Export" command, rather than the "Quarto: Convert to .qmd" command (<https://github.com/quarto-dev/quarto/pull/999>).
+
+## 1.133.0 (Release on 2026-06-03)
+
+- Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>).
+- Added setting and command to show/hide cells in outline (<https://github.com/quarto-dev/quarto/pull/974>).
+- Added custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
+- Added code symbols into outline (<https://github.com/quarto-dev/quarto/pull/972>).
+- Updated the bundled Mermaid to match what is currently in the Quarto CLI (11.12.0) (<https://github.com/quarto-dev/quarto/pull/986>).
+
+
+## 1.132.0 (Release on 2026-05-05)
 
 - Fixed a bug where formatting a code cell stripped leading empty lines. Leading empty lines between option directives and code are now preserved, and two or more leading empty lines are collapsed to one (<https://github.com/quarto-dev/quarto/pull/953>).
 - Added clickable document links for file paths in `_quarto.yml` files. File paths are now clickable and navigate directly to the referenced file (<https://github.com/quarto-dev/quarto/pull/906>).
 - Added filepath autocompletion in `_quarto.yml` files. When editing YAML values, the extension now suggests project files as you type (<https://github.com/quarto-dev/quarto/pull/906>).
 - In an empty document, Positron's active runtime is now used to choose the language for a new code cell (<https://github.com/quarto-dev/quarto/pull/951>).
+- Send cell figure options (width/height) to Positron to control sizing in its Plots pane (<https://github.com/quarto-dev/quarto/pull/938>).
+- Added "Convert to .ipynb" and "Convert to .qmd" commands for converting between Quarto documents and Jupyter notebooks (<https://github.com/quarto-dev/quarto/pull/955>)
+- Guard against empty `config` field in `quarto inspect` which might happen in some circumstances in Quarto 1.9 (<https://github.com/quarto-dev/quarto/pull/961>)
+- Increase timeout to run `quarto preview` in a terminal with a Python virtual environment to 5s, to work around VS code injecting shell commands after `quarto preview` started (<https://github.com/quarto-dev/quarto/pull/962>)
 
 ## 1.131.0 (Release on 2026-04-14)
 

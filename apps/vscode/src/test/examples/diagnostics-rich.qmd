@@ -1,0 +1,10 @@
+---
+title: "Rich diagnostics test"
+format: html
+---
+
+some_target content here
+
+```{python}
+x = rich_diagnostic
+```

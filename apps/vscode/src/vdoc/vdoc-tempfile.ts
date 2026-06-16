@@ -21,44 +21,37 @@ import * as uuid from "uuid";
 import {
   commands,
   Hover,
+  languages,
   Position,
   TextDocument,
   Uri,
   workspace,
-  WorkspaceEdit,
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
 
+interface VirtualDocTempFileOptions {
+  /** Fire a "dummy" hover request to cause the language server to start  */
+  warmup: boolean;
+}
+
 /**
- * Create an on disk temporary file containing the contents of the virtual document
+ * Create an on-disk temporary file for a virtual document and open it.
  *
- * @param virtualDoc The document to use when populating the temporary file
- * @param docPath The path to the original document the virtual document is
- *   based on. When `local` is `true`, this is used to determine the directory
- *   to create the temporary file in.
- * @param local Whether or not the temporary file should be created "locally" in
- *   the workspace next to `docPath` or in a temporary directory outside the
- *   workspace.
- * @returns A `VirtualDocUri`
+ * @param virtualDoc The virtual document content to write.
+ * @param directory The directory to create the file in.
  */
 export async function virtualDocUriFromTempFile(
   virtualDoc: VirtualDoc,
-  docPath: string,
-  local: boolean
+  directory: string,
+  options: VirtualDocTempFileOptions,
 ): Promise<VirtualDocUri> {
-  const useLocal = local || virtualDoc.language.localTempFile;
+  const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
+  createVirtualDoc(filepath, virtualDoc.content);
 
-  // If `useLocal`, then create the temporary document alongside the `docPath`
-  // so tools like formatters have access to workspace configuration. Otherwise,
-  // create it in a temp directory.
-  const virtualDocFilepath = useLocal
-    ? createVirtualDocLocalFile(virtualDoc, path.dirname(docPath))
-    : createVirtualDocTempfile(virtualDoc);
-
-  const virtualDocUri = Uri.file(virtualDocFilepath);
+  const virtualDocUri = Uri.file(filepath);
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
 
-  if (!useLocal) {
+  if (options.warmup) {
     // TODO: Reevaluate whether this is necessary. Old comment:
     // > if this is the first time getting a virtual doc for this
     // > language then execute a dummy request to cause it to load
@@ -69,7 +62,7 @@ export async function virtualDocUriFromTempFile(
     );
   }
 
-  return <VirtualDocUri>{
+  return {
     uri: virtualDocTextDocument.uri,
     cleanup: async () => await deleteDocument(virtualDocTextDocument),
   };
@@ -85,45 +78,53 @@ export async function virtualDocUriFromTempFile(
  *
  * @param doc The `TextDocument` to delete
  */
-async function deleteDocument(doc: TextDocument) {
+export async function deleteDocument(doc: TextDocument) {
   try {
+    // First set the language to 'plaintext' so that the language client
+    // closes the text document in the language server, which clears
+    // diagnostics for the file. This stops diagnostics from building
+    // up even after virtual docs are cleaned up.
+    //
+    // Unfortunately, workspace.fs.delete does not trigger the
+    // vscode.window.onDidCloseTextDocument event, which the language
+    // client relies on to send the textDocument/didClose notification
+    // to the language server.
+    //
+    // vscode.WorkspaceEdit *does* trigger onDidCloseTextDocument,
+    // but doesn't support skipping the trash - see the note above
+    // re #708.
+    await languages.setTextDocumentLanguage(doc, "plaintext");
+
     await workspace.fs.delete(doc.uri, {
       useTrash: false
     });
   } catch (error) {
+    // It's okay if the file is already deleted.
+    if (error instanceof Error && error.message.includes("ENOENT")) {
+      return;
+    }
     const msg = error instanceof Error ? error.message : JSON.stringify(error);
-    console.log(`Error removing vdoc at ${doc.fileName}: ${msg}`);
+    console.error(`Error removing vdoc at ${doc.fileName}: ${msg}`);
   }
 }
 
 tmp.setGracefulCleanup();
-const VIRTUAL_DOC_TEMP_DIRECTORY = tmp.dirSync().name;
+export const VIRTUAL_DOC_TEMP_DIRECTORY = tmp.dirSync().name;
 
 /**
- * Creates a virtual document in a temporary directory
+ * Resolves the `.quarto/vdoc/` directory for the workspace containing `docPath`.
  *
- * The temporary directory is automatically cleaned up on process exit.
- *
- * @param virtualDoc The document to use when populating the temporary file
- * @returns The path to the temporary file
+ * Falls back to the source file's directory if no workspace folder is found
+ * (e.g., when working with a single file outside a workspace).
  */
-function createVirtualDocTempfile(virtualDoc: VirtualDoc): string {
-  const filepath = generateVirtualDocFilepath(VIRTUAL_DOC_TEMP_DIRECTORY, virtualDoc.language.extension);
-  createVirtualDoc(filepath, virtualDoc.content);
-  return filepath;
-}
-
-/**
- * Creates a virtual document in the provided directory
- *
- * @param virtualDoc The document to use when populating the temporary file
- * @param directory The directory to create the temporary file in
- * @returns The path to the temporary file
- */
-function createVirtualDocLocalFile(virtualDoc: VirtualDoc, directory: string): string {
-  const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
-  createVirtualDoc(filepath, virtualDoc.content);
-  return filepath;
+export function quartoVdocDir(docPath: string): string {
+  const sourceDirectory = path.dirname(docPath);
+  const workspaceFolder = workspace.workspaceFolders?.find(
+    (folder) => sourceDirectory.startsWith(folder.uri.fsPath)
+  );
+  return workspaceFolder
+    ? Uri.joinPath(workspaceFolder.uri, ".quarto", "vdoc").fsPath
+    : sourceDirectory;
 }
 
 /**
@@ -133,7 +134,7 @@ function createVirtualDoc(filepath: string, content: string): void {
   const directory = path.dirname(filepath);
 
   if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory);
+    fs.mkdirSync(directory, { recursive: true });
   }
 
   fs.writeFileSync(filepath, content);
@@ -149,15 +150,4 @@ function createVirtualDoc(filepath: string, content: string): void {
  */
 function generateVirtualDocFilepath(directory: string, extension: string): string {
   return path.join(directory, ".vdoc." + uuid.v4() + "." + extension);
-}
-
-export function isVirtualDoc(uri: Uri): boolean {
-  // Check for tempfile virtual docs
-  if (uri.scheme === "file") {
-    const filename = path.basename(uri.fsPath);
-    // Virtual docs have a specific filename pattern .vdoc.[uuid].[extension]
-    return filename.startsWith(".vdoc.") && filename.split(".").length > 3;
-  }
-
-  return false;
 }

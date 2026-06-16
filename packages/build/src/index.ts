@@ -13,8 +13,9 @@
  *
  */
 
-import { build, Format, Platform } from 'esbuild';
+import { build, Format, Platform, PluginBuild } from 'esbuild';
 import { AssetPair, copy } from 'esbuild-plugin-copy';
+import { rm } from 'node:fs/promises';
 
 export interface BuildOptions {
   entryPoints: string[];
@@ -58,17 +59,27 @@ export async function runBuild(options: BuildOptions) {
     watch: dev ? {
       onRebuild(error) {
         if (error)
-          console.error('[watch] build failed:', error)
+          console.error('[watch] build failed:', error);
         else
-          console.log('[watch] build finished')
+          console.log('[watch] build finished');
       },
     } : false,
-    plugins: assets ? [
-      copy({
+    plugins: [
+      ...(outdir ? [{
+        name: 'clear-outdir',
+        setup(build: PluginBuild) {
+          build.onStart(async () => {
+            console.log(`Clearing the ${outdir} directory`);
+            await rm(outdir, { recursive: true, force: true });
+            console.log(`Cleared the ${outdir} directory`);
+          });
+        },
+      }] : []),
+      ...(assets ? [copy({
         resolveFrom: 'cwd',
         assets,
-      }),
-    ] : [],
+      })] : []),
+    ],
   });
 
   if (dev) {

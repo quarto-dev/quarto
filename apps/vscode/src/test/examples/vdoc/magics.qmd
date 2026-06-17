@@ -1,0 +1,20 @@
+---
+title: "IPython magics and shell escapes in code cells"
+format: html
+---
+
+## Header
+
+```{python}
+import pandas as pd
+
+%reload_ext pandas
+%%timeit
+!pip install pandas
+  %time x = 1
+x = 1
+```
+
+```{r}
+1 + 1
+```

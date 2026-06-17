@@ -31,6 +31,16 @@ suite("Virtual documents", function () {
     VirtualDocStyle.Block
   );
 
+  // IPython magics (`%`, `%%`) and shell escapes (`!`) should be commented out
+  // in Python virtual documents so they don't produce spurious diagnostics.
+  snapshotVirtualDocument(
+    "vdoc/magics-python.py",
+    "vdoc/magics.qmd",
+    new vscode.Position(8, 0),
+    engine,
+    VirtualDocStyle.Language
+  );
+
   test("OOB position returns `undefined` virtual doc", async function () {
     const { doc } = await openAndShowExamplesTextDocument("vdoc/oob.qmd");
 

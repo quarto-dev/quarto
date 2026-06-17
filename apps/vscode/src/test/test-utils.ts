@@ -27,17 +27,26 @@ export function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function openAndShowExamplesTextDocument(fileName: string) {
-  return openAndShowUri(examplesUri(fileName));
+export async function openAndShowExamplesTextDocument(
+  fileName: string,
+  showOptions?: vscode.TextDocumentShowOptions
+) {
+  return openAndShowUri(examplesUri(fileName), showOptions);
 }
 
-export async function openAndShowExamplesOutTextDocument(fileName: string) {
-  return openAndShowUri(examplesOutUri(fileName));
+export async function openAndShowExamplesOutTextDocument(
+  fileName: string,
+  showOptions?: vscode.TextDocumentShowOptions
+) {
+  return openAndShowUri(examplesOutUri(fileName), showOptions);
 }
 
-export async function openAndShowUri(uri: vscode.Uri) {
+export async function openAndShowUri(
+  uri: vscode.Uri,
+  showOptions?: vscode.TextDocumentShowOptions
+) {
   const doc = await vscode.workspace.openTextDocument(uri);
-  const editor = await vscode.window.showTextDocument(doc);
+  const editor = await vscode.window.showTextDocument(doc, showOptions);
   return { doc, editor };
 }
 
@@ -73,7 +82,7 @@ export async function openUniqueExampleDocument(fileName: string) {
   };
 }
 
-const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
+export const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
 export async function roundtrip(doc: vscode.TextDocument) {
   const before = doc.getText();
 

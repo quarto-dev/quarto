@@ -1,5 +1,5 @@
 /*
- * lanugage.ts
+ * language.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
  *
@@ -38,20 +38,22 @@ export function isExecutableLanguageBlock(token: Token) : token is TokenMath | T
   }
 }
 
-export function codeForExecutableLanguageBlock(token: TokenMath | TokenCodeBlock) {
+export function codeForExecutableLanguageBlock(
+  token: TokenMath | TokenCodeBlock,
+  appendNewline = true,
+) {
   if (isMath(token)) {
     return token.data.text;
   } else if (isCodeBlock(token)) {
-    return token.data + "\n";
+    return token.data + (appendNewline ? "\n" : "");
   } else {
     return "";
   }
 }
 
-
-export function languageBlockAtPosition(
+export function languageBlockAtLine(
   tokens: Token[],
-  position: Position,
+  line: number,
   includeFence = false
 ) {
   for (const languageBlock of tokens.filter(isExecutableLanguageBlock)) {
@@ -61,13 +63,20 @@ export function languageBlockAtPosition(
       start++;
       end--;
     }
-    if (position.line >= start && position.line <= end) {
+    if (line >= start && line <= end) {
       return languageBlock;
     }
   }
   return undefined;
 }
 
+export function languageBlockAtPosition(
+  tokens: Token[],
+  position: Position,
+  includeFence = false
+) {
+  return languageBlockAtLine(tokens, position.line, includeFence);
+}
 
 export function isDisplayMath(token: Token): token is TokenMath {
   if (isMath(token)) {

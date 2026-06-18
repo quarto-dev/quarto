@@ -1,7 +1,7 @@
 /*
  * vdoc.ts
  *
- * Copyright (C) 2022-2025 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
@@ -13,6 +13,7 @@
  *
  */
 
+import * as path from "path";
 import { Position, TextDocument, Uri, Range, SemanticTokens } from "vscode";
 import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 
@@ -20,7 +21,7 @@ import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { embeddedLanguage, EmbeddedLanguage } from "./languages";
 import { virtualDocUriFromEmbeddedContent } from "./vdoc-content";
-import { virtualDocUriFromTempFile } from "./vdoc-tempfile";
+import { virtualDocUriFromTempFile, VIRTUAL_DOC_TEMP_DIRECTORY } from "./vdoc-tempfile";
 import { decodeSemanticTokens, encodeSemanticTokens } from "../providers/semantic-tokens";
 
 export interface VirtualDoc {
@@ -28,11 +29,21 @@ export interface VirtualDoc {
   content: string;
 }
 
+export enum VirtualDocStyle {
+  /** Every block corresponding to the current position's language */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Language,
+
+  /** Only the block corresponding to the current position */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Block
+}
+
 export async function virtualDoc(
   document: TextDocument,
   position: Position,
   engine: MarkdownEngine,
-  block?: Token
+  style = VirtualDocStyle.Language
 ): Promise<VirtualDoc | undefined> {
   // make sure this is a quarto doc
   if (!isQuartoDoc(document)) {
@@ -41,22 +52,34 @@ export async function virtualDoc(
 
   // check if the cursor is in a fenced code block
   const tokens = engine.parse(document);
-  const language = languageAtPosition(tokens, position);
 
-  if (language) {
-    if (block) {
-      return virtualDocForBlock(document, block, language);
-    } else {
+  const block = languageBlockAtPosition(tokens, position);
+  if (!block) {
+    return undefined;
+  }
+
+  const language = languageFromBlock(block);
+  if (!language) {
+    return undefined;
+  }
+
+  switch (style) {
+    case VirtualDocStyle.Language: {
       return virtualDocForLanguage(document, tokens, language);
     }
-  } else {
-    return undefined;
+    case VirtualDocStyle.Block: {
+      return virtualDocForBlock(document, block, language);
+    }
+    default: {
+      // Should be unreachable
+      return undefined;
+    }
   }
 }
 
-export function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {
+function virtualDocForBlock(document: TextDocument, block: Token, language: EmbeddedLanguage) {
   const lines = linesForLanguage(document, language);
-  fillLinesFromBlock(lines, document, block);
+  fillLinesFromBlock(lines, document, block, language);
   padLinesForLanguage(lines, language);
   return virtualDocForCode(lines, language);
 }
@@ -64,15 +87,22 @@ export function virtualDocForBlock(document: TextDocument, block: Token, languag
 export function virtualDocForLanguage(
   document: TextDocument,
   tokens: Token[],
-  language: EmbeddedLanguage
+  language: EmbeddedLanguage,
+  action?: VirtualDocAction,
 ): VirtualDoc {
   const lines = linesForLanguage(document, language);
   for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
-    fillLinesFromBlock(lines, document, languageBlock);
+    fillLinesFromBlock(lines, document, languageBlock, language);
   }
   padLinesForLanguage(lines, language);
-  return virtualDocForCode(lines, language);
+  return virtualDocForCode(lines, language, action);
 }
+
+// IPython line magics (`%`), cell magics (`%%`), and shell escapes (`!`) are not
+// valid Python, so they produce spurious diagnostics from Python language
+// servers. Comment these lines out in the virtual document, mirroring how
+// Jupyter tooling (e.g. the ruff_notebook crate) sanitizes notebook input.
+const kIPythonMagicPattern = /^\s*(%{1,2}|!)/;
 
 function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
   const lines: string[] = [];
@@ -82,13 +112,23 @@ function linesForLanguage(document: TextDocument, language: EmbeddedLanguage) {
   return lines;
 }
 
-function fillLinesFromBlock(lines: string[], document: TextDocument, block: Token) {
+function fillLinesFromBlock(
+  lines: string[],
+  document: TextDocument,
+  block: Token,
+  language: EmbeddedLanguage
+) {
   for (
     let line = block.range.start.line + 1;
     line < block.range.end.line && line < document.lineCount;
     line++
   ) {
-    lines[line] = document.lineAt(line).text;
+    const text = document.lineAt(line).text;
+    if (language.commentMagics && kIPythonMagicPattern.test(text)) {
+      lines[line] = language.emptyLine || "";
+    } else {
+      lines[line] = text;
+    }
   }
 }
 
@@ -98,11 +138,16 @@ function padLinesForLanguage(lines: string[], language: EmbeddedLanguage) {
   }
 }
 
-export function virtualDocForCode(code: string[], language: EmbeddedLanguage) {
+export function virtualDocForCode(
+  code: string[],
+  language: EmbeddedLanguage,
+  action?: VirtualDocAction,
+) {
 
   const lines = [...code];
 
-  if (language.inject) {
+  // For non-diagnostic actions, inject lines of code to disable diagnostics.
+  if (language.inject && action !== "diagnostics") {
     lines.unshift(...language.inject);
   }
 
@@ -121,7 +166,8 @@ export type VirtualDocAction =
   "statementRange" |
   "helpTopic" |
   "executeSelectionAtPositionInteractive" |
-  "semanticTokens";
+  "semanticTokens" |
+  "diagnostics";
 
 export type VirtualDocUri = { uri: Uri, cleanup?: () => Promise<void>; };
 
@@ -163,13 +209,16 @@ async function virtualDocUri(
   action: VirtualDocAction
 ): Promise<VirtualDocUri> {
 
-  // format and definition actions use a transient local vdoc
-  // (so they can get project-specific paths and formatting config)
-  const local = ["format", "definition"].includes(action);
+  if (virtualDoc.language.type === "content") {
+    return { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) };
+  }
 
-  return virtualDoc.language.type === "content"
-    ? { uri: virtualDocUriFromEmbeddedContent(virtualDoc, parentUri) }
-    : await virtualDocUriFromTempFile(virtualDoc, parentUri.fsPath, local);
+  // format and definition actions use a local vdoc alongside the source
+  // so tools like formatters have access to workspace configuration
+  const local = ["format", "definition"].includes(action) || virtualDoc.language.localTempFile;
+  const dir = local ? path.dirname(parentUri.fsPath) : VIRTUAL_DOC_TEMP_DIRECTORY;
+
+  return await virtualDocUriFromTempFile(virtualDoc, dir, { warmup: !local });
 }
 
 export function languageAtPosition(tokens: Token[], position: Position) {
@@ -220,13 +269,21 @@ export function isBlockOfLanguage(language: EmbeddedLanguage) {
   };
 }
 
-// adjust position for inject
+// adjust line for inject
+export function adjustedLine(language: EmbeddedLanguage, line: number): number {
+  return line + (language.inject?.length || 0);
+}
+
+export function unadjustedLine(language: EmbeddedLanguage, line: number): number {
+  return line - (language.inject?.length || 0);
+}
+
 export function adjustedPosition(language: EmbeddedLanguage, pos: Position) {
-  return new Position(pos.line + (language.inject?.length || 0), pos.character);
+  return new Position(adjustedLine(language, pos.line), pos.character);
 }
 
 export function unadjustedPosition(language: EmbeddedLanguage, pos: Position) {
-  return new Position(pos.line - (language.inject?.length || 0), pos.character);
+  return new Position(unadjustedLine(language, pos.line), pos.character);
 }
 
 export function unadjustedRange(language: EmbeddedLanguage, range: Range) {

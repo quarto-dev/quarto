@@ -1,4 +1,3 @@
-
 name: Test VS Code Extension
 
 on:
@@ -13,26 +12,30 @@ on:
 jobs:
   test-extension:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        quarto: [release, pre-release]
+    name: Test (Quarto ${{ matrix.quarto }})
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-
       - name: Update build environment and install XVFB
         run: |
           sudo apt-get -y update
           sudo apt-get -y install --fix-missing xvfb
-
       - uses: quarto-dev/quarto-actions/setup@v2
-
+        with:
+          version: ${{ matrix.quarto }}
       - name: Build vscode extension
         run: |
           yarn install
           yarn run build-vscode
-
       - name: Compile and run tests
+        env:
+          QUARTO_CHANNEL: ${{ matrix.quarto }}
         run: |
           yarn install --immutable --immutable-cache --check-cache
           xvfb-run yarn test-vscode

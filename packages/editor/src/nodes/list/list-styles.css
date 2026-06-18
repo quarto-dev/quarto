@@ -21,20 +21,21 @@
   flex: 0 1 auto;
   margin-top: 3px;
   margin-right: 7px;
+  height: 13px;
 }
 
 .ProseMirror li .list-item-content {
   flex: 1 1 auto;
 }
 
-.ProseMirror li ul, 
+.ProseMirror li ul,
 .ProseMirror li ol {
   margin-bottom: 1em;
 }
 
-.ProseMirror ol[data-tight] li ul, 
-.ProseMirror ol[data-tight] li ol, 
-.ProseMirror ul[data-tight] li ul, 
+.ProseMirror ol[data-tight] li ul,
+.ProseMirror ol[data-tight] li ol,
+.ProseMirror ul[data-tight] li ul,
 .ProseMirror ul[data-tight] li ol {
   margin-bottom: 0;
 }
@@ -49,6 +50,27 @@
  {
   margin-top: 0;
   margin-bottom: 0.3rem;
+}
+
+.ProseMirror ol > li[data-checked],
+.ProseMirror ul > li[data-checked]
+{
+  list-style-type: none;
+  margin-left: -20px;
+  margin-bottom: 1em;
+}
+
+.ProseMirror ol[data-tight] > li[data-checked],
+.ProseMirror ul[data-tight] > li[data-checked]
+{
+  list-style-type: none;
+  margin-left: -20px;
+  margin-bottom: 0.3rem;
+}
+.ProseMirror ol > li[data-checked] > .list-item-container > .list-item-content > p,
+.ProseMirror ul > li[data-checked] > .list-item-container > .list-item-content > p
+{
+  margin-bottom: 0rem;
 }
 
 /* Example Lists */

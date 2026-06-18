@@ -19,11 +19,13 @@ import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { MarkdownEngine } from "./markdown/engine";
 import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
+import { activateEmbeddedDiagnostics, type EmbeddedDiagnosticsService } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activatePreview } from "./providers/preview/preview";
 import { activateRender } from "./providers/render";
+import { activateConvert } from "./providers/convert";
 import { activateStatusBar } from "./providers/statusbar";
 import { walkthroughCommands } from "./providers/walkthrough";
 import { activateLuaTypes } from "./providers/lua-types";
@@ -32,19 +34,28 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
+import { isInlineOutputEnabled } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
 import { textFormattingCommands } from "./providers/text-format";
 import { newDocumentCommands } from "./providers/newdoc";
 import { insertCommands } from "./providers/insert";
+import { registerOutlineConfigListener, symbolsCommands } from "./providers/symbols";
 import { activateDiagram } from "./providers/diagram/diagram";
 import { activateCodeFormatting } from "./providers/format";
 import { activateOptionEnterProvider } from "./providers/option";
 import { activateBackgroundHighlighter } from "./providers/background";
+import { activateYamlLinks } from "./providers/yaml-links";
+import { activateYamlFilepathCompletions } from "./providers/yaml-filepath-completions";
 import { activateContextKeySetter } from "./providers/context-keys";
+import { activateDivBracketDecorations } from "./providers/div-brackets";
 import { CommandManager } from "./core/command";
 import { createQuartoExtensionApi, QuartoExtensionApi } from "./api";
+import { activateNotebookExport, NotebookExportService } from "./providers/notebook-export";
+
+let embeddedDiagnosticsService: EmbeddedDiagnosticsService | undefined;
+let notebookExportService: NotebookExportService | undefined;
 
 /**
  * Entry point for the entire extension! This initializes the LSP, quartoContext, extension host, and more...
@@ -113,8 +124,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // deno config
     activateDenoConfig(context, engine);
 
+    // embedded diagnostics
+    embeddedDiagnosticsService = activateEmbeddedDiagnostics(engine, outputChannel);
+    context.subscriptions.push(embeddedDiagnosticsService);
+
     // lsp
     const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
+
+    // restore outline expansion after the LSP re-registers symbols on config change
+    registerOutlineConfigListener(context);
 
     // provide visual editor
     const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
@@ -135,6 +153,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   const renderCommands = activateRender(quartoContext, engine);
   commands.push(...renderCommands);
 
+  // provide convert (convert between .qmd and .ipynb)
+  const convertCommands = activateConvert(quartoContext, engine, outputChannel);
+  commands.push(...convertCommands);
+
   // provide preview
   const previewCommands = activatePreview(context, host, quartoContext, engine);
   commands.push(...previewCommands);
@@ -149,15 +171,53 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   commands.push(...insertCommands(engine));
 
+  commands.push(...symbolsCommands());
+
   commands.push(...activateDiagram(context, host, engine));
 
   commands.push(...activateCodeFormatting(engine));
 
-  // provide code lens
-  vscode.languages.registerCodeLensProvider(
-    kQuartoDocSelector,
-    quartoCellExecuteCodeLensProvider(host, engine)
-  );
+  // provide code lens (conditionally in Positron based on inline output setting)
+  const isPositron = tryAcquirePositronApi();
+  if (isPositron) {
+    // In Positron, only show code lens when inline output is disabled
+    let codeLensDisposable: vscode.Disposable | undefined;
+
+    const updateCodeLens = () => {
+      const inlineOutputEnabled = isInlineOutputEnabled();
+
+      if (inlineOutputEnabled && codeLensDisposable) {
+        // Dispose existing code lens when inline output is enabled
+        codeLensDisposable.dispose();
+        codeLensDisposable = undefined;
+      } else if (!inlineOutputEnabled && !codeLensDisposable) {
+        // Register code lens when inline output is disabled
+        codeLensDisposable = vscode.languages.registerCodeLensProvider(
+          kQuartoDocSelector,
+          quartoCellExecuteCodeLensProvider(host, engine)
+        );
+        context.subscriptions.push(codeLensDisposable);
+      }
+    };
+
+    // Initial setup
+    updateCodeLens();
+
+    // Listen for setting changes
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("positron.quarto.inlineOutput.enabled")) {
+          updateCodeLens();
+        }
+      })
+    );
+  } else {
+    // In VS Code, always register the code lens
+    vscode.languages.registerCodeLensProvider(
+      kQuartoDocSelector,
+      quartoCellExecuteCodeLensProvider(host, engine)
+    );
+  }
 
   // provide file copy/drop handling
   activateCopyFiles(context);
@@ -168,8 +228,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   // background highlighter
   activateBackgroundHighlighter(context, engine);
 
+  // yaml document links
+  activateYamlLinks(context);
+
+  // yaml filepath completions
+  activateYamlFilepathCompletions(context);
+
   // context setter
   activateContextKeySetter(context, engine);
+
+  // div bracket decorations
+  activateDivBracketDecorations(context);
+
+  // notebook export (conditionally in Positron)
+  notebookExportService = activateNotebookExport(quartoContext, outputChannel);
+  if (notebookExportService) {
+    context.subscriptions.push(notebookExportService);
+  }
 
   // commands
   const commandManager = new CommandManager();
@@ -229,5 +304,7 @@ function registerQuartoPathConfigListener(context: vscode.ExtensionContext, outp
 }
 
 export async function deactivate() {
+  await embeddedDiagnosticsService?.deactivate();
+  await notebookExportService?.deactivate();
   return deactivateLsp();
 }

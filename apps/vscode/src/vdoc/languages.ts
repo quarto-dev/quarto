@@ -23,7 +23,18 @@ export interface EmbeddedLanguage {
   emptyLine?: string;
   comment?: string;
   trigger?: string[];
+  /**
+   * Lines of code to inject at the top of the virtual document.
+   * Used to add lines that hint to language LSPs to disable diagnostics for virtual documents that were
+   * created for non-diagnostic actions.
+   */
   inject?: string[];
+  /**
+   * Comment out IPython magics (`%`, `%%`) and shell escapes (`!`) in the
+   * virtual document so they don't produce spurious diagnostics from language
+   * servers. Applies to IPython-flavored languages such as Python.
+   */
+  commentMagics?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
 }
@@ -42,6 +53,7 @@ const kEmbededLanguages = [
   defineLanguage("python", {
     inject: ["# type: ignore", "# flake8: noqa"],
     emptyLine: "#",
+    commentMagics: true,
     canFormat: true,
     canFormatDocument: false,
   }),
@@ -88,7 +100,18 @@ interface LanguageOptions {
   type?: "content" | "tempfile";
   localTempFile?: boolean;
   emptyLine?: string;
+  /**
+   * Lines of code to inject at the top of the virtual document.
+   * Used to add lines that hint to language LSPs to disable diagnostics for virtual documents that were
+   * created for non-diagnostic actions.
+   */
   inject?: string[];
+  /**
+   * Comment out IPython magics (`%`, `%%`) and shell escapes (`!`) in the
+   * virtual document so they don't produce spurious diagnostics from language
+   * servers. Applies to IPython-flavored languages such as Python.
+   */
+  commentMagics?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
 }
@@ -119,6 +142,7 @@ function defineLanguage(
     emptyLine: options?.emptyLine,
     trigger: language.trigger,
     inject: options?.inject,
+    commentMagics: options?.commentMagics,
     canFormat: options?.canFormat,
     canFormatDocument: options?.canFormatDocument
   };

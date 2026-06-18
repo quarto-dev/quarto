@@ -1,0 +1,12 @@
+---
+title: Formatting Python Code Cells with Option Directive Variants
+subtitle: https://github.com/quarto-dev/quarto/pull/655
+format: html
+---
+
+```{python}
+#|label: no-space
+# | space-before-pipe
+#|  extra-space-after
+x=1;y=2;z=x+y
+```

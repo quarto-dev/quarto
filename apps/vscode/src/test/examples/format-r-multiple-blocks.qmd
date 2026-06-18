@@ -1,0 +1,18 @@
+---
+title: Formatting an R Document with Multiple Blocks
+subtitle: https://github.com/quarto-dev/quarto/pull/655
+format: html
+---
+
+```{r}
+#| label: first
+x<-1
+```
+
+Some prose between the cells.
+
+```{r}
+#| label: second
+#| echo: false
+y<-2
+```

@@ -86,24 +86,25 @@ export function readPandocList(nodeType: NodeType, capabilities: ListCapabilitie
         writer.logExampleList();
       }
     }
-    
+
     const children = getChildren(tok);
-    const attrs = { ...getAttrs(tok), 
-                    tight: children.length && children[0].length && children[0][0].t === 'Plain'
-                  };
+    const attrs = {
+      ...getAttrs(tok),
+      tight: children.length && children[0].length && children[0][0].t === 'Plain'
+    };
     writer.openNode(nodeType, attrs);
     children.forEach((child: PandocToken[]) => {
       // setup tokens/attribs for output
       let tokens = child;
-      const childAttrs: { checked: null | boolean } = { checked: null };
+      const childAttrs: { checked: null | boolean; } = { checked: null };
 
       // special task list processing if the current format supports task lists
       if (capabilities.tasks) {
         // look for checkbox in first character of child tokens
         // if we see it, remove it and set childAttrs.checked as appropriate
-        const childWithChecked = tokensWithChecked(child);
-        childAttrs.checked = childWithChecked.checked;
-        tokens = childWithChecked.tokens;
+        const { tokens: modifiedTokens, checked } = tokensWithChecked(child);
+        childAttrs.checked = checked;
+        tokens = modifiedTokens;
       }
 
       // process children
@@ -165,7 +166,7 @@ function listNodeOptions(node: ProsemirrorNode, capabilities: ListCapabilities):
   // (allow case of [paragraph,list] which is just a nested list)
   node.forEach(item => {
     if (options.tight && item.childCount > 1) {
-      if (item.childCount > 2 || !isList(item.child(1)) ) {
+      if (item.childCount > 2 || !isList(item.child(1))) {
         options.tight = false;
       }
     }

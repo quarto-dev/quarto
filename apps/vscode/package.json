@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.129.0",
+  "version": "1.134.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -29,7 +29,7 @@
   "private": true,
   "engines": {
     "vscode": "^1.75.0",
-    "positron": "^2025.12.0"
+    "positron": "^2026.04.1"
   },
   "main": "./out/main.js",
   "browser": "./browser.js",
@@ -91,10 +91,7 @@
         "id": "typst",
         "aliases": [
           "Typst",
-          "mermaid"
-        ],
-        "extensions": [
-          ".typ"
+          "typst"
         ],
         "configuration": "./languages/typst/typst.configuration.json"
       }
@@ -222,7 +219,7 @@
     "commands": [
       {
         "command": "quarto.newDocument",
-        "title": "New Document",
+        "title": "New Quarto Document (qmd)",
         "category": "Quarto"
       },
       {
@@ -232,12 +229,12 @@
       },
       {
         "command": "quarto.newPresentation",
-        "title": "New Presentation",
+        "title": "New Quarto Presentation (qmd)",
         "category": "Quarto"
       },
       {
         "command": "quarto.newNotebook",
-        "title": "New Notebook (ipynb)",
+        "title": "New Quarto Notebook (ipynb)",
         "category": "Quarto"
       },
       {
@@ -296,13 +293,28 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.toggleCodeCellsInOutline",
+        "title": "Toggle Code Cells in Outline",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.convertToIpynb",
+        "title": "Convert to .ipynb",
+        "category": "Quarto"
+      },
+      {
+        "command": "quarto.convertToQmd",
+        "title": "Convert to .qmd",
+        "category": "Notebook"
+      },
+      {
         "command": "quarto.insertCodeCell",
         "icon": "$(insert)",
         "title": "Insert Code Cell",
         "category": "Quarto",
         "actionBarOptions": {
           "controlType": "button",
-          "displayTitle": true
+          "displayTitle": false
         }
       },
       {
@@ -404,7 +416,7 @@
       },
       {
         "command": "quarto.walkthrough.newDocument",
-        "title": "New Document (qmd)",
+        "title": "New Quarto Document (qmd)",
         "category": "Quarto"
       },
       {
@@ -434,18 +446,6 @@
         "title": "Toggle Code",
         "category": "Quarto",
         "enablement": "editorTextFocus && !editorReadonly && editorLangId == quarto"
-      },
-      {
-        "command": "quarto.toggleEditMode",
-        "title": "Edit Mode",
-        "category": "Quarto",
-        "enablement": "editorLangId == quarto",
-        "actionBarOptions": {
-          "controlType": "toggle",
-          "leftTitle": "Source",
-          "rightTitle": "Visual",
-          "toggled": "activeCustomEditorId == 'quarto.visualEditor'"
-        }
       },
       {
         "command": "quarto.toggleRenderOnSave",
@@ -650,11 +650,6 @@
           "command": "quarto.toggleRenderOnSave",
           "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "0_preview"
-        },
-        {
-          "command": "quarto.toggleEditMode",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
-          "group": "1_editor_mode"
         }
       ],
       "editor/actions/right": [
@@ -695,6 +690,16 @@
           "group": "q_execute"
         },
         {
+          "command": "quarto.convertToIpynb",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "group": "q_zzConvert"
+        },
+        {
+          "command": "quarto.convertToQmd",
+          "when": "resourceExtname == .ipynb && !quarto.hasNotebookExporter",
+          "group": "q_zzConvert"
+        },
+        {
           "command": "quarto.editInVisualMode",
           "when": "resourceScheme != untitled && editorLangId == quarto || resourceScheme != untitled && editorLangId == markdown",
           "group": "q_switch"
@@ -706,7 +711,7 @@
         },
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "q_zPreview"
         },
         {
@@ -716,7 +721,7 @@
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
           "group": "q_zPreview"
         }
       ],
@@ -742,6 +747,11 @@
         {
           "command": "quarto.previewFormat",
           "group": "q_zPreview"
+        },
+        {
+          "command": "quarto.convertToQmd",
+          "when": "resourceExtname == .ipynb && !quarto.hasNotebookExporter",
+          "group": "q_zzConvert"
         }
       ],
       "file/newFile": [
@@ -788,7 +798,7 @@
         },
         {
           "command": "quarto.renderDocument",
-          "when": "editorLangId == quarto ||  editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto ||  editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewScript",
@@ -796,11 +806,11 @@
         },
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewDiagram",
@@ -898,6 +908,14 @@
         {
           "command": "quarto.zoteroUnauthorized",
           "when": "false"
+        },
+        {
+          "command": "quarto.convertToIpynb",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+        },
+        {
+          "command": "quarto.convertToQmd",
+          "when": "resourceExtname == .ipynb"
         }
       ],
       "view/title": [
@@ -990,6 +1008,20 @@
           "default": true,
           "markdownDescription": "Show parameter help when editing function calls."
         },
+        "quarto.cells.diagnostics.enabled": {
+          "order": 25,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable diagnostics (linting) for code blocks from language servers."
+        },
+        "quarto.cells.diagnostics.debounceDelay": {
+          "order": 26,
+          "scope": "window",
+          "type": "number",
+          "default": 500,
+          "markdownDescription": "Delay in milliseconds before updating diagnostics after document changes."
+        },
         "quarto.cells.background.enabled": {
           "type": "boolean",
           "description": "Enable coloring the background of executable code cells.",
@@ -1036,7 +1068,7 @@
           "markdownDescription": "Millisecond delay between background color updates."
         },
         "quarto.cells.useReticulate": {
-          "order": 25,
+          "order": 27,
           "scope": "window",
           "type": "boolean",
           "default": true,
@@ -1275,6 +1307,20 @@
           "default": false,
           "markdownDescription": "Write markdown links as references rather than inline. Reference links are written to the location specified in `#quarto.visualEditor.markdownReferences#`."
         },
+        "quarto.yaml.documentLinks.enabled": {
+          "order": 45,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable clickable file links in `_quarto.yml` files."
+        },
+        "quarto.yaml.filepathCompletions.enabled": {
+          "order": 46,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable file path autocomplete in `_quarto.yml` files."
+        },
         "quarto.zotero.library": {
           "order": 50,
           "scope": "window",
@@ -1325,7 +1371,11 @@
         },
         "quarto.symbols.exportToWorkspace": {
           "type": "string",
-          "enum": ["default", "all", "none"],
+          "enum": [
+            "default",
+            "all",
+            "none"
+          ],
           "enumDescriptions": [
             "Depends on the project type: `\"none\"` in R packages, `\"all\"` otherwise.",
             "",
@@ -1333,6 +1383,11 @@
           ],
           "default": "default",
           "description": "Whether Markdown elements like section headers are included in workspace symbol search."
+        },
+        "quarto.symbols.showCodeCellsInOutline": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show code cells in the document outline."
         }
       }
     },
@@ -1461,7 +1516,7 @@
     "nanoid": "^4.0.0",
     "p-queue": "^8.0.1",
     "picomatch": "^2.3.1",
-    "@posit-dev/positron": "^0.1.0",
+    "@posit-dev/positron": "^0.2.4",
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-utils": "*",

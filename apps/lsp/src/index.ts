@@ -18,8 +18,10 @@ import path from "path";
 import {
   ClientCapabilities,
   Definition,
+  Disposable,
   DocumentLink,
   DocumentSymbol,
+  DocumentSymbolRequest,
   FoldingRange,
   InitializeParams,
   ProposedFeatures,
@@ -73,6 +75,13 @@ let initializationOptions: LspInitializationOptions | undefined;
 
 // Markdown language service
 let mdLs: IMdLanguageService | undefined;
+
+// Resolved once `mdLs` has been created in `onInitialized`. Request handlers
+// that depend on `mdLs` should `await` this so that requests arriving during
+// the async portion of startup do not race and return empty results that the
+// client then caches (e.g. an empty document outline after a window reload).
+let resolveMdLsReady!: () => void;
+const mdLsReady = new Promise<void>(resolve => { resolveMdLsReady = resolve; });
 
 connection.onInitialize((params: InitializeParams) => {
   // Set log level from initialization options if provided so that we use the
@@ -131,6 +140,11 @@ connection.onInitialize((params: InitializeParams) => {
   connection.onDocumentSymbol(async (params, token): Promise<DocumentSymbol[]> => {
     logger.logRequest('documentSymbol');
 
+    await mdLsReady;
+    if (token.isCancellationRequested) {
+      return [];
+    }
+
     const document = documents.get(params.textDocument.uri);
     if (!document) {
       return [];
@@ -140,6 +154,11 @@ connection.onInitialize((params: InitializeParams) => {
 
   connection.onFoldingRanges(async (params, token): Promise<FoldingRange[]> => {
     logger.logRequest('foldingRanges');
+
+    await mdLsReady;
+    if (token.isCancellationRequested) {
+      return [];
+    }
 
     const document = documents.get(params.textDocument.uri);
     if (!document) {
@@ -198,7 +217,6 @@ connection.onInitialize((params: InitializeParams) => {
       hoverProvider: true,
       definitionProvider: true,
       documentLinkProvider: { resolveProvider: true },
-      documentSymbolProvider: true,
       foldingRangeProvider: true,
       referencesProvider: true,
       selectionRangeProvider: true,
@@ -291,6 +309,29 @@ connection.onInitialized(async () => {
 
   // register custom methods
   registerCustomMethods(quarto, lspConnection, documents);
+
+  // dynamically register the document symbol provider now that `mdLs` exists
+  // so the client only learns about the capability once we can actually serve
+  // it (avoids the cold-start race where the client requests symbols, caches
+  // an empty response, and never re-queries on its own). Re-register on every
+  // config change so the client re-queries symbols with the new shape; the
+  // VS Code extension restores outline expansion state after the re-query.
+  let documentSymbolRegistration: Disposable | undefined;
+  const registerDocumentSymbolProvider = async () => {
+    documentSymbolRegistration?.dispose();
+    documentSymbolRegistration = await connection.client.register(
+      DocumentSymbolRequest.type,
+      { documentSelector: null }
+    );
+  };
+  await registerDocumentSymbolProvider();
+  configManager.onDidChangeConfiguration(() => {
+    registerDocumentSymbolProvider();
+  });
+
+  // signal that `mdLs` is now ready to serve requests:
+  // handlers like document symbols, folding ranges, etc will now proceed
+  resolveMdLsReady();
 });
 
 

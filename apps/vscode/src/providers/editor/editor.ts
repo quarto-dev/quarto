@@ -62,7 +62,6 @@ import { JsonRpcRequestTransport } from "core";
 import {
   editInSourceModeCommand,
   editInVisualModeCommand,
-  toggleEditModeCommand,
   toggleRenderOnSaveCommand,
   reopenEditorInSourceMode
 } from "./toggle";
@@ -103,7 +102,6 @@ export function activateEditor(
     },
     editInVisualModeCommand(),
     editInSourceModeCommand(),
-    toggleEditModeCommand(),
     toggleRenderOnSaveCommand()
   ];
 }

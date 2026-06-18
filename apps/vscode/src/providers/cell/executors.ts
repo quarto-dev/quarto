@@ -17,7 +17,7 @@
 // (e.g. see https://github.com/JeepShen/vscode-markdown-code-runner)
 
 
-import { TextDocument } from "vscode";
+import { TextDocument, Range } from "vscode";
 
 import {
   codeForExecutableLanguageBlock,
@@ -34,6 +34,7 @@ import { cellOptionsForToken, kExecuteEval } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
 import { executableLanguages } from "../../host/executors";
+import { isInlineOutputEnabled } from "../../host/positron";
 import { Position } from "vscode";
 import { Uri } from "vscode";
 
@@ -59,6 +60,12 @@ export function blockIsExecutable(host: ExtensionHost, token?: Token): token is 
   } else {
     return false;
   }
+}
+
+// extract cell options as execution metadata (returns undefined if no options)
+export function cellMetadataForBlock(token: TokenMath | TokenCodeBlock): Record<string, unknown> | undefined {
+  const options = cellOptionsForToken(token);
+  return Object.keys(options).length > 0 ? options : undefined;
 }
 
 // skip yaml options for execution
@@ -87,9 +94,20 @@ export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
 export async function executeInteractive(
   executor: CellExecutor,
   blocks: string[],
-  document: TextDocument
+  document: TextDocument,
+  ranges?: Range[],
+  metadata?: Record<string, unknown>[]
 ): Promise<void> {
-  return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined);
+  // If inline output is enabled, the document has a URI, and the executor supports
+  // inline execution, use that instead of the standard console execution
+  if (isInlineOutputEnabled() &&
+    !document.isUntitled &&
+    ranges &&
+    ranges.length > 0 &&
+    executor.executeInlineCells) {
+    return await executor.executeInlineCells(document.uri, ranges, metadata);
+  }
+  return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined, metadata);
 }
 
 

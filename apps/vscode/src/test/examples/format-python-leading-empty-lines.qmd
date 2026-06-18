@@ -1,0 +1,17 @@
+---
+title: Leading Empty Lines in Python Code Cells
+format: html
+---
+
+```{python}
+#| label: one-empty-line
+
+x=1;y=2
+```
+
+```{python}
+#| label: two-empty-lines
+
+
+x=3;y=4
+```

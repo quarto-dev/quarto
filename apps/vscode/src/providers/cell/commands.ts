@@ -15,8 +15,9 @@
  *
  */
 
-import { lines, sleep } from "core";
-import { CodeViewActiveBlockContext, CodeViewSelectionAction } from "editor-types";
+import { lines } from "core";
+import { Range as LSRange } from 'vscode-languageserver-types';
+import { CodeViewActiveBlockContext } from "editor-types";
 import {
   Position,
   Range,
@@ -43,6 +44,7 @@ import { QuartoVisualEditor, VisualEditorProvider } from "../editor/editor";
 import {
   blockHasExecutor,
   blockIsExecutable,
+  cellMetadataForBlock,
   codeWithoutOptionsFromBlock,
   executeInteractive,
   executeSelectionInteractive,
@@ -55,7 +57,6 @@ import { commands } from "vscode";
 import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
 import { embeddedLanguage } from "../../vdoc/languages";
 import { Uri } from "vscode";
-import { StatementRange } from "positron";
 
 const isPositron = tryAcquirePositronApi();
 
@@ -176,7 +177,9 @@ class RunCurrentCellCommand extends RunCommand implements Command {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
         const code = codeWithoutOptionsFromBlock(block);
-        await executeInteractive(executor, [code], editor.document);
+        const ranges = [toVscodeRange(block.range)];
+        const metadata = cellMetadataForBlock(block);
+        await executeInteractive(executor, [code], editor.document, ranges, metadata ? [metadata] : undefined);
       }
     }
   }
@@ -305,7 +308,8 @@ class RunCurrentCommand extends RunCommand implements Command {
 
       if (resolveToRunCell) {
         const code = codeWithoutOptionsFromBlock(block);
-        await executeInteractive(executor, [code], editor.document);
+        const metadata = cellMetadataForBlock(block);
+        await executeInteractive(executor, [code], editor.document, undefined, metadata ? [metadata] : undefined);
       } else {
         // submit
         const executed = await executeSelectionInteractive(executor);
@@ -353,31 +357,29 @@ class RunCurrentCommand extends RunCommand implements Command {
       if (activeBlock && selection.length <= 0) {
         const codeLines = lines(activeBlock.code);
         const vdoc = virtualDocForCode(codeLines, embeddedLanguage(activeBlock.language)!);
-        if (vdoc) {
-          const parentUri = Uri.file(editor.document.fileName);
-          const injectedLines = (vdoc.language?.inject?.length ?? 0);
+        const parentUri = Uri.file(editor.document.fileName);
+        const injectedLines = (vdoc.language?.inject?.length ?? 0);
 
-          const positionIntoVdoc = (p: LineAndCharPos) =>
-            new Position(p.line + injectedLines, p.character);
-          const positionOutOfVdoc = (p: LineAndCharPos) =>
-            new Position(p.line - injectedLines, p.character);
+        const positionIntoVdoc = (p: LineAndCharPos) =>
+          new Position(p.line + injectedLines, p.character);
+        const positionOutOfVdoc = (p: LineAndCharPos) =>
+          new Position(p.line - injectedLines, p.character);
 
-          const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-          if (executor) {
-            const nextStatementPos = await withVirtualDocUri(
-              vdoc,
-              parentUri,
-              "executeSelectionAtPositionInteractive",
-              (uri) => executeAtPositionInteractive(
-                executor,
-                uri,
-                positionIntoVdoc(context.selection.start)
-              )
-            );
+        const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
+        if (executor) {
+          const nextStatementPos = await withVirtualDocUri(
+            vdoc,
+            parentUri,
+            "executeSelectionAtPositionInteractive",
+            (uri) => executeAtPositionInteractive(
+              executor,
+              uri,
+              positionIntoVdoc(context.selection.start)
+            )
+          );
 
-            if (nextStatementPos !== undefined) {
-              await editor.setBlockSelection(context, positionOutOfVdoc(nextStatementPos));
-            }
+          if (nextStatementPos !== undefined) {
+            await editor.setBlockSelection(context, positionOutOfVdoc(nextStatementPos));
           }
         }
       }
@@ -499,16 +501,22 @@ class RunCellsAboveCommand extends RunCommand implements Command {
 
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        // accumulate code
+        // accumulate code, ranges, and metadata
         const code: string[] = [];
-        for (const block of blocks.filter(
+        const ranges: Range[] = [];
+        const metadata: (Record<string, unknown> | undefined)[] = [];
+        for (const blk of blocks.filter(
           isExecutableLanguageBlockOf(language)
-        )) {
-          code.push(codeWithoutOptionsFromBlock(block));
+        ) as Array<TokenMath | TokenCodeBlock>) {
+          code.push(codeWithoutOptionsFromBlock(blk));
+          metadata.push(cellMetadataForBlock(blk));
+          ranges.push(toVscodeRange(blk.range));
         }
 
-        // execute
-        await executeInteractive(executor, code, editor.document);
+        // execute (only pass ranges if we collected the same number as code blocks)
+        const validRanges = ranges.length === code.length ? ranges : undefined;
+        const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
+        await executeInteractive(executor, code, editor.document, validRanges, validMetadata);
       }
     }
   }
@@ -558,9 +566,11 @@ class RunCellsBelowCommand extends RunCommand implements Command {
       : undefined;
 
     const blocks: string[] = [];
+    const ranges: Range[] = [];
+    const metadata: (Record<string, unknown> | undefined)[] = [];
     for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
       // skip if the cell is above or at the cursor
-      if (line < blk.range.start.line) {
+      if (blk.range && line < blk.range.start.line) {
         // set language if needed
         const blockLanguage = languageNameFromBlock(blk);
         if (!language) {
@@ -569,14 +579,18 @@ class RunCellsBelowCommand extends RunCommand implements Command {
         // include blocks of this language
         if (blockLanguage === language) {
           blocks.push(codeWithoutOptionsFromBlock(blk));
+          ranges.push(toVscodeRange(blk.range));
+          metadata.push(cellMetadataForBlock(blk));
         }
       }
     }
-    // execute
+    // execute (only pass ranges if we collected the same number as code blocks)
     if (language && blocks.length > 0) {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        await executeInteractive(executor, blocks, editor.document);
+        const validRanges = ranges.length === blocks.length ? ranges : undefined;
+        const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
+        await executeInteractive(executor, blocks, editor.document, validRanges, validMetadata);
       }
     }
   }
@@ -622,19 +636,26 @@ class RunAllCellsCommand extends RunCommand implements Command {
   ) {
     let language: string | undefined;
     const blocks: string[] = [];
-    for (const block of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
-      const blockLanguage = languageNameFromBlock(block);
+    const ranges: Range[] = [];
+    const metadata: (Record<string, unknown> | undefined)[] = [];
+    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
+      const blockLanguage = languageNameFromBlock(blk);
       if (!language) {
         language = blockLanguage;
       }
       if (blockLanguage === language) {
-        blocks.push(codeWithoutOptionsFromBlock(block));
+        blocks.push(codeWithoutOptionsFromBlock(blk));
+        metadata.push(cellMetadataForBlock(blk));
+        ranges.push(toVscodeRange(blk.range));
       }
     }
     if (language && blocks.length > 0) {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        await executeInteractive(executor, blocks, editor.document);
+        // only pass ranges if we collected the same number as code blocks
+        const validRanges = ranges.length === blocks.length ? ranges : undefined;
+        const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
+        await executeInteractive(executor, blocks, editor.document, validRanges, validMetadata);
       }
     }
   }
@@ -727,7 +748,9 @@ async function runAdjacentBlock(host: ExtensionHost, editor: TextEditor, engine:
   const language = languageNameFromBlock(block);
   const executor = await host.cellExecutorForLanguage(language, editor.document, engine);
   if (executor) {
-    await executeInteractive(executor, [codeWithoutOptionsFromBlock(block)], editor.document);
+    const ranges = [toVscodeRange(block.range)];
+    const metadata = cellMetadataForBlock(block);
+    await executeInteractive(executor, [codeWithoutOptionsFromBlock(block)], editor.document, ranges, metadata ? [metadata] : undefined);
   }
 }
 
@@ -787,4 +810,12 @@ async function activateIfRequired(editor: QuartoVisualEditor) {
   if (!(await editor.hasFocus())) {
     await editor.activate();
   }
+}
+
+/** Convert a plain LSP-style range to a VS Code Range instance. */
+function toVscodeRange(range: LSRange): Range {
+  return new Range(
+    new Position(range.start.line, range.start.character),
+    new Position(range.end.line, range.end.character)
+  );
 }

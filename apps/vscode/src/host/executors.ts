@@ -13,7 +13,7 @@
  *
  */
 
-import { Uri, commands, window, extensions } from "vscode";
+import { Uri, commands, window, extensions, Range } from "vscode";
 
 import semver from "semver";
 import { TextDocument } from "vscode";
@@ -25,9 +25,10 @@ import { JupyterKernelspec } from "core";
 import { Position } from "vscode";
 
 export interface CellExecutor {
-  execute: (blocks: string[], editorUri?: Uri) => Promise<void>;
+  execute: (blocks: string[], editorUri?: Uri, executionMetadata?: Record<string, unknown>[]) => Promise<void>;
   executeSelection?: () => Promise<void>;
   executeAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
+  executeInlineCells?: (documentUri: Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]) => Promise<void>;
 }
 
 export function executableLanguages() {
@@ -153,7 +154,11 @@ const csharpCellExecutor: VSCodeCellExecutor = {
 const bashCellExecutor: VSCodeCellExecutor = {
   language: "bash",
   execute: async (blocks: string[]) => {
-    const terminal = window.activeTerminal || window.createTerminal();
+    // todo: this should probably check that the terminal isn't an interactive terminal for languages
+    // other than R as well...
+    const terminal = window.activeTerminal && window.activeTerminal?.name !== 'R Interactive' ?
+      window.activeTerminal : window.createTerminal();
+
     terminal.show();
     terminal.sendText(blocks.join("\n"));
   },
@@ -283,7 +288,7 @@ export async function ensureRequiredExtension(
       }
     }
   } else {
-    return false;
+    return true;
   }
 }
 

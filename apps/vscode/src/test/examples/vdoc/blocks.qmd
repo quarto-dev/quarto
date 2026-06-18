@@ -1,0 +1,26 @@
+---
+title: "Test all blocks for language at position"
+format: html
+---
+
+## Header
+
+```{python}
+1 + 1
+```
+
+```{python}
+2 + 2
+```
+
+```{r}
+3 + 3
+```
+
+```{python}
+4 + 4
+```
+
+```{r}
+5 + 5
+```

@@ -18,11 +18,12 @@ import vscode, { DocumentSelector, Disposable, WebviewPanelOptions, WebviewOptio
 
 import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument } from "./executors";
 import { EditorToolbarProvider } from "./toolbar";
-import { hasHooks, hooksExtensionHost } from "./hooks";
+import { positronExtensionHost } from "./positron";
 import { TextDocument } from "vscode";
 import { MarkdownEngine } from "../markdown/engine";
 import { WebviewPanel } from "vscode";
 import { ViewColumn } from "vscode";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 export type { CellExecutor };
 export type { EditorToolbarProvider, ToolbarItem, ToolbarCommand, ToolbarButton, ToolbarMenu } from './toolbar';
@@ -58,7 +59,7 @@ export interface HostHelpTopicProvider {
 
 /**
  * There are currently two extension hosts:
- * - [`hooksExtensionHost`](./hooks.ts) for Positron
+ * - [`positronExtensionHost`](./positron.ts) for Positron
  * - [`defaultExtensionHost`](./index.ts) otherwise
  */
 export interface ExtensionHost {
@@ -99,8 +100,8 @@ export interface ExtensionHost {
 }
 
 export function extensionHost(): ExtensionHost {
-  if (hasHooks()) {
-    return hooksExtensionHost();
+  if (tryAcquirePositronApi()) {
+    return positronExtensionHost();
   } else {
     return defaultExtensionHost();
   }

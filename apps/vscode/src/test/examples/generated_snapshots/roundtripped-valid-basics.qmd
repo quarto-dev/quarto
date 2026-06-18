@@ -1,6 +1,6 @@
--   Item one
--   Item two
--   Item three
+- Item one
+- Item two
+- Item three
 
 This is `inline code` text
 

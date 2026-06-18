@@ -91,7 +91,7 @@ function langCommentChars(lang: string): string[] {
     return chars;
   }
 }
-function optionCommentPattern(comment: string) {
+export function optionCommentPattern(comment: string) {
   return new RegExp("^" + escapeRegExp(comment) + "\\s*\\| ?");
 }
 

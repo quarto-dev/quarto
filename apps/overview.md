@@ -89,6 +89,27 @@ out the extension there are a couple of places where your logs can end up:
     that says EXTENSION HOST.
 - `Quarto` output console for [[LSP]] code
 
+### LSP Log Levels
+
+The `quarto.server.logLevel` setting controls **LSP server** logs (from `apps/lsp/`):
+- `"trace"` - Most verbose, includes all requests/notifications
+- `"debug"` - Debug information
+- `"info"` - Informational messages
+- `"warn"` - Warnings only (default)
+- `"error"` - Errors only
+- `"off"` - No logging
+
+When debugging the LSP, you may need to set `"quarto.server.logLevel": "info"` or `"trace"` in your user settings to see detailed LSP logs in the Quarto output channel.
+
+Available logging methods in the LSP (in `apps/lsp/`):
+- `logger.logTrace()` - Only appears at trace level
+- `logger.logDebug()` - Appears at debug level and below
+- `logger.logInfo()` - Appears at info level and below
+- `logger.logWarn()` - Appears at warn level and below (use for important debug messages during development)
+- `logger.logError()` - Always appears unless logging is off
+
+Note: Extension host code (in `apps/vscode/src/`) uses `outputChannel.info()`, `outputChannel.warn()`, etc. for logging (e.g., "Activated Quarto extension."). These logs appear in the same Quarto output channel but are not controlled by the `quarto.server.logLevel` setting.
+
 ## Examples of Controlling the Visual Editor from the server-side of the extension
 
 ### Example: Setting cursor position
@@ -164,7 +185,7 @@ in [client.ts](./vscode/src/lsp/client.ts)
 ### Example: Positron Specific - Help Topic & Statement Range
 
 `EmbeddedStatementRangeProvider` or `EmbeddedHelpTopicProvider` in
-[hooks.ts](./vscode/src/host/hooks.ts)
+[positron.ts](./vscode/src/host/positron.ts)
 
 - simply executes the command "vscode.executeStatementRangeProvider" or
   "positron.executeHelpTopicProvider" respectively inside a virtual doc for a

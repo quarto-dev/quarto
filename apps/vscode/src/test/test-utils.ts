@@ -2,6 +2,7 @@ import { DisposableStore } from "core";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
+import { deleteDocument } from "../vdoc/vdoc-tempfile";
 
 
 /**
@@ -69,22 +70,26 @@ export async function openAndShowUri(
  * the `teardown` hook.
  */
 export async function openAndShowUniqueExamplesDocument(fileName: string, disposables: DisposableStore) {
-  const uri = uniqueExamplesUri(fileName, disposables);
-  return openAndShowUri(uri);
+  const doc = await openUniqueExamplesDocument(fileName, disposables);
+  const editor = await vscode.window.showTextDocument(doc);
+  return { doc, editor };
 }
 
-export function uniqueExamplesUri(fileName: string, disposables: DisposableStore) {
+export async function openUniqueExamplesDocument(fileName: string, disposables: DisposableStore) {
   const sourceUri = examplesUri(fileName);
   const extension = path.extname(fileName);
   const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
   const uniqueUri = vscode.Uri.joinPath(sourceUri, "..", uniqueName);
 
-  // Ensure that the copy is deleted on dispose (usually, on test `teardown`).
-  disposables.add({ dispose: () => fs.rmSync(uniqueUri.fsPath, { force: true }) });
+  /**
+   * Ensure that the copy is deleted on dispose (usually, on test `teardown`).
+   * See the notes in {@link deleteDocument} for why we have to use that function.
+   */
+  disposables.add({ dispose: () => deleteDocument(doc) });
 
   fs.copyFileSync(sourceUri.fsPath, uniqueUri.fsPath);
-
-  return uniqueUri;
+  const doc = await vscode.workspace.openTextDocument(uniqueUri);
+  return doc;
 }
 
 export const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;

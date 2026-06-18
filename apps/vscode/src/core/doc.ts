@@ -243,6 +243,16 @@ export function findQuartoEditor(
     filter(editor.notebook.cellAt(0)?.document)
   );
   if (visibleNotebookEditor) {
+    // NOTE: We used to get the text document belonging to the first item in
+    //  `vscode.window.visibleTextEditors` whose URI matched the notebook.
+    //  However, there was a bug where cells would stop appearing in
+    //  `visibleTextEditors` when the Panel or Sidebar were open. Now we
+    //  arbitrarily use the first cell's document. This is ok because,
+    //  for notebooks, the rest of this extension only requires that
+    //  `QuartoEditor.document` belongs to any cell in the notebook.
+    //  A better longer-term solution would be to *not* require a text
+    //  document for notebook `QuartoEditor`s and expose the required
+    //  information (e.g. `document.uri`) in another way.
     const firstCellDocument = visibleNotebookEditor.notebook.cellAt(0).document;
     return quartoNotebookEditor(visibleNotebookEditor, firstCellDocument);
   }

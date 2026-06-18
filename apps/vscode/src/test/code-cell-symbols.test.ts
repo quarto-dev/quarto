@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { openUniqueExampleDocument, wait } from "./test-utils";
+import { openAndShowUniqueExamplesDocument, wait } from "./test-utils";
 import { DisposableStore } from "core";
 
 /**
@@ -112,7 +112,7 @@ suite("Code Cell Symbols", function () {
     ));
     await wait(100);
 
-    const { doc } = await openUniqueExampleDocument("format/basics.qmd", disposables);
+    const { doc } = await openAndShowUniqueExamplesDocument("format/basics.qmd", disposables);
     await wait(800);
 
     const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
@@ -145,7 +145,7 @@ suite("Code Cell Symbols", function () {
     ));
     await wait(100);
 
-    const { doc } = await openUniqueExampleDocument("format/basics.qmd", disposables);
+    const { doc } = await openAndShowUniqueExamplesDocument("format/basics.qmd", disposables);
     await wait(800);
 
     const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
@@ -176,7 +176,7 @@ suite("Code Cell Symbols", function () {
     ));
     await wait(100);
 
-    const { doc } = await openUniqueExampleDocument("format/basics.qmd", disposables);
+    const { doc } = await openAndShowUniqueExamplesDocument("format/basics.qmd", disposables);
     await wait(800);
 
     const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(

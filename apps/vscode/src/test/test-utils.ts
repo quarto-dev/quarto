@@ -52,8 +52,8 @@ export async function openAndShowUri(
 }
 
 /**
- * Opens a unique on-disk copy of an example file and registers a callback
- * with a disposable store to delete the copy.
+ * Creates a unique on-disk copy of an example file and registers a callback
+ * with a disposable store to delete the copy on dispose.
  *
  * Use this instead of `openAndShowExamplesTextDocument` when a test exercises a
  * provider command that caches results per document URI, such as
@@ -68,7 +68,12 @@ export async function openAndShowUri(
  * behavior (LSP, configuration) is preserved. Always dispose `disposables` in
  * the `teardown` hook.
  */
-export async function openUniqueExampleDocument(fileName: string, disposables: DisposableStore) {
+export async function openAndShowUniqueExamplesDocument(fileName: string, disposables: DisposableStore) {
+  const uri = uniqueExamplesUri(fileName, disposables);
+  return openAndShowExamplesTextDocument(uri.fsPath);
+}
+
+export function uniqueExamplesUri(fileName: string, disposables: DisposableStore) {
   const sourcePath = path.join(WORKSPACE_PATH, fileName);
   const extension = path.extname(fileName);
   const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
@@ -79,11 +84,7 @@ export async function openUniqueExampleDocument(fileName: string, disposables: D
 
   fs.copyFileSync(sourcePath, uniquePath);
 
-  const { doc, editor } = await openAndShowUri(vscode.Uri.file(uniquePath));
-  return {
-    doc,
-    editor,
-  };
+  return vscode.Uri.file(uniquePath);
 }
 
 export const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;

@@ -34,7 +34,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
-import { isInlineOutputEnabled } from "./host/hooks";
+import { isInlineOutputEnabled } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";

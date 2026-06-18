@@ -538,21 +538,3 @@ function unadjustSymbolRanges(
     };
   });
 }
-
-/**
- * Creates a diagnostic handler middleware that filters out diagnostics from virtual documents
- *
- * @returns A handler function for the middleware
- */
-export function createDiagnosticFilter() {
-  return (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
-    // If this is not a virtual document, pass through all diagnostics
-    if (!isVirtualDoc(uri)) {
-      next(uri, diagnostics);
-      return;
-    }
-
-    // For virtual documents, filter out all diagnostics
-    next(uri, []);
-  };
-}

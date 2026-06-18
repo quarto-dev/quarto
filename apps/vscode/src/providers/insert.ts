@@ -22,8 +22,8 @@ import {
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { hooksApi } from "../host/hooks";
 import { isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 
 export function insertCommands(engine: MarkdownEngine): Command[] {
@@ -102,7 +102,7 @@ class InsertCodeCellCommand implements Command {
         // if no language found in document, fall back to Positron's active runtime
         const languages = ['python', 'r', 'julia', 'ojs', 'sql', 'bash', 'mermaid', 'dot'];
         if (!language) {
-          const session = await hooksApi()?.runtime.getForegroundSession();
+          const session = await tryAcquirePositronApi()?.runtime.getForegroundSession();
           const sessionLang = session?.runtimeMetadata.languageId ?? "";
           if (languages.includes(sessionLang)) {
             language = sessionLang;

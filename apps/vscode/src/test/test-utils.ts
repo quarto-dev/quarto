@@ -70,21 +70,21 @@ export async function openAndShowUri(
  */
 export async function openAndShowUniqueExamplesDocument(fileName: string, disposables: DisposableStore) {
   const uri = uniqueExamplesUri(fileName, disposables);
-  return openAndShowExamplesTextDocument(uri.fsPath);
+  return openAndShowUri(uri);
 }
 
 export function uniqueExamplesUri(fileName: string, disposables: DisposableStore) {
-  const sourcePath = path.join(WORKSPACE_PATH, fileName);
+  const sourceUri = examplesUri(fileName);
   const extension = path.extname(fileName);
   const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
-  const uniquePath = path.join(path.dirname(sourcePath), uniqueName);
+  const uniqueUri = vscode.Uri.joinPath(sourceUri, "..", uniqueName);
 
   // Ensure that the copy is deleted on dispose (usually, on test `teardown`).
-  disposables.add({ dispose: () => fs.rmSync(uniquePath, { force: true }) });
+  disposables.add({ dispose: () => fs.rmSync(uniqueUri.fsPath, { force: true }) });
 
-  fs.copyFileSync(sourcePath, uniquePath);
+  fs.copyFileSync(sourceUri.fsPath, uniqueUri.fsPath);
 
-  return vscode.Uri.file(uniquePath);
+  return uniqueUri;
 }
 
 export const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;

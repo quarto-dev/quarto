@@ -59,7 +59,7 @@ export interface HostHelpTopicProvider {
 
 /**
  * There are currently two extension hosts:
- * - [`positronExtensionHost`](./hooks.ts) for Positron
+ * - [`positronExtensionHost`](./positron.ts) for Positron
  * - [`defaultExtensionHost`](./index.ts) otherwise
  */
 export interface ExtensionHost {

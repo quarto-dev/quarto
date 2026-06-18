@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
 import { openUniqueExampleDocument, wait } from "./test-utils";
+import { DisposableStore } from "core";
 
 /**
  * Creates a fake document symbol provider that returns DocumentSymbol[] for virtual docs.
@@ -69,6 +70,8 @@ function flattenSymbolNames(symbols: vscode.DocumentSymbol[]): string[] {
 }
 
 suite("Code Cell Symbols", function () {
+  const disposables = new DisposableStore();
+
   setup(async function () {
     await vscode.workspace
       .getConfiguration("quarto")
@@ -77,6 +80,7 @@ suite("Code Cell Symbols", function () {
   });
 
   teardown(async function () {
+    disposables.clear();
     await vscode.workspace
       .getConfiguration("quarto")
       .update("symbols.showCodeCellsInOutline", undefined);
@@ -102,106 +106,88 @@ suite("Code Cell Symbols", function () {
 
     // Register BEFORE opening the document
     // Use both scheme and language like the formatting tests
-    const provider = vscode.languages.registerDocumentSymbolProvider(
+    disposables.add(vscode.languages.registerDocumentSymbolProvider(
       { scheme: "file", pattern: "**/.vdoc.*" },
       createFakeDocumentSymbolProvider(fakeSymbols)
-    );
+    ));
     await wait(100);
 
-    const { doc, cleanup } = await openUniqueExampleDocument("format/basics.qmd");
-    try {
-      await wait(800);
+    const { doc } = await openUniqueExampleDocument("format/basics.qmd", disposables);
+    await wait(800);
 
-      const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-        "vscode.executeDocumentSymbolProvider",
-        doc.uri
-      );
+    const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+      "vscode.executeDocumentSymbolProvider",
+      doc.uri
+    );
 
-      const names = flattenSymbolNames(symbols);
-      assert.ok(
-        names.includes("my_function"),
-        `Expected 'my_function' in symbols, got: ${names.join(", ")}`
-      );
-      assert.ok(
-        names.includes("my_variable"),
-        `Expected 'my_variable' in symbols, got: ${names.join(", ")}`
-      );
-      assert.ok(
-        names.includes("(code cell)"),
-        `Expected '(code cell)' in symbols, got: ${names.join(", ")}`
-      );
-    } finally {
-      provider.dispose();
-      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-      cleanup();
-    }
+    const names = flattenSymbolNames(symbols);
+    assert.ok(
+      names.includes("my_function"),
+      `Expected 'my_function' in symbols, got: ${names.join(", ")}`
+    );
+    assert.ok(
+      names.includes("my_variable"),
+      `Expected 'my_variable' in symbols, got: ${names.join(", ")}`
+    );
+    assert.ok(
+      names.includes("(code cell)"),
+      `Expected '(code cell)' in symbols, got: ${names.join(", ")}`
+    );
   });
 
   test("handles SymbolInformation[] from embedded provider", async function () {
     const symbolNames = ["info_function", "info_class"];
 
     // Register BEFORE opening the document
-    const provider = vscode.languages.registerDocumentSymbolProvider(
+    disposables.add(vscode.languages.registerDocumentSymbolProvider(
       { scheme: "file", pattern: "**/.vdoc.*" },
       createFakeSymbolInformationProvider(symbolNames)
-    );
+    ));
     await wait(100);
 
-    const { doc, cleanup } = await openUniqueExampleDocument("format/basics.qmd");
-    try {
-      await wait(800);
+    const { doc } = await openUniqueExampleDocument("format/basics.qmd", disposables);
+    await wait(800);
 
-      const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-        "vscode.executeDocumentSymbolProvider",
-        doc.uri
-      );
+    const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+      "vscode.executeDocumentSymbolProvider",
+      doc.uri
+    );
 
-      const names = flattenSymbolNames(symbols);
-      assert.ok(
-        names.includes("(code cell)"),
-        `Expected '(code cell)' in symbols, got: ${names.join(", ")}`
-      );
-      assert.ok(
-        names.includes("info_function"),
-        `Expected 'info_function' in symbols, got: ${names.join(", ")}`
-      );
-      assert.ok(
-        names.includes("info_class"),
-        `Expected 'info_class' in symbols, got: ${names.join(", ")}`
-      );
-    } finally {
-      provider.dispose();
-      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-      cleanup();
-    }
+    const names = flattenSymbolNames(symbols);
+    assert.ok(
+      names.includes("(code cell)"),
+      `Expected '(code cell)' in symbols, got: ${names.join(", ")}`
+    );
+    assert.ok(
+      names.includes("info_function"),
+      `Expected 'info_function' in symbols, got: ${names.join(", ")}`
+    );
+    assert.ok(
+      names.includes("info_class"),
+      `Expected 'info_class' in symbols, got: ${names.join(", ")}`
+    );
   });
 
   test("handles undefined from embedded provider without error", async function () {
     // Register BEFORE opening the document
-    const provider = vscode.languages.registerDocumentSymbolProvider(
+    disposables.add(vscode.languages.registerDocumentSymbolProvider(
       { scheme: "file", pattern: "**/.vdoc.*" },
       createUndefinedSymbolProvider()
-    );
+    ));
     await wait(100);
 
-    const { doc, cleanup } = await openUniqueExampleDocument("format/basics.qmd");
-    try {
-      await wait(800);
+    const { doc } = await openUniqueExampleDocument("format/basics.qmd", disposables);
+    await wait(800);
 
-      const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-        "vscode.executeDocumentSymbolProvider",
-        doc.uri
-      );
+    const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+      "vscode.executeDocumentSymbolProvider",
+      doc.uri
+    );
 
-      const names = flattenSymbolNames(symbols);
-      assert.ok(
-        names.includes("(code cell)"),
-        `Expected '(code cell)' to still appear even when embedded provider returns undefined, got: ${names.join(", ")}`
-      );
-    } finally {
-      provider.dispose();
-      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
-      cleanup();
-    }
+    const names = flattenSymbolNames(symbols);
+    assert.ok(
+      names.includes("(code cell)"),
+      `Expected '(code cell)' to still appear even when embedded provider returns undefined, got: ${names.join(", ")}`
+    );
   });
 });

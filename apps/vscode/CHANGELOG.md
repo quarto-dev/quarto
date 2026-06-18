@@ -7,6 +7,7 @@
 - Fixed a bug where formatting a code cell stripped leading empty lines. Leading empty lines between option directives and code are now preserved, and two or more leading empty lines are collapsed to one (<https://github.com/quarto-dev/quarto/pull/953>).
 - Fixed a bug where IPython magics (`%`, `%%`) and shell escapes (`!`) in Python code cells produced spurious diagnostics from language servers like Pyrefly and Ruff. These lines are now commented out in the virtual document handed to language servers (<https://github.com/quarto-dev/quarto/pull/1013>).
 - The "Render Document" command is now available in the Positron Notebook Editor (<https://github.com/quarto-dev/quarto/pull/1002>).
+- Fixed notebooks failing to render or preview when they were visible but not active, or while the Panel or Sidebar were open (<https://github.com/quarto-dev/quarto/pull/1007>).
 
 ## 1.133.0 (Release on 2026-06-03)
 

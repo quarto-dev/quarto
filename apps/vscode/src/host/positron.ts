@@ -37,7 +37,7 @@ export function isInlineOutputEnabled(): boolean {
     .get<boolean>("enabled", false);
 }
 
-export function positronExtensionHost(): ExtensionHost {
+export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
   return {
     // supported executable languages (we delegate to the default for langugaes
     // w/o runtimes so we support all languages)
@@ -68,18 +68,52 @@ export function positronExtensionHost(): ExtensionHost {
               const callback = async () => {
                 for (let i = 0; i < blocks.length; i++) {
                   const metadata = executionMetadata?.[i];
-                  await runtime.executeCode(
-                    language,   // The language ID
-                    blocks[i],  // The code string to execute
-                    false,      // Whether to focus the console
-                    true,       // Whether to allow incomplete code to run
-                    undefined,  // The execution mode
-                    undefined,  // The error behavior
-                    undefined,  // An optional observer
-                    undefined,  // The specific session ID in which to execute
-                    editorUri,  // The document URI
-                    metadata
-                  );
+
+                  // Track whether the runtime itself reported the failure. A
+                  // failure of the running code (a runtime error or syntax
+                  // error in the cell), an interrupt, or the session exiting are
+                  // all delivered through the execution observer's `onFailed`
+                  // callback before `executeCode` rejects. These are already
+                  // surfaced in the console, so we don't want to surface them
+                  // again. A rejection *without* `onFailed` having fired means
+                  // the code couldn't be submitted to the runtime at all (e.g.
+                  // no runtime is registered for the language), which is a
+                  // genuine problem worth reporting.
+                  let runtimeFailure = false;
+
+                  try {
+                    await runtime.executeCode(
+                      language,   // The language ID
+                      blocks[i],  // The code string to execute
+                      false,      // Whether to focus the console
+                      true,       // Whether to allow incomplete code to run
+                      undefined,  // The execution mode
+                      undefined,  // The error behavior
+                      { onFailed: () => { runtimeFailure = true; } }, // An execution observer
+                      undefined,  // The specific session ID in which to execute
+                      editorUri,  // The document URI
+                      metadata
+                    );
+                  } catch (err) {
+                    const message = err instanceof Error ? err.message : JSON.stringify(err);
+
+                    if (!runtimeFailure) {
+                      // The code couldn't be submitted to the runtime. Log it
+                      // and let it propagate so the user finds out.
+                      outputChannel?.error(`Failed to execute ${language} cell: ${message}`);
+                      throw err;
+                    }
+
+                    // The executed code raised an error (or was interrupted).
+                    // It's already reported in the console, so log it for the
+                    // record but don't let it propagate to the command handler,
+                    // which would surface it again as a notification popup.
+                    // https://github.com/posit-dev/positron/issues/9845
+                    outputChannel?.debug(`Error executing ${language} cell: ${message}`);
+
+                    // Stop executing any subsequent blocks since one failed.
+                    break;
+                  }
                 }
               };
 

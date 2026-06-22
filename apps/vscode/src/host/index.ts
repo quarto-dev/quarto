@@ -99,9 +99,9 @@ export interface ExtensionHost {
 
 }
 
-export function extensionHost(): ExtensionHost {
+export function extensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
   if (tryAcquirePositronApi()) {
-    return positronExtensionHost();
+    return positronExtensionHost(outputChannel);
   } else {
     return defaultExtensionHost();
   }

@@ -1506,7 +1506,7 @@
     "editor-core": "*",
     "editor-server": "*",
     "editor-types": "*",
-    "glob": "^11.0.3",
+    "glob": "^13.0.6",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",

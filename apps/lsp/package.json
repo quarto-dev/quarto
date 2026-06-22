@@ -16,7 +16,7 @@
     "core-node": "*",
     "editor-server": "*",
     "file-url": "^4.0.0",
-    "glob": "^10.2.5",
+    "glob": "^13.0.6",
     "js-yaml": "^4.1.0",
     "node-html-parser": "^6.1.5",
     "picomatch": "^2.3.1",

@@ -67,7 +67,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   outputChannel.info("Activating Quarto extension.");
 
   // create extension host
-  const host = extensionHost();
+  const host = extensionHost(outputChannel);
 
   // create markdown engine
   const engine = new MarkdownEngine();

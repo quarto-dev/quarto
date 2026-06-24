@@ -80,6 +80,8 @@ export async function openUniqueExamplesDocument(fileName: string, disposables: 
   const extension = path.extname(fileName);
   const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
   const uniqueUri = vscode.Uri.joinPath(sourceUri, "..", uniqueName);
+  fs.copyFileSync(sourceUri.fsPath, uniqueUri.fsPath);
+  const doc = await vscode.workspace.openTextDocument(uniqueUri);
 
   /**
    * Ensure that the copy is deleted on dispose (usually, on test `teardown`).
@@ -87,8 +89,6 @@ export async function openUniqueExamplesDocument(fileName: string, disposables: 
    */
   disposables.add({ dispose: () => deleteDocument(doc) });
 
-  fs.copyFileSync(sourceUri.fsPath, uniqueUri.fsPath);
-  const doc = await vscode.workspace.openTextDocument(uniqueUri);
   return doc;
 }
 

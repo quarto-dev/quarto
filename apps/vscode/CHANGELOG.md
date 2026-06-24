@@ -1,6 +1,8 @@
 # Changelog
 
-## 1.134.0 (Unreleased)
+## 1.135.0 (Unreleased)
+
+## 1.134.0 (Release on 2026-06-22)
 
 - The "Preview" and "Preview Format..." commands now show in the Positron Notebook Editor overflow menu (<https://github.com/quarto-dev/quarto/pull/1001>).
 - In Positron, Jupyter Notebooks (`.ipynb`) are now exported via the new unified "Export" command, rather than the "Quarto: Convert to .qmd" command (<https://github.com/quarto-dev/quarto/pull/999>).

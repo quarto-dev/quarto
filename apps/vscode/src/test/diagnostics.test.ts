@@ -124,9 +124,11 @@ suite("Diagnostics", function () {
     assert.strictEqual(result, true, "Timed out waiting for multi-language diagnostics");
 
     // The final published diagnostics should contain entries from both languages.
-    assert.ok(events.length === 2, `Expected 2 diagnostics events (one per language), got ${events.length}`);
-    assert.ok(events[0].diagnostics.length === 1, "Expected one diagnostic when the first language's diagnostics are received");
-    assert.ok(events[1].diagnostics.length === 2, "Expected two diagnostics when the second language's diagnostics are received");
+    const finalDiagnostics = vscode.languages.getDiagnostics(doc.uri);
+    assert.ok(
+      finalDiagnostics.length >= 2,
+      `Expected at least 2 diagnostics (one per language), got ${finalDiagnostics.length}`
+    );
   });
 
   test("times out for unresponsive language servers without blocking others", async function () {

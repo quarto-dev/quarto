@@ -728,7 +728,7 @@
       "editor/title/run": [
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "(editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor') && !quartoCanUsePositronPreviewSplitButton"
         },
         {
           "command": "quarto.previewScript",

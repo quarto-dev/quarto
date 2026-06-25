@@ -15,6 +15,7 @@
 
 import * as vscode from "vscode";
 import debounce from "lodash.debounce";
+import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
@@ -43,6 +44,9 @@ export function activateContextKeySetter(
   // set the initial context keys
   setEditorContextKeys(vscode.window.activeTextEditor, engine);
   setLanguageContextKeys(vscode.window.activeTextEditor, engine);
+
+  // set the Positron preview split-button context key (static for the session)
+  setPositronPreviewSplitButtonContextKey();
 
   // register for quarto.render.renderOnSave or quarto.render.renderOnSaveShiny configuration change notification
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
@@ -116,6 +120,28 @@ export function toggleRenderOnSaveOverride() {
     renderOnSaveShinyOverride = !renderOnSaveShinyOverride;
     vscode.commands.executeCommand<boolean>('setContext', 'quarto.editor.renderOnSaveShiny', renderOnSaveShinyOverride);
   }
+}
+
+// Positron 2026.07.0+ provides a native Preview split button on the editor
+// action bar, with per-format preview in its dropdown. When running in such a
+// Positron, this context key lets us hide the extension's own `editor/title/run`
+// Preview button so there is a single button. Gating on the version (rather than
+// a Positron-set feature flag) keeps this temporal logic in the extension; the
+// check and key can be deleted once the supported Positron floor reaches that
+// version.
+//
+// String comparison, not `semver`: calendar versions like "2026.07.0" aren't
+// valid semver (leading zero in the month), but the zero-padded year/month sort
+// correctly lexicographically. This mirrors src/host/positron.ts.
+function setPositronPreviewSplitButtonContextKey() {
+  const positronVersion = tryAcquirePositronApi()?.version;
+  const canUsePositronPreviewSplitButton =
+    positronVersion !== undefined && positronVersion >= "2026.07.0";
+  vscode.commands.executeCommand(
+    "setContext",
+    "quartoCanUsePositronPreviewSplitButton",
+    canUsePositronPreviewSplitButton
+  );
 }
 
 // sets editor context keys

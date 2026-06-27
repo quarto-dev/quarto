@@ -164,7 +164,7 @@ export function preserveEditorFocus(editor?: QuartoEditor) {
   editor =
     editor ||
     (vscode.window.activeTextEditor
-      ? quartoEditor(vscode.window.activeTextEditor)
+      ? quartoTextEditor(vscode.window.activeTextEditor)
       : undefined);
   if (editor) {
     if (!isNotebook(editor?.document)) {
@@ -217,11 +217,9 @@ export function findQuartoEditor(
       | vscode.NotebookDocument
       | undefined;
     if (notebookDocument) {
-      const textEditor = vscode.window.visibleTextEditors.find((editor) => {
-        return editor.document.uri.fsPath.includes(notebookDocument.uri.fsPath);
-      });
-      if (textEditor && filter(textEditor.document)) {
-        return quartoEditor(textEditor, engine, context, notebookDocument);
+      const firstCellDocument = notebookDocument.cellAt(0)?.document;
+      if (firstCellDocument && filter(firstCellDocument)) {
+        return quartoNotebookEditor(notebookEditor, firstCellDocument);
       }
     }
   }
@@ -229,35 +227,53 @@ export function findQuartoEditor(
   // active text editor
   const textEditor = vscode.window.activeTextEditor;
   if (textEditor && filter(textEditor.document)) {
-    return quartoEditor(textEditor, engine, context);
-    // check visible text editors
-  } else if (includeVisible) {
-    // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
-    const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
-    if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
-      return visibleVisualEditor;
-    }
-
-    // visible text editors
-    const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
-      filter(editor.document)
-    );
-    if (visibleEditor) {
-      return quartoEditor(visibleEditor, engine, context);
-    } else {
-      return undefined;
-    }
-  } else {
-    return undefined;
+    return quartoTextEditor(textEditor, engine, context);
   }
+
+  // check visible editors
+
+  // visible visual editor (sometime it loses track of 'active' so we need to use 'visible')
+  const visibleVisualEditor = VisualEditorProvider.activeEditor(true);
+  if (visibleVisualEditor && filter(visibleVisualEditor.document)) {
+    return visibleVisualEditor;
+  }
+
+  // visible notebook editors
+  const visibleNotebookEditor = vscode.window.visibleNotebookEditors.find((editor) =>
+    filter(editor.notebook.cellAt(0)?.document)
+  );
+  if (visibleNotebookEditor) {
+    // NOTE: We used to get the text document belonging to the first item in
+    //  `vscode.window.visibleTextEditors` whose URI matched the notebook.
+    //  However, there was a bug where cells would stop appearing in
+    //  `visibleTextEditors` when the Panel or Sidebar were open. Now we
+    //  arbitrarily use the first cell's document. This is ok because,
+    //  for notebooks, the rest of this extension only requires that
+    //  `QuartoEditor.document` belongs to any cell in the notebook.
+    //  A better longer-term solution would be to *not* require a text
+    //  document for notebook `QuartoEditor`s and expose the required
+    //  information (e.g. `document.uri`) in another way.
+    const firstCellDocument = visibleNotebookEditor.notebook.cellAt(0).document;
+    return quartoNotebookEditor(visibleNotebookEditor, firstCellDocument);
+  }
+
+  // visible text editors
+  const visibleEditor = vscode.window.visibleTextEditors.find((editor) =>
+    filter(editor.document)
+  );
+  if (visibleEditor) {
+    return quartoTextEditor(visibleEditor, engine, context);
+  }
+
+  return undefined;
 }
 
-export function quartoEditor(
+function quartoTextEditor(
   editor: vscode.TextEditor,
   engine?: MarkdownEngine,
   context?: QuartoContext,
   notebook?: NotebookDocument
-) {
+): QuartoEditor {
   return {
     document: editor.document,
     activate: async () => {
@@ -282,6 +298,33 @@ export function quartoEditor(
     viewColumn: editor.viewColumn,
     textEditor: editor,
     notebook,
+  };
+}
+
+function quartoNotebookEditor(
+  editor: vscode.NotebookEditor,
+  firstCellDocument: vscode.TextDocument,
+): QuartoEditor {
+  return {
+    document: firstCellDocument,
+    activate: async () => {
+      // TODO: This should probably use showNotebookDocument.
+      //  And we could probably also activate() notebook editors
+      //  in many places where we currently skip notebooks.
+      //  We're leaving it as showTextDocument for now to minimize
+      //  the number of changes in this PR focused on #1006.
+      await vscode.window.showTextDocument(
+        firstCellDocument,
+        editor.viewColumn,
+        false
+      );
+    },
+    slideIndex: async () => {
+      // Throwing is safe, since the only place slideIndex is called today
+      // skips notebooks.
+      throw new Error("slideIndex not supported for notebook editors");
+    },
+    notebook: editor.notebook,
   };
 }
 

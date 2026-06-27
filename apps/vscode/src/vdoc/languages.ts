@@ -29,6 +29,12 @@ export interface EmbeddedLanguage {
    * created for non-diagnostic actions.
    */
   inject?: string[];
+  /**
+   * Comment out IPython magics (`%`, `%%`) and shell escapes (`!`) in the
+   * virtual document so they don't produce spurious diagnostics from language
+   * servers. Applies to IPython-flavored languages such as Python.
+   */
+  commentMagics?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
 }
@@ -47,6 +53,7 @@ const kEmbededLanguages = [
   defineLanguage("python", {
     inject: ["# type: ignore", "# flake8: noqa"],
     emptyLine: "#",
+    commentMagics: true,
     canFormat: true,
     canFormatDocument: false,
   }),
@@ -99,6 +106,12 @@ interface LanguageOptions {
    * created for non-diagnostic actions.
    */
   inject?: string[];
+  /**
+   * Comment out IPython magics (`%`, `%%`) and shell escapes (`!`) in the
+   * virtual document so they don't produce spurious diagnostics from language
+   * servers. Applies to IPython-flavored languages such as Python.
+   */
+  commentMagics?: boolean;
   canFormat?: boolean;
   canFormatDocument?: boolean;
 }
@@ -129,6 +142,7 @@ function defineLanguage(
     emptyLine: options?.emptyLine,
     trigger: language.trigger,
     inject: options?.inject,
+    commentMagics: options?.commentMagics,
     canFormat: options?.canFormat,
     canFormatDocument: options?.canFormatDocument
   };

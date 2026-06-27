@@ -34,7 +34,7 @@ import { cellOptionsForToken, kExecuteEval } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
 import { executableLanguages } from "../../host/executors";
-import { isInlineOutputEnabled } from "../../host/hooks";
+import { isInlineOutputEnabled } from "../../host/positron";
 import { Position } from "vscode";
 import { Uri } from "vscode";
 
@@ -101,10 +101,10 @@ export async function executeInteractive(
   // If inline output is enabled, the document has a URI, and the executor supports
   // inline execution, use that instead of the standard console execution
   if (isInlineOutputEnabled() &&
-      !document.isUntitled &&
-      ranges &&
-      ranges.length > 0 &&
-      executor.executeInlineCells) {
+    !document.isUntitled &&
+    ranges &&
+    ranges.length > 0 &&
+    executor.executeInlineCells) {
     return await executor.executeInlineCells(document.uri, ranges, metadata);
   }
   return await executor.execute(blocks, !document.isUntitled ? document.uri : undefined, metadata);

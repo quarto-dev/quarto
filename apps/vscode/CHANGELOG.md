@@ -1,11 +1,26 @@
 # Changelog
 
-## 1.133.0 (Unreleased)
+## 1.135.0 (Unreleased)
 
-- Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>)
+- In Positron, running a cell that raises an error no longer results in an error toast message (<https://github.com/posit-dev/positron/issues/9845>).
+
+## 1.134.0 (Release on 2026-06-22)
+
+- The "Preview" and "Preview Format..." commands now show in the Positron Notebook Editor overflow menu (<https://github.com/quarto-dev/quarto/pull/1001>).
+- In Positron, Jupyter Notebooks (`.ipynb`) are now exported via the new unified "Export" command, rather than the "Quarto: Convert to .qmd" command (<https://github.com/quarto-dev/quarto/pull/999>).
+- Fixed a bug where formatting a code cell stripped leading empty lines. Leading empty lines between option directives and code are now preserved, and two or more leading empty lines are collapsed to one (<https://github.com/quarto-dev/quarto/pull/953>).
+- Fixed a bug where IPython magics (`%`, `%%`) and shell escapes (`!`) in Python code cells produced spurious diagnostics from language servers like Pyrefly and Ruff. These lines are now commented out in the virtual document handed to language servers (<https://github.com/quarto-dev/quarto/pull/1013>).
+- The "Render Document" command is now available in the Positron Notebook Editor (<https://github.com/quarto-dev/quarto/pull/1002>).
+- Fixed notebooks failing to render or preview when they were visible but not active, or while the Panel or Sidebar were open (<https://github.com/quarto-dev/quarto/pull/1007>).
+
+## 1.133.0 (Release on 2026-06-03)
+
+- Added diagnostics (i.e. squiggly underlines) to code cells in qmds (<https://github.com/quarto-dev/quarto/pull/980>).
 - Added setting and command to show/hide cells in outline (<https://github.com/quarto-dev/quarto/pull/974>).
 - Added custom pair colorization and highlighting for divs in qmds (<https://github.com/quarto-dev/quarto/pull/973>).
 - Added code symbols into outline (<https://github.com/quarto-dev/quarto/pull/972>).
+- Updated the bundled Mermaid to match what is currently in the Quarto CLI (11.12.0) (<https://github.com/quarto-dev/quarto/pull/986>).
+
 
 ## 1.132.0 (Release on 2026-05-05)
 

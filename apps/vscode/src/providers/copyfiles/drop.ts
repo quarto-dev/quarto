@@ -24,8 +24,6 @@ import * as vscode from 'vscode';
 import * as URI from 'vscode-uri';
 import { Schemes } from '../../core/schemes';
 
-import './types';
-
 export const imageFileExtensions = new Set<string>([
   'bmp',
   'gif',

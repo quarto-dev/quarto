@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.133.0",
+  "version": "1.135.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -696,7 +696,7 @@
         },
         {
           "command": "quarto.convertToQmd",
-          "when": "resourceExtname == .ipynb",
+          "when": "resourceExtname == .ipynb && !quarto.hasNotebookExporter",
           "group": "q_zzConvert"
         },
         {
@@ -711,7 +711,7 @@
         },
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeCustomEditorId == 'quarto.visualEditor'",
           "group": "q_zPreview"
         },
         {
@@ -721,7 +721,7 @@
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
           "group": "q_zPreview"
         }
       ],
@@ -750,7 +750,7 @@
         },
         {
           "command": "quarto.convertToQmd",
-          "when": "resourceExtname == .ipynb",
+          "when": "resourceExtname == .ipynb && !quarto.hasNotebookExporter",
           "group": "q_zzConvert"
         }
       ],
@@ -798,7 +798,7 @@
         },
         {
           "command": "quarto.renderDocument",
-          "when": "editorLangId == quarto ||  editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto ||  editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewScript",
@@ -806,11 +806,11 @@
         },
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
+          "when": "editorLangId == quarto || editorLangId == markdown || resourceExtname == .ipynb || activeEditor == 'workbench.editor.notebook' || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderDocActive"
         },
         {
           "command": "quarto.previewDiagram",
@@ -1500,13 +1500,13 @@
     "test": "yarn build-test && vscode-test"
   },
   "dependencies": {
-    "axios": "^1.2.1",
+    "axios": "^1.16.0",
     "core": "*",
     "core-node": "*",
     "editor-core": "*",
     "editor-server": "*",
     "editor-types": "*",
-    "glob": "^11.0.3",
+    "glob": "^13.0.6",
     "highlight.js": "^11.7.0",
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",
@@ -1516,14 +1516,14 @@
     "nanoid": "^4.0.0",
     "p-queue": "^8.0.1",
     "picomatch": "^2.3.1",
-    "@posit-dev/positron": "^0.1.0",
+    "@posit-dev/positron": "^0.2.4",
     "quarto-core": "*",
     "quarto-lsp": "*",
     "quarto-utils": "*",
     "quarto-vscode-editor": "*",
     "quarto-vscode-markdownit": "*",
     "semver": "^7.3.8",
-    "tmp": "^0.2.1",
+    "tmp": "^0.2.7",
     "uuid": "^9.0.0",
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver-types": "^3.17.3",

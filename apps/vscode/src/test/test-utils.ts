@@ -1,6 +1,8 @@
+import { DisposableStore } from "core";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
+import { deleteDocument } from "../vdoc/vdoc-tempfile";
 
 
 /**
@@ -27,23 +29,32 @@ export function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export async function openAndShowExamplesTextDocument(fileName: string) {
-  return openAndShowUri(examplesUri(fileName));
+export async function openAndShowExamplesTextDocument(
+  fileName: string,
+  showOptions?: vscode.TextDocumentShowOptions
+) {
+  return openAndShowUri(examplesUri(fileName), showOptions);
 }
 
-export async function openAndShowExamplesOutTextDocument(fileName: string) {
-  return openAndShowUri(examplesOutUri(fileName));
+export async function openAndShowExamplesOutTextDocument(
+  fileName: string,
+  showOptions?: vscode.TextDocumentShowOptions
+) {
+  return openAndShowUri(examplesOutUri(fileName), showOptions);
 }
 
-export async function openAndShowUri(uri: vscode.Uri) {
+export async function openAndShowUri(
+  uri: vscode.Uri,
+  showOptions?: vscode.TextDocumentShowOptions
+) {
   const doc = await vscode.workspace.openTextDocument(uri);
-  const editor = await vscode.window.showTextDocument(doc);
+  const editor = await vscode.window.showTextDocument(doc, showOptions);
   return { doc, editor };
 }
 
 /**
- * Opens a unique on-disk copy of an example file and returns it along with a
- * `cleanup` function that deletes the copy.
+ * Creates a unique on-disk copy of an example file and registers a callback
+ * with a disposable store to delete the copy on dispose.
  *
  * Use this instead of `openAndShowExamplesTextDocument` when a test exercises a
  * provider command that caches results per document URI, such as
@@ -55,25 +66,33 @@ export async function openAndShowUri(uri: vscode.Uri) {
  * actually runs.
  *
  * The copy is created alongside the original example file so workspace-relative
- * behavior (LSP, configuration) is preserved. Always call `cleanup()` in a
- * `finally` block.
+ * behavior (LSP, configuration) is preserved. Always dispose `disposables` in
+ * the `teardown` hook.
  */
-export async function openUniqueExampleDocument(fileName: string) {
-  const sourcePath = path.join(WORKSPACE_PATH, fileName);
-  const extension = path.extname(fileName);
-  const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
-  const uniquePath = path.join(path.dirname(sourcePath), uniqueName);
-  fs.copyFileSync(sourcePath, uniquePath);
-
-  const { doc, editor } = await openAndShowUri(vscode.Uri.file(uniquePath));
-  return {
-    doc,
-    editor,
-    cleanup: () => fs.rmSync(uniquePath, { force: true }),
-  };
+export async function openAndShowUniqueExamplesDocument(fileName: string, disposables: DisposableStore) {
+  const doc = await openUniqueExamplesDocument(fileName, disposables);
+  const editor = await vscode.window.showTextDocument(doc);
+  return { doc, editor };
 }
 
-const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
+export async function openUniqueExamplesDocument(fileName: string, disposables: DisposableStore) {
+  const sourceUri = examplesUri(fileName);
+  const extension = path.extname(fileName);
+  const uniqueName = `${path.basename(fileName, extension)}-${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
+  const uniqueUri = vscode.Uri.joinPath(sourceUri, "..", uniqueName);
+  fs.copyFileSync(sourceUri.fsPath, uniqueUri.fsPath);
+  const doc = await vscode.workspace.openTextDocument(uniqueUri);
+
+  /**
+   * Ensure that the copy is deleted on dispose (usually, on test `teardown`).
+   * See the notes in {@link deleteDocument} for why we have to use that function.
+   */
+  disposables.add({ dispose: () => deleteDocument(doc) });
+
+  return doc;
+}
+
+export const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
 export async function roundtrip(doc: vscode.TextDocument) {
   const before = doc.getText();
 
@@ -115,6 +134,16 @@ ${RESET_COLOR_ESCAPE_CODE}`);
     );
     return content;
   }
+}
+
+/**
+ * Emit a GitHub Actions warning annotation (surfaced on the PR and in the run
+ * summary). Outside Actions it just prints a line, which is harmless.
+ * See https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions
+ */
+export function emitActionsWarning(title: string, message: string): void {
+  const data = message.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+  console.log(`::warning title=${title}::${data}`);
 }
 
 /**

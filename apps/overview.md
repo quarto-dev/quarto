@@ -185,7 +185,7 @@ in [client.ts](./vscode/src/lsp/client.ts)
 ### Example: Positron Specific - Help Topic & Statement Range
 
 `EmbeddedStatementRangeProvider` or `EmbeddedHelpTopicProvider` in
-[hooks.ts](./vscode/src/host/hooks.ts)
+[positron.ts](./vscode/src/host/positron.ts)
 
 - simply executes the command "vscode.executeStatementRangeProvider" or
   "positron.executeHelpTopicProvider" respectively inside a virtual doc for a

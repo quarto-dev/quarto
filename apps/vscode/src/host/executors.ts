@@ -114,7 +114,7 @@ const reticulateCellExecutor: VSCodeCellExecutor = {
 
 const juliaCellExecutor: VSCodeCellExecutor = {
   language: "julia",
-  requiredExtension: ["julialang.language-julia"],
+  requiredExtension: ["julialang.language-julia", "ntluong95.positron-julia"],
   requiredExtensionName: "Julia",
   requiredVersion: "1.4.0",
   execute: async (blocks: string[], editorUri?: Uri) => {

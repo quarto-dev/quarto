@@ -47,6 +47,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
       : Promise<CellExecutor | undefined> => {
       switch (language) {
         // use positron api for known runtimes
+        case "julia":
         case "python":
         case "csharp":
         case "r":

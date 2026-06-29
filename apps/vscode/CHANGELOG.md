@@ -4,6 +4,7 @@
 
 - In Positron, running a cell that raises an error no longer results in an error toast message (<https://github.com/posit-dev/positron/issues/9845>).
 - In Positron, Julia code cells in `.qmd` files can now be executed when the `ntluong95.positron-julia` extension is installed, the same way Python and R do (<https://github.com/quarto-dev/quarto/pull/989>).
+- Fixed a bug where soft line breaks within a paragraph were rendered as separate paragraphs in the markdown preview (<https://github.com/quarto-dev/quarto/pull/1027>).
 
 ## 1.134.0 (Release on 2026-06-22)
 

@@ -38,11 +38,6 @@ export const divPlugin = (md: MarkdownIt) => {
     kDivRuleName,
     (state, start, _end, silent) => {
 
-      // This is a validation run, can ignore
-      if (silent) {
-        return true;
-      }
-      
       // Get the line for parsing
       const lineStart = state.bMarks[start] + state.tShift[start];
       const lineEnd = state.eMarks[start];
@@ -85,6 +80,12 @@ export const divPlugin = (md: MarkdownIt) => {
       }
 
       if (match) {
+        // This is a validation run. Report that actual div markers interrupt
+        // paragraphs, but avoid mutating div state until the parser consumes it.
+        if (silent) {
+          return true;
+        }
+
         // There is a div here, is one already open?
         const divFence = match[1];
         const attr = match[2];

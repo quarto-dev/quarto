@@ -1,7 +1,7 @@
 /*
  * omni_insert.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 import { Mark, Fragment, DOMOutputSpec } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';

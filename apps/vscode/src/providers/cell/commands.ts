@@ -3,7 +3,7 @@
  *
  * commands for executing code in cells, both in the Source Editor and Visual Editor.
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { lines } from "core";

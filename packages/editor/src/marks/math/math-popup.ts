@@ -1,7 +1,7 @@
 /*
  * math-preview.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Plugin, PluginKey } from 'prosemirror-state';

@@ -1,7 +1,7 @@
 /*
  * automerge-doc.ts
  *
- * Copyright (C) 2023 by Posit Software, PBC
+ * Copyright (C) 2023-2026 by Posit Software, PBC
  */
 
 import { unstable as Automerge } from "@automerge/automerge";

@@ -2,7 +2,7 @@
 /*
  * insert_xref-index.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 import { XRef } from 'editor-types';
 import Fuse from 'fuse.js';

@@ -1,7 +1,7 @@
 /*
  * node_attr.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Node as ProsemirrorNode, NodeType, Schema } from 'prosemirror-model';

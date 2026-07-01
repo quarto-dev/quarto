@@ -1,7 +1,7 @@
 /*
  * index.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 // https://stackoverflow.com/questions/19275776/node-js-how-to-get-the-os-platforms-user-data-folder

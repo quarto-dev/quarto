@@ -1,7 +1,7 @@
 /*
  * user_comment-cache.ts
  *
- * Copyright (C) 2019-20 by RStudio, PBC
+ * Copyright (C) 2019-2026 by Posit Software, PBC
  */
 
 import { Node, Schema } from "prosemirror-model";

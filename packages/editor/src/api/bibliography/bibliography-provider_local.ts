@@ -1,7 +1,7 @@
 /*
  * bibliography-provider_local.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import { Transaction } from 'prosemirror-state';

@@ -1,7 +1,7 @@
 /*
  * semantic-tokens.ts
  *
- * Copyright (C) 2025 by Posit Software, PBC
+ * Copyright (C) 2025-2026 by Posit Software, PBC
  */
 
 import {

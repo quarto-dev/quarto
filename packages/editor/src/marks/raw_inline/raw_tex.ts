@@ -1,7 +1,7 @@
 /*
  * raw_tex.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Node as ProsemirrorNode, Mark, Fragment, Schema } from 'prosemirror-model';

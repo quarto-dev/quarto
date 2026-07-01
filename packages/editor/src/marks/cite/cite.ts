@@ -1,7 +1,7 @@
 /*
  * cite.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Mark, Schema, Fragment, Node as ProsemirrorNode, Slice } from 'prosemirror-model';

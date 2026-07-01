@@ -1,7 +1,7 @@
 /*
  * definition_list-pandoc.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Schema, Node as ProsemirrorNode } from 'prosemirror-model';

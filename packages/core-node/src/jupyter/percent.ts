@@ -2,7 +2,7 @@
 /*
  * percent.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 // IMPORTANT: This is a port of https://github.com/quarto-dev/quarto-cli/blob/main/src/execute/jupyter/percent.ts

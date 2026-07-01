@@ -1,7 +1,7 @@
 /*
  * navigation-types.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 

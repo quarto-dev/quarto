@@ -1,7 +1,7 @@
 /*
  * automerge.ts
  *
- * Copyright (C) 2023 by Posit Software, PBC
+ * Copyright (C) 2023-2026 by Posit Software, PBC
  */
 
 // TODO: use the 2.1 alpha 'marks' attribute of splice once it works

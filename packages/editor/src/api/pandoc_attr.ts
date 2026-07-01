@@ -1,7 +1,7 @@
 /*
  * pandoc_attr.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { NodeSpec, MarkSpec } from 'prosemirror-model';

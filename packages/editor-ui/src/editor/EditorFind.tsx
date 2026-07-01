@@ -1,7 +1,7 @@
 /*
  * EditorFind.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';

@@ -1,7 +1,7 @@
 /*
  * client.ts
  *
- * Copyright (C) 2022-2025 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as path from "path";

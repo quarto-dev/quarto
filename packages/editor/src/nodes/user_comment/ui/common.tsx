@@ -1,7 +1,7 @@
 /*
  * common.tsx
  *
- * Copyright (C) 2019-20 by RStudio, PBC
+ * Copyright (C) 2019-2026 by Posit Software, PBC
  */
 
 export function getThreadElement(threadId: any) {

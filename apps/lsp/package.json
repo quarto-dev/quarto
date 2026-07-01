@@ -2,7 +2,7 @@
   "name": "quarto-lsp",
   "version": "0.0.0",
   "private": true,
-  "license": "agpl-3.0",
+  "license": "MIT",
   "scripts": {
     "build": "tsx build.ts",
     "dev": "yarn run build dev",

@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>wasm-qmd-parser</title>
+    </head>
+        <script type="module">
+            import main from "./wasm_qmd_parser.js";
+            let m = await main();
+            let parsed = m.parse_qmd("# Hello\n");
+            console.log(parsed);
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

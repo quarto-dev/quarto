@@ -9,6 +9,9 @@ const outDir = process.env.PANMIRROR_OUTDIR || "dist";
 const plugins = [cssInjectedByJsPlugin()];
 
 export default defineConfig({
+  esbuild: {
+    legalComments: 'eof' as const,
+  },
   define: {
     'process.env.DEBUG': '""',
     'process.env.NODE_ENV': '"production"',

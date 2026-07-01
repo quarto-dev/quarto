@@ -29,6 +29,7 @@ export interface BuildOptions {
   external?: string[]; // []
   dev?: boolean;       // false
   sourcemap?: boolean | 'linked' | 'inline' | 'external' | 'both'; // false
+  legalComments?: 'none' | 'inline' | 'eof' | 'linked' | 'external'; // eof
 }
 
 export async function runBuild(options: BuildOptions) {
@@ -43,7 +44,8 @@ export async function runBuild(options: BuildOptions) {
     platform = 'node',
     external,
     dev = false,
-    sourcemap = dev
+    sourcemap = dev,
+    legalComments = 'eof'
   } = options;
 
   await build({
@@ -56,6 +58,7 @@ export async function runBuild(options: BuildOptions) {
     platform,
     external,
     sourcemap,
+    legalComments,
     watch: dev ? {
       onRebuild(error) {
         if (error)

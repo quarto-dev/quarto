@@ -1,16 +1,7 @@
 /*
  * index.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { build, Format, Platform, PluginBuild } from 'esbuild';
@@ -29,6 +20,7 @@ export interface BuildOptions {
   external?: string[]; // []
   dev?: boolean;       // false
   sourcemap?: boolean | 'linked' | 'inline' | 'external' | 'both'; // false
+  legalComments?: 'none' | 'inline' | 'eof' | 'linked' | 'external'; // eof
 }
 
 export async function runBuild(options: BuildOptions) {
@@ -43,7 +35,8 @@ export async function runBuild(options: BuildOptions) {
     platform = 'node',
     external,
     dev = false,
-    sourcemap = dev
+    sourcemap = dev,
+    legalComments = 'eof'
   } = options;
 
   await build({
@@ -56,6 +49,7 @@ export async function runBuild(options: BuildOptions) {
     platform,
     external,
     sourcemap,
+    legalComments,
     watch: dev ? {
       onRebuild(error) {
         if (error)

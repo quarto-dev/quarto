@@ -8,6 +8,9 @@ export default defineConfig(env => {
   const dev = env.mode === "development";
 
   return {
+    esbuild: {
+      legalComments: 'eof' as const,
+    },
     define: {
       'process.env.DEBUG': '""',
       'process.env.NODE_ENV': '"production"',

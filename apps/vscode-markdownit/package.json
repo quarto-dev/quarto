@@ -22,7 +22,7 @@
   "dependencies": {
     "core": "*",
     "js-yaml": "^4.1.0",
-    "markdown-it": "^12.2.3",
+    "markdown-it": "^14.0.0",
     "markdown-it-attrs": "^4.1.6",
     "markdown-it-deflist": "^2.0.3",
     "markdown-it-footnote": "^3.0.2",

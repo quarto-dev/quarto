@@ -1511,7 +1511,7 @@
     "js-yaml": "^4.1.0",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
-    "markdown-it": "^13.0.1",
+    "markdown-it": "^14.0.0",
     "markdown-it-highlightjs": "^4.0.1",
     "nanoid": "^4.0.0",
     "p-queue": "^8.0.1",

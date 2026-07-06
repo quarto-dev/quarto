@@ -19,6 +19,9 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "watch": "concurrently 'tsc --watch --noEmit --project apps/writer/tsconfig.json' 'tsc --watch --noEmit  --project packages/writer-server/tsconfig.json'"
   },
+  "resolutions": {
+    "linkify-it": "5.0.2"
+  },
   "devDependencies": {
     "@vscode/test-cli": "^0.0.11",
     "concurrently": "^7.5.0",

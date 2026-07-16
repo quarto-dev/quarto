@@ -20,6 +20,11 @@ jobs:
           node-version: latest
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Build vscode extension
+        # macos-latest runners have ~7 GB RAM, so Node's default V8 heap limit
+        # (~2 GB) is too small for the vscode-editor vite build and it OOMs.
+        # Raise the limit to match what larger (ubuntu) runners get by default.
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           yarn install
           yarn run build-vscode

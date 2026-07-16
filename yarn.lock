@@ -2064,10 +2064,10 @@
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@posit-dev/positron-test-electron@latest":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@posit-dev/positron-test-electron/-/positron-test-electron-0.0.1.tgz#76c045fa186e67899c5ec179d86c92de01a7dfbd"
-  integrity sha512-qN3KkagyRPvIVzF/T6K9T0hHJ3x6QUAbVBw07T6AGA8KGyAVzTFn3gtsLPc38uA3dJAqBDyNLtZuj7aYHaXNDQ==
+"@posit-dev/positron-test-electron@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@posit-dev/positron-test-electron/-/positron-test-electron-0.0.2.tgz#509f1b56cb92342bdf0b2a8e707e4919ed2ad313"
+  integrity sha512-betE+lg9R6qom5cHafmimF9bJ9yWUhATj9JxzRNDAPCh9CLisQ8iSxfIv+RL+x+r7frGT0H018Y7ekb4JxW2vA==
   dependencies:
     "@vscode/test-electron" "^2.4.1"
 

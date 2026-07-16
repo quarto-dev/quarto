@@ -1497,7 +1497,8 @@
     "lint": "eslint src --ext ts",
     "build-lang": "node syntaxes/build-lang",
     "build-test": "yarn run build test",
-    "test": "yarn build-test && vscode-test"
+    "test": "yarn build-test && vscode-test",
+    "test-positron": "yarn build-test && node ./scripts/run-positron-tests.mjs"
   },
   "dependencies": {
     "axios": "^1.16.0",
@@ -1545,6 +1546,7 @@
     "@types/uuid": "^9.0.0",
     "@types/vscode": "1.75.0",
     "@types/which": "^2.0.2",
+    "@posit-dev/positron-test-electron": "latest",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "@vscode/test-cli": "^0.0.11",

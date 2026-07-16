@@ -17,11 +17,44 @@
  * Copyright (C) 2026 by Posit Software, PBC
  */
 
+import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { runTests } from "@posit-dev/positron-test-electron";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Create a throwaway user-data-dir seeded with settings that turn off extension
+ * auto-update, and return `--user-data-dir <dir>` launch args pointing at it.
+ *
+ * We run with extensions enabled (see `disableExtensions: false` below) so
+ * Positron's bundled extensions stay available, but that also leaves the
+ * extension gallery active. On startup Positron then auto-updates "outdated"
+ * extensions, and it treats the Quarto extension we load from
+ * `extensionDevelopmentPath` as one of them: it disables/removes it mid-run, so
+ * `vscode.extensions.getExtension("quarto.quarto")` is gone by the time the
+ * tests query it ("Extension quarto.quarto not found"). Disabling auto-update
+ * keeps our development extension in place.
+ *
+ * `@posit-dev/positron-test-electron` always passes its own `--user-data-dir`
+ * first and appends ours last; Positron uses the last occurrence, so ours wins.
+ * A short `os.tmpdir()` prefix keeps the derived IPC socket path under macOS's
+ * 103-char Unix-socket limit.
+ */
+function seededUserDataDirArgs() {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "qpt-"));
+  fs.mkdirSync(path.join(userDataDir, "User"), { recursive: true });
+  fs.writeFileSync(
+    path.join(userDataDir, "User", "settings.json"),
+    JSON.stringify({
+      "extensions.autoUpdate": false,
+      "extensions.autoCheckUpdates": false,
+    })
+  );
+  return ["--user-data-dir", userDataDir];
+}
 
 async function main() {
   // Extension root (contains package.json); `scripts/` lives one level below it.
@@ -42,6 +75,7 @@ async function main() {
     // Our tests exercise Positron's bundled extensions (notebook export and the
     // R/Python runtimes), so opt out of the default `--disable-extensions`.
     disableExtensions: false,
+    launchArgs: seededUserDataDirArgs(),
   });
 
   process.exit(code);

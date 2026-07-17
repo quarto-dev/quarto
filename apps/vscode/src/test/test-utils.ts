@@ -29,6 +29,49 @@ export function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Polls `condition` until it returns true or `timeout` elapses. Useful for
+ * waiting on asynchronous, eventually-consistent state such as the Quarto LSP
+ * finishing its (now lazy) startup and indexing before making assertions.
+ */
+export async function waitForCondition(
+  condition: () => boolean | Promise<boolean>,
+  { timeout = 15000, interval = 100, message = "condition" }: { timeout?: number; interval?: number; message?: string } = {}
+): Promise<void> {
+  const start = Date.now();
+  for (; ;) {
+    if (await condition()) {
+      return;
+    }
+    if (Date.now() - start >= timeout) {
+      throw new Error(`Timed out after ${timeout}ms waiting for ${message}`);
+    }
+    await wait(interval);
+  }
+}
+
+/**
+ * Waits until the (lazily started) Quarto LSP is running and has indexed the
+ * workspace, detected by the presence of a known workspace symbol. Sets
+ * `symbols.exportToWorkspace` to "all" so the probe symbol is visible
+ * regardless of project type (e.g. R projects filter symbols by default).
+ */
+export async function waitForWorkspaceSymbol(name: string) {
+  await vscode.workspace
+    .getConfiguration("quarto")
+    .update("symbols.exportToWorkspace", "all");
+  await waitForCondition(
+    async () => {
+      const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
+        "vscode.executeWorkspaceSymbolProvider",
+        ""
+      );
+      return !!symbols?.find((s) => s.name === name);
+    },
+    { message: `Quarto LSP workspace symbol "${name}"` }
+  );
+}
+
 export async function openAndShowExamplesTextDocument(
   fileName: string,
   showOptions?: vscode.TextDocumentShowOptions

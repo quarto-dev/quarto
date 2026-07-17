@@ -17,12 +17,11 @@ import { ExtensionContext, ProgressLocation, commands, window, workspace, Uri } 
 import { zoteroApi, zoteroSyncWebLibraries, zoteroValidateApiKey } from "editor-server";
 
 import { Command } from "../../core/command";
-import { LanguageClient } from "vscode-languageclient/node";
-import { lspClientTransport } from "core-node";
+import { QuartoLspClient } from "../../lsp/client";
 import { editorZoteroJsonRpcServer } from "editor-core";
 import { ZoteroCollectionSpec, ZoteroResult, ZoteroServer, kZoteroMyLibrary } from "editor-types";
 import { zoteroServerMethods } from "editor-server/src/server/zotero";
-import { JsonRpcRequestTransport, sleep } from "core";
+import { JsonRpcRequestTransport } from "core";
 
 const kQuartoZoteroWebApiKey = "quartoZoteroWebApiKey";
 
@@ -30,14 +29,13 @@ const kZoteroConfigureLibrary = "quarto.zoteroConfigureLibrary";
 const kZoteroSyncWebLibrary = "quarto.zoteroSyncWebLibrary";
 const kZoteroUnauthorized = "quarto.zoteroUnauthorized";
 
-export async function activateZotero(context: ExtensionContext, lspClient: LanguageClient): Promise<Command[]> {
+export async function activateZotero(context: ExtensionContext, lsp: QuartoLspClient): Promise<Command[]> {
 
-  // establish zotero connection
-  const lspRequest = lspClientTransport(lspClient);
-  const zotero = editorZoteroJsonRpcServer(lspRequest);
+  // establish zotero connection (lazy: does not force the LSP to start)
+  const zotero = editorZoteroJsonRpcServer(lsp.lspRequest);
 
-  // set quarto config for back end
-  await syncZoteroConfig(context, zotero);
+  // sync quarto config to the back end (whenever the LSP server is running)
+  syncZoteroConfig(context, zotero, lsp);
 
   // register commands
   const commands: Command[] = [];
@@ -50,7 +48,7 @@ export async function activateZotero(context: ExtensionContext, lspClient: Langu
 }
 
 
-async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer) {
+function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer, lsp: QuartoLspClient) {
 
   const kZoteroConfig = "quarto.zotero";
   const kLibrary = "library";
@@ -60,15 +58,8 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
   const kGroupLibraries = "groupLibraries";
   const kZoteroGroupLibraries = `${kZoteroConfig}.${kGroupLibraries}`;
 
-  // set initial config
-  const setLspLibraryConfig = async (retry?: number) => {
-    // if this isn't a retry then provide an initial delay (for the lsp to be ready)
-    if (retry === undefined) {
-      await sleep(500);
-      // if this is our final retry then bail
-    } else if (retry === 5) {
-      return;
-    }
+  // push the current library config to the LSP server
+  const pushLibraryConfig = async () => {
     const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
     const type = zoteroConfig.get<"none" | "local" | "web">(kLibrary, "local");
     const dataDir = zoteroConfig.get<string>(kDataDir, "");
@@ -82,10 +73,21 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
     } catch (error) {
       const message = error instanceof Error ? error.message : JSON.stringify(error);
       console.log("Error setting zotero library config: " + message);
-      setTimeout(() => setLspLibraryConfig((retry || 0) + 1), 1000);
     }
   };
-  await setLspLibraryConfig();
+
+  // push config whenever the LSP server starts (this both handles the initial
+  // sync and re-syncs after any config change made while the server was down).
+  // We deliberately do NOT start the server just to push config; if it isn't
+  // running the config will be picked up the next time it starts.
+  context.subscriptions.push(lsp.onReady(() => { void pushLibraryConfig(); }));
+
+  // push config on change, but only if the server is already running
+  const pushLibraryConfigIfRunning = async () => {
+    if (lsp.runningClient()) {
+      await pushLibraryConfig();
+    }
+  };
 
   // note initial group library config (for detecting changes)
   const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
@@ -94,7 +96,7 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
   // monitor changes to web api key and update lsp
   context.secrets.onDidChange(async (e) => {
     if (e.key === kQuartoZoteroWebApiKey) {
-      await setLspLibraryConfig();
+      await pushLibraryConfigIfRunning();
     }
   });
 
@@ -111,7 +113,7 @@ async function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer)
         !(await safeReadZoteroApiKey(context))) {
         await commands.executeCommand(kZoteroConfigureLibrary);
       } else {
-        await setLspLibraryConfig();
+        await pushLibraryConfigIfRunning();
       }
     }
 

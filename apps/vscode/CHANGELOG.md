@@ -2,6 +2,8 @@
 
 ## 1.136.0 (Unreleased)
 
+- Reduce memory usage by only starting the language server (LSP) in projects containing Quarto documents (https://github.com/quarto-dev/quarto/pull/1059)
+
 ## 1.135.0 (Release on 2026-07-08)
 
 - In Positron, running a cell that raises an error no longer results in an error toast message (<https://github.com/posit-dev/positron/issues/9845>).

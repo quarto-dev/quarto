@@ -8,6 +8,11 @@ import {
 } from "./test-utils";
 
 suite("Convert Commands", function () {
+  // Each test spawns `quarto convert`; the first (cold) CLI spawn can exceed
+  // mocha's default 5s timeout, especially when the lazily-started LSP is
+  // warming up concurrently. Give the whole suite generous headroom.
+  this.timeout(30000);
+
   suiteSetup(async function () {
     await vscode.workspace.fs.delete(examplesOutUri(), { recursive: true });
     await vscode.workspace.fs.copy(

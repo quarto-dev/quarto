@@ -128,14 +128,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     embeddedDiagnosticsService = activateEmbeddedDiagnostics(engine, outputChannel);
     context.subscriptions.push(embeddedDiagnosticsService);
 
-    // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
+    // lsp (started lazily on first use, not at activation)
+    const lspClient = activateLsp(context, quartoContext, engine, outputChannel);
 
     // restore outline expansion after the LSP re-registers symbols on config change
     registerOutlineConfigListener(context);
 
     // provide visual editor
-    const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
+    const editorCommands = activateEditor(context, host, quartoContext, lspClient.lspRequest, engine);
     commands.push(...editorCommands);
 
     // zotero

@@ -25,6 +25,7 @@ import { clearFormatting } from '../api/formatting';
 import { EditorCommandId, ProsemirrorCommand } from '../api/command';
 import { pasteTransaction } from '../api/clipboard';
 import { isLink, linkPasteHandler } from '../api/link';
+import { markIsActive } from '../api/mark';
 
 const kTextPlain = "text/plain";
 const kTextHtml = "text/html";
@@ -148,7 +149,13 @@ function pasteMarkdownHandler(
           event: ClipboardEvent, 
           pasteRaw: boolean,
           slice: Slice) => {
-  
+
+    // pastes inside a citation id (e.g. a DOI pasted after '@') are handled
+    // by the cite mark's paste handler (https://github.com/rstudio/rstudio/issues/18295)
+    if (citeIdIsActive(schema, view.state)) {
+      return false;
+    }
+
     // must be in a location valid for a markdown paste
     if (!editorMarkdown.allowMarkdownPaste(view.state)) {
       return false;
@@ -218,6 +225,12 @@ function pasteHtmlHandler(
     if (!event.clipboardData) {
       return false;
     }
+
+    // pastes inside a citation id (e.g. a DOI pasted after '@') are handled
+    // by the cite mark's paste handler (https://github.com/rstudio/rstudio/issues/18295)
+    if (citeIdIsActive(schema, view.state)) {
+      return false;
+    }
   
     // helper to paste slice
     const pasteSlice = (s: Slice) => {
@@ -268,6 +281,12 @@ function pasteHtmlHandler(
   }
 }
   
+
+// detect a paste inside a citation id (the schema may not define the
+// cite_id mark if citations are not enabled for the format)
+function citeIdIsActive(schema: Schema, state: EditorState) {
+  return !!schema.marks.cite_id && markIsActive(state, schema.marks.cite_id);
+}
 
 // detect vscode paste
 const kVscodeEditorData = "vscode-editor-data";

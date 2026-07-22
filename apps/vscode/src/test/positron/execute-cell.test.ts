@@ -33,22 +33,9 @@
  */
 
 import * as assert from "assert";
-import * as path from "path";
 import * as vscode from "vscode";
 import { extension } from "../extension";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
-import { kInlineOutputEnabledSetting } from "../../host/positron";
-
-const kDeprecatedInlineOutputEnabledSetting =
-  "positron.quarto.inlineOutput.enabled";
-const kExamplesOutDir = path.resolve(
-  __dirname,
-  "..",
-  "..",
-  "src",
-  "test",
-  "examples-out"
-);
 
 interface RuntimeCall {
   method: "executeCode" | "executeInlineCell";
@@ -62,31 +49,12 @@ suite("Positron: cell execution", function () {
   // a spy during each test and must restore it afterwards.
   const globalWithApi = globalThis as { acquirePositronApi?: () => unknown };
   let originalAcquire: (() => unknown) | undefined;
-  let originalGetConfiguration: typeof vscode.workspace.getConfiguration | undefined;
-  const tempFiles: vscode.Uri[] = [];
 
-  teardown(async function () {
+  teardown(function () {
     if (originalAcquire !== undefined) {
       globalWithApi.acquirePositronApi = originalAcquire;
       originalAcquire = undefined;
     }
-
-    if (originalGetConfiguration !== undefined) {
-      (vscode.workspace as typeof vscode.workspace & {
-        getConfiguration: typeof vscode.workspace.getConfiguration;
-      }).getConfiguration = originalGetConfiguration;
-      originalGetConfiguration = undefined;
-    }
-
-    while (tempFiles.length > 0) {
-      const tempFile = tempFiles.pop()!;
-      await vscode.workspace.fs.delete(tempFile).then(
-        () => undefined,
-        () => undefined
-      );
-    }
-
-    await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
   });
 
   /**
@@ -96,8 +64,7 @@ suite("Positron: cell execution", function () {
    */
   async function runCellAndCaptureCalls(
     qmd: string,
-    codeLine: number,
-    uri?: vscode.Uri
+    codeLine: number
   ): Promise<RuntimeCall[]> {
     const positron = tryAcquirePositronApi();
     assert.ok(
@@ -143,64 +110,15 @@ suite("Positron: cell execution", function () {
     });
     globalWithApi.acquirePositronApi = () => fakeApi;
 
-    const doc = uri
-      ? await openSavedQuartoDocument(uri, qmd)
-      : await vscode.workspace.openTextDocument({
-          language: "quarto",
-          content: qmd,
-        });
+    const doc = await vscode.workspace.openTextDocument({
+      language: "quarto",
+      content: qmd,
+    });
     const editor = await vscode.window.showTextDocument(doc);
     editor.selection = new vscode.Selection(codeLine, 0, codeLine, 0);
 
     await vscode.commands.executeCommand("quarto.runCurrentCell");
     return calls;
-  }
-
-  async function openSavedQuartoDocument(
-    uri: vscode.Uri,
-    qmd: string
-  ): Promise<vscode.TextDocument> {
-    await vscode.workspace.fs.createDirectory(vscode.Uri.file(kExamplesOutDir));
-    await vscode.workspace.fs.writeFile(uri, Buffer.from(qmd, "utf8"));
-    tempFiles.push(uri);
-    return await vscode.workspace.openTextDocument(uri);
-  }
-
-  function makeTempQuartoUri(prefix: string): vscode.Uri {
-    return vscode.Uri.file(
-      path.join(kExamplesOutDir, `${prefix}-${Date.now()}.qmd`)
-    );
-  }
-
-  function mockInlineOutputEnabled(enabled: boolean): void {
-    originalGetConfiguration ??= vscode.workspace.getConfiguration;
-    (vscode.workspace as typeof vscode.workspace & {
-      getConfiguration: typeof vscode.workspace.getConfiguration;
-    }).getConfiguration = ((...args: Parameters<typeof vscode.workspace.getConfiguration>) => {
-      const config = originalGetConfiguration!(...args);
-      return {
-        has: config.has.bind(config),
-        update: config.update.bind(config),
-        inspect: ((section: string) => {
-          if (section === kInlineOutputEnabledSetting) {
-            return { globalValue: enabled };
-          }
-          if (section === kDeprecatedInlineOutputEnabledSetting) {
-            return { globalValue: undefined };
-          }
-          return config.inspect(section);
-        }) as typeof config.inspect,
-        get: ((section: string, defaultValue?: unknown) => {
-          if (
-            section === kInlineOutputEnabledSetting ||
-            section === kDeprecatedInlineOutputEnabledSetting
-          ) {
-            return enabled;
-          }
-          return config.get(section, defaultValue);
-        }) as typeof config.get,
-      } as typeof config;
-    }) as typeof vscode.workspace.getConfiguration;
   }
 
   test("submits a Python cell to executeCode as python, with cell options stripped", async function () {
@@ -217,11 +135,7 @@ suite("Positron: cell execution", function () {
       "",
     ].join("\n");
     // Cursor on the statement (line 6), i.e. below the `#|` option line.
-    const calls = await runCellAndCaptureCalls(
-      qmd,
-      6,
-      makeTempQuartoUri("positron-execute-code")
-    );
+    const calls = await runCellAndCaptureCalls(qmd, 6);
 
     const call = calls.find(
       (c) => c.method === "executeCode" && c.args[0] === "python"
@@ -256,11 +170,7 @@ suite("Positron: cell execution", function () {
       "",
     ].join("\n");
     // Cursor on the statement (line 5).
-    const calls = await runCellAndCaptureCalls(
-      qmd,
-      5,
-      makeTempQuartoUri("positron-knitr-python")
-    );
+    const calls = await runCellAndCaptureCalls(qmd, 5);
 
     // In a knitr document, Quarto sends Python to the R runtime wrapped in
     // reticulate rather than to the Python runtime directly.
@@ -281,57 +191,6 @@ suite("Positron: cell execution", function () {
     assert.ok(
       code.includes(`${marker} = 42`),
       "the original Python code should be embedded in the reticulate call"
-    );
-  });
-
-  test("uses executeInlineCell for a saved qmd when inline output is enabled", async function () {
-    const marker = `qmd_marker_${Date.now()}`;
-    const qmd = [
-      "---",
-      "title: test",
-      "---",
-      "",
-      "```{python}",
-      "#| echo: false",
-      `${marker} = 42`,
-      "```",
-      "",
-    ].join("\n");
-
-    mockInlineOutputEnabled(true);
-
-    const uri = makeTempQuartoUri("positron-inline");
-    const calls = await runCellAndCaptureCalls(qmd, 6, uri);
-
-    assert.ok(
-      !calls.some((c) => c.method === "executeCode"),
-      "Saved documents with inline output enabled should not fall back to executeCode"
-    );
-
-    const call = calls.find((c) => c.method === "executeInlineCell");
-    assert.ok(
-      call,
-      "Running a saved document with inline output enabled should call positron.runtime.executeInlineCell(...). " +
-        `Observed: ${describe(calls)}`
-    );
-
-    assert.ok(
-      vscode.Uri.isUri(call!.args[0]) &&
-        call!.args[0].toString() === uri.toString(),
-      "executeInlineCell should receive the saved document URI"
-    );
-
-    const ranges = call!.args[1] as vscode.Range[];
-    assert.ok(
-      Array.isArray(ranges) && ranges.length === 1,
-      "executeInlineCell should receive the current cell range"
-    );
-
-    const metadata = call!.args[2] as Record<string, unknown>[] | undefined;
-    assert.strictEqual(
-      metadata?.[0]?.echo,
-      false,
-      "executeInlineCell should receive parsed Quarto cell metadata"
     );
   });
 });

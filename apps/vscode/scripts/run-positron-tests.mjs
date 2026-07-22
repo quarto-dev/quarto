@@ -39,12 +39,15 @@ async function main() {
     channel: process.env.POSITRON_CHANNEL === "daily" ? "daily" : "stable",
     extensionDevelopmentPath,
     extensionTestsPath,
-    // Our tests exercise Positron's bundled extensions (notebook export and the
-    // R/Python runtimes), so opt out of the default `--disable-extensions`.
-    // Extension auto-update (which would otherwise evict the extension loaded
-    // from extensionDevelopmentPath) is disabled by @posit-dev/positron-test-
-    // electron itself, so no extra launch args are needed here.
+    // Our tests exercise Positron's bundled notebook-export and runtime
+    // extensions, so the blanket `--disable-extensions` default would remove
+    // the APIs under test. Keep extensions enabled, but explicitly disable
+    // unrelated AI/chat extensions that add startup noise and login prompts.
     disableExtensions: false,
+    launchArgs: [
+      "--disable-extension=GitHub.copilot-chat",
+      "--disable-extension=positron.positron-assistant",
+    ],
   });
 
   process.exit(code);

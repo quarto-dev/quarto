@@ -22,41 +22,51 @@
  */
 
 import * as assert from "assert";
+import * as fs from "fs";
+import * as path from "path";
 import * as vscode from "vscode";
 import { extension } from "../extension";
 import { notebookExporterLabel } from "../../providers/notebook-export";
 import { NotebookExportExtension } from "../../@types/positron-notebook-export";
 
 const kNotebookExportExtensionId = "positron.notebook-export";
+const kExamplesDir = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "src",
+  "test",
+  "examples"
+);
+const kExamplesOutDir = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "src",
+  "test",
+  "examples-out"
+);
 
 suite("Positron: notebook export", function () {
+  suiteSetup(async function () {
+    await vscode.workspace.fs.delete(vscode.Uri.file(kExamplesOutDir), { recursive: true }).then(
+      () => undefined,
+      () => undefined
+    );
+    await vscode.workspace.fs.copy(
+      vscode.Uri.file(kExamplesDir),
+      vscode.Uri.file(kExamplesOutDir)
+    );
+  });
+
+  teardown(async function () {
+    await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+  });
+
   test("registers the Quarto Markdown exporter with positron.notebook-export", async function () {
     this.timeout(30000);
 
-    const exportExt = vscode.extensions.getExtension<NotebookExportExtension>(
-      kNotebookExportExtensionId
-    );
-    assert.ok(
-      exportExt,
-      `Expected the built-in ${kNotebookExportExtensionId} extension to be present in Positron`
-    );
-
-    const exportApi = await exportExt.activate();
-
-    // Activating Quarto is what registers the exporter against the notebook
-    // export API.
-    const quarto = extension();
-    if (!quarto.isActive) {
-      await quarto.activate();
-    }
-
-    // Quarto registers the exporter asynchronously (after the notebook-export
-    // extension finishes activating), so poll until it shows up rather than
-    // asserting immediately.
-    const quartoExporter = await waitFor(
-      () => exportApi.exporters.find((e) => e.label === notebookExporterLabel),
-      15000
-    );
+    const quartoExporter = await waitForQuartoExporter();
 
     assert.ok(
       quartoExporter,
@@ -68,7 +78,57 @@ suite("Positron: notebook export", function () {
       "Quarto exporter should target the .qmd file extension"
     );
   });
+
+  test("exports a .ipynb notebook to .qmd through notebook.export", async function () {
+    this.timeout(30000);
+
+    const sourceFile = vscode.Uri.file(
+      path.join(kExamplesOutDir, "convert-ipynb-to-qmd.ipynb")
+    );
+    const convertedFile = vscode.Uri.file(
+      path.join(kExamplesOutDir, "convert-ipynb-to-qmd.qmd")
+    );
+    fs.rmSync(convertedFile.fsPath, { force: true, recursive: true });
+
+    const quartoExporter = await waitForQuartoExporter();
+
+    const notebook = await vscode.workspace.openNotebookDocument(sourceFile);
+    await vscode.window.showNotebookDocument(notebook);
+
+    await quartoExporter!.export(notebook);
+
+    assert.ok(fs.existsSync(convertedFile.fsPath), ".qmd file should be created");
+    assert.strictEqual(
+      vscode.window.activeTextEditor?.document.uri.toString(),
+      convertedFile.toString(),
+      "converted .qmd did not open in the text editor"
+    );
+  });
 });
+
+async function waitForQuartoExporter() {
+  const exportExt = vscode.extensions.getExtension<NotebookExportExtension>(
+    kNotebookExportExtensionId
+  );
+  assert.ok(
+    exportExt,
+    `Expected the built-in ${kNotebookExportExtensionId} extension to be present in Positron`
+  );
+
+  const exportApi = await exportExt.activate();
+  const quarto = extension();
+  if (!quarto.isActive) {
+    await quarto.activate();
+  }
+
+  // Quarto registers the exporter asynchronously (after the notebook-export
+  // extension finishes activating), so poll until it shows up rather than
+  // asserting immediately.
+  return await waitFor(
+    () => exportApi.exporters.find((e) => e.label === notebookExporterLabel),
+    15000
+  );
+}
 
 /** Poll `fn` until it returns a truthy value or `timeoutMs` elapses. */
 async function waitFor<T>(

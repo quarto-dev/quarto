@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "apps/vscode/**"
+      - ".github/workflows/test-positron.yaml"
   pull_request:
     branches:
       - main
+    paths:
+      - "apps/vscode/**"
+      - ".github/workflows/test-positron.yaml"
   workflow_dispatch:
 
 jobs:

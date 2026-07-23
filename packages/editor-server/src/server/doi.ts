@@ -37,7 +37,9 @@ export function doiServer() : DOIServer {
         const contentType = response.headers.get("Content-Type") || "";
         if (response.ok && !contentType.includes("json")) {
           throw new Error(
-            "This DOI resolved, but its registration agency does not provide citation metadata."
+            "This DOI was found, but no citation data is available for it. " +
+            "This usually means the organization that registered the DOI does not support automatic citation lookup. " +
+            "To cite this work, you can add an entry to your bibliography manually."
           );
         }
 

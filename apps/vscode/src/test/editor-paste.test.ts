@@ -44,14 +44,20 @@ const schema = new Schema({
   },
 });
 
+// use a real, registered DOI rather than the canonical example DOI
+// (10.1000/182, the DOI Handbook): the handbook's registration agency
+// doesn't support CSL content negotiation, so pasting that example into
+// a live editor fails to look up citation metadata
+const kDOI = "10.1038/nature12373";
+
 // doc with a cite_id marked citation in the first paragraph and
 // plain text in the second
 const doc = schema.node("doc", null, [
-  schema.node("paragraph", null, [schema.text("@10.1000/182", [schema.marks.cite_id.create()])]),
+  schema.node("paragraph", null, [schema.text(`@${kDOI}`, [schema.marks.cite_id.create()])]),
   schema.node("paragraph", null, [schema.text("some plain text")]),
 ]);
 const kInsideCiteIdPos = 5;
-const kOutsideCiteIdPos = 18;
+const kOutsideCiteIdPos = doc.child(0).nodeSize + 5; // inside the second paragraph
 
 function editorView(pos: number): EditorView {
   const state = EditorState.create({
@@ -96,8 +102,8 @@ function setUserAgent(userAgent: string) {
   });
 }
 
-const kDOIText = "https://doi.org/10.1000/182";
-const kDOIHtml = '<a href="https://doi.org/10.1000/182">https://doi.org/10.1000/182</a>';
+const kDOIText = `https://doi.org/${kDOI}`;
+const kDOIHtml = `<a href="${kDOIText}">${kDOIText}</a>`;
 const kWordHtml = '<html xmlns:w="urn:schemas-microsoft-com:office:word"><body><p>content</p></body></html>';
 
 suite("Editor Paste Handlers", function () {

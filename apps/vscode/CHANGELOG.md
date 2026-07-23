@@ -2,6 +2,8 @@
 
 ## 1.140.0 (Unreleased)
 
+- Improved the error message shown when inserting a citation from a DOI whose registration agency does not provide citation metadata (<https://github.com/quarto-dev/quarto/pull/1061>).
+
 ## 1.139.0 (Release on 2026-10-20)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).

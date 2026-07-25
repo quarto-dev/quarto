@@ -163,13 +163,15 @@ function math_block(
   if (silent) {
     return true;
   }
-  if (firstLine.trim().slice(-2) === "$$") {
-    // Single line expression
-    firstLine = firstLine.trim().slice(0, -2);
+  let attrStr = undefined;
+  const singleLineMatch = firstLine.trim().match(/^(.*)\$\$\s*(\{.*\})?\s*$/);
+  if (singleLineMatch) {
+    // Single line expression, optionally followed by attributes (e.g. {#eq-label})
+    firstLine = singleLineMatch[1];
+    attrStr = singleLineMatch[2];
     found = true;
   }
 
-  let attrStr = undefined;
   for (next = start; !found; ) {
     next++;
 

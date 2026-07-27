@@ -13,6 +13,7 @@
     "dev-vscode": "turbo run dev --filter quarto...",
     "build-vscode": "turbo run build --filter quarto...",
     "test-vscode": "cd apps/vscode && yarn test",
+    "test-packages": "turbo run test --filter='./packages/*'",
     "install-vscode": "cd apps/vscode && yarn install-vscode",
     "install-positron": "cd apps/vscode && yarn install-positron",
     "lint": "turbo run lint",

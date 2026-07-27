@@ -11,7 +11,7 @@
     "cross-fetch": "^3.1.5",
     "editor-types": "*",
     "jayson": "^4.0.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.2.2",
     "mathjax-full": "^3.2.2",
     "node-sqlite3-wasm": "^0.5.2",
     "quarto-core": "*",

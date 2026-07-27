@@ -23,6 +23,18 @@ import type StateBlock from "markdown-it/lib/rules_block/state_block";
 export const kTokMathBlock = "math_block";
 export const kTokMathInline = "math_inline";
 
+// A closing `$$` may be followed by a pandoc attribute block, e.g. `$$ {#eq-label}`.
+// Both close checks below share this tail so they cannot drift apart again: the
+// single-line check once omitted it, which made a labeled one-line equation
+// consume the rest of the document (https://github.com/quarto-dev/quarto/issues/976).
+const kAttrTail = String.raw`\s*(\{.*\})?\s*$`;
+
+// Close on the same line as the opening `$$`, e.g. `$$1+1$$ {#eq-label}`
+const kCloseSameLine = new RegExp(String.raw`^(.*)\$\$` + kAttrTail);
+
+// Close on a line of its own, e.g. `$$ {#eq-label}`
+const kCloseOwnLine = new RegExp(String.raw`^\$\$` + kAttrTail);
+
 
 interface ConvertOptions {
   display: boolean
@@ -163,13 +175,15 @@ function math_block(
   if (silent) {
     return true;
   }
-  if (firstLine.trim().slice(-2) === "$$") {
-    // Single line expression
-    firstLine = firstLine.trim().slice(0, -2);
+  let attrStr: string | undefined;
+  const singleLineMatch = firstLine.trim().match(kCloseSameLine);
+  if (singleLineMatch) {
+    // Single line expression, optionally followed by attributes (e.g. {#eq-label})
+    firstLine = singleLineMatch[1];
+    attrStr = singleLineMatch[2];
     found = true;
   }
 
-  let attrStr = undefined;
   for (next = start; !found; ) {
     next++;
 
@@ -186,13 +200,21 @@ function math_block(
     }
 
     const line = state.src.slice(pos, max).trim();
-    const match = line.match(/^\$\$\s*(\{.*\})?\s*$/);
+    const match = line.match(kCloseOwnLine);
     if (match) {
       lastPos = state.src.slice(0, max).lastIndexOf("$$");
       lastLine = state.src.slice(pos, lastPos);
       attrStr = match[1];
       found = true;
     }
+  }
+
+  // Without a close, decline the rule rather than emitting a token that runs to
+  // the end of the document. Consuming the remainder hides every heading and code
+  // cell below from the outline and from cell execution, which is what an
+  // in-progress `$$` looks like while it is still being typed.
+  if (!found) {
+    return false;
   }
 
   state.line = next + 1;

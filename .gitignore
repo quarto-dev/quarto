@@ -19,3 +19,5 @@ public/dist
 .positron-test
 *.vsix
 *.timestamp-*.mjs
+# roborev snapshots
+/.roborev/

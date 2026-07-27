@@ -18,3 +18,5 @@ public/dist
 .vscode-test
 *.vsix
 *.timestamp-*.mjs
+# roborev snapshots
+/.roborev/

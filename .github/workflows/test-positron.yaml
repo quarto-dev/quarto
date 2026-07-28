@@ -1,0 +1,40 @@
+name: Test Positron API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/vscode/**"
+      - ".github/workflows/test-positron.yaml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/vscode/**"
+      - ".github/workflows/test-positron.yaml"
+  workflow_dispatch:
+
+jobs:
+  test-positron:
+    runs-on: macos-latest
+    name: Test Positron API
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Build vscode extension
+        # macos-latest runners have ~7 GB RAM, so Node's default V8 heap limit
+        # (~2 GB) is too small for the vscode-editor vite build and it OOMs.
+        # Raise the limit to match what larger (ubuntu) runners get by default.
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          yarn install
+          yarn run build-vscode
+      - name: Run Positron API tests
+        uses: posit-dev/setup-positron@main
+        with:
+          positron-channel: stable

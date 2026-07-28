@@ -54,6 +54,7 @@ Testing procedures vary by component:
   - Test log output is suppressed automatically when run by Claude Code; set `VERBOSE=1` when debugging failures
   - The output is small enough to read directly — don't pipe through `tail` or `grep`
   - Read the [test configuration file](./apps/vscode/.vscode-test.mjs) for valid labels
+- Positron integration tests: Run `yarn test-positron` to run the tests in `apps/vscode/src/test/positron/` inside a downloaded Positron build (rather than vanilla VS Code), covering Positron API code paths. Set `POSITRON_CHANNEL=daily` for a daily build (default: `stable`)
 - Other components have specific test commands defined in their respective package.json files
 
 

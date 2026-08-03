@@ -145,11 +145,35 @@ export async function roundtrip(doc: vscode.TextDocument) {
   await vscode.commands.executeCommand("quarto.editInVisualMode");
   await wait(APPROX_TIME_TO_OPEN_VISUAL_EDITOR);
   await vscode.commands.executeCommand("quarto.editInSourceMode");
-  await wait(300);
+  await waitForSourceEditor(doc);
 
   const after = doc.getText();
 
   return { before, after };
+}
+
+/**
+ * Waits until `doc` is showing in the active text editor again after a switch
+ * back to source mode.
+ *
+ * `quarto.editInSourceMode` returns before the source editor has been reopened:
+ * it closes the visual editor and then reopens the text document in a callback
+ * that the command does not await (see `reopenEditorInSourceMode`). Without
+ * waiting for the reopen to land, that deferred `showTextDocument` can fire
+ * after the next test has already shown a different file, stealing active
+ * editor focus and failing assertions in a test that did nothing wrong.
+ */
+export async function waitForSourceEditor(doc: vscode.TextDocument) {
+  await waitForCondition(
+    () => vscode.window.activeTextEditor?.document.uri.toString() === doc.uri.toString(),
+    {
+      // the reopen normally lands in tens of milliseconds; stay inside the
+      // 5s per-test mocha budget so this message is what surfaces on failure
+      timeout: 2000,
+      interval: 50,
+      message: `${path.basename(doc.uri.fsPath)} to become the active text editor`
+    }
+  );
 }
 
 const YELLOW_COLOR_ESCAPE_CODE = '\x1b[33m';

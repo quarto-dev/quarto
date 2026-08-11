@@ -170,6 +170,49 @@
         "path": "./languages/mermaid/mermaid.tmLanguage.json"
       }
     ],
+    "semanticTokenTypes": [
+      {
+        "id": "quartoYamlKey",
+        "description": "YAML key in a Quarto cell option (#|) comment"
+      },
+      {
+        "id": "quartoYamlString",
+        "description": "YAML string value in a Quarto cell option (#|) comment"
+      },
+      {
+        "id": "quartoYamlNumber",
+        "description": "YAML number value in a Quarto cell option (#|) comment"
+      },
+      {
+        "id": "quartoYamlBoolean",
+        "description": "YAML boolean value in a Quarto cell option (#|) comment"
+      },
+      {
+        "id": "quartoYamlNull",
+        "description": "YAML null value in a Quarto cell option (#|) comment"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "scopes": {
+          "quartoYamlKey": [
+            "entity.name.tag.yaml"
+          ],
+          "quartoYamlString": [
+            "string.unquoted.plain.out.yaml"
+          ],
+          "quartoYamlNumber": [
+            "constant.numeric.yaml"
+          ],
+          "quartoYamlBoolean": [
+            "constant.language.boolean.yaml"
+          ],
+          "quartoYamlNull": [
+            "constant.language.null.yaml"
+          ]
+        }
+      }
+    ],
     "snippets": [
       {
         "language": "quarto",
@@ -1529,7 +1572,8 @@
     "vscode-languageclient": "^8.1.0",
     "vscode-languageserver-types": "^3.17.3",
     "vscode-nls": "^5.2.0",
-    "which": "^3.0.0"
+    "which": "^3.0.0",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",

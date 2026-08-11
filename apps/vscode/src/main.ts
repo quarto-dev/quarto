@@ -46,6 +46,7 @@ import { activateDiagram } from "./providers/diagram/diagram";
 import { activateCodeFormatting } from "./providers/format";
 import { activateOptionEnterProvider } from "./providers/option";
 import { activateBackgroundHighlighter } from "./providers/background";
+import { activateHashPipeYamlHighlighter } from "./providers/hash-pipe-yaml";
 import { activateYamlLinks } from "./providers/yaml-links";
 import { activateYamlFilepathCompletions } from "./providers/yaml-filepath-completions";
 import { activateContextKeySetter } from "./providers/context-keys";
@@ -230,6 +231,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   // background highlighter
   activateBackgroundHighlighter(context, engine);
+
+  // yaml highlighting for cell options (#| comments)
+  activateHashPipeYamlHighlighter(context, engine);
 
   // yaml document links
   activateYamlLinks(context);

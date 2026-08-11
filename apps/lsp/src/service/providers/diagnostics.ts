@@ -171,14 +171,6 @@ class FileLinkMap {
   }
 }
 
-export class DiagnosticOnSaveComputer {
-  constructor(private readonly quarto_: Quarto) { }
-
-  public async compute(doc: Document): Promise<lsp.Diagnostic[]> {
-    return provideYamlDiagnostics(this.quarto_, doc);
-  }
-}
-
 export class DiagnosticComputer {
 
   readonly #configuration: LsConfiguration;
@@ -186,6 +178,7 @@ export class DiagnosticComputer {
   readonly #linkProvider: MdLinkProvider;
   readonly #tocProvider: MdTableOfContentsProvider;
   readonly #logger: ILogger;
+  readonly #quarto: Quarto;
 
   constructor(
     configuration: LsConfiguration,
@@ -193,12 +186,14 @@ export class DiagnosticComputer {
     linkProvider: MdLinkProvider,
     tocProvider: MdTableOfContentsProvider,
     logger: ILogger,
+    quarto: Quarto,
   ) {
     this.#configuration = configuration;
     this.#workspace = workspace;
     this.#linkProvider = linkProvider;
     this.#tocProvider = tocProvider;
     this.#logger = logger;
+    this.#quarto = quarto;
   }
 
   public async compute(
@@ -211,6 +206,10 @@ export class DiagnosticComputer {
     readonly statCache: ResourceMap<{ readonly exists: boolean; }>;
   }> {
     this.#logger.logDebug('DiagnosticComputer.compute', { document: doc.uri, version: doc.version });
+
+    // yaml diagnostics (frontmatter and cell options) -- kicked off
+    // concurrently with link resolution below
+    const yamlDiagnostics = provideYamlDiagnostics(this.#quarto, doc);
 
     const { links, definitions } = await this.#linkProvider.getLinks(doc);
     const statCache = new ResourceMap<{ readonly exists: boolean; }>();
@@ -234,6 +233,8 @@ export class DiagnosticComputer {
         Array.from(this.#validateDuplicateLinkDefinitions(options, links)),
       ])).flat());
     }
+
+    diagnostics.push(...(await yamlDiagnostics));
 
     this.#logger.logTrace('DiagnosticComputer.compute finished', { document: doc.uri, version: doc.version, diagnostics });
 
@@ -643,6 +644,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
     linkProvider: MdLinkProvider,
     tocProvider: MdTableOfContentsProvider,
     logger: ILogger,
+    quarto: Quarto,
   ) {
     super();
 
@@ -679,7 +681,7 @@ export class DiagnosticsManager extends Disposable implements IPullDiagnosticsMa
       },
     });
 
-    this.#computer = new DiagnosticComputer(configuration, stateCachedWorkspace, linkProvider, tocProvider, logger);
+    this.#computer = new DiagnosticComputer(configuration, stateCachedWorkspace, linkProvider, tocProvider, logger, quarto);
 
     this._register(workspace.onDidDeleteMarkdownDocument(uri => {
       this.#linkWatcher.deleteDocument(uri);

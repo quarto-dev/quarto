@@ -55,44 +55,8 @@ export async function registerDiagnostics(
 
   const subs: Disposable[] = [];
 
-
-
-  // baseline diagnostics sent on save (and cleared on change)
-  const saveDiagnosticsSources: Array<(doc: Document) => Promise<Diagnostic[]>> = [];
-  saveDiagnosticsSources.push((doc: Document) => {
-    return mdLs.computeOnSaveDiagnostics(doc);
-  });
-  // diagnostics on open and save (clear on doc modified)
-  subs.push(
-    documents.onDidOpen(async (e) => {
-      sendDiagnostics(e.document, await computeDiagnostics(e.document));
-    })
-  );
-  subs.push(
-    documents.onDidSave(async (e) => {
-      sendDiagnostics(e.document, await computeDiagnostics(e.document));
-    })
-  );
-  subs.push(
-    documents.onDidChangeContent(async (e) => {
-      sendDiagnostics(e.document, []);
-    })
-  );
-  const computeDiagnostics = async (
-    doc: Document
-  ): Promise<Diagnostic[]> => {
-    return (await Promise.all(saveDiagnosticsSources.map(src => src(doc)))).flat();
-  };
-  const sendDiagnostics = (doc: Document, diagnostics: Diagnostic[]) => {
-    connection.sendDiagnostics({
-      uri: doc.uri,
-      version: doc.version,
-      diagnostics,
-    });
-  };
-
-
-  // if we can watch files then register a pull source for markdown
+  // if we can watch files then register a pull source (diagnostics are
+  // computed as the user types)
   if (isWorkspaceWithFileWatching(workspace)) {
     let diagnosticOptions: DiagnosticOptions = kDefaultDiagnosticOptions;
     const updateDiagnosticsSetting = (): void => {
@@ -169,14 +133,36 @@ export async function registerDiagnostics(
       })
     );
   } else {
-    // run diagnostics on save (and clear on edit)
-    saveDiagnosticsSources.push((doc: Document) => {
-      return mdLs?.computeDiagnostics(
+    // no file watching, so run diagnostics on open and save (and clear on edit)
+    const computeDiagnostics = (doc: Document): Promise<Diagnostic[]> => {
+      return mdLs.computeDiagnostics(
         doc,
         getDiagnosticsOptions(configManager),
         CancellationToken.None
-      )
-    });
+      );
+    };
+    const sendDiagnostics = (doc: Document, diagnostics: Diagnostic[]) => {
+      connection.sendDiagnostics({
+        uri: doc.uri,
+        version: doc.version,
+        diagnostics,
+      });
+    };
+    subs.push(
+      documents.onDidOpen(async (e) => {
+        sendDiagnostics(e.document, await computeDiagnostics(e.document));
+      })
+    );
+    subs.push(
+      documents.onDidSave(async (e) => {
+        sendDiagnostics(e.document, await computeDiagnostics(e.document));
+      })
+    );
+    subs.push(
+      documents.onDidChangeContent(async (e) => {
+        sendDiagnostics(e.document, []);
+      })
+    );
   }
 
   return {

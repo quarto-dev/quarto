@@ -20,7 +20,7 @@ import { URI } from 'vscode-uri';
 import { Document, Parser } from "quarto-core";
 import { LsConfiguration } from './config';
 import { MdDefinitionProvider } from './providers/definitions';
-import { DiagnosticComputer, DiagnosticOnSaveComputer, DiagnosticOptions, DiagnosticsManager, IPullDiagnosticsManager } from './providers/diagnostics';
+import { DiagnosticComputer, DiagnosticOptions, DiagnosticsManager, IPullDiagnosticsManager } from './providers/diagnostics';
 import { MdDocumentHighlightProvider } from './providers/document-highlights';
 import { createWorkspaceLinkCache, MdLinkProvider, ResolvedDocumentLinkTarget } from './providers/document-links';
 import { MdDocumentSymbolProvider } from './providers/document-symbols';
@@ -149,13 +149,6 @@ export interface IMdLanguageService {
   getDocumentHighlights(document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]>;
 
   /**
-   * Compute save diagnostics for a given file
-   *
-   * Compute diagnostics that should be scanned for on save (and cleared on edit)
-   */
-  computeOnSaveDiagnostics(doc: Document): Promise<lsp.Diagnostic[]>;
-
-  /**
    * Compute diagnostics for a given file.
    *
    * Note that this function is stateless and re-validates all links every time you make the request. Use {@link IMdLanguageService.createPullDiagnosticsManager}
@@ -206,8 +199,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
   const linkCache = createWorkspaceLinkCache(init.parser, init.workspace);
   const referencesProvider = new MdReferencesProvider(config, init.parser, init.workspace, tocProvider, linkCache, logger);
   const definitionsProvider = new MdDefinitionProvider(config, init.workspace, tocProvider, linkCache);
-  const diagnosticOnSaveComputer = new DiagnosticOnSaveComputer(init.quarto);
-  const diagnosticsComputer = new DiagnosticComputer(config, init.workspace, linkProvider, tocProvider, logger);
+  const diagnosticsComputer = new DiagnosticComputer(config, init.workspace, linkProvider, tocProvider, logger, init.quarto);
   const docSymbolProvider = new MdDocumentSymbolProvider(config, tocProvider, linkProvider, logger);
   const workspaceSymbolProvider = new MdWorkspaceSymbolProvider(init.workspace, init.config, docSymbolProvider);
   const documentHighlightProvider = new MdDocumentHighlightProvider(config, tocProvider, linkProvider);
@@ -237,9 +229,6 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
     getDocumentHighlights: (document: Document, position: lsp.Position, token: CancellationToken): Promise<lsp.DocumentHighlight[]> => {
       return documentHighlightProvider.getDocumentHighlights(document, position, token);
     },
-    computeOnSaveDiagnostics: async (doc: Document) => {
-      return (await diagnosticOnSaveComputer.compute(doc));
-    },
     computeDiagnostics: async (doc: Document, options: DiagnosticOptions, token: CancellationToken): Promise<lsp.Diagnostic[]> => {
       return (await diagnosticsComputer.compute(doc, options, token))?.diagnostics;
     },
@@ -247,7 +236,7 @@ export function createLanguageService(init: LanguageServiceInitialization): IMdL
       if (!isWorkspaceWithFileWatching(init.workspace)) {
         throw new Error(`Workspace does not support file watching. Diagnostics manager not supported`);
       }
-      return new DiagnosticsManager(config, init.workspace, linkProvider, tocProvider, logger);
+      return new DiagnosticsManager(config, init.workspace, linkProvider, tocProvider, logger, init.quarto);
     }
   });
 }

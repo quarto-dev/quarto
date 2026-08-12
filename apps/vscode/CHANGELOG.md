@@ -4,6 +4,7 @@
 
 - Reduce memory usage by only starting the language server (LSP) in projects containing Quarto documents (https://github.com/quarto-dev/quarto/pull/1059).
 - Fixed a bug where single-line display math with a cross-reference label (e.g. `$$1+1$$ {#eq-spec0}`), or an unclosed `$$`, stopped the rest of the document from being parsed, so headings went missing from the outline, LaTeX preview was unavailable, and code cells below could not be run (<https://github.com/quarto-dev/quarto/pull/1063>).
+- Adds a command "Quarto: Reflow Comment in Cell" that breaks up long comment lines into multiple comment lines (by default 80 characters is considerered long, but that is configurable by `quarto.cells.reflowColumn`) (<https://github.com/quarto-dev/quarto/pull/1087>).
 
 ## 1.135.0 (Release on 2026-07-08)
 

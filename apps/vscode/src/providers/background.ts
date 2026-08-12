@@ -231,7 +231,7 @@ class HiglightingConfig {
     }
 
     this.enabled_ = backgroundOption !== CellBackgroundColor.off;
-    this.delayMs_ = config.get("cells.background.delay", 250);
+    this.delayMs_ = config.get("cells.background.delay", 50);
 
 
     if (this.backgroundDecoration_) {
@@ -264,7 +264,7 @@ class HiglightingConfig {
   private enabled_ = true;
   private backgroundDecoration_: vscode.TextEditorDecorationType | undefined;
   private inlineBackgroundDecoration_: vscode.TextEditorDecorationType | undefined;
-  private delayMs_ = 250;
+  private delayMs_ = 50;
 }
 
 const highlightingConfig = new HiglightingConfig();

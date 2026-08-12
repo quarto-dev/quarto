@@ -21,6 +21,7 @@ import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
 import { activateEmbeddedDiagnostics, type EmbeddedDiagnosticsService } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
+import { reflowCommands } from "./providers/cell/reflow";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activatePreview } from "./providers/preview/preview";
@@ -176,6 +177,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   commands.push(...activateDiagram(context, host, engine));
 
   commands.push(...activateCodeFormatting(engine));
+
+  commands.push(...reflowCommands(engine));
 
   // provide code lens (conditionally in Positron based on inline output setting)
   const isPositron = tryAcquirePositronApi();

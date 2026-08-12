@@ -83,7 +83,7 @@ export function cellOptions(language: string, source: string[]): Record<string, 
   }
 }
 
-function langCommentChars(lang: string): string[] {
+export function langCommentChars(lang: string): string[] {
   const chars = kLangCommentChars[lang] || "#";
   if (!Array.isArray(chars)) {
     return [chars];
@@ -140,6 +140,6 @@ const kLangCommentChars: Record<string, string | [string, string]> = {
   apl: "⍝",
 };
 
-function escapeRegExp(str: string) {
+export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }

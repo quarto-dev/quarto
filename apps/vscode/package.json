@@ -378,6 +378,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.reflowCommentInCell",
+        "title": "Reflow Comment in Cell",
+        "category": "Quarto"
+      },
+      {
         "command": "quarto.previewMath",
         "category": "Quarto",
         "title": "Preview Math"
@@ -662,6 +667,11 @@
       "editor/context": [
         {
           "command": "quarto.formatCell",
+          "when": "editorLangId == quarto && !editorHasSelection",
+          "group": "1_modification"
+        },
+        {
+          "command": "quarto.reflowCommentInCell",
           "when": "editorLangId == quarto && !editorHasSelection",
           "group": "1_modification"
         },
@@ -1021,6 +1031,13 @@
           "type": "number",
           "default": 500,
           "markdownDescription": "Delay in milliseconds before updating diagnostics after document changes."
+        },
+        "quarto.cells.reflowColumn": {
+          "order": 28,
+          "scope": "window",
+          "type": "number",
+          "default": 80,
+          "markdownDescription": "Maximum line length used by the **Quarto: Reflow Comment in Cell** command."
         },
         "quarto.cells.background.enabled": {
           "type": "boolean",

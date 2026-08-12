@@ -22,6 +22,7 @@ import { MarkdownEngine } from "../markdown/engine";
 import { isExecutableLanguageBlock } from "quarto-core";
 import { vscRange } from "../core/range";
 import { createThrottle } from "../core/throttle";
+import { hashPipeYaml } from "./hash-pipe-yaml";
 
 export function activateBackgroundHighlighter(
   context: vscode.ExtensionContext,
@@ -153,13 +154,28 @@ async function setEditorHighlightDecorations(
   // ranges to highlight
   const blockRanges: vscode.Range[] = [];
   const inlineRanges: vscode.Range[] = [];
+  const optionLineRanges: vscode.Range[] = [];
+  const optionSeparatorRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
 
     // find code blocks
     const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      blockRanges.push(vscRange(block.range));
+      const blockRange = vscRange(block.range);
+      blockRanges.push(blockRange);
+
+      // cell options (#| comments) get a darker background, and the last
+      // option line gets a separator (rendered as a bottom border)
+      const { lines } = hashPipeYaml(editor.document, blockRange);
+      for (const line of lines) {
+        optionLineRanges.push(editor.document.lineAt(line.docLine).range);
+      }
+      if (lines.length > 0) {
+        optionSeparatorRanges.push(
+          editor.document.lineAt(lines[lines.length - 1].docLine).range
+        );
+      }
     }
 
     // find inline executable code
@@ -186,11 +202,39 @@ async function setEditorHighlightDecorations(
     highlightingConfig.inlineBackgroundDecoration(),
     inlineRanges
   );
+  editor.setDecorations(cellOptionsBackgroundDecoration, optionLineRanges);
+  editor.setDecorations(cellOptionsSeparatorDecoration, optionSeparatorRanges);
 }
 
 function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
   editor.setDecorations(highlightingConfig.backgroundDecoration(), []);
+  editor.setDecorations(cellOptionsBackgroundDecoration, []);
+  editor.setDecorations(cellOptionsSeparatorDecoration, []);
 }
+
+// these composite on top of the cell background decoration, so a
+// translucent black overlay reads as "slightly darker" in both themes
+const cellOptionsBackgroundDecoration = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  light: {
+    backgroundColor: "#00000012",
+  },
+  dark: {
+    backgroundColor: "#00000033",
+  },
+});
+
+const cellOptionsSeparatorDecoration = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  borderStyle: "solid",
+  borderWidth: "0 0 1px 0",
+  light: {
+    borderColor: "#00000025",
+  },
+  dark: {
+    borderColor: "#FFFFFF25",
+  },
+});
 
 enum CellBackgroundColor {
   default = "default",

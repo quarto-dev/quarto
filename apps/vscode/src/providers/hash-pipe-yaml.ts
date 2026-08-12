@@ -51,7 +51,7 @@ export function activateHashPipeYamlHighlighter(
 
 // a single #| line: where its yaml content lives within the assembled
 // yaml source, and where that content starts in the document
-interface HashPipeLine {
+export interface HashPipeLine {
   yamlStart: number;
   yamlEnd: number;
   docLine: number;
@@ -84,7 +84,7 @@ class HashPipeYamlTokensProvider
 // to generalize to all languages (//| for js, --| for sql, /*| ... */
 // for c, etc.), derive the prefix from the block's language using
 // kLangCommentChars/optionCommentPattern in packages/core/src/jupyter/options.ts
-function hashPipeYaml(
+export function hashPipeYaml(
   document: vscode.TextDocument,
   blockRange: vscode.Range
 ) {

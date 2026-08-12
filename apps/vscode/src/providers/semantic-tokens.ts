@@ -34,6 +34,7 @@ import {
   mainLanguage
 } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from "../vdoc/languages";
+import { hashPipeYamlTokens } from "./hash-pipe-yaml";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
@@ -232,8 +233,17 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
           uri
         );
 
+        // yaml tokens for cell options (#| comments) -- merged into the
+        // result so that they aren't lost when this provider wins the
+        // document over the standalone provider in hash-pipe-yaml.ts
+        // (vscode uses a single semantic tokens provider per document)
+        const yamlTokens = hashPipeYamlEntries(engine, document);
+
         if (!tokens || tokens.data.length === 0) {
-          return tokens;
+          // no embedded tokens: return null (rather than an empty result,
+          // which would still claim the document) so vscode can fall through
+          // to other semantic token providers
+          return yamlTokens.length > 0 ? encodeSemanticTokens(yamlTokens) : null;
         }
 
         // Remap token indices from embedded provider's legend to our universal legend
@@ -243,10 +253,44 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
         }
 
         // Adjust token positions from virtual doc to real doc coordinates
-        return unadjustedSemanticTokens(vdoc.language, remappedTokens);
+        const adjustedTokens = unadjustedSemanticTokens(vdoc.language, remappedTokens);
+
+        // Merge in the cell option yaml tokens (encoding requires tokens
+        // sorted by document position)
+        if (yamlTokens.length === 0) {
+          return adjustedTokens;
+        }
+        const merged = decodeSemanticTokens(adjustedTokens).concat(yamlTokens);
+        merged.sort((a, b) => a.line - b.line || a.startChar - b.startChar);
+        return encodeSemanticTokens(merged);
       } catch (error) {
         return undefined;
       }
     });
   };
+}
+
+// cell option yaml tokens with token types resolved against the quarto
+// semantic token legend
+function hashPipeYamlEntries(engine: MarkdownEngine, document: TextDocument) {
+  const entries: Array<{
+    line: number;
+    startChar: number;
+    length: number;
+    tokenType: number;
+    tokenModifiers: number;
+  }> = [];
+  for (const token of hashPipeYamlTokens(engine, document)) {
+    const tokenType = QUARTO_SEMANTIC_TOKEN_LEGEND.tokenTypes.indexOf(token.tokenType);
+    if (tokenType >= 0) {
+      entries.push({
+        line: token.line,
+        startChar: token.startChar,
+        length: token.length,
+        tokenType,
+        tokenModifiers: 0,
+      });
+    }
+  }
+  return entries;
 }

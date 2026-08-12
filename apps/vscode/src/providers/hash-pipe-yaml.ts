@@ -32,9 +32,17 @@ const kTokenTypes = [
   "quartoYamlBoolean",
   "quartoYamlNull",
 ] as const;
-type HashPipeTokenType = (typeof kTokenTypes)[number];
+export type HashPipeTokenType = (typeof kTokenTypes)[number];
 
 const kLegend = new vscode.SemanticTokensLegend([...kTokenTypes]);
+
+// a single semantic token for yaml in cell options (absolute position)
+export interface HashPipeYamlToken {
+  line: number;
+  startChar: number;
+  length: number;
+  tokenType: HashPipeTokenType;
+}
 
 export function activateHashPipeYamlHighlighter(
   context: vscode.ExtensionContext,
@@ -47,6 +55,24 @@ export function activateHashPipeYamlHighlighter(
       kLegend
     )
   );
+}
+
+// compute yaml semantic tokens for the cell options (#| comments) of all
+// executable blocks in a document (also used by the embedded semantic
+// tokens middleware, which merges these with embedded language tokens)
+export function hashPipeYamlTokens(
+  engine: MarkdownEngine,
+  document: vscode.TextDocument
+): HashPipeYamlToken[] {
+  const yamlTokens: HashPipeYamlToken[] = [];
+  const tokens = engine.parse(document);
+  for (const block of tokens.filter(isExecutableLanguageBlock)) {
+    const { lines, source } = hashPipeYaml(document, vscRange(block.range));
+    if (lines.length > 0) {
+      emitYamlTokens(source, lines, yamlTokens);
+    }
+  }
+  return yamlTokens;
 }
 
 // a single #| line: where its yaml content lives within the assembled
@@ -66,12 +92,17 @@ class HashPipeYamlTokensProvider
     document: vscode.TextDocument
   ): vscode.SemanticTokens {
     const builder = new vscode.SemanticTokensBuilder(kLegend);
-    const tokens = this.engine_.parse(document);
-    for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      const { lines, source } = hashPipeYaml(document, vscRange(block.range));
-      if (lines.length > 0) {
-        emitYamlTokens(source, lines, builder);
-      }
+    const yamlTokens = hashPipeYamlTokens(this.engine_, document);
+    for (const token of yamlTokens) {
+      builder.push(
+        new vscode.Range(
+          token.line,
+          token.startChar,
+          token.line,
+          token.startChar + token.length
+        ),
+        token.tokenType
+      );
     }
     return builder.build();
   }
@@ -112,7 +143,7 @@ export function hashPipeYaml(
 function emitYamlTokens(
   source: string,
   lines: HashPipeLine[],
-  builder: vscode.SemanticTokensBuilder
+  yamlTokens: HashPipeYamlToken[]
 ) {
   const yaml = parseDocument(source);
   visit(yaml, {
@@ -120,7 +151,7 @@ function emitYamlTokens(
       if (node.range) {
         const type: HashPipeTokenType =
           key === "key" ? "quartoYamlKey" : scalarTokenType(node.value);
-        pushTokens(lines, node.range[0], node.range[1], type, builder);
+        pushTokens(lines, node.range[0], node.range[1], type, yamlTokens);
       }
     },
   });
@@ -138,28 +169,25 @@ function scalarTokenType(value: unknown): HashPipeTokenType {
   }
 }
 
-// map a [start, end) range in the yaml source back to document ranges,
+// map a [start, end) range in the yaml source back to document positions,
 // splitting across lines (e.g. for block scalars)
 function pushTokens(
   lines: HashPipeLine[],
   start: number,
   end: number,
-  type: HashPipeTokenType,
-  builder: vscode.SemanticTokensBuilder
+  tokenType: HashPipeTokenType,
+  yamlTokens: HashPipeYamlToken[]
 ) {
   for (const line of lines) {
     const tokenStart = Math.max(start, line.yamlStart);
     const tokenEnd = Math.min(end, line.yamlEnd);
     if (tokenStart < tokenEnd) {
-      builder.push(
-        new vscode.Range(
-          line.docLine,
-          line.docCharBase + (tokenStart - line.yamlStart),
-          line.docLine,
-          line.docCharBase + (tokenEnd - line.yamlStart)
-        ),
-        type
-      );
+      yamlTokens.push({
+        line: line.docLine,
+        startChar: line.docCharBase + (tokenStart - line.yamlStart),
+        length: tokenEnd - tokenStart,
+        tokenType,
+      });
     }
   }
 }

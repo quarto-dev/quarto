@@ -30,7 +30,12 @@ export const QUARTO_SEMANTIC_TOKEN_LEGEND = {
     'macro', 'label', 'comment', 'string', 'keyword',
     'number', 'regexp', 'operator',
     // Commonly used by language servers, widely supported by themes
-    'module'
+    'module',
+    // Custom types for yaml in cell options (#| comments), themed via
+    // semanticTokenScopes in the vscode extension's package.json
+    // (only append here: existing indices must not shift)
+    'quartoYamlKey', 'quartoYamlString', 'quartoYamlNumber',
+    'quartoYamlBoolean', 'quartoYamlNull'
   ],
   tokenModifiers: [
     'declaration', 'definition', 'readonly', 'static', 'deprecated',

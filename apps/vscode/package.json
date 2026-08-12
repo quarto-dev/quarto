@@ -379,7 +379,7 @@
       },
       {
         "command": "quarto.reflowCommentInCell",
-        "title": "Reflow Comment in Cell",
+        "title": "Reflow Comments in Cell",
         "category": "Quarto"
       },
       {
@@ -1037,7 +1037,7 @@
           "scope": "window",
           "type": "number",
           "default": 80,
-          "markdownDescription": "Maximum line length used by the **Quarto: Reflow Comment in Cell** command."
+          "markdownDescription": "Maximum line length used by the **Quarto: Reflow Comments in Cell** command."
         },
         "quarto.cells.background.enabled": {
           "type": "boolean",

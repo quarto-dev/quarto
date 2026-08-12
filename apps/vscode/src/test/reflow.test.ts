@@ -3,7 +3,7 @@ import * as assert from "assert";
 import { WORKSPACE_PATH, examplesOutUri, openAndShowExamplesOutTextDocument } from "./test-utils";
 import { reflowComments } from "../providers/cell/reflow";
 
-suite("Reflow Comment in Cell", function () {
+suite("Reflow Comments in Cell", function () {
 
   suite("reflowComments", function () {
     test("Wraps a long comment to the column", function () {

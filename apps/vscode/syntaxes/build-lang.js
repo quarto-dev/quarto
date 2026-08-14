@@ -491,6 +491,13 @@ const fencedCodeBlockDefinition = (
       while: (^|\\G)(?!\\s*([\`~]{3,})\\s*$)
       contentName: ${contentName}
       patterns:
+        - begin: ^(\\s*)(#\\|)
+          while: ^(\\s*)(#\\|)
+          captures:
+            '2': {name: 'comment.line.number-sign.quarto'}
+          contentName: meta.embedded.block.yaml
+          patterns:
+            - {include: 'source.yaml'}
 ${indent(4, scopes)}
 `;
 };

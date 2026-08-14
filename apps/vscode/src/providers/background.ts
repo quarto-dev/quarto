@@ -153,13 +153,28 @@ async function setEditorHighlightDecorations(
   // ranges to highlight
   const blockRanges: vscode.Range[] = [];
   const inlineRanges: vscode.Range[] = [];
+  const optionLineRanges: vscode.Range[] = [];
+  const optionSeparatorRanges: vscode.Range[] = [];
 
   if (highlightingConfig.enabled()) {
 
     // find code blocks
     const tokens = engine.parse(editor.document);
     for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      blockRanges.push(vscRange(block.range));
+      const blockRange = vscRange(block.range);
+      blockRanges.push(blockRange);
+
+      // cell options (#| comments) get a darker background, and the last
+      // option line gets a separator (rendered as a bottom border)
+      const lines = hashPipeLines(editor.document, blockRange);
+      for (const line of lines) {
+        optionLineRanges.push(editor.document.lineAt(line).range);
+      }
+      if (lines.length > 0) {
+        optionSeparatorRanges.push(
+          editor.document.lineAt(lines[lines.length - 1]).range
+        );
+      }
     }
 
     // find inline executable code
@@ -186,10 +201,75 @@ async function setEditorHighlightDecorations(
     highlightingConfig.inlineBackgroundDecoration(),
     inlineRanges
   );
+  editor.setDecorations(cellOptionsBackgroundDecoration, optionLineRanges);
+  editor.setDecorations(cellOptionsSeparatorDecoration, optionSeparatorRanges);
 }
 
 function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
   editor.setDecorations(highlightingConfig.backgroundDecoration(), []);
+  editor.setDecorations(cellOptionsBackgroundDecoration, []);
+  editor.setDecorations(cellOptionsSeparatorDecoration, []);
+}
+
+// these composite on top of the cell background decoration, so a
+// translucent black overlay reads as "slightly darker" in both themes
+// (the text is also slightly dimmed to de-emphasize options vs. code)
+const cellOptionsBackgroundDecoration = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  opacity: "0.75",
+  light: {
+    backgroundColor: "#00000012",
+  },
+  dark: {
+    backgroundColor: "#00000033",
+  },
+});
+
+// the separator is rendered via an "after" attachment (absolutely
+// positioned to span the bottom of the row) rather than a border on the
+// line itself: vscode applies line decorations to every visual row of a
+// soft-wrapped line, which would repeat the border on each wrapped row,
+// while an attachment is placed once, after the line's content
+const cellOptionsSeparatorDecoration = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  after: {
+    contentText: "",
+    textDecoration:
+      "none; position: absolute; left: 0; bottom: 0; width: 100vw; border-bottom: 1px solid;",
+  },
+  light: {
+    after: {
+      borderColor: "#00000025",
+    },
+  },
+  dark: {
+    after: {
+      borderColor: "#FFFFFF25",
+    },
+  },
+});
+
+// document lines of the leading run of cell option (#|) comments in a cell
+// (same pattern as the tmLanguage rule in ../../syntaxes/build-lang.js:
+// optional leading whitespace, then "#|" or "# |")
+//
+// note: this only handles #-comment languages (r, python, julia, etc.).
+// to generalize to all languages (//| for js, --| for sql, /*| ... */
+// for c, etc.), derive the prefix from the block's language using
+// kLangCommentChars/optionCommentPattern in packages/core/src/jupyter/options.ts
+function hashPipeLines(
+  document: vscode.TextDocument,
+  blockRange: vscode.Range
+): number[] {
+  const lines: number[] = [];
+  const lastLine = Math.min(blockRange.end.line, document.lineCount - 1);
+  for (let i = blockRange.start.line + 1; i <= lastLine; i++) {
+    if (!/^\s*# ?\|/.test(document.lineAt(i).text)) {
+      break;
+    }
+    lines.push(i);
+  }
+  return lines;
 }
 
 enum CellBackgroundColor {

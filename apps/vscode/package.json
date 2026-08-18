@@ -1495,7 +1495,7 @@
     "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
-    "build-lang": "node syntaxes/build-lang",
+    "build-lang": "tsx syntaxes/build-lang.js",
     "build-test": "yarn run build test",
     "test": "yarn build-test && vscode-test",
     "test-positron": "yarn build-test && node ./scripts/run-positron-tests.mjs"

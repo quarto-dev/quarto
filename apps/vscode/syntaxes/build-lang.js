@@ -5,6 +5,14 @@ const path = require("path");
 const yaml = require("js-yaml");
 const plist = require("plist");
 
+// the cell option comment characters/pattern shared with the extension
+// itself (this is a typescript module: run this script with tsx)
+const {
+  kLangCommentChars,
+  langCommentChars,
+  optionCommentPattern,
+} = require("../src/providers/cell/comment-chars");
+
 const languages = [
   {
     name: "css",
@@ -449,6 +457,16 @@ const languages = [
   },
 ];
 
+// textmate-conventional scope suffixes for the option comment markers
+const kCommentScopeNames = {
+  "#": "number-sign",
+  "//": "double-slash",
+  "--": "double-dash",
+  "%": "percentage",
+  "*": "asterisk",
+  "!": "exclamation",
+};
+
 const fencedCodeBlockDefinition = (
   name,
   identifiers,
@@ -471,6 +489,44 @@ const fencedCodeBlockDefinition = (
     contentName += ` ${additionalContentName.join(" ")}`;
   }
 
+  // patterns for the cell content: the leading run of cell option comments
+  // (e.g. #| fig-cap: ...) is highlighted as yaml, then a second region
+  // claims the rest of the cell with only the language grammar, so option
+  // markers in the body of a cell stay ordinary comments. block-comment
+  // languages (e.g. /*| ... */ for c and css) are not supported: their
+  // closing delimiter would end up inside the yaml
+  const commentChars = langCommentChars(
+    name in kLangCommentChars ? name : language
+  );
+  let contentPatterns;
+  if (commentChars.length > 1) {
+    contentPatterns = indent(4, scopes);
+  } else {
+    // the runtime option pattern, sans its ^ anchor (the grammar allows
+    // leading indentation, and also reuses the marker inside a lookahead)
+    const marker = optionCommentPattern(commentChars[0]).source.replace(
+      /^\^/,
+      ""
+    );
+    const scope = `comment.line.${
+      kCommentScopeNames[commentChars[0]] || "cell-options"
+    }.quarto`;
+    contentPatterns = indent(
+      4,
+      `- begin: ^(\\s*)(${marker})
+  while: ^(\\s*)(${marker})
+  captures:
+    '2': {name: '${scope}'}
+  contentName: meta.embedded.block.yaml
+  patterns:
+    - {include: 'source.yaml'}
+- begin: ^(?!\\s*${marker})
+  while: (^|\\G)
+  patterns:
+${indent(2, scopes)}`
+    );
+  }
+
   return `fenced_code_block_${name}:
   begin:
     (^|\\G)(\\s*)(\`{3,}|~{3,})\\s*(?:\\{(?:#[\\w-]+\\s+)?[\\{\\.=]?)?(?i:(${identifiers.join(
@@ -491,14 +547,7 @@ const fencedCodeBlockDefinition = (
       while: (^|\\G)(?!\\s*([\`~]{3,})\\s*$)
       contentName: ${contentName}
       patterns:
-        - begin: ^(\\s*)(#\\|)
-          while: ^(\\s*)(#\\|)
-          captures:
-            '2': {name: 'comment.line.number-sign.quarto'}
-          contentName: meta.embedded.block.yaml
-          patterns:
-            - {include: 'source.yaml'}
-${indent(4, scopes)}
+${contentPatterns}
 `;
 };
 

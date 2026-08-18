@@ -19,9 +19,10 @@ import * as vscode from "vscode";
 
 import { isQuartoDoc, kQuartoDocSelector } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { isExecutableLanguageBlock } from "quarto-core";
+import { isExecutableLanguageBlock, languageNameFromBlock } from "quarto-core";
 import { vscRange } from "../core/range";
 import { createThrottle } from "../core/throttle";
+import { langCommentChars, optionCommentPattern } from "./cell/comment-chars";
 
 export function activateBackgroundHighlighter(
   context: vscode.ExtensionContext,
@@ -166,7 +167,11 @@ async function setEditorHighlightDecorations(
 
       // cell options (#| comments) get a darker background, and the last
       // option line gets a separator (rendered as a bottom border)
-      const lines = hashPipeLines(editor.document, blockRange);
+      const lines = cellOptionLines(
+        editor.document,
+        blockRange,
+        languageNameFromBlock(block)
+      );
       for (const line of lines) {
         optionLineRanges.push(editor.document.lineAt(line).range);
       }
@@ -249,22 +254,29 @@ const cellOptionsSeparatorDecoration = vscode.window.createTextEditorDecorationT
   },
 });
 
-// document lines of the leading run of cell option (#|) comments in a cell
-// (same pattern as the tmLanguage rule in ../../syntaxes/build-lang.js:
-// optional leading whitespace, then "#|" or "# |")
+// document lines of the leading run of cell option comments in a cell
+// (#| for python/r, //| for js, etc. -- the same pattern used by the
+// tmLanguage rules generated in ../../syntaxes/build-lang.js, with
+// optional leading indentation allowed)
 //
-// note: this only handles #-comment languages (r, python, julia, etc.).
-// to generalize to all languages (//| for js, --| for sql, /*| ... */
-// for c, etc.), derive the prefix from the block's language using
-// kLangCommentChars/optionCommentPattern in packages/core/src/jupyter/options.ts
-function hashPipeLines(
+// note: block-comment languages (e.g. /*| ... */ for c and css) are not
+// supported (same as the tmLanguage)
+function cellOptionLines(
   document: vscode.TextDocument,
-  blockRange: vscode.Range
+  blockRange: vscode.Range,
+  language: string
 ): number[] {
+  const commentChars = langCommentChars(language);
+  if (commentChars.length > 1) {
+    return [];
+  }
+  const pattern = new RegExp(
+    "^\\s*" + optionCommentPattern(commentChars[0]).source.replace(/^\^/, "")
+  );
   const lines: number[] = [];
   const lastLine = Math.min(blockRange.end.line, document.lineCount - 1);
   for (let i = blockRange.start.line + 1; i <= lastLine; i++) {
-    if (!/^\s*# ?\|/.test(document.lineAt(i).text)) {
+    if (!pattern.test(document.lineAt(i).text)) {
       break;
     }
     lines.push(i);

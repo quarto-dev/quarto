@@ -185,8 +185,14 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
   if (selection.isEmpty) {
     splitStart = splitEnd = clamp(new Position(selection.active.line, 0));
   } else {
-    splitStart = clamp(selection.start);
-    splitEnd = clamp(selection.end);
+    // snap the selection to whole lines
+    // (notean end position at column 0 belongs to the previous line)
+    splitStart = clamp(new Position(selection.start.line, 0));
+    const endLine =
+      selection.end.character === 0
+        ? selection.end.line
+        : selection.end.line + 1;
+    splitEnd = clamp(new Position(endLine, 0));
   }
 
   // cell bodies, with surrounding blank lines removed (but indentation kept)

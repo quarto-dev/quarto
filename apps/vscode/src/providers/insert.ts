@@ -226,9 +226,12 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
     }
   }
 
-  // render the cells (empty cells get a blank line for the cursor to land on)
+  // render the cells (empty cells get a blank line for the cursor to land on).
+  const defaultHeader = fence + "{" + languageNameFromBlock(block) + "}";
+  const firstCellWithBody = Math.max(bodies.findIndex((body) => body.length > 0), 0);
   const eol = doc.eol === EndOfLine.CRLF ? "\r\n" : "\n";
-  const cellText = (body: string) => header + eol + body + eol + fence;
+  const cellText = (body: string, i: number) =>
+    (i === firstCellWithBody ? header : defaultHeader) + eol + body + eol + fence;
   const newText = bodies.map(cellText).join(eol + eol);
 
   // cursor goes to the first body line of the target cell

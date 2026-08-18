@@ -249,6 +249,7 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
     const cursor = new Position(cursorLine, 0);
     editor.selection = new Selection(cursor, cursor);
     editor.revealRange(new Range(cursor, cursor));
+    return true;
   }
-  return true;
+  return false;
 }

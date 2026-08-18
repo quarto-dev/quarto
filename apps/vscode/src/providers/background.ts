@@ -56,6 +56,15 @@ export function activateBackgroundHighlighter(
     context.subscriptions
   );
 
+  // release cached ranges when documents close
+  vscode.workspace.onDidCloseTextDocument(
+    (doc) => {
+      highlightRangesCache.delete(doc.uri.toString());
+    },
+    null,
+    context.subscriptions
+  );
+
   // update highlighting when visible text editors change
   vscode.window.onDidChangeVisibleTextEditors(
     (visibleEditors) => {
@@ -140,6 +149,53 @@ function updateAllEditorsDecorationsThrottled(engine: MarkdownEngine) {
   }
 }
 
+// computed ranges are cached by document version: updates are triggered
+// (among other things) by the document highlight provider, which fires on
+// every cursor move against an unchanged document
+const highlightRangesCache = new Map<string, {
+  version: number;
+  blockRanges: vscode.Range[];
+  inlineRanges: vscode.Range[];
+}>();
+
+function editorHighlightRanges(
+  editor: vscode.TextEditor,
+  engine: MarkdownEngine
+) {
+  const uri = editor.document.uri.toString();
+  const version = editor.document.version;
+  const cached = highlightRangesCache.get(uri);
+  if (cached && cached.version === version) {
+    return cached;
+  }
+
+  const blockRanges: vscode.Range[] = [];
+  const inlineRanges: vscode.Range[] = [];
+
+  // find code blocks
+  const tokens = engine.parse(editor.document);
+  for (const block of tokens.filter(isExecutableLanguageBlock)) {
+    blockRanges.push(vscRange(block.range));
+  }
+
+  // find inline executable code
+  for (let i = 0; i < editor.document.lineCount; i++) {
+    const line = editor.document.lineAt(i);
+    const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
+    for (const match of matches) {
+      if (match.index !== undefined) {
+        const begin = new vscode.Position(i, match.index + match[1].length);
+        const end = new vscode.Position(i, begin.character + match[0].length - match[1].length);
+        inlineRanges.push(new vscode.Range(begin, end));
+      }
+    }
+  }
+
+  const ranges = { version, blockRanges, inlineRanges };
+  highlightRangesCache.set(uri, ranges);
+  return ranges;
+}
+
 async function setEditorHighlightDecorations(
   editor: vscode.TextEditor,
   engine: MarkdownEngine,
@@ -150,34 +206,11 @@ async function setEditorHighlightDecorations(
     return;
   }
 
-  // ranges to highlight
-  const blockRanges: vscode.Range[] = [];
-  const inlineRanges: vscode.Range[] = [];
+  // ranges to highlight (could be none if highlighting isn't enabled)
+  const { blockRanges, inlineRanges } = highlightingConfig.enabled()
+    ? editorHighlightRanges(editor, engine)
+    : { blockRanges: [], inlineRanges: [] };
 
-  if (highlightingConfig.enabled()) {
-
-    // find code blocks
-    const tokens = engine.parse(editor.document);
-    for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      blockRanges.push(vscRange(block.range));
-    }
-
-    // find inline executable code
-    for (let i = 0; i < editor.document.lineCount; i++) {
-      const line = editor.document.lineAt(i);
-      const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
-      for (const match of matches) {
-        if (match.index !== undefined) {
-          const begin = new vscode.Position(i, match.index + match[1].length);
-          const end = new vscode.Position(i, begin.character + match[0].length - match[1].length);
-          inlineRanges.push(new vscode.Range(begin, end));
-        }
-      }
-    }
-  }
-
-
-  // set highlights (could be none if we highlighting isn't enabled)
   editor.setDecorations(
     highlightingConfig.backgroundDecoration(),
     blockRanges

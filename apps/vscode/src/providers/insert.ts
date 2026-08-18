@@ -16,6 +16,7 @@
 import {
   commands,
   window,
+  EndOfLine,
   Range,
   Position,
   Selection,
@@ -192,8 +193,8 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
   const cellBody = (range: Range) => {
     const text = doc
       .getText(range)
-      .replace(/^([ \t]*\n)+/, "")
-      .replace(/(\n[ \t]*)+$/, "");
+      .replace(/^([ \t]*\r?\n)+/, "")
+      .replace(/(\r?\n[ \t]*)+$/, "");
     return text.trim() ? text : "";
   };
   const before = cellBody(new Range(bodyStart, splitStart));
@@ -220,8 +221,9 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
   }
 
   // render the cells (empty cells get a blank line for the cursor to land on)
-  const cellText = (body: string) => header + "\n" + body + "\n" + fence;
-  const newText = bodies.map(cellText).join("\n\n");
+  const eol = doc.eol === EndOfLine.CRLF ? "\r\n" : "\n";
+  const cellText = (body: string) => header + eol + body + eol + fence;
+  const newText = bodies.map(cellText).join(eol + eol);
 
   // cursor goes to the first body line of the target cell
   let cursorLine = headerLine + 1;

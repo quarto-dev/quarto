@@ -212,6 +212,7 @@ async function setEditorHighlightDecorations(
 
 function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
   editor.setDecorations(highlightingConfig.backgroundDecoration(), []);
+  editor.setDecorations(highlightingConfig.inlineBackgroundDecoration(), []);
   editor.setDecorations(cellOptionsBackgroundDecoration, []);
   editor.setDecorations(cellOptionsSeparatorDecoration, []);
 }

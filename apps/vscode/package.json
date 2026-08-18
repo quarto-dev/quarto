@@ -1067,6 +1067,13 @@
           "default": 250,
           "markdownDescription": "Millisecond delay between background color updates."
         },
+        "quarto.cells.options.background": {
+          "order": 23,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Apply a visual treatment to cell option comments (e.g. `#|` lines): a slightly darker background, dimmed text, and a separator below the options."
+        },
         "quarto.cells.useReticulate": {
           "order": 27,
           "scope": "window",

@@ -167,18 +167,20 @@ async function setEditorHighlightDecorations(
 
       // cell options (#| comments) get a darker background, and the last
       // option line gets a separator (rendered as a bottom border)
-      const lines = cellOptionLines(
-        editor.document,
-        blockRange,
-        languageNameFromBlock(block)
-      );
-      for (const line of lines) {
-        optionLineRanges.push(editor.document.lineAt(line).range);
-      }
-      if (lines.length > 0) {
-        optionSeparatorRanges.push(
-          editor.document.lineAt(lines[lines.length - 1]).range
+      if (highlightingConfig.cellOptionsBackgroundEnabled()) {
+        const lines = cellOptionLines(
+          editor.document,
+          blockRange,
+          languageNameFromBlock(block)
         );
+        for (const line of lines) {
+          optionLineRanges.push(editor.document.lineAt(line).range);
+        }
+        if (lines.length > 0) {
+          optionSeparatorRanges.push(
+            editor.document.lineAt(lines[lines.length - 1]).range
+          );
+        }
       }
     }
 
@@ -298,6 +300,10 @@ class HiglightingConfig {
     return this.enabled_;
   }
 
+  public cellOptionsBackgroundEnabled() {
+    return this.cellOptionsBackground_;
+  }
+
   public backgroundDecoration() {
     return this.backgroundDecoration_!;
   }
@@ -324,6 +330,7 @@ class HiglightingConfig {
     }
 
     this.enabled_ = backgroundOption !== CellBackgroundColor.off;
+    this.cellOptionsBackground_ = config.get<boolean>("cells.options.background", true);
     this.delayMs_ = config.get("cells.background.delay", 250);
 
 
@@ -355,6 +362,7 @@ class HiglightingConfig {
   }
 
   private enabled_ = true;
+  private cellOptionsBackground_ = true;
   private backgroundDecoration_: vscode.TextEditorDecorationType | undefined;
   private inlineBackgroundDecoration_: vscode.TextEditorDecorationType | undefined;
   private delayMs_ = 250;

@@ -58,8 +58,8 @@ class InsertCodeCellCommand implements Command {
           if (await splitCodeCell(editor, block)) {
             return;
           }
-          // block isn't a backtick code fence (e.g. display math), so
-          // insert a new cell below it
+          // block can't be split (e.g. display math or an unclosed fence),
+          // so insert a new cell below it
           language = languageNameFromBlock(block);
           insertTopPaddingLine = true;
           const moveDown = block.range.end.line - cursorLine + 1;
@@ -145,8 +145,8 @@ class InsertCodeCellCommand implements Command {
 
 // split the code cell containing the cursor into two cells at the cursor line
 // (with a selection, into three cells: before / selection / after), mirroring
-// RStudio's insert chunk behavior. returns false if the block isn't a backtick
-// code fence (e.g. display math) and so can't be split
+// RStudio's insert chunk behavior. returns false if the block isn't a closed
+// backtick code fence (e.g. display math) and so can't be split
 async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean> {
   const doc = editor.document;
   const headerLine = block.range.start.line;
@@ -158,22 +158,18 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
   const fence = fenceMatch[1];
 
   // locate the closing fence: the parsed range can end one line past it (when
-  // the next line has content) or the block may be unclosed at end of document
+  // the next line has content)
   const closingFenceRegex = new RegExp("^ {0,3}`{" + fence.length + ",}\\s*$");
   let footerLine = Math.min(block.range.end.line, doc.lineCount - 1);
   while (footerLine > headerLine && !closingFenceRegex.test(doc.lineAt(footerLine).text)) {
     footerLine--;
   }
-  const closed = footerLine > headerLine;
-  const blockEndLine = closed ? footerLine : Math.min(block.range.end.line, doc.lineCount - 1);
-  if (blockEndLine <= headerLine) {
-    // header-only block with no body to split
+  if (footerLine <= headerLine) {
+    // an unclosed fence parses to the end of the document
     return false;
   }
   const bodyStart = new Position(headerLine + 1, 0);
-  const bodyEnd = closed
-    ? new Position(footerLine, 0)
-    : new Position(blockEndLine, doc.lineAt(blockEndLine).text.length);
+  const bodyEnd = new Position(footerLine, 0);
 
   // determine the split point(s): the cursor line with no selection, otherwise
   // the selection boundaries (clamped to the cell body)
@@ -242,7 +238,7 @@ async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean>
 
   const replaceRange = new Range(
     new Position(headerLine, 0),
-    closed ? new Position(footerLine, doc.lineAt(footerLine).text.length) : bodyEnd
+    new Position(footerLine, doc.lineAt(footerLine).text.length)
   );
   const applied = await editor.edit((edit) => edit.replace(replaceRange, newText));
   if (applied) {

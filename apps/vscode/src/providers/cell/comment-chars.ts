@@ -80,6 +80,6 @@ export function optionCommentPattern(comment: string) {
   return new RegExp("^" + escapeRegExp(comment) + "\\s*\\| ?");
 }
 
-function escapeRegExp(str: string) {
+export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }

@@ -28,7 +28,7 @@ import { Command } from "../../core/command";
 import { isQuartoDoc } from "../../core/doc";
 import { MarkdownEngine } from "../../markdown/engine";
 import { languageFromBlock } from "../../vdoc/vdoc";
-import { escapeRegExp, langCommentChars, optionCommentPattern } from "./options";
+import { escapeRegExp, langCommentChars, optionCommentPattern } from "./comment-chars";
 
 export function reflowCommands(engine: MarkdownEngine): Command[] {
   return [new ReflowCommentInCellCommand(engine)];
@@ -87,13 +87,13 @@ class ReflowCommentInCellCommand implements Command {
     const lineOffset = block.range.start.line + 1;
 
     await editor.edit((editBuilder) => {
-      // Sort by descending start position to avoid range shifting issues
+      // Sort by descending position to avoid range shifting issues
       [...reflows]
-        .sort((a, b) => b.startLine - a.startLine)
+        .sort((a, b) => b.line - a.line)
         .forEach((reflow) => {
           const range = new Range(
-            new Position(lineOffset + reflow.startLine, 0),
-            document.lineAt(lineOffset + reflow.endLine).range.end
+            new Position(lineOffset + reflow.line, 0),
+            document.lineAt(lineOffset + reflow.line).range.end
           );
           editBuilder.replace(range, reflow.newLines.join(eol));
         });
@@ -116,35 +116,32 @@ function lineCommentForBlock(block: TokenMath | TokenCodeBlock): string | undefi
 }
 
 export interface CommentReflow {
-  /** First line of the replaced region (0-based, relative to the cell body). */
-  startLine: number;
-  /** Last line of the replaced region (inclusive). */
-  endLine: number;
-  /** Replacement lines (may be fewer or more than the region spans). */
+  /** The replaced line (0-based, relative to the cell body). */
+  line: number;
+  /** Replacement lines. */
   newLines: string[];
 }
 
-interface ParsedCommentLine {
-  raw: string;
+interface WrappableComment {
   indent: string;
   prefix: string;
   content: string;
-  kind: "blank" | "fixed" | "text";
 }
 
 /**
- * Reflow the full-line comments in a cell body to the given column.
+ * Split the full-line comments in a cell body that extend past the given
+ * column. Each long comment line is wrapped greedily onto continuation lines
+ * that repeat its indentation and comment prefix. Lines are only ever split,
+ * never joined, and lines that aren't split are never rewritten.
  *
- * Consecutive comment lines form paragraphs whose words are re-wrapped
- * greedily. Paragraphs are delimited by code lines, empty comment lines
- * (which are preserved as separators), changes in indentation or comment
- * prefix, and "fixed" lines that are kept verbatim: divider/banner lines
- * without any word content (`# ------`, `#######`) and section headers
- * ending in a run of `-`/`=` (`# Load data ----`). Quarto option directives
- * (`#| echo: false`) and lines that mix code and a trailing comment are
- * never touched.
+ * Only comments of the form `<prefix> <text>` are wrapped: lines where the
+ * prefix runs straight into other characters (`#!/usr/bin/env bash`,
+ * `#--- foo`), Quarto option directives (`#| echo: false`), empty comment
+ * lines, divider/banner lines without any word content (`# ------`,
+ * `#######`), section headers ending in a run of `-`/`=` (`# Load data ----`),
+ * and lines that mix code and a trailing comment are all left verbatim.
  *
- * Returns one replacement per contiguous comment run that actually changed.
+ * Returns one replacement per line that was split.
  */
 export function reflowComments(
   cellLines: string[],
@@ -157,7 +154,7 @@ export function reflowComments(
   // like `#'` (roxygen), `///` and `//!` (doc comments) intact when wrapping.
   const prefixPattern = new RegExp("^((?:" + escapeRegExp(comment) + ")+[!'/]?)");
 
-  const parseLine = (raw: string): ParsedCommentLine | undefined => {
+  const parseLine = (raw: string): WrappableComment | undefined => {
     const trimmed = raw.trimStart();
     if (!trimmed.startsWith(comment)) {
       return undefined;
@@ -167,93 +164,47 @@ export function reflowComments(
       return undefined;
     }
     const indent = raw.slice(0, raw.length - trimmed.length);
-    let prefix = prefixPattern.exec(trimmed)![1];
-    let rest = trimmed.slice(prefix.length);
+    const prefix = prefixPattern.exec(trimmed)![1];
+    const rest = trimmed.slice(prefix.length);
     if (rest !== "" && !/^[ \t]/.test(rest)) {
-      // The extended prefix runs straight into other text (e.g. `#--- foo`):
-      // fall back to the bare comment string as the prefix.
-      prefix = comment;
-      rest = trimmed.slice(comment.length);
+      // The prefix runs straight into other characters (`#!/usr/bin/env`,
+      // `#--- foo`): leave the line verbatim.
+      return undefined;
     }
     const content = rest.trim();
-    const kind =
-      content === ""
-        ? prefix === comment
-          ? "blank"
-          : "fixed" // banner lines like `#####` are kept verbatim
-        : !/[\p{L}\p{N}]/u.test(content) || /[-=]{4,}$/.test(content)
-          ? "fixed" // dividers (`# ----`) and section headers (`# Load ----`)
-          : "text";
-    return { raw, indent, prefix, content, kind };
+    if (content === "") {
+      return undefined;
+    }
+    if (!/[\p{L}\p{N}]/u.test(content) || /[-=]{4,}$/.test(content)) {
+      // Dividers (`# ----`) and section headers (`# Load ----`)
+      return undefined;
+    }
+    return { indent, prefix, content };
   };
 
   const reflows: CommentReflow[] = [];
-  let i = 0;
-  while (i < cellLines.length) {
-    if (!parseLine(cellLines[i])) {
-      i++;
-      continue;
+  cellLines.forEach((raw, line) => {
+    if (raw.length <= column) {
+      return;
     }
-    // Collect a contiguous run of comment lines
-    const runStart = i;
-    const run: ParsedCommentLine[] = [];
-    for (; i < cellLines.length; i++) {
-      const parsed = parseLine(cellLines[i]);
-      if (!parsed) {
-        break;
-      }
-      run.push(parsed);
+    const parsed = parseLine(raw);
+    if (!parsed) {
+      return;
     }
-    const runEnd = i - 1;
-    const newLines = reflowRun(run, column);
-    const original = cellLines.slice(runStart, runEnd + 1);
-    if (
-      newLines.length !== original.length ||
-      newLines.some((line, idx) => line !== original[idx])
-    ) {
-      reflows.push({ startLine: runStart, endLine: runEnd, newLines });
+    const newLines = wrapComment(parsed, column);
+    // A single wrapped line means nothing was split (e.g. one unbreakable
+    // word, or only trailing whitespace past the column): leave it verbatim.
+    if (newLines.length > 1) {
+      reflows.push({ line, newLines });
     }
-  }
+  });
   return reflows;
 }
 
-function reflowRun(run: ParsedCommentLine[], column: number): string[] {
-  const out: string[] = [];
-  let paragraph: ParsedCommentLine[] = [];
-  const flush = () => {
-    if (paragraph.length > 0) {
-      out.push(...wrapParagraph(paragraph, column));
-      paragraph = [];
-    }
-  };
-  for (const line of run) {
-    if (line.kind === "blank") {
-      flush();
-      // Normalize empty comment lines (drops trailing whitespace)
-      out.push(line.indent + line.prefix);
-    } else if (line.kind === "fixed") {
-      flush();
-      out.push(line.raw);
-    } else {
-      if (
-        paragraph.length > 0 &&
-        (paragraph[0].indent !== line.indent || paragraph[0].prefix !== line.prefix)
-      ) {
-        flush();
-      }
-      paragraph.push(line);
-    }
-  }
-  flush();
-  return out;
-}
-
-function wrapParagraph(paragraph: ParsedCommentLine[], column: number): string[] {
-  const linePrefix = paragraph[0].indent + paragraph[0].prefix + " ";
+function wrapComment(comment: WrappableComment, column: number): string[] {
+  const linePrefix = comment.indent + comment.prefix + " ";
   const width = Math.max(1, column - linePrefix.length);
-  const words = paragraph
-    .flatMap((line) => line.content.split(/\s+/))
-    .filter((word) => word.length > 0);
+  const words = comment.content.split(/\s+/);
   const out: string[] = [];
   let current = "";
   for (const word of words) {

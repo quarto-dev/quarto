@@ -6,7 +6,7 @@ import { reflowComments } from "../providers/cell/reflow";
 suite("Reflow Comments in Cell", function () {
 
   suite("reflowComments", function () {
-    test("Wraps a long comment to the column", function () {
+    test("Splits a long comment at the column", function () {
       const reflows = reflowComments(
         ["# aaa bbb ccc ddd", "x <- 1"],
         "#",
@@ -14,21 +14,42 @@ suite("Reflow Comments in Cell", function () {
       );
       assert.strictEqual(reflows.length, 1);
       assert.deepStrictEqual(reflows[0], {
-        startLine: 0,
-        endLine: 0,
+        line: 0,
         newLines: ["# aaa bbb", "# ccc ddd"],
       });
     });
 
-    test("Joins short comment lines up to the column", function () {
+    test("Never joins short comment lines", function () {
       const reflows = reflowComments(["# aaa", "# bbb", "# ccc"], "#", 80);
-      assert.strictEqual(reflows.length, 1);
-      assert.deepStrictEqual(reflows[0].newLines, ["# aaa bbb ccc"]);
-      assert.strictEqual(reflows[0].endLine, 2);
+      assert.deepStrictEqual(reflows, []);
     });
 
     test("Returns no edits when comments already fit", function () {
       const reflows = reflowComments(["# aaa bbb", "x <- 1"], "#", 80);
+      assert.deepStrictEqual(reflows, []);
+    });
+
+    test("Never rewrites lines it does not split", function () {
+      // Irregular spacing, trailing whitespace, and blank comment lines are
+      // all left alone when the line fits within the column
+      assert.deepStrictEqual(
+        reflowComments(["# aaa    bbb", "# ", "#  ccc  "], "#", 80),
+        []
+      );
+      // A line over the column is left alone when splitting is impossible:
+      // one unbreakable word, or only trailing whitespace past the column
+      assert.deepStrictEqual(
+        reflowComments(["# aaaaaaaaaaaaaa", "# aaa       "], "#", 10),
+        []
+      );
+    });
+
+    test("Leaves shebangs and other unspaced prefixes verbatim", function () {
+      const reflows = reflowComments(
+        ["#!/usr/bin/env bash -o pipefail", "#--- not a wrappable comment"],
+        "#",
+        10
+      );
       assert.deepStrictEqual(reflows, []);
     });
 
@@ -39,39 +60,22 @@ suite("Reflow Comments in Cell", function () {
         10
       );
       assert.strictEqual(reflows.length, 1);
-      assert.strictEqual(reflows[0].startLine, 2);
-      assert.strictEqual(reflows[0].endLine, 2);
+      assert.strictEqual(reflows[0].line, 2);
     });
 
-    test("Blank comment lines separate paragraphs", function () {
-      const reflows = reflowComments(["# aaa bbb ccc", "#", "# ddd"], "#", 10);
-      assert.strictEqual(reflows.length, 1);
-      assert.deepStrictEqual(reflows[0].newLines, [
-        "# aaa bbb",
-        "# ccc",
-        "#",
-        "# ddd",
-      ]);
-      // ...and trailing whitespace on blank comment lines is normalized
-      const normalized = reflowComments(["# aaa", "# ", "# bbb"], "#", 80);
-      assert.deepStrictEqual(normalized[0].newLines, ["# aaa", "#", "# bbb"]);
-    });
-
-    test("Code lines delimit comment runs and are untouched", function () {
+    test("Splits each long line separately, leaving others untouched", function () {
       const reflows = reflowComments(
-        ["# aaa bbb ccc", "x <- 1  # trailing comment stays put", "# ddd eee fff"],
+        ["# aaa bbb ccc", "#", "x <- 1  # trailing comment stays put", "# ddd eee fff"],
         "#",
         10
       );
       assert.strictEqual(reflows.length, 2);
       assert.deepStrictEqual(reflows[0], {
-        startLine: 0,
-        endLine: 0,
+        line: 0,
         newLines: ["# aaa bbb", "# ccc"],
       });
       assert.deepStrictEqual(reflows[1], {
-        startLine: 2,
-        endLine: 2,
+        line: 3,
         newLines: ["# ddd eee", "# fff"],
       });
     });
@@ -88,33 +92,34 @@ suite("Reflow Comments in Cell", function () {
         10
       );
       assert.strictEqual(reflows.length, 1);
-      assert.deepStrictEqual(reflows[0].newLines, [
-        "# ---------------------------------------",
-        "# aaa bbb",
-        "# ccc",
-        "###########################################",
-        "# Load the data ----",
-      ]);
+      assert.deepStrictEqual(reflows[0], {
+        line: 1,
+        newLines: ["# aaa bbb", "# ccc"],
+      });
     });
 
     test("Preserves indentation and extended prefixes", function () {
       const reflows = reflowComments(
-        ["  # aaa bbb ccc", "#' roxygen docs stay grouped apart", "#' from plain comments"],
+        ["  # aaa bbb ccc", "#' roxygen docs stay wrapped with their prefix"],
         "#",
         12
       );
-      assert.strictEqual(reflows.length, 1);
-      assert.deepStrictEqual(reflows[0].newLines, [
-        "  # aaa bbb",
-        "  # ccc",
-        "#' roxygen",
-        "#' docs stay",
-        "#' grouped",
-        "#' apart",
-        "#' from",
-        "#' plain",
-        "#' comments",
-      ]);
+      assert.strictEqual(reflows.length, 2);
+      assert.deepStrictEqual(reflows[0], {
+        line: 0,
+        newLines: ["  # aaa bbb", "  # ccc"],
+      });
+      assert.deepStrictEqual(reflows[1], {
+        line: 1,
+        newLines: [
+          "#' roxygen",
+          "#' docs stay",
+          "#' wrapped",
+          "#' with",
+          "#' their",
+          "#' prefix",
+        ],
+      });
     });
 
     test("Supports multi-character comment strings", function () {

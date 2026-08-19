@@ -57,6 +57,15 @@ export function activateBackgroundHighlighter(
     context.subscriptions
   );
 
+  // release cached ranges when documents close
+  vscode.workspace.onDidCloseTextDocument(
+    (doc) => {
+      highlightRangesCache.delete(doc.uri.toString());
+    },
+    null,
+    context.subscriptions
+  );
+
   // update highlighting when visible text editors change
   vscode.window.onDidChangeVisibleTextEditors(
     (visibleEditors) => {
@@ -141,6 +150,80 @@ function updateAllEditorsDecorationsThrottled(engine: MarkdownEngine) {
   }
 }
 
+// computed ranges are cached by document version: updates are triggered
+// (among other things) by the document highlight provider, which fires on
+// every cursor move against an unchanged document
+const highlightRangesCache = new Map<string, {
+  version: number;
+  blockRanges: vscode.Range[];
+  inlineRanges: vscode.Range[];
+  optionLineRanges: vscode.Range[];
+  optionSeparatorRanges: vscode.Range[];
+}>();
+
+function editorHighlightRanges(
+  editor: vscode.TextEditor,
+  engine: MarkdownEngine
+) {
+  const uri = editor.document.uri.toString();
+  const version = editor.document.version;
+  const cached = highlightRangesCache.get(uri);
+  if (cached && cached.version === version) {
+    return cached;
+  }
+
+  const blockRanges: vscode.Range[] = [];
+  const inlineRanges: vscode.Range[] = [];
+  const optionLineRanges: vscode.Range[] = [];
+  const optionSeparatorRanges: vscode.Range[] = [];
+
+  // find code blocks
+  const tokens = engine.parse(editor.document);
+  for (const block of tokens.filter(isExecutableLanguageBlock)) {
+    const blockRange = vscRange(block.range);
+    blockRanges.push(blockRange);
+
+    // cell options (#| comments) get a darker background, and the last
+    // option line gets a separator (rendered as a bottom border)
+    const lines = cellOptionLines(
+      editor.document,
+      blockRange,
+      languageNameFromBlock(block)
+    );
+    for (const line of lines) {
+      optionLineRanges.push(editor.document.lineAt(line).range);
+    }
+    if (lines.length > 0) {
+      optionSeparatorRanges.push(
+        editor.document.lineAt(lines[lines.length - 1]).range
+      );
+    }
+  }
+
+  // find inline executable code
+  for (let i = 0; i < editor.document.lineCount; i++) {
+    const line = editor.document.lineAt(i);
+    const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
+    for (const match of matches) {
+      if (match.index !== undefined) {
+        const begin = new vscode.Position(i, match.index + match[1].length);
+        const end = new vscode.Position(i, begin.character + match[0].length - match[1].length);
+        inlineRanges.push(new vscode.Range(begin, end));
+      }
+    }
+  }
+
+  const ranges = {
+    version,
+    blockRanges,
+    inlineRanges,
+    optionLineRanges,
+    optionSeparatorRanges,
+  };
+  highlightRangesCache.set(uri, ranges);
+  return ranges;
+}
+
 async function setEditorHighlightDecorations(
   editor: vscode.TextEditor,
   engine: MarkdownEngine,
@@ -151,65 +234,33 @@ async function setEditorHighlightDecorations(
     return;
   }
 
-  // ranges to highlight
-  const blockRanges: vscode.Range[] = [];
-  const inlineRanges: vscode.Range[] = [];
-  const optionLineRanges: vscode.Range[] = [];
-  const optionSeparatorRanges: vscode.Range[] = [];
+  // ranges to highlight (could be none if highlighting isn't enabled)
+  const ranges = highlightingConfig.enabled()
+    ? editorHighlightRanges(editor, engine)
+    : {
+      blockRanges: [],
+      inlineRanges: [],
+      optionLineRanges: [],
+      optionSeparatorRanges: [],
+    };
+  const optionsEnabled = highlightingConfig.cellOptionsBackgroundEnabled();
 
-  if (highlightingConfig.enabled()) {
-
-    // find code blocks
-    const tokens = engine.parse(editor.document);
-    for (const block of tokens.filter(isExecutableLanguageBlock)) {
-      const blockRange = vscRange(block.range);
-      blockRanges.push(blockRange);
-
-      // cell options (#| comments) get a darker background, and the last
-      // option line gets a separator (rendered as a bottom border)
-      if (highlightingConfig.cellOptionsBackgroundEnabled()) {
-        const lines = cellOptionLines(
-          editor.document,
-          blockRange,
-          languageNameFromBlock(block)
-        );
-        for (const line of lines) {
-          optionLineRanges.push(editor.document.lineAt(line).range);
-        }
-        if (lines.length > 0) {
-          optionSeparatorRanges.push(
-            editor.document.lineAt(lines[lines.length - 1]).range
-          );
-        }
-      }
-    }
-
-    // find inline executable code
-    for (let i = 0; i < editor.document.lineCount; i++) {
-      const line = editor.document.lineAt(i);
-      const matches = line.text.matchAll(/(^|[^`])`{[\w_]+}[ \t]([^`]+)`/g);
-      for (const match of matches) {
-        if (match.index !== undefined) {
-          const begin = new vscode.Position(i, match.index + match[1].length);
-          const end = new vscode.Position(i, begin.character + match[0].length - match[1].length);
-          inlineRanges.push(new vscode.Range(begin, end));
-        }
-      }
-    }
-  }
-
-
-  // set highlights (could be none if we highlighting isn't enabled)
   editor.setDecorations(
     highlightingConfig.backgroundDecoration(),
-    blockRanges
+    ranges.blockRanges
   );
   editor.setDecorations(
     highlightingConfig.inlineBackgroundDecoration(),
-    inlineRanges
+    ranges.inlineRanges
   );
-  editor.setDecorations(cellOptionsBackgroundDecoration, optionLineRanges);
-  editor.setDecorations(cellOptionsSeparatorDecoration, optionSeparatorRanges);
+  editor.setDecorations(
+    cellOptionsBackgroundDecoration,
+    optionsEnabled ? ranges.optionLineRanges : []
+  );
+  editor.setDecorations(
+    cellOptionsSeparatorDecoration,
+    optionsEnabled ? ranges.optionSeparatorRanges : []
+  );
 }
 
 function clearEditorHighlightDecorations(editor: vscode.TextEditor) {
@@ -331,7 +382,7 @@ class HiglightingConfig {
 
     this.enabled_ = backgroundOption !== CellBackgroundColor.off;
     this.cellOptionsBackground_ = config.get<boolean>("cells.options.background", true);
-    this.delayMs_ = config.get("cells.background.delay", 250);
+    this.delayMs_ = config.get("cells.background.delay", 50);
 
 
     if (this.backgroundDecoration_) {
@@ -365,7 +416,7 @@ class HiglightingConfig {
   private cellOptionsBackground_ = true;
   private backgroundDecoration_: vscode.TextEditorDecorationType | undefined;
   private inlineBackgroundDecoration_: vscode.TextEditorDecorationType | undefined;
-  private delayMs_ = 250;
+  private delayMs_ = 50;
 }
 
 const highlightingConfig = new HiglightingConfig();

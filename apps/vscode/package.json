@@ -1064,7 +1064,7 @@
           "order": 22,
           "scope": "window",
           "type": "integer",
-          "default": 250,
+          "default": 50,
           "markdownDescription": "Millisecond delay between background color updates."
         },
         "quarto.cells.options.background": {

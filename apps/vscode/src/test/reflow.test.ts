@@ -163,6 +163,45 @@ suite("Reflow Comments in Cell", function () {
       );
     });
 
+    test("With a selection, only reflows the comment lines that overlap it", async function () {
+      const { doc, editor } = await openAndShowExamplesOutTextDocument("reflow.qmd");
+
+      // Select part of line 9 (the second long comment); line 7 also needs
+      // reflowing but doesn't overlap the selection
+      editor.selection = new vscode.Selection(9, 2, 9, 10);
+      await vscode.commands.executeCommand("quarto.reflowCommentInCell");
+
+      const lines = doc.getText().split("\n");
+      assert.strictEqual(
+        lines[7],
+        "# It is a truth universally acknowledged, that a single man in possession of a good fortune must be in want of a wife."
+      );
+      assert.strictEqual(
+        lines[9],
+        '# "My dear Mr. Bennet," said his lady to him one day, "have you heard that'
+      );
+      assert.strictEqual(lines[10], "# Netherfield Park is let at last?\"");
+    });
+
+    test("A selection ending at the start of a line doesn't include that line", async function () {
+      const { doc, editor } = await openAndShowExamplesOutTextDocument("reflow.qmd");
+
+      // Select lines 7-8 by dragging to the start of line 9
+      editor.selection = new vscode.Selection(7, 0, 9, 0);
+      await vscode.commands.executeCommand("quarto.reflowCommentInCell");
+
+      const lines = doc.getText().split("\n");
+      assert.strictEqual(
+        lines[7],
+        "# It is a truth universally acknowledged, that a single man in possession of a"
+      );
+      assert.strictEqual(lines[8], "# good fortune must be in want of a wife.");
+      assert.strictEqual(
+        lines[10],
+        '# "My dear Mr. Bennet," said his lady to him one day, "have you heard that Netherfield Park is let at last?"'
+      );
+    });
+
     test("Leaves option directives and code untouched in the Python cell", async function () {
       const { doc, editor } = await openAndShowExamplesOutTextDocument("reflow.qmd");
 

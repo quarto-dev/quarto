@@ -74,17 +74,34 @@ class ReflowCommentInCellCommand implements Command {
       .getConfiguration("quarto")
       .get<number>("cells.reflowColumn", kDefaultReflowColumn);
 
+    // The `+ 1` skips the opening fence line.
+    const lineOffset = block.range.start.line + 1;
+
     const cellLines = lines(codeForExecutableLanguageBlock(block, false));
-    const reflows = reflowComments(cellLines, comment, column);
+    let reflows = reflowComments(cellLines, comment, column);
+
+    // With a selection, only reflow the lines that overlap it; with just a
+    // cursor, reflow the whole cell.
+    const selections = editor.selections.filter((selection) => !selection.isEmpty);
+    if (selections.length > 0) {
+      reflows = reflows.filter((reflow) =>
+        selections.some((selection) => {
+          const line = lineOffset + reflow.line;
+          // A selection ending at the start of a line doesn't include that line
+          const endLine =
+            selection.end.character === 0 && selection.end.line > selection.start.line
+              ? selection.end.line - 1
+              : selection.end.line;
+          return line >= selection.start.line && line <= endLine;
+        })
+      );
+    }
     if (reflows.length === 0) {
       return;
     }
 
     // Use the document's line ending to avoid introducing mixed EOL in CRLF files.
     const eol = document.eol === EndOfLine.CRLF ? "\r\n" : "\n";
-
-    // The `+ 1` skips the opening fence line.
-    const lineOffset = block.range.start.line + 1;
 
     await editor.edit((editBuilder) => {
       // Sort by descending position to avoid range shifting issues

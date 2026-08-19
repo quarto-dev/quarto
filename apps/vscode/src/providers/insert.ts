@@ -16,13 +16,16 @@
 import {
   commands,
   window,
+  EndOfLine,
   Range,
   Position,
+  Selection,
+  TextEditor,
 } from "vscode";
 import { Command } from "../core/command";
 import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
-import { isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
+import { Token, isExecutableLanguageBlock, languageBlockAtPosition, languageNameFromBlock } from "quarto-core";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 
@@ -37,19 +40,26 @@ class InsertCodeCellCommand implements Command {
 
   async execute(): Promise<void> {
     if (window.activeTextEditor) {
-      const doc = window.activeTextEditor?.document;
+      const editor = window.activeTextEditor;
+      const doc = editor.document;
       if (doc && isQuartoDoc(doc)) {
 
         // determine most recently used language engien above the cursor
         const tokens = this.engine_.parse(doc);
-        const cursorLine = window.activeTextEditor?.selection.active.line;
+        const cursorLine = editor.selection.active.line;
         let language = "";
         let insertTopPaddingLine = false;
 
         const pos = new Position(cursorLine, 0);
         const block = languageBlockAtPosition(tokens, pos, true);
         if (block) {
-          // cursor is in an executable block
+          // cursor is in an executable block: split it into two cells at the
+          // cursor (or three around the selection), like RStudio does
+          if (await splitCodeCell(editor, block)) {
+            return;
+          }
+          // block can't be split (e.g. display math or an unclosed fence),
+          // so insert a new cell below it
           language = languageNameFromBlock(block);
           insertTopPaddingLine = true;
           const moveDown = block.range.end.line - cursorLine + 1;
@@ -131,4 +141,111 @@ class InsertCodeCellCommand implements Command {
       }
     }
   }
+}
+
+// split the code cell containing the cursor into two cells at the cursor line
+// (with a selection, into three cells: before / selection / after), mirroring
+// RStudio's insert chunk behavior. returns false if the block isn't a closed
+// backtick code fence (e.g. display math) and so can't be split
+async function splitCodeCell(editor: TextEditor, block: Token): Promise<boolean> {
+  const doc = editor.document;
+  const headerLine = block.range.start.line;
+  const header = doc.lineAt(headerLine).text;
+  const fenceMatch = header.match(/^(`{3,})\s*\{/);
+  if (!fenceMatch) {
+    return false;
+  }
+  const fence = fenceMatch[1];
+
+  // locate the closing fence: the parsed range can end one line past it (when
+  // the next line has content)
+  const closingFenceRegex = new RegExp("^ {0,3}`{" + fence.length + ",}\\s*$");
+  let footerLine = Math.min(block.range.end.line, doc.lineCount - 1);
+  while (footerLine > headerLine && !closingFenceRegex.test(doc.lineAt(footerLine).text)) {
+    footerLine--;
+  }
+  if (footerLine <= headerLine) {
+    // an unclosed fence parses to the end of the document
+    return false;
+  }
+  const bodyStart = new Position(headerLine + 1, 0);
+  const bodyEnd = new Position(footerLine, 0);
+
+  // determine the split point(s): the cursor line with no selection, otherwise
+  // the selection boundaries (clamped to the cell body)
+  const clamp = (p: Position) =>
+    p.isBefore(bodyStart) ? bodyStart : p.isAfter(bodyEnd) ? bodyEnd : p;
+  const selection = editor.selection;
+  let splitStart: Position;
+  let splitEnd: Position;
+  if (selection.isEmpty) {
+    splitStart = splitEnd = clamp(new Position(selection.active.line, 0));
+  } else {
+    // snap the selection to whole lines
+    // (notean end position at column 0 belongs to the previous line)
+    splitStart = clamp(new Position(selection.start.line, 0));
+    const endLine =
+      selection.end.character === 0
+        ? selection.end.line
+        : selection.end.line + 1;
+    splitEnd = clamp(new Position(endLine, 0));
+  }
+
+  // cell bodies, with surrounding blank lines removed (but indentation kept)
+  const cellBody = (range: Range) => {
+    const text = doc
+      .getText(range)
+      .replace(/^([ \t]*\r?\n)+/, "")
+      .replace(/(\r?\n[ \t]*)+$/, "");
+    return text.trim() ? text : "";
+  };
+  const before = cellBody(new Range(bodyStart, splitStart));
+  const middle = cellBody(new Range(splitStart, splitEnd));
+  const after = cellBody(new Range(splitEnd, bodyEnd));
+
+  // assemble the new cells and pick the one that should receive the cursor
+  const bodies: string[] = [];
+  let cursorCell: number;
+  if (splitStart.isEqual(splitEnd)) {
+    bodies.push(before, after);
+    // when everything ends up in the second cell the first (empty) cell is
+    // the new one, so put the cursor there
+    cursorCell = !before && after ? 0 : 1;
+  } else {
+    if (before) {
+      bodies.push(before);
+    }
+    cursorCell = bodies.length;
+    bodies.push(middle);
+    if (after) {
+      bodies.push(after);
+    }
+  }
+
+  // render the cells (empty cells get a blank line for the cursor to land on).
+  const defaultHeader = fence + "{" + languageNameFromBlock(block) + "}";
+  const firstCellWithBody = Math.max(bodies.findIndex((body) => body.length > 0), 0);
+  const eol = doc.eol === EndOfLine.CRLF ? "\r\n" : "\n";
+  const cellText = (body: string, i: number) =>
+    (i === firstCellWithBody ? header : defaultHeader) + eol + body + eol + fence;
+  const newText = bodies.map(cellText).join(eol + eol);
+
+  // cursor goes to the first body line of the target cell
+  let cursorLine = headerLine + 1;
+  for (let i = 0; i < cursorCell; i++) {
+    cursorLine += (bodies[i] ? bodies[i].split("\n").length : 1) + 3;
+  }
+
+  const replaceRange = new Range(
+    new Position(headerLine, 0),
+    new Position(footerLine, doc.lineAt(footerLine).text.length)
+  );
+  const applied = await editor.edit((edit) => edit.replace(replaceRange, newText));
+  if (applied) {
+    const cursor = new Position(cursorLine, 0);
+    editor.selection = new Selection(cursor, cursor);
+    editor.revealRange(new Range(cursor, cursor));
+    return true;
+  }
+  return false;
 }

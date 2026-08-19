@@ -76,7 +76,7 @@ suite("Insert Code Cell", function () {
   });
 
   suite("Splitting the cell at the cursor", function () {
-    const PYTHON_CELL_DOC = [
+    const PYTHON_CELL_LINES = [
       "---",
       "title: Test",
       "---",
@@ -87,7 +87,8 @@ suite("Insert Code Cell", function () {
       "2 + 2",        // line 7
       "```",          // line 8
       "",
-    ].join("\n");
+    ];
+    const PYTHON_CELL_DOC = PYTHON_CELL_LINES.join("\n");
 
     test("Splits the cell in two when cursor is between statements", async function () {
       const { doc, editor } = await openTestDocument("insert-test-split.qmd", PYTHON_CELL_DOC);
@@ -219,6 +220,87 @@ suite("Insert Code Cell", function () {
         [editor.selection.active.line, editor.selection.active.character],
         [5, 0]
       );
+    });
+
+    test("Copies a labeled header to only the first cell", async function () {
+      const content = [
+        "```{r setup, include=FALSE}",  // line 0
+        "x <- 1",                       // line 1
+        "",                             // line 2
+        "y <- 2",                       // line 3
+        "```",                          // line 4
+        "",
+      ].join("\n");
+      const { doc, editor } = await openTestDocument("insert-test-split-label.qmd", content);
+
+      editor.selection = new vscode.Selection(2, 0, 2, 0);
+      await vscode.commands.executeCommand("quarto.insertCodeCell");
+
+      // duplicating the header would duplicate the chunk label, so the second
+      // cell gets a bare language header
+      assert.strictEqual(
+        doc.getText(),
+        [
+          "```{r setup, include=FALSE}",
+          "x <- 1",
+          "```",
+          "",
+          "```{r}",
+          "y <- 2",
+          "```",
+          "",
+        ].join("\n")
+      );
+    });
+
+    test("Preserves CRLF line endings without mixing in LF", async function () {
+      const { doc, editor } = await openTestDocument(
+        "insert-test-split-crlf.qmd",
+        PYTHON_CELL_LINES.join("\r\n")
+      );
+
+      editor.selection = new vscode.Selection(6, 0, 6, 0);
+      await vscode.commands.executeCommand("quarto.insertCodeCell");
+
+      assert.strictEqual(
+        doc.getText(),
+        [
+          "---",
+          "title: Test",
+          "---",
+          "",
+          "```{python}",
+          "1 + 1",
+          "```",
+          "",
+          "```{python}",
+          "2 + 2",
+          "```",
+          "",
+        ].join("\r\n")
+      );
+      // no bare LF anywhere in the document
+      assert.ok(!/[^\r]\n/.test(doc.getText()));
+    });
+
+    test("Does not split an unclosed cell; inserts a new cell below instead", async function () {
+      const content = [
+        "```{python}",  // line 0 (fence is never closed)
+        "1 + 1",        // line 1
+        "",             // line 2
+        "Some prose.",  // line 3
+        "",
+      ].join("\n");
+      const { doc, editor } = await openTestDocument("insert-test-unclosed.qmd", content);
+
+      editor.selection = new vscode.Selection(2, 0, 2, 0);
+      await vscode.commands.executeCommand("quarto.insertCodeCell");
+
+      // an unclosed fence parses to the end of the document; splitting it
+      // would pull the prose into a code cell, so the block is left untouched
+      // and the new cell goes below it
+      assert.ok(doc.getText().startsWith("```{python}\n1 + 1\n\nSome prose."));
+      assert.strictEqual(countOccurrences(doc.getText(), "```{python}"), 2);
     });
   });
 

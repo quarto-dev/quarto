@@ -226,8 +226,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.html.basic</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.html.basic</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -279,8 +311,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.ini</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.ini</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -332,8 +396,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.java</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.java</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -385,8 +481,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.lua</string>
+                <key>begin</key>
+                <string>^(\s*)(--\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(--\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-dash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*--\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.lua</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -438,8 +566,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.makefile</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.makefile</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -491,8 +651,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.perl</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.perl</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -544,8 +736,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.prql</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.prql</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -597,8 +821,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.r</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.r</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -650,8 +906,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.julia</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.julia</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -703,8 +991,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.matlab</string>
+                <key>begin</key>
+                <string>^(\s*)(%\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(%\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.percentage.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*%\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.matlab</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -756,8 +1076,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.stata</string>
+                <key>begin</key>
+                <string>^(\s*)(\*\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\*\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.asterisk.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\*\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.stata</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -809,8 +1161,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.dot</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.dot</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -862,8 +1246,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.mmd</string>
+                <key>begin</key>
+                <string>^(\s*)(%%\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(%%\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.cell-options.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*%%\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.mmd</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -915,8 +1331,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.wsd</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.wsd</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -968,8 +1416,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.ruby</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.ruby</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1021,12 +1501,44 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.html.basic</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
               </dict>
               <dict>
-                <key>include</key>
-                <string>source.php</string>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.html.basic</string>
+                  </dict>
+                  <dict>
+                    <key>include</key>
+                    <string>source.php</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1078,8 +1590,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.sql</string>
+                <key>begin</key>
+                <string>^(\s*)(--\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(--\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-dash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*--\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.sql</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1131,8 +1675,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.asp.vb.net</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.asp.vb.net</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1184,8 +1760,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.xml</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.xml</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1237,8 +1845,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.xml.xsl</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.xml.xsl</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1290,8 +1930,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.yaml</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1343,8 +2015,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.batchfile</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.batchfile</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1396,8 +2100,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.clojure</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.clojure</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1449,8 +2185,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.coffee</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.coffee</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1555,8 +2323,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.cpp</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.cpp</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1608,8 +2408,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.diff</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.diff</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1661,8 +2493,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.dockerfile</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.dockerfile</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1714,8 +2578,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.git-commit</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.git-commit</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1767,8 +2663,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.git-rebase</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.git-rebase</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1820,8 +2748,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.go</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.go</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1873,8 +2833,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.groovy</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.groovy</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1926,8 +2918,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.pug</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.pug</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -1979,8 +3003,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.js</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.js</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2032,8 +3088,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.js.regexp</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.js.regexp</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2085,8 +3173,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.json</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.json</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2138,8 +3258,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.json.comments</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.json.comments</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2191,8 +3343,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.css.less</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.css.less</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2244,8 +3428,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.objc</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.objc</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2297,8 +3513,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.swift</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.swift</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2350,8 +3598,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.css.scss</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.css.scss</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2403,8 +3683,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.perl.6</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.perl.6</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2456,8 +3768,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.powershell</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.powershell</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2509,8 +3853,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.stan</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.stan</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2562,8 +3938,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.python</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.python</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2615,8 +4023,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.regexp.python</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.regexp.python</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2668,8 +4108,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.rust</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.rust</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2721,8 +4193,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.scala</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.scala</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2774,8 +4278,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.shell</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.shell</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2827,8 +4363,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.ts</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.ts</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2880,8 +4448,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.tsx</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.tsx</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2933,8 +4533,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.typst</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.typst</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -2986,8 +4618,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.cs</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.cs</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3039,8 +4703,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.fsharp</string>
+                <key>begin</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(\/\/\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.double-slash.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*\/\/\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.fsharp</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3092,8 +4788,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.dart</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.dart</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3145,8 +4873,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.html.handlebars</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.html.handlebars</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3198,8 +4958,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.html.markdown</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.html.markdown</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3251,8 +5043,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.log</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.log</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3304,8 +5128,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.erlang</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.erlang</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3357,8 +5213,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>source.elixir</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.elixir</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3410,8 +5298,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.tex.latex</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.tex.latex</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>
@@ -3463,8 +5383,40 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>include</key>
-                <string>text.bibtex</string>
+                <key>begin</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>while</key>
+                <string>^(\s*)(#\s*\| ?)</string>
+                <key>captures</key>
+                <dict>
+                  <key>2</key>
+                  <dict>
+                    <key>name</key>
+                    <string>comment.line.number-sign.quarto</string>
+                  </dict>
+                </dict>
+                <key>contentName</key>
+                <string>meta.embedded.block.yaml</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>source.yaml</string>
+                  </dict>
+                </array>
+              </dict>
+              <dict>
+                <key>begin</key>
+                <string>^(?!\s*#\s*\| ?)</string>
+                <key>while</key>
+                <string>(^|\G)</string>
+                <key>patterns</key>
+                <array>
+                  <dict>
+                    <key>include</key>
+                    <string>text.bibtex</string>
+                  </dict>
+                </array>
               </dict>
             </array>
           </dict>

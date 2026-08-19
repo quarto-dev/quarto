@@ -1072,7 +1072,7 @@
           "scope": "window",
           "type": "boolean",
           "default": true,
-          "markdownDescription": "Apply a visual treatment to cell option comments (e.g. `#|` lines): a slightly darker background, dimmed text, and a separator below the options."
+          "markdownDescription": "Apply a visual treatment to cell option comments such as `#|` lines: a slightly darker background, dimmed text, and a separator below the options. When `#quarto.cells.background.color#` is `off`, this setting has no effect."
         },
         "quarto.cells.useReticulate": {
           "order": 27,

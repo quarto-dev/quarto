@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.137.0 (Unreleased)
+
+
 ## 1.136.0 (Release on 2026-08-25)
 
 - Reduce memory usage by only starting the language server (LSP) in projects containing Quarto documents (https://github.com/quarto-dev/quarto/pull/1059).

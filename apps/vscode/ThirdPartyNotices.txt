@@ -1,12 +1,13 @@
 THIRD PARTY NOTICES
 
-The Quarto extension for Visual Studio Code bundles third-party software listed
+The Quarto VS Code extension and Panmirror bundle third-party software listed
 below. Original copyright notices and licenses are reproduced here as required.
+Not every listed component is included in every distribution.
 
-This extension uses biblatex-csl-converter which is licensed under the GNU Lesser
-General Public License v3.0. The source code for this extension is available at
-https://github.com/quarto-dev/quarto and users may modify biblatex-csl-converter
-and rebuild the extension from source.
+These distributions use biblatex-csl-converter, which is licensed under the GNU
+Lesser General Public License v3.0. The source code for these distributions is
+available at https://github.com/quarto-dev/quarto. Users may modify
+biblatex-csl-converter and rebuild the applicable distribution from source.
 
 ---------------------------------------------------------
 biblatex-csl-converter

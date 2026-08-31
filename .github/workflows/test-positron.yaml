@@ -1,0 +1,37 @@
+name: Test Positron API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/vscode/**"
+      - ".github/workflows/test-positron.yaml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/vscode/**"
+      - ".github/workflows/test-positron.yaml"
+  workflow_dispatch:
+
+jobs:
+  test-positron:
+    runs-on: ubuntu-latest
+    name: Test Positron API
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: Build vscode extension
+        run: |
+          yarn install
+          yarn run build-vscode
+      - name: Run Positron API tests
+        uses: posit-dev/setup-positron@v1
+        with:
+          positron-channel: stable
+          # Positron is an Electron app and needs a display server on Linux.
+          run: xvfb-run -a npm run test-positron

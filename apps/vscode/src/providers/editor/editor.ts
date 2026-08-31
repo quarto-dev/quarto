@@ -29,8 +29,6 @@ import {
   TabInputText
 } from "vscode";
 
-import { LanguageClient } from "vscode-languageclient/node";
-
 import { projectDirForDocument, QuartoContext } from "quarto-core";
 
 import { CodeViewActiveBlockContext, CodeViewSelectionAction, HostContext, NavLocation, Prefs, SourcePos, VSCodeVisualEditor, VSCodeVisualEditorHost, XRef } from "editor-types";
@@ -47,7 +45,6 @@ import { clearInterval } from "timers";
 import { vscodePrefsServer } from "./prefs";
 import { vscodeCodeViewServer } from "./codeview";
 import { MarkdownEngine } from "../../markdown/engine";
-import { lspClientTransport } from "core-node";
 import { editorSourceJsonRpcServer } from "editor-core";
 import { JsonRpcRequestTransport } from "core";
 import {
@@ -71,11 +68,11 @@ export function activateEditor(
   context: ExtensionContext,
   host: ExtensionHost,
   quartoContext: QuartoContext,
-  lspClient: LanguageClient,
+  lspRequest: JsonRpcRequestTransport,
   engine: MarkdownEngine
 ): Command[] {
   // register the provider
-  context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspClient, engine));
+  context.subscriptions.push(VisualEditorProvider.register(context, host, quartoContext, lspRequest, engine));
 
   // return commands
   return [
@@ -126,12 +123,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     context: ExtensionContext,
     host: ExtensionHost,
     quartoContext: QuartoContext,
-    lspClient: LanguageClient,
+    lspRequest: JsonRpcRequestTransport,
     engine: MarkdownEngine
   ): Disposable {
-
-    // setup request transport
-    const lspRequest = lspClientTransport(lspClient);
 
     // track edits in the active editor if its untitled. this enables us to recover the
     // content when we switch to an untitled document, which otherwise are just dropped

@@ -13,6 +13,14 @@ Run the extension tests with:
 yarn test-vscode # compile the test files and run them with the vscode-test CLI
 ```
 
+The Positron-specific integration tests (`src/test/positron/`) exercise Positron API code paths that vanilla VS Code can't reach. They run inside a downloaded Positron build rather than VS Code:
+
+```sh
+yarn test-positron # build the tests and run them inside Positron
+```
+
+Set `POSITRON_CHANNEL=daily` to test against a daily build (default: `stable`).
+
 Install the dev version of the extension in VS Code or Positron with:
 
 ```sh

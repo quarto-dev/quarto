@@ -1,6 +1,17 @@
 # Changelog
 
-## 1.135.0 (Unreleased)
+## 1.137.0 (Unreleased)
+
+
+## 1.136.0 (Release on 2026-08-25)
+
+- Reduce memory usage by only starting the language server (LSP) in projects containing Quarto documents (https://github.com/quarto-dev/quarto/pull/1059).
+- Fixed a bug where single-line display math with a cross-reference label (e.g. `$$1+1$$ {#eq-spec0}`), or an unclosed `$$`, stopped the rest of the document from being parsed, so headings went missing from the outline, LaTeX preview was unavailable, and code cells below could not be run (<https://github.com/quarto-dev/quarto/pull/1063>).
+- Adds a command "Quarto: Reflow Comments in Cell" that breaks up long comment lines into multiple comment lines (by default 80 characters is considered long, but that is configurable by `quarto.cells.reflowColumn`) (<https://github.com/quarto-dev/quarto/pull/1087>).
+- Make "insert cell" split the cell when cursor is inside, or insert a cell above when the cursor is at the top (<https://github.com/quarto-dev/quarto/pull/1086>).
+- Add highlighting for option comments in code cells (<https://github.com/quarto-dev/quarto/pull/1084>).
+
+## 1.135.0 (Release on 2026-07-08)
 
 - In Positron, running a cell that raises an error no longer results in an error toast message (<https://github.com/posit-dev/positron/issues/9845>).
 - In Positron, Julia code cells in `.qmd` files can now be executed when the `ntluong95.positron-julia` extension is installed, the same way Python and R do (<https://github.com/quarto-dev/quarto/pull/989>).

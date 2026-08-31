@@ -41,7 +41,7 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
 
   // Read debounce delay from config
   const getDelayMs = () =>
-    vscode.workspace.getConfiguration('quarto').get('cells.background.delay', 250);
+    vscode.workspace.getConfiguration('quarto').get('cells.background.delay', 50);
 
   // Cache for parsed tokens
   const parseCache = new Map<string, {

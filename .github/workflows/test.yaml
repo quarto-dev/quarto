@@ -10,6 +10,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-packages:
+    runs-on: ubuntu-latest
+    name: Test packages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - run: yarn install --immutable --immutable-cache --check-cache
+      - name: Run package tests
+        run: yarn test-packages
+
   test-extension:
     runs-on: ubuntu-latest
     strategy:

@@ -10,7 +10,7 @@ import * as glob from "glob";
 const args = process.argv;
 const dev = args[2] === "dev";
 const test = args[2] === "test";
-const testFiles = glob.sync("src/test/{*.ts,fixtures/*.ts,utils/*.ts}");
+const testFiles = glob.sync("src/test/{*.ts,fixtures/*.ts,utils/*.ts,positron/*.ts}");
 
 const testBuildOptions = {
   entryPoints: testFiles,

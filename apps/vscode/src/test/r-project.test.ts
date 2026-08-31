@@ -1,10 +1,18 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
+import { waitForWorkspaceSymbol } from "./test-utils";
 
 // This file is for testing behaviour that is specific to R projects, i.e.
 // projects with a top-level `DESCRIPTION` file.
 
 suite("Workspace Symbols - R Project", function () {
+  suiteSetup(async function () {
+    // The LSP now starts lazily, so wait for it to be running and have indexed
+    // the workspace before asserting on symbol results.
+    this.timeout(30000);
+    await waitForWorkspaceSymbol("Symbols-Header-1");
+  });
+
   teardown(async function () {
     await vscode.workspace
       .getConfiguration("quarto")

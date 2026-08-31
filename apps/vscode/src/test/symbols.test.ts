@@ -1,9 +1,16 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { WORKSPACE_PATH } from "./test-utils";
+import { WORKSPACE_PATH, waitForWorkspaceSymbol } from "./test-utils";
 
 suite("Workspace Symbols", function () {
+  suiteSetup(async function () {
+    // The LSP now starts lazily, so wait for it to be running and have indexed
+    // the workspace before asserting on symbol results.
+    this.timeout(30000);
+    await waitForWorkspaceSymbol("Symbols-Header-1");
+  });
+
   teardown(async function () {
     await vscode.workspace
       .getConfiguration("quarto")

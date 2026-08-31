@@ -11,7 +11,7 @@
     "pandoc",
     "quarto"
   ],
-  "version": "1.135.0",
+  "version": "1.137.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/quarto-dev/quarto/tree/main/apps/vscode"
@@ -378,6 +378,11 @@
         "category": "Quarto"
       },
       {
+        "command": "quarto.reflowCommentInCell",
+        "title": "Reflow Comments in Cell",
+        "category": "Quarto"
+      },
+      {
         "command": "quarto.previewMath",
         "category": "Quarto",
         "title": "Preview Math"
@@ -663,6 +668,11 @@
         {
           "command": "quarto.formatCell",
           "when": "editorLangId == quarto && !editorHasSelection",
+          "group": "1_modification"
+        },
+        {
+          "command": "quarto.reflowCommentInCell",
+          "when": "editorLangId == quarto",
           "group": "1_modification"
         },
         {
@@ -995,32 +1005,39 @@
           ]
         },
         "quarto.cells.hoverHelp.enabled": {
-          "order": 23,
+          "order": 24,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Show help when hovering over functions."
         },
         "quarto.cells.signatureHelp.enabled": {
-          "order": 24,
+          "order": 25,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Show parameter help when editing function calls."
         },
         "quarto.cells.diagnostics.enabled": {
-          "order": 25,
+          "order": 26,
           "scope": "window",
           "type": "boolean",
           "default": true,
           "markdownDescription": "Enable diagnostics (linting) for code blocks from language servers."
         },
         "quarto.cells.diagnostics.debounceDelay": {
-          "order": 26,
+          "order": 27,
           "scope": "window",
           "type": "number",
           "default": 500,
           "markdownDescription": "Delay in milliseconds before updating diagnostics after document changes."
+        },
+        "quarto.cells.reflowColumn": {
+          "order": 28,
+          "scope": "window",
+          "type": "number",
+          "default": 80,
+          "markdownDescription": "Maximum line length used by the **Quarto: Reflow Comments in Cell** command."
         },
         "quarto.cells.background.enabled": {
           "type": "boolean",
@@ -1064,11 +1081,18 @@
           "order": 22,
           "scope": "window",
           "type": "integer",
-          "default": 250,
+          "default": 50,
           "markdownDescription": "Millisecond delay between background color updates."
         },
+        "quarto.cells.options.background": {
+          "order": 23,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Apply a visual treatment to cell option comments such as `#|` lines: a slightly darker background, dimmed text, and a separator below the options. When `#quarto.cells.background.color#` is `off`, this setting has no effect."
+        },
         "quarto.cells.useReticulate": {
-          "order": 27,
+          "order": 28,
           "scope": "window",
           "type": "boolean",
           "default": true,
@@ -1495,9 +1519,10 @@
     "build": "tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
-    "build-lang": "node syntaxes/build-lang",
+    "build-lang": "tsx syntaxes/build-lang.js",
     "build-test": "yarn run build test",
-    "test": "yarn build-test && vscode-test"
+    "test": "yarn build-test && vscode-test",
+    "test-positron": "yarn build-test && node ./scripts/run-positron-tests.mjs"
   },
   "dependencies": {
     "axios": "^1.16.0",
@@ -1545,6 +1570,7 @@
     "@types/uuid": "^9.0.0",
     "@types/vscode": "1.75.0",
     "@types/which": "^2.0.2",
+    "@posit-dev/positron-test-electron": "^0.0.3",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "@vscode/test-cli": "^0.0.11",

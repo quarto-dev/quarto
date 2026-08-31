@@ -20,6 +20,8 @@ import {
   DocumentSymbol,
   Range,
   SymbolKind,
+  Disposable,
+  languages,
 } from "vscode";
 import {
   LanguageClient,
@@ -63,19 +65,59 @@ import { embeddedSemanticTokensProvider } from "../providers/semantic-tokens";
 import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
+import { lspClientTransport } from "core-node";
+import { JsonRpcRequestTransport } from "core";
 import { extensionHost } from "../host";
 import semver from "semver";
 import { EmbeddedLanguage } from "../vdoc/languages";
 import { SymbolInformation } from "vscode";
 
-let client: LanguageClient;
+// The active language client. Retained at module scope so `deactivate` can stop
+// it. It is created eagerly during activation but the underlying server process
+// is not spawned until the client is actually needed (see `ensureStarted`).
+let client: LanguageClient | undefined;
 
-export async function activateLsp(
+/**
+ * Handle returned by {@link activateLsp}. It lets consumers talk to the Quarto
+ * language server without forcing it to start at extension activation. The
+ * server process (~100MB) is spawned lazily the first time it is actually
+ * needed: when a document it serves is opened, or when a request is issued
+ * through {@link QuartoLspClient.lspRequest}.
+ */
+export interface QuartoLspClient {
+  /**
+   * JSON-RPC transport that lazily starts the language server on first use and
+   * waits for it to be running before issuing the request.
+   */
+  lspRequest: JsonRpcRequestTransport;
+
+  /**
+   * Register a callback invoked each time the server reaches the running state.
+   * Registering does NOT itself start the server; use this for work that should
+   * happen "if and when" the server comes up (e.g. pushing configuration). If
+   * the server is already running the callback is invoked immediately.
+   */
+  onReady: (callback: (client: LanguageClient) => void) => Disposable;
+
+  /**
+   * Start the language server if it has not already been started. Idempotent:
+   * repeated calls return the same promise.
+   */
+  ensureStarted: () => Promise<LanguageClient>;
+
+  /**
+   * The underlying language client if it is currently running, otherwise
+   * undefined. Useful for "fire only if already running" behavior.
+   */
+  runningClient: () => LanguageClient | undefined;
+}
+
+export function activateLsp(
   context: ExtensionContext,
   quartoContext: QuartoContext,
   engine: MarkdownEngine,
   outputChannel: LogOutputChannel,
-) {
+): QuartoLspClient {
 
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
@@ -128,64 +170,147 @@ export async function activateLsp(
     "**/_{brand,quarto,metadata,extension}*.{yml,yaml}" :
     "**/_{quarto,metadata,extension}*.{yml,yaml}";
 
+  // documents this server handles; also used to decide when to lazily start it
+  const documentSelector = [
+    { scheme: "*", language: "quarto" },
+    {
+      scheme: "*",
+      language: "yaml",
+      pattern: documentSelectorPattern,
+    },
+  ];
+
   const clientOptions: LanguageClientOptions = {
     initializationOptions,
-    documentSelector: [
-      { scheme: "*", language: "quarto" },
-      {
-        scheme: "*",
-        language: "yaml",
-        pattern: documentSelectorPattern,
-      },
-    ],
+    documentSelector,
     middleware,
     outputChannel
   };
 
-  // Create the language client and start the client.
-  client = new LanguageClient(
+  // Create the language client. NOTE: we deliberately do NOT start it here;
+  // startup is deferred until the server is actually needed (see below).
+  const languageClient = new LanguageClient(
     "quarto-lsp",
     "Quarto LSP",
     serverOptions,
     clientOptions
   );
+  client = languageClient;
 
-  // Helper to send current theme to LSP server
+  // callbacks to invoke each time the server reaches the running state
+  const readyCallbacks = new Set<(client: LanguageClient) => void>();
+  const onReady = (callback: (client: LanguageClient) => void): Disposable => {
+    readyCallbacks.add(callback);
+    // if the server is already running, invoke immediately
+    if (languageClient.state === State.Running) {
+      callback(languageClient);
+    }
+    return new Disposable(() => {
+      readyCallbacks.delete(callback);
+    });
+  };
+
+  // Helper to send current theme to LSP server (no-op unless it is running)
   const sendThemeNotification = () => {
-    if (client) {
+    if (languageClient.state === State.Running) {
       const kind = (window.activeColorTheme.kind === ColorThemeKind.Light || window.activeColorTheme.kind === ColorThemeKind.HighContrastLight) ? "light" : "dark";
-      client.sendNotification("quarto/didChangeActiveColorTheme", { kind });
+      languageClient.sendNotification("quarto/didChangeActiveColorTheme", { kind });
     }
   };
 
-  // Listen for theme changes and notify the server
+  // Send the computed theme whenever the server starts, and on theme changes
+  onReady(() => sendThemeNotification());
   context.subscriptions.push(
     window.onDidChangeActiveColorTheme(() => {
       sendThemeNotification();
     })
   );
 
-  // return once the server is running
-  return new Promise<LanguageClient>((resolve, reject) => {
+  // Start the server on first use. Idempotent: the promise is memoized so
+  // repeated calls (and multiple triggers) only launch the server once.
+  let startPromise: Promise<LanguageClient> | undefined;
+  const ensureStarted = (): Promise<LanguageClient> => {
+    if (!startPromise) {
+      outputChannel.info("Starting Quarto LSP server.");
+      startPromise = new Promise<LanguageClient>((resolve, reject) => {
+        const handler = languageClient.onDidChangeState(e => {
+          if (e.newState === State.Running) {
+            handler.dispose();
+            // notify readiness listeners (theme, zotero config, ...)
+            readyCallbacks.forEach(cb => cb(languageClient));
+            resolve(languageClient);
+          } else if (e.newState === State.Stopped) {
+            handler.dispose();
+            reject(new Error("Failed to start Quarto LSP Server"));
+          }
+        });
+        // Start the client. This will also launch the server.
+        languageClient.start();
+      });
+    }
+    return startPromise;
+  };
 
-    const handler = client.onDidChangeState(e => {
-      if (e.newState === State.Running) {
-        handler.dispose();
-        // Send computed theme on startup
-        sendThemeNotification();
-        resolve(client);
-      } else if (e.newState === State.Stopped) {
-        reject(new Error("Failed to start Quarto LSP Server"));
-      }
+  // Lazy JSON-RPC transport: starts the server on first use, then forwards.
+  let transport: JsonRpcRequestTransport | undefined;
+  const lspRequest: JsonRpcRequestTransport = async (method, params) => {
+    const started = await ensureStarted();
+    if (!transport) {
+      transport = lspClientTransport(started);
+    }
+    return transport(method, params);
+  };
+
+  const runningClient = () =>
+    languageClient.state === State.Running ? languageClient : undefined;
+
+  const startLazily = () => {
+    void ensureStarted().catch(() => {
+      // failure is reported to the output channel by the client itself
     });
+  };
 
-    // Start the client. This will also launch the server
-    client.start();
-  });
+  // Lazily start the server when a document it serves is opened. Check the
+  // documents already open at activation, then listen for newly opened ones.
+  const maybeStartForDocument = (doc: TextDocument) => {
+    if (languages.match(documentSelector, doc) > 0) {
+      startLazily();
+    }
+  };
+  workspace.textDocuments.forEach(maybeStartForDocument);
+  context.subscriptions.push(
+    workspace.onDidOpenTextDocument(maybeStartForDocument)
+  );
+
+  // Also start the server if the workspace already contains Quarto content, so
+  // that workspace-wide features (symbol search, cross-file navigation, project
+  // indexing) work before any document is opened. This keeps behavior identical
+  // to eager startup for real Quarto projects, while non-Quarto sessions (e.g.
+  // editing R files in a workspace with no Quarto files) never spawn the server.
+  if (workspace.workspaceFolders?.length) {
+    const contentGlobs = ["**/*.{qmd,rmd}", documentSelectorPattern];
+    void (async () => {
+      for (const glob of contentGlobs) {
+        // stop early if some other trigger (e.g. an open document) already started it
+        if (startPromise) {
+          return;
+        }
+        const found = await workspace.findFiles(glob, undefined, 1);
+        if (found.length > 0) {
+          startLazily();
+          return;
+        }
+      }
+    })();
+  }
+
+  return { lspRequest, onReady, ensureStarted, runningClient };
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
+  // Nothing to stop if the server was never started (state stays Stopped until
+  // the first `start()` call).
+  if (!client || client.state === State.Stopped) {
     return undefined;
   }
   return client.stop();

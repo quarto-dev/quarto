@@ -12,6 +12,7 @@ import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
 import { activateEmbeddedDiagnostics, type EmbeddedDiagnosticsService } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
+import { reflowCommands } from "./providers/cell/reflow";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
 import { activatePreview } from "./providers/preview/preview";
@@ -25,7 +26,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
-import { isInlineOutputEnabled } from "./host/positron";
+import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
@@ -119,14 +120,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     embeddedDiagnosticsService = activateEmbeddedDiagnostics(engine, outputChannel);
     context.subscriptions.push(embeddedDiagnosticsService);
 
-    // lsp
-    const lspClient = await activateLsp(context, quartoContext, engine, outputChannel);
+    // lsp (started lazily on first use, not at activation)
+    const lspClient = activateLsp(context, quartoContext, engine, outputChannel);
 
     // restore outline expansion after the LSP re-registers symbols on config change
     registerOutlineConfigListener(context);
 
     // provide visual editor
-    const editorCommands = activateEditor(context, host, quartoContext, lspClient, engine);
+    const editorCommands = activateEditor(context, host, quartoContext, lspClient.lspRequest, engine);
     commands.push(...editorCommands);
 
     // zotero
@@ -168,6 +169,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   commands.push(...activateCodeFormatting(engine));
 
+  commands.push(...reflowCommands(engine));
+
   // provide code lens (conditionally in Positron based on inline output setting)
   const isPositron = tryAcquirePositronApi();
   if (isPositron) {
@@ -197,7 +200,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     // Listen for setting changes
     context.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration("positron.quarto.inlineOutput.enabled")) {
+        if (
+          e.affectsConfiguration(kInlineOutputEnabledSetting) ||
+          e.affectsConfiguration(kInlineOutputEnabledSettingDeprecated)
+        ) {
           updateCodeLens();
         }
       })

@@ -1,0 +1,48 @@
+# Snyk (https://snyk.io) policy file
+version: v1.25.0
+ignore:
+  SNYK-JS-JSYAML-18313070:
+    - '*':
+        reason: >-
+          No fix exists in the js-yaml 4.x line as of 2026-07-27; the advisory is
+          fixed only in 5.2.2, and js-yaml 5.0.0 is a breaking rewrite (flat named
+          exports, YAML 1.2 number parsing instead of 1.1, reorganized schema
+          exports) that needs a deliberate migration rather than an automated bump.
+          Exposure here is limited: the affected parse path handles front matter and
+          config from documents the user has already opened locally, not untrusted
+          network input, so the worst case is a self-inflicted editor hang. Revisit
+          when a 4.x backport lands or the 5.x migration is scheduled.
+        expires: '2026-10-25T00:00:00.000Z'
+  # The three advisories below all resolve to the same proposed remediation:
+  # upgrade prosemirror-dev-tools from 3.x to 4.x. See #978 and #1073.
+  SNYK-JS-JSONDIFFPATCH-16322990:
+    - '*':
+        reason: >-
+          jsondiffpatch reaches us only as a transitive dependency of
+          prosemirror-dev-tools, a debugging inspector that is loaded on demand by
+          the "Enable Dev Tools" command and never runs in normal editing. The
+          advisory requires an attacker-controlled delta or JSON Patch document to
+          be handed to jsondiffpatch.patch(); devtools only ever diffs the local
+          ProseMirror state the developer is already inspecting, so there is no
+          untrusted input on that path. The only offered fix is a major
+          prosemirror-dev-tools bump that Snyk itself rates high breaking-change
+          risk and cannot even lock, and pinning jsondiffpatch 0.7.x via
+          resolutions would break prosemirror-dev-tools 3.x at runtime. Revisit if
+          we deliberately upgrade or drop prosemirror-dev-tools.
+        expires: '2026-11-01T00:00:00.000Z'
+  SNYK-JS-NANOID-18506894:
+    - '*':
+        reason: >-
+          Same dependency path and same proposed fix as
+          SNYK-JS-JSONDIFFPATCH-16322990 above: nanoid 2.x arrives only through
+          prosemirror-dev-tools. The advisory needs a negative size argument passed
+          to nanoid/non-secure to hang the thread, and devtools calls nanoid only
+          for internal id generation with no caller-supplied size. Revisit if we
+          deliberately upgrade or drop prosemirror-dev-tools.
+        expires: '2026-11-01T00:00:00.000Z'
+  SNYK-JS-NANOID-18506897:
+    - '*':
+        reason: >-
+          Duplicate advisory for the same negative-size infinite loop as
+          SNYK-JS-NANOID-18506894; see that entry for the rationale.
+        expires: '2026-11-01T00:00:00.000Z'

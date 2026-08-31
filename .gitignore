@@ -16,5 +16,8 @@ public/dist
 .ipynb_checkpoints
 /.luarc.json
 .vscode-test
+.positron-test
 *.vsix
 *.timestamp-*.mjs
+# roborev snapshots
+/.roborev/

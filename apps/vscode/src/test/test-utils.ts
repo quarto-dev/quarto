@@ -29,6 +29,49 @@ export function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Polls `condition` until it returns true or `timeout` elapses. Useful for
+ * waiting on asynchronous, eventually-consistent state such as the Quarto LSP
+ * finishing its (now lazy) startup and indexing before making assertions.
+ */
+export async function waitForCondition(
+  condition: () => boolean | Promise<boolean>,
+  { timeout = 15000, interval = 100, message = "condition" }: { timeout?: number; interval?: number; message?: string } = {}
+): Promise<void> {
+  const start = Date.now();
+  for (; ;) {
+    if (await condition()) {
+      return;
+    }
+    if (Date.now() - start >= timeout) {
+      throw new Error(`Timed out after ${timeout}ms waiting for ${message}`);
+    }
+    await wait(interval);
+  }
+}
+
+/**
+ * Waits until the (lazily started) Quarto LSP is running and has indexed the
+ * workspace, detected by the presence of a known workspace symbol. Sets
+ * `symbols.exportToWorkspace` to "all" so the probe symbol is visible
+ * regardless of project type (e.g. R projects filter symbols by default).
+ */
+export async function waitForWorkspaceSymbol(name: string) {
+  await vscode.workspace
+    .getConfiguration("quarto")
+    .update("symbols.exportToWorkspace", "all");
+  await waitForCondition(
+    async () => {
+      const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
+        "vscode.executeWorkspaceSymbolProvider",
+        ""
+      );
+      return !!symbols?.find((s) => s.name === name);
+    },
+    { message: `Quarto LSP workspace symbol "${name}"` }
+  );
+}
+
 export async function openAndShowExamplesTextDocument(
   fileName: string,
   showOptions?: vscode.TextDocumentShowOptions
@@ -102,11 +145,35 @@ export async function roundtrip(doc: vscode.TextDocument) {
   await vscode.commands.executeCommand("quarto.editInVisualMode");
   await wait(APPROX_TIME_TO_OPEN_VISUAL_EDITOR);
   await vscode.commands.executeCommand("quarto.editInSourceMode");
-  await wait(300);
+  await waitForSourceEditor(doc);
 
   const after = doc.getText();
 
   return { before, after };
+}
+
+/**
+ * Waits until `doc` is showing in the active text editor again after a switch
+ * back to source mode.
+ *
+ * `quarto.editInSourceMode` returns before the source editor has been reopened:
+ * it closes the visual editor and then reopens the text document in a callback
+ * that the command does not await (see `reopenEditorInSourceMode`). Without
+ * waiting for the reopen to land, that deferred `showTextDocument` can fire
+ * after the next test has already shown a different file, stealing active
+ * editor focus and failing assertions in a test that did nothing wrong.
+ */
+export async function waitForSourceEditor(doc: vscode.TextDocument) {
+  await waitForCondition(
+    () => vscode.window.activeTextEditor?.document.uri.toString() === doc.uri.toString(),
+    {
+      // the reopen normally lands in tens of milliseconds; stay inside the
+      // 5s per-test mocha budget so this message is what surfaces on failure
+      timeout: 2000,
+      interval: 50,
+      message: `${path.basename(doc.uri.fsPath)} to become the active text editor`
+    }
+  );
 }
 
 const YELLOW_COLOR_ESCAPE_CODE = '\x1b[33m';

@@ -10,6 +10,10 @@ import * as yaml from "js-yaml";
 import { lines } from "core";
 import { Token, isCodeBlock, languageNameFromBlock } from "quarto-core";
 
+import { langCommentChars, optionCommentPattern } from "./comment-chars";
+
+export { optionCommentPattern } from "./comment-chars";
+
 
 export const kExecuteEval = "eval";
 
@@ -72,65 +76,4 @@ export function cellOptions(language: string, source: string[]): Record<string, 
   } else {
     return {};
   }
-}
-
-function langCommentChars(lang: string): string[] {
-  const chars = kLangCommentChars[lang] || "#";
-  if (!Array.isArray(chars)) {
-    return [chars];
-  } else {
-    return chars;
-  }
-}
-export function optionCommentPattern(comment: string) {
-  return new RegExp("^" + escapeRegExp(comment) + "\\s*\\| ?");
-}
-
-const kLangCommentChars: Record<string, string | [string, string]> = {
-  r: "#",
-  python: "#",
-  julia: "#",
-  scala: "//",
-  matlab: "%",
-  csharp: "//",
-  fsharp: "//",
-  c: ["/*", "*/"],
-  css: ["/*", "*/"],
-  sas: ["*", ";"],
-  powershell: "#",
-  bash: "#",
-  sql: "--",
-  mysql: "--",
-  psql: "--",
-  lua: "--",
-  cpp: "//",
-  cc: "//",
-  stan: "#",
-  octave: "#",
-  fortran: "!",
-  fortran95: "!",
-  awk: "#",
-  gawk: "#",
-  stata: "*",
-  java: "//",
-  groovy: "//",
-  sed: "#",
-  perl: "#",
-  ruby: "#",
-  tikz: "%",
-  js: "//",
-  d3: "//",
-  node: "//",
-  sass: "//",
-  coffee: "#",
-  go: "//",
-  asy: "//",
-  haskell: "--",
-  dot: "//",
-  ojs: "//",
-  apl: "⍝",
-};
-
-function escapeRegExp(str: string) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }

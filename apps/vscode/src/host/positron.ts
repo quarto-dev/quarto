@@ -19,13 +19,57 @@ import { Uri } from 'vscode';
 import { tryAcquirePositronApi } from '@posit-dev/positron';
 
 /**
+ * The canonical Positron setting for enabling Quarto inline output.
+ */
+export const kInlineOutputEnabledSetting = "quarto.inlineOutput.enabled";
+
+/**
+ * The deprecated alias for {@link kInlineOutputEnabledSetting}. Positron keeps
+ * this key working during the deprecation window; reads prefer the new key and
+ * fall back to this one.
+ */
+export const kInlineOutputEnabledSettingDeprecated =
+  "positron.quarto.inlineOutput.enabled";
+
+/**
  * Check if inline output is enabled in Positron settings.
  * This helper is shared with main.ts for code lens visibility.
+ *
+ * Prefers the canonical `quarto.inlineOutput.enabled` key and falls back to the
+ * deprecated `positron.quarto.inlineOutput.enabled` alias when the new key has
+ * not been explicitly set. Uses `inspect` so an explicit `false` on either key
+ * is honored over the default.
  */
 export function isInlineOutputEnabled(): boolean {
-  return vscode.workspace
-    .getConfiguration("positron.quarto.inlineOutput")
-    .get<boolean>("enabled", false);
+  const config = vscode.workspace.getConfiguration();
+
+  const inspection = config.inspect<boolean>(kInlineOutputEnabledSetting);
+  if (isConfigurationSet(inspection)) {
+    return config.get<boolean>(kInlineOutputEnabledSetting, false);
+  }
+
+  const deprecatedInspection = config.inspect<boolean>(
+    kInlineOutputEnabledSettingDeprecated
+  );
+  if (isConfigurationSet(deprecatedInspection)) {
+    return config.get<boolean>(kInlineOutputEnabledSettingDeprecated, false);
+  }
+
+  return false;
+}
+
+/**
+ * Whether a configuration value has been explicitly set at any level (as
+ * opposed to falling back to its registered default).
+ */
+function isConfigurationSet<T>(
+  inspection: { globalValue?: T; workspaceValue?: T; workspaceFolderValue?: T; } | undefined
+): boolean {
+  return (
+    inspection?.globalValue !== undefined ||
+    inspection?.workspaceValue !== undefined ||
+    inspection?.workspaceFolderValue !== undefined
+  );
 }
 
 export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {

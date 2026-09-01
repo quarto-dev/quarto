@@ -32,10 +32,10 @@ This repository contains code under multiple open source licenses:
 
 | Component | License |
 |-----------|---------|
-| [VS Code Extension](apps/vscode/package.json) | AGPL-3.0 |
-| [Language Server](apps/lsp/package.json) | AGPL-3.0 |
-| [Visual Editor](packages/editor/package.json) | AGPL-3.0 |
-| [Panmirror](apps/panmirror/package.json) (RStudio integration) | AGPL-3.0 |
+| [VS Code Extension](apps/vscode/package.json) | MIT |
+| [Language Server](apps/lsp/package.json) | MIT |
+| [Visual Editor](packages/editor/package.json) | MIT |
+| [Panmirror](apps/panmirror/package.json) (RStudio integration) | MIT |
 | @quarto/* npm packages | MIT (e.g. [mapped-string](packages/mapped-string/package.json)) |
 | OJS Runtime | ISC (e.g. [quarto-ojs-runtime](packages/ojs/quarto-ojs-runtime/package.json)) |
 

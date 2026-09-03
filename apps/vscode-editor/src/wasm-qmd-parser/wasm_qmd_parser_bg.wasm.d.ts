@@ -1,0 +1,38 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const abort: () => void;
+export const calloc: (a: number, b: number) => number;
+export const clock: () => bigint;
+export const fclose: (a: number) => number;
+export const fdopen: (a: number, b: number) => number;
+export const fprintf: (a: number, b: number, c: number) => number;
+export const fputc: (a: number, b: number) => number;
+export const fputs: (a: number, b: number) => number;
+export const free: (a: number) => void;
+export const fwrite: (a: number, b: number, c: number, d: number) => number;
+export const isprint: (a: number) => number;
+export const iswalnum: (a: number) => number;
+export const iswalpha: (a: number) => number;
+export const iswdigit: (a: number) => number;
+export const iswspace: (a: number) => number;
+export const malloc: (a: number) => number;
+export const memcmp: (a: number, b: number, c: number) => number;
+export const memcpy: (a: number, b: number, c: number) => number;
+export const memmove: (a: number, b: number, c: number) => number;
+export const memset: (a: number, b: number, c: number) => number;
+export const realloc: (a: number, b: number) => number;
+export const strncmp: (a: number, b: number, c: number) => number;
+export const towlower: (a: number) => number;
+export const vsnprintf: (a: number, b: number, c: number, d: number) => number;
+export const convert: (a: any, b: any, c: any) => any;
+export const get_builtin_template: (a: any) => any;
+export const parse_qmd: (a: any, b: any) => any;
+export const render_with_template: (a: any, b: any, c: any) => any;
+export const write_qmd: (a: any) => any;
+export const run: () => void;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_start: () => void;

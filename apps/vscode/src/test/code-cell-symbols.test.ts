@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as assert from "assert";
 import { openAndShowUniqueExamplesDocument, wait } from "./test-utils";
 import { DisposableStore } from "core";
+import { nestCellSymbols, QuartoCellSymbols } from "../lsp/cell-symbols";
 
 /**
  * Creates a fake document symbol provider that returns DocumentSymbol[] for virtual docs.
@@ -189,5 +190,156 @@ suite("Code Cell Symbols", function () {
       names.includes("(code cell)"),
       `Expected '(code cell)' to still appear even when embedded provider returns undefined, got: ${names.join(", ")}`
     );
+  });
+});
+
+/**
+ * Builds a chunk symbol the way the Quarto language server's `toc.ts` does:
+ * `SymbolKind.Function`, over a range that covers the fences too.
+ */
+function chunkSymbol(
+  name: string,
+  startLine: number,
+  endLine: number
+): vscode.DocumentSymbol {
+  return new vscode.DocumentSymbol(
+    name,
+    "",
+    vscode.SymbolKind.Function,
+    new vscode.Range(startLine, 0, endLine, 3),
+    new vscode.Range(startLine, 0, startLine, 3)
+  );
+}
+
+function headingSymbol(
+  name: string,
+  startLine: number,
+  endLine: number,
+  children: vscode.DocumentSymbol[]
+): vscode.DocumentSymbol {
+  const symbol = new vscode.DocumentSymbol(
+    name,
+    "",
+    vscode.SymbolKind.String,
+    new vscode.Range(startLine, 0, endLine, 0),
+    new vscode.Range(startLine, 0, startLine, 0)
+  );
+  symbol.children = children;
+  return symbol;
+}
+
+/** One cell's answer from `positron.executeQuartoCellSymbolProvider`. */
+function cellAnswer(
+  startLine: number,
+  endLine: number,
+  names: string[]
+): QuartoCellSymbols {
+  return {
+    range: new vscode.Range(startLine, 0, endLine, 0),
+    symbols: names.map(
+      (name) =>
+        new vscode.DocumentSymbol(
+          name,
+          "",
+          vscode.SymbolKind.Variable,
+          new vscode.Range(startLine, 0, startLine, 5),
+          new vscode.Range(startLine, 0, startLine, 5)
+        )
+    ),
+  };
+}
+
+suite("Native Cell Symbol Nesting", function () {
+  test("nests a cell's symbols under the chunk that contains it", function () {
+    // Chunk fences on lines 2 and 5, so the cell's code span is lines 3 to 4.
+    const symbols = [chunkSymbol("{r}", 2, 5)];
+    const cells = [cellAnswer(3, 4, ["my_function"])];
+
+    const nested = nestCellSymbols(symbols, cells);
+
+    assert.deepStrictEqual(flattenSymbolNames(nested), ["{r}", "my_function"]);
+  });
+
+  test("leaves a chunk alone when no cell's code sits inside it", function () {
+    const symbols = [chunkSymbol("{r}", 2, 5)];
+    // A cell from a different chunk further down the document.
+    const cells = [cellAnswer(11, 12, ["other_function"])];
+
+    const nested = nestCellSymbols(symbols, cells);
+
+    assert.deepStrictEqual(flattenSymbolNames(nested), ["{r}"]);
+  });
+
+  test("gives each chunk only its own cell's symbols", function () {
+    const symbols = [chunkSymbol("{r}", 2, 5), chunkSymbol("{python}", 7, 10)];
+    const cells = [
+      cellAnswer(3, 4, ["r_thing"]),
+      cellAnswer(8, 9, ["python_thing"]),
+    ];
+
+    const nested = nestCellSymbols(symbols, cells);
+
+    assert.deepStrictEqual(flattenSymbolNames(nested), [
+      "{r}",
+      "r_thing",
+      "{python}",
+      "python_thing",
+    ]);
+  });
+
+  test("finds chunks nested under headings", function () {
+    const symbols = [
+      headingSymbol("Section", 0, 11, [
+        chunkSymbol("{r}", 2, 5),
+        headingSymbol("Subsection", 6, 11, [chunkSymbol("{python}", 7, 10)]),
+      ]),
+    ];
+    const cells = [
+      cellAnswer(3, 4, ["r_thing"]),
+      cellAnswer(8, 9, ["python_thing"]),
+    ];
+
+    const nested = nestCellSymbols(symbols, cells);
+
+    assert.deepStrictEqual(flattenSymbolNames(nested), [
+      "Section",
+      "{r}",
+      "r_thing",
+      "Subsection",
+      "{python}",
+      "python_thing",
+    ]);
+  });
+
+  test("keeps children the language server already nested under a chunk", function () {
+    const chunk = chunkSymbol("{r}", 2, 5);
+    chunk.children = [
+      new vscode.DocumentSymbol(
+        "existing",
+        "",
+        vscode.SymbolKind.Field,
+        new vscode.Range(3, 0, 3, 4),
+        new vscode.Range(3, 0, 3, 4)
+      ),
+    ];
+    const cells = [cellAnswer(3, 4, ["my_function"])];
+
+    const nested = nestCellSymbols([chunk], cells);
+
+    assert.deepStrictEqual(flattenSymbolNames(nested), [
+      "{r}",
+      "existing",
+      "my_function",
+    ]);
+  });
+
+  test("returns the tree unchanged when no cell has symbols", function () {
+    const symbols = [
+      headingSymbol("Section", 0, 6, [chunkSymbol("{r}", 2, 5)]),
+    ];
+
+    const nested = nestCellSymbols(symbols, []);
+
+    assert.deepStrictEqual(flattenSymbolNames(nested), ["Section", "{r}"]);
   });
 });

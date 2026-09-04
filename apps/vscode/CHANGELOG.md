@@ -2,6 +2,7 @@
 
 ## 1.137.0 (Unreleased)
 
+- In Positron, when Positron serves language features for code cells itself (the `quarto.embeddedLanguageFeatures.native` setting), the extension no longer serves them from virtual document temp files.
 
 ## 1.136.0 (Release on 2026-08-25)
 

@@ -25,6 +25,7 @@ import {
   mainLanguage
 } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from "../vdoc/languages";
+import { useNativeEmbeddedFeatures } from "../host/native-features";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
@@ -205,6 +206,11 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
     if (!language) {
       // No language found, delegate to default
       return await next(document, token);
+    }
+
+    // Stand down when the host serves this language's cells itself
+    if (useNativeEmbeddedFeatures(language)) {
+      return undefined;
     }
 
     // Create virtual doc for all blocks of this language

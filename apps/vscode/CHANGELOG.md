@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.138.0 (Unreleased)
+
+
 ## 1.137.0 (Release on 2026-09-04)
 
 - Relicensed the extension to MIT (<https://github.com/quarto-dev/quarto/pull/1032>).

@@ -1,6 +1,11 @@
 # Changelog
 
-## 1.137.0 (Unreleased)
+## 1.138.0 (Unreleased)
+
+
+## 1.137.0 (Release on 2026-09-04)
+
+- Relicensed the extension to MIT (<https://github.com/quarto-dev/quarto/pull/1032>).
 
 - In Positron, when Positron serves language features for code cells itself (the `quarto.embeddedLanguageFeatures.native` setting), the extension no longer serves them from virtual document temp files.
 

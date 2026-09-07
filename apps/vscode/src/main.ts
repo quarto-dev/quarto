@@ -27,6 +27,7 @@ import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
 import { detectNativeEmbeddedFeatures } from "./host/native-features";
+import { setVdocTempFileLogger } from "./vdoc/vdoc-tempfile";
 import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
@@ -56,6 +57,7 @@ let notebookExportService: NotebookExportService | undefined;
 export async function activate(context: vscode.ExtensionContext): Promise<QuartoExtensionApi> {
   // create output channel for extension logs and lsp client logs
   const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
+  setVdocTempFileLogger(outputChannel);
 
   outputChannel.info("Activating Quarto extension.");
 

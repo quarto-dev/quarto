@@ -95,8 +95,13 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                 return;
               }
 
-              if (language === "python" && isKnitrDocument(document, engine)) {
-                language = "r";
+              let executionLanguage = language;
+              if (
+                language === "python" &&
+                isKnitrDocument(document, engine) &&
+                vscode.workspace.getConfiguration("quarto").get("cells.useReticulate", true)
+              ) {
+                executionLanguage = "r";
                 blocks = blocks.map(pythonWithReticulate);
               }
 
@@ -119,7 +124,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
 
                   try {
                     await runtime.executeCode(
-                      language,   // The language ID
+                      executionLanguage, // The language ID
                       blocks[i],  // The code string to execute
                       false,      // Whether to focus the console
                       true,       // Whether to allow incomplete code to run
@@ -136,7 +141,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                     if (!runtimeFailure) {
                       // The code couldn't be submitted to the runtime. Log it
                       // and let it propagate so the user finds out.
-                      outputChannel?.error(`Failed to execute ${language} cell: ${message}`);
+                      outputChannel?.error(`Failed to execute ${executionLanguage} cell: ${message}`);
                       throw err;
                     }
 
@@ -145,7 +150,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                     // record but don't let it propagate to the command handler,
                     // which would surface it again as a notification popup.
                     // https://github.com/posit-dev/positron/issues/9845
-                    outputChannel?.debug(`Error executing ${language} cell: ${message}`);
+                    outputChannel?.debug(`Error executing ${executionLanguage} cell: ${message}`);
 
                     // Stop executing any subsequent blocks since one failed.
                     break;
@@ -153,7 +158,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                 }
               };
 
-              await ExecuteQueue.instance.add(language, callback);
+              await ExecuteQueue.instance.add(executionLanguage, callback);
             },
             executeSelection: async (): Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });

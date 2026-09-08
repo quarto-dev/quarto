@@ -2,6 +2,7 @@
 
 ## 1.138.0 (Unreleased)
 
+- In Positron, running a Python cell in a knitr document now respects the `quarto.cells.useReticulate` setting, instead of always routing it through reticulate on the R console (<https://github.com/quarto-dev/quarto/pull/1116>).
 
 ## 1.137.0 (Release on 2026-09-04)
 

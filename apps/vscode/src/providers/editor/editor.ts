@@ -26,7 +26,9 @@ import {
   Selection,
   TextEditorRevealType,
   GlobPattern,
-  TabInputText
+  TabInputText,
+  Event,
+  EventEmitter
 } from "vscode";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
@@ -266,6 +268,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static recordPendingSwitchToVisual(document: TextDocument) {
     this.editorPendingSwitchToVisual.add(document.uri.toString());
+  }
+
+  // fires when a visual editor's webview panel becomes active
+  public static onDidChangeActiveEditor(): Event<TrackedEditor> {
+    return this.visualEditors.onDidChangeActiveEditor;
   }
 
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {
@@ -677,17 +684,27 @@ interface VisualEditorTracker {
   track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) => Disposable;
   editorForUri: (uri: Uri) => TrackedEditor | undefined;
   activeEditor: (includeVisible?: boolean) => TrackedEditor | undefined;
+  onDidChangeActiveEditor: Event<TrackedEditor>;
 }
 
 function visualEditorTracker(): VisualEditorTracker {
 
   const activeEditors = new Array<TrackedEditor>();
+  const onDidChangeActiveEditorEmitter = new EventEmitter<TrackedEditor>();
 
   return {
     track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor): Disposable => {
-      activeEditors.push({ document, webviewPanel, editor });
+      const trackedEditor = { document, webviewPanel, editor };
+      activeEditors.push(trackedEditor);
+      // notify when this editor's webview panel becomes active
+      const viewStateDisposable = webviewPanel.onDidChangeViewState(e => {
+        if (e.webviewPanel.active) {
+          onDidChangeActiveEditorEmitter.fire(trackedEditor);
+        }
+      });
       return {
         dispose: () => {
+          viewStateDisposable.dispose();
           const idx = activeEditors.findIndex(editor => editor.webviewPanel === webviewPanel);
           if (idx !== -1) {
             activeEditors.splice(idx, 1);
@@ -711,7 +728,8 @@ function visualEditorTracker(): VisualEditorTracker {
         }
 
       });
-    }
+    },
+    onDidChangeActiveEditor: onDidChangeActiveEditorEmitter.event
   };
 }
 

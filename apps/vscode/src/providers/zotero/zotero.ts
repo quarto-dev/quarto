@@ -4,15 +4,15 @@
  * Copyright (C) 2023-2026 by Posit Software, PBC
  */
 
-import { ExtensionContext, ProgressLocation, commands, window, workspace, Uri } from "vscode";
+import { ExtensionContext, LogOutputChannel, ProgressLocation, commands, window, workspace, Uri } from "vscode";
 import { zoteroApi, zoteroSyncWebLibraries, zoteroValidateApiKey } from "editor-server";
 
 import { Command } from "../../core/command";
 import { QuartoLspClient } from "../../lsp/client";
 import { editorZoteroJsonRpcServer } from "editor-core";
-import { ZoteroCollectionSpec, ZoteroResult, ZoteroServer, kZoteroMyLibrary } from "editor-types";
+import { ZoteroCollectionSpec, ZoteroLibraryConfig, ZoteroResult, ZoteroServer, kZoteroMyLibrary } from "editor-types";
 import { zoteroServerMethods } from "editor-server/src/server/zotero";
-import { JsonRpcRequestTransport } from "core";
+import { JsonRpcRequestTransport, sleep } from "core";
 
 const kQuartoZoteroWebApiKey = "quartoZoteroWebApiKey";
 
@@ -28,14 +28,14 @@ const kZoteroUnauthorized = "quarto.zoteroUnauthorized";
 // defaults to a no-op so `zoteroLspProxy` is safe if Zotero was never activated.
 let ensureZoteroConfigSynced: () => Promise<void> = () => Promise.resolve();
 
-export async function activateZotero(context: ExtensionContext, lsp: QuartoLspClient): Promise<Command[]> {
+export async function activateZotero(context: ExtensionContext, lsp: QuartoLspClient, outputChannel: LogOutputChannel): Promise<Command[]> {
 
   // establish zotero connection (lazy: does not force the LSP to start)
   const zotero = editorZoteroJsonRpcServer(lsp.lspRequest);
 
   // sync quarto config to the back end (whenever the LSP server is running);
   // exposes the gate that Zotero data requests await before running
-  ensureZoteroConfigSynced = syncZoteroConfig(context, zotero, lsp);
+  ensureZoteroConfigSynced = syncZoteroConfig(context, zotero, lsp, outputChannel);
 
   // register commands
   const commands: Command[] = [];
@@ -48,7 +48,17 @@ export async function activateZotero(context: ExtensionContext, lsp: QuartoLspCl
 }
 
 
-function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer, lsp: QuartoLspClient): () => Promise<void> {
+function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer, lsp: QuartoLspClient, outputChannel: LogOutputChannel): () => Promise<void> {
+
+  // the config push can race server startup (running != ready for custom
+  // requests), so failed pushes are retried at a fixed delay
+  const kMaxPushAttempts = 5;
+  const kPushRetryDelayMs = 1000;
+
+  // after a failed retry cycle, requests skip retrying until this cooldown
+  // elapses, so a persistent failure doesn't retry on every citation lookup
+  const kSyncFailureCooldownMs = 30_000;
+  let retryAfter = 0;
 
   const kZoteroConfig = "quarto.zotero";
   const kLibrary = "library";
@@ -58,22 +68,49 @@ function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer, lsp: 
   const kGroupLibraries = "groupLibraries";
   const kZoteroGroupLibraries = `${kZoteroConfig}.${kGroupLibraries}`;
 
-  // push the current library config to the LSP server
-  const pushLibraryConfig = async () => {
+  // read the currently configured library settings
+  const readLibraryConfig = async (): Promise<ZoteroLibraryConfig> => {
     const zoteroConfig = workspace.getConfiguration(kZoteroConfig);
-    const type = zoteroConfig.get<"none" | "local" | "web">(kLibrary, "local");
-    const dataDir = zoteroConfig.get<string>(kDataDir, "");
-    const apiKey = await safeReadZoteroApiKey(context);
+    return {
+      type: zoteroConfig.get<"none" | "local" | "web">(kLibrary, "local"),
+      dataDir: zoteroConfig.get<string>(kDataDir, ""),
+      apiKey: await safeReadZoteroApiKey(context)
+    };
+  };
+
+  // push a library config to the LSP server, returning success; takes config
+  // as a param so retries don't re-read config/secrets on every attempt
+  const pushLibraryConfig = async (config: ZoteroLibraryConfig): Promise<boolean> => {
     try {
-      await zotero.setLibraryConfig({
-        type,
-        dataDir,
-        apiKey
-      });
+      await zotero.setLibraryConfig(config);
+      return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : JSON.stringify(error);
-      console.log("Error setting zotero library config: " + message);
+      outputChannel.warn("Error setting zotero library config: " + message);
+      return false;
     }
+  };
+
+  // Log a failure, clear the memo so the next request retries (a single
+  // failure must not disable Zotero for the session, see
+  // https://github.com/quarto-dev/quarto/issues/1101), and warn the user
+  // with a retry option.
+  const notifySyncFailure = (message: string) => {
+    outputChannel.warn(message);
+    configSyncPromise = undefined;
+    retryAfter = Date.now() + kSyncFailureCooldownMs;
+    const kRetry = "Retry";
+    void window.showWarningMessage(
+      "Quarto could not configure the connection to your Zotero library, " +
+      "so Zotero may be unavailable as a citation source.",
+      kRetry
+    ).then((result) => {
+      if (result === kRetry) {
+        // user-initiated retry bypasses the cooldown
+        retryAfter = 0;
+        void ensureLibraryConfigSynced();
+      }
+    });
   };
 
   // Ensure the initial library config has been pushed to a running server.
@@ -83,13 +120,35 @@ function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer, lsp: 
   // this gate before it ever hits the transport would otherwise wait forever
   // for a config sync that never happens because nothing started the server.
   // Note `pushLibraryConfig` uses the ungated `zotero` connection, so its own
-  // `setLibraryConfig` call does not wait on this gate.
+  // `setLibraryConfig` call does not wait on this gate. After a failure,
+  // calls during the cooldown above resolve immediately without retrying.
   let configSyncPromise: Promise<void> | undefined;
   const ensureLibraryConfigSynced = (): Promise<void> => {
     if (!configSyncPromise) {
+      if (Date.now() < retryAfter) {
+        return Promise.resolve();
+      }
       configSyncPromise = (async () => {
-        await lsp.ensureStarted();
-        await pushLibraryConfig();
+        try {
+          await lsp.ensureStarted();
+        } catch (error) {
+          const message = error instanceof Error ? error.message : JSON.stringify(error);
+          notifySyncFailure("Unable to start Quarto LSP server to sync zotero library config: " + message);
+          return;
+        }
+        const config = await readLibraryConfig();
+        for (let attempt = 1; attempt <= kMaxPushAttempts; attempt++) {
+          if (await pushLibraryConfig(config)) {
+            return;
+          }
+          if (attempt < kMaxPushAttempts) {
+            await sleep(kPushRetryDelayMs);
+          }
+        }
+        notifySyncFailure(
+          `Unable to sync zotero library config after ${kMaxPushAttempts} attempts; ` +
+          `will retry on the next zotero request after a ${kSyncFailureCooldownMs / 1000}s cooldown.`
+        );
       })();
     }
     return configSyncPromise;
@@ -99,10 +158,13 @@ function syncZoteroConfig(context: ExtensionContext, zotero: ZoteroServer, lsp: 
   // without waiting for the first Zotero request (matches prior eager behavior)
   context.subscriptions.push(lsp.onReady(() => { void ensureLibraryConfigSynced(); }));
 
-  // push config on change, but only if the server is already running
+  // push config on change, but only if the server is already running; route
+  // through the same gate as the initial sync so a failure here retries and
+  // notifies the user just like an initial sync failure would
   const pushLibraryConfigIfRunning = async () => {
     if (lsp.runningClient()) {
-      await pushLibraryConfig();
+      configSyncPromise = undefined;
+      await ensureLibraryConfigSynced();
     }
   };
 

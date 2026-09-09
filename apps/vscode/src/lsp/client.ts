@@ -228,6 +228,7 @@ export function activateLsp(
 
   // Start the server on first use. Idempotent: the promise is memoized so
   // repeated calls (and multiple triggers) only launch the server once.
+  // Cleared on failure below so a later call can retry.
   let startPromise: Promise<LanguageClient> | undefined;
   const ensureStarted = (): Promise<LanguageClient> => {
     if (!startPromise) {
@@ -241,6 +242,8 @@ export function activateLsp(
             resolve(languageClient);
           } else if (e.newState === State.Stopped) {
             handler.dispose();
+            // clear the memo so a later call retries instead of replaying this rejection
+            startPromise = undefined;
             reject(new Error("Failed to start Quarto LSP Server"));
           }
         });

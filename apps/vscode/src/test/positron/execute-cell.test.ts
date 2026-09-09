@@ -38,7 +38,7 @@ suite("Positron: cell execution", function () {
 
   // `acquirePositronApi` is injected onto the global by Positron; we swap it for
   // a spy during each test and must restore it afterwards.
-  const globalWithApi = globalThis as { acquirePositronApi?: () => unknown };
+  const globalWithApi = globalThis as { acquirePositronApi?: () => unknown; };
   let originalAcquire: (() => unknown) | undefined;
 
   teardown(function () {
@@ -73,7 +73,7 @@ suite("Positron: cell execution", function () {
     // which we record instead of dispatching to a kernel.
     const calls: RuntimeCall[] = [];
     originalAcquire = globalWithApi.acquirePositronApi;
-    const realApi = originalAcquire!() as { runtime: Record<string, unknown> };
+    const realApi = originalAcquire!() as { runtime: Record<string, unknown>; };
     const fakeRuntime = new Proxy(realApi.runtime, {
       get(target, prop, receiver) {
         if (prop === "executeCode") {
@@ -134,7 +134,7 @@ suite("Positron: cell execution", function () {
     assert.ok(
       call,
       "Running the cell should call positron.runtime.executeCode('python', ...). " +
-        `Observed: ${describe(calls)}`
+      `Observed: ${describe(calls)}`
     );
 
     const code = String(call!.args[1]);
@@ -171,7 +171,7 @@ suite("Positron: cell execution", function () {
     assert.ok(
       call,
       "A knitr Python cell should be submitted to executeCode('r', ...). " +
-        `Observed: ${describe(calls)}`
+      `Observed: ${describe(calls)}`
     );
 
     const code = String(call!.args[1]);
@@ -183,6 +183,59 @@ suite("Positron: cell execution", function () {
       code.includes(`${marker} = 42`),
       "the original Python code should be embedded in the reticulate call"
     );
+  });
+
+  test("submits a knitr Python cell as python when cells.useReticulate is false", async function () {
+    const config = vscode.workspace.getConfiguration("quarto");
+    const previous = config.get<boolean>("cells.useReticulate");
+    await config.update(
+      "cells.useReticulate",
+      false,
+      vscode.ConfigurationTarget.Global
+    );
+    try {
+      const marker = `qmd_marker_${Date.now()}`;
+      const qmd = [
+        "---",
+        "engine: knitr",
+        "---",
+        "",
+        "```{python}",
+        `${marker} = 42`,
+        "```",
+        "",
+      ].join("\n");
+      // Cursor on the statement (line 5).
+      const calls = await runCellAndCaptureCalls(qmd, 5);
+
+      const rCall = calls.find(
+        (c) => c.method === "executeCode" && c.args[0] === "r"
+      );
+      assert.ok(
+        !rCall,
+        "With cells.useReticulate=false, a knitr Python cell should not be " +
+        `submitted to the R runtime. Observed: ${describe(calls)}`
+      );
+
+      const pyCall = calls.find(
+        (c) => c.method === "executeCode" && c.args[0] === "python"
+      );
+      assert.ok(
+        pyCall,
+        "With cells.useReticulate=false, a knitr Python cell should be " +
+        `submitted to executeCode('python', ...). Observed: ${describe(calls)}`
+      );
+      assert.ok(
+        !String(pyCall!.args[1]).includes("reticulate::repl_python"),
+        "the code should not be wrapped in reticulate::repl_python(...)"
+      );
+    } finally {
+      await config.update(
+        "cells.useReticulate",
+        previous,
+        vscode.ConfigurationTarget.Global
+      );
+    }
   });
 });
 

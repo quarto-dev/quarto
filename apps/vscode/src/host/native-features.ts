@@ -48,7 +48,7 @@ const kNativeLanguages = new Set(["r", "python"]);
 let nativeAvailable = false;
 
 /**
- * Determine if this host can serve embedded language features natively.
+ * Whether this host carries the virtual notebook.
  *
  * Capability detection is command presence rather than a Positron API flag or a
  * version comparison. Positron registers these commands unconditionally: with
@@ -56,23 +56,27 @@ let nativeAvailable = false;
  * tracks "this build can serve natively" exactly. Vanilla VS Code and older
  * Positron builds have no such commands, so a user who pastes the setting key
  * into their own `settings.json` there stays on virtual documents.
- *
- * Must be awaited during activation, before any gate can be consulted.
- *
  */
-export async function detectNativeEmbeddedFeatures(
-  outputChannel?: LogOutputChannel
-): Promise<void> {
+async function isNativeAvailable(): Promise<boolean> {
   if (!tryAcquirePositronApi()) {
-    nativeAvailable = false;
-    return;
+    return false;
   }
 
   // `false` keeps the underscore-prefixed ids we are looking for
   const all = await commands.getCommands(false);
-  nativeAvailable = kNativeFeatureCommands.every((command) =>
-    all.includes(command)
-  );
+  return kNativeFeatureCommands.every((command) => all.includes(command));
+}
+
+/**
+ * Determine if this host can serve embedded language features natively, and
+ * record the answer where the gates can read it.
+ *
+ * Must be awaited during activation, before any gate can be consulted.
+ */
+export async function detectNativeEmbeddedFeatures(
+  outputChannel?: LogOutputChannel
+): Promise<void> {
+  nativeAvailable = await isNativeAvailable();
 
   if (nativeAvailable) {
     outputChannel?.info(

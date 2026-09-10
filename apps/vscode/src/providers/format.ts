@@ -29,6 +29,7 @@ import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { optionCommentPattern } from "./cell/options";
 import { EmbeddedLanguage, languageCanFormatDocument } from "../vdoc/languages";
+import { hostOwnsCellFeatures } from "../host/cell-features";
 import {
   isBlockOfLanguage,
   languageFromBlock,
@@ -41,6 +42,55 @@ import {
 
 export function activateCodeFormatting(engine: MarkdownEngine) {
   return [new FormatCellCommand(engine)];
+}
+
+/**
+ * What the host's cell formatting commands answer. Edits are already in source
+ * document coordinates, so there is no range arithmetic to do here.
+ */
+interface CellFormattingResult {
+  /** Empty when a cell was vetoed. */
+  readonly edits: TextEdit[];
+
+  /**
+   * Cells whose formatter answer the host rejected, because the edits reached
+   * outside the cell or would have changed its `#|` option lines. Above zero
+   * means the format was abandoned.
+   */
+  readonly vetoedCells: number;
+}
+
+/** No edits, and no veto: what a command that cannot answer amounts to. */
+const kNoCellFormattingEdits: CellFormattingResult = { edits: [], vetoedCells: 0 };
+
+async function executeCellFormattingProvider(
+  uri: Uri
+): Promise<CellFormattingResult> {
+  try {
+    const result = await commands.executeCommand<CellFormattingResult | undefined>(
+      "positron.executeQuartoCellFormattingProvider",
+      uri
+    );
+    return result ?? kNoCellFormattingEdits;
+  } catch (error) {
+    return kNoCellFormattingEdits;
+  }
+}
+
+async function executeCellRangeFormattingProvider(
+  uri: Uri,
+  range: Range
+): Promise<CellFormattingResult> {
+  try {
+    const result = await commands.executeCommand<CellFormattingResult | undefined>(
+      "positron.executeQuartoCellRangeFormattingProvider",
+      uri,
+      range
+    );
+    return result ?? kNoCellFormattingEdits;
+  } catch (error) {
+    return kNoCellFormattingEdits;
+  }
 }
 
 export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
@@ -63,6 +113,17 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
     }
     if (activeEditor.document.uri.toString() !== document.uri.toString()) {
       return [];
+    }
+
+    if (hostOwnsCellFeatures()) {
+      const result = await executeCellFormattingProvider(document.uri);
+      if (result.vetoedCells > 0) {
+        window.showInformationMessage(
+          `Formatting edits could not be applied to ${result.vetoedCells} code cell${result.vetoedCells === 1 ? "" : "s"}; document was not modified.`
+        );
+        return [];
+      }
+      return result.edits;
     }
 
     const tokens = engine.parse(document);
@@ -135,6 +196,17 @@ export function embeddedDocumentRangeFormattingProvider(
     if (!isQuartoDoc(document, true)) {
       // If we don't perform any formatting, then call the next handler
       return next(document, range, options, token);
+    }
+
+    if (hostOwnsCellFeatures()) {
+      const result = await executeCellRangeFormattingProvider(document.uri, range);
+      if (result.vetoedCells > 0) {
+        window.showInformationMessage(
+          "Formatting edits could not be applied to the code cell."
+        );
+        return [];
+      }
+      return result.edits;
     }
 
     const includeFence = false;
@@ -325,12 +397,12 @@ async function formatBlock(
   const eol = doc.eol === EndOfLine.CRLF ? "\r\n" : "\n";
   const normalizeEdit: TextEdit | undefined = leadingEmptyLines > 1
     ? new TextEdit(
-        new Range(
-          new Position(block.range.start.line + 1 + optionLines, 0),
-          new Position(block.range.start.line + 1 + optionLines + leadingEmptyLines, 0)
-        ),
-        eol
-      )
+      new Range(
+        new Position(block.range.start.line + 1 + optionLines, 0),
+        new Position(block.range.start.line + 1 + optionLines + leadingEmptyLines, 0)
+      ),
+      eol
+    )
     : undefined;
 
   // Skip the formatter if the block is entirely option directives (or only

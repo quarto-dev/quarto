@@ -26,6 +26,8 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
+import { detectCellFeatureOwnership } from "./host/cell-features";
+import { setVdocTempFileLogger } from "./vdoc/vdoc-tempfile";
 import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
@@ -55,11 +57,15 @@ let notebookExportService: NotebookExportService | undefined;
 export async function activate(context: vscode.ExtensionContext): Promise<QuartoExtensionApi> {
   // create output channel for extension logs and lsp client logs
   const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
+  setVdocTempFileLogger(outputChannel);
 
   outputChannel.info("Activating Quarto extension.");
 
   // create extension host
   const host = extensionHost(outputChannel);
+
+  // does the host own language features for code cells?
+  await detectCellFeatureOwnership(outputChannel);
 
   // create markdown engine
   const engine = new MarkdownEngine();

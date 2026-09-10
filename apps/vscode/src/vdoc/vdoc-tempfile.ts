@@ -13,12 +13,23 @@ import {
   commands,
   Hover,
   languages,
+  LogOutputChannel,
   Position,
   TextDocument,
   Uri,
   workspace,
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
+
+/**
+ * Where vdoc temp file creation and deletion are logged. Wired to the Quarto
+ * output channel at activation; a no-op before that. Debug level, because a
+ * vdoc is created per language-feature request.
+ */
+let logChannel: LogOutputChannel | undefined;
+export function setVdocTempFileLogger(channel: LogOutputChannel): void {
+  logChannel = channel;
+}
 
 interface VirtualDocTempFileOptions {
   /** Fire a "dummy" hover request to cause the language server to start  */
@@ -38,6 +49,7 @@ export async function virtualDocUriFromTempFile(
 ): Promise<VirtualDocUri> {
   const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
   createVirtualDoc(filepath, virtualDoc.content);
+  logChannel?.debug(`[vdoc] Created ${filepath}`);
 
   const virtualDocUri = Uri.file(filepath);
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
@@ -89,6 +101,7 @@ export async function deleteDocument(doc: TextDocument) {
     await workspace.fs.delete(doc.uri, {
       useTrash: false
     });
+    logChannel?.debug(`[vdoc] Deleted ${doc.fileName}`);
   } catch (error) {
     // It's okay if the file is already deleted.
     if (error instanceof Error && error.message.includes("ENOENT")) {

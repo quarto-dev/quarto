@@ -3,12 +3,12 @@
 ## 1.138.0 (Unreleased)
 
 - In Positron, running a Python cell in a knitr document now respects the `quarto.cells.useReticulate` setting, instead of always routing it through reticulate on the R console (<https://github.com/quarto-dev/quarto/pull/1116>).
+- In Positron, when Positron serves language features for code cells itself (the `quarto.embeddedLanguageFeatures.native` setting), the extension no longer serves them from virtual document temp files (<https://github.com/quarto-dev/quarto/pull/1115>).
 - Fixed several bugs where Zotero could fail to appear as a citation source in the visual editor. The initial Zotero library configuration push to the language server was attempted only once and failures were swallowed (a regression in 1.136.0); it is now retried, failures are logged to the Quarto output channel, and a warning with a retry option is shown if the sync ultimately fails. Concurrent citation lookups could also race on the same cached copy of the local Zotero database, and that database could not be read at all when Zotero stored it in WAL mode, the default in current Zotero versions; both are now fixed (<https://github.com/quarto-dev/quarto/pull/1120>).
 
 ## 1.137.0 (Release on 2026-09-04)
 
 - Relicensed the extension to MIT (<https://github.com/quarto-dev/quarto/pull/1032>).
-
 
 ## 1.136.0 (Release on 2026-08-25)
 

@@ -358,7 +358,7 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
 
     if (vdoc && !isWithinYamlComment(document, position)) {
-      // stand down when the host serves this language's cells itself
+      // when the host is Positron, it may serve the language's cells itself and the extension should stand down (not try to provide them)
       if (useNativeEmbeddedFeatures(vdoc.language)) {
         return undefined;
       }

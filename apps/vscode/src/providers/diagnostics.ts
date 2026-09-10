@@ -28,6 +28,7 @@ import {
 
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, embeddedLanguage } from "../vdoc/languages";
+import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
 import { virtualDocForLanguage } from "../vdoc/vdoc";
 import { virtualDocUriFromTempFile, quartoVdocDir, VIRTUAL_DOC_TEMP_DIRECTORY } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
@@ -264,6 +265,7 @@ export class EmbeddedDiagnosticsManager extends Disposable {
       if (!languageName) { continue; }
       const language = embeddedLanguage(languageName);
       if (!language) { continue; }
+      if (hostOwnsCellFeatures(language)) { continue; }
       const session = this.getOrCreateSession(document.uri, language);
       session.languageBlocks.push(block);
     }
@@ -597,6 +599,13 @@ export function activateEmbeddedDiagnostics(
         createManager();
       } else {
         disposeManager();
+      }
+    }
+
+    if (e.affectsConfiguration(kHostCellFeaturesSetting)) {
+      disposeManager();
+      if (isEnabled()) {
+        createManager();
       }
     }
   });

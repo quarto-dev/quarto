@@ -68,6 +68,8 @@ import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { lspClientTransport } from "core-node";
 import { JsonRpcRequestTransport } from "core";
 import { extensionHost } from "../host";
+import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
+import { hasChunkSymbols, nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
 import semver from "semver";
 import { EmbeddedLanguage } from "../vdoc/languages";
 import { SymbolInformation } from "vscode";
@@ -157,8 +159,36 @@ export function activateLsp(
   if (config.get("cells.signatureHelp.enabled", true)) {
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
-  extensionHost().registerStatementRangeProvider(engine);
-  extensionHost().registerHelpTopicProvider(engine);
+  // Statement range and help topic are single-answer features: whichever
+  // provider registered last owns Cmd+Enter and F1. When the host owns the
+  // cells we must not compete with it, so these registrations follow the
+  // setting live rather than being made once. Disposing on enable hands the
+  // features to the host; re-registering on disable wins the race because this
+  // registration is then the most recent.
+  let hostProviders: Disposable[] = [];
+  const registerHostProviders = () => {
+    hostProviders = [
+      extensionHost().registerStatementRangeProvider(engine),
+      extensionHost().registerHelpTopicProvider(engine),
+    ];
+  };
+  if (!hostOwnsCellFeatures()) {
+    registerHostProviders();
+  }
+  context.subscriptions.push(
+    new Disposable(() => hostProviders.forEach((d) => d.dispose())),
+    workspace.onDidChangeConfiguration((e) => {
+      if (!e.affectsConfiguration(kHostCellFeaturesSetting)) {
+        return;
+      }
+      if (hostOwnsCellFeatures()) {
+        hostProviders.forEach((d) => d.dispose());
+        hostProviders = [];
+      } else if (hostProviders.length === 0) {
+        registerHostProviders();
+      }
+    })
+  );
 
   // create client options
   const initializationOptions: LspInitializationOptions = {
@@ -328,6 +358,11 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
 
     if (vdoc && !isWithinYamlComment(document, position)) {
+      // when the host is Positron, it may own the language's cells and the extension should stand down (not try to provide them)
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       // if there is a trigger character make sure the language supports it
       const language = vdoc.language;
       if (context.triggerCharacter) {
@@ -372,6 +407,10 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       return await withVirtualDocUri(vdoc, document.uri, "hover", async (uri: Uri) => {
         try {
           return await getHover(uri, vdoc.language, position);
@@ -396,6 +435,10 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       return await withVirtualDocUri(vdoc, document.uri, "signature", async (uri: Uri) => {
         try {
           return await getSignatureHelpHover(uri, vdoc.language, position, context.triggerCharacter);
@@ -418,6 +461,10 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       return await withVirtualDocUri(vdoc, document.uri, "definition", async (uri: Uri) => {
         try {
           const definitions = await commands.executeCommand<
@@ -508,6 +555,22 @@ function embeddedDocumentSymbolProvider(engine: MarkdownEngine) {
     // I don't think we actually ever get SymbolInformation[] here, but I'm not certain
     // so this is defensively coded.
     if (baseSymbols.length > 0 && isDocumentSymbol(baseSymbols[0])) {
+      // When the host owns the cells, one command answers for the whole
+      // document, so it is fetched once per request and the chunks are matched
+      // to it by range.
+      if (hostOwnsCellFeatures()) {
+        const symbols = baseSymbols as DocumentSymbol[];
+        // Nothing to ask the host about when the outline carries no chunk
+        // symbol to nest under, which is every request for a `_quarto.yml` and
+        // every request at all while `showCodeCellsInOutline` is off.
+        if (!hasChunkSymbols(symbols)) {
+          return baseSymbols;
+        }
+        const cells = await quartoCellSymbols(document.uri);
+        if (token.isCancellationRequested) return baseSymbols;
+        return nestCellSymbols(symbols, cells);
+      }
+
       const enhanced = await enhanceSymbolsWithCodeCellContent(
         document,
         baseSymbols as DocumentSymbol[],

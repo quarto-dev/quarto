@@ -52,6 +52,22 @@ export async function quartoCellSymbols(
 }
 
 /**
+ * Whether a symbol tree holds any chunk symbol for a cell to nest under.
+ *
+ * The language server marks chunks with `SymbolKind.Function` (its `toc.ts`),
+ * and drops every one of them when `quarto.symbols.showCodeCellsInOutline` is
+ * off. A `_quarto.yml`, which this client's document selector also covers, never
+ * has one either. In both cases {@link nestCellSymbols} would have nothing to
+ * attach to, so the caller can answer without asking the host for cell symbols.
+ */
+export function hasChunkSymbols(symbols: readonly DocumentSymbol[]): boolean {
+  return symbols.some(
+    (symbol) =>
+      symbol.kind === SymbolKind.Function || hasChunkSymbols(symbol.children)
+  );
+}
+
+/**
  * Nests each cell's symbols under the chunk symbol it came from.
  *
  * Chunks are matched to cells by range containment: a chunk symbol's range

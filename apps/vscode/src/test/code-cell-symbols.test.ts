@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as assert from "assert";
 import { openAndShowUniqueExamplesDocument, wait } from "./test-utils";
 import { DisposableStore } from "core";
-import { nestCellSymbols, QuartoCellSymbols } from "../lsp/cell-symbols";
+import { hasChunkSymbols, nestCellSymbols, QuartoCellSymbols } from "../lsp/cell-symbols";
 
 /**
  * Creates a fake document symbol provider that returns DocumentSymbol[] for virtual docs.
@@ -341,5 +341,37 @@ suite("Native Cell Symbol Nesting", function () {
     const nested = nestCellSymbols(symbols, []);
 
     assert.deepStrictEqual(flattenSymbolNames(nested), ["Section", "{r}"]);
+  });
+});
+
+suite("Chunk Symbol Detection", function () {
+  test("finds a chunk at the top level", function () {
+    assert.strictEqual(hasChunkSymbols([chunkSymbol("{r}", 2, 5)]), true);
+  });
+
+  test("finds a chunk nested under headings", function () {
+    const symbols = [
+      headingSymbol("Section", 0, 11, [
+        headingSymbol("Subsection", 6, 11, [chunkSymbol("{python}", 7, 10)]),
+      ]),
+    ];
+
+    assert.strictEqual(hasChunkSymbols(symbols), true);
+  });
+
+  test("finds no chunk in a tree of headings only", function () {
+    // What the outline looks like while `showCodeCellsInOutline` is off: the
+    // language server has filtered every chunk out of the tree.
+    const symbols = [
+      headingSymbol("Section", 0, 11, [
+        headingSymbol("Subsection", 6, 11, []),
+      ]),
+    ];
+
+    assert.strictEqual(hasChunkSymbols(symbols), false);
+  });
+
+  test("finds no chunk in an empty tree", function () {
+    assert.strictEqual(hasChunkSymbols([]), false);
   });
 });

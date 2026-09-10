@@ -69,7 +69,7 @@ import { lspClientTransport } from "core-node";
 import { JsonRpcRequestTransport } from "core";
 import { extensionHost } from "../host";
 import { kNativeFeaturesSetting, useNativeEmbeddedFeatures } from "../host/native-features";
-import { nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
+import { hasChunkSymbols, nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
 import semver from "semver";
 import { EmbeddedLanguage } from "../vdoc/languages";
 import { SymbolInformation } from "vscode";
@@ -559,9 +559,16 @@ function embeddedDocumentSymbolProvider(engine: MarkdownEngine) {
       // document, so it is fetched once per request and the chunks are matched
       // to it by range.
       if (useNativeEmbeddedFeatures()) {
+        const symbols = baseSymbols as DocumentSymbol[];
+        // Nothing to ask the host about when the outline carries no chunk
+        // symbol to nest under, which is every request for a `_quarto.yml` and
+        // every request at all while `showCodeCellsInOutline` is off.
+        if (!hasChunkSymbols(symbols)) {
+          return baseSymbols;
+        }
         const cells = await quartoCellSymbols(document.uri);
         if (token.isCancellationRequested) return baseSymbols;
-        return nestCellSymbols(baseSymbols as DocumentSymbol[], cells);
+        return nestCellSymbols(symbols, cells);
       }
 
       const enhanced = await enhanceSymbolsWithCodeCellContent(

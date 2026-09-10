@@ -6,7 +6,9 @@ import {
   isNativeEmbeddedLanguage,
   useNativeEmbeddedFeatures,
 } from "../host/native-features";
+import { hasNativeCells } from "../providers/semantic-tokens";
 import { embeddedLanguage } from "../vdoc/languages";
+import { MarkdownEngine } from "../markdown/engine";
 
 function language(name: string) {
   const found = embeddedLanguage(name);
@@ -63,5 +65,67 @@ suite("Native Embedded Features", function () {
     assert.strictEqual(useNativeEmbeddedFeatures(), false);
     assert.strictEqual(useNativeEmbeddedFeatures(language("r")), false);
     assert.strictEqual(useNativeEmbeddedFeatures(language("python")), false);
+  });
+});
+
+suite("Native Cells In A Document", function () {
+  const engine = new MarkdownEngine();
+
+  /**
+   * Parses `content` as a Quarto document and asks whether any of its cells are
+   * in a native language.
+   *
+   * The document is in memory and never shown. A fixture on disk would be worse
+   * here: showing one wakes the providers, which litter the workspace folder
+   * with `.vdoc.*` temp files that other suites then trip over while copying it.
+   */
+  async function hasNativeCellsIn(content: string): Promise<boolean> {
+    const doc = await vscode.workspace.openTextDocument({
+      language: "quarto",
+      content,
+    });
+    return hasNativeCells(engine.parse(doc));
+  }
+
+  const kJulia = "```{julia}\nx = 1\n```";
+  const kPython = "```{python}\nx = 1\n```";
+  const kR = "```{r}\nx <- 1\n```";
+  const kTypescript = "```{typescript}\nconst x = 1;\n```";
+
+  test("sees an R cell", async function () {
+    assert.strictEqual(await hasNativeCellsIn(kR), true);
+  });
+
+  test("sees a Python cell", async function () {
+    assert.strictEqual(await hasNativeCellsIn(kPython), true);
+  });
+
+  test("sees one native cell among cells of another language", async function () {
+    // One native cell is enough. Semantic tokens are answered for the whole
+    // document and only one provider's answer survives, so the host takes the
+    // document as soon as it owns any of it.
+    assert.strictEqual(
+      await hasNativeCellsIn(`${kJulia}\n\n${kPython}`),
+      true
+    );
+  });
+
+  test("sees no native cells among only julia and typescript", async function () {
+    assert.strictEqual(
+      await hasNativeCellsIn(`${kJulia}\n\n${kTypescript}`),
+      false
+    );
+  });
+
+  test("sees no native cells in a document with no code", async function () {
+    assert.strictEqual(
+      await hasNativeCellsIn("# Heading\n\nJust prose, no cells.\n"),
+      false
+    );
+  });
+
+  test("ignores a non-executable block that names a native language", async function () {
+    // ```r is a display block, not a cell; the host has nothing to serve in it.
+    assert.strictEqual(await hasNativeCellsIn("```r\nx <- 1\n```"), false);
   });
 });

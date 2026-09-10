@@ -15,6 +15,7 @@ import {
   window,
 } from "vscode";
 import { DocumentSemanticsTokensSignature } from "vscode-languageclient";
+import { Token } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 import { isQuartoDoc } from "../core/doc";
 import {
@@ -25,7 +26,7 @@ import {
   mainLanguage
 } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from "../vdoc/languages";
-import { useNativeEmbeddedFeatures } from "../host/native-features";
+import { isNativeEmbeddedLanguage, useNativeEmbeddedFeatures } from "../host/native-features";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
@@ -173,6 +174,17 @@ export function remapTokenIndices(
   return encodeSemanticTokens(remapped, tokens.resultId);
 }
 
+/**
+ * Whether any of a document's cells are in a language the host serves natively.
+ *
+ * Pure, so it can be tested without an extension host: the setting and
+ * capability half of the decision is `useNativeEmbeddedFeatures()`, which the
+ * caller checks separately.
+ */
+export function hasNativeCells(tokens: Token[]): boolean {
+  return mainLanguage(tokens, isNativeEmbeddedLanguage) !== undefined;
+}
+
 export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
   return async (
     document: TextDocument,
@@ -184,6 +196,14 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
       return await next(document, token);
     }
 
+    // Parse the document to get all tokens
+    const tokens = engine.parse(document);
+
+    // Stand down when the host serves any of this document's cells.
+    if (useNativeEmbeddedFeatures() && hasNativeCells(tokens)) {
+      return undefined;
+    }
+
     // Ensure we are dealing with the active document
     const editor = window.activeTextEditor;
     const activeDocument = editor?.document;
@@ -191,9 +211,6 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
       // Not the active document, delegate to default
       return await next(document, token);
     }
-
-    // Parse the document to get all tokens
-    const tokens = engine.parse(document);
 
     // Try to find language at cursor position, otherwise use main language
     const line = editor.selection.active.line;
@@ -206,11 +223,6 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
     if (!language) {
       // No language found, delegate to default
       return await next(document, token);
-    }
-
-    // Stand down when the host serves this language's cells itself
-    if (useNativeEmbeddedFeatures(language)) {
-      return undefined;
     }
 
     // Create virtual doc for all blocks of this language

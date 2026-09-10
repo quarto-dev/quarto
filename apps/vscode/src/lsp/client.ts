@@ -68,7 +68,7 @@ import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { lspClientTransport } from "core-node";
 import { JsonRpcRequestTransport } from "core";
 import { extensionHost } from "../host";
-import { kNativeFeaturesSetting, useNativeEmbeddedFeatures } from "../host/native-features";
+import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
 import { hasChunkSymbols, nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
 import semver from "semver";
 import { EmbeddedLanguage } from "../vdoc/languages";
@@ -160,8 +160,8 @@ export function activateLsp(
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
   // Statement range and help topic are single-answer features: whichever
-  // provider registered last owns Cmd+Enter and F1. When the host serves cells
-  // natively we must not compete with it, so these registrations follow the
+  // provider registered last owns Cmd+Enter and F1. When the host owns the
+  // cells we must not compete with it, so these registrations follow the
   // setting live rather than being made once. Disposing on enable hands the
   // features to the host; re-registering on disable wins the race because this
   // registration is then the most recent.
@@ -172,16 +172,16 @@ export function activateLsp(
       extensionHost().registerHelpTopicProvider(engine),
     ];
   };
-  if (!useNativeEmbeddedFeatures()) {
+  if (!hostOwnsCellFeatures()) {
     registerHostProviders();
   }
   context.subscriptions.push(
     new Disposable(() => hostProviders.forEach((d) => d.dispose())),
     workspace.onDidChangeConfiguration((e) => {
-      if (!e.affectsConfiguration(kNativeFeaturesSetting)) {
+      if (!e.affectsConfiguration(kHostCellFeaturesSetting)) {
         return;
       }
-      if (useNativeEmbeddedFeatures()) {
+      if (hostOwnsCellFeatures()) {
         hostProviders.forEach((d) => d.dispose());
         hostProviders = [];
       } else if (hostProviders.length === 0) {
@@ -358,8 +358,8 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
 
     if (vdoc && !isWithinYamlComment(document, position)) {
-      // when the host is Positron, it may serve the language's cells itself and the extension should stand down (not try to provide them)
-      if (useNativeEmbeddedFeatures(vdoc.language)) {
+      // when the host is Positron, it may own the language's cells and the extension should stand down (not try to provide them)
+      if (hostOwnsCellFeatures(vdoc.language)) {
         return undefined;
       }
 
@@ -407,7 +407,7 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      if (useNativeEmbeddedFeatures(vdoc.language)) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
         return undefined;
       }
 
@@ -435,7 +435,7 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      if (useNativeEmbeddedFeatures(vdoc.language)) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
         return undefined;
       }
 
@@ -461,7 +461,7 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
-      if (useNativeEmbeddedFeatures(vdoc.language)) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
         return undefined;
       }
 
@@ -555,10 +555,10 @@ function embeddedDocumentSymbolProvider(engine: MarkdownEngine) {
     // I don't think we actually ever get SymbolInformation[] here, but I'm not certain
     // so this is defensively coded.
     if (baseSymbols.length > 0 && isDocumentSymbol(baseSymbols[0])) {
-      // When the host serves the cells, one command answers for the whole
+      // When the host owns the cells, one command answers for the whole
       // document, so it is fetched once per request and the chunks are matched
       // to it by range.
-      if (useNativeEmbeddedFeatures()) {
+      if (hostOwnsCellFeatures()) {
         const symbols = baseSymbols as DocumentSymbol[];
         // Nothing to ask the host about when the outline carries no chunk
         // symbol to nest under, which is every request for a `_quarto.yml` and

@@ -29,7 +29,7 @@ import { isQuartoDoc } from "../core/doc";
 import { MarkdownEngine } from "../markdown/engine";
 import { optionCommentPattern } from "./cell/options";
 import { EmbeddedLanguage, languageCanFormatDocument } from "../vdoc/languages";
-import { useNativeEmbeddedFeatures } from "../host/native-features";
+import { hostOwnsCellFeatures } from "../host/cell-features";
 import {
   isBlockOfLanguage,
   languageFromBlock,
@@ -115,7 +115,7 @@ export function embeddedDocumentFormattingProvider(engine: MarkdownEngine) {
       return [];
     }
 
-    if (useNativeEmbeddedFeatures()) {
+    if (hostOwnsCellFeatures()) {
       const result = await executeCellFormattingProvider(document.uri);
       if (result.vetoedCells > 0) {
         window.showInformationMessage(
@@ -198,7 +198,7 @@ export function embeddedDocumentRangeFormattingProvider(
       return next(document, range, options, token);
     }
 
-    if (useNativeEmbeddedFeatures()) {
+    if (hostOwnsCellFeatures()) {
       const result = await executeCellRangeFormattingProvider(document.uri, range);
       if (result.vetoedCells > 0) {
         window.showInformationMessage(

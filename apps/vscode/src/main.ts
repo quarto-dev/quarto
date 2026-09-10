@@ -26,7 +26,7 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
-import { detectNativeEmbeddedFeatures } from "./host/native-features";
+import { detectCellFeatureOwnership } from "./host/cell-features";
 import { setVdocTempFileLogger } from "./vdoc/vdoc-tempfile";
 import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
@@ -64,8 +64,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   // create extension host
   const host = extensionHost(outputChannel);
 
-  // does this host serve embedded language features natively?
-  await detectNativeEmbeddedFeatures(outputChannel);
+  // does the host own language features for code cells?
+  await detectCellFeatureOwnership(outputChannel);
 
   // create markdown engine
   const engine = new MarkdownEngine();

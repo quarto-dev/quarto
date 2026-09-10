@@ -33,7 +33,7 @@ export interface QuartoCellSymbols {
  * Answers `[]` for every unservable state: a host without the command, a
  * document with no cells, and a document whose cells have no language server
  * attached yet. That last case is why the caller must gate on
- * `useNativeEmbeddedFeatures()` rather than treat an empty answer as a reason to
+ * `hostOwnsCellFeatures()` rather than treat an empty answer as a reason to
  * fall back, and it needs no retry: when a server does register, the editor
  * re-requests document symbols on its own.
  */

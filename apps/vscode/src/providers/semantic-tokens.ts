@@ -26,7 +26,7 @@ import {
   mainLanguage
 } from "../vdoc/vdoc";
 import { EmbeddedLanguage } from "../vdoc/languages";
-import { isNativeEmbeddedLanguage, useNativeEmbeddedFeatures } from "../host/native-features";
+import { hostOwnsLanguage, hostOwnsCellFeatures } from "../host/cell-features";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
@@ -175,14 +175,14 @@ export function remapTokenIndices(
 }
 
 /**
- * Whether any of a document's cells are in a language the host serves natively.
+ * Whether the host owns any of a document's cells.
  *
  * Pure, so it can be tested without an extension host: the setting and
- * capability half of the decision is `useNativeEmbeddedFeatures()`, which the
+ * capability half of the decision is `hostOwnsCellFeatures()`, which the
  * caller checks separately.
  */
-export function hasNativeCells(tokens: Token[]): boolean {
-  return mainLanguage(tokens, isNativeEmbeddedLanguage) !== undefined;
+export function hostOwnsAnyCell(tokens: Token[]): boolean {
+  return mainLanguage(tokens, hostOwnsLanguage) !== undefined;
 }
 
 export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
@@ -199,8 +199,8 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
     // Parse the document to get all tokens
     const tokens = engine.parse(document);
 
-    // Stand down when the host serves any of this document's cells.
-    if (useNativeEmbeddedFeatures() && hasNativeCells(tokens)) {
+    // Stand down when the host owns any of this document's cells.
+    if (hostOwnsCellFeatures() && hostOwnsAnyCell(tokens)) {
       return undefined;
     }
 

@@ -249,7 +249,7 @@ function cellAnswer(
   };
 }
 
-suite("Native Cell Symbol Nesting", function () {
+suite("Host Cell Symbol Nesting", function () {
   test("nests a cell's symbols under the chunk that contains it", function () {
     // Chunk fences on lines 2 and 5, so the cell's code span is lines 3 to 4.
     const symbols = [chunkSymbol("{r}", 2, 5)];

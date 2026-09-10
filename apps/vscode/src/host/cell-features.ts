@@ -4,6 +4,39 @@
  * Copyright (C) 2026 by Posit Software, PBC
  */
 
+/**
+ * Who answers language feature requests inside Quarto code cells: this
+ * extension, from a `.vdoc.*` temp file, or the host, from an in memory
+ * virtual notebook. Both answers reach the editor for one request, so only one
+ * can answer it.
+ *
+ * This module is the entry point for that decision, and only the decision. The
+ * features stay in their own providers. Each one asks here, then stands down or
+ * carries on.
+ *
+ * Gated per language, so a cell the host does not cover keeps its virtual
+ * document:
+ *
+ * - completion, hover, signature help, go to definition (`lsp/client.ts`)
+ * - diagnostics (`providers/diagnostics.ts`)
+ *
+ * Gated per document, because one request covers the whole file and only one
+ * answer survives. Any cell the host owns hands it every cell, including ones
+ * in languages the host does not cover:
+ *
+ * - document symbols (`lsp/client.ts`)
+ * - document and range formatting (`providers/format.ts`)
+ * - semantic tokens (`providers/semantic-tokens.ts`)
+ * - statement range and help topic (`lsp/client.ts`), which are registrations,
+ *   so they are disposed and registered again rather than returning early
+ *
+ * Not gated: `quarto.formatCell` still uses a virtual document.
+ *
+ * The host owns a feature when it has the cell commands (probed at activation
+ * by {@link detectCellFeatureOwnership}), the setting is on, and, for a
+ * per-language gate, the language is one of `kHostOwnedLanguages`.
+ */
+
 import { commands, LogOutputChannel, workspace } from "vscode";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 

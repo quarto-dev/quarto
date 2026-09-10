@@ -26,7 +26,7 @@ export async function provideYamlDiagnostics(
 ): Promise<Diagnostic[]> {
 
   const context = docEditorContext(doc, Position.create(0, 0), true);
-  const diagnostics = await quarto.getYamlDiagnostics(context);
+  const diagnostics = (await quarto.getYamlDiagnostics(context)) ?? [];
   return diagnostics.map((item) => {
     return {
       severity: lintSeverity(item),

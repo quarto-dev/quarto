@@ -38,7 +38,7 @@ export interface Quarto extends QuartoContext {
     token: AttrToken,
     context: EditorContext
   ): Promise<CompletionItem[]>;
-  getYamlDiagnostics(context: EditorContext): Promise<LintItem[]>;
+  getYamlDiagnostics(context: EditorContext): Promise<LintItem[] | null>;
   getHover?: (context: EditorContext) => Promise<HoverResult | null>;
 }
 
@@ -168,7 +168,7 @@ function normalizedValue(value: string, simpleDiv: boolean) {
 
 interface QuartoYamlModule {
   getCompletions(context: EditorContext): Promise<CompletionResult>;
-  getLint(context: EditorContext): Promise<Array<LintItem>>;
+  getLint(context: EditorContext): Promise<Array<LintItem> | null>;
   getHover?: (context: EditorContext) => Promise<HoverResult | null>;
 }
 

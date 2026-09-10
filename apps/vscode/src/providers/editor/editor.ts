@@ -271,9 +271,8 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
   }
 
   // fires when a visual editor's webview panel becomes active
-  public static onDidChangeActiveEditor(): Event<TrackedEditor> {
-    return this.visualEditors.onDidChangeActiveEditor;
-  }
+  public static readonly onDidChangeActiveEditor: Event<TrackedEditor> =
+    VisualEditorProvider.visualEditors.onDidChangeActiveEditor;
 
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);

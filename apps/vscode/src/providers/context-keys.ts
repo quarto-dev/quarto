@@ -56,7 +56,7 @@ export function activateContextKeySetter(
   // set context keys when a visual editor becomes active (custom editors
   // don't fire onDidChangeActiveTextEditor)
   context.subscriptions.push(
-    VisualEditorProvider.onDidChangeActiveEditor()(editor => {
+    VisualEditorProvider.onDidChangeActiveEditor(editor => {
       setEditorContextKeys(editor.document, engine);
       setLanguageContextKeys(editor.document, engine);
     })

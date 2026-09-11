@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.138.0 (Unreleased)
+## 1.138.0 (Release on 2026-09-11)
 
 - In Positron, running a Python cell in a knitr document now respects the `quarto.cells.useReticulate` setting, instead of always routing it through reticulate on the R console (<https://github.com/quarto-dev/quarto/pull/1116>).
 - In Positron, when Positron serves language features for code cells itself (the `quarto.embeddedLanguageFeatures.native` setting), the extension no longer serves them from virtual document temp files (<https://github.com/quarto-dev/quarto/pull/1115>).

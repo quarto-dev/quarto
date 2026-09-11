@@ -32,24 +32,34 @@ export function activateContextKeySetter(
   engine: MarkdownEngine
 ) {
   // set the initial context keys
-  setEditorContextKeys(vscode.window.activeTextEditor, engine);
-  setLanguageContextKeys(vscode.window.activeTextEditor, engine);
+  setEditorContextKeys(vscode.window.activeTextEditor?.document, engine);
+  setLanguageContextKeys(vscode.window.activeTextEditor?.document, engine);
 
   // register for quarto.render.renderOnSave or quarto.render.renderOnSaveShiny configuration change notification
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
     // if the change affects quarto.render.renderOnSave or quarto.render.renderOnSaveShiny, set the editor context keys.
     if (event.affectsConfiguration('quarto.render.renderOnSave') || event.affectsConfiguration('quarto.render.renderOnSaveShiny')) {
-      setEditorContextKeys(vscode.window.activeTextEditor, engine);
+      const document = vscode.window.activeTextEditor?.document ?? VisualEditorProvider.activeEditor()?.document;
+      setEditorContextKeys(document, engine);
     }
   }));
 
   // set context keys when active text editor changes
   vscode.window.onDidChangeActiveTextEditor(activeTextEditor => {
-    setEditorContextKeys(activeTextEditor, engine);
-    setLanguageContextKeys(activeTextEditor, engine);
+    setEditorContextKeys(activeTextEditor?.document, engine);
+    setLanguageContextKeys(activeTextEditor?.document, engine);
   },
     null,
     context.subscriptions
+  );
+
+  // set context keys when a visual editor becomes active (custom editors
+  // don't fire onDidChangeActiveTextEditor)
+  context.subscriptions.push(
+    VisualEditorProvider.onDidChangeActiveEditor(editor => {
+      setEditorContextKeys(editor.document, engine);
+      setLanguageContextKeys(editor.document, engine);
+    })
   );
 
   // set context keys on changes to the document (if it's active)
@@ -59,8 +69,8 @@ export function activateContextKeySetter(
       // TODO: this debounce is being created and called immediately, which is not correct.
       debounce(
         () => {
-          setEditorContextKeys(activeEditor, engine);
-          setLanguageContextKeys(activeEditor, engine);
+          setEditorContextKeys(activeEditor.document, engine);
+          setLanguageContextKeys(activeEditor.document, engine);
         },
         debounceOnDidChangeDocumentMs
       )();
@@ -110,11 +120,11 @@ export function toggleRenderOnSaveOverride() {
 }
 
 // sets editor context keys
-function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, engine: MarkdownEngine) {
+function setEditorContextKeys(document: vscode.TextDocument | undefined, engine: MarkdownEngine) {
   // if a Quarto doc is active, set the editor context keys
-  if (isQuartoDoc(activeTextEditor?.document)) {
+  if (isQuartoDoc(document)) {
     // set the quarto.editor.type context key
-    quartoEditorType = !isQuartoShinyDoc(engine, activeTextEditor?.document)
+    quartoEditorType = !isQuartoShinyDoc(engine, document)
       ? 'quarto'
       : 'quarto-shiny';
     vscode.commands.executeCommand<string>(
@@ -145,13 +155,13 @@ function setEditorContextKeys(activeTextEditor: vscode.TextEditor | undefined, e
   }
 }
 
-function setLanguageContextKeys(activeTextEditor: vscode.TextEditor | undefined, engine: MarkdownEngine) {
-  if (!activeTextEditor || !isQuartoDoc(activeTextEditor.document)) {
+function setLanguageContextKeys(document: vscode.TextDocument | undefined, engine: MarkdownEngine) {
+  if (!document || !isQuartoDoc(document)) {
     return;
   }
 
   // expose main language for use in keybindings, etc
-  const tokens = engine.parse(activeTextEditor.document);
+  const tokens = engine.parse(document);
   const language = mainLanguage(tokens);
   vscode.commands.executeCommand(
     'setContext',

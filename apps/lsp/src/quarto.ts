@@ -50,7 +50,9 @@ export async function initializeQuarto(context: QuartoContext): Promise<Quarto> 
     getAttrCompletions: initializeAttrCompletionProvider(
       context.resourcePath
     ),
-    getYamlDiagnostics: quartoModule.getLint,
+    // the external getLint() resolves to null when linting fails
+    getYamlDiagnostics: async (context) =>
+      (await quartoModule.getLint(context)) ?? [],
     getHover: quartoModule.getHover
   };
 
@@ -168,7 +170,7 @@ function normalizedValue(value: string, simpleDiv: boolean) {
 
 interface QuartoYamlModule {
   getCompletions(context: EditorContext): Promise<CompletionResult>;
-  getLint(context: EditorContext): Promise<Array<LintItem>>;
+  getLint(context: EditorContext): Promise<Array<LintItem> | null>;
   getHover?: (context: EditorContext) => Promise<HoverResult | null>;
 }
 

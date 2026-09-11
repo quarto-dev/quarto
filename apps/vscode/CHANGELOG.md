@@ -4,6 +4,8 @@
 
 - In Positron, running a Python cell in a knitr document now respects the `quarto.cells.useReticulate` setting, instead of always routing it through reticulate on the R console (<https://github.com/quarto-dev/quarto/pull/1116>).
 - In Positron, when Positron serves language features for code cells itself (the `quarto.embeddedLanguageFeatures.native` setting), the extension no longer serves them from virtual document temp files (<https://github.com/quarto-dev/quarto/pull/1115>).
+- In Positron, fixed how the "Render on Save" checkbox works in the visual editor (<https://github.com/quarto-dev/quarto/pull/1121>).
+- Fixed a crash of the Quarto language server on save when a code cell contained unparseable YAML options (e.g. an unquoted `fig-cap` value containing a colon) (<https://github.com/quarto-dev/quarto/pull/1123>).
 - Fixed several bugs where Zotero could fail to appear as a citation source in the visual editor. The initial Zotero library configuration push to the language server was attempted only once and failures were swallowed (a regression in 1.136.0); it is now retried, failures are logged to the Quarto output channel, and a warning with a retry option is shown if the sync ultimately fails. Requests to the language server also now wait for the server to signal that it has finished starting up, fixing "Unhandled method" errors when requests raced with server startup. Concurrent citation lookups could also race on the same cached copy of the local Zotero database, and that database could not be read at all when Zotero stored it in WAL mode, the default in current Zotero versions; both are now fixed (<https://github.com/quarto-dev/quarto/pull/1120>).
 
 ## 1.137.0 (Release on 2026-09-04)

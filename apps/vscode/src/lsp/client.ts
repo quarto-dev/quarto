@@ -66,7 +66,7 @@ import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { lspClientTransport } from "core-node";
-import { JsonRpcRequestTransport } from "core";
+import { JsonRpcRequestTransport, sleep } from "core";
 import { extensionHost } from "../host";
 import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
 import { hasChunkSymbols, nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
@@ -89,7 +89,8 @@ let client: LanguageClient | undefined;
 export interface QuartoLspClient {
   /**
    * JSON-RPC transport that lazily starts the language server on first use and
-   * waits for it to be running before issuing the request.
+   * waits for it to be running and fully initialized (all request handlers
+   * registered) before issuing the request.
    */
   lspRequest: JsonRpcRequestTransport;
 
@@ -227,6 +228,13 @@ export function activateLsp(
   );
   client = languageClient;
 
+  // Resolves when the server signals that it has finished its async startup
+  // and registered all of its request handlers, including the custom JSON-RPC
+  // methods served via `lspRequest`.
+  let resolveServerReady!: () => void;
+  const serverReady = new Promise<void>(resolve => { resolveServerReady = resolve; });
+  languageClient.onNotification("quarto/serverReady", () => resolveServerReady());
+
   // callbacks to invoke each time the server reaches the running state
   const readyCallbacks = new Set<(client: LanguageClient) => void>();
   const onReady = (callback: (client: LanguageClient) => void): Disposable => {
@@ -284,10 +292,21 @@ export function activateLsp(
     return startPromise;
   };
 
-  // Lazy JSON-RPC transport: starts the server on first use, then forwards.
+  // Lazy JSON-RPC transport: starts the server on first use, waits for it to
+  // finish initializing, then forwards.
   let transport: JsonRpcRequestTransport | undefined;
+  let readinessWarningShown = false;
   const lspRequest: JsonRpcRequestTransport = async (method, params) => {
     const started = await ensureStarted();
+    // Wait for the server to register its request handlers.
+    const timedOut = await Promise.race([
+      serverReady.then(() => false as const),
+      sleep(60_000).then(() => true as const)
+    ]);
+    if (timedOut && !readinessWarningShown) {
+      readinessWarningShown = true;
+      outputChannel.warn("Timed out waiting for the Quarto LSP server to finish starting up; requests to it may fail.");
+    }
     if (!transport) {
       transport = lspClientTransport(started);
     }

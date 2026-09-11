@@ -456,7 +456,7 @@
         "command": "quarto.toggleRenderOnSave",
         "title": "Render on Save",
         "category": "Quarto",
-        "enablement": "editorLangId == quarto",
+        "enablement": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'",
         "actionBarOptions": {
           "controlType": "checkbox",
           "checked": "(quarto.editor.type == quarto && quarto.editor.renderOnSave) || (quarto.editor.type == 'quarto-shiny' && quarto.editor.renderOnSaveShiny)"

@@ -323,6 +323,11 @@ connection.onInitialized(async () => {
   // signal that `mdLs` is now ready to serve requests:
   // handlers like document symbols, folding ranges, etc will now proceed
   resolveMdLsReady();
+
+  // signal to the client that startup is complete and all request handlers
+  // (including the custom methods registered above) are ready to serve
+  // requests
+  connection.sendNotification("quarto/serverReady");
 });
 
 

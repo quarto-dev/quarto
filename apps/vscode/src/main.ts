@@ -137,7 +137,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     commands.push(...editorCommands);
 
     // zotero
-    const zoteroCommands = await activateZotero(context, lspClient);
+    const zoteroCommands = await activateZotero(context, lspClient, outputChannel);
     commands.push(...zoteroCommands);
 
     // assist panel

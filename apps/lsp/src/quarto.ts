@@ -38,7 +38,7 @@ export interface Quarto extends QuartoContext {
     token: AttrToken,
     context: EditorContext
   ): Promise<CompletionItem[]>;
-  getYamlDiagnostics(context: EditorContext): Promise<LintItem[] | null>;
+  getYamlDiagnostics(context: EditorContext): Promise<LintItem[]>;
   getHover?: (context: EditorContext) => Promise<HoverResult | null>;
 }
 
@@ -50,7 +50,9 @@ export async function initializeQuarto(context: QuartoContext): Promise<Quarto> 
     getAttrCompletions: initializeAttrCompletionProvider(
       context.resourcePath
     ),
-    getYamlDiagnostics: quartoModule.getLint,
+    // the external getLint() resolves to null when linting fails
+    getYamlDiagnostics: async (context) =>
+      (await quartoModule.getLint(context)) ?? [],
     getHover: quartoModule.getHover
   };
 

@@ -7,8 +7,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { Node as ProsemirrorNode } from 'prosemirror-model';
-
 import {
   BibliographyFile,
   BibliographyManager,
@@ -17,6 +15,7 @@ import {
   BibliographySource,
 } from '../../api/bibliography/bibliography';
 import { kInvalidCiteKeyChars } from '../../api/cite';
+import { YamlBlockSource } from '../../api/yaml';
 import { changeExtension } from '../../api/path';
 import { EditorUI } from '../../api/ui-types';
 import { WidgetProps } from '../../api/widgets/react';
@@ -56,10 +55,11 @@ export interface InsertCitationDialogResult {
 
 // Show the insert citation dialog and returns the
 // items that should be inserted, the bibliography in which to write them
-// and the last selected position in the tree
+// and the last selected position in the tree. The yaml source is the document
+// (or its yaml blocks, for hosts w/o an editor instance)
 export async function showInsertCitationDialog(
   ui: EditorUI,
-  doc: ProsemirrorNode,
+  yamlSource: YamlBlockSource,
   bibliographyManager: BibliographyManager,
   server: EditorServer,
   performInsertCitations: (result: InsertCitationDialogResult) => Promise<void>,
@@ -106,7 +106,7 @@ export async function showInsertCitationDialog(
       const providersForBibliography = (writable: boolean) => {
         if (writable) {
           const providers =  [
-            bibliographySourcePanel(doc, ui, bibliographyManager),
+            bibliographySourcePanel(ui, bibliographyManager),
             doiSourcePanel(ui, server.doi, bibliographyManager),
             crossrefSourcePanel(ui, server.crossref, server.doi, bibliographyManager),
             dataciteSourcePanel(ui, server.datacite, server.doi, bibliographyManager),
@@ -117,7 +117,7 @@ export async function showInsertCitationDialog(
           }
           return providers;
         } else {
-          return [bibliographySourcePanel(doc, ui, bibliographyManager)];
+          return [bibliographySourcePanel(ui, bibliographyManager)];
         }
       };
       
@@ -127,7 +127,7 @@ export async function showInsertCitationDialog(
       const configurationStream: InsertCitationPanelConfigurationStream = {
         current: {
           providers: providersForBibliography(bibliographyManager.allowsWrites()),
-          bibliographyFiles: bibliographyManager.bibliographyFiles(doc, ui),
+          bibliographyFiles: bibliographyManager.bibliographyFiles(yamlSource, ui),
           existingIds: bibliographyManager.localSources().map(source => source.id),
         },
         stream: () => {
@@ -136,10 +136,10 @@ export async function showInsertCitationDialog(
       };
 
       // Load the bibliography and then update the configuration
-      bibliographyManager.load(ui, doc, true).then(() => {
+      bibliographyManager.load(ui, yamlSource, true).then(() => {
         updatedConfiguration = {
           providers: providersForBibliography(bibliographyManager.allowsWrites()),
-          bibliographyFiles: bibliographyManager.bibliographyFiles(doc, ui),
+          bibliographyFiles: bibliographyManager.bibliographyFiles(yamlSource, ui),
           existingIds: bibliographyManager.localSources().map(source => source.id),
         };
       });
@@ -212,7 +212,6 @@ export async function showInsertCitationDialog(
           initiallySelectedNodeKey={initiallySelectedNodeKey}
           onOk={onOk}
           onCancel={onCancel}
-          doc={doc}
           ui={ui}
         />
       );
@@ -251,7 +250,6 @@ interface InsertCitationPanelConfigurationStream {
 // to be added to a document.
 interface InsertCitationPanelProps extends WidgetProps {
   ui: EditorUI;
-  doc: ProsemirrorNode;
   height: number;
   width: number;
   themed: boolean;

@@ -27,6 +27,7 @@ import { performCompletionReplacement } from '../../api/completion';
 import { FixupContext } from '../../api/fixup';
 import { pasteTransaction } from '../../api/clipboard';
 import { ensureBibliographyFileForDoc } from '../../api/bibliography/bibliography-provider_local';
+import { YamlBlockSource } from '../../api/yaml';
 
 import { citationCompletionHandler } from './cite-completion';
 import { citeHighlightPlugin } from './cite-highlight';
@@ -755,8 +756,38 @@ export async function ensureSourcesInBibliography(
   ui: EditorUI,
   server: PandocServer,
 ): Promise<boolean> {
+  // Write the sources to the bibliography file
+  const proceedWithInsert = await writeSourcesToBibliography(
+    sources,
+    bibliographyFile,
+    bibManager,
+    view.state.doc,
+    ui,
+    server,
+  );
+
+  // Ensure the bibliography file is referenced in the document YAML
+  if (proceedWithInsert && !bibliographyFile.isProject && sources.some(source => source.id)) {
+    ensureBibliographyFileForDoc(tr, bibliographyFile.displayPath);
+  }
+
+  return proceedWithInsert;
+}
+
+// Writes the sources to the specified bibliography file (if they aren't already
+// present), confirming with the user if a provider has a warning. Returns false
+// if the user elected not to proceed. This doesn't touch the document, so it can
+// also be used by hosts that don't have an editor instance.
+export async function writeSourcesToBibliography(
+  sources: BibliographySource[],
+  bibliographyFile: BibliographyFile,
+  bibManager: BibliographyManager,
+  yamlSource: YamlBlockSource,
+  ui: EditorUI,
+  server: PandocServer,
+): Promise<boolean> {
   // Write entry to a bibliography file if it isn't already present
-  await bibManager.loadLocal(ui, view.state.doc);
+  await bibManager.loadLocal(ui, yamlSource);
 
   // See if there is a warning for the selected provider. If there is, we may need to surface
   // that to the user. If there is no provider specified, no need to care about warnings.
@@ -815,10 +846,6 @@ export async function ensureSourcesInBibliography(
               sourceAsBibTex || '',
               ui.context.getDocumentPath()
             );
-          }
-
-          if (!bibliographyFile.isProject) {
-            ensureBibliographyFileForDoc(tr, bibliographyFile.displayPath);
           }
         }
       }),

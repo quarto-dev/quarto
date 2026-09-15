@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
-import { Node as ProsemirrorNode, Schema } from 'prosemirror-model';
+import { Schema } from 'prosemirror-model';
 import { Transaction } from 'prosemirror-state';
 
 import { PandocServer } from '../pandoc';
@@ -17,7 +17,7 @@ import {
   BibliographyCollection,
   BibliographySourceWithCollections,
 } from './bibliography';
-import { ParsedYaml, parseYamlNodes, valueFromYamlText } from '../yaml';
+import { ParsedYaml, YamlBlock, parseYamlNodes, valueFromYamlText } from '../yaml';
 import { toBibTeX } from './bibDB';
 import { CSL } from '../csl';
 import { Bibliography } from 'editor-types';
@@ -47,9 +47,9 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
     return Promise.resolve();
   }
 
-  public async load(ui: EditorUI, docPath: string | null, resourcePath: string, yamlBlocks: ParsedYaml[]): Promise<boolean> {
+  public async load(ui: EditorUI, docPath: string | null, resourcePath: string, yamlBlocks: YamlBlock[]): Promise<boolean> {
     // Gather the biblography files from the document
-    const bibliographiesRelative = bibliographyFilesFromDoc(yamlBlocks);
+    const bibliographiesRelative = bibliographyFilesFromYaml(yamlBlocks);
     const bibliographiesAbsolute = bibliographiesRelative?.map(path => {
       if (isAbsolute(path, ui.context.isWindowsDesktop())) {
         return path;
@@ -133,7 +133,7 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
     return undefined;
   }
 
-  public bibliographyPaths(doc: ProsemirrorNode, ui: EditorUI): BibliographyFile[] {
+  public bibliographyPaths(yamlBlocks: YamlBlock[], ui: EditorUI): BibliographyFile[] {
     const kPermissableFileExtensions = ['bibtex', 'bib', 'yaml', 'yml', 'json'];
     if (this.bibliography?.project_biblios && this.bibliography.project_biblios.length > 0) {
       return this.bibliography?.project_biblios.map(projectBiblio => {
@@ -146,7 +146,7 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
       });
     }
     return (
-      bibliographyFilesFromDocument(doc)?.map(path => {
+      bibliographyFilesFromYaml(yamlBlocks)?.map(path => {
         return {
           displayPath: path,
           fullPath: isAbsolute(path, ui.context.isWindowsDesktop()) ? path : joinPaths(ui.context.getDefaultResourceDir(), path),
@@ -158,17 +158,13 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
   }
 }
 
-function bibliographyFilesFromDocument(doc: ProsemirrorNode): string[] | undefined {
-  // Gather the files from the document
-  return bibliographyFilesFromDoc(parseYamlNodes(doc));
-}
-
-function bibliographyFilesFromDoc(parsedYamls: ParsedYaml[]): string[] | undefined {
+// The bibliography files declared in the yaml blocks (undefined if there are none)
+export function bibliographyFilesFromYaml(yamlBlocks: YamlBlock[]): string[] | undefined {
   // Read the values of any yaml blocks that include bibliography headers
   // filter out blocks that don't include such headers
-  const bibliographyValues = parsedYamls
-    .map(parsedYaml => {
-      return valueFromYamlText('bibliography', parsedYaml.yamlCode);
+  const bibliographyValues = yamlBlocks
+    .map(yamlBlock => {
+      return valueFromYamlText('bibliography', yamlBlock.yamlCode);
     })
     .filter(val => val !== null);
 
@@ -189,8 +185,8 @@ function bibliographyFilesFromDoc(parsedYamls: ParsedYaml[]): string[] | undefin
   return undefined;
 }
 
-function referenceBlockFromYaml(parsedYamls: ParsedYaml[]): string {
-  const refBlockParsedYamls = parsedYamls.filter(
+function referenceBlockFromYaml(yamlBlocks: YamlBlock[]): string {
+  const refBlockParsedYamls = yamlBlocks.filter(
     parsedYaml => parsedYaml.yaml !== null && typeof parsedYaml.yaml === 'object' && parsedYaml.yaml.references,
   );
 
@@ -221,7 +217,7 @@ export function ensureBibliographyFileForDoc(tr: Transaction, bibliographyFile: 
   const parsedYamlNodes = parseYamlNodes(tr.doc);
 
   // Gather the biblography files from the document
-  const bibliographiesRelative = bibliographyFilesFromDoc(parsedYamlNodes);
+  const bibliographiesRelative = bibliographyFilesFromYaml(parsedYamlNodes);
   if (bibliographiesRelative && bibliographiesRelative.length > 0) {
     // The user selected bibliography is already in the document OR
     // There is a bibliography entry, but it doesn't include the user

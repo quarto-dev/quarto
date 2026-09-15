@@ -5,7 +5,7 @@
  */
 
 
-import { ParsedYaml, valueFromYamlText } from '../yaml';
+import { YamlBlock, valueFromYamlText } from '../yaml';
 import { suggestCiteId } from '../cite';
 
 import {
@@ -47,7 +47,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
     _ui: EditorUI,
     docPath: string,
     _resourcePath: string,
-    yamlBlocks: ParsedYaml[],
+    yamlBlocks: YamlBlock[],
     refreshCollectionData: boolean,
   ): Promise<boolean> {
     let hasUpdates = false;
@@ -195,12 +195,12 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
 //
 // By default, zotero integration is enabled. Add this header to disable integration
 //
-function zoteroConfig(parsedYamls: ParsedYaml[]): boolean | string[] {
+function zoteroConfig(yamlBlocks: YamlBlock[]): boolean | string[] {
   // Read the values of any yaml blocks that include bibliography headers
   // filter out blocks that don't include such headers
-  const zoteroValues = parsedYamls
-    .map(parsedYaml => {
-      return valueFromYamlText('zotero', parsedYaml.yamlCode);
+  const zoteroValues = yamlBlocks
+    .map(yamlBlock => {
+      return valueFromYamlText('zotero', yamlBlock.yamlCode);
     })
     .filter(val => val !== null);
 

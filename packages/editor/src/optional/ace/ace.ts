@@ -521,9 +521,11 @@ export class AceNodeView implements NodeView {
 
     // If the cursor moves and we're in focus, ensure that the cursor is
     // visible. Ace's own cursor visiblity mechanisms don't work in embedded
-    // editors.
+    // editors. Selection changes we make ourselves (this.updating) don't count:
+    // those come from ProseMirror syncing its selection into the editor, not
+    // from the user moving the cursor.
     this.aceEditor.getSelection().on('changeCursor', () => {
-      if (this.dom.contains(document.activeElement) && !this.mouseDown) {
+      if (!this.updating && this.dom.contains(document.activeElement) && !this.mouseDown) {
         this.cursorDirty = true;
       }
     });

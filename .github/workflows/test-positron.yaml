@@ -24,13 +24,13 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: latest
-      - uses: quarto-dev/quarto-actions/setup@v2
+      - uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b # v2
       - name: Build vscode extension
         run: |
           yarn install
           yarn run build-vscode
       - name: Run Positron API tests
-        uses: posit-dev/setup-positron@v1
+        uses: posit-dev/setup-positron@fe12658acf186daf3c9196a3d04783746704af22 # v1
         with:
           positron-channel: stable
           # Positron is an Electron app and needs a display server on Linux.

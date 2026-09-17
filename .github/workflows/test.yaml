@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get -y update
           sudo apt-get -y install --fix-missing xvfb
-      - uses: quarto-dev/quarto-actions/setup@v2
+      - uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b # v2
         with:
           version: ${{ matrix.quarto }}
       - name: Build vscode extension

@@ -23,7 +23,7 @@ jobs:
       - run: yarn install --immutable --immutable-cache --check-cache
 
       - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v2
+        uses: HaaLeo/publish-vscode-extension@ca5561daa085dee804bf9f37fe0165785a9b14db # v2
         id: publish_extension
         with:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
@@ -32,7 +32,7 @@ jobs:
           packagePath: apps/vscode
 
       - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v2
+        uses: HaaLeo/publish-vscode-extension@ca5561daa085dee804bf9f37fe0165785a9b14db # v2
         with:
             pat: ${{ secrets.OPEN_VSX_TOKEN }}
             yarn: true
@@ -40,12 +40,12 @@ jobs:
 
       - name: Get version of VS Code extension to publish
         id: extension-version
-        uses: 'euberdeveloper/ga-project-version@main'
+        uses: euberdeveloper/ga-project-version@5ddfd05bca46829074510125c27850b39714d6a9 # main
         with:
           path: apps/vscode/package.json
 
       - name: Publish GH release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           name: VSC extension - v${{ steps.extension-version.outputs.version }}
           tag_name: v${{ steps.extension-version.outputs.version }}-vsix

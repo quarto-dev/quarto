@@ -20,17 +20,17 @@ jobs:
     runs-on: ubuntu-latest
     name: Test Positron API
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: latest
-      - uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b # v2
+      - uses: quarto-dev/quarto-actions/setup@v2
       - name: Build vscode extension
         run: |
           yarn install
           yarn run build-vscode
       - name: Run Positron API tests
-        uses: posit-dev/setup-positron@fe12658acf186daf3c9196a3d04783746704af22 # v1
+        uses: posit-dev/setup-positron@v1
         with:
           positron-channel: stable
           # Positron is an Electron app and needs a display server on Linux.

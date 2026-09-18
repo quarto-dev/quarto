@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Test packages
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: latest
       - run: yarn install --immutable --immutable-cache --check-cache
@@ -30,8 +30,8 @@ jobs:
         quarto: [release, pre-release]
     name: Test (Quarto ${{ matrix.quarto }})
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: latest
       - name: Update build environment and install XVFB

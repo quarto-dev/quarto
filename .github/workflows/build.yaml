@@ -22,8 +22,8 @@ jobs:
     outputs:
       vsixPath: ${{ steps.package_extension.outputs.vsixPath }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: latest
       - run: yarn install --immutable --immutable-cache --check-cache
@@ -39,7 +39,7 @@ jobs:
           packagePath: apps/vscode
 
       - name: Upload extension vsix file as a workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: quarto-vscode-${{ github.sha }}
           path: ${{ steps.package_extension.outputs.vsixPath }}

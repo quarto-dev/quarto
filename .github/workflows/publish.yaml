@@ -16,8 +16,8 @@ jobs:
     outputs:
       vsixPath: ${{ steps.publish_extension.outputs.vsixPath }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: latest
       - run: yarn install --immutable --immutable-cache --check-cache
@@ -40,7 +40,7 @@ jobs:
 
       - name: Get version of VS Code extension to publish
         id: extension-version
-        uses: 'euberdeveloper/ga-project-version@main'
+        uses: euberdeveloper/ga-project-version@v5
         with:
           path: apps/vscode/package.json
 

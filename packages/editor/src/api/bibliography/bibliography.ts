@@ -4,13 +4,11 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { Node as ProsemirrorNode } from 'prosemirror-model';
-
 import Fuse from 'fuse.js';
 import { PandocServer } from '../pandoc';
 
 import { EditorUI } from '../ui-types';
-import { ParsedYaml, parseYamlNodes } from '../yaml';
+import { YamlBlock, YamlBlockSource, yamlBlocksFromSource } from '../yaml';
 import { CSL } from '../csl';
 import { BibliographyDataProviderLocal, kLocalBibliographyProviderKey } from './bibliography-provider_local';
 import { BibliographyDataProviderZotero } from './bibliography-provider_zotero';
@@ -72,13 +70,13 @@ export interface BibliographyDataProvider {
     ui: EditorUI,
     docPath: string | null,
     resourcePath: string,
-    yamlBlocks: ParsedYaml[],
+    yamlBlocks: YamlBlock[],
     refreshCollectionData?: boolean,
   ): Promise<boolean>;
   collections(): BibliographyCollection[];
   items(): BibliographySourceWithCollections[];
   itemsForCollection(collectionKey: string): BibliographySourceWithCollections[];
-  bibliographyPaths(doc: ProsemirrorNode, ui: EditorUI): BibliographyFile[];
+  bibliographyPaths(yamlBlocks: YamlBlock[], ui: EditorUI): BibliographyFile[];
   generateBibTeX(ui: EditorUI, id: string, csl: CSL): Promise<string | undefined>;
   warningMessage(): string | undefined;
 }
@@ -135,18 +133,18 @@ export class BibliographyManager {
     }
   }
 
-  public async prime(ui: EditorUI, doc: ProsemirrorNode) {
+  public async prime(ui: EditorUI, source: YamlBlockSource) {
     // Load the bibliography
-    await this.load(ui, doc, true);
+    await this.load(ui, source, true);
   }
 
-  public async loadLocal(ui: EditorUI, doc: ProsemirrorNode) {
-    await this.load(ui, doc, false, true);
+  public async loadLocal(ui: EditorUI, source: YamlBlockSource) {
+    await this.load(ui, source, false, true);
   }
 
-  public async load(ui: EditorUI, doc: ProsemirrorNode, refreshCollectionData?: boolean, localOnly?: boolean): Promise<void> {
-    // read the Yaml blocks from the document
-    const parsedYamlNodes = parseYamlNodes(doc);
+  public async load(ui: EditorUI, source: YamlBlockSource, refreshCollectionData?: boolean, localOnly?: boolean): Promise<void> {
+    // read the Yaml blocks from the document (or use the blocks provided by the host)
+    const yamlBlocks = yamlBlocksFromSource(source);
 
     // Currently edited doc
     const docPath = ui.context.getDocumentPath();
@@ -155,7 +153,7 @@ export class BibliographyManager {
     const providers = localOnly ? this.providers.filter(provider => provider.requiresWritable === false) : this.providers;
     const providersNeedUpdate = await Promise.all(
       providers.map(provider =>
-        provider.load(ui, docPath, ui.context.getDefaultResourceDir(), parsedYamlNodes, refreshCollectionData),
+        provider.load(ui, docPath, ui.context.getDefaultResourceDir(), yamlBlocks, refreshCollectionData),
       ),
     );
 
@@ -177,7 +175,7 @@ export class BibliographyManager {
     }
 
     // Is this a writable bibliography
-    this.writable = this.isWritable(doc, ui);
+    this.writable = this.isWritable(yamlBlocks, ui);
   }
 
   public hasSources() {
@@ -209,8 +207,8 @@ export class BibliographyManager {
     return this.writable || false;
   }
 
-  private isWritable(doc: ProsemirrorNode, ui: EditorUI): boolean {
-    const bibliographyFiles = this.bibliographyFiles(doc, ui);
+  private isWritable(yamlBlocks: YamlBlock[], ui: EditorUI): boolean {
+    const bibliographyFiles = this.bibliographyFiles(yamlBlocks, ui);
     if (bibliographyFiles.length === 0) {
       // Since there are no bibliographies, we can permit writing a fresh one
       return true;
@@ -218,12 +216,13 @@ export class BibliographyManager {
     return bibliographyFiles.filter(bibFile => bibFile.writable).length > 0;
   }
 
-  public writableBibliographyFiles(doc: ProsemirrorNode, ui: EditorUI) {
-    return this.bibliographyFiles(doc, ui).filter(bibFile => bibFile.writable);
+  public writableBibliographyFiles(source: YamlBlockSource, ui: EditorUI) {
+    return this.bibliographyFiles(source, ui).filter(bibFile => bibFile.writable);
   }
 
-  public bibliographyFiles(doc: ProsemirrorNode, ui: EditorUI): BibliographyFile[] {
-    const bibliographyPaths = this.providers.map(provider => provider.bibliographyPaths(doc, ui));
+  public bibliographyFiles(source: YamlBlockSource, ui: EditorUI): BibliographyFile[] {
+    const yamlBlocks = yamlBlocksFromSource(source);
+    const bibliographyPaths = this.providers.map(provider => provider.bibliographyPaths(yamlBlocks, ui));
     return ([] as BibliographyFile[]).concat(...bibliographyPaths);
   }
 

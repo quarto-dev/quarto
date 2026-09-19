@@ -7,8 +7,6 @@
 import React from 'react';
 import uniqby from 'lodash.uniqby';
 
-import { Node as ProsemirrorNode } from 'prosemirror-model';
-
 import { EditorUI } from '../../../api/ui-types';
 import { NavigationTreeNode } from '../../../api/widgets/navigation-tree';
 import {
@@ -34,7 +32,6 @@ import './insert_citation-source-panel-bibliography.css';
 const kAllLocalSourcesRootNodeType = 'All Local Sources';
 
 export function bibliographySourcePanel(
-  _doc: ProsemirrorNode,
   ui: EditorUI,
   bibliographyManager: BibliographyManager,
 ): CitationSourcePanelProvider {

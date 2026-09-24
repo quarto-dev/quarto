@@ -1,0 +1,18 @@
+{
+  "name": "wasm-qmd-parser",
+  "type": "module",
+  "collaborators": [
+    "Carlos Scheidegger <carlos.scheidegger@posit.co>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "wasm_qmd_parser_bg.wasm",
+    "wasm_qmd_parser.js",
+    "wasm_qmd_parser.d.ts"
+  ],
+  "main": "wasm_qmd_parser.js",
+  "types": "wasm_qmd_parser.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -27,7 +27,7 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Build vscode extension
         run: |
-          yarn install
+          yarn install --frozen-lockfile
           yarn run build-vscode
       - name: Run Positron API tests
         uses: posit-dev/setup-positron@v1

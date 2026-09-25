@@ -15,6 +15,7 @@
     "core": "*",
     "core-node": "*",
     "editor-server": "*",
+    "editor-types": "*",
     "file-url": "^4.0.0",
     "glob": "^13.0.6",
     "js-yaml": "^4.1.0",

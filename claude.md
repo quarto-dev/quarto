@@ -7,7 +7,6 @@ Quarto is an open-source scientific and technical publishing system built on [Pa
 ### Main Components
 
 - **VS Code Extension**: The primary VS Code extension for working with Quarto documents
-- **Writer**: An experimental web-based editor for Quarto documents (not used in production yet)
 - **LSP**: Language server for Quarto documents
 - **Core Packages**: Shared libraries used across multiple components
 
@@ -23,7 +22,6 @@ The repository is organized as a monorepo using Yarn workspaces and Turborepo fo
 
 - `apps/`: Contains standalone applications
   - `vscode/`: VS Code extension for Quarto
-  - `writer/`: Experimental web-based Quarto editor (not in production, ignore this for now)
   - `lsp/`: Language Server Protocol implementation
   - `panmirror/`: WYSIWYG editor component
 - `packages/`: Contains shared libraries
@@ -39,7 +37,6 @@ Quarto uses [turborepo](https://turbo.build/) to manage the monorepo build proce
 - `turbo.json`: Defines the pipeline configuration for common tasks
 - Common commands:
   - `yarn build`: Builds all packages and applications
-  - `yarn dev-writer`: Runs the writer app in development mode
   - `yarn dev-vscode`: Runs the VS Code extension in development mode
   - `yarn lint`: Runs linters across all workspaces
   - `yarn build-vscode`: Builds only the VS Code extension and its dependencies

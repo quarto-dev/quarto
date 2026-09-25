@@ -9,7 +9,6 @@
     "tsconfig": "*"
   },
   "dependencies": {
-    "esbuild": "^0.28.2",
-    "esbuild-plugin-copy": "^2.1.1"
+    "esbuild": "^0.28.2"
   }
 }

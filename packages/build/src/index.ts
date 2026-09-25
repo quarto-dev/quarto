@@ -5,8 +5,15 @@
  */
 
 import { build, BuildOptions as EsbuildOptions, context, Format, Platform, PluginBuild } from 'esbuild';
-import { AssetPair, copy } from 'esbuild-plugin-copy';
-import { rm } from 'node:fs/promises';
+import { copyFile, glob, mkdir, rm, stat } from 'node:fs/promises';
+import { dirname, join, relative } from 'node:path';
+
+// Copy files matching the `from` globs (relative to cwd) into the `to` directory,
+// keeping each file's path relative to the non-glob prefix of its pattern
+export interface AssetPair {
+  from: string[];
+  to: string;
+}
 
 export interface BuildOptions {
   entryPoints: string[];
@@ -65,10 +72,14 @@ export async function runBuild(options: BuildOptions) {
           });
         },
       }] : []),
-      ...(assets ? [copy({
-        resolveFrom: 'cwd',
-        assets,
-      })] : []),
+      ...(assets ? [{
+        name: 'copy-assets',
+        setup(build: PluginBuild) {
+          build.onEnd(async () => {
+            await copyAssets(assets);
+          });
+        },
+      }] : []),
       ...(dev ? [{
         name: 'watch-logger',
         setup(build: PluginBuild) {
@@ -90,4 +101,26 @@ export async function runBuild(options: BuildOptions) {
   } else {
     await build(esbuildOptions);
   }
+}
+
+async function copyAssets(assets: AssetPair[]) {
+  for (const { from, to } of assets) {
+    for (const pattern of from) {
+      const base = globBase(pattern);
+      for await (const file of glob(pattern)) {
+        if (!(await stat(file)).isFile()) {
+          continue;
+        }
+        const dest = join(to, relative(base, file));
+        await mkdir(dirname(dest), { recursive: true });
+        await copyFile(file, dest);
+      }
+    }
+  }
+}
+
+function globBase(pattern: string) {
+  const segments = pattern.split('/');
+  const firstGlob = segments.findIndex(segment => /[*?[\]{}]/.test(segment));
+  return firstGlob === -1 ? dirname(pattern) : segments.slice(0, firstGlob).join('/');
 }

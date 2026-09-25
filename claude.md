@@ -34,14 +34,14 @@ The repository is organized as a monorepo using Yarn workspaces and Turborepo fo
 
 Quarto uses [turborepo](https://turbo.build/) to manage the monorepo build process:
 
-- `turbo.json`: Defines the pipeline configuration for common tasks
+- `turbo.json`: Defines the task configuration for common tasks
 - Common commands:
   - `yarn build`: Builds all packages and applications
   - `yarn dev-vscode`: Runs the VS Code extension in development mode
   - `yarn lint`: Runs linters across all workspaces
   - `yarn build-vscode`: Builds only the VS Code extension and its dependencies
 
-The turborepo pipeline helps optimize build times by caching build artifacts and respecting the dependency graph between packages.
+Turborepo helps optimize build times by caching build artifacts and respecting the dependency graph between packages.
 
 ## Testing
 

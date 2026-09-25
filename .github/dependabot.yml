@@ -1,0 +1,29 @@
+version: 2
+updates:
+  # Yarn (v1) workspaces: a single entry at the root covers apps/* and packages/*
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      # Batch routine minor/patch bumps into one PR; majors get their own PRs
+      npm-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Must match `engines.vscode` in apps/vscode/package.json; bump deliberately
+      - dependency-name: "@types/vscode"
+      # Should track the Node version bundled with the VS Code/Electron runtime
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

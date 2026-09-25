@@ -9,7 +9,6 @@
     "js-yaml": "^4.1.0",
     "markdown-it": "^13.0.1",
     "markdown-it-attrs": "^4.1.6",
-    "mermaid": "^9.1.7",
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "wcwidth": "^1.0.1"

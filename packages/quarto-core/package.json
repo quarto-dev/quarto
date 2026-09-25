@@ -14,14 +14,12 @@
     "semver": "^7.3.8",
     "tsconfig": "*",
     "typescript": "^4.5.2",
-    "uuid": "^9.0.0",
     "vscode-languageserver-types": "^3.17.3",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
     "@types/markdown-it": "^12.2.3",
-    "@types/semver": "^7.3.13",
-    "@types/uuid": "^9.0.0"
+    "@types/semver": "^7.3.13"
   }
 }

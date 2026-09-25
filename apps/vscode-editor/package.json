@@ -24,6 +24,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
+    "editor-core": "*",
     "editor-types": "*",
     "editor-ui": "*",
     "lodash.debounce": "^4.0.8",
@@ -32,6 +33,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "redux": "^4.2.0",
+    "ui-widgets": "*",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -40,6 +42,7 @@
     "@types/vscode-webview": "^1.57.0",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
+    "sass": "^1.56.1",
     "tsconfig": "*",
     "typescript": "^4.5.2",
     "vite": "^3.0.0",

@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { Range, Position } from "vscode-languageserver";
+import { Range, Position } from "vscode-languageserver-types";
 
 import { Document } from "../document";
 

@@ -6,14 +6,19 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "markdown-it": "^13.0.1",
     "markdown-it-attrs": "^4.1.6",
+    "mermaid": "^9.1.7",
     "tsconfig": "*",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "wcwidth": "^1.0.1"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-attrs": "^4.1.0",
+    "@types/wcwidth": "^1.0.0",
     "tsx": "^4.7.1"
   },
   "scripts": {

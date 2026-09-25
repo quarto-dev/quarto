@@ -1516,7 +1516,7 @@
     "vscode:prepublish": "rm -rf ./out/markdownit && cd ../.. && turbo run build --force --filter quarto...",
     "install-vscode": "rm -rf *.vsix && vsce package && code --install-extension *.vsix",
     "install-positron": "rm -rf *.vsix && vsce package && positron --install-extension *.vsix",
-    "build": "tsx build.ts",
+    "build": "tsc --noEmit && tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src --ext ts",
     "build-lang": "tsx syntaxes/build-lang.js",

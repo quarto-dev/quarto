@@ -3,8 +3,9 @@
  *
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
-
-
+// node-sqlite3-wasm ships no types; reference ours explicitly so packages that
+// bundle editor-server (apps/vscode, apps/lsp) see them when type-checking.
+/// <reference path="../../../@types/node-sqlite3-wasm.d.ts" />
 
 import * as fs from "node:fs";
 import * as path from "node:path";

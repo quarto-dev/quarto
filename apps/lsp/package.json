@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "tsx build.ts",
+    "build": "tsc --noEmit && tsx build.ts",
     "dev": "yarn run build dev",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "lint": "tsc --noEmit && TIMING=1 eslint \"src/**/*.ts*\"",

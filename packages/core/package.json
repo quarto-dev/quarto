@@ -15,7 +15,7 @@
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-attrs": "^4.1.0",
     "@types/wcwidth": "^1.0.0",
-    "tsx": "^4.7.1"
+    "tsx": "^4.23.15"
   },
   "scripts": {
     "test": "node --import tsx --test test/*.test.ts"

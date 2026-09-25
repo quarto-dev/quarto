@@ -1,5 +1,7 @@
 # Building the extension
 
+Use the Node version in `.nvmrc` (for example, with `nvm use`), and run `corepack enable` to get Yarn 1.
+
 To develop the Quarto VS Code extension, clone the quarto mono-repo, run `yarn` at top level, then run the `yarn dev-vscode` command:
 
 ```sh

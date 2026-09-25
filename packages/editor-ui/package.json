@@ -23,15 +23,13 @@
     "redux": "^4.2.0",
     "typo-js": "^1.2.2",
     "ui-widgets": "*",
-    "use-debounce": "^9.0.2",
-    "uuid": "^9.0.0"
+    "use-debounce": "^9.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
     "@types/react-transition-group": "^4.4.5",
     "@types/typo-js": "^1.2.0",
-    "@types/uuid": "^9.0.0",
     "tsconfig": "*",
     "typescript": "^4.5.2"
   }

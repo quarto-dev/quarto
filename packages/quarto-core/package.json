@@ -13,7 +13,6 @@
     "markdown-it-attrs": "^4.1.6",
     "semver": "^7.3.8",
     "tsconfig": "*",
-    "typescript": "^4.5.2",
     "vscode-languageserver-types": "^3.17.3",
     "vscode-uri": "^3.0.3"
   },

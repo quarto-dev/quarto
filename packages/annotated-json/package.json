@@ -18,13 +18,13 @@
   "types": "dist/cjs/index.d.ts",
   "files": ["dist"],
   "dependencies": {
-    "tsconfig": "*",
-    "typescript": "^5.4.2",
     "@quarto/mapped-string": "^0.1.8",
     "@quarto/tidyverse-errors": "^0.1.9"
   },
   "devDependencies": {
-    "tsx": "^4.7.1"
+    "tsconfig": "*",
+    "tsx": "^4.7.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "npm run build:cjs",

@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file
+version: v1.25.0
+ignore:
+  SNYK-JS-JSYAML-18313070:
+    - '*':
+        reason: >-
+          No fix exists in the js-yaml 4.x line as of 2026-07-27; the advisory is
+          fixed only in 5.2.2, and js-yaml 5.0.0 is a breaking rewrite (flat named
+          exports, YAML 1.2 number parsing instead of 1.1, reorganized schema
+          exports) that needs a deliberate migration rather than an automated bump.
+          Exposure here is limited: the affected parse path handles front matter and
+          config from documents the user has already opened locally, not untrusted
+          network input, so the worst case is a self-inflicted editor hang. Revisit
+          when a 4.x backport lands or the 5.x migration is scheduled.
+        expires: '2026-10-25T00:00:00.000Z'

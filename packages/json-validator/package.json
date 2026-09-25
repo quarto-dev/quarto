@@ -27,7 +27,7 @@
   "devDependencies": {
     "build": "*",
     "tsconfig": "*",
-    "tsx": "^4.7.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   },
   "scripts": {

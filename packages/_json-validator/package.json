@@ -27,6 +27,6 @@
     "@quarto/_annotated-json": "*"
   },
   "devDependencies": {
-    "tsx": "^4.7.1"
+    "tsx": "^4.23.15"
   }
 }

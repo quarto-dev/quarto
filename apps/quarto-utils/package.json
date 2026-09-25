@@ -7,10 +7,9 @@
   "types": "./src/index.ts",
   "dependencies": {
     "tsconfig": "*",
-    "typescript": "^4.5.2",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6"
+    "@types/node": "^22.15.0"
   }
 }

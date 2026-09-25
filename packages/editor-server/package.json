@@ -17,13 +17,12 @@
     "quarto-core": "*",
     "tmp": "^0.2.7",
     "tsconfig": "*",
-    "typescript": "^4.5.2",
     "uuid": "^9.0.0",
     "vscode-languageserver-types": "^3.17.3",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/node": "^18.11.17",
+    "@types/node": "^22.15.0",
     "@types/tmp": "^0.2.3",
     "vscode-languageserver": "^8.1.0"
   }

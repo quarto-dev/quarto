@@ -830,7 +830,11 @@ export class Editor  {
   }
 
   public focus() {
-    this.view.focus();
+    // Focusing the outer contenteditable first can reset an embedded editor's
+    // DOM selection before it regains focus.
+    if (!this.extensions.focus(this.view)) {
+      this.view.focus();
+    }
   }
 
   public hasFocus() {

@@ -42,6 +42,7 @@ export function codeMirrorExtension(
 
     // return plugin
     return {
+      focus: view => codeMirrorNodeViews.focus(view),
       plugins: () => [
         new Plugin({
           key: codeMirrorPluginKey,

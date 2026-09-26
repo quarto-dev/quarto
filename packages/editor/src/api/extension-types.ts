@@ -32,6 +32,8 @@ import { EditorMarkdown } from './markdown-types';
 
 export interface Extension {
   view?: (view: EditorView) => void;
+  // Return true when an embedded editor has handled focus.
+  focus?: (view: EditorView) => boolean;
   marks?: PandocMark[];
   nodes?: PandocNode[];
   baseKeys?: (schema: Schema) => readonly BaseKeyBinding[];

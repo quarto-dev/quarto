@@ -268,6 +268,10 @@ export class ExtensionManager {
     });
   }
 
+  public focus(view: EditorView): boolean {
+    return this.extensions.some(extension => extension.focus?.(view) === true);
+  }
+
   public pandocMarks(): readonly PandocMark[] {
     return this.collect(extension => extension.marks);
   }

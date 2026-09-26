@@ -1533,7 +1533,7 @@
     "editor-types": "*",
     "glob": "^13.0.6",
     "highlight.js": "^11.7.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.3.2",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "markdown-it": "^13.0.1",

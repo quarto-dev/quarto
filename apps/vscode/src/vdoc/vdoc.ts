@@ -287,30 +287,22 @@ export function unadjustedRange(language: EmbeddedLanguage, range: Range) {
 /**
  * Adjust semantic tokens from virtual document coordinates to real document coordinates
  *
- * This function decodes the tokens, adjusts each token's position using unadjustedRange,
- * and re-encodes them back to delta format.
+ * This function decodes the tokens, shifts each token's line using unadjustedLine,
+ * and re-encodes them back to delta format. When `lines` is given, only tokens on those
+ * real document lines are kept, dropping tokens on the virtual doc's filler and injected lines.
  */
 export function unadjustedSemanticTokens(
   language: EmbeddedLanguage,
-  tokens: SemanticTokens
+  tokens: SemanticTokens,
+  lines?: Set<number>
 ): SemanticTokens {
   // Decode tokens to absolute positions
   const decoded = decodeSemanticTokens(tokens);
 
-  // Adjust each token's position
-  const adjusted = decoded.map(t => {
-    const range = unadjustedRange(language, new Range(
-      new Position(t.line, t.startChar),
-      new Position(t.line, t.startChar + t.length)
-    ));
-    return {
-      line: range.start.line,
-      startChar: range.start.character,
-      length: range.end.character - range.start.character,
-      tokenType: t.tokenType,
-      tokenModifiers: t.tokenModifiers
-    };
-  });
+  // Adjust each token's line (tokens never span lines, so columns are unchanged)
+  const adjusted = decoded
+    .map(t => ({ ...t, line: unadjustedLine(language, t.line) }))
+    .filter(t => t.line >= 0 && (!lines || lines.has(t.line)));
 
   // Re-encode to delta format
   return encodeSemanticTokens(adjusted, tokens.resultId);

@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
 import { decodeSemanticTokens, encodeSemanticTokens, remapTokenIndices } from "../providers/semantic-tokens";
+import { unadjustedSemanticTokens } from "../vdoc/vdoc";
+import { embeddedLanguage } from "../vdoc/languages";
 
 suite("Semantic Tokens", function () {
 
@@ -162,6 +164,27 @@ suite("Semantic Tokens", function () {
     // Only readonly and static should be mapped; customModifier should be dropped
     const expectedModifiers = (1 << 0) | (1 << 1); // readonly + static in target
     assert.strictEqual(decoded[0].tokenModifiers, expectedModifiers, "Unmapped modifiers should be filtered out");
+  });
+
+  test("Unadjusting semantic tokens drops tokens outside code lines", function () {
+    // Python injects 2 lines at the top of the virtual doc
+    const python = embeddedLanguage("python")!;
+
+    // Virtual doc coordinates: lines 0-1 are injected, line 2 (real line 0) is a
+    // `#` filler line, and line 4 (real line 2) is code
+    const vdocTokens = encodeSemanticTokens([
+      { line: 0, startChar: 0, length: 14, tokenType: 0, tokenModifiers: 0 }, // injected
+      { line: 2, startChar: 0, length: 1, tokenType: 0, tokenModifiers: 0 },  // filler `#`
+      { line: 4, startChar: 0, length: 1, tokenType: 1, tokenModifiers: 0 },  // code
+      { line: 4, startChar: 4, length: 3, tokenType: 2, tokenModifiers: 0 },  // code
+    ]);
+
+    const decoded = decodeSemanticTokens(unadjustedSemanticTokens(python, vdocTokens, new Set([2])));
+
+    assert.deepStrictEqual(decoded, [
+      { line: 2, startChar: 0, length: 1, tokenType: 1, tokenModifiers: 0 },
+      { line: 2, startChar: 4, length: 3, tokenType: 2, tokenModifiers: 0 },
+    ]);
   });
 
 });

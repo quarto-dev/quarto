@@ -2,6 +2,8 @@
 
 ## 1.139.0 (Unreleased)
 
+- Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
+
 ## 1.138.0 (Release on 2026-09-11)
 
 - In Positron, running a Python cell in a knitr document now respects the `quarto.cells.useReticulate` setting, instead of always routing it through reticulate on the R console (<https://github.com/quarto-dev/quarto/pull/1116>).

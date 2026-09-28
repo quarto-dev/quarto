@@ -20,5 +20,8 @@
     "@types/semver": "^7.3.13",
     "eslint": "^10.11.0",
     "eslint-config-custom-server": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "dev": "tsc --noEmit && vite build --mode=development",
-    "lint": "TIMING=1 eslint \"src/**/*.ts\""
+    "lint": "eslint src"
   },
   "dependencies": {
     "@fluentui/react-components": "^9.21.0",

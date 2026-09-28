@@ -1519,7 +1519,7 @@
     "build": "tsc --noEmit && tsx build.ts",
     "dev": "yarn run build dev",
     "lint": "eslint src",
-    "build-lang": "tsx syntaxes/build-lang.js",
+    "build-lang": "tsx syntaxes/build-lang.mjs",
     "build-test": "yarn run build test",
     "test": "yarn build-test && vscode-test",
     "test-positron": "yarn build-test && node ./scripts/run-positron-tests.mjs"
@@ -1575,7 +1575,7 @@
     "build": "*",
     "eslint": "^10.11.0",
     "mocha": "^9.2.1",
-    "plist": "^3.0.6",
+    "plist": "^5.0.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.0",

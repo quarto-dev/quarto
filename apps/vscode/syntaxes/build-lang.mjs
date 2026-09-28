@@ -1,17 +1,17 @@
 // @ts-check
 
-const fs = require("fs");
-const path = require("path");
-const yaml = require("js-yaml");
-const plist = require("plist");
+import fs from "node:fs";
+import path from "node:path";
+import { load } from "js-yaml";
+import { build } from "plist";
 
 // the cell option comment characters/pattern shared with the extension
 // itself (this is a typescript module: run this script with tsx)
-const {
+import {
   kLangCommentChars,
   langCommentChars,
   optionCommentPattern,
-} = require("../src/providers/cell/comment-chars");
+} from "../src/providers/cell/comment-chars";
 
 const languages = [
   {
@@ -577,7 +577,7 @@ const fencedCodeBlockIncludes = () =>
 
 const buildGrammar = () => {
   let text = fs.readFileSync(
-    path.join(__dirname, "quarto.tmLanguage.yaml"),
+    path.join(import.meta.dirname, "quarto.tmLanguage.yaml"),
     "utf8"
   );
   text = text.replace(
@@ -589,10 +589,10 @@ const buildGrammar = () => {
     "\n" + indent(1, fencedCodeBlockDefinitions())
   );
 
-  const grammar = yaml.load(text);
+  const grammar = load(text);
   // @ts-ignore
-  const out = plist.build(grammar);
-  fs.writeFileSync(path.join(__dirname, "quarto.tmLanguage"), out);
+  const out = build(grammar);
+  fs.writeFileSync(path.join(import.meta.dirname, "quarto.tmLanguage"), out);
 };
 
 buildGrammar();

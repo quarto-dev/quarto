@@ -4,8 +4,6 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import fetch from "cross-fetch";
-
 import { JsonRpcServerMethod } from "core";
 import { DOIResult, DOIServer, kDoiFetchCsl } from "editor-types"
 

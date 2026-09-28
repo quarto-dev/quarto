@@ -119,7 +119,9 @@ export async function executeSelectionInteractive(executor: CellExecutor) {
   }
 }
 
-function hasYamlHashOptions(language: string) {
+// NOTE: this returns a (always truthy) array rather than checking `language`, so
+// `#|` option lines are currently stripped for every language. Preserved as-is.
+function hasYamlHashOptions(_language: string) {
   return ["python", "r", "julia", "bash", "sh", "shell"];
 }
 

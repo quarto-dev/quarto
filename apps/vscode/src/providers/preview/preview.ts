@@ -85,7 +85,7 @@ tmp.setGracefulCleanup();
 const kPreviewWindowTitle = "Quarto Preview";
 
 const kLocalPreviewRegex =
-  /(http:\/\/(?:localhost|127\.0\.0\.1)\:\d+\/?[^\s]*)/;
+  /(http:\/\/(?:localhost|127\.0\.0\.1):\d+\/?[^\s]*)/;
 
 let previewManager: PreviewManager;
 
@@ -127,7 +127,7 @@ export function activatePreview(
   // onDidSaveNotebookDocument was introduced in 1.67
   if (haveNotebookSaveEvents()) {
     context.subscriptions.push(
-      (vscode.workspace as any).onDidSaveNotebookDocument(
+      vscode.workspace.onDidSaveNotebookDocument(
         async (notebook: NotebookDocument) => {
           await onSave(notebook.uri);
         }
@@ -318,7 +318,7 @@ class PreviewManager {
         } else {
           await this.startPreview(previewEnv, uri, format, doc, slideIndex);
         }
-      } catch (e) {
+      } catch {
         await this.startPreview(previewEnv, uri, format, doc, slideIndex);
       }
     } else {
@@ -354,7 +354,7 @@ class PreviewManager {
         validateStatus: () => true,
       });
       return response.status === 200 || response.status === 404;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -404,7 +404,7 @@ class PreviewManager {
       await axios.get(this.previewServerRequestUri("/" + kTerminateToken), {
         timeout: 1000,
       });
-    } catch (error) {
+    } catch {
       /*
       console.log("Error requesting preview server termination");
       console.log(error);
@@ -519,7 +519,7 @@ class PreviewManager {
 
   private async onPreviewOutput(output: string) {
     this.detectErrorNavigation(output);
-    const kOutputCreatedPattern = /Output created\: (.*?)\n/;
+    const kOutputCreatedPattern = /Output created: (.*?)\n/;
     this.previewOutput_ += output;
     if (!this.previewUrl_) {
       // detect new preview and show in browser

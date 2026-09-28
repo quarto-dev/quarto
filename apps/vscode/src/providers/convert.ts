@@ -101,6 +101,7 @@ export async function convertDocument(
     // 2. Extract just the first non-empty line — the rest is source context
     //    and stack traces that belong in the output channel, not a dialog.
     const message = stderr
+      // eslint-disable-next-line no-control-regex -- matching ANSI escapes is the point
       ? stderr.replace(/\x1B\[[0-9;]*m/g, "").split("\n").find(l => l.trim()) ?? stderr
       : e.message;
 

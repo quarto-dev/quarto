@@ -7,7 +7,7 @@
 import semver from "semver";
 
 import vscode from "vscode";
-import { TextDocument, Uri, workspace } from "vscode";
+import { TextDocument, workspace } from "vscode";
 
 import {
   projectDirForDocument,
@@ -96,7 +96,7 @@ export async function renderOnSave(engine: MarkdownEngine, document: TextDocumen
 export function haveNotebookSaveEvents() {
   return (
     semver.gte(vscode.version, "1.67.0") &&
-    !!(workspace as any).onDidSaveNotebookDocument
+    !!workspace.onDidSaveNotebookDocument
   );
 }
 

@@ -171,7 +171,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                   uri,
                   position
                 ) as Position;
-              } catch (e) {
+              } catch {
                 // an error can happen, we think, if the statementRangeProvider errors
                 console.error('error when using `positron.executeCodeFromPosition`');
               }
@@ -221,7 +221,8 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
     ): HostWebviewPanel => {
 
       // create preview panel
-      const panel = tryAcquirePositronApi()?.window.createPreviewPanel(
+      // (this host is only used when the Positron API is available)
+      const panel = tryAcquirePositronApi()!.window.createPreviewPanel(
         viewType,
         title,
         preserveFocus,
@@ -231,7 +232,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
           localResourceRoots: options?.localResourceRoots,
           portMapping: options?.portMapping
         }
-      )!;
+      );
 
       // adapt to host interface
       return new PositronWebviewPanel(panel);
@@ -265,7 +266,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
   async provideStatementRange(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken): Promise<positron.StatementRange | undefined> {
+    _token: vscode.CancellationToken): Promise<positron.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine, VirtualDocStyle.Block);
 
     if (!vdoc) {
@@ -281,7 +282,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       } catch (err) {
-        let positronApi = tryAcquirePositronApi();
+        const positronApi = tryAcquirePositronApi();
 
         if (!positronApi) {
           throw err;
@@ -321,7 +322,7 @@ class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {
   async provideHelpTopic(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken): Promise<string | undefined> {
+    _token: vscode.CancellationToken): Promise<string | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine);
 
     if (vdoc) {

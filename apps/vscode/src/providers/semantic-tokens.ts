@@ -9,6 +9,7 @@ import {
   commands,
   Position,
   SemanticTokens,
+  SemanticTokensLegend,
   SemanticTokensBuilder,
   TextDocument,
   Uri,
@@ -25,7 +26,6 @@ import {
   languageAtPosition,
   mainLanguage
 } from "../vdoc/vdoc";
-import { EmbeddedLanguage } from "../vdoc/languages";
 import { hostOwnsLanguage, hostOwnsCellFeatures } from "../host/cell-features";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
@@ -231,7 +231,7 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
     return await withVirtualDocUri(vdoc, document.uri, "semanticTokens", async (uri: Uri) => {
       try {
         // Get the legend from the embedded language provider
-        const legend = await commands.executeCommand<any>(
+        const legend = await commands.executeCommand<SemanticTokensLegend | undefined>(
           "vscode.provideDocumentSemanticTokensLegend",
           uri
         );
@@ -253,7 +253,7 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
 
         // Adjust token positions from virtual doc to real doc coordinates
         return unadjustedSemanticTokens(vdoc.language, remappedTokens);
-      } catch (error) {
+      } catch {
         return undefined;
       }
     });

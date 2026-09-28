@@ -12,7 +12,7 @@ function createFakeDocumentSymbolProvider(
 ): vscode.DocumentSymbolProvider {
   return {
     provideDocumentSymbols(
-      document: vscode.TextDocument
+      _document: vscode.TextDocument
     ): vscode.ProviderResult<vscode.DocumentSymbol[]> {
       return symbols;
     },

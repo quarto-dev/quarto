@@ -13,7 +13,7 @@ import { toggleRenderOnSaveOverride } from "../context-keys";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 export function determineMode(text: string, uri: Uri): string | undefined {
-  let editorOpener = undefined;
+  let editorOpener: string | undefined;
 
   // check if file itself has a mode
   if (hasEditorMode(text, "source")) {

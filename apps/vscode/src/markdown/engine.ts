@@ -6,7 +6,7 @@
 
 import * as vscode from "vscode";
 
-import { Parser, Document, QuartoContext, Token, markdownitParser } from "quarto-core";
+import { Parser, Document, Token, markdownitParser } from "quarto-core";
 import { Range, Position } from "vscode-languageserver-types";
 
 export class MarkdownEngine {

@@ -131,7 +131,7 @@ suite("Convert Commands", function () {
 
       const original = vscode.window.showWarningMessage;
       const messages: string[] = [];
-      vscode.window.showWarningMessage = async (msg: string, ...args: unknown[]) => {
+      vscode.window.showWarningMessage = async (msg: string, ..._args: unknown[]) => {
         messages.push(msg);
         if (msg.includes("already exists")) {
           // Choose to overwrite the existing path.

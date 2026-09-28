@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import path, { extname, win32 } from "path";
+import path, { extname } from "path";
 import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
@@ -177,7 +177,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             const fileData = await workspace.fs.readFile(uri);
             const fileContent = Buffer.from(fileData).toString('utf8');
             const editorMode = determineMode(fileContent, uri);
-            let isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
+            const isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
             if (this.editorPendingSwitchToVisual.has(uri.toString())) {
               this.editorPendingSwitchToVisual.delete(uri.toString());
             }
@@ -737,7 +737,7 @@ function visualEditorTracker(): VisualEditorTracker {
       return activeEditors.find(editor => {
         try {
           return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
-        } catch (err) {
+        } catch {
           // we've seen activeEditors hold on to references to disposed editors (can't on the
           // surface see how this would occur as we subscribe to dispose, but as an insurance
           // policy let's eat any exception that occurs, since a single zombie webviewPanel

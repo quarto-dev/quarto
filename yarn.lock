@@ -2210,10 +2210,10 @@
   resolved "https://registry.npmjs.org/@types/vscode-webview/-/vscode-webview-1.57.1.tgz"
   integrity sha512-ghW5SfuDmsGDS2A4xkvGsLwDRNc3Vj5rS6rPOyPm/IryZuf3wceZKxgYaUoW+k9f0f/CB7y2c1rRsdOWZWn0PQ==
 
-"@types/vscode@1.75.0":
-  version "1.75.0"
-  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.75.0.tgz"
-  integrity sha512-SAr0PoOhJS6FUq5LjNr8C/StBKALZwDVm3+U4pjF/3iYkt3GioJOPV/oB1Sf1l7lROe4TgrMyL5N1yaEgTWycw==
+"@types/vscode@1.101.0":
+  version "1.101.0"
+  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.101.0.tgz"
+  integrity sha512-ZWf0IWa+NGegdW3iU42AcDTFHWW7fApLdkdnBqwYEtHVIBGbTu0ZNQKP/kX3Ds/uMJXIMQNAojHR4vexCEEz5Q==
 
 "@types/wcwidth@^1.0.0":
   version "1.0.0"

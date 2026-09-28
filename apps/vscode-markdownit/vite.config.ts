@@ -21,13 +21,17 @@ export default defineConfig(env => {
       viteStaticCopy({
         targets: [
           {
-            src: normalizePath(path.resolve(__dirname, './dist/*')),
-            dest: normalizePath(path.resolve(__dirname, '../vscode/out/markdownit'))
+            src: normalizePath(path.resolve(__dirname, './dist/**/*')),
+            dest: normalizePath(path.resolve(__dirname, '../vscode/out/markdownit')),
+            // copy dist/<file> to <dest>/<file>, not <dest>/dist/<file>
+            rename: { stripBase: 1 }
           }
         ]
       })
     ],
     build: {
+      // VS Code 1.101, the supported floor, runs webviews in Chromium 134
+      target: 'chrome134',
       watch: dev ? {} : null,
       lib: {
         entry: 'src/index.ts',

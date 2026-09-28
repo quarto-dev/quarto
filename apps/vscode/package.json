@@ -1580,7 +1580,7 @@
     "mocha": "^9.2.1",
     "plist": "^3.0.6",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.3",
+    "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0",
     "vsce": "^2.15.0",
     "vscode-languageserver": "^8.1.0",

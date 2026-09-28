@@ -17,7 +17,7 @@
  */
 
 // we use the empty object {} a lot in this public API
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 
 /** @deprecated use KeyAllowlist */
 export interface IKeyAllowlist<T> {

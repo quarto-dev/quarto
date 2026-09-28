@@ -3,7 +3,7 @@
     "module": "commonjs",
     "target": "ES2021",
     "outDir": "out",
-    "lib": ["ES2021"],
+    "lib": ["ES2021", "DOM"],
     "sourceMap": true,
     "strict": true
     /* enable all strict type-checking options */

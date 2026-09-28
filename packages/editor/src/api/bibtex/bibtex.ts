@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { NodeArray, RangeArray, NameDictObject, TextNodeObject, NodeObject, MarkObject } from 'biblatex-csl-converter';
+import { NodeArray, RangeArray, NameDictObject, TextNodeObject, NodeObject, MarkObject } from '../bibliography/bibliojson-types';
 import { FieldMap } from './fields';
 import { typeMapping } from './types';
 import { FormattingTags } from './formatting';

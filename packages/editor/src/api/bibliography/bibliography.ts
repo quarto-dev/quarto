@@ -6,7 +6,7 @@
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
-import Fuse from 'fuse.js';
+import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 import { PandocServer } from '../pandoc';
 
 import { EditorUI } from '../ui-types';
@@ -103,7 +103,7 @@ export interface BibliographySourceWithCollections extends BibliographySource {
 
 // The fields and weights that will indexed and searched
 // when searching bibliographic sources
-const kFields: Fuse.FuseOptionKeyObject<void>[] = [
+const kFields: FuseOptionKeyObject<void>[] = [
   { name: 'id', weight: 30 },
   { name: 'author.family', weight: 15 },
   { name: 'author.literal', weight: 15 },

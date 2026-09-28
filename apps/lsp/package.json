@@ -20,7 +20,7 @@
     "glob": "^13.0.6",
     "js-yaml": "^5.4.2",
     "node-html-parser": "^6.1.5",
-    "picomatch": "^2.3.1",
+    "picomatch": "^4.0.7",
     "quarto-core": "*",
     "quarto-utils": "*",
     "vscode-languageserver": "^8.1.0",
@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
-    "@types/picomatch": "^2.3.0",
+    "@types/picomatch": "^4.0.3",
     "build": "*",
     "eslint": "^10.11.0",
     "eslint-config-custom-server": "*",

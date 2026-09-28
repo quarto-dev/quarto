@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "dependencies": {
     "core": "*",
-    "jayson": "^4.0.0",
+    "jayson": "^5.0.0",
     "tsconfig": "*"
   },
   "devDependencies": {

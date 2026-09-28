@@ -14,7 +14,7 @@
     "editor-core": "*",
     "editor-types": "*",
     "fuse.js": "^7.5.0",
-    "jayson": "^4.0.0",
+    "jayson": "^5.0.0",
     "js-yaml": "^5.4.2",
     "lodash.debounce": "^4.0.8",
     "lodash.uniqby": "^4.7.0",

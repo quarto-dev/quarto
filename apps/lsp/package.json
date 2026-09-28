@@ -18,7 +18,7 @@
     "editor-types": "*",
     "file-url": "^4.0.0",
     "glob": "^13.0.6",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.4.2",
     "node-html-parser": "^6.1.5",
     "picomatch": "^2.3.1",
     "quarto-core": "*",
@@ -30,7 +30,6 @@
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5",
     "@types/node": "^22.15.0",
     "@types/picomatch": "^2.3.0",
     "build": "*",

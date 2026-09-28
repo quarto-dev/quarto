@@ -4,7 +4,7 @@
  * Copyright (C) 2023-2026 by Posit Software, PBC
  */
 
-import * as jsYaml from "js-yaml";
+import { loadYaml } from "../yaml";
 
 export const kCellId = "id";
 export const kCellLabel = "label";
@@ -45,7 +45,7 @@ export function partitionCellOptions(
     break;
   }
 
-  const yaml = yamlLines.length > 0 ? jsYaml.load(yamlLines.join("\n")) : undefined;
+  const yaml = yamlLines.length > 0 ? loadYaml(yamlLines.join("\n")) : undefined;
   return {
     yaml: yaml as Record<string, unknown> | undefined,
     optionsSource,

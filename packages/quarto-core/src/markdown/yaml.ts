@@ -4,9 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import * as yaml from "js-yaml";
-
-import { lines } from "core";
+import { lines, loadYaml } from "core";
 
 import { Document } from "../document";
 
@@ -17,7 +15,7 @@ import { isFrontMatter } from "./token";
 export function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
-    return yaml.load(str);
+    return loadYaml(str);
   } catch (error) {
     return undefined;
   }

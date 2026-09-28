@@ -9,9 +9,8 @@ import fs from "node:fs";
 import * as tmp from "tmp";
 tmp.setGracefulCleanup();
 
-import * as yaml from "js-yaml";
 
-import { lines, pathWithForwardSlashes, removeYamlDelimiters } from "core";
+import { lines, loadYaml, pathWithForwardSlashes, removeYamlDelimiters } from "core";
 import { hasExtension } from "core-node";
 
 import {
@@ -67,7 +66,7 @@ export function cslBibliography(
   if (refBlock) {
     try {
       const cleanedYaml = lines(removeYamlDelimiters(refBlock)).map((x) => x.trimEnd()).join("\n");
-      const refBlockYaml = yaml.load(cleanedYaml) as { references: CSL[] };
+      const refBlockYaml = loadYaml(cleanedYaml) as { references: CSL[] };
       bibliography.sources.push(...refBlockYaml.references);
     } catch(err) {
       console.log("Error parsing refBlock yaml");
@@ -372,7 +371,7 @@ function biblioOptionsFromMetadataFile(file: string): BiblioOptions {
   const yamlSrc = fs.readFileSync(file, "utf-8");
   try {
     if (yamlSrc.trim().length > 0) {
-      const yamlOpts = yaml.load(yamlSrc) as Record<string, unknown>;
+      const yamlOpts = loadYaml(yamlSrc) as Record<string, unknown>;
       return bibliographyOptions(path.dirname(file), yamlOpts);
     }
   } catch (err) {

@@ -19,7 +19,7 @@
     "file-url": "^4.0.0",
     "glob": "^13.0.6",
     "js-yaml": "^5.4.2",
-    "node-html-parser": "^6.1.5",
+    "node-html-parser": "^9.0.4",
     "picomatch": "^4.0.7",
     "quarto-core": "*",
     "quarto-utils": "*",

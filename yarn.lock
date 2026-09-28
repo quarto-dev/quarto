@@ -4036,6 +4036,11 @@ entities@^4.2.0, entities@^4.3.0, entities@^4.4.0:
   resolved "https://registry.npmjs.org/entities/-/entities-4.4.0.tgz"
   integrity sha512-oYp7156SP8LkeGD0GF85ad1X9Ai79WtRsZ2gxJqtBuzH+98YUV6jkHEKlZkMbcrjJjIVJNIDP/3WL9wQkoPbWA==
 
+entities@^8.0.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/entities/-/entities-8.1.0.tgz#9632d69619ebdbe0cf0ef22f53088fe5a2163d86"
+  integrity sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==
+
 entities@~2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/entities/-/entities-2.1.0.tgz"
@@ -6409,13 +6414,13 @@ node-fetch@^2.6.1:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-html-parser@^6.1.5:
-  version "6.1.5"
-  resolved "https://registry.npmjs.org/node-html-parser/-/node-html-parser-6.1.5.tgz"
-  integrity sha512-fAaM511feX++/Chnhe475a0NHD8M7AxDInsqQpz6x63GRF7xYNdS8Vo5dKsIVPgsOvG7eioRRTZQnWBrhDHBSg==
+node-html-parser@^9.0.4:
+  version "9.0.4"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-9.0.4.tgz#effc99ae8aa6cff3c99f8c6fd9a0096f73b874c0"
+  integrity sha512-reUSrZkF1rO7hEYe5mJwtbVcQ6mB5QrViCZH6Wv+iz3er/PA9Q50gol15dMLQRDfdli4VzqPMPR24HNRFgVKFw==
   dependencies:
     css-select "^5.1.0"
-    he "1.2.0"
+    entities "^8.0.0"
 
 node-sqlite3-wasm@^0.5.2:
   version "0.5.2"

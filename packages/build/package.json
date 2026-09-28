@@ -6,9 +6,9 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "devDependencies": {
-    "esbuild": "^0.16.7",
-    "esbuild-plugin-copy": "^2.0.1",
     "tsconfig": "*"
   },
-  "dependencies": {}
+  "dependencies": {
+    "esbuild": "^0.28.2"
+  }
 }

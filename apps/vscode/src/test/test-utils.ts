@@ -72,6 +72,37 @@ export async function waitForWorkspaceSymbol(name: string) {
   );
 }
 
+/**
+ * Sets `symbols.exportToWorkspace` and waits until the workspace symbol results
+ * reflect it: every name in `names` present (`expected: true`) or absent
+ * (`expected: false`). The wait is needed because `configuration.update()`
+ * resolves before the LSP has pulled the new value, so a query made straight
+ * away can still see the previous setting.
+ */
+export async function setExportToWorkspaceAndWait(
+  value: "default" | "all" | "none",
+  names: string[],
+  expected: boolean
+) {
+  await vscode.workspace
+    .getConfiguration("quarto")
+    .update("symbols.exportToWorkspace", value);
+  await waitForCondition(
+    async () => {
+      const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
+        "vscode.executeWorkspaceSymbolProvider",
+        ""
+      );
+      return names.every((name) => !!symbols?.find((s) => s.name === name) === expected);
+    },
+    {
+      // Stay under the 5s mocha timeout so the failure message is ours.
+      timeout: 3000,
+      message: `workspace symbols ${names.join(", ")} to be ${expected ? "present" : "absent"} with exportToWorkspace "${value}"`,
+    }
+  );
+}
+
 export async function openAndShowExamplesTextDocument(
   fileName: string,
   showOptions?: vscode.TextDocumentShowOptions

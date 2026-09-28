@@ -215,7 +215,8 @@ export async function waitForVisualEditorSynced(doc: vscode.TextDocument) {
       }
     );
   } catch (error) {
-    throw new Error(`${(error as Error).message} (active: ${active}, synced: ${synced})`);
+    (error as Error).message += ` (active: ${active}, synced: ${synced})`;
+    throw error;
   }
 }
 

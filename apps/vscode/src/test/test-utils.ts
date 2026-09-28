@@ -198,17 +198,25 @@ export async function roundtrip(doc: vscode.TextDocument) {
  * document unchanged, so a roundtrip would compare the unmodified source.
  */
 export async function waitForVisualEditorSynced(doc: vscode.TextDocument) {
-  await waitForCondition(
-    async () =>
-      (await vscode.commands.executeCommand<boolean>("quarto.test_isInVisualEditor")) &&
-      (await vscode.commands.executeCommand<boolean>("quarto.test_isVisualEditorSynced", doc.uri.toString())),
-    {
-      // leave room under ROUNDTRIP_TIMEOUT for the rest of the roundtrip, so
-      // this message is what surfaces on failure
-      timeout: ROUNDTRIP_TIMEOUT - 5000,
-      message: `the visual editor for ${path.basename(doc.uri.fsPath)} to load and sync`
-    }
-  );
+  let active = false;
+  let synced = false;
+  try {
+    await waitForCondition(
+      async () => {
+        active = !!(await vscode.commands.executeCommand<boolean>("quarto.test_isInVisualEditor"));
+        synced = !!(await vscode.commands.executeCommand<boolean>("quarto.test_isVisualEditorSynced", doc.uri.toString()));
+        return active && synced;
+      },
+      {
+        // leave room under ROUNDTRIP_TIMEOUT for the rest of the roundtrip, so
+        // this message is what surfaces on failure
+        timeout: ROUNDTRIP_TIMEOUT - 5000,
+        message: `the visual editor for ${path.basename(doc.uri.fsPath)} to load and sync`
+      }
+    );
+  } catch (error) {
+    throw new Error(`${(error as Error).message} (active: ${active}, synced: ${synced})`);
+  }
 }
 
 /**

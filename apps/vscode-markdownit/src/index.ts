@@ -26,7 +26,8 @@ import { decoratorPlugin } from 'core';
 import { gridTableRulePlugin } from 'core';
 import { shortcodePlugin } from 'core';
 import { yamlPlugin } from 'core';
-import { mermaidPlugin } from "core";
+
+import mermaidPlugin from "./mermaid";
 
 // styles.css sits next to whichever chunk this module ends up in
 // (index.js, or a hashed chunk such as index-<hash>.js)

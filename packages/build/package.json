@@ -6,6 +6,8 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "devDependencies": {
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*",
     "tsconfig": "*"
   },
   "dependencies": {

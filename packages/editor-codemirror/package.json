@@ -51,6 +51,8 @@
     "style-mod": "^4.0.0"
   },
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.7"
+    "@types/lodash.debounce": "^4.0.7",
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*"
   }
 }

@@ -20,7 +20,7 @@
     "editor": "*"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
+    "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",
     "typescript": "^5.9.3",

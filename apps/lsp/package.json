@@ -34,7 +34,7 @@
     "@types/node": "^22.15.0",
     "@types/picomatch": "^2.3.0",
     "build": "*",
-    "eslint": "^7.32.0",
+    "eslint": "^10.11.0",
     "eslint-config-custom-server": "*",
     "tsconfig": "*",
     "tsx": "^4.23.15",

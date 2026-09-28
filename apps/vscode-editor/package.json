@@ -40,7 +40,7 @@
     "@types/lodash.debounce": "^4.0.7",
     "@types/lodash.throttle": "^4.1.7",
     "@types/vscode-webview": "^1.57.0",
-    "eslint": "^7.32.0",
+    "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "sass": "^1.56.1",
     "tsconfig": "*",

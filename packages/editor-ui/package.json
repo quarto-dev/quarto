@@ -30,6 +30,8 @@
     "@types/react-dom": "^18.2.4",
     "@types/react-transition-group": "^4.4.5",
     "@types/typo-js": "^1.2.0",
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*",
     "tsconfig": "*"
   }
 }

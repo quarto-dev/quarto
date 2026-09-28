@@ -6,18 +6,17 @@
 
 import React from "react";
 
-import { Store } from 'redux';
 import { Provider as StoreProvider } from 'react-redux';
 
 import { HotkeysProvider } from "ui-widgets";
 
-import { CommandManagerProvider } from "editor-ui";
+import { CommandManagerProvider, EditorUIStore } from "editor-ui";
 
 import EditorContainer, { EditorContainerProps } from "./EditorContainer";
 
 
 interface AppProps extends EditorContainerProps {
-  store: Store;
+  store: EditorUIStore;
   editorId: string;
 }
 

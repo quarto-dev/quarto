@@ -4,11 +4,11 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
 import { defaultPrefs, Prefs, PrefsServer } from "editor-types";
 
-import { EditorUIStore, rtkFakeBaseQuery, rtkHandleQuery } from "editor-ui";
+import { EditorUIStore, rtkHandleQuery } from "editor-ui";
 
 const kPrefsTag = "Prefs";
 
@@ -31,7 +31,7 @@ export function readPrefsApi(store: EditorUIStore) {
 
 export const prefsApi = createApi({
   reducerPath: "prefs",
-  baseQuery: rtkFakeBaseQuery<JsonRpcError>(),
+  baseQuery: fakeBaseQuery<JsonRpcError>(),
   tagTypes: [kPrefsTag],
 
   endpoints(build) {

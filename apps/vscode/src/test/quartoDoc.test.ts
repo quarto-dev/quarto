@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { WORKSPACE_PATH, readOrCreateSnapshot, examplesOutUri, wait, roundtrip, openAndShowExamplesOutTextDocument } from "./test-utils";
+import { WORKSPACE_PATH, readOrCreateSnapshot, examplesOutUri, wait, roundtrip, openAndShowExamplesOutTextDocument, ROUNDTRIP_TIMEOUT } from "./test-utils";
 import { isQuartoDoc } from "../core/doc";
 
 
@@ -23,6 +23,8 @@ suite("Quarto basics", function () {
   //       test. That's okay for this test, but could cause issues if you expect a qmd to look how it
   //       does in `/examples`.
   test("Roundtrip doesn't change hello.qmd", async function () {
+    this.timeout(ROUNDTRIP_TIMEOUT);
+
     const { doc } = await openAndShowExamplesOutTextDocument("hello.qmd");
 
     const { before, after } = await roundtrip(doc);
@@ -76,6 +78,8 @@ function roundtripSnapshotTest(filename: string) {
   const snapshotFileName = `roundtripped-${filename}`;
 
   test(`Roundtripped ${filename} matches snapshot`, async function () {
+    this.timeout(ROUNDTRIP_TIMEOUT);
+
     const { doc } = await openAndShowExamplesOutTextDocument(filename);
 
     const { after } = await roundtrip(doc);

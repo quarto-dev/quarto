@@ -8,9 +8,6 @@ export default defineConfig(env => {
   const dev = env.mode === "development";
 
   return {
-    esbuild: {
-      legalComments: 'eof' as const,
-    },
     define: {
       'process.env.DEBUG': '""',
       'process.env.NODE_ENV': '"production"',
@@ -21,8 +18,8 @@ export default defineConfig(env => {
       viteStaticCopy({
         targets: [
           {
-            src: normalizePath(path.resolve(__dirname, './dist/**/*')),
-            dest: normalizePath(path.resolve(__dirname, '../vscode/assets/www/editor')),
+            src: normalizePath(path.resolve(import.meta.dirname, './dist/**/*')),
+            dest: normalizePath(path.resolve(import.meta.dirname, '../vscode/assets/www/editor')),
             // copy dist/<file> to <dest>/<file>, not <dest>/dist/<file>
             rename: { stripBase: 1 }
           }
@@ -41,8 +38,10 @@ export default defineConfig(env => {
         // apps/vscode/src/providers/editor/editor.ts loads style.css
         cssFileName: 'style'
       },
-      rollupOptions: {
+      rolldownOptions: {
         external: ['vscode-webview'],
+        // keep license banners (Vite drops them when minifying)
+        output: { comments: { legal: true } },
       },
       sourcemap: dev ? 'inline' : false
     }

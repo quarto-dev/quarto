@@ -13,12 +13,12 @@ const plugins = [
   viteStaticCopy({
     targets: [
       {
-        src: normalizePath(path.resolve(__dirname, '../vscode/LICENSE')),
+        src: normalizePath(path.resolve(import.meta.dirname, '../vscode/LICENSE')),
         dest: '.',
         rename: { stripBase: 1 },
       },
       {
-        src: normalizePath(path.resolve(__dirname, '../vscode/ThirdPartyNotices.txt')),
+        src: normalizePath(path.resolve(import.meta.dirname, '../vscode/ThirdPartyNotices.txt')),
         dest: '.',
         rename: { stripBase: 1 },
       },
@@ -27,9 +27,6 @@ const plugins = [
 ];
 
 export default defineConfig({
-  esbuild: {
-    legalComments: 'eof' as const,
-  },
   define: {
     'process.env.DEBUG': '""',
     'process.env.NODE_ENV': '"production"',
@@ -46,9 +43,11 @@ export default defineConfig({
       formats: ['umd'],
       fileName: () => 'panmirror.js' 
     },
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         assetFileNames: "panmirror.[ext]",
+        // keep license banners (Vite drops them when minifying)
+        comments: { legal: true },
       },
     },
     sourcemap: false,

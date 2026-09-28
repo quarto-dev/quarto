@@ -146,7 +146,7 @@ const underlineField = StateField.define<DecorationSet>({
   },
   update(underlines, tr) {
     underlines = underlines.map(tr.changes);
-    for (let e of tr.effects) {
+    for (const e of tr.effects) {
       if (e.is(addUnderline)) {
         underlines = underlines.update({
           add: [Decoration.mark({ class: "cm-underline", message: e.value.message }).range(e.value.from, e.value.to)]
@@ -176,7 +176,7 @@ const underline = (cmView: EditorView, from: number, to: number, message: string
 };
 
 const clearUnderlines = (cmView: EditorView) => {
-  if (!!cmView.state.field(underlineField, false)) {
+  if (cmView.state.field(underlineField, false)) {
     cmView.dispatch({ effects: [removeUnderlines.of()] });
   }
 };
@@ -187,7 +187,8 @@ const clearUnderlines = (cmView: EditorView) => {
 
 // helper function for positionally picking data from a DecorationSet
 const rangeAndSpecOfDecorationAtPos = (pos: number, d: DecorationSet) => {
-  let spec: any | undefined;
+  // the spec of the marks created by `underline` (see `underlineField`)
+  let spec: { message: string } | undefined;
   let from: number | undefined;
   let to: number | undefined;
   d.between(pos, pos, (decoFrom, decoTo, deco) => {

@@ -28,7 +28,9 @@ import { shortcodePlugin } from 'core';
 import { yamlPlugin } from 'core';
 import { mermaidPlugin } from "core";
 
-const styleHref = import.meta.url.replace(/index\.[\d\S]*\.?js$/, 'styles.css');
+// styles.css sits next to whichever chunk this module ends up in
+// (index.js, or a hashed chunk such as index-<hash>.js)
+const styleHref = import.meta.url.replace(/[^/]*$/, 'styles.css');
 
 interface MarkdownItRenderer {
 	extendMarkdownIt(fn: (md: MarkdownIt) => void): void;

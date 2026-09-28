@@ -8,9 +8,6 @@
 import gridTableRulePlugin from './gridtables'
 export { gridTableRulePlugin };
 
-import mermaidPlugin from './mermaid';
-export { mermaidPlugin };
-
 export * from './callouts'
 export * from './cites'
 export * from './decorator'

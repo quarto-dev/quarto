@@ -90,6 +90,14 @@ export function activateEditor(
         return VisualEditorProvider.activeEditor() !== undefined;
       }
     },
+    {
+      // lets tests wait for a visual editor to finish loading, instead of
+      // sleeping for a guessed duration
+      id: 'quarto.test_isVisualEditorSynced',
+      execute(uri: string) {
+        return VisualEditorProvider.isSynced(Uri.parse(uri));
+      }
+    },
     editInVisualModeCommand(),
     editInSourceModeCommand(),
     toggleRenderOnSaveCommand()
@@ -120,6 +128,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   // track visual editors
   private static visualEditors = visualEditorTracker();
+
+  // visual editors whose initial sync has completed: the webview has loaded the
+  // document and any markdown canonicalization has been applied back to it
+  private static syncedEditors = new Set<WebviewPanel>();
 
   public static register(
     context: ExtensionContext,
@@ -305,6 +317,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     return this.visualEditors.editorForUri(uri);
   }
 
+  public static isSynced(uri: Uri): boolean {
+    const editor = this.visualEditors.editorForUri(uri);
+    return !!editor && this.syncedEditors.has(editor.webviewPanel);
+  }
+
   public static visualEditorPendingXRefNavigation(uri: string, xref: XRef) {
     this.visualEditorPendingXRefNavigations.set(uri, xref);
   }
@@ -433,6 +450,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
         // initialize sync manager
         await syncManager.init();
+        VisualEditorProvider.syncedEditors.add(webviewPanel);
 
         // notify for document changes
         disposables.push(workspace.onDidChangeTextDocument(
@@ -559,6 +577,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
+      VisualEditorProvider.syncedEditors.delete(webviewPanel);
       for (const disposable of disposables) {
         disposable.dispose();
       }

@@ -167,6 +167,14 @@ export async function openUniqueExamplesDocument(fileName: string, disposables: 
 }
 
 export const APPROX_TIME_TO_OPEN_VISUAL_EDITOR = 1700;
+
+/**
+ * Time allowed for `roundtrip()` to open the visual editor and sync it. Loading
+ * normally takes 1–2s but is slower on CI, especially with the Quarto
+ * pre-release. Tests that call `roundtrip()` need a mocha timeout above this.
+ */
+export const ROUNDTRIP_TIMEOUT = 15000;
+
 export async function roundtrip(doc: vscode.TextDocument) {
   const before = doc.getText();
 
@@ -174,13 +182,41 @@ export async function roundtrip(doc: vscode.TextDocument) {
   await vscode.commands.executeCommand("quarto.test_setkVisualModeConfirmedTrue");
   await wait(300);
   await vscode.commands.executeCommand("quarto.editInVisualMode");
-  await wait(APPROX_TIME_TO_OPEN_VISUAL_EDITOR);
+  await waitForVisualEditorSynced(doc);
   await vscode.commands.executeCommand("quarto.editInSourceMode");
   await waitForSourceEditor(doc);
 
   const after = doc.getText();
 
   return { before, after };
+}
+
+/**
+ * Waits until the visual editor for `doc` is active and has finished its initial
+ * sync: the webview has loaded the document and written the canonicalized
+ * markdown back to it. Switching back to source mode before then leaves the
+ * document unchanged, so a roundtrip would compare the unmodified source.
+ */
+export async function waitForVisualEditorSynced(doc: vscode.TextDocument) {
+  let active = false;
+  let synced = false;
+  try {
+    await waitForCondition(
+      async () => {
+        active = !!(await vscode.commands.executeCommand<boolean>("quarto.test_isInVisualEditor"));
+        synced = !!(await vscode.commands.executeCommand<boolean>("quarto.test_isVisualEditorSynced", doc.uri.toString()));
+        return active && synced;
+      },
+      {
+        // leave room under ROUNDTRIP_TIMEOUT for the rest of the roundtrip, so
+        // this message is what surfaces on failure
+        timeout: ROUNDTRIP_TIMEOUT - 5000,
+        message: `the visual editor for ${path.basename(doc.uri.fsPath)} to load and sync`
+      }
+    );
+  } catch (error) {
+    throw new Error(`${(error as Error).message} (active: ${active}, synced: ${synced})`);
+  }
 }
 
 /**

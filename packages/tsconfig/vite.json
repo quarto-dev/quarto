@@ -4,6 +4,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
+    "customConditions": ["browser"],
     "lib": ["ESNext", "DOM"],
     "sourceMap": true,
     "resolveJsonModule": true,

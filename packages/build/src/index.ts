@@ -62,6 +62,7 @@ export async function runBuild(options: BuildOptions) {
     sourcemap,
     legalComments,
     plugins: [
+      mathjaxDefaultFontPlugin,
       ...(outdir ? [{
         name: 'clear-outdir',
         setup(build: PluginBuild) {
@@ -102,6 +103,23 @@ export async function runBuild(options: BuildOptions) {
     await build(esbuildOptions);
   }
 }
+
+// MathJax 4's output jax statically import their default font (mathjax-newcm,
+// about 1 MB) through the `#default-font/*` subpath import, even when another
+// font is passed in. editor-server uses the MathJax TeX font, so resolve the
+// default to that and keep newcm out of the bundle.
+const mathjaxDefaultFontPlugin = {
+  name: 'mathjax-default-font',
+  setup(build: PluginBuild) {
+    build.onResolve({ filter: /^#default-font\// }, args =>
+      build.resolve(args.path.replace(/^#default-font\//, '@mathjax/mathjax-tex-font/mjs/'), {
+        kind: args.kind,
+        importer: args.importer,
+        resolveDir: args.resolveDir,
+      })
+    );
+  },
+};
 
 async function copyAssets(assets: AssetPair[]) {
   for (const { from, to } of assets) {

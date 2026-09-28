@@ -1075,8 +1075,16 @@ Copyright (c) Kiro Risk <kirollos@gmail.com>
 (License text: see Apache-2.0 above)
 
 ---------------------------------------------------------
-mathjax-full
+@mathjax/src
 https://github.com/mathjax/MathJax-src
+Apache License, Version 2.0
+
+Copyright (c) The MathJax Consortium
+(License text: see Apache-2.0 above)
+
+---------------------------------------------------------
+@mathjax/mathjax-tex-font, @mathjax/mathjax-mhchem-font-extension
+https://github.com/mathjax/MathJax-fonts
 Apache License, Version 2.0
 
 Copyright (c) The MathJax Consortium

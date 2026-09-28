@@ -3,6 +3,7 @@
 ## 1.139.0 (Unreleased)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
+- The extension now reads YAML the way Quarto CLI does: merge keys (`<<`) in front matter and `_quarto.yml` are no longer resolved, and dates are read as strings (<https://github.com/quarto-dev/quarto/pull/1158>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

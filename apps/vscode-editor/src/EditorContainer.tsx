@@ -6,8 +6,6 @@
 
 import React, { useMemo, useEffect, useContext, useCallback, useState } from 'react';
 
-import * as uuid from 'uuid';
-
 import { FluentProvider } from '@fluentui/react-components';
 
 import { JsonRpcRequestTransport, pathWithForwardSlashes } from 'core';
@@ -249,7 +247,7 @@ class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
   }
   private subscriptions: Record<string, { file: string, handler: VoidFunction }> = {};
   private subscribe(file: string, handler: VoidFunction) : VoidFunction {
-    const id = uuid.v4();
+    const id = crypto.randomUUID();
     this.subscriptions[id] = { file: pathWithForwardSlashes(this.resolvePath(file)), handler };
     return () => {
       delete this.subscriptions[id];

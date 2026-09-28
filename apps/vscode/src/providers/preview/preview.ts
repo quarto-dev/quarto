@@ -6,7 +6,7 @@
 
 import * as path from "path";
 import * as fs from "fs";
-import * as uuid from "uuid";
+import { randomUUID } from "node:crypto";
 import axios from "axios";
 import * as semver from "semver";
 
@@ -257,7 +257,7 @@ class PreviewManager {
     private readonly quartoContext_: QuartoContext,
     private readonly engine_: MarkdownEngine
   ) {
-    this.renderToken_ = uuid.v4();
+    this.renderToken_ = randomUUID();
     this.webviewManager_ = new QuartoPreviewWebviewManager(
       context,
       host,

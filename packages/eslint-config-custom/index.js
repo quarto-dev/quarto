@@ -14,6 +14,16 @@ export default defineConfig({
   },
   rules: {
     "@typescript-eslint/no-non-null-assertion": "off",
+    // A leading underscore marks a binding as intentionally unused
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+      },
+    ],
     // `import x = require("x")` is how the `declare module` shims pull in types
     "@typescript-eslint/no-require-imports": ["error", { allowAsImport: true }],
   },

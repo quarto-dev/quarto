@@ -18,7 +18,6 @@ import { zoteroTrace } from "../trace";
 // race another's and delete the file out from under it. Queue per dataDir.
 const dbQueues = new Map<string, Promise<unknown>>();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function withZoteroDb<T>(dataDir: string, f: (db: Database) => Promise<T>): Promise<T> {
   const previous = dbQueues.get(dataDir) ?? Promise.resolve();
   const current = previous.catch(() => undefined).then(() => withZoteroDbExclusive(dataDir, f));

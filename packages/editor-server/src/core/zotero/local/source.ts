@@ -22,7 +22,6 @@ import { withZoteroDb } from "./db";
 import { equalsIgnoreCase } from "core";
 import { resolveCslJsonCheaterKeys } from "../util";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollectionSource {
  
   // resolve data dir
@@ -112,7 +111,6 @@ export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollection
       
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getActiveCollectionSpecs(collections: string[]): Promise<ZoteroResult> {
       if (dataDir) {
 

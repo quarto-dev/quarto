@@ -137,7 +137,7 @@ const underlinedErrorHoverTooltip = hoverTooltip((view, pos) => {
 const addUnderline = StateEffect.define<{ from: number, to: number, message: string; }>({
   map: ({ from, to, message }, change) => ({ from: change.mapPos(from), to: change.mapPos(to), message })
 });
-const removeUnderlines = StateEffect.define({
+const removeUnderlines = StateEffect.define<void>({
   map: () => { }
 });
 const underlineField = StateField.define<DecorationSet>({

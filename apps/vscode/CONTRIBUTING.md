@@ -42,9 +42,11 @@ Here is the process:
 
 - Let `yarn dev-vscode` run in the background somewhere.
 
-- Open the `apps/vscode` folder in VS Code or Positron and go to the `Run and debug` pane.
+- Open the repository root in VS Code or Positron and go to the `Run and debug` pane.
 
 - Run the `Run VS Code Extension` to open the dev version of the extension in a new window.
+
+  Alternatively, open the `apps/vscode` folder and run `Run Extension`. Its pre-launch task starts `yarn dev-vscode` for you and waits for the first build.
 
 - If you need to set breakpoints in the LSP, you'll have to select the launch configuration `Attach to VS Code LSP server` and run that as well. You should see your LSP breakpoints bind (go from grayed out to red dots) as soon as the debugger is attached to the LSP.
 

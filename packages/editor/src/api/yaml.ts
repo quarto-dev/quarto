@@ -9,7 +9,9 @@ import { NodeWithPos } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
 import { EditorState, Transaction } from 'prosemirror-state';
 
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
+
+import { loadYaml } from 'core';
 
 import { findTopLevelBodyNodes } from './node';
 import { logException } from './log';
@@ -113,11 +115,7 @@ export function firstYamlBlock(code: string): Record<string,any> | null {
 
 export function parseYaml(yamlCode: string) : unknown {
   try {
-    
-    const yamlParsed = yaml.load(yamlCode, {
-      onWarning: logException,
-    });
-    return yamlParsed;
+    return loadYaml(yamlCode);
   } catch (e) {
     logException(e);
     return null;

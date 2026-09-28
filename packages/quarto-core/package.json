@@ -8,7 +8,6 @@
   "dependencies": {
     "core": "*",
     "core-node": "*",
-    "js-yaml": "^4.1.0",
     "markdown-it": "^13.0.1",
     "markdown-it-attrs": "^4.1.6",
     "semver": "^7.3.8",
@@ -17,7 +16,6 @@
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5",
     "@types/markdown-it": "^12.2.3",
     "@types/semver": "^7.3.13",
     "eslint": "^10.11.0",

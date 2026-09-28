@@ -1533,7 +1533,7 @@
     "editor-types": "*",
     "glob": "^13.0.6",
     "highlight.js": "^11.7.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.4.2",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "markdown-it": "^13.0.1",
@@ -1559,7 +1559,6 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/highlight.js": "^10.1.0",
-    "@types/js-yaml": "^4.0.5",
     "@types/lodash.debounce": "^4.0.7",
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-highlightjs": "^3.3.1",

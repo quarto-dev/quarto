@@ -1566,7 +1566,7 @@
     "@types/semver": "^7.3.13",
     "@types/tmp": "^0.2.3",
     "@types/vscode": "1.101.0",
-    "@types/which": "^2.0.2",
+    "@types/which": "^3.0.4",
     "@posit-dev/positron-test-electron": "^0.0.3",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@vscode/test-cli": "^0.0.11",

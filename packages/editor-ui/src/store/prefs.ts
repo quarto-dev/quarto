@@ -51,7 +51,7 @@ export const prefsApi = createApi({
           )
           try {
             await queryFulfilled
-          } catch (error) {
+          } catch {
             // refetch on failure
             dispatch(prefsApi.util.invalidateTags([kPrefsTag]));
           }

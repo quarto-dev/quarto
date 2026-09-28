@@ -628,7 +628,7 @@ export class Editor  {
         // eat exceptions that might result from an invalid position
         try {
           setTextSelection(loc.pos)(tr);
-        } catch (e) {
+        } catch {
           // do-nothing, this error can happen and shouldn't result in 
           // a failure to setMarkdown
         }

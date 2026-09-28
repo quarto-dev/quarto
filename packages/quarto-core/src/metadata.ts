@@ -240,7 +240,7 @@ export async function quartoProjectConfig(
         }
       }
     }
-  } catch (e) {
+  } catch {
     config = undefined;
   }
 

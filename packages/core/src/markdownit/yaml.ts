@@ -266,7 +266,7 @@ function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
     return loadYaml(str, { schema: yaml.FAILSAFE_SCHEMA });
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

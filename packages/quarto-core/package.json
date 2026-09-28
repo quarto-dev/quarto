@@ -19,6 +19,8 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
     "@types/markdown-it": "^12.2.3",
-    "@types/semver": "^7.3.13"
+    "@types/semver": "^7.3.13",
+    "eslint": "^10.11.0",
+    "eslint-config-custom-server": "*"
   }
 }

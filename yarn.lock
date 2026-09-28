@@ -4506,10 +4506,10 @@ eventemitter3@^4.0.0:
   resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
 
-eventemitter3@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-5.0.1.tgz"
-  integrity sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==
+eventemitter3@^5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-5.0.4.tgz#a86d66170433712dde814707ac52b5271ceb1feb"
+  integrity sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==
 
 exceljs@^4.3.0:
   version "4.4.0"
@@ -6583,18 +6583,18 @@ p-map@^7.0.4:
   resolved "https://registry.yarnpkg.com/p-map/-/p-map-7.0.8.tgz#e2ce27eff78cd934a78908a3cede58330a3a5543"
   integrity sha512-MitaVsCuCFIvOLLPIU7NnfrZvS9H9h7kwMUkDo+T2pEISaJD48IV9S8iIdXB7PsvvdxyYcsSTTrr90XKsbulNw==
 
-p-queue@^8.0.1:
-  version "8.0.1"
-  resolved "https://registry.npmjs.org/p-queue/-/p-queue-8.0.1.tgz"
-  integrity sha512-NXzu9aQJTAzbBqOt2hwsR63ea7yvxJc0PwN/zobNAudYfb1B7R08SzB4TsLeSbUCuG467NhnoT0oO6w1qRO+BA==
+p-queue@^9.3.3:
+  version "9.3.3"
+  resolved "https://registry.yarnpkg.com/p-queue/-/p-queue-9.3.3.tgz#c5e528c7eb361b7ba8eb5a9406902f7f2e75fc8f"
+  integrity sha512-NXAOdnEe5FsZJfT4oK84lE1Y5cFFdWlRuOo5tww8DyNMxyRXwn39fIkUtNLKppcPC+UYU/bXujNCUGDv01y7CA==
   dependencies:
-    eventemitter3 "^5.0.1"
-    p-timeout "^6.1.2"
+    eventemitter3 "^5.0.4"
+    p-timeout "^7.0.0"
 
-p-timeout@^6.1.2:
-  version "6.1.2"
-  resolved "https://registry.npmjs.org/p-timeout/-/p-timeout-6.1.2.tgz"
-  integrity sha512-UbD77BuZ9Bc9aABo74gfXhNvzC9Tx7SxtHSh1fxvx3jTLLYvmVhiQZZrJzqqU0jKbN32kb5VOKiLEQI/3bIjgQ==
+p-timeout@^7.0.0:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-7.0.2.tgz#6b5c8c8eb99ea96fa775508fb1604e7ea094dd47"
+  integrity sha512-prbX4Z3YszrFNgH+MW5Zoeq3baXrMtP/MQnFeET90UB/GtGcGDQ5Usg9OCy6ETjTTntOw1SL2z9fMPUppN3Guw==
 
 package-json-from-dist@^1.0.0:
   version "1.0.1"

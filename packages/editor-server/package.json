@@ -11,7 +11,7 @@
     "editor-types": "*",
     "jayson": "^5.0.0",
     "mathjax-full": "^3.2.2",
-    "node-sqlite3-wasm": "^0.5.2",
+    "node-sqlite3-wasm": "^0.8.60",
     "quarto-core": "*",
     "tmp": "^0.2.7",
     "tsconfig": "*",

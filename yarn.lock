@@ -6392,10 +6392,10 @@ node-html-parser@^6.1.5:
     css-select "^5.1.0"
     he "1.2.0"
 
-node-sqlite3-wasm@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.npmjs.org/node-sqlite3-wasm/-/node-sqlite3-wasm-0.5.2.tgz"
-  integrity sha512-Qt4h2lzNa4JM8NW+fzmgSbglhbITT7GmmvlmBloBsSPaTuKsH8HLwNnCkZGtm1kGT/UTNaINxVdJnlFcsbBKtA==
+node-sqlite3-wasm@^0.8.60:
+  version "0.8.60"
+  resolved "https://registry.yarnpkg.com/node-sqlite3-wasm/-/node-sqlite3-wasm-0.8.60.tgz#101081eb3dc5a35772cde041823dd37c33a66172"
+  integrity sha512-woDEJy/Df0EBFKJ2N7HSL4SiH5UL1GDwxvBeBjaKvqmUApgTKapcoQiAgZKrLSUmrWU6VYyHz41Sz58Hi6YPmg==
 
 non-layered-tidy-tree-layout@^2.0.2:
   version "2.0.2"

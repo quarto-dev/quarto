@@ -1577,11 +1577,11 @@
     "@vscode/vsce": "^2.15.0",
     "build": "*",
     "eslint": "^10.11.0",
+    "eslint-config-custom-server": "*",
     "mocha": "^9.2.1",
     "plist": "^3.0.6",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.71.0",
     "vsce": "^2.15.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.4"

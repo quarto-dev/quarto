@@ -9,7 +9,6 @@
     "core": "*",
     "core-node": "*",
     "editor-types": "*",
-    "jayson": "^5.0.0",
     "mathjax-full": "^3.2.2",
     "node-sqlite3-wasm": "^0.8.60",
     "quarto-core": "*",

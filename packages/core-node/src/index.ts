@@ -5,7 +5,6 @@
  */
 
 
-export * from './jsonrpc';
 export * from './jsonrpc-lsp'
 export * from './appdirs';
 export * from './exec';

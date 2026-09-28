@@ -648,7 +648,7 @@ export function updateImageViewSize(
         const liftImgStyle = (attrib: string, val: string) => img.style.setProperty(attrib, val);
         value = removeStyleAttrib(value, 'border(?:[\\w\\-])*', liftImgStyle);
         value = removeStyleAttrib(value, 'margin(?:[\\w\\-])*', liftImgStyle);
-        value = removeStyleAttrib(value, 'display', liftImgStyle);
+        removeStyleAttrib(value, 'display', liftImgStyle);
       } else if (key === kWidthAttrib) {
         // see if this is a unit we can edit
         const widthProp = imageSizePropWithUnit(value);
@@ -702,7 +702,7 @@ export function updateImageViewSize(
     if (figure) {
       const align = pandocAttrGetKeyvalue(node.attrs, kFigAlignAttrib);
       if (align && (align !== "default")) {
-        let width: number | null = null;
+        let width: number | null;
         const widthProp = imageSizePropWithUnit(img.style.width);
         if (widthProp) {
           width = widthProp.size;

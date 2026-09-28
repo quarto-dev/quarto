@@ -131,50 +131,6 @@ export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourc
 
     const classes = ['pm-insert-citation-source-panel-list-container'].concat(props.classes || []).join(' ');
     switch (props.status) {
-      case CitationSourceListStatus.default:
-        if (props.citations.length > 0) {
-          return (
-            <div
-              tabIndex={0}
-              onKeyDown={handleListKeyDown}
-              onFocus={onFocus}
-              onBlur={onBlur}
-              ref={ref}
-              className={classes}
-            >
-              <FixedSizeList
-                className="pm-insert-citation-source-panel-list"
-                height={props.height}
-                width="100%"
-                itemCount={props.citations.length}
-                itemSize={props.itemHeight}
-                itemData={{
-                  selectedIndex: props.selectedIndex,
-                  onSelectedIndexChanged: props.onSelectedIndexChanged,
-                  citations: props.citations,
-                  citationsToAdd: props.citationsToAdd,
-                  onAddCitation: props.onAddCitation,
-                  onRemoveCitation: props.onRemoveCitation,
-                  onConfirm: props.onConfirm,
-                  showSeparator: true,
-                  showSelection: true,
-                  preventFocus: true,
-                  ui: props.ui,
-                }}
-                ref={fixedList}
-              >
-                {props.itemProvider}
-              </FixedSizeList>
-            </div>
-          );
-        } else {
-          return (
-            <div className={classes} style={{ height: props.height + 'px' }} ref={ref}>
-              <div className="pm-insert-citation-source-panel-list-noresults-text">{props.statusMessage}</div>
-            </div>
-          );
-        }
-
       case CitationSourceListStatus.inProgress:
         return (
           <div className={classes} style={{ height: props.height + 'px' }} ref={ref}>

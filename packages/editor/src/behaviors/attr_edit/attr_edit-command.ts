@@ -170,7 +170,7 @@ async function editNodeAttrs(
         tr.setNodeMarkup(pos, targetNode.type, {
           ...attrs,
           ...result.attr,
-        }),
+        });
         dispatch(tr);
       }
     }

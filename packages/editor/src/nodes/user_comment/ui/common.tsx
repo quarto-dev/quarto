@@ -4,7 +4,7 @@
  * Copyright (C) 2019-2026 by Posit Software, PBC
  */
 
-export function getThreadElement(threadId: any) {
+export function getThreadElement(threadId: string) {
   return document.getElementById(createThreadIdAttr(threadId));
 }
 

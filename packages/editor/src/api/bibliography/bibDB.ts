@@ -319,7 +319,7 @@ function sortedKeys(csl: CSL) {
   keySortOrder.url = pos++;
 
   keySortOrder.page = pos++;
-  keySortOrder.publisher = pos++;
+  keySortOrder.publisher = pos;
 
   const enumerableCSL = csl as Record<string,unknown>;
   const keys = Object.keys(enumerableCSL);

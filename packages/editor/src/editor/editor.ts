@@ -1189,11 +1189,17 @@ export class Editor  {
 
     // override to disable input rules as requested
     // https://github.com/ProseMirror/prosemirror-inputrules/commit/b4bf67623aa4c4c1e096c20aa649c0e63751f337
-    const customHandleTextInput = (view: EditorView, from: number, to: number, text: string) => {
+    const customHandleTextInput = (
+      view: EditorView,
+      from: number,
+      to: number,
+      text: string,
+      deflt: () => Transaction,
+    ) => {
       if (!markFilter(view.state)) {
         return false;
       }
-      return handleTextInput(view, from, to, text);
+      return handleTextInput(view, from, to, text, deflt);
     };
 
     

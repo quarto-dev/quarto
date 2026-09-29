@@ -8,7 +8,7 @@ import { Node as ProsemirrorNode, NodeType } from 'prosemirror-model';
 
 import { GapCursor } from 'prosemirror-gapcursor';
 import { EditorView } from 'prosemirror-view';
-import { EditorState } from 'prosemirror-state';
+import { EditorState, TextSelection } from 'prosemirror-state';
 
 import { Position } from "vscode-languageserver-types";
 
@@ -48,6 +48,7 @@ export interface CodeViewOptions {
 
 export interface CodeEditorNodeView {
   isFocused(): boolean;
+  focus?(anchor: number, head: number): void;
   getPos(): number;
   dom: HTMLElement;
   setGapCursorPending(pending: boolean): void;
@@ -72,6 +73,21 @@ export class CodeEditorNodeViews {
 
   public activeNodeView(): CodeEditorNodeView | undefined {
     return this.nodeViews.find(view => view.isFocused());
+  }
+
+  public focus(view: EditorView): boolean {
+    const selection = view.state.selection;
+    if (!(selection instanceof TextSelection) || selection.$from.depth === 0 ||
+        !selection.$from.sameParent(selection.$to)) {
+      return false;
+    }
+    const pos = selection.$from.before();
+    const nodeView = this.nodeViews.find(nodeView => nodeView.getPos() === pos);
+    if (!nodeView?.focus) {
+      return false;
+    }
+    nodeView.focus(selection.anchor - pos - 1, selection.head - pos - 1);
+    return true;
   }
 
   public handleClick(view: EditorView, event: Event): boolean {

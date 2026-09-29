@@ -131,6 +131,10 @@ export const codeMirrorNodeView: (
   // detection between views for gap cursor handling)
   const cmNodeView : CodeEditorNodeView = {
     isFocused: () => codeMirrorView.hasFocus,
+    focus: (anchor, head) => withState(State.Updating, () => {
+      codeMirrorView.dispatch({ selection: { anchor, head } });
+      codeMirrorView.focus();
+    }),
     getPos: typeof(getPos) === "function" ? getPos : (() => 0),
     dom,
     setGapCursorPending

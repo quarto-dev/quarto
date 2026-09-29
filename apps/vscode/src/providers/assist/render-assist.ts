@@ -338,11 +338,11 @@ function renderAssist(
   markdown: string,
   asWebviewUri?: (uri: Uri) => Uri
 ) {
-  const md = MarkdownIt("default", {
+  const md = new MarkdownIt("default", {
     html: true,
     linkify: true,
   });
-  const validateLink = md.validateLink;
+  const validateLink = md.validateLink.bind(md);
   md.validateLink = (link: string) => {
     return (
       validateLink(link) ||

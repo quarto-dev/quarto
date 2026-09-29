@@ -29,7 +29,7 @@ import {
   TextEdit
 } from "vscode-languageserver-types";
 
-import md from "markdown-it";
+import MarkdownIt from "markdown-it";
 
 import { editorLanguage } from "editor-core";
 
@@ -318,7 +318,7 @@ function infoNodeForItem(item: CompletionItem) {
     }
     if (MarkupContent.is(item.documentation)) {
       if (item.documentation.kind === MarkupKind.Markdown) {
-        const commonmark = md('commonmark');
+        const commonmark = new MarkdownIt('commonmark');
         const html = commonmark.render(item.documentation.value);
         const mdDiv = document.createElement("div");
         mdDiv.innerHTML = html;

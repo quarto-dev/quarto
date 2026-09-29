@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as MarkdownIt from "markdown-it";
+import type { MarkdownIt } from "markdown-it";
 import IState from "../../interfaces/markdown-it/IState";
 import getCells from "../gridtables/GetCells";
 import ColumnAlignments from "./ColumnAlignments";

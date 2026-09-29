@@ -7,14 +7,12 @@
   "types": "./src/index.ts",
   "dependencies": {
     "js-yaml": "^5.4.2",
-    "markdown-it": "^13.0.1",
-    "markdown-it-attrs": "^4.1.6",
+    "markdown-it": "^15.0.2",
+    "markdown-it-attrs": "^4.5.0",
     "tsconfig": "*",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
-    "@types/markdown-it": "^12.2.3",
-    "@types/markdown-it-attrs": "^4.1.0",
     "@types/wcwidth": "^1.0.0",
     "eslint": "^10.11.0",
     "eslint-config-custom": "*",

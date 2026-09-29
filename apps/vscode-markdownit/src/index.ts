@@ -5,7 +5,7 @@
  * Copyright (c) 2016-2020 ParkSB.
  */
 
-import type * as MarkdownIt from 'markdown-it';
+import type { MarkdownIt } from 'markdown-it';
 import type { RendererContext } from 'vscode-notebook-renderer';
 
 import attrPlugin from "markdown-it-attrs";
@@ -79,24 +79,24 @@ export async function activate(ctx: RendererContext<void>) {
       return render(src, env);
     }
 
-		return md.use(footnotes, {})
-             .use(spansPlugin, {})
+		return md.use(footnotes)
+             .use(spansPlugin)
              .use(attrPlugin, {})
-             .use(deflistPlugin, {})
+             .use(deflistPlugin)
              .use(figuresPlugin, {})
-             .use(gridTableRulePlugin, {})
-             .use(subPlugin, {})
-             .use(supPlugin, {})
-             .use(taskListPlugin, {})
-             .use(divPlugin, {})
-             .use(figureDivsPlugin, {})
-             .use(tableCaptionPlugin, {})
-             .use(citationPlugin, {})
+             .use(gridTableRulePlugin)
+             .use(subPlugin)
+             .use(supPlugin)
+             .use(taskListPlugin)
+             .use(divPlugin)
+             .use(figureDivsPlugin)
+             .use(tableCaptionPlugin)
+             .use(citationPlugin)
              .use(mermaidPlugin, { dark: isDark }) // TODO: mermaid breaks other plugins
-             .use(calloutPlugin, {})
-             .use(decoratorPlugin, {})
+             .use(calloutPlugin)
+             .use(decoratorPlugin)
              .use(yamlPlugin)
-             .use(shortcodePlugin, {})
+             .use(shortcodePlugin)
 	});
 }
 

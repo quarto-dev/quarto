@@ -1512,6 +1512,9 @@
       }
     ]
   },
+  "vsce": {
+    "dependencies": false
+  },
   "scripts": {
     "vscode:prepublish": "rm -rf ./out/markdownit && cd ../.. && turbo run build --force --filter quarto...",
     "install-vscode": "rm -rf *.vsix && vsce package && code --install-extension *.vsix",
@@ -1560,7 +1563,7 @@
     "@types/lodash.debounce": "^4.0.7",
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-highlightjs": "^3.3.1",
-    "@types/mocha": "^9.1.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.15.0",
     "@types/picomatch": "^4.0.3",
     "@types/semver": "^7.3.13",
@@ -1569,17 +1572,17 @@
     "@types/which": "^3.0.4",
     "@posit-dev/positron-test-electron": "^0.0.3",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2",
-    "@vscode/vsce": "^2.15.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
     "build": "*",
     "eslint": "^10.11.0",
     "eslint-config-custom-server": "*",
-    "mocha": "^9.2.1",
+    "mocha": "^11.7.6",
+    "ovsx": "^1.2.0",
     "plist": "^5.0.0",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "vsce": "^2.15.0",
     "vscode-languageserver": "^8.1.0",
     "vscode-languageserver-textdocument": "^1.0.4"
   }

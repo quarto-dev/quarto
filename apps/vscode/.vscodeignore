@@ -1,5 +1,7 @@
 .vscode/**
 .vscode-test/**
+.positron-test/**
+test-out/**
 .turbo/**
 node_modules/**
 src/**

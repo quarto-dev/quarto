@@ -1,4 +1,3 @@
-
 name: Build VS Code Extension
 
 on:
@@ -8,19 +7,38 @@ on:
     paths:
       - 'apps/lsp/**'
       - 'apps/vscode/**'
+      - '.github/workflows/build.yaml'
   pull_request:
     branches:
       - main
     paths:
       - 'apps/lsp/**'
       - 'apps/vscode/**'
+      - '.github/workflows/build.yaml'
   workflow_dispatch:
+  # publish.yaml calls this workflow so that the published VSIX is the one built here
+  workflow_call:
+    outputs:
+      artifact-name:
+        description: Name of the workflow artifact that contains the VSIX
+        value: ${{ jobs.package-extension.outputs.artifact-name }}
+      vsix-name:
+        description: File name of the VSIX inside the artifact
+        value: ${{ jobs.package-extension.outputs.vsix-name }}
+      version:
+        description: Version of the packaged extension
+        value: ${{ jobs.package-extension.outputs.version }}
+
+permissions:
+  contents: read
 
 jobs:
   package-extension:
     runs-on: ubuntu-latest
     outputs:
-      vsixPath: ${{ steps.package_extension.outputs.vsixPath }}
+      artifact-name: ${{ steps.meta.outputs.artifact-name }}
+      vsix-name: ${{ steps.meta.outputs.vsix-name }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -28,18 +46,28 @@ jobs:
           node-version-file: .nvmrc
       - run: yarn install --frozen-lockfile
 
+      - name: Get extension name and version
+        id: meta
+        working-directory: apps/vscode
+        run: |
+          name="$(jq -r .name package.json)"
+          version="$(jq -r .version package.json)"
+          {
+            echo "version=${version}"
+            echo "vsix-name=${name}-${version}.vsix"
+            echo "artifact-name=quarto-vscode-${GITHUB_SHA}"
+          } >> "$GITHUB_OUTPUT"
+
+      # Uses the repo's pinned @vscode/vsce; vscode:prepublish builds the extension
       - name: Package extension
-        uses: HaaLeo/publish-vscode-extension@v2
-        id: package_extension
-        with:
-          pat: not-a-real-pat
-          yarn: true
-          dryRun: true
-          preRelease: true
-          packagePath: apps/vscode
+        working-directory: apps/vscode
+        env:
+          VSIX_NAME: ${{ steps.meta.outputs.vsix-name }}
+        run: yarn --silent vsce package --out "$VSIX_NAME"
 
       - name: Upload extension vsix file as a workflow artifact
         uses: actions/upload-artifact@v7
         with:
-          name: quarto-vscode-${{ github.sha }}
-          path: ${{ steps.package_extension.outputs.vsixPath }}
+          name: ${{ steps.meta.outputs.artifact-name }}
+          path: apps/vscode/${{ steps.meta.outputs.vsix-name }}
+          if-no-files-found: error

@@ -11,7 +11,7 @@
     "start": "node dist/lsp.js"
   },
   "dependencies": {
-    "@vscode/l10n": "^0.0.14",
+    "@vscode/l10n": "^0.0.18",
     "core": "*",
     "core-node": "*",
     "editor-server": "*",
@@ -29,7 +29,7 @@
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^22.20.4",
     "@types/picomatch": "^4.0.3",
     "build": "*",
     "eslint": "^10.11.0",

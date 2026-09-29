@@ -20,8 +20,8 @@
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
-    "@types/tmp": "^0.2.3",
+    "@types/node": "^22.20.4",
+    "@types/tmp": "^0.2.6",
     "eslint": "^10.11.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15",

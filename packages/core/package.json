@@ -15,7 +15,7 @@
   "devDependencies": {
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-attrs": "^4.1.0",
-    "@types/wcwidth": "^1.0.0",
+    "@types/wcwidth": "^1.0.2",
     "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "tsx": "^4.23.15"

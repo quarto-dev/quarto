@@ -10,6 +10,6 @@
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0"
+    "@types/node": "^22.20.4"
   }
 }

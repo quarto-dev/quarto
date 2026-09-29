@@ -29,12 +29,12 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "markdown-it-task-lists": "^1.3.0",
-    "mermaid": "^9.1.7",
+    "mermaid": "^9.4.3",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
-    "@types/vscode-notebook-renderer": "^1.72.0",
-    "@types/wcwidth": "^1.0.0",
+    "@types/vscode-notebook-renderer": "^1.72.4",
+    "@types/wcwidth": "^1.0.2",
     "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",

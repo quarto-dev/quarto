@@ -5,8 +5,7 @@
  *
  */
 
-import MarkdownIt from "markdown-it";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt, Token } from "markdown-it";
 import { kTokInline, kTokParaClose, kTokParaOpen, kTokTableClose, kTokTableOpen, kTokText } from "./utils/tok";
 
 

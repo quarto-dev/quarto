@@ -29,7 +29,7 @@ import {
   TextEdit
 } from "vscode-languageserver-types";
 
-import md from "markdown-it";
+import { renderCompletionMarkdown } from "./completion-markdown";
 
 import { editorLanguage } from "editor-core";
 
@@ -318,8 +318,7 @@ function infoNodeForItem(item: CompletionItem) {
     }
     if (MarkupContent.is(item.documentation)) {
       if (item.documentation.kind === MarkupKind.Markdown) {
-        const commonmark = md('commonmark');
-        const html = commonmark.render(item.documentation.value);
+        const html = renderCompletionMarkdown(item.documentation.value);
         const mdDiv = document.createElement("div");
         mdDiv.innerHTML = html;
         // remove mdn links

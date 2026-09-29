@@ -1,0 +1,99 @@
+{
+  "markdownIt": [
+    "fence <code> [0,5]",
+    "fence <code> [6,11]",
+    "blockquote_open <blockquote> [12,35]",
+    "  fence <code> [12,15]",
+    "  math_block <math> [16,19]",
+    "  blockquote_open <blockquote> [20,21]",
+    "    paragraph_open <p> [20,21]",
+    "      inline [20,21]",
+    "    paragraph_close <p>",
+    "  blockquote_close <blockquote>",
+    "  paragraph_open <p> [22,29]",
+    "    inline [22,29]",
+    "  paragraph_close <p>",
+    "  paragraph_open <p> [30,31]",
+    "    inline [30,31]",
+    "  paragraph_close <p>",
+    "  pandoc_div_open <div> attrs=[[\"class\",\"hello\"]] meta={\"line\":32,\"level\":1}",
+    "    paragraph_open <p> [33,34]",
+    "      inline [33,34]",
+    "    paragraph_close <p>",
+    "  pandoc_div_close <div> meta={\"line\":34,\"level\":1}",
+    "blockquote_close <blockquote>"
+  ],
+  "tokens": [
+    {
+      "type": "RawBlock",
+      "range": "0:0-4:6",
+      "data": {
+        "format": "markdown",
+        "text": "```{=markdown}\nhi\n```\n"
+      }
+    },
+    {
+      "type": "CodeBlock",
+      "range": "6:0-10:4",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": "```{python}\na = 3\n```"
+    },
+    {
+      "type": "BlockQuote",
+      "range": "12:0-34:5"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "12:0-15:1",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": "1+1"
+    },
+    {
+      "type": "Math",
+      "range": "16:0-19:1",
+      "data": {
+        "type": "DisplayMath",
+        "text": "\n3 = 1 + 1 + 1 = 2 + 1 = 1 + 2\n"
+      }
+    },
+    {
+      "type": "BlockQuote",
+      "range": "20:0-21:1"
+    },
+    {
+      "type": "Para",
+      "range": "20:0-21:1"
+    },
+    {
+      "type": "Para",
+      "range": "22:0-29:1"
+    },
+    {
+      "type": "Para",
+      "range": "30:0-31:1"
+    },
+    {
+      "type": "Div",
+      "range": "32:0-34:5",
+      "attr": [
+        "",
+        [
+          "hello"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "Para",
+      "range": "33:0-34:5"
+    }
+  ]
+}

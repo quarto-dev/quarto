@@ -8,8 +8,7 @@
   "dependencies": {
     "core": "*",
     "tsconfig": "*",
-    "vscode-languageclient": "^8.1.0",
-    "vscode-languageserver": "^8.1.0"
+    "vscode-languageclient": "^10.1.2"
   },
   "devDependencies": {
     "eslint": "^10.11.0",

@@ -6,7 +6,7 @@
 
 
 import MarkdownIt from "markdown-it";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt as MarkdownItInstance, Token } from "markdown-it";
 
 import attrPlugin from 'markdown-it-attrs';
 
@@ -21,7 +21,23 @@ import { makeRange } from "../../range";
 export function markdownitParser() : Parser {
 
   // block parser
-  const md = MarkdownIt("zero");
+  const md = markdownitBlockParser();
+
+  // inline parser
+  const mdInline = new MarkdownIt("commonmark");
+  const mdToText = (markdown: string ) => {
+    const tokens = mdInline.parseInline(markdown, {});
+    return tokensToText(tokens);
+  }
+
+  return cachingParser((doc: Document) => {
+    return parseDocument(md, mdToText, doc.getText());
+  })
+}
+
+// The block-level markdown-it instance behind markdownitParser()
+export function markdownitBlockParser() : MarkdownItInstance {
+  const md = new MarkdownIt("zero");
   md.enable([
     "blockquote",
     "code",
@@ -38,23 +54,13 @@ export function markdownitParser() : Parser {
   md.use(mathjaxPlugin, { enableInlines: false } );
   md.use(yamlPlugin);
   md.use(divPlugin);
-
-  // inline parser
-  const mdInline = MarkdownIt("commonmark");
-  const mdToText = (markdown: string ) => {
-    const tokens = mdInline.parseInline(markdown, {});
-    return tokensToText(tokens);
-  }
-
-  return cachingParser((doc: Document) => {
-    return parseDocument(md, mdToText, doc.getText());
-  })
+  return md;
 }
 
 type MarkdownToPlainText = (markdown: string) => string;
 
 function parseDocument(
-  md: MarkdownIt, 
+  md: MarkdownItInstance, 
   mdToText: MarkdownToPlainText, 
   markdown: string
 ) : QToken[] {
@@ -102,12 +108,12 @@ function parseDocument(
         break;
       }
       case "pandoc_div_open": {
-        const startLine = token.meta.line as number;
+        const startLine = token.meta?.line as number;
         let endLine = -1;
         for (let j=(i+1); j<mdItTokens.length; j++) {
           const t = mdItTokens[j];
-          if (t.type === "pandoc_div_close" && t.meta.level === token.meta.level) {
-            endLine = t.meta.line;
+          if (t.type === "pandoc_div_close" && t.meta?.level === token.meta?.level) {
+            endLine = t.meta?.line as number;
             break;
           } 
         }
@@ -243,14 +249,14 @@ const tokensToText = (tokens: Token[]) : string => {
   }).join("");
 }
 
-const asTokenAttr = (attribs: Array<[string,string]> | null) => {
+const asTokenAttr = (attribs: Token["attrs"]) => {
   const tokenAttr: TokenAttr = ['', [], []];
   if (attribs === null || attribs.length === 0) {
     return tokenAttr;
   }
   for (const attrib of attribs) {
     const key = attrib[0];
-    const value = attrib[1];
+    const value = String(attrib[1]);
     switch(key) {
       case 'id':
         tokenAttr[kAttrIdentifier] = value;

@@ -16,7 +16,7 @@
     "quarto-core": "*",
     "tmp": "^0.2.7",
     "tsconfig": "*",
-    "vscode-languageserver-types": "^3.17.3",
+    "vscode-languageserver-types": "^3.18.4",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
@@ -25,7 +25,7 @@
     "eslint": "^10.11.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15",
-    "vscode-languageserver": "^8.1.0"
+    "vscode-languageserver": "^10.1.2"
   },
   "scripts": {
     "test": "node --import tsx --test test/*.test.ts",

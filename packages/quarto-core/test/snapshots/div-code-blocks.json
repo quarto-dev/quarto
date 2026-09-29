@@ -1,0 +1,995 @@
+{
+  "markdownIt": [
+    "front_matter [0,45]",
+    "heading_open <h2> [5,6]",
+    "  inline [5,6]",
+    "heading_close <h2>",
+    "paragraph_open <p> [7,9]",
+    "  inline [7,9]",
+    "paragraph_close <p>",
+    "heading_open <h2> [10,11]",
+    "  inline [10,11]",
+    "heading_close <h2>",
+    "fence <code> [12,16] attrs=[[\"r\",\"\"]]",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":17,\"level\":1}",
+    "  bullet_list_open <ul> [18,19]",
+    "    list_item_open <li> [18,19]",
+    "      paragraph_open <p> [18,19]",
+    "        inline [18,19]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":19,\"level\":1}",
+    "heading_open <h2> [21,22]",
+    "  inline [21,22]",
+    "heading_close <h2>",
+    "math_block <math> [23,26]",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":27,\"level\":1}",
+    "  bullet_list_open <ul> [28,29]",
+    "    list_item_open <li> [28,29]",
+    "      paragraph_open <p> [28,29]",
+    "        inline [28,29]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":29,\"level\":1}",
+    "heading_open <h2> [31,32]",
+    "  inline [31,32]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":33,\"level\":1}",
+    "  bullet_list_open <ul> [34,35]",
+    "    list_item_open <li> [34,35]",
+    "      paragraph_open <p> [34,35]",
+    "        inline [34,35]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":35,\"level\":1}",
+    "heading_open <h2> [37,38]",
+    "  inline [37,38]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":39,\"level\":1}",
+    "  bullet_list_open <ul> [40,41]",
+    "    list_item_open <li> [40,41]",
+    "      paragraph_open <p> [40,41]",
+    "        inline [40,41]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":41,\"level\":1}",
+    "heading_open <h2> [43,44]",
+    "  inline [43,44]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":45,\"level\":1}",
+    "  bullet_list_open <ul> [46,47]",
+    "    list_item_open <li> [46,47]",
+    "      paragraph_open <p> [46,47]",
+    "        inline [46,47]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":47,\"level\":1}",
+    "heading_open <h2> [49,50]",
+    "  inline [49,50]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":51,\"level\":1}",
+    "  bullet_list_open <ul> [52,53]",
+    "    list_item_open <li> [52,53]",
+    "      paragraph_open <p> [52,53]",
+    "        inline [52,53]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":53,\"level\":1}",
+    "heading_open <h2> [55,56]",
+    "  inline [55,56]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":57,\"level\":1}",
+    "  bullet_list_open <ul> [58,59]",
+    "    list_item_open <li> [58,59]",
+    "      paragraph_open <p> [58,59]",
+    "        inline [58,59]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":59,\"level\":1}",
+    "heading_open <h2> [61,62]",
+    "  inline [61,62]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":63,\"level\":1}",
+    "  bullet_list_open <ul> [64,65]",
+    "    list_item_open <li> [64,65]",
+    "      paragraph_open <p> [64,65]",
+    "        inline [64,65]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":65,\"level\":1}",
+    "heading_open <h2> [67,68]",
+    "  inline [67,68]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":69,\"level\":1}",
+    "  bullet_list_open <ul> [70,71]",
+    "    list_item_open <li> [70,71]",
+    "      paragraph_open <p> [70,71]",
+    "        inline [70,71]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":71,\"level\":1}",
+    "heading_open <h2> [73,74]",
+    "  inline [73,74]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":75,\"level\":1}",
+    "  bullet_list_open <ul> [76,77]",
+    "    list_item_open <li> [76,77]",
+    "      paragraph_open <p> [76,77]",
+    "        inline [76,77]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":77,\"level\":1}",
+    "heading_open <h2> [79,80]",
+    "  inline [79,80]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":81,\"level\":1}",
+    "  bullet_list_open <ul> [82,83]",
+    "    list_item_open <li> [82,83]",
+    "      paragraph_open <p> [82,83]",
+    "        inline [82,83]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":83,\"level\":1}",
+    "heading_open <h2> [85,86]",
+    "  inline [85,86]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":87,\"level\":1}",
+    "  bullet_list_open <ul> [88,89]",
+    "    list_item_open <li> [88,89]",
+    "      paragraph_open <p> [88,89]",
+    "        inline [88,89]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":89,\"level\":1}",
+    "heading_open <h2> [91,92]",
+    "  inline [91,92]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":93,\"level\":1}",
+    "  bullet_list_open <ul> [94,95]",
+    "    list_item_open <li> [94,95]",
+    "      paragraph_open <p> [94,95]",
+    "        inline [94,95]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":95,\"level\":1}",
+    "heading_open <h2> [97,98]",
+    "  inline [97,98]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":99,\"level\":1}",
+    "  bullet_list_open <ul> [100,101]",
+    "    list_item_open <li> [100,101]",
+    "      paragraph_open <p> [100,101]",
+    "        inline [100,101]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":101,\"level\":1}",
+    "heading_open <h2> [103,104]",
+    "  inline [103,104]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":105,\"level\":1}",
+    "  bullet_list_open <ul> [106,107]",
+    "    list_item_open <li> [106,107]",
+    "      paragraph_open <p> [106,107]",
+    "        inline [106,107]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":107,\"level\":1}",
+    "heading_open <h2> [109,110]",
+    "  inline [109,110]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":111,\"level\":1}",
+    "  bullet_list_open <ul> [112,113]",
+    "    list_item_open <li> [112,113]",
+    "      paragraph_open <p> [112,113]",
+    "        inline [112,113]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":113,\"level\":1}",
+    "heading_open <h2> [115,116]",
+    "  inline [115,116]",
+    "heading_close <h2>",
+    "fence <code> [117,120] attrs=[[\"r\",\"\"]]",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":121,\"level\":1}",
+    "  bullet_list_open <ul> [122,123]",
+    "    list_item_open <li> [122,123]",
+    "      paragraph_open <p> [122,123]",
+    "        inline [122,123]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":123,\"level\":1}",
+    "heading_open <h2> [125,126]",
+    "  inline [125,126]",
+    "heading_close <h2>",
+    "math_block <math> [127,130]",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":131,\"level\":1}",
+    "  bullet_list_open <ul> [132,133]",
+    "    list_item_open <li> [132,133]",
+    "      paragraph_open <p> [132,133]",
+    "        inline [132,133]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":133,\"level\":1}",
+    "heading_open <h2> [135,136]",
+    "  inline [135,136]",
+    "heading_close <h2>",
+    "paragraph_open <p> [137,138]",
+    "  inline [137,138]",
+    "paragraph_close <p>",
+    "fence <code> [139,142] attrs=[[\"r\",\"\"]]",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":143,\"level\":1}",
+    "  bullet_list_open <ul> [144,145]",
+    "    list_item_open <li> [144,145]",
+    "      paragraph_open <p> [144,145]",
+    "        inline [144,145]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":145,\"level\":1}",
+    "heading_open <h2> [147,148]",
+    "  inline [147,148]",
+    "heading_close <h2>",
+    "paragraph_open <p> [149,150]",
+    "  inline [149,150]",
+    "paragraph_close <p>",
+    "math_block <math> [151,154]",
+    "pandoc_div_open <div> attrs=[[\"class\",\"notes\"]] meta={\"line\":155,\"level\":1}",
+    "  bullet_list_open <ul> [156,157]",
+    "    list_item_open <li> [156,157]",
+    "      paragraph_open <p> [156,157]",
+    "        inline [156,157]",
+    "      paragraph_close <p>",
+    "    list_item_close <li>",
+    "  bullet_list_close <ul>",
+    "pandoc_div_close <div> meta={\"line\":157,\"level\":1}"
+  ],
+  "tokens": [
+    {
+      "type": "FrontMatter",
+      "range": "0:0-4:0",
+      "data": "---\ntitle: \"Div Code Blocks\"\nformat: html\n---"
+    },
+    {
+      "type": "Header",
+      "range": "5:0-5:42",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Code blocks in divs without blank lines"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "7:0-8:54"
+    },
+    {
+      "type": "Header",
+      "range": "10:0-10:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "CodeBlock",
+      "range": "12:0-15:3",
+      "attr": [
+        "",
+        [
+          "{r"
+        ],
+        []
+      ],
+      "data": "library(tidyverse)\nhead(mtcars)"
+    },
+    {
+      "type": "Div",
+      "range": "17:0-19:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "18:0-18:12"
+    },
+    {
+      "type": "Para",
+      "range": "18:0-19:3"
+    },
+    {
+      "type": "Header",
+      "range": "21:0-21:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Math",
+      "range": "23:0-25:2",
+      "data": {
+        "type": "DisplayMath",
+        "text": "\n\\mathbf{y} = \\mathbf{X}^\\top\\beta + \\varepsilon\n"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "27:0-29:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "28:0-28:12"
+    },
+    {
+      "type": "Para",
+      "range": "28:0-29:3"
+    },
+    {
+      "type": "Header",
+      "range": "31:0-31:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "33:0-35:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "34:0-34:12"
+    },
+    {
+      "type": "Para",
+      "range": "34:0-35:3"
+    },
+    {
+      "type": "Header",
+      "range": "37:0-37:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "39:0-41:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "40:0-40:12"
+    },
+    {
+      "type": "Para",
+      "range": "40:0-41:3"
+    },
+    {
+      "type": "Header",
+      "range": "43:0-43:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "45:0-47:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "46:0-46:12"
+    },
+    {
+      "type": "Para",
+      "range": "46:0-47:3"
+    },
+    {
+      "type": "Header",
+      "range": "49:0-49:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "51:0-53:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "52:0-52:12"
+    },
+    {
+      "type": "Para",
+      "range": "52:0-53:3"
+    },
+    {
+      "type": "Header",
+      "range": "55:0-55:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "57:0-59:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "58:0-58:12"
+    },
+    {
+      "type": "Para",
+      "range": "58:0-59:3"
+    },
+    {
+      "type": "Header",
+      "range": "61:0-61:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "63:0-65:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "64:0-64:12"
+    },
+    {
+      "type": "Para",
+      "range": "64:0-65:3"
+    },
+    {
+      "type": "Header",
+      "range": "67:0-67:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "69:0-71:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "70:0-70:12"
+    },
+    {
+      "type": "Para",
+      "range": "70:0-71:3"
+    },
+    {
+      "type": "Header",
+      "range": "73:0-73:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "75:0-77:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "76:0-76:12"
+    },
+    {
+      "type": "Para",
+      "range": "76:0-77:3"
+    },
+    {
+      "type": "Header",
+      "range": "79:0-79:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "81:0-83:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "82:0-82:12"
+    },
+    {
+      "type": "Para",
+      "range": "82:0-83:3"
+    },
+    {
+      "type": "Header",
+      "range": "85:0-85:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "87:0-89:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "88:0-88:12"
+    },
+    {
+      "type": "Para",
+      "range": "88:0-89:3"
+    },
+    {
+      "type": "Header",
+      "range": "91:0-91:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "93:0-95:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "94:0-94:12"
+    },
+    {
+      "type": "Para",
+      "range": "94:0-95:3"
+    },
+    {
+      "type": "Header",
+      "range": "97:0-97:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "99:0-101:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "100:0-100:12"
+    },
+    {
+      "type": "Para",
+      "range": "100:0-101:3"
+    },
+    {
+      "type": "Header",
+      "range": "103:0-103:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "105:0-107:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "106:0-106:12"
+    },
+    {
+      "type": "Para",
+      "range": "106:0-107:3"
+    },
+    {
+      "type": "Header",
+      "range": "109:0-109:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "111:0-113:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "112:0-112:12"
+    },
+    {
+      "type": "Para",
+      "range": "112:0-113:3"
+    },
+    {
+      "type": "Header",
+      "range": "115:0-115:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "CodeBlock",
+      "range": "117:0-119:3",
+      "attr": [
+        "",
+        [
+          "{r"
+        ],
+        []
+      ],
+      "data": "head(mtcars)"
+    },
+    {
+      "type": "Div",
+      "range": "121:0-123:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "122:0-122:12"
+    },
+    {
+      "type": "Para",
+      "range": "122:0-123:3"
+    },
+    {
+      "type": "Header",
+      "range": "125:0-125:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Math",
+      "range": "127:0-129:2",
+      "data": {
+        "type": "DisplayMath",
+        "text": "\n\\mathbf{y} = \\mathbf{X}^\\top\\beta + \\varepsilon\n"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "131:0-133:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "132:0-132:12"
+    },
+    {
+      "type": "Para",
+      "range": "132:0-133:3"
+    },
+    {
+      "type": "Header",
+      "range": "135:0-135:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with code"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "137:0-137:36"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "139:0-141:3",
+      "attr": [
+        "",
+        [
+          "{r"
+        ],
+        []
+      ],
+      "data": "head(mtcars)"
+    },
+    {
+      "type": "Div",
+      "range": "143:0-145:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "144:0-144:12"
+    },
+    {
+      "type": "Para",
+      "range": "144:0-145:3"
+    },
+    {
+      "type": "Header",
+      "range": "147:0-147:20",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "A slide with math"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "149:0-149:36"
+    },
+    {
+      "type": "Math",
+      "range": "151:0-153:2",
+      "data": {
+        "type": "DisplayMath",
+        "text": "\n\\mathbf{y} = \\mathbf{X}^\\top\\beta + \\varepsilon\n"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "155:0-157:3",
+      "attr": [
+        "",
+        [
+          "notes"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "BulletList",
+      "range": "156:0-156:12"
+    },
+    {
+      "type": "Para",
+      "range": "156:0-157:3"
+    }
+  ]
+}

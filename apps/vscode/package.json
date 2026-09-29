@@ -1539,8 +1539,8 @@
     "js-yaml": "^5.4.2",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
-    "markdown-it": "^13.0.1",
-    "markdown-it-highlightjs": "^4.0.1",
+    "markdown-it": "^15.0.2",
+    "markdown-it-highlightjs": "^4.3.0",
     "p-queue": "^9.3.3",
     "picomatch": "^4.0.7",
     "@posit-dev/positron": "^0.2.10",
@@ -1551,16 +1551,13 @@
     "quarto-vscode-markdownit": "*",
     "semver": "^7.8.5",
     "tmp": "^0.2.7",
-    "vscode-languageclient": "^8.1.0",
-    "vscode-languageserver-types": "^3.17.3",
-    "vscode-nls": "^5.2.0",
+    "vscode-languageclient": "^10.1.2",
+    "vscode-languageserver-types": "^3.18.4",
     "vscode-uri": "^3.0.3",
     "which": "^3.0.1"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",
-    "@types/markdown-it": "^12.2.3",
-    "@types/markdown-it-highlightjs": "^3.3.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.20.4",
     "@types/picomatch": "^4.0.3",
@@ -1581,7 +1578,7 @@
     "plist": "^5.0.0",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "vscode-languageserver": "^8.1.0",
-    "vscode-languageserver-textdocument": "^1.0.4"
+    "vscode-languageserver": "^10.1.2",
+    "vscode-languageserver-textdocument": "^1.0.15"
   }
 }

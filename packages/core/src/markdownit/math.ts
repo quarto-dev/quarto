@@ -14,11 +14,7 @@ https://github.com/runarberg/markdown-it-math
 It differs in that it takes (a subset of) LaTeX as input and relies on MathJax
 for rendering output.
 */
-import type MarkdownIt from "markdown-it";
-
-import type Token from "markdown-it/lib/token";
-import type StateInline from "markdown-it/lib/rules_inline/state_inline";
-import type StateBlock from "markdown-it/lib/rules_block/state_block";
+import type { MarkdownIt, StateBlock, StateInline, Token } from "markdown-it";
 
 export const kTokMathBlock = "math_block";
 export const kTokMathInline = "math_inline";

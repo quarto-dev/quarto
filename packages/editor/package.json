@@ -44,7 +44,7 @@
     "tlite": "^0.1.9",
     "transliteration": "^2.6.1",
     "use-debounce": "^9.0.4",
-    "vscode-languageserver-types": "^3.17.3",
+    "vscode-languageserver-types": "^3.18.4",
     "zenscroll": "^4.0.2"
   },
   "devDependencies": {

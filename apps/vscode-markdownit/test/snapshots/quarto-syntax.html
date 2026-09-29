@@ -1,0 +1,126 @@
+<h1>Fixture</h1>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">Options</span></div>
+<pre class="quarto-frontmatter-container"><code class="cm-s-jupyter language-yaml quarto-frontmatter">format: html
+</code></pre><div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#sec-one</span><span class="quarto-attribute-decorator-content">.unnumbered</span></div><h1 id="sec-one" class="unnumbered">Heading One</h1>
+<p>Some <em>emphasis</em>, <strong>strong</strong>, <code>code</code>, H<sub>2</sub>O and x<sup>2</sup>, a <span class="mark" id="sp" key="val">span</span>,
+a citation <code  class="cite in-text">@knuth84</code> and [see <code  class="cite normal">@doe99,</code> p. 33; <code  class="cite in-text">@roe2000</code>], and a shortcode <span class="shortcode">{{&lt; var foo &quot;&lt;b&gt;&quot; &gt;}}</span>.
+Links: <a href="https://quarto.org">https://quarto.org</a>, <a href="https://example.com/path">https://example.com/path</a>, www.example.com, example.com and <a href="mailto:foo@bar.com">foo@bar.com</a>.
+Unicode punctuation link: <a href="https://example.com/a">https://example.com/a</a>。next and (<a href="https://example.com/b">https://example.com/b</a>).</p>
+<h2>Setext heading</h2>
+<div  class="callout callout-note callout-style-default">
+<div class="callout-header">
+<div class="callout-icon-container">
+  <i class="callout-icon"></i>
+</div>
+<div class="callout-title-container">
+Callout title</div>
+</div><div class="callout-body-container callout-body"><p>Callout body with a footnote.<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+</div></div><div  class="callout callout-warning callout-style-default">
+<div class="callout-header">
+<div class="callout-icon-container">
+  <i class="callout-icon"></i>
+</div>
+<div class="callout-title-container">Attr title
+</div>
+</div><div class="callout-body-container callout-body">Warning body.</p>
+</div></div><div  class="callout callout-tip callout-style-default">
+<div class="callout-header">
+<div class="callout-icon-container">
+  <i class="callout-icon"></i>
+</div>
+<div class="callout-title-container">Tip
+</div>
+</div><div class="callout-body-container callout-body">Tip without braces.</p>
+</div></div><div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#fig-panel</span></div><figure id="fig-panel" layout-ncol="2">
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#fig-a</span></div><figure id="fig-a">
+<figure><img src="a.png" alt="Caption A" width="50%"></figure>
+</figure>
+<figcaption>Panel caption</figcaption>
+</figure>
+<figure><img src="img.png" alt="A figure caption" id="fig-img" fig-alt="alt text"></figure>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">.column-margin</span></div><div  class="column-margin quarto-div"><p>Margin content</p>
+</div><p id="eq-mass">$$
+E = mc^2
+$$</p>
+<p>Inline math $a &lt; b$ and $\ce{A &lt;=&gt; B}$.</p>
+<pre><code python="">#| label: fig-plot
+#| echo: false
+print(&quot;hi&quot;)
+</code></pre>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">r</span></div><pre><code class="language-r">x &lt;- 1
+</code></pre>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">mermaid</span></div><img  style="max-width:100px;max-height:50px" src="data:image/svg+xml,%3Csvg%3Eflowchart%20LR%0A%20%20A%20--%3E%20B%3C%2Fsvg%3E"><img  style="max-width:100px;max-height:50px" src="data:image/svg+xml,%3Csvg%3Eflowchart%20LR%0A%20%20C%20--%3E%20D%3C%2Fsvg%3E"><pre><code>&lt;div&gt;raw&lt;/div&gt;
+</code></pre>
+<pre><code class="python" filename="a.py">print(1)
+</code></pre>
+<!-- A comment
+
+```{r}
+hidden_chunk()
+```
+
+still comment -->
+<details>
+<summary>Summary</summary>
+<p>Details body</p>
+</details>
+<!doctype html>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#tbl-one</span></div><table id="tbl-one">
+<caption>Table caption</caption>
+<thead>
+<tr>
+<th>Col A</th>
+<th>Col B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Grid</th>
+<th>Table</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>b</td>
+</tr>
+</tbody>
+</table>
+<dl>
+<dt>Term</dt>
+<dd>Definition one</dd>
+</dl>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox"> todo</li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"> done</li>
+<li>plain</li>
+</ul>
+<ol>
+<li>one</li>
+<li>two</li>
+</ol>
+<blockquote>
+<p>quote with <strong>bold</strong></p>
+</blockquote>
+<hr>
+<p>Text<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> with a footnote.</p>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">.foo</span></div><h2 class="foo">Heading with <code>code</code> and <a href="https://x.org">link</a></h2>
+<h3>Heading three</h3>
+<p>Final paragraph ::: not a div</p>
+<div  class="quarto-div"><hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>First footnote. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>Second footnote. <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>

@@ -6,6 +6,7 @@
 - In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).
 - The extension now reads YAML the way Quarto CLI does: merge keys (`<<`) in front matter and `_quarto.yml` are no longer resolved, and dates are read as strings (<https://github.com/quarto-dev/quarto/pull/1158>).
 - Math hovers and visual editor equation previews are now rendered with MathJax 4, using the same TeX font as before. Output is nearly identical; `numcases` now works, and a few extensible arrows from the `extpfeil` extension (such as `\xtwoheadrightarrow`) render slightly differently (<https://github.com/quarto-dev/quarto/pull/1171>).
+- Updated markdown-it to version 15. In the Quarto help panel, bare domains such as `www.example.com` are no longer turned into links (`https://` URLs still are), and a link now ends at Unicode punctuation. In notebook markdown cells, definition lists with a blank line between the term and the definition now wrap each definition in a paragraph, as Pandoc does (<https://github.com/quarto-dev/quarto/pull/1174>).
 
 
 ## 1.138.0 (Release on 2026-09-11)

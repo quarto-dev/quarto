@@ -16,7 +16,6 @@
     "quarto-core": "*",
     "tmp": "^0.2.7",
     "tsconfig": "*",
-    "uuid": "^9.0.0",
     "vscode-languageserver-types": "^3.17.3",
     "vscode-uri": "^3.0.3"
   },

@@ -8,7 +8,7 @@
 import * as fs from "fs";
 import path from "path";
 
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 
 import vscode, { TextDocument, Uri } from "vscode";
 
@@ -51,7 +51,7 @@ export function documentImageResolver(
         return imagePath;
       }
     }
-    return path.join(docDir, `${stem}-${nanoid()}`);
+    return path.join(docDir, `${stem}-${randomUUID()}`);
   };
 
   const resolveImage = (uri: string) => {

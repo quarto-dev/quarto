@@ -7,8 +7,6 @@
 import React from "react";
 import { createRoot } from 'react-dom/client';
 
-import * as uuid from "uuid";
-
 import 'vscode-webview';
 
 import { addEditor, initEditorTranslations, initializeStore, setEditorTheme } from 'editor-ui';
@@ -37,7 +35,7 @@ async function runEditor() {
     const store = await initializeStore(request);
 
     // create editor id
-    const editorId = uuid.v4();
+    const editorId = crypto.randomUUID();
     store.dispatch(addEditor(editorId));
 
     // render

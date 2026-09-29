@@ -7,7 +7,7 @@
 import * as assert from "assert";
 import * as path from "path";
 
-import { uniqueImagePath } from "../providers/editor/images";
+import { ensureForwardSlashes, uniqueImagePath } from "../providers/editor/images";
 
 suite("Image paths", function () {
   const imagesDir = path.join("doc", "images");
@@ -43,5 +43,13 @@ suite("Image paths", function () {
       uniqueImagePath(imagesDir, "plot", "", true, () => true, () => "abc"),
       path.join(imagesDir, "plot-abc.png")
     );
+  });
+
+  test("Backslashes in relative paths all become forward slashes", function () {
+    assert.strictEqual(
+      ensureForwardSlashes("..\\..\\assets\\images\\plot.png"),
+      "../../assets/images/plot.png"
+    );
+    assert.strictEqual(ensureForwardSlashes("images/plot.png"), "images/plot.png");
   });
 });

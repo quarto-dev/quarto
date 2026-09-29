@@ -15,6 +15,13 @@ import vscode, { TextDocument, Uri } from "vscode";
 import { EditorUIImageResolver } from "editor-types";
 import { isHttpUrl, kImageExtensions } from "core";
 
+/**
+ * Convert every backslash in `file` to a forward slash, so relative image
+ * paths computed on Windows work as Markdown links.
+ */
+export function ensureForwardSlashes(file: string): string {
+  return file.replace(/\\/g, "/");
+}
 
 /**
  * Pick an unused file path in `imagesDir` for an image named `stem` + `ext`.
@@ -53,10 +60,6 @@ export function documentImageResolver(
 
   // sticky images dir (start out w/ docDir)
   let imagesDir = docDir;
-
-  const ensureForwardSlashes = (path: string) => {
-    return path.replace(/\\/, "/");
-  };
 
   const ensureImagesDir = () => {
     const imagesDir = path.join(docDir, "images");

@@ -22,19 +22,18 @@
   "license": "ISC",
   "dependencies": {
     "@observablehq/inputs": "^0.10.4",
+    "acorn-walk": "8.3.5",
     "external-alex-garcia-unofficial-observablehq-compiler": "*",
     "external-observablehq-parser": "*",
     "external-observablehq-runtime": "*",
     "external-observablehq-stdlib": "*",
-    "@rollup/plugin-commonjs": "^22.0.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "eslint": "^7.32.0",
-    "exceljs": "^4.3.0",
-    "node-fetch": "^2.6.1",
-    "rollup": "^3.2.5",
-    "@rollup/plugin-json": "^5.0.1",
-    "rollup-plugin-terser": "^7.0.2",
-    "mime": "^3.0.0",
-    "acorn-walk": "^8.2.0"
+    "mime": "^4.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^1.0.0",
+    "rollup": "^4.63.5"
   }
 }

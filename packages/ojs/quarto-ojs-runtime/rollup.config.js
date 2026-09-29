@@ -1,6 +1,6 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import meta from "./package.json" with { type: "json" };
 import json from "@rollup/plugin-json";
 
@@ -16,7 +16,7 @@ const config = {
     banner: `// ${meta.name} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author.name}`,
     globals: ["$", "Shiny"]
   },
-  plugins: [json(), commonjs(), nodeResolve({
+  plugins: [json(), commonjs({ strictRequires: false }), nodeResolve({
     mainFields: ["module", "main"],
   })]
 };

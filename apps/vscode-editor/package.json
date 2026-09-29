@@ -35,9 +35,9 @@
     "ui-widgets": "*"
   },
   "devDependencies": {
-    "@types/lodash.debounce": "^4.0.7",
-    "@types/lodash.throttle": "^4.1.7",
-    "@types/vscode-webview": "^1.57.0",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/lodash.throttle": "^4.1.9",
+    "@types/vscode-webview": "^1.57.5",
     "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "sass": "^1.105.0",

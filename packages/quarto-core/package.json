@@ -10,13 +10,13 @@
     "core-node": "*",
     "markdown-it": "^15.0.2",
     "markdown-it-attrs": "^4.5.0",
-    "semver": "^7.3.8",
+    "semver": "^7.8.5",
     "tsconfig": "*",
     "vscode-languageserver-types": "^3.18.4",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/semver": "^7.3.13",
+    "@types/semver": "^7.8.0",
     "eslint": "^10.11.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15"

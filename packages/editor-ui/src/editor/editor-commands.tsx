@@ -49,6 +49,9 @@ export function editorExternalCommands(editor: Editor): Command[] {
 }
 
 export function editorDebugCommands(editor: Editor): Command[] {
+  if (!editor.devToolsAvailable()) {
+    return [];
+  }
   return [
     {
       id: EditorUICommandId.EnableDevTools,

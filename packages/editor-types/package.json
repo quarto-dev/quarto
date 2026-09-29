@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "dependencies": {
     "tsconfig": "*",
-    "vscode-languageserver-types": "^3.17.3"
+    "vscode-languageserver-types": "^3.18.4"
   },
   "devDependencies": {
     "eslint": "^10.11.0",

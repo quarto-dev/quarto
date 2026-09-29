@@ -1,0 +1,21 @@
+---
+title: "LSP features"
+execute:
+  echo: 42
+---
+
+## First Section {#sec-first}
+
+See @sec-first, [hello](hello.qmd) and [the section](#first-section).
+
+$$
+x^2 + y^2
+$$
+
+```{python}
+print(1)
+```
+
+## Second Section
+
+Text.

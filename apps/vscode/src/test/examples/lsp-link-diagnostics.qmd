@@ -1,0 +1,7 @@
+---
+title: "LSP link diagnostics"
+---
+
+## First Section
+
+See [the section](#first-section) and [nowhere](#no-such-section).

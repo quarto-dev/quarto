@@ -156,13 +156,19 @@ export class ConfigurationManager extends Disposable {
     this._logger.logTrace('Sending \'configuration\' request');
     // Request only the specific sections we need to avoid warnings about
     // language-scoped settings like [markdown], [python], etc.
-    const [workbench, quarto] = await this.connection_.workspace.getConfiguration([
+    const [workbench, quarto, validate] = await this.connection_.workspace.getConfiguration([
       { section: 'workbench' },
-      { section: 'quarto' }
+      { section: 'quarto' },
+      { section: 'markdown.validate' }
     ]);
 
+    const defaults = defaultSettings();
     this._settings = {
-      ...defaultSettings(),
+      ...defaults,
+      markdown: {
+        ...defaults.markdown,
+        validate: validateSettings(validate, defaults.markdown.validate)
+      },
       workbench: {
         colorTheme: workbench?.colorTheme ?? this._settings.workbench.colorTheme
       },
@@ -212,6 +218,38 @@ export class ConfigurationManager extends Disposable {
       this._onDidChangeConfiguration.fire(this._settings);
     }
   }
+}
+
+// Read the `markdown.validate.*` settings sent by the client (the same
+// settings that VS Code's built-in Markdown extension uses), falling back to
+// the defaults (validation off) for anything missing or malformed.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function validateSettings(validate: any, defaults: Settings['markdown']['validate']): Settings['markdown']['validate'] {
+  const level = <T extends string>(value: unknown, fallback: T, allowed: readonly string[]): T =>
+    typeof value === 'string' && allowed.includes(value) ? value as T : fallback;
+  const levels = ['ignore', 'hint', 'warning', 'error'];
+  return {
+    enabled: typeof validate?.enabled === 'boolean' ? validate.enabled : defaults.enabled,
+    referenceLinks: {
+      enabled: level(validate?.referenceLinks?.enabled, defaults.referenceLinks.enabled, levels),
+    },
+    fragmentLinks: {
+      enabled: level(validate?.fragmentLinks?.enabled, defaults.fragmentLinks.enabled, levels),
+    },
+    fileLinks: {
+      enabled: level(validate?.fileLinks?.enabled, defaults.fileLinks.enabled, levels),
+      markdownFragmentLinks: level(validate?.fileLinks?.markdownFragmentLinks, defaults.fileLinks.markdownFragmentLinks, [...levels, 'inherit']),
+    },
+    ignoredLinks: Array.isArray(validate?.ignoredLinks)
+      ? validate.ignoredLinks.filter((link: unknown) => typeof link === 'string')
+      : defaults.ignoredLinks,
+    unusedLinkDefinitions: {
+      enabled: level(validate?.unusedLinkDefinitions?.enabled, defaults.unusedLinkDefinitions.enabled, levels),
+    },
+    duplicateLinkDefinitions: {
+      enabled: level(validate?.duplicateLinkDefinitions?.enabled, defaults.duplicateLinkDefinitions.enabled, levels),
+    },
+  };
 }
 
 export function lsConfiguration(configManager: ConfigurationManager): LsConfiguration {

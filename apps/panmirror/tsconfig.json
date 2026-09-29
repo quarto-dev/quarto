@@ -5,6 +5,6 @@
   "compilerOptions": {
     "target": "ES2019",
     "lib": ["ES2019", "ES2022.String"],
-    "jsx": "react"
+    "jsx": "react-jsx"
   }
 }

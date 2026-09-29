@@ -7,7 +7,7 @@
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import { EditorView } from 'prosemirror-view';
 import { findChildrenByType } from 'prosemirror-utils';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { deleteComment, findCommentItem, findCommentThread, createCommentItemNode, saveComment } from '../user_comment-model';
 import { CommentContainer } from './comment-item';
 import { synchronizeCommentViewPositions } from './layout';

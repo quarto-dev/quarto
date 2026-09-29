@@ -16,12 +16,11 @@
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "dev": "tsc --noEmit && vite build --mode=development",
-    "lint": "TIMING=1 eslint \"src/**/*.ts\"",
+    "lint": "eslint src",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
     "core": "*",
-    "js-yaml": "^4.1.0",
     "markdown-it": "^12.2.3",
     "markdown-it-attrs": "^4.1.6",
     "markdown-it-deflist": "^2.0.3",
@@ -36,11 +35,11 @@
   "devDependencies": {
     "@types/vscode-notebook-renderer": "^1.72.0",
     "@types/wcwidth": "^1.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",
-    "typescript": "^5.9.3",
-    "vite": "^3.0.0",
-    "vite-plugin-static-copy": "^0.13.0"
+    "typescript": "~6.0.3",
+    "vite": "^8.3.1",
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }

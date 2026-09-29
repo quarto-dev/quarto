@@ -10,8 +10,8 @@ import fs from "node:fs";
 
 import * as semver from "semver";
 
-import * as yaml from "js-yaml";
 import { ExecFileSyncOptions } from "child_process";
+import { loadYaml } from "core";
 import { md5Hash } from "core-node";
 import { QuartoContext } from "./context";
 
@@ -80,7 +80,7 @@ export function yamlFromMetadataFile(file: string): Record<string, unknown> | nu
   const yamlSrc = fs.readFileSync(file, "utf-8");
   try {
     if (yamlSrc.trim().length > 0) {
-      const yamlOpts = yaml.load(yamlSrc) as Record<string, unknown>;
+      const yamlOpts = loadYaml(yamlSrc) as Record<string, unknown>;
       return yamlOpts;
     }
   } catch (err) {
@@ -95,7 +95,7 @@ export type QuartoProjectConfig = {
     project: {
       type: string;
       preview: {
-        serve: { /* */ };
+        serve: Record<string, unknown>;
       };
     };
     format: Record<string, unknown> | string;
@@ -240,7 +240,7 @@ export async function quartoProjectConfig(
         }
       }
     }
-  } catch (e) {
+  } catch {
     config = undefined;
   }
 

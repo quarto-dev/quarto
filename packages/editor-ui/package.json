@@ -8,19 +8,18 @@
   "dependencies": {
     "@fluentui/react-components": "^9.21.0",
     "@fluentui/react-icons": "^2.0.203",
-    "@reduxjs/toolkit": "^1.9.0",
+    "@reduxjs/toolkit": "^2.12.0",
     "core": "*",
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
     "editor-core": "*",
     "editor-types": "*",
-    "i18next": "^22.4.6",
+    "i18next": "^26.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-redux": "^8.0.5",
+    "react-redux": "^9.3.0",
     "react-transition-group": "^4.4.5",
-    "redux": "^4.2.0",
     "typo-js": "^1.2.2",
     "ui-widgets": "*",
     "use-debounce": "^9.0.2"
@@ -30,6 +29,11 @@
     "@types/react-dom": "^18.2.4",
     "@types/react-transition-group": "^4.4.5",
     "@types/typo-js": "^1.2.0",
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*",
     "tsconfig": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

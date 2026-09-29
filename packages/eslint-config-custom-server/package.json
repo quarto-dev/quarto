@@ -3,9 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "type": "module",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
   "dependencies": {
-    "eslint-config-turbo": "latest"
+    "eslint-config-custom": "*",
+    "globals": "^17.12.0"
+  },
+  "peerDependencies": {
+    "eslint": "^10.0.0"
   },
   "publishConfig": {
     "access": "public"

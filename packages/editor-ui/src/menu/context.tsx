@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * context.ts
  *
@@ -7,9 +6,6 @@
 
 import React, { useEffect, useMemo } from "react";
 import { createRoot } from 'react-dom/client';
-
-import { v4 as uuidv4 } from 'uuid';
-
 
 import {
   Menu, 
@@ -94,7 +90,7 @@ const ContextMenu : React.FC<ContextMenuProps> = (props) => {
 
   const menuItem = useMemo(() => (item: EditorMenuItem) => {
     if (item.separator) {
-      return <MenuDivider key={uuidv4()} />;
+      return <MenuDivider key={crypto.randomUUID()} />;
     } else if (item.command) {
       const command = props.commands[item.command];
       return (
@@ -110,12 +106,12 @@ const ContextMenu : React.FC<ContextMenuProps> = (props) => {
         );
     } else if (item.subMenu && item.text) {
       return (
-        <SubMenu key={uuidv4()} text={item.text}>
+        <SubMenu key={crypto.randomUUID()} text={item.text}>
           {item.subMenu.items.map(menuItem)}
         </SubMenu>
       );
     } else if (item.text && item.exec) {
-      return <MenuItem key={uuidv4()} className={classes.item} onClick={item.exec}>{item.text}</MenuItem>
+      return <MenuItem key={crypto.randomUUID()} className={classes.item} onClick={item.exec}>{item.text}</MenuItem>
     } else {
       return null;
     }

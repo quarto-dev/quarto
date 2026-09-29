@@ -8,7 +8,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as tmp from "tmp";
-import * as uuid from "uuid";
+import { randomUUID } from "node:crypto";
 import {
   commands,
   Hover,
@@ -153,5 +153,5 @@ function createVirtualDoc(filepath: string, content: string): void {
  * language server request is running (#683).
  */
 function generateVirtualDocFilepath(directory: string, extension: string): string {
-  return path.join(directory, ".vdoc." + uuid.v4() + "." + extension);
+  return path.join(directory, ".vdoc." + randomUUID() + "." + extension);
 }

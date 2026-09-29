@@ -185,7 +185,7 @@ const defaultBoostScore = (context: CompletionContext, items: CompletionItem[], 
   const replaceTextInItemLabel = item.label.slice(i, replaceText.length);
 
   // mostly counts how many upper/lowercase differences there are
-  let diff = simpleStringDiff(replaceTextInItemLabel, replaceText);
+  const diff = simpleStringDiff(replaceTextInItemLabel, replaceText);
 
   // `-i` scores completions better if what you typed is earlier in the completion
   // `-diff/10` mostly tie breaks that score by capitalization differences.

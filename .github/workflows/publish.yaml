@@ -9,45 +9,77 @@ on:
         description: |
           The changelog and version are up-to-date for the VS Code extension! 🚀
 
+permissions:
+  contents: read
+
 jobs:
-  publish-extension:
+  # Package once; every job below publishes this same VSIX
+  package:
+    if: ${{ inputs.ready_to_go }}
+    uses: ./.github/workflows/build.yaml
+
+  publish-vscode-marketplace:
+    needs: package
     runs-on: ubuntu-latest
-    if:  ${{ inputs.ready_to_go }}
-    outputs:
-      vsixPath: ${{ steps.publish_extension.outputs.vsixPath }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
+      # For the repo's pinned @vscode/vsce
       - run: yarn install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.package.outputs.artifact-name }}
+          path: dist
 
       - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v2
-        id: publish_extension
+        working-directory: apps/vscode
+        env:
+          VSCE_PAT: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+          EXTENSION_FILE: ${{ github.workspace }}/dist/${{ needs.package.outputs.vsix-name }}
+        run: yarn --silent vsce publish --packagePath "$EXTENSION_FILE" --skip-duplicate
+
+  publish-open-vsx:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
-          registryUrl: https://marketplace.visualstudio.com
-          yarn: true
-          packagePath: apps/vscode
+          node-version-file: .nvmrc
+      # For the repo's pinned ovsx
+      - run: yarn install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.package.outputs.artifact-name }}
+          path: dist
 
       - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v2
-        with:
-            pat: ${{ secrets.OPEN_VSX_TOKEN }}
-            yarn: true
-            packagePath: apps/vscode
+        working-directory: apps/vscode
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
+          EXTENSION_FILE: ${{ github.workspace }}/dist/${{ needs.package.outputs.vsix-name }}
+        run: yarn --silent ovsx publish "$EXTENSION_FILE" --skip-duplicate
 
-      - name: Get version of VS Code extension to publish
-        id: extension-version
-        uses: euberdeveloper/ga-project-version@v5
+  github-release:
+    needs:
+      - package
+      - publish-vscode-marketplace
+      - publish-open-vsx
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
         with:
-          path: apps/vscode/package.json
+          name: ${{ needs.package.outputs.artifact-name }}
+          path: dist
 
       - name: Publish GH release
         uses: softprops/action-gh-release@v2
         with:
-          name: VSC extension - v${{ steps.extension-version.outputs.version }}
-          tag_name: v${{ steps.extension-version.outputs.version }}-vsix
+          name: VSC extension - v${{ needs.package.outputs.version }}
+          tag_name: v${{ needs.package.outputs.version }}-vsix
           fail_on_unmatched_files: true
-          files: ${{ steps.publish_extension.outputs.vsixPath }}
+          files: dist/${{ needs.package.outputs.vsix-name }}

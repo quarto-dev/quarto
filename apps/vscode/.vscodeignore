@@ -1,12 +1,14 @@
 .vscode/**
 .vscode-test/**
+.positron-test/**
+test-out/**
 .turbo/**
 node_modules/**
 src/**
 .gitignore
 .yarnrc
 **/tsconfig.json
-**/.eslintrc.json
+eslint.config.mjs
 **/*.map
 **/*.ts
 *.vsix

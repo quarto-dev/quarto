@@ -6,9 +6,14 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "devDependencies": {
-    "esbuild": "^0.16.7",
-    "esbuild-plugin-copy": "^2.0.1",
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*",
     "tsconfig": "*"
   },
-  "dependencies": {}
+  "dependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "lint": "eslint src"
+  }
 }

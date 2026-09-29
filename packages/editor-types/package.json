@@ -8,5 +8,12 @@
   "dependencies": {
     "tsconfig": "*",
     "vscode-languageserver-types": "^3.17.3"
+  },
+  "devDependencies": {
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

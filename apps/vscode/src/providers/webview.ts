@@ -4,14 +4,13 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import vscode, {
+import {
   Uri,
   WebviewPanel,
   window,
   ViewColumn,
   EventEmitter,
   ExtensionContext,
-  WebviewPanelOnDidChangeViewStateEvent,
 } from "vscode";
 
 import { Disposable } from "../core/dispose";

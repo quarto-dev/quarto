@@ -94,7 +94,7 @@ function parseDocument(context: QuartoContext, resourcePath: string, markdown: s
   
     return tokens;
 
-  } catch(error) {
+  } catch {
     // message has already been written to stderr
     return [];
   

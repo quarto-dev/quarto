@@ -3,9 +3,6 @@
  *
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
-// node-sqlite3-wasm ships no types; reference ours explicitly so packages that
-// bundle editor-server (apps/vscode, apps/lsp) see them when type-checking.
-/// <reference path="../../../@types/node-sqlite3-wasm.d.ts" />
 
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -21,7 +18,6 @@ import { zoteroTrace } from "../trace";
 // race another's and delete the file out from under it. Queue per dataDir.
 const dbQueues = new Map<string, Promise<unknown>>();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function withZoteroDb<T>(dataDir: string, f: (db: Database) => Promise<T>): Promise<T> {
   const previous = dbQueues.get(dataDir) ?? Promise.resolve();
   const current = previous.catch(() => undefined).then(() => withZoteroDbExclusive(dataDir, f));
@@ -55,11 +51,18 @@ async function withZoteroDbExclusive<T>(dataDir: string, f: (db: Database) => Pr
     fs.utimesSync(dbCopyFile, dbFileStat.atime, dbFileStat.mtime);
   }
 
+  // node-sqlite3-wasm (>= 0.6) locks the database by creating a `<db>.lock`
+  // directory, and reports SQLITE_BUSY while one exists. A process killed
+  // mid-query (e.g. on window reload) leaves it behind, which would block every
+  // later open. The queue above means no query in this process holds the lock,
+  // and the copy is only ever read, so clearing it is safe.
+  removeLockDir(dbCopyFile);
+
    // create connection
    let db : Database | undefined;
    try {
      // attempt open
-     db = new Database(dbCopyFile, { fileMustExist: true });
+     db = new Database(dbCopyFile, { readOnly: true });
     // try a simple query to validate the connection
      try {
       db.exec("SELECT * FROM libraries");
@@ -86,12 +89,17 @@ async function withZoteroDbExclusive<T>(dataDir: string, f: (db: Database) => Pr
       // no db means we couldn't open it, remove it
       try {
         fs.rmSync(dbCopyFile);
+        removeLockDir(dbCopyFile);
       } catch(error) {
         console.error(error);
       }
     }
   }
 
+}
+
+function removeLockDir(dbFile: string) {
+  fs.rmSync(`${dbFile}.lock`, { recursive: true, force: true });
 }
 
 // File header offset 18-19 flags journal mode (1 = legacy, 2 = WAL);

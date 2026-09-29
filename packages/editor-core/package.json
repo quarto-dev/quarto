@@ -9,5 +9,12 @@
     "core": "*",
     "editor-types": "*",
     "tsconfig": "*"
+  },
+  "devDependencies": {
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

@@ -37,7 +37,6 @@ import {
 } from "vscode";
 
 const FILE_EXTENSIONS = ['qmd', 'scss', 'css', 'html', 'js', 'bib', 'tex', 'md'];
-const IGNORE_PATTERNS = ['.git', 'node_modules', '_site', '_freeze', '.quarto'];
 
 export function activateYamlLinks(context: ExtensionContext) {
   const config = workspace.getConfiguration("quarto");

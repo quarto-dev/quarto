@@ -2,6 +2,7 @@
   "name": "quarto",
   "version": "1.86.0",
   "private": true,
+  "packageManager": "yarn@1.22.22",
   "engines": {
     "node": ">=24"
   },
@@ -26,11 +27,9 @@
     "linkify-it": "5.0.2"
   },
   "devDependencies": {
-    "@vscode/test-cli": "^0.0.11",
-    "eslint": "^7.32.0",
-    "eslint-config-custom": "*",
+    "eslint": "^10.11.0",
     "prettier": "^2.5.1",
-    "turbo": "^1.8.5",
-    "typescript": "^5.9.3"
+    "turbo": "^2.11.4",
+    "typescript": "~6.0.3"
   }
 }

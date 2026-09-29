@@ -9,6 +9,7 @@ import MarkdownIt from "markdown-it";
 import StateBlock from "markdown-it/lib/rules_block/state_block";
 import Token from "markdown-it/lib/token";
 import * as yaml from "js-yaml";
+import { loadYaml } from "../yaml";
 import { decorator } from "./utils/html";
 
 // Typescript version of https://github.com/parksb/markdown-it-front-matter
@@ -264,8 +265,8 @@ type DocMetaValue = {
 function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
-    return yaml.load(str, { schema: yaml.FAILSAFE_SCHEMA});
-  } catch (error) {
+    return loadYaml(str, { schema: yaml.FAILSAFE_SCHEMA });
+  } catch {
     return undefined;
   }
 }

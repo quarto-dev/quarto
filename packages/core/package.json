@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "js-yaml": "^5.4.2",
     "markdown-it": "^13.0.1",
     "markdown-it-attrs": "^4.1.6",
     "tsconfig": "*",
@@ -15,9 +16,12 @@
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-attrs": "^4.1.0",
     "@types/wcwidth": "^1.0.0",
-    "tsx": "^4.7.1"
+    "eslint": "^10.11.0",
+    "eslint-config-custom": "*",
+    "tsx": "^4.23.15"
   },
   "scripts": {
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "lint": "eslint src test"
   }
 }

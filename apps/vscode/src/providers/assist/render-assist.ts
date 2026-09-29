@@ -28,7 +28,7 @@ import { CodeViewCellContext, kCodeViewAssist } from "editor-types";
 import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
 import { getHover, getSignatureHelpHover } from "../../core/hover";
-import { Hover as LspHover, MarkupKind } from "vscode-languageserver-types";
+import { Hover as LspHover } from "vscode-languageserver-types";
 import { MarkupContent } from "vscode-languageclient";
 
 const kAssistHelp = "Quarto: Help";

@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-@import '../variables.scss';
+@use '../variables' as *;
 
 $findHeight: 160px;
 $findWidth: 270px;

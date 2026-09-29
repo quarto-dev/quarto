@@ -280,7 +280,7 @@ export function imageCommand(editorUI: EditorUI, editorFormat: EditorFormat, ima
       // see if we are editing an existing node
       let node: ProsemirrorNode | null = null;
       let nodeType = schema.nodes.image;
-      let img: HTMLImageElement | null = null;
+      let img: HTMLImageElement | null;
       let imgDimensions: ImageDimensions | null = null;
       if (selectionIsImageNode(schema, state.selection)) {
         node = (state.selection as NodeSelection).node;

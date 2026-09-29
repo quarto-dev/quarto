@@ -86,7 +86,7 @@ export class BibliographyDataProviderZotero implements BibliographyDataProvider 
         } else {
           // console.log(result.status);
         }
-      } catch (err) {
+      } catch {
         // console.log(err);
       }
 

@@ -235,7 +235,6 @@ export const getKeyComboString = (e: KeyboardEvent): string => {
   } else if (KeyCodes[which] != null) {
     keys.push(KeyCodes[which]);
   } else {
-    // eslint-disable-next-line id-blacklist
     keys.push(String.fromCharCode(which).toLowerCase());
   }
 
@@ -257,7 +256,6 @@ export const getKeyCombo = (e: KeyboardEvent): IKeyCombo => {
   } else if (KeyCodes[which] != null) {
     key = KeyCodes[which];
   } else {
-    // eslint-disable-next-line id-blacklist
     key = String.fromCharCode(which).toLowerCase();
   }
 

@@ -10,6 +10,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: yarn install --frozen-lockfile
+      - name: Run linters
+        run: yarn lint
+
   test-packages:
     runs-on: ubuntu-latest
     name: Test packages

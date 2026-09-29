@@ -331,12 +331,9 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
 
   // Increments or decrements the index
   const incrementIndex = (increment: number) => {
-    let newIndex = currentIndex;
-    if (increment > 0) {
-      newIndex = Math.min(currentIndex + increment, filteredXrefs.length - 1);
-    } else {
-      newIndex = Math.max(currentIndex + increment, 0);
-    }
+    const newIndex = increment > 0
+      ? Math.min(currentIndex + increment, filteredXrefs.length - 1)
+      : Math.max(currentIndex + increment, 0);
     if (newIndex !== currentIndex) {
       setSelectedXRefIndex(newIndex);
       fixedList.current?.scrollToItem(newIndex);

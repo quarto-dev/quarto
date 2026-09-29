@@ -8,7 +8,8 @@
     "rootDir": "./src",
     "esModuleInterop": true,
     "target": "ES2020",
-    "moduleResolution": "node",
+    "module": "node20",
+    "moduleResolution": "node16",
     "allowJs": true,
   },
 }

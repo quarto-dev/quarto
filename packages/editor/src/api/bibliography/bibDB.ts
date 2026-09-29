@@ -5,16 +5,9 @@
  */
 
 
-import {
-  BibFieldTypes,
-  NodeArray,
-  NameDictObject,
-  RangeArray,
-  BibField,
-  BibLatexExporter,
-  BibTypes,
-  BibType,
-} from 'biblatex-csl-converter';
+import { BibFieldTypes, BibTypes } from 'bibliojson';
+
+import { NodeArray, NameDictObject, RangeArray, BibField, BibType } from './bibliojson-types';
 
 import { Mark, Node as ProsemirrorNode } from 'prosemirror-model';
 
@@ -34,34 +27,8 @@ export interface EntryObject {
   unknown_fields?: Record<string, unknown>;
 }
 
-// This is our wrapper of a typescript BibLaTeX exporter
-// https://github.com/fiduswriter/biblatex-csl-converter
-
-// Traditional Form Looks Like:
-// author = {{Abbas}, {Osma Ahmed} and {Ibrahim}, {Issa Ghada} and {Ismail}, {Abdel-Gawad Eman}}
-//
-// Non traditional form looks like:
-// author = {given={Osma Ahmed}, family={Abbas} and given={Issa Ghada}, family={Ibrahim} and given={Abdel-Gawad Eman}, family={Ismail}}
-const kUseTraditionalNameForm = false;
-
-// Generates bibLaTeX for a given CSL object / id
-export function toBibLaTeX(id: string, csl: CSL): string | undefined {
-  // A BibDB is basically a map of key / EntryObject[] that is
-  // used by the exporter to generate BibLaTeX
-  const bibDB = cslToBibDB(id, csl);
-  if (bibDB) {
-    // Use the exported to parse the bibDB and generate bibLaTeX
-    const exporter: BibLatexExporter = new BibLatexExporter(bibDB, false, {
-      traditionalNames: kUseTraditionalNameForm,
-    });
-    const sourceAsBibLaTeX = exporter.parse();
-
-    // Indent any , new lines
-    return sourceAsBibLaTeX.replace(/,\n/g, ',\n\t');
-  }
-  return undefined;
-}
-
+// Generates BibTeX for a given CSL object / id, using the BibDB type and
+// field tables from bibliojson (https://github.com/fiduswriter/BiblioJSON)
 export function toBibTeX(id: string, csl: CSL): string | undefined {
   // A BibDB is basically a map of key / EntryObject[] that is
   // used by the exporter to generate BibLaTeX
@@ -296,7 +263,8 @@ function bibFieldForValue(cslKey: string, cslType: string): Array<[string, BibFi
   // patent number
   // * collection-number
   // See https://discourse.citationstyles.org/t/issue-number-and-bibtex/1072
-  // https://github.com/fiduswriter/biblatex-csl-converter/blob/35d152935eba253ebadd00e285fb13c5828f167f/src/const.js#L561
+  // (bibliojson's BibFieldTypes maps these through an object-valued `csl`,
+  // keyed by CSL type, which the string lookup below doesn't handle)
   if (
     (cslType === 'article-journal' && cslKey === 'issue') ||
     (cslType === 'patent' && cslKey === 'number') ||
@@ -351,7 +319,7 @@ function sortedKeys(csl: CSL) {
   keySortOrder.url = pos++;
 
   keySortOrder.page = pos++;
-  keySortOrder.publisher = pos++;
+  keySortOrder.publisher = pos;
 
   const enumerableCSL = csl as Record<string,unknown>;
   const keys = Object.keys(enumerableCSL);

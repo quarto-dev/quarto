@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * dictionary.ts
  *
@@ -8,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { JsonRpcServerMethod } from "core";
 
@@ -85,7 +84,7 @@ export function dictionaryServer(options: DictionaryServerOptions) : DictionaryS
   const writeIgnoredWords = (context: string, words: string[]) => {
     const index = readIgnoredWordsIndex();
     if (!index[context]) {
-      index[context] = uuidv4();
+      index[context] = randomUUID();
       writeIgnoredWordsIndex(index);
     }
     const wordsPath = path.join(ignoredWordsPath, index[context]);

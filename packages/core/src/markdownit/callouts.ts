@@ -4,9 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import type MarkdownIt from "markdown-it/lib"
-import Renderer from "markdown-it/lib/renderer";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt, MarkdownItOptions, Renderer, Token } from "markdown-it";
 import { addClass, readAttrValue } from "./utils/markdownit";
 import { kTokDivClose, kTokDivOpen } from "./divs";
 
@@ -23,7 +21,7 @@ const kTokCalloutContentClose = "quarto_callout_content_close";
 const kCalloutPrefix = "callout-";
 const kCalloutRuleName = "quarto-callouts";
 
-interface Callout {
+type Callout = {
   type: "note" | "caution" | "warning" | "important" | "tip" | string;
   clz: string;
   title?: string;
@@ -51,7 +49,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
       }
 
       const activeCallout = () => {
-        return state.env['quarto-active-callout'];
+        return state.env['quarto-active-callout'] as Callout;
       }
 
       const isCloseCallout = (depth: number) => {
@@ -59,7 +57,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
       }
 
       const titleOpenTok = (title?: string) => {
-        const token = new Token(kTokCalloutTitleOpen, "", 1)
+        const token = new state.Token(kTokCalloutTitleOpen, "", 1)
         token.tag = "div";
         token.attrs = [["class", "callout-header"]];
         if (title) {
@@ -69,20 +67,20 @@ export const calloutPlugin = (md: MarkdownIt) => {
       }
 
       const titleCloseTok = () => {
-        const token = new Token(kTokCalloutTitleClose, "", -1)
+        const token = new state.Token(kTokCalloutTitleClose, "", -1)
         token.tag = "div";
         return token;       
       }
 
       const contentOpenTok = () => {
-        const token = new Token(kTokCalloutContentOpen, "", 1)
+        const token = new state.Token(kTokCalloutContentOpen, "", 1)
         token.tag = "div";
         token.attrs = [["class", "callout-body-container callout-body"]];
         return token;
       }
 
       const contentCloseTok = () => {
-        const token = new Token(kTokCalloutContentClose, "", -1)
+        const token = new state.Token(kTokCalloutContentClose, "", -1)
         token.tag = "div";
         return token;        
       }
@@ -130,7 +128,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
                 noteStartCallout(callout, divDepth);
                 calloutState = "add-title";
               
-                const openCallout = new Token(kTokCalloutOpen, "", 1);
+                const openCallout = new state.Token(kTokCalloutOpen, "", 1);
                 openCallout.attrs = openCallout.attrs || [];
                 openCallout.meta = callout;
                 outTokens.push(openCallout);
@@ -140,7 +138,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
             } else if (token.type === kTokDivClose) {   
               if (isCloseCallout(divDepth)) {
                 outTokens.push(contentCloseTok());
-                outTokens.push(new Token(kTokCalloutClose, "", -1));
+                outTokens.push(new state.Token(kTokCalloutClose, "", -1));
                 noteCloseCallout()
               } else {
                 outTokens.push(token);
@@ -165,7 +163,7 @@ export const calloutPlugin = (md: MarkdownIt) => {
 
 
 // Render pandoc-style divs
-function renderStartCallout(tokens: Token[], idx: number, _options: MarkdownIt.Options, _env: unknown, self: Renderer): string {
+function renderStartCallout(tokens: Token[], idx: number, _options: MarkdownItOptions, _env: unknown, self: Renderer): string {
   const token = tokens[idx];
   const callout = token.meta as Callout;
 
@@ -217,7 +215,7 @@ const calloutAppearance = (val: string | undefined) => {
   }
 }
 
-const parseCallout = (attrs: null | [string, string][]) : Callout | undefined => {
+const parseCallout = (attrs: Token["attrs"]) : Callout | undefined => {
   if (attrs === null) { 
     return undefined;
   }
@@ -227,7 +225,7 @@ const parseCallout = (attrs: null | [string, string][]) : Callout | undefined =>
     return undefined;
   }
 
-  const classes = classAttr[1].split(" ");
+  const classes = String(classAttr[1]).split(" ");
   const calloutClass = classes.find((clz) => {
     return clz.startsWith('callout-');
   })

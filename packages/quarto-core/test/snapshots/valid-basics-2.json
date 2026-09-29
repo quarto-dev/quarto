@@ -1,0 +1,280 @@
+{
+  "markdownIt": [
+    "front_matter [0,36]",
+    "paragraph_open <p> [4,5]",
+    "  inline [4,5]",
+    "paragraph_close <p>",
+    "fence <code> [6,9]",
+    "paragraph_open <p> [10,11]",
+    "  inline [10,11]",
+    "paragraph_close <p>",
+    "fence <code> [12,15] info=\"{{r}}\"",
+    "blockquote_open <blockquote> [16,18]",
+    "  paragraph_open <p> [16,18]",
+    "    inline [16,18]",
+    "  paragraph_close <p>",
+    "blockquote_close <blockquote>",
+    "paragraph_open <p> [19,21]",
+    "  inline [19,21]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [22,23]",
+    "  inline [22,23]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [24,25]",
+    "  inline [24,25]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [26,27] attrs=[[\"class\",\"smallcaps\"]]",
+    "  inline [26,27]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [28,29]",
+    "  inline [28,29]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [30,31]",
+    "  inline [30,31]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [32,33]",
+    "  inline [32,33]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [34,35]",
+    "  inline [34,35]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [36,37]",
+    "  inline [36,37]",
+    "paragraph_close <p>",
+    "hr <hr> [38,39]",
+    "pandoc_div_open <div> attrs=[[\"id\",\"thm-pythagoras\"]] meta={\"line\":40,\"level\":1}",
+    "  heading_open <h4> [41,42]",
+    "    inline [41,42]",
+    "  heading_close <h4>",
+    "  paragraph_open <p> [42,43]",
+    "    inline [42,43]",
+    "  paragraph_close <p>",
+    "  math_block <math> [43,46]",
+    "pandoc_div_close <div> meta={\"line\":46,\"level\":1}",
+    "paragraph_open <p> [48,49]",
+    "  inline [48,49]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [50,51]",
+    "  inline [50,51]",
+    "paragraph_close <p>",
+    "table_open <table> [52,57]",
+    "  thead_open <thead> [52,53] meta={\"colsnum\":3}",
+    "    tr_open <tr> [52,53]",
+    "      th_open <th>",
+    "        inline",
+    "      th_close <th>",
+    "      th_open <th>",
+    "        inline",
+    "      th_close <th>",
+    "      th_open <th> attrs=[[\"style\",\"text-align:right\"]]",
+    "        inline",
+    "      th_close <th>",
+    "    tr_close <tr>",
+    "  thead_close <thead>",
+    "  tbody_open <tbody> [54,57] meta={\"colsnum\":3}",
+    "    tr_open <tr> [54,55]",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td> attrs=[[\"style\",\"text-align:right\"]]",
+    "        inline",
+    "      td_close <td>",
+    "    tr_close <tr>",
+    "    tr_open <tr> [55,56]",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td> attrs=[[\"style\",\"text-align:right\"]]",
+    "        inline",
+    "      td_close <td>",
+    "    tr_close <tr>",
+    "    tr_open <tr> [56,57]",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td> attrs=[[\"style\",\"text-align:right\"]]",
+    "        inline",
+    "      td_close <td>",
+    "    tr_close <tr>",
+    "  tbody_close <tbody>",
+    "table_close <table>",
+    "paragraph_open <p> [58,59]",
+    "  inline [58,59]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [60,61]",
+    "  inline [60,61]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [62,63]",
+    "  inline [62,63]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [64,65]",
+    "  inline [64,65]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [66,67]",
+    "  inline [66,67]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [68,69]",
+    "  inline [68,69]",
+    "paragraph_close <p>"
+  ],
+  "tokens": [
+    {
+      "type": "FrontMatter",
+      "range": "0:0-3:0",
+      "data": "---\nbibliography: references.bib\n---"
+    },
+    {
+      "type": "Para",
+      "range": "4:0-4:26"
+    },
+    {
+      "type": "RawBlock",
+      "range": "6:0-8:3",
+      "data": {
+        "format": "html",
+        "text": "<div>hi</div>\n"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "10:0-10:11"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "12:0-14:3",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": "1 + 1"
+    },
+    {
+      "type": "BlockQuote",
+      "range": "16:0-17:30"
+    },
+    {
+      "type": "Para",
+      "range": "16:0-17:30"
+    },
+    {
+      "type": "Para",
+      "range": "19:0-20:28"
+    },
+    {
+      "type": "Para",
+      "range": "22:0-22:25"
+    },
+    {
+      "type": "Para",
+      "range": "24:0-24:30"
+    },
+    {
+      "type": "Para",
+      "range": "26:0-26:85"
+    },
+    {
+      "type": "Para",
+      "range": "28:0-28:33"
+    },
+    {
+      "type": "Para",
+      "range": "30:0-30:15"
+    },
+    {
+      "type": "Para",
+      "range": "32:0-32:22"
+    },
+    {
+      "type": "Para",
+      "range": "34:0-34:17"
+    },
+    {
+      "type": "Para",
+      "range": "36:0-36:24"
+    },
+    {
+      "type": "HorizontalRule",
+      "range": "38:0-38:72"
+    },
+    {
+      "type": "Div",
+      "range": "40:0-46:3",
+      "attr": [
+        "thm-pythagoras",
+        [],
+        []
+      ]
+    },
+    {
+      "type": "Header",
+      "range": "41:0-42:112",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 4,
+        "text": "Pythagoras's Theorem"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "42:0-43:2"
+    },
+    {
+      "type": "Math",
+      "range": "43:0-46:3",
+      "data": {
+        "type": "DisplayMath",
+        "text": "\na^2 + b^2 = c^2.\n"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "48:0-48:32"
+    },
+    {
+      "type": "Para",
+      "range": "50:0-50:18"
+    },
+    {
+      "type": "Table",
+      "range": "52:0-56:22"
+    },
+    {
+      "type": "Para",
+      "range": "58:0-58:15"
+    },
+    {
+      "type": "Para",
+      "range": "60:0-60:10"
+    },
+    {
+      "type": "Para",
+      "range": "62:0-62:12"
+    },
+    {
+      "type": "Para",
+      "range": "64:0-64:16"
+    },
+    {
+      "type": "Para",
+      "range": "66:0-66:27"
+    },
+    {
+      "type": "Para",
+      "range": "68:0-68:63"
+    }
+  ]
+}

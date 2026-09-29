@@ -6,9 +6,7 @@
 */
 
 
-import type MarkdownIt from "markdown-it/lib"
-import Renderer from "markdown-it/lib/renderer";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt, MarkdownItOptions, Renderer, Token } from "markdown-it";
 
 const kTokCite = "quarto_cite";
 
@@ -154,7 +152,7 @@ export const citationPlugin = (md: MarkdownIt) => {
 
 
 // Render pandoc-style divs
-function renderCite(tokens: Token[], idx: number, _options: MarkdownIt.Options, _env: unknown, self: Renderer): string {
+function renderCite(tokens: Token[], idx: number, _options: MarkdownItOptions, _env: unknown, self: Renderer): string {
   const token = tokens[idx]; 
   const citeContent =  `<code ${self.renderAttrs(token)}>${token.content}</code>`;
   return citeContent;

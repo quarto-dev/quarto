@@ -5,9 +5,6 @@
  * Copyright (c) 2020 Matt Bierner
  */
 
-import MarkdownIt from "markdown-it";
-import markdownItHljs from "markdown-it-highlightjs";
-
 import {
   Uri,
   window,
@@ -29,6 +26,7 @@ import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
 import { getHover, getSignatureHelpHover } from "../../core/hover";
 import { Hover as LspHover, MarkupContent } from "vscode-languageserver-types";
+import { renderAssistMarkdown } from "./markdown";
 
 const kAssistHelp = "Quarto: Help";
 const kAssistEquation = "Quarto: Equation";
@@ -337,24 +335,7 @@ function renderAssist(
   markdown: string,
   asWebviewUri?: (uri: Uri) => Uri
 ) {
-  const md = MarkdownIt("default", {
-    html: true,
-    linkify: true,
-  });
-  const validateLink = md.validateLink;
-  md.validateLink = (link: string) => {
-    return (
-      validateLink(link) ||
-      link.startsWith("vscode-resource:") ||
-      link.startsWith("file:") ||
-      /^data:image\/.*?;/.test(link)
-    );
-  };
-  md.use(markdownItHljs, {
-    auto: true,
-    code: true,
-  });
-  let html = md.render(markdown).trim();
+  let html = renderAssistMarkdown(markdown).trim();
 
   // replace image paths with webview safe ones
   if (asWebviewUri) {

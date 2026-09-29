@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as MarkdownIt from "markdown-it";
+import type { MarkdownIt } from "markdown-it";
 import emitTable from "../common/markdown-it/EmitTable";
 import getCharCodeAtStartOfLine from "../common/markdown-it/GetCharCodeAtStartOfLine";
 import parseTable from "../common/markdown-it/ParseTable";

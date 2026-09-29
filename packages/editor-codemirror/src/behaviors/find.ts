@@ -25,12 +25,13 @@ export function findBehavior(context: BehaviorContext) : Behavior {
         // get the find decorations
         const findMarkers: Range<Decoration>[] = [];
         const decorations = context.pmContext.find.decorations();      
-        if (decorations && typeof getPos === "function") {
-          const decos = decorations?.find(getPos(), getPos() + updateNode.nodeSize - 1);
+        const pos = getPos();
+        if (decorations && pos !== undefined) {
+          const decos = decorations?.find(pos, pos + updateNode.nodeSize - 1);
           if (decos) {
             decos.forEach((deco) => {
               if (deco.from !== view.state.selection.from && deco.to !== view.state.selection.to) {
-                findMarkers.push(findDecoratorMark.range(deco.from - getPos() - 1, deco.to - getPos() -1));
+                findMarkers.push(findDecoratorMark.range(deco.from - pos - 1, deco.to - pos - 1));
               } else {
                 // ensure that the selection is visible
                 const domElement = cmView.domAtPos(deco.from);

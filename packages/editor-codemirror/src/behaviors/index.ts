@@ -40,7 +40,7 @@ export interface Behavior {
 export interface BehaviorContext {
   dom: HTMLElement;
   view: PMEditorView;
-  getPos: boolean | (() => number);
+  getPos: () => number | undefined;
   options: CodeViewOptions;
   pmContext: ExtensionContext;
   withState: WithState;

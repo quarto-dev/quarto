@@ -80,11 +80,12 @@ export function trackSelectionBehavior(context: BehaviorContext): Behavior {
 export const asCodeMirrorSelection = (
   pmView: PMEditorView,
   cmView: EditorView,
-  getPos: (() => number) | boolean
+  getPos: () => number | undefined
 ) => {
-  if (typeof (getPos) === "function") {
-    const offset = getPos() + 1;
-    const node = pmView.state.doc.nodeAt(getPos());
+  const pos = getPos();
+  if (pos !== undefined) {
+    const offset = pos + 1;
+    const node = pmView.state.doc.nodeAt(pos);
     if (node) {
       const nodeSize = node.nodeSize;
       const selection = pmView.state.selection;

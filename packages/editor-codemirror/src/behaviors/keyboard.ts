@@ -112,8 +112,9 @@ const maybeEscape = (
   dir: -1 | 1,
   cm: EditorView,
   view: PMEditorView,
-  getPos: boolean | (() => number)
+  getPos: () => number | undefined
 ) => {
+  const pos = getPos();
   const sel = cm.state.selection.main;
   const line = cm.state.doc.lineAt(sel.from);
   const lastLine = cm.state.doc.lines;
@@ -121,13 +122,13 @@ const maybeEscape = (
     sel.to !== sel.from ||
     line.number !== (dir < 0 ? 1 : lastLine) ||
     (unit === "char" && sel.from !== (dir < 0 ? 0 : line.to)) ||
-    typeof getPos !== "function"
+    pos === undefined
   ) {
     return false;
   }
 
   view.focus();
-  handleArrowToAdjacentNode(getPos(), dir, view.state, view.dispatch);
+  handleArrowToAdjacentNode(pos, dir, view.state, view.dispatch);
   view.focus();
   return true;
 };

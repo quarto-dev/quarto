@@ -5,7 +5,7 @@
  */
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
-import { NodeView, EditorView } from 'prosemirror-view';
+import { NodeView, EditorView, ViewMutationRecord } from 'prosemirror-view';
 import { NodeSelection, PluginKey, Plugin } from 'prosemirror-state';
 
 import { EditorUI } from '../../api/ui-types';
@@ -41,7 +41,7 @@ export function imageNodeViewPlugins(
       key: new PluginKey(`${type}-node-view`),
       props: {
         nodeViews: {
-          [type]: (node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) => {
+          [type]: (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) => {
             return new ImageNodeView(node, view, getPos as () => number, ui, format, events, pandocExtensions);
           },
         },
@@ -263,7 +263,7 @@ class ImageNodeView implements NodeView {
   }
 
   // ignore mutations outside of the content dom so sizing actions don't cause PM re-render
-  public ignoreMutation(mutation: MutationRecord | { type: 'selection'; target: Element }) {
+  public ignoreMutation(mutation: ViewMutationRecord) {
     return !this.contentDOM || !this.contentDOM.contains(mutation.target);
   }
 

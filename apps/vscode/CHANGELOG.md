@@ -10,7 +10,7 @@
 - Updated the visual editor to current ProseMirror releases. The ProseMirror developer tools (Ctrl+Alt+P) are now only included in development builds of the extension (<https://github.com/quarto-dev/quarto/pull/1179>).
 - In the visual editor, once 100 pasted or inserted images share a name, new images are still saved in the `images/` folder with their file extension. Previously they went into the document's folder with no extension (<https://github.com/quarto-dev/quarto/pull/1181>).
 - On Windows, image paths the visual editor inserts that contain more than one folder separator (e.g. `../images/plot.png`) now use forward slashes throughout. Previously only the first backslash was converted (<https://github.com/quarto-dev/quarto/pull/1181>).
-
+- Running a Stata or C# cell no longer drops leading `#|` lines. These languages write cell options as `*|` and `//|`, so `#|` lines are code, and they are now sent to the kernel just as `quarto render` sends them (<https://github.com/quarto-dev/quarto/pull/1183>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

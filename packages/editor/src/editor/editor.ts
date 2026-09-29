@@ -628,7 +628,7 @@ export class Editor  {
         // eat exceptions that might result from an invalid position
         try {
           setTextSelection(loc.pos)(tr);
-        } catch (e) {
+        } catch {
           // do-nothing, this error can happen and shouldn't result in 
           // a failure to setMarkdown
         }
@@ -1185,7 +1185,6 @@ export class Editor  {
 
     // create the defautl inputRules plugin
     const plugin = inputRules({ rules: this.extensions.inputRules(this.schema) });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleTextInput = plugin.props.handleTextInput!.bind(plugin);
 
     // override to disable input rules as requested
@@ -1198,7 +1197,6 @@ export class Editor  {
     };
 
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugin.props.handleTextInput = customHandleTextInput;
     return plugin;
   }

@@ -9,9 +9,9 @@
  * First call executes immediately, subsequent calls within the delay are coalesced.
  */
 export function createThrottle(
-  fn: () => any,
+  fn: () => unknown,
   getDelay: () => number
-): () => any {
+): () => void {
   let timer: NodeJS.Timeout | undefined;
   let pending = false;
 

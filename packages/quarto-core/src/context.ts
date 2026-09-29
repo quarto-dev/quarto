@@ -193,11 +193,11 @@ function detectQuarto(quartoPath: string): QuartoInstallation | undefined {
   };
   try {
     readQuartoInfo(quartoPath);
-  } catch (e) {
+  } catch {
     if (windows) {
       try {
         readQuartoInfo(quartoPath + ".cmd");
-      } catch (e) { /* */ }
+      } catch { /* */ }
     }
   }
   // return version if we have it

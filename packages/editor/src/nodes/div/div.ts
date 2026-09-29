@@ -276,7 +276,6 @@ function divInputRuleEnter() {
     }
 
     // full text of parent must meet the pattern
-    // eslint-disable-next-line no-useless-escape
     const match = state.selection.$head.parent.textContent.match(/^:{3,}(\s+({.*?}|\S+)?[\s:]*)?$/);
     if (!match) {
       return false;

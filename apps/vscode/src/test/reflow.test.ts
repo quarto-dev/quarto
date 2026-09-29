@@ -231,6 +231,7 @@ suite("Reflow Comments in Cell", function () {
       const messages: string[] = [];
       vscode.window.showInformationMessage = async (msg: string) => {
         messages.push(msg);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- stub for an overloaded API
         return undefined as any;
       };
 

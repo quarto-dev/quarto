@@ -21,6 +21,7 @@
     "tsx": "^4.23.15"
   },
   "scripts": {
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "lint": "eslint src test"
   }
 }

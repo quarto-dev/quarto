@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { TextDocument, TextEdit, workspace, window, WorkspaceEdit, Range } from "vscode";
+import { TextDocument, TextEdit, workspace, WorkspaceEdit, Range } from "vscode";
 import { JsonRpcRequestTransport } from "core";
 
 import { editorSourceJsonRpcServer } from "editor-core";

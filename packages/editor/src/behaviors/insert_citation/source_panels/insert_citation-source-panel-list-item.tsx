@@ -58,7 +58,7 @@ export const CitationSourcePanelListItem = (props: ListChildComponentProps) => {
   let authors = "";
   try {
     authors = citationEntry.authors(authorWidth);
-  } catch (er) {
+  } catch {
     // Failed to format the authors, just ignore this.
   }
 

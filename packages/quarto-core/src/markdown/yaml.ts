@@ -16,7 +16,7 @@ export function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
     return loadYaml(str);
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

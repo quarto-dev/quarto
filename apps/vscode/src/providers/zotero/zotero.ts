@@ -455,7 +455,7 @@ class SyncCancelledError extends Error {
 async function safeReadZoteroApiKey(context: ExtensionContext) {
   try {
     return await context.secrets.get(kQuartoZoteroWebApiKey);
-  } catch (error) {
+  } catch {
     console.log("Error reading zotero api key");
     return undefined;
   }

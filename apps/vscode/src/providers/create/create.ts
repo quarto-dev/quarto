@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import vscode, { ExtensionContext, workspace, window, ViewColumn } from "vscode";
+import { ExtensionContext, workspace, window, ViewColumn } from "vscode";
 import { QuartoContext } from "quarto-core";
 import { collectFirstRun } from "./firstrun";
 import { CreateProjectCommand } from "./create-project";

@@ -13,7 +13,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "lint": "TIMING=1 eslint \"src/**/*.ts\"",
+    "lint": "eslint src",
     "build": "tsc --noEmit && vite build"
   },
   "dependencies": {

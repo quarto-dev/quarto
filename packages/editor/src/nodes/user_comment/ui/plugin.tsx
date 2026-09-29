@@ -101,7 +101,7 @@ export class UserCommentViewPlugin extends Plugin {
                     onHeightChange = {handleHeightChange}
                     callback={syncCommentViewPos}
                     />,
-                  );``
+                  );
 
                 return true;
               },

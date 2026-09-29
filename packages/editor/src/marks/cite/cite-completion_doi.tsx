@@ -119,7 +119,7 @@ const CSLSourceView: React.FC<CSLEntry> = cslEntry => {
       image={cslEntry.image}
       heading={csl['short-container-title'] || csl.publisher || ''}
       title={csl.title || ''}
-      subTitle={`${cslEntry.formattedAuthor} ${cslEntry.formattedIssueDate}` || ''}
+      subTitle={`${cslEntry.formattedAuthor} ${cslEntry.formattedIssueDate}`.trim()}
     />
   );
 };

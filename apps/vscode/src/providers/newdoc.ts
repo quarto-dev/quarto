@@ -42,7 +42,7 @@ class NewNotebookCommand implements Command {
     );
     cells.push(new NotebookCellData(NotebookCellKind.Code, "1 + 1", "python"));
     const nbData = new NotebookData(cells);
-    let notebook = await workspace.openNotebookDocument(
+    const notebook = await workspace.openNotebookDocument(
       "jupyter-notebook",
       nbData
     );

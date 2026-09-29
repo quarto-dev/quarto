@@ -47,6 +47,7 @@ suite.skip("Notebook export", function () {
     const notebook = await vscode.workspace.openNotebookDocument(uri);
     await vscode.window.showNotebookDocument(notebook);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- stub for an overloaded API
     (vscode.window as any).showQuickPick = async (items: readonly QuickPickItem[]) => {
       // Return the Quarto exporter item, as if it were selected by the user.
       const item = (await items).find(item => item.label === notebookExporterLabel);

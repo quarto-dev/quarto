@@ -208,7 +208,6 @@ class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
   }
 
   // watch a resource for changes (returns an unsubscribe function)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public watchResource(path: string, notify: VoidFunction): VoidFunction {
     return this.subscribe(path, notify);
   }

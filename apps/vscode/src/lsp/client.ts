@@ -404,7 +404,7 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
           language,
           document.uri
         );
-      } catch (error) {
+      } catch {
         return undefined;
       }
     } else {
@@ -464,7 +464,7 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
       return await withVirtualDocUri(vdoc, document.uri, "signature", async (uri: Uri) => {
         try {
           return await getSignatureHelpHover(uri, vdoc.language, position, context.triggerCharacter);
-        } catch (error) {
+        } catch {
           return undefined;
         }
       });
@@ -538,7 +538,7 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           } else {
             return definitions;
           }
-        } catch (error) {
+        } catch {
           return undefined;
         }
       });
@@ -553,7 +553,7 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
   return !!line.match(/^\s*#\s*\| /);
 }
 
-const isDocumentSymbol = (a: Object): a is DocumentSymbol => {
+const isDocumentSymbol = (a: object): a is DocumentSymbol => {
   return ('range' in a && 'selectionRange' in a);
 };
 
@@ -658,8 +658,7 @@ async function enhanceSymbolsWithCodeCellContent(
         token
       );
       if (childResult === 'HadUndefined') {
-        hadUndefined = true;
-        symbol.children = symbol.children; // Keep existing children
+        hadUndefined = true; // keep the existing children
       } else {
         symbol.children = childResult;
       }
@@ -717,9 +716,13 @@ async function getCodeCellSymbols(
           (result as SymbolInformation[]).map<DocumentSymbol>(symbolInformationToDocumentSymbol);
 
         return unadjustSymbolRanges(documentSymbols, vdoc.language, cellRange.start.line);
-      } catch (error) { }
+      } catch {
+        // no symbols for this cell
+      }
     });
-  } catch (error) { }
+  } catch {
+    // no symbols for this document
+  }
 }
 
 /**

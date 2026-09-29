@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

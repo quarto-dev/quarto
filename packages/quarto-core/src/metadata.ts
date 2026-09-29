@@ -95,7 +95,7 @@ export type QuartoProjectConfig = {
     project: {
       type: string;
       preview: {
-        serve: { /* */ };
+        serve: Record<string, unknown>;
       };
     };
     format: Record<string, unknown> | string;
@@ -240,7 +240,7 @@ export async function quartoProjectConfig(
         }
       }
     }
-  } catch (e) {
+  } catch {
     config = undefined;
   }
 

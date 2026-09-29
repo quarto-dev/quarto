@@ -18,9 +18,11 @@
   "devDependencies": {
     "@types/semver": "^7.3.13",
     "eslint": "^10.11.0",
-    "eslint-config-custom-server": "*"
+    "eslint-config-custom-server": "*",
+    "tsx": "^4.23.15"
   },
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint src test",
+    "test": "node --import tsx --test test/*.test.ts"
   }
 }

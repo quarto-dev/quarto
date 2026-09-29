@@ -53,9 +53,11 @@
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.7",
     "eslint": "^10.11.0",
-    "eslint-config-custom": "*"
+    "eslint-config-custom": "*",
+    "tsx": "^4.23.15"
   },
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint src test",
+    "test": "node --import tsx --test test/*.test.ts"
   }
 }

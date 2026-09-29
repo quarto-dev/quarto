@@ -1,6 +1,5 @@
 {
   "name": "quarto-vscode-markdownit",
-  "type": "module",
   "version": "0.0.1",
   "files": [
     "dist"
@@ -16,7 +15,8 @@
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "dev": "tsc --noEmit && vite build --mode=development",
-    "lint": "eslint src",
+    "lint": "eslint src test",
+    "test": "node --import tsx --test test/*.test.ts",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "eslint": "^10.11.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vite": "^8.3.1",
     "vite-plugin-static-copy": "^4.1.1"

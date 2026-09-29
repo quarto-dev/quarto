@@ -21,6 +21,22 @@ import { makeRange } from "../../range";
 export function markdownitParser() : Parser {
 
   // block parser
+  const md = markdownitBlockParser();
+
+  // inline parser
+  const mdInline = new MarkdownIt("commonmark");
+  const mdToText = (markdown: string ) => {
+    const tokens = mdInline.parseInline(markdown, {});
+    return tokensToText(tokens);
+  }
+
+  return cachingParser((doc: Document) => {
+    return parseDocument(md, mdToText, doc.getText());
+  })
+}
+
+// The block-level markdown-it instance behind markdownitParser()
+export function markdownitBlockParser() : MarkdownItInstance {
   const md = new MarkdownIt("zero");
   md.enable([
     "blockquote",
@@ -38,17 +54,7 @@ export function markdownitParser() : Parser {
   md.use(mathjaxPlugin, { enableInlines: false } );
   md.use(yamlPlugin);
   md.use(divPlugin);
-
-  // inline parser
-  const mdInline = new MarkdownIt("commonmark");
-  const mdToText = (markdown: string ) => {
-    const tokens = mdInline.parseInline(markdown, {});
-    return tokensToText(tokens);
-  }
-
-  return cachingParser((doc: Document) => {
-    return parseDocument(md, mdToText, doc.getText());
-  })
+  return md;
 }
 
 type MarkdownToPlainText = (markdown: string) => string;

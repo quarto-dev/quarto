@@ -236,23 +236,26 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
           uri
         );
 
-        const tokens = await commands.executeCommand<SemanticTokens>(
+        const semanticTokens = await commands.executeCommand<SemanticTokens>(
           "vscode.provideDocumentSemanticTokens",
           uri
         );
 
-        if (!tokens || tokens.data.length === 0) {
-          return tokens;
+        if (!semanticTokens || semanticTokens.data.length === 0) {
+          return semanticTokens;
         }
 
         // Remap token indices from embedded provider's legend to our universal legend
-        let remappedTokens = tokens;
+        let remappedTokens = semanticTokens;
         if (legend) {
-          remappedTokens = remapTokenIndices(tokens, legend, QUARTO_SEMANTIC_TOKEN_LEGEND);
+          remappedTokens = remapTokenIndices(semanticTokens, legend, QUARTO_SEMANTIC_TOKEN_LEGEND);
         }
 
-        // Adjust token positions from virtual doc to real doc coordinates
-        return unadjustedSemanticTokens(vdoc.language, remappedTokens);
+        // Adjust token positions from virtual doc to real doc coordinates,
+        // keeping only tokens on code lines. The virtual doc fills all other
+        // lines with placeholder content (e.g. `#` comments), whose tokens must
+        // not be applied to the real document.
+        return unadjustedSemanticTokens(vdoc.language, remappedTokens, vdoc.codeLines);
       } catch {
         return undefined;
       }

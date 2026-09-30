@@ -12,7 +12,11 @@ export default defineConfig(env => {
       'process.env.DEBUG': '""',
       'process.env.NODE_ENV': '"production"',
       'process.env.TERM': '""',
-      'process.platform': '""'
+      'process.platform': '""',
+      // Other renderers in the notebook webview can load an AMD loader
+      // (RequireJS), and UMD wrappers such as fastdom's then call define()
+      // instead of setting module.exports, leaving the bundled import empty
+      'define': 'undefined'
     },
     plugins: [
       viteStaticCopy({

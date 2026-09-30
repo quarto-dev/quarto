@@ -186,3 +186,32 @@ suite("Mermaid version", function () {
     assert.fail(advice);
   });
 });
+
+suite("Notebook renderer build", function () {
+  // Another renderer in the notebook webview can load an AMD loader, and a UMD
+  // wrapper that sees a global `define` registers with it instead of setting
+  // module.exports. Mermaid's bundled fastdom then imports as `{}` and Mermaid
+  // fails to load ("h.default.extend is not a function"). The renderer's Vite
+  // config defines `define` as undefined so no UMD check survives the build.
+  test("no bundled UMD wrapper checks for an AMD define", function () {
+    assert.ok(
+      fs.existsSync(notebookRendererDir),
+      `${notebookRendererDir} does not exist; build apps/vscode-markdownit first.`
+    );
+    const offenders = fs
+      .readdirSync(notebookRendererDir)
+      .filter(file => file.endsWith(".js"))
+      .filter(file =>
+        /typeof\s+define\b/.test(
+          fs.readFileSync(path.join(notebookRendererDir, file), "utf8")
+        )
+      );
+    assert.deepStrictEqual(
+      offenders,
+      [],
+      `These notebook renderer chunks check for a global AMD \`define\`: ${offenders.join(", ")}. ` +
+      `Keep \`define: 'undefined'\` in apps/vscode-markdownit/vite.config.ts, and delete ` +
+      `${notebookRendererDir} and rebuild to clear out stale chunks.`
+    );
+  });
+});

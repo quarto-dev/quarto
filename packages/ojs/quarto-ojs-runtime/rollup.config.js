@@ -1,24 +1,24 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import meta from "./package.json" with { type: "json" };
-import json from "@rollup/plugin-json";
 
 const config = {
   input: "src/index.js",
-  external: Object.keys(meta.dependencies || {}).filter(key => /^d3-/.test(key)),
   output: {
     file: "dist/quarto-ojs-runtime.js",
-    name: "quarto",
     format: "esm",
     indent: false,
-    extend: true,
-    banner: `// ${meta.name} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author.name}`,
-    globals: ["$", "Shiny"]
+    banner: `// ${meta.name} v${meta.version} Copyright ${(new Date).getFullYear()} ${meta.author}`,
   },
-  plugins: [json(), commonjs(), nodeResolve({
-    mainFields: ["module", "main"],
-  })]
+  plugins: [
+    nodeResolve({
+      mainFields: ["module", "main"],
+    }),
+    // The compiler's dist/index.js is UMD. Inline it eagerly, as
+    // @rollup/plugin-commonjs did before v27 made strictRequires the default.
+    commonjs({ strictRequires: false }),
+  ]
 };
 
 export default [
@@ -28,7 +28,6 @@ export default [
     output: {
       ...config.output,
       file: "dist/quarto-ojs-runtime.min.js",
-      name: "quarto-min",
     },
     plugins: [
       ...config.plugins,

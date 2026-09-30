@@ -5,7 +5,13 @@
 *
 */
 
-export const hasClass = (clz: string, attrs: null | [string, string][]) => {
+import type { Token } from "markdown-it";
+
+// markdown-it types attribute values as `string | number`
+type Attrs = Token["attrs"];
+type Attr = NonNullable<Attrs>[number];
+
+export const hasClass = (clz: string, attrs: Attrs) => {
   if (attrs === null) {
     return false
   }
@@ -20,16 +26,16 @@ export const hasClass = (clz: string, attrs: null | [string, string][]) => {
 
 }
 
-export const readAttrValue = (name: string, attrs: null | [string, string][]) => {
+export const readAttrValue = (name: string, attrs: Attrs) => {
   if (attrs === null) {
     return undefined;
   }
 
   const attr = attrs.find((attr) => { return attr[0] === name; });
-  return attr ? attr[1] : undefined;
+  return attr ? String(attr[1]) : undefined;
 }
 
-export const addClass = (clz: string, attrs: null | [string, string][]): [string, string][] => {
+export const addClass = (clz: string, attrs: Attrs): Attr[] => {
   if (attrs === null) {
     attrs = []
     attrs.push(["class", clz])

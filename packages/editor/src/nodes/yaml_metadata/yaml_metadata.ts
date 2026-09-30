@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { Node as ProsemirrorNode, DOMOutputSpec, ParseRule } from 'prosemirror-model';
+import { Node as ProsemirrorNode, DOMOutputSpec } from 'prosemirror-model';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { setTextSelection } from 'prosemirror-utils';
 
@@ -38,7 +38,7 @@ const extension = (context: ExtensionContext): Extension => {
             {
               tag: "div[class*='yaml-block']",
               preserveWhitespace: 'full',
-            } as ParseRule,
+            },
           ],
           toDOM(): DOMOutputSpec {
             return ['div', { class: 'yaml-block pm-code-block' }, 0];

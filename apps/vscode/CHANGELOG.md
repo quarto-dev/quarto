@@ -6,7 +6,12 @@
 - In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).
 - The extension now reads YAML the way Quarto CLI does: merge keys (`<<`) in front matter and `_quarto.yml` are no longer resolved, and dates are read as strings (<https://github.com/quarto-dev/quarto/pull/1158>).
 - Math hovers and visual editor equation previews are now rendered with MathJax 4, using the same TeX font as before. Output is nearly identical; `numcases` now works, and a few extensible arrows from the `extpfeil` extension (such as `\xtwoheadrightarrow`) render slightly differently (<https://github.com/quarto-dev/quarto/pull/1171>).
-- Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
+- Updated markdown-it to version 15. In the Quarto help panel, bare domains such as `www.example.com` are no longer turned into links (`https://` URLs still are), and a link now ends at Unicode punctuation. In notebook markdown cells, definition lists with a blank line between the term and the definition now wrap each definition in a paragraph, as Pandoc does (<https://github.com/quarto-dev/quarto/pull/1174>).
+- Updated the visual editor to current ProseMirror releases. The ProseMirror developer tools (Ctrl+Alt+P) are now only included in development builds of the extension (<https://github.com/quarto-dev/quarto/pull/1179>).
+- In the visual editor, once 100 pasted or inserted images share a name, new images are still saved in the `images/` folder with their file extension. Previously they went into the document's folder with no extension (<https://github.com/quarto-dev/quarto/pull/1181>).
+- On Windows, image paths the visual editor inserts that contain more than one folder separator (e.g. `../images/plot.png`) now use forward slashes throughout. Previously only the first backslash was converted (<https://github.com/quarto-dev/quarto/pull/1181>).
+- Running a Stata or C# cell no longer drops leading `#|` lines. These languages write cell options as `*|` and `//|`, so `#|` lines are code, and they are now sent to the kernel just as `quarto render` sends them (<https://github.com/quarto-dev/quarto/pull/1183>).
+- Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

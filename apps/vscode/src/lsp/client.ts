@@ -26,7 +26,14 @@ import {
 import {
   LanguageClient,
   LanguageClientOptions,
+  Middleware,
+  ProvideCompletionItemsSignature,
+  ProvideDefinitionSignature,
+  ProvideHoverSignature,
+  ProvideSignatureHelpSignature,
+  ProvideDocumentSymbolsSignature,
   ServerOptions,
+  State,
   TransportKind,
 } from "vscode-languageclient/node";
 
@@ -37,15 +44,6 @@ import {
   Position,
   TextDocument,
 } from "vscode";
-import {
-  Middleware,
-  ProvideCompletionItemsSignature,
-  ProvideDefinitionSignature,
-  ProvideHoverSignature,
-  ProvideSignatureHelpSignature,
-  ProvideDocumentSymbolsSignature,
-  State,
-} from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
   adjustedPosition,

@@ -38,7 +38,12 @@ export default defineConfig(env => {
       rolldownOptions: {
         external: ['vscode-webview', 'vscode-notebook-renderer'],
         // keep license banners (Vite drops them when minifying)
-        output: { comments: { legal: true } },
+        output: {
+          comments: { legal: true },
+          // the package isn't "type": "module" (so its tests can load `core`
+          // from source), which would otherwise make Vite name chunks .mjs
+          chunkFileNames: '[name]-[hash].js',
+        },
       },
       sourcemap: dev ? 'inline' : false
     }

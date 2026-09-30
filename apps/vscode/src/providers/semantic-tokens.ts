@@ -15,7 +15,7 @@ import {
   Uri,
   window,
 } from "vscode";
-import { DocumentSemanticsTokensSignature } from "vscode-languageclient";
+import { DocumentSemanticsTokensSignature } from "vscode-languageclient/node";
 import { Token } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 import { isQuartoDoc } from "../core/doc";

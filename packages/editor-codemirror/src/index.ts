@@ -33,7 +33,7 @@ export function codeMirrorExtension(
       [name: string]: (
         node: ProsemirrorNode,
         view: EditorView,
-        getPos: boolean | (() => number)
+        getPos: () => number | undefined
       ) => NodeView;
     } = {};
     nodeTypes.forEach((name) => {

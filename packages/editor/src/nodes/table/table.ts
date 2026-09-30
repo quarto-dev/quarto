@@ -121,6 +121,9 @@ const extension = (context: ExtensionContext): Extension | null => {
       return [
         columnResizing({
           handleWidth: 5,
+          // prosemirror-tables 1.6 raised the default to 100px, which makes
+          // tables without column widths overflow narrow editor panes
+          defaultCellMinWidth: 25,
         }),
         tableEditing(),
         tablePaste(),

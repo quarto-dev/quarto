@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["ES2020", "DOM"],
+    "types": ["node"],
     "module": "CommonJS",
     "outDir": "./dist",
     "sourceMap": true,

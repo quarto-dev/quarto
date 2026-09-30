@@ -32,16 +32,13 @@ export interface CitationSourcePanelProps extends WidgetProps {
   statusMessage: string;
 
   warningMessage: string;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ref: React.Ref<any>;
 }
 
 // Citation Panels Providers are the core element of ths dialog. Each provider provides
 // the main panel UI as well as the tree to display when the panel is displayed.
 export interface CitationSourcePanelProvider {
   key: string;
-  panel: React.FC<CitationSourcePanelProps>;
+  panel: React.ForwardRefExoticComponent<CitationSourcePanelProps & React.RefAttributes<HTMLDivElement>>;
   treeNode(): NavigationTreeNode;
   placeHolderMessage?: string;
   progressMessage?: string;

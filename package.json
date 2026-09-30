@@ -17,19 +17,16 @@
     "build-vscode": "turbo run build --filter quarto...",
     "test-vscode": "cd apps/vscode && yarn test",
     "test-positron": "cd apps/vscode && yarn test-positron",
-    "test-packages": "turbo run test --filter='./packages/*'",
+    "test-packages": "turbo run test --filter='./packages/*' --filter=quarto-vscode-markdownit",
     "install-vscode": "cd apps/vscode && yarn install-vscode",
     "install-positron": "cd apps/vscode && yarn install-positron",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx}\""
   },
-  "resolutions": {
-    "linkify-it": "5.0.2"
-  },
   "devDependencies": {
     "eslint": "^10.11.0",
     "prettier": "^2.5.1",
-    "turbo": "^2.11.4",
+    "turbo": "^2.11.5",
     "typescript": "~6.0.3"
   }
 }

@@ -11,7 +11,7 @@
     "start": "node dist/lsp.js"
   },
   "dependencies": {
-    "@vscode/l10n": "^0.0.14",
+    "@vscode/l10n": "^0.0.18",
     "core": "*",
     "core-node": "*",
     "editor-server": "*",
@@ -23,13 +23,13 @@
     "picomatch": "^4.0.7",
     "quarto-core": "*",
     "quarto-utils": "*",
-    "vscode-languageserver": "^8.1.0",
-    "vscode-languageserver-textdocument": "^1.0.4",
-    "vscode-languageserver-types": "^3.17.3",
+    "vscode-languageserver": "^10.1.2",
+    "vscode-languageserver-textdocument": "^1.0.15",
+    "vscode-languageserver-types": "^3.18.4",
     "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^22.20.4",
     "@types/picomatch": "^4.0.3",
     "build": "*",
     "eslint": "^10.11.0",

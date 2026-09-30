@@ -5,9 +5,7 @@
  * Copyright (c) 2016-2020 ParkSB.
  */
 
-import MarkdownIt from "markdown-it";
-import StateBlock from "markdown-it/lib/rules_block/state_block";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt, StateBlock, Token } from "markdown-it";
 import * as yaml from "js-yaml";
 import { loadYaml } from "../yaml";
 import { decorator } from "./utils/html";
@@ -135,10 +133,10 @@ export function yamlPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
       token.markup = markup;
       token.block = true;
       token.map = [startLine, pos];
-      token.meta = state.src.slice(start_content, start - 1);
+      token.content = state.src.slice(start_content, start - 1);
   
       if (cb) {
-        cb(token.meta);
+        cb(token.content);
       }    
       state.parentType = old_parent;
       state.lineMax = old_line_max;  

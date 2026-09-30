@@ -352,7 +352,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
   ];
 
   // The initial setting of focus and loading of data for the panel.
-  const panelRef = React.useRef<HTMLElement>();
+  const panelRef = React.useRef<HTMLDivElement>(null);
 
   // When the stream of configuration changes is actually loaded, we need to refresh the search
   // results to reflect the new configuration. The below refs basically:
@@ -536,7 +536,6 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
     status: insertCitationPanelState.status,
     statusMessage: insertCitationPanelState.statusMessage,
     warningMessage: selectedPanelProvider.warningMessage || '',
-    ref: panelRef,
   };
 
   // Tracks whether a long running search has been canceled
@@ -655,7 +654,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
 
   // Create the panel that should be displayed for the selected node of the tree
   const panelToDisplay = selectedPanelProvider
-    ? React.createElement(selectedPanelProvider.panel, citationProps)
+    ? React.createElement(selectedPanelProvider.panel, { ...citationProps, ref: panelRef })
     : undefined;
   return (
     <div className={classes.join(' ')} style={style} onKeyPress={onKeyPress} onKeyDown={onKeyDown}>

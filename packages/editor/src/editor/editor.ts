@@ -11,8 +11,6 @@ import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'pros
 import { EditorView } from 'prosemirror-view';
 import 'prosemirror-view/style/prosemirror.css';
 
-import applyDevTools from "prosemirror-dev-tools";
-
 import { setTextSelection } from 'prosemirror-utils';
 
 import { qtWebEngineVersion } from 'core-browser';
@@ -899,8 +897,22 @@ export class Editor  {
     this.emitEvent(ResizeEvent);
   }
 
+  // prosemirror-dev-tools is a devDependency, and only development builds
+  // (`vite build --mode development`) bundle it
+  public devToolsAvailable() {
+    return import.meta.env.MODE === 'development';
+  }
+
   public enableDevTools() {
-    applyDevTools(this.view);
+    // test MODE inline (not via devToolsAvailable) so production builds
+    // can drop the import
+    if (import.meta.env.MODE !== 'development') {
+      console.warn('ProseMirror dev tools are only available in development builds');
+      return;
+    }
+    import('prosemirror-dev-tools')
+      .then(({ default: applyDevTools }) => applyDevTools(this.view))
+      .catch((error) => console.error('Unable to load ProseMirror dev tools', error));
   }
 
   public getMenus(): EditorMenus {
@@ -1189,11 +1201,17 @@ export class Editor  {
 
     // override to disable input rules as requested
     // https://github.com/ProseMirror/prosemirror-inputrules/commit/b4bf67623aa4c4c1e096c20aa649c0e63751f337
-    const customHandleTextInput = (view: EditorView, from: number, to: number, text: string) => {
+    const customHandleTextInput = (
+      view: EditorView,
+      from: number,
+      to: number,
+      text: string,
+      deflt: () => Transaction,
+    ) => {
       if (!markFilter(view.state)) {
         return false;
       }
-      return handleTextInput(view, from, to, text);
+      return handleTextInput(view, from, to, text, deflt);
     };
 
     

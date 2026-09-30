@@ -57,10 +57,10 @@ export function aceExtension(codeViews: { [key: string]: CodeViewOptions }): Ext
     // build nodeViews
     const nodeTypes = Object.keys(codeViews);
     const nodeViews: {
-      [name: string]: (node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) => NodeView;
+      [name: string]: (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) => NodeView;
     } = {};
     nodeTypes.forEach(name => {
-      nodeViews[name] = (node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) => {
+      nodeViews[name] = (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) => {
         return new AceNodeView(
           node,
           view,

@@ -15,6 +15,39 @@ import vscode, { TextDocument, Uri } from "vscode";
 import { EditorUIImageResolver } from "editor-types";
 import { isHttpUrl, kImageExtensions } from "core";
 
+/**
+ * Convert every backslash in `file` to a forward slash, so relative image
+ * paths computed on Windows work as Markdown links.
+ */
+export function ensureForwardSlashes(file: string): string {
+  return file.replace(/\\/g, "/");
+}
+
+/**
+ * Pick an unused file path in `imagesDir` for an image named `stem` + `ext`.
+ *
+ * Tries a short name with an integer suffix (`stem-1.png`, `stem-2.png`, ...;
+ * with `preserveStem`, the bare `stem.png` is tried first). After 100
+ * collisions it falls back to a random suffix, keeping the same directory and
+ * extension.
+ */
+export function uniqueImagePath(
+  imagesDir: string,
+  stem: string,
+  ext: string,
+  preserveStem?: boolean,
+  exists: (file: string) => boolean = fs.existsSync,
+  uniqueId: () => string = randomUUID
+): string {
+  ext = ext || ".png";
+  for (let i = 0; i < 100; i++) {
+    const imagePath = path.join(imagesDir, `${stem}${(i > 0 || !preserveStem) ? ('-' + (i + 1)) : ''}${ext}`);
+    if (!exists(imagePath)) {
+      return imagePath;
+    }
+  }
+  return path.join(imagesDir, `${stem}-${uniqueId()}${ext}`);
+}
 
 export function documentImageResolver(
   doc: TextDocument,
@@ -28,30 +61,12 @@ export function documentImageResolver(
   // sticky images dir (start out w/ docDir)
   let imagesDir = docDir;
 
-  const ensureForwardSlashes = (path: string) => {
-    return path.replace(/\\/, "/");
-  };
-
   const ensureImagesDir = () => {
     const imagesDir = path.join(docDir, "images");
     if (!fs.existsSync(imagesDir)) {
       fs.mkdirSync(imagesDir);
     }
     return imagesDir;
-  };
-
-  const uniqueImagePath = (stem: string, ext: string, preserveStem?: boolean) => {
-
-    // try for a short name w/ integer, fallback to a longer one
-    ext = ext || ".png";
-    const imagesDir = ensureImagesDir();
-    for (let i = 0; i < 100; i++) {
-      const imagePath = path.join(imagesDir, `${stem}${(i > 0 || !preserveStem) ? ('-' + (i + 1)) : ''}${ext}`);
-      if (!fs.existsSync(imagePath)) {
-        return imagePath;
-      }
-    }
-    return path.join(docDir, `${stem}-${randomUUID()}`);
   };
 
   const resolveImage = (uri: string) => {
@@ -68,7 +83,7 @@ export function documentImageResolver(
       // otherwise copy to images dir
     } else {
       const parsedPath = path.parse(uri);
-      const imagePath = uniqueImagePath(parsedPath.name, parsedPath.ext, true);
+      const imagePath = uniqueImagePath(ensureImagesDir(), parsedPath.name, parsedPath.ext, true);
       fs.copyFileSync(uri, imagePath);
       return relative(docDir, imagePath);
     }
@@ -92,7 +107,7 @@ export function documentImageResolver(
         if (match) {
           const base64Data = base64.replace(kImgRegex, "");
           const imageBuffer = Buffer.from(base64Data, "base64");
-          const imagePath = uniqueImagePath("paste", `.${match[1]}`);
+          const imagePath = uniqueImagePath(ensureImagesDir(), "paste", `.${match[1]}`);
           fs.writeFileSync(imagePath, imageBuffer);
           return ensureForwardSlashes(path.relative(docDir, imagePath));
         } else {

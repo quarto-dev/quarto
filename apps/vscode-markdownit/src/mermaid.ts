@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import MarkdownIt from "markdown-it";
+import type { MarkdownIt } from "markdown-it";
 import Mermaid from "mermaid";
 
 export default function mermaidPlugin(md: MarkdownIt, options: { dark?: boolean}) {

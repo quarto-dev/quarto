@@ -14,6 +14,9 @@ export default defineConfig(env => {
       'process.env.TERM': '""',
       'process.platform': '""'
     },
+    // the automatic JSX runtime, set explicitly so it doesn't depend on which
+    // tsconfig Oxc finds for files under packages/*
+    oxc: { jsx: { runtime: 'automatic' } },
     plugins: [
       viteStaticCopy({
         targets: [

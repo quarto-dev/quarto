@@ -12,6 +12,7 @@
 - On Windows, image paths the visual editor inserts that contain more than one folder separator (e.g. `../images/plot.png`) now use forward slashes throughout. Previously only the first backslash was converted (<https://github.com/quarto-dev/quarto/pull/1181>).
 - Running a Stata or C# cell no longer drops leading `#|` lines. These languages write cell options as `*|` and `//|`, so `#|` lines are code, and they are now sent to the kernel just as `quarto render` sends them (<https://github.com/quarto-dev/quarto/pull/1183>).
 - Updated the Mermaid used to render diagrams in notebook Markdown cells from 9.4 to 11.17, so newer syntax such as `A@{ shape: ... }` works. The diagram preview moves from Mermaid 11.12 to 11.17 too. In both, class and C4 diagrams now use Mermaid's newer renderer, so they look slightly different (<https://github.com/quarto-dev/quarto/pull/1189>).
+- Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

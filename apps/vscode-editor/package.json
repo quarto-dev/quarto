@@ -19,7 +19,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@fluentui/react-components": "^9.21.0",
+    "@fluentui/react-components": "^9.74.9",
     "core": "*",
     "core-browser": "*",
     "editor": "*",

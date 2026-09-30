@@ -13,7 +13,8 @@ import { initQuartoContext } from "quarto-core";
 
 import { EXTENSION_ROOT_DIR, emitActionsWarning } from "./test-utils";
 
-// The Mermaid build the Diagram preview webview loads.
+// The Mermaid build the Diagram preview webview loads: a copy of the `mermaid`
+// npm package's dist/mermaid.min.js (the same file Quarto CLI vendors).
 const bundledMermaidPath = path.join(
   EXTENSION_ROOT_DIR,
   "assets",
@@ -30,24 +31,38 @@ const notebookRendererDir = path.join(EXTENSION_ROOT_DIR, "out", "markdownit");
 // older renders those diagrams as "undefined" (see posit-dev/positron#13881).
 const kMinShapeSyntaxVersion = "11.3.0";
 
+// How a Mermaid build records its version, minified or not:
+// - up to at least 11.12, it embeds Mermaid's package.json:
+//   `name:"mermaid",version:"X.Y.Z"`
+// - by 11.17 it no longer does, but render() passes the version to each
+//   diagram's renderer: `renderer.draw(text, id, "X.Y.Z", diagram)`
+const kVersionPatterns = [
+  /name:\s*"mermaid",\s*version:\s*"([^"]+)"/,
+  /renderer\.draw\(\w+,\s*\w+,\s*"(\d+\.\d+\.\d+[^"]*)"/,
+];
+
 /**
- * Extract the Mermaid version baked into a Mermaid bundle. Both the extension's
- * vendored build and the Quarto CLI's build embed Mermaid's own package.json,
- * so the version shows up as `name:"mermaid",version:"X.Y.Z"`.
+ * Extract the Mermaid version baked into a Mermaid bundle (the extension's
+ * vendored build, the Quarto CLI's, or a chunk of the notebook renderer).
  */
 function readMermaidVersion(filePath: string): string | undefined {
   if (!fs.existsSync(filePath)) {
     return undefined;
   }
   const contents = fs.readFileSync(filePath, "utf8");
-  const match = contents.match(/name:\s*"mermaid",\s*version:\s*"([^"]+)"/);
-  return match?.[1];
+  for (const pattern of kVersionPatterns) {
+    const match = contents.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+  return undefined;
 }
 
 /**
  * The Mermaid versions bundled into the notebook renderer. The chunk that holds
- * Mermaid's package.json has a hashed name, so look through all of them. Watch
- * builds don't clear the directory, so stale chunks can add more versions.
+ * the version has a hashed name, so look through all of them. Watch builds
+ * don't clear the directory, so stale chunks can add more versions.
  */
 function readNotebookRendererMermaidVersions(): string[] {
   if (!fs.existsSync(notebookRendererDir)) {
@@ -65,13 +80,30 @@ function readNotebookRendererMermaidVersions(): string[] {
   return [...versions];
 }
 
+function readNotebookRendererMermaidVersion(): string {
+  const versions = readNotebookRendererMermaidVersions();
+  assert.ok(
+    versions.length > 0,
+    `Could not read a Mermaid version from ${notebookRendererDir}`
+  );
+  assert.strictEqual(
+    versions.length,
+    1,
+    `Found several Mermaid versions (${versions.join(", ")}) in ${notebookRendererDir}; ` +
+    `delete it and rebuild to clear out stale chunks.`
+  );
+  return versions[0];
+}
+
+function readBundledMermaidVersion(): string {
+  const bundled = readMermaidVersion(bundledMermaidPath);
+  assert.ok(bundled, `Could not read a Mermaid version from ${bundledMermaidPath}`);
+  return bundled;
+}
+
 suite("Mermaid version", function () {
   test("bundled Mermaid supports the modern node-shape syntax", function () {
-    const bundled = readMermaidVersion(bundledMermaidPath);
-    assert.ok(
-      bundled,
-      `Could not read a Mermaid version from ${bundledMermaidPath}`
-    );
+    const bundled = readBundledMermaidVersion();
     assert.ok(
       semver.gte(bundled, kMinShapeSyntaxVersion),
       `Bundled Mermaid is ${bundled}, which is older than ${kMinShapeSyntaxVersion}. ` +
@@ -80,46 +112,35 @@ suite("Mermaid version", function () {
   });
 
   // The notebook renderer's Mermaid comes from npm (apps/vscode-markdownit's
-  // `mermaid` dependency), the Diagram preview's is vendored from the CLI. Both
-  // should follow the CLI, so keep them on the same minor release (patches may
-  // differ: npm resolves the latest 11.x.y patch).
+  // `mermaid` dependency) and the Diagram preview's is vendored. Both come from
+  // the same npm release, so require the exact same version: a diagram then
+  // renders the same in both, and re-vendoring is a file copy.
   test("notebook renderer Mermaid matches the Diagram preview's", function () {
-    const bundled = readMermaidVersion(bundledMermaidPath);
-    const notebookVersions = readNotebookRendererMermaidVersions();
-    assert.ok(bundled, `Could not read a Mermaid version from ${bundledMermaidPath}`);
-    assert.ok(
-      notebookVersions.length > 0,
-      `Could not read a Mermaid version from ${notebookRendererDir}`
-    );
+    const bundled = readBundledMermaidVersion();
+    const notebook = readNotebookRendererMermaidVersion();
     assert.strictEqual(
-      notebookVersions.length,
-      1,
-      `Found several Mermaid versions (${notebookVersions.join(", ")}) in ${notebookRendererDir}; ` +
-      `delete it and rebuild to clear out stale chunks.`
-    );
-    const notebook = notebookVersions[0];
-    const minor = (v: string) => `${semver.major(v)}.${semver.minor(v)}`;
-    assert.strictEqual(
-      minor(notebook),
-      minor(bundled),
+      notebook,
+      bundled,
       `The notebook renderer's Mermaid (${notebook}) and the Diagram preview's (${bundled}) have drifted apart. ` +
-      `Pin \`mermaid\` in apps/vscode-markdownit/package.json to the same minor version as ${bundledMermaidPath}.`
+      `Re-vendor the preview's by copying node_modules/mermaid/dist/mermaid.min.js to ${bundledMermaidPath}, ` +
+      `or pin \`mermaid\` in apps/vscode-markdownit/package.json to ${bundled}.`
     );
   });
 
-  // Drift detector: the Diagram preview should never fall behind the Mermaid
-  // that the resolved Quarto CLI ships, otherwise a diagram can render in
-  // `quarto render` but break in the in-editor preview. This compares against
-  // whatever CLI is installed in the test environment, so it skips when no CLI
-  // is available (e.g. CI without Quarto) and fires once the CLI moves ahead.
+  // Drift detector: neither Mermaid should fall behind the Mermaid that the
+  // resolved Quarto CLI ships, otherwise a diagram can render in `quarto
+  // render` but break in the in-editor previews. Being ahead is fine. This
+  // compares against whatever CLI is installed in the test environment, so it
+  // skips when no CLI is available (e.g. CI without Quarto) and fires once the
+  // CLI moves ahead.
   //
   // CI runs this against both the `release` and `pre-release` Quarto channels
   // (see .github/workflows/test.yaml). On `release` (and locally) drift is a
-  // hard failure: we must match the shipped CLI. On `pre-release` it's only an
-  // early heads-up, since that Mermaid hasn't reached stable Quarto yet, so we
-  // emit a warning annotation instead of failing. The channel is passed in via
-  // the QUARTO_CHANNEL env var.
-  test("bundled Mermaid is not behind the installed Quarto CLI", function () {
+  // hard failure: we must keep up with the shipped CLI. On `pre-release` it's
+  // only an early heads-up, since that Mermaid hasn't reached stable Quarto yet,
+  // so we emit a warning annotation instead of failing. The channel is passed in
+  // via the QUARTO_CHANNEL env var.
+  test("Mermaid is not behind the installed Quarto CLI", function () {
     const ctx = initQuartoContext();
     if (!ctx.available || !ctx.resourcePath) {
       this.skip();
@@ -139,24 +160,26 @@ suite("Mermaid version", function () {
       this.skip();
     }
 
-    const bundled = readMermaidVersion(bundledMermaidPath);
-    assert.ok(
-      bundled,
-      `Could not read a Mermaid version from ${bundledMermaidPath}`
-    );
-
-    if (semver.gte(bundled, cliVersion!)) {
-      return; // bundled build is current with (or ahead of) the CLI
+    const behind: string[] = [];
+    const bundled = readBundledMermaidVersion();
+    if (semver.lt(bundled, cliVersion!)) {
+      behind.push(`the Diagram preview's (${bundled}, ${bundledMermaidPath})`);
+    }
+    const notebook = readNotebookRendererMermaidVersion();
+    if (semver.lt(notebook, cliVersion!)) {
+      behind.push(`the notebook renderer's (${notebook}, apps/vscode-markdownit's \`mermaid\` dependency)`);
+    }
+    if (behind.length === 0) {
+      return; // current with (or ahead of) the CLI
     }
 
-    // Drift detected: the bundled Mermaid is older than the installed CLI's.
     const advice =
-      `Bundled Mermaid (${bundled}) is behind the Quarto CLI's Mermaid (${cliVersion}). ` +
-      `Re-vendor it by copying ${cliMermaidPath} to ${bundledMermaidPath}, ` +
-      `and update assets/www/diagram/diagram.js if the Mermaid API changed.`;
+      `The Quarto CLI ships Mermaid ${cliVersion}, which is ahead of ${behind.join(" and ")}. ` +
+      `Upgrade \`mermaid\` in apps/vscode-markdownit/package.json, copy node_modules/mermaid/dist/mermaid.min.js ` +
+      `to ${bundledMermaidPath}, and update assets/www/diagram/diagram.js if the Mermaid API changed.`;
 
     if (process.env.QUARTO_CHANNEL === "pre-release") {
-      emitActionsWarning("Diagram preview Mermaid is behind the Quarto pre-release CLI", advice);
+      emitActionsWarning("Extension Mermaid is behind the Quarto pre-release CLI", advice);
       return;
     }
 

@@ -22,6 +22,10 @@ const bundledMermaidPath = path.join(
   "mermaid.min.js"
 );
 
+// The notebook Markdown renderer's build (apps/vscode-markdownit), which bundles
+// the `mermaid` npm package into hashed chunks.
+const notebookRendererDir = path.join(EXTENSION_ROOT_DIR, "out", "markdownit");
+
 // Mermaid 11.3.0 introduced the `A@{ shape: ... }` node-shape syntax. Anything
 // older renders those diagrams as "undefined" (see posit-dev/positron#13881).
 const kMinShapeSyntaxVersion = "11.3.0";
@@ -36,8 +40,29 @@ function readMermaidVersion(filePath: string): string | undefined {
     return undefined;
   }
   const contents = fs.readFileSync(filePath, "utf8");
-  const match = contents.match(/name:"mermaid",version:"([^"]+)"/);
+  const match = contents.match(/name:\s*"mermaid",\s*version:\s*"([^"]+)"/);
   return match?.[1];
+}
+
+/**
+ * The Mermaid versions bundled into the notebook renderer. The chunk that holds
+ * Mermaid's package.json has a hashed name, so look through all of them. Watch
+ * builds don't clear the directory, so stale chunks can add more versions.
+ */
+function readNotebookRendererMermaidVersions(): string[] {
+  if (!fs.existsSync(notebookRendererDir)) {
+    return [];
+  }
+  const versions = new Set<string>();
+  for (const file of fs.readdirSync(notebookRendererDir)) {
+    if (file.endsWith(".js")) {
+      const version = readMermaidVersion(path.join(notebookRendererDir, file));
+      if (version) {
+        versions.add(version);
+      }
+    }
+  }
+  return [...versions];
 }
 
 suite("Mermaid version", function () {
@@ -51,6 +76,34 @@ suite("Mermaid version", function () {
       semver.gte(bundled, kMinShapeSyntaxVersion),
       `Bundled Mermaid is ${bundled}, which is older than ${kMinShapeSyntaxVersion}. ` +
       `Diagram preview will render newer node shapes (e.g. A@{ shape: text }) as "undefined".`
+    );
+  });
+
+  // The notebook renderer's Mermaid comes from npm (apps/vscode-markdownit's
+  // `mermaid` dependency), the Diagram preview's is vendored from the CLI. Both
+  // should follow the CLI, so keep them on the same minor release (patches may
+  // differ: npm resolves the latest 11.x.y patch).
+  test("notebook renderer Mermaid matches the Diagram preview's", function () {
+    const bundled = readMermaidVersion(bundledMermaidPath);
+    const notebookVersions = readNotebookRendererMermaidVersions();
+    assert.ok(bundled, `Could not read a Mermaid version from ${bundledMermaidPath}`);
+    assert.ok(
+      notebookVersions.length > 0,
+      `Could not read a Mermaid version from ${notebookRendererDir}`
+    );
+    assert.strictEqual(
+      notebookVersions.length,
+      1,
+      `Found several Mermaid versions (${notebookVersions.join(", ")}) in ${notebookRendererDir}; ` +
+      `delete it and rebuild to clear out stale chunks.`
+    );
+    const notebook = notebookVersions[0];
+    const minor = (v: string) => `${semver.major(v)}.${semver.minor(v)}`;
+    assert.strictEqual(
+      minor(notebook),
+      minor(bundled),
+      `The notebook renderer's Mermaid (${notebook}) and the Diagram preview's (${bundled}) have drifted apart. ` +
+      `Pin \`mermaid\` in apps/vscode-markdownit/package.json to the same minor version as ${bundledMermaidPath}.`
     );
   });
 

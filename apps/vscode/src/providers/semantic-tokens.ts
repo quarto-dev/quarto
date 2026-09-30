@@ -20,7 +20,6 @@ import { Token } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 import { isQuartoDoc } from "../core/doc";
 import {
-  isBlockOfLanguage,
   unadjustedSemanticTokens,
   virtualDocForLanguage,
   withVirtualDocUri,
@@ -229,16 +228,6 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
     // Create virtual doc for all blocks of this language
     const vdoc = virtualDocForLanguage(document, tokens, language);
 
-    // Lines of the real document that are code of this language. The virtual
-    // doc fills all other lines with placeholder content (e.g. `#` comments),
-    // whose tokens must not be applied to the real document.
-    const codeLines = new Set<number>();
-    for (const block of tokens.filter(isBlockOfLanguage(language))) {
-      for (let line = block.range.start.line + 1; line < block.range.end.line; line++) {
-        codeLines.add(line);
-      }
-    }
-
     return await withVirtualDocUri(vdoc, document.uri, "semanticTokens", async (uri: Uri) => {
       try {
         // Get the legend from the embedded language provider
@@ -263,8 +252,10 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
         }
 
         // Adjust token positions from virtual doc to real doc coordinates,
-        // keeping only tokens on code lines
-        return unadjustedSemanticTokens(vdoc.language, remappedTokens, codeLines);
+        // keeping only tokens on code lines. The virtual doc fills all other
+        // lines with placeholder content (e.g. `#` comments), whose tokens must
+        // not be applied to the real document.
+        return unadjustedSemanticTokens(vdoc.language, remappedTokens, vdoc.codeLines);
       } catch {
         return undefined;
       }

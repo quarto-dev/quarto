@@ -1,8 +1,11 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { decodeSemanticTokens, encodeSemanticTokens, remapTokenIndices } from "../providers/semantic-tokens";
+import { decodeSemanticTokens, embeddedSemanticTokensProvider, encodeSemanticTokens, remapTokenIndices } from "../providers/semantic-tokens";
 import { unadjustedSemanticTokens } from "../vdoc/vdoc";
 import { embeddedLanguage } from "../vdoc/languages";
+import { MarkdownEngine } from "../markdown/engine";
+import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
+import { openAndShowExamplesTextDocument } from "./test-utils";
 
 suite("Semantic Tokens", function () {
 
@@ -185,6 +188,61 @@ suite("Semantic Tokens", function () {
       { line: 2, startChar: 0, length: 1, tokenType: 1, tokenModifiers: 0 },
       { line: 2, startChar: 4, length: 3, tokenType: 2, tokenModifiers: 0 },
     ]);
+  });
+
+  suite("Embedded semantic tokens provider", function () {
+    let registration: vscode.Disposable;
+
+    suiteSetup(function () {
+      // Fake python provider: a comment token at column 0 of every non-empty
+      // line of the virtual doc, including its `#` filler lines (#985)
+      const legend = new vscode.SemanticTokensLegend(["comment"]);
+      registration = vscode.languages.registerDocumentSemanticTokensProvider(
+        { language: "python" },
+        {
+          provideDocumentSemanticTokens(document) {
+            const builder = new vscode.SemanticTokensBuilder(legend);
+            for (let line = 0; line < document.lineCount; line++) {
+              if (document.lineAt(line).text.trim() !== "") {
+                builder.push(line, 0, 1, 0, 0);
+              }
+            }
+            return builder.build();
+          }
+        },
+        legend
+      );
+    });
+
+    suiteTeardown(async function () {
+      registration.dispose();
+      await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    });
+
+    /** Lines of `fileName` with a semantic token, with the cursor on `cursorLine` */
+    async function tokenLines(fileName: string, cursorLine: number) {
+      const { doc, editor } = await openAndShowExamplesTextDocument(fileName);
+      editor.selection = new vscode.Selection(cursorLine, 0, cursorLine, 0);
+
+      const provide = embeddedSemanticTokensProvider(new MarkdownEngine());
+      const tokens = await provide(doc, new vscode.CancellationTokenSource().token, async () => undefined);
+      assert.ok(tokens, "Provider should return tokens");
+
+      const decoded = decodeSemanticTokens(tokens);
+      const comment = QUARTO_SEMANTIC_TOKEN_LEGEND.tokenTypes.indexOf("comment");
+      assert.ok(decoded.every(t => t.tokenType === comment), "Tokens should be remapped to the Quarto legend");
+      return decoded.map(t => t.line);
+    }
+
+    test("Tokens only on code lines of the cells of the language", async function () {
+      // Not on YAML, heading, prose, fences, or the R cell
+      assert.deepStrictEqual(await tokenLines("semantic-tokens.qmd", 10), [9, 10, 16, 17]);
+    });
+
+    test("No tokens on IPython magic lines", async function () {
+      // `%`, `%%` and `!` lines are `#` filler in the virtual doc
+      assert.deepStrictEqual(await tokenLines("vdoc/magics.qmd", 8), [8, 14]);
+    });
   });
 
 });

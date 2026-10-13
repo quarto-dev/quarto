@@ -27,7 +27,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       # For the repo's pinned @vscode/vsce
-      - run: yarn install --frozen-lockfile
+      - run: npm ci
       - uses: actions/download-artifact@v8
         with:
           name: ${{ needs.package.outputs.artifact-name }}
@@ -38,7 +38,7 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           EXTENSION_FILE: ${{ github.workspace }}/dist/${{ needs.package.outputs.vsix-name }}
-        run: yarn --silent vsce publish --packagePath "$EXTENSION_FILE" --skip-duplicate
+        run: npx --no vsce publish --packagePath "$EXTENSION_FILE" --skip-duplicate
 
   publish-open-vsx:
     needs: package
@@ -49,7 +49,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       # For the repo's pinned ovsx
-      - run: yarn install --frozen-lockfile
+      - run: npm ci
       - uses: actions/download-artifact@v8
         with:
           name: ${{ needs.package.outputs.artifact-name }}
@@ -60,7 +60,7 @@ jobs:
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
           EXTENSION_FILE: ${{ github.workspace }}/dist/${{ needs.package.outputs.vsix-name }}
-        run: yarn --silent ovsx publish "$EXTENSION_FILE" --skip-duplicate
+        run: npx --no ovsx publish "$EXTENSION_FILE" --skip-duplicate
 
   github-release:
     needs:

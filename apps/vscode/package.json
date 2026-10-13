@@ -1520,12 +1520,12 @@
     "install-vscode": "rm -rf *.vsix && vsce package && code --install-extension *.vsix",
     "install-positron": "rm -rf *.vsix && vsce package && positron --install-extension *.vsix",
     "build": "tsc --noEmit && tsx build.ts",
-    "dev": "yarn run build dev",
+    "dev": "npm run build -- dev",
     "lint": "eslint src",
     "build-lang": "tsx syntaxes/build-lang.mjs",
-    "build-test": "yarn run build test",
-    "test": "yarn build-test && vscode-test",
-    "test-positron": "yarn build-test && node ./scripts/run-positron-tests.mjs"
+    "build-test": "npm run build -- test",
+    "test": "npm run build-test && vscode-test",
+    "test-positron": "npm run build-test && node ./scripts/run-positron-tests.mjs"
   },
   "dependencies": {
     "axios": "^1.20.0",

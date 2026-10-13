@@ -174,7 +174,7 @@ suite("Quarto LSP features", function () {
     );
   });
 
-  test("link diagnostics follow markdown.validate.enabled", async function () {
+  test("link diagnostics follow quarto.validate.links.enabled", async function () {
     this.timeout(60000);
     const linksUri = examplesUri("lsp-link-diagnostics.qmd");
     const linksDoc = await vscode.workspace.openTextDocument(linksUri);
@@ -183,12 +183,12 @@ suite("Quarto LSP features", function () {
       const code = typeof d.code === "object" ? d.code.value : d.code;
       return typeof code === "string" && code.startsWith("link.");
     });
-    const config = vscode.workspace.getConfiguration("markdown.validate");
+    const config = vscode.workspace.getConfiguration("quarto.validate.links");
     try {
       await config.update("enabled", true, vscode.ConfigurationTarget.Global);
       await waitForCondition(
         () => linkDiagnostics().length > 0,
-        { timeout: 20000, message: "link diagnostics after enabling markdown.validate" }
+        { timeout: 20000, message: "link diagnostics after enabling quarto.validate.links" }
       );
       const diagnostics = linkDiagnostics();
       const line = linksDoc.positionAt(linksDoc.getText().indexOf("#no-such-section")).line;
@@ -202,7 +202,7 @@ suite("Quarto LSP features", function () {
     }
     await waitForCondition(
       () => linkDiagnostics().length === 0,
-      { timeout: 20000, message: "link diagnostics cleared after disabling markdown.validate" }
+      { timeout: 20000, message: "link diagnostics cleared after disabling quarto.validate.links" }
     );
   });
 });

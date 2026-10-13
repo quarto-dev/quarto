@@ -33,6 +33,9 @@ export default defineConfig({
     'process.env.TERM': '""',
     'process.platform': '""'
   },
+  // the automatic JSX runtime, set explicitly so it doesn't depend on which
+  // tsconfig Oxc finds for files under packages/*
+  oxc: { jsx: { runtime: 'automatic' } },
   plugins,
   build: {
     // Vite 3's default ('modules'); RStudio decides whether to raise it

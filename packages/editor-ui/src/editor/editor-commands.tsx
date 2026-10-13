@@ -4,8 +4,6 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React from "react"
-
 import { Command, EditorUICommandId, t } from 'editor-ui';
 
 import { Slot } from '@fluentui/react-components';

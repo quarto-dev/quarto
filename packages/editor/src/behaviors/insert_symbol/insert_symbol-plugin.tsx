@@ -7,8 +7,6 @@
 import { EditorState, Transaction, Plugin, PluginKey } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 
-import React from 'react';
-
 import { applyStyles } from '../../api/css';
 import { EditorEvents } from '../../api/event-types';
 import { canInsertNode } from '../../api/node';

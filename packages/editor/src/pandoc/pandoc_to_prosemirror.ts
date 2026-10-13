@@ -473,17 +473,16 @@ function detectLineWrapping(ast: PandocAst): PandocLineWrapping {
 
 // determine which heading ids are valid based on explicit headings contained in the
 // document and any headings targeted by links. remove any heading ids not so identified
-function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
+export function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
   // determine function we will use to create auto-identifiers
   const autoIdentifier = extensions.gfm_auto_identifiers ? gfmAutoIdentifier : pandocAutoIdentifier;
 
   // start with ids we know are valid (i.e. ones the user added to the doc)
   const headingIds = new Set<string>((ast.heading_ids || []).map(id => id.toLocaleLowerCase()));
 
-  // find ids referenced in links. note that the result of this pass has always been
-  // discarded (the pass below maps the original `ast.blocks`), so the link rewrite
-  // here has no effect and the pass only collects `headingIds`.
-  mapTokens(ast.blocks, tok => {
+  // find ids referenced in links, and strip the target from shortcut heading links
+  // (e.g. [My Heading]) so that linkHeadingsPostprocessor can bind them to the heading
+  const linkedBlocks = mapTokens(ast.blocks, tok => {
     if (tok.t === PandocTokenType.Link) {
       const target = tok.c[kLinkTarget];
       const href = target[kLinkTargetUrl] as string;
@@ -515,7 +514,7 @@ function resolveHeadingIds(ast: PandocAst, extensions: PandocExtensions) {
   });
 
   // remove any heading ids not created by the user or required by a link
-  const astBlocks = mapTokens(ast.blocks, tok => {
+  const astBlocks = mapTokens(linkedBlocks, tok => {
     if (tok.t === PandocTokenType.Header) {
       const attr = pandocAttrReadAST(tok, kHeadingAttr);
       if (attr.id && !headingIds.has('#' + attr.id.toLocaleLowerCase())) {

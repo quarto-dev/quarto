@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
 
-import { Card, Input, makeStyles, Select, shorthands, tokens } from "@fluentui/react-components"
+import { Card, Input, makeStyles, Select, tokens } from "@fluentui/react-components"
 
 import { Field, ProgressBar } from "@fluentui/react-components"
 
@@ -319,10 +319,10 @@ const useStyles = makeStyles({
     overflowY: 'scroll',
     width: '100%',
     height: '200px',
-    ...shorthands.padding('4px'),
+    padding: '4px',
     marginBottom: '5px',
     "& td": {
-      ...shorthands.padding(0,0,'4px'),
+      padding: '0 0 4px',
     },
     "& tr td:first-child": {
       fontWeight: tokens.fontWeightSemibold,

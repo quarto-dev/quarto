@@ -51,6 +51,6 @@ export async function activate(ctx: RendererContext<void>) {
 	document.head.appendChild(styleTemplate);
 
 	markdownItRenderer.extendMarkdownIt((md: MarkdownIt) => {
-    extendMarkdownIt(md, (md) => mermaidPlugin(md, { dark: isDark }));
+    extendMarkdownIt(md, mermaidPlugin);
 	});
 }

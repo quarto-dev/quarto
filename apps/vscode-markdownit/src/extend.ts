@@ -52,7 +52,7 @@ export function extendMarkdownIt(md: MarkdownIt, mermaidPlugin: (md: MarkdownIt)
            .use(figureDivsPlugin)
            .use(tableCaptionPlugin)
            .use(citationPlugin)
-           .use(mermaidPlugin) // TODO: mermaid breaks other plugins
+           .use(mermaidPlugin)
            .use(calloutPlugin)
            .use(decoratorPlugin)
            .use(yamlPlugin)

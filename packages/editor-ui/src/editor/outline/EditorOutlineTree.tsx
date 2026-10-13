@@ -7,13 +7,13 @@
 import React, { useContext } from 'react';
 
 import {
+  makeStyles,
+  mergeClasses,
   Tree,
   TreeItem,
   TreeItemLayout,
-  TreeNavigationData_unstable,
-} from "@fluentui/react-components/unstable";
-
-import { makeStyles, mergeClasses } from '@fluentui/react-components';
+  TreeNavigationDataParam,
+} from '@fluentui/react-components';
 
 import { EditorOutline, EditorOutlineItem, NavigationType } from 'editor';
 
@@ -75,8 +75,8 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
   };
 
   // drive editor selection from outline
-  const onNavigation = (_event: React.MouseEvent | React.KeyboardEvent, data: TreeNavigationData_unstable<string>) => {
-    editor.navigate(NavigationType.Id, data.value, true);
+  const onNavigation = (_event: React.SyntheticEvent, data: TreeNavigationDataParam) => {
+    editor.navigate(NavigationType.Id, String(data.value), true);
     editor.focus();
   };
 
@@ -88,7 +88,7 @@ export const EditorOutlineTree: React.FC<EditorOutlineTreeProps> = props => {
         defaultOpenItems={outlineIds(props.outline)}
         className={[styles.outlineTree, 'pm-light-text-color'].join(' ')}  
         size="small"
-        onNavigation_unstable={onNavigation}>
+        onNavigation={onNavigation}>
         {contents}
       </Tree>
     </div>

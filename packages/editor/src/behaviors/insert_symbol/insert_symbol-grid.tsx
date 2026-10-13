@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { FixedSizeGrid } from 'react-window';
+import { Grid, useGridCallbackRef } from 'react-window';
 
 import debounce from 'lodash.debounce';
 
@@ -41,12 +41,19 @@ const SymbolCharacterGrid = React.forwardRef<HTMLDivElement, CharacterGridProps>
     selectedItemClassName,
   };
 
-  const gridRef = React.useRef<FixedSizeGrid>(null);
+  // The grid's API is held in state so that the scroll effect below runs
+  // again once the grid has mounted
+  const [grid, setGrid] = useGridCallbackRef(null);
+  const rowCount = Math.ceil(props.symbolCharacters.length / props.numberOfColumns);
   const handleScroll = debounce(() => {
-    gridRef.current?.scrollToItem({ rowIndex: Math.floor(props.selectedIndex / props.numberOfColumns) });
+    // scrollToRow throws on an out-of-range index, where react-window 1 clamped it
+    const index = Math.floor(props.selectedIndex / props.numberOfColumns);
+    if (grid && index >= 0 && index < rowCount) {
+      grid.scrollToRow({ index, align: 'auto' });
+    }
   }, 5);
 
-  React.useEffect(handleScroll, [props.selectedIndex]);
+  React.useEffect(handleScroll, [grid, props.selectedIndex]);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const newIndex = newIndexForKeyboardEvent(
@@ -63,19 +70,17 @@ const SymbolCharacterGrid = React.forwardRef<HTMLDivElement, CharacterGridProps>
 
   return (
     <div onKeyDown={handleKeyDown} tabIndex={0} ref={ref}>
-      <FixedSizeGrid
+      <Grid
         columnCount={props.numberOfColumns}
-        rowCount={Math.ceil(props.symbolCharacters.length / props.numberOfColumns)}
-        height={props.height}
-        width={props.width + 1}
+        rowCount={rowCount}
+        style={{ height: props.height, width: props.width + 1 }}
         rowHeight={columnWidth}
         columnWidth={columnWidth}
-        itemData={characterCellData}
+        cellComponent={SymbolCharacterCell}
+        cellProps={characterCellData}
         className="pm-symbol-grid"
-        ref={gridRef}
-      >
-        {SymbolCharacterCell}
-      </FixedSizeGrid>
+        gridRef={setGrid}
+      />
     </div>
   );
 });

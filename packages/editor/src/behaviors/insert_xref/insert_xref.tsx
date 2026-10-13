@@ -7,7 +7,7 @@ import { Node as ProsemirrorNode } from 'prosemirror-model';
 import React, { ChangeEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { List, RowComponentProps, useListRef } from 'react-window';
 import uniqBy from 'lodash.uniqby';
 import debounce from 'lodash.debounce';
 
@@ -242,7 +242,7 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
 
   // References to key controls
   const textRef = React.useRef<HTMLInputElement>(null);
-  const fixedList = React.useRef<FixedSizeList>(null);
+  const xrefList = useListRef(null);
   const styleSelectRef = React.useRef<HTMLSelectElement>(null);
   const prefixRef = React.useRef<HTMLInputElement>(null);
 
@@ -336,7 +336,7 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
       : Math.max(currentIndex + increment, 0);
     if (newIndex !== currentIndex) {
       setSelectedXRefIndex(newIndex);
-      fixedList.current?.scrollToItem(newIndex);
+      xrefList.current?.scrollToRow({ index: newIndex, align: 'auto' });
     }
   };
 
@@ -496,23 +496,21 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
               onKeyDown={handleKeyboardEvent}
               tabIndex={0}
             >
-              <FixedSizeList
+              <List
                 className="pm-insert-xref-list pm-block-border-color pm-background-color"
-                height={props.height}
-                width="100%"
-                itemCount={filteredXrefs.length}
-                itemSize={66}
-                itemData={{
+                style={{ height: props.height, width: '100%' }}
+                rowCount={filteredXrefs.length}
+                rowHeight={66}
+                rowComponent={XRefItem}
+                rowProps={{
                   xrefs: filteredXrefs,
                   selectedIndex: currentIndex,
                   ui: props.ui,
                   onclick: handleItemClicked,
                   ondoubleclick: handleItemDoubleClicked
                 }}
-                ref={fixedList}
-              >
-                {XRefItem}
-              </FixedSizeList>
+                listRef={xrefList}
+              />
             </div>
 
           ) : (
@@ -562,18 +560,16 @@ const InsertXrefPanel: React.FC<InsertXrefPanelProps> = props => {
   );
 };
 
-interface XRefItemProps extends ListChildComponentProps {
-  data: {
-    xrefs: XRef[],
-    selectedIndex: number
-    ui: EditorUI,
-    onclick: (index: number) => void,
-    ondoubleclick: (index: number) => void
-  };
+interface XRefItemData {
+  xrefs: XRef[],
+  selectedIndex: number
+  ui: EditorUI,
+  onclick: (index: number) => void,
+  ondoubleclick: (index: number) => void
 }
 
-const XRefItem = (props: XRefItemProps) => {
-  const thisXref: XRef = props.data.xrefs[props.index];
+const XRefItem = (props: RowComponentProps<XRefItemData>) => {
+  const thisXref: XRef = props.xrefs[props.index];
 
   // The type (e.g. fig)
   const type = kQuartoXRefTypes[thisXref.type];
@@ -587,22 +583,22 @@ const XRefItem = (props: XRefItemProps) => {
   const detailText = thisXref.title || "";
 
   // The image and adornment
-  const image = type?.image(props.data.ui) || props.data.ui.images.omni_insert.generic;
+  const image = type?.image(props.ui) || props.ui.images.omni_insert.generic;
 
   // Click handlers
   const onItemClick = () => {
-    props.data.onclick(props.index);
+    props.onclick(props.index);
   };
 
   const onItemDoubleClick = () => {
-    props.data.ondoubleclick(props.index);
+    props.ondoubleclick(props.index);
   };
 
   // Whether this node is selected
-  const selected = props.data.selectedIndex === props.index;
+  const selected = props.selectedIndex === props.index;
   const selectedClassName = `pm-xref-item${selected ? ' pm-list-item-selected' : ''}`;
   return (
-    <div key={thisXref.id} style={props.style} className={selectedClassName} onClick={onItemClick} onDoubleClick={onItemDoubleClick}>
+    <div key={thisXref.id} style={props.style} {...props.ariaAttributes} className={selectedClassName} onClick={onItemClick} onDoubleClick={onItemDoubleClick}>
       <div className={`pm-xref-item-image-container ${thisXref.type}`}>
         <img src={image} className={'pm-xref-item-image pm-border-color'} draggable="false"/>
       </div>

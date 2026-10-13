@@ -2,6 +2,6 @@
   "extends": "tsconfig/vite.json",
   "include": ["./src", "../../packages/editor/src/@types"],
   "compilerOptions": {
-    "jsx": "react"
+    "jsx": "react-jsx"
   }
 }

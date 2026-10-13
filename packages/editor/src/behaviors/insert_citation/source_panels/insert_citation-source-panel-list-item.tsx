@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ListChildComponentProps } from 'react-window';
+import { RowComponentProps } from 'react-window';
 
 import { OutlineButton } from '../../../api/widgets/button';
 
@@ -13,8 +13,8 @@ import { CitationSourcePanelListItemData } from './insert_citation-source-panel-
 
 import './insert_citation-source-panel-list-item.css';
 
-export const CitationSourcePanelListItem = (props: ListChildComponentProps) => {
-  const citationListData: CitationSourcePanelListItemData = props.data;
+export const CitationSourcePanelListItem = (props: RowComponentProps<CitationSourcePanelListItemData>) => {
+  const citationListData: CitationSourcePanelListItemData = props;
 
   const citationEntry = citationListData.citations[props.index];
 
@@ -68,6 +68,7 @@ export const CitationSourcePanelListItem = (props: ListChildComponentProps) => {
       onDoubleClick={onDoubleClick}
       className="pm-insert-citation-source-panel-item"
       style={props.style}
+      {...props.ariaAttributes}
     >
       <div className={`pm-insert-citation-source-panel-item-border ${selected ? 'pm-list-item-selected' : ''}`}>
         <div className="pm-insert-citation-source-panel-item-container">

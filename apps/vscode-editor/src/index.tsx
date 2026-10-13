@@ -4,7 +4,6 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React from "react";
 import { createRoot } from 'react-dom/client';
 
 import 'vscode-webview';

@@ -75,18 +75,23 @@ function virtualDocForBlock(document: TextDocument, block: Token, language: Embe
   return virtualDocForCode(lines, language);
 }
 
+/**
+ * Create a virtual doc from all blocks of `language`. Also returns `codeLines`,
+ * the real document lines filled with code; all other lines hold filler.
+ */
 export function virtualDocForLanguage(
   document: TextDocument,
   tokens: Token[],
   language: EmbeddedLanguage,
   action?: VirtualDocAction,
-): VirtualDoc {
+): VirtualDoc & { codeLines: Set<number> } {
   const lines = linesForLanguage(document, language);
+  const codeLines = new Set<number>();
   for (const languageBlock of tokens.filter(isBlockOfLanguage(language))) {
-    fillLinesFromBlock(lines, document, languageBlock, language);
+    fillLinesFromBlock(lines, document, languageBlock, language, codeLines);
   }
   padLinesForLanguage(lines, language);
-  return virtualDocForCode(lines, language, action);
+  return { ...virtualDocForCode(lines, language, action), codeLines };
 }
 
 // IPython line magics (`%`), cell magics (`%%`), and shell escapes (`!`) are not
@@ -107,7 +112,8 @@ function fillLinesFromBlock(
   lines: string[],
   document: TextDocument,
   block: Token,
-  language: EmbeddedLanguage
+  language: EmbeddedLanguage,
+  codeLines?: Set<number>
 ) {
   for (
     let line = block.range.start.line + 1;
@@ -119,6 +125,7 @@ function fillLinesFromBlock(
       lines[line] = language.emptyLine || "";
     } else {
       lines[line] = text;
+      codeLines?.add(line);
     }
   }
 }
@@ -287,30 +294,22 @@ export function unadjustedRange(language: EmbeddedLanguage, range: Range) {
 /**
  * Adjust semantic tokens from virtual document coordinates to real document coordinates
  *
- * This function decodes the tokens, adjusts each token's position using unadjustedRange,
- * and re-encodes them back to delta format.
+ * This function decodes the tokens, shifts each token's line using unadjustedLine,
+ * and re-encodes them back to delta format. Only tokens on the real document `lines`
+ * are kept, dropping tokens on the virtual doc's filler and injected lines.
  */
 export function unadjustedSemanticTokens(
   language: EmbeddedLanguage,
-  tokens: SemanticTokens
+  tokens: SemanticTokens,
+  lines: Set<number>
 ): SemanticTokens {
   // Decode tokens to absolute positions
   const decoded = decodeSemanticTokens(tokens);
 
-  // Adjust each token's position
-  const adjusted = decoded.map(t => {
-    const range = unadjustedRange(language, new Range(
-      new Position(t.line, t.startChar),
-      new Position(t.line, t.startChar + t.length)
-    ));
-    return {
-      line: range.start.line,
-      startChar: range.start.character,
-      length: range.end.character - range.start.character,
-      tokenType: t.tokenType,
-      tokenModifiers: t.tokenModifiers
-    };
-  });
+  // Adjust each token's line (tokens never span lines, so columns are unchanged)
+  const adjusted = decoded
+    .map(t => ({ ...t, line: unadjustedLine(language, t.line) }))
+    .filter(t => lines.has(t.line));
 
   // Re-encode to delta format
   return encodeSemanticTokens(adjusted, tokens.resultId);

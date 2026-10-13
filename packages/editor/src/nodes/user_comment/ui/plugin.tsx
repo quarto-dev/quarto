@@ -7,7 +7,6 @@
 import { Schema } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
 import { NodeView } from 'prosemirror-view';
-import React from 'react';
 import { onNodeAttached } from '../../../api/dom';
 import { UserCommentViewPluginKey } from '../user_comment-constants';
 import { synchronizeCommentViewPositions } from './layout';

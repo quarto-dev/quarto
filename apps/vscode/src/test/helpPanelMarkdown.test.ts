@@ -3,7 +3,7 @@
  * (hovers and help topics): markdown-it with html, linkify and highlight.js.
  *
  * The HTML snapshot is in src/test/markdown/snapshots/. To update it after an
- * intended change, run `UPDATE_SNAPSHOTS=1 yarn test-vscode` and review the diff.
+ * intended change, run `UPDATE_SNAPSHOTS=1 npm run test-vscode` and review the diff.
  */
 
 import * as fs from "fs";

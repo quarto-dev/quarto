@@ -87,6 +87,17 @@ test("divs with identifiers are not added to the outline", async () => {
   assert.deepEqual(symbols.flatMap(names), ["Introduction", "Methods", "Results", "Results", "fig-plot"]);
 });
 
+test("references to a heading with an explicit identifier", async () => {
+  const mdLs = memoryLanguageService([doc]);
+  const text = doc.getText();
+  const locations = await mdLs.getReferences(doc, { line: 0, character: 4 }, { includeDeclaration: false }, CancellationToken.None);
+  // The link to `#sec-intro`, but not the one to `#introduction`
+  assert.deepEqual(
+    locations.map(l => doc.offsetAt(l.range.start)),
+    [text.indexOf("#sec-intro)")]
+  );
+});
+
 test("go to definition on a link to an explicit heading identifier", async () => {
   const mdLs = memoryLanguageService([doc]);
   const text = doc.getText();

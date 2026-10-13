@@ -6,7 +6,7 @@ execute:
 
 ## First Section {#sec-first}
 
-See @sec-first, [hello](hello.qmd) and [the section](#first-section).
+See @sec-first, [hello](hello.qmd) and [the section](#sec-first).
 
 $$
 x^2 + y^2

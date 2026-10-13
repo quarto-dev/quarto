@@ -167,7 +167,7 @@ suite("Quarto LSP features", function () {
       ),
       (locations) => locations.length > 0
     );
-    const fragmentLine = positionOf(doc, "(#first-section)").line;
+    const fragmentLine = positionOf(doc, "(#sec-first)").line;
     assert.ok(
       locations.some((l) => l.range.start.line === fragmentLine),
       JSON.stringify(locations.map((l) => l.range.start.line))

@@ -23,6 +23,7 @@ import {
   isFrontMatter,
   isHeader,
   isCodeBlock,
+  kAttrIdentifier,
   getDocUri,
   getLine,
   Document,
@@ -36,7 +37,7 @@ import { pandocSlugifier, ISlugifier, Slug } from './slugify';
 import { IWorkspace } from './workspace';
 import { MdDocumentInfoCache } from './workspace-cache';
 
-export enum TocEntryType { Title, Header, CodeCell };
+export enum TocEntryType { Title, Header, CodeCell, Div };
 
 export interface TocEntry {
   readonly type: TocEntryType;
@@ -100,34 +101,40 @@ export function isTocHeaderEntry(entry?: TocEntry): entry is TocHeaderEntry {
 export class TableOfContents {
 
   public static async create(parser: Parser, document: Document, token: CancellationToken): Promise<TableOfContents> {
-    const entries = await this.#buildPandocToc(parser, document, token);
-    return new TableOfContents(entries, pandocSlugifier);
+    const { entries, anchors } = await this.#buildPandocToc(parser, document, token);
+    return new TableOfContents(entries, pandocSlugifier, anchors);
   }
 
   public static async createForContainingDoc(parser: Parser, workspace: IWorkspace, document: Document, token: CancellationToken): Promise<TableOfContents> {
     const context = workspace.getContainingDocument?.(getDocUri(document));
     if (context) {
-      const entries = (await Promise.all(Array.from(context.children, async cell => {
+      const tocs = await Promise.all(Array.from(context.children, async cell => {
         const doc = await workspace.openMarkdownDocument(cell.uri);
         if (!doc || token.isCancellationRequested) {
-          return [];
+          return { entries: [], anchors: [] };
         }
         return this.#buildPandocToc(parser, doc, token);
-      }))).flat();
-      return new TableOfContents(entries, pandocSlugifier);
+      }));
+      return new TableOfContents(
+        tocs.flatMap(toc => toc.entries),
+        pandocSlugifier,
+        tocs.flatMap(toc => toc.anchors)
+      );
     }
 
     return this.create(parser, document, token);
   }
 
-  static async #buildPandocToc(parser: Parser, document: Document, token: CancellationToken): Promise<TocEntry[]> {
+  static async #buildPandocToc(parser: Parser, document: Document, token: CancellationToken): Promise<{ entries: TocEntry[], anchors: TocEntry[] }> {
 
     const docUri = getDocUri(document);
 
     const toc: TocEntry[] = [];
+    // Other link targets that aren't part of the outline, such as `::: {#id}` divs
+    const anchors: TocEntry[] = [];
     const tokens = parser(document);
     if (token.isCancellationRequested) {
-      return [];
+      return { entries: [], anchors: [] };
     }
 
     // compute restricted ranges (ignore headings in these ranges)
@@ -143,6 +150,21 @@ export class TableOfContents {
         ++existingSlugEntry.count;
         slug = pandocSlugifier.fromHeading(slug.value + '-' + existingSlugEntry.count);
       } else {
+        existingSlugEntries.set(slug.value, { count: 0 });
+      }
+      return slug;
+    }
+
+    // An explicit `{#id}` replaces the auto-generated identifier, as in
+    // Pandoc. It's still recorded so that later auto-generated identifiers
+    // don't reuse it.
+    const explicitSlug = (token: Token) => {
+      const id = token.attr?.[kAttrIdentifier];
+      if (!id) {
+        return undefined;
+      }
+      const slug = pandocSlugifier.fromHeading(id);
+      if (!existingSlugEntries.has(slug.value)) {
         existingSlugEntries.set(slug.value, { count: 0 });
       }
       return slug;
@@ -185,7 +207,7 @@ export class TableOfContents {
         const text = token.data.text;
 
         // slug
-        const slug = toSlug(text);
+        const slug = explicitSlug(token) ?? toSlug(text);
 
         // line
         const line = token.range.start.line;
@@ -245,10 +267,22 @@ export class TableOfContents {
           line: token.range.start.line,
           sectionLocation: asLocation(token.range),
         })
+      } else if (token.type === "Div") {
+        const slug = explicitSlug(token);
+        if (slug) {
+          anchors.push({
+            type: TocEntryType.Div,
+            slug,
+            text: token.attr![kAttrIdentifier],
+            level: lastLevel,
+            line: token.range.start.line,
+            sectionLocation: asLocation(token.range),
+          });
+        }
       }
     }
 
-    return toc;
+    return { entries: toc, anchors };
   }
 
 
@@ -259,13 +293,17 @@ export class TableOfContents {
   private constructor(
     public readonly entries: readonly TocEntry[],
     slugifier: ISlugifier,
+    // Link targets that aren't in the outline (`entries`), such as divs with
+    // an `{#id}`.
+    private readonly anchors: readonly TocEntry[] = [],
   ) {
     this.#slugifier = slugifier;
   }
 
   public lookup(fragment: string): TocEntry | undefined {
     const slug = this.#slugifier.fromHeading(fragment);
-    return this.entries.find(entry => entry.slug.equals(slug));
+    return this.entries.find(entry => entry.slug.equals(slug))
+      ?? this.anchors.find(entry => entry.slug.equals(slug));
   }
 }
 

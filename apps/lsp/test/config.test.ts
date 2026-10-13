@@ -11,19 +11,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { CancellationToken, Connection, Emitter, TextDocuments } from "vscode-languageserver";
-import { TextDocument } from "vscode-languageserver-textdocument";
-import { URI, Utils } from "vscode-uri";
-
-import { Document, markdownitParser } from "quarto-core";
+import { CancellationToken, Connection } from "vscode-languageserver";
 
 import { ConfigurationManager, getDiagnosticsOptions } from "../src/config";
-import { Logger } from "../src/logging";
-import { createLanguageService, DiagnosticLevel, IWorkspace } from "../src/service";
-import { Quarto } from "../src/quarto";
-import { defaultLsConfiguration } from "../src/service/config";
-
-const logger = new Logger(() => { /* quiet */ });
+import { DiagnosticLevel } from "../src/service";
+import { logger, memoryLanguageService, qmd } from "./workspace";
 
 // Configuration manager whose client answers `workspace/configuration`
 // requests from a map of section name to value.
@@ -125,25 +117,8 @@ test("the quarto settings are still read alongside markdown.validate", async () 
   assert.equal(settings.markdown.validate.unusedLinkDefinitions.enabled, "ignore");
 });
 
-// Minimal in-memory workspace holding the given documents.
-function memoryWorkspace(root: URI, docs: Document[]): IWorkspace {
-  const byUri = new Map(docs.map(doc => [doc.uri, doc]));
-  return {
-    workspaceFolders: [root],
-    onDidChangeMarkdownDocument: new Emitter<Document>().event,
-    onDidCreateMarkdownDocument: new Emitter<Document>().event,
-    onDidDeleteMarkdownDocument: new Emitter<URI>().event,
-    getAllMarkdownDocuments: async () => docs,
-    hasMarkdownDocument: (resource: URI) => byUri.has(resource.toString()),
-    openMarkdownDocument: async (resource: URI) => byUri.get(resource.toString()),
-    stat: async (resource: URI) => byUri.has(resource.toString()) ? { isDirectory: false } : undefined,
-    readDirectory: async () => [],
-  };
-}
-
 test("link diagnostics are reported for a Quarto document once quarto.validate.links.enabled is on", async () => {
-  const root = URI.file("/project");
-  const doc = TextDocument.create(Utils.joinPath(root, "doc.qmd").toString(), "quarto", 1, [
+  const doc = qmd("doc.qmd", [
     "## Introduction",
     "",
     "See [intro](#introduction), [nowhere](#no-such-header),",
@@ -151,15 +126,8 @@ test("link diagnostics are reported for a Quarto document once quarto.validate.l
     "",
     "[unused]: https://example.com",
     "",
-  ].join("\n"));
-  const mdLs = createLanguageService({
-    config: defaultLsConfiguration(),
-    quarto: {} as Quarto,
-    workspace: memoryWorkspace(root, [doc]),
-    documents: new TextDocuments(TextDocument),
-    parser: markdownitParser(),
-    logger,
-  });
+  ]);
+  const mdLs = memoryLanguageService([doc]);
 
   // Turning on markdown.validate for .md files doesn't affect Quarto documents
   const disabled = await configFrom({ "markdown.validate": { ...vscodeValidateDefaults, enabled: true } });

@@ -39,7 +39,7 @@ export interface CitationSourceListProps extends WidgetProps {
   onConfirm: VoidFunction;
   focusPrevious?: () => void;
 
-  itemProvider: (props: RowComponentProps<CitationSourcePanelListItemData>) => React.ReactElement<any>;
+  itemProvider: (props: RowComponentProps<CitationSourcePanelListItemData>) => React.ReactElement;
   itemHeight: number;
 
   status: CitationSourceListStatus;

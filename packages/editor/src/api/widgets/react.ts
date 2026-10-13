@@ -20,7 +20,7 @@ export interface WidgetProps {
 // (unattached to the DOM), and then subsequently destoyed/unmounted by ProseMirror. We use a
 // MutationObserver to watch EditorView.dom for the element's removal then in response call
 // ReactDOM.unmountComponentAtNode
-export function reactRenderForEditorView(element: React.ReactElement<any>, container: HTMLElement, view: EditorView) {
+export function reactRenderForEditorView(element: React.ReactElement, container: HTMLElement, view: EditorView) {
   // render the react element into the container
   const root = createRoot(container);
   root.render(element);

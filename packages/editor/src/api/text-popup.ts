@@ -17,8 +17,6 @@ import { textRangePopupDecorationPosition } from './widgets/decoration';
 import { kPlatformMac } from './platform';
 import { MarkType } from 'prosemirror-model';
 
-import type { JSX } from "react";
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TextPopupTarget<AttrsType = any> {
   attrs: AttrsType;
@@ -34,7 +32,7 @@ export interface TextPopupDecoration<AttrsType = any> {
     view: EditorView,
     target: TextPopupTarget<AttrsType>,
     style: React.CSSProperties,
-  ) => Promise<JSX.Element | null>;
+  ) => Promise<React.JSX.Element | null>;
   dismissOnEdit?: boolean;
   makeLinksAccessible?: boolean;
   specKey?: (target: TextPopupTarget<AttrsType>) => string;

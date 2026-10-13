@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React, { type JSX } from "react";
+import React from "react";
 
 import { 
   Button, 
@@ -35,7 +35,7 @@ export interface ModalDialogProps {
   noCancelButton?: boolean;
   cancelCaption?: string;
   focusOKButton?: boolean;
-  leftButtons?: JSX.Element;
+  leftButtons?: React.JSX.Element;
 }
 
 export const ModalDialog: React.FC<ModalDialogProps> = props => {

@@ -85,7 +85,7 @@ const hotkeysReducer = (state: HotkeysContextState, action: HotkeysAction) => {
 
 export interface HotkeysProviderProps {
   /** The component subtree which will have access to this hotkeys context. */
-  children: React.ReactElement<any> | number | string;
+  children: React.ReactElement | number | string;
 
   /** If provided, we will use this context instance instead of generating our own. */
   value?: HotkeysContextInstance;

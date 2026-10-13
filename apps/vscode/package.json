@@ -1412,6 +1412,14 @@
           "type": "boolean",
           "default": true,
           "description": "Show code cells in the document outline."
+        },
+        "quarto.validate.links.enabled": {
+          "type": "boolean",
+          "default": false,
+          "tags": [
+            "experimental"
+          ],
+          "markdownDescription": "Report link diagnostics in Quarto documents: undefined reference links, links to missing headers or files, and unused or duplicate link definitions. The level of each check, and the links to skip, come from the `markdown.validate.*` settings (such as `#markdown.validate.fragmentLinks.enabled#`); `#markdown.validate.enabled#` has no effect on Quarto documents.\n\nLinks to files that only exist after rendering (such as `other.html`) are reported as missing files; add them to `#markdown.validate.ignoredLinks#` or link to the `.qmd` source instead."
         }
       }
     },

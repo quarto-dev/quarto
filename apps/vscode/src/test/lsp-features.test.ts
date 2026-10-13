@@ -167,10 +167,42 @@ suite("Quarto LSP features", function () {
       ),
       (locations) => locations.length > 0
     );
-    const fragmentLine = positionOf(doc, "(#first-section)").line;
+    const fragmentLine = positionOf(doc, "(#sec-first)").line;
     assert.ok(
       locations.some((l) => l.range.start.line === fragmentLine),
       JSON.stringify(locations.map((l) => l.range.start.line))
+    );
+  });
+
+  test("link diagnostics follow quarto.validate.links.enabled", async function () {
+    this.timeout(60000);
+    const linksUri = examplesUri("lsp-link-diagnostics.qmd");
+    const linksDoc = await vscode.workspace.openTextDocument(linksUri);
+    await vscode.window.showTextDocument(linksDoc);
+    const linkDiagnostics = () => vscode.languages.getDiagnostics(linksUri).filter((d) => {
+      const code = typeof d.code === "object" ? d.code.value : d.code;
+      return typeof code === "string" && code.startsWith("link.");
+    });
+    const config = vscode.workspace.getConfiguration("quarto.validate.links");
+    try {
+      await config.update("enabled", true, vscode.ConfigurationTarget.Global);
+      await waitForCondition(
+        () => linkDiagnostics().length > 0,
+        { timeout: 20000, message: "link diagnostics after enabling quarto.validate.links" }
+      );
+      const diagnostics = linkDiagnostics();
+      const line = linksDoc.positionAt(linksDoc.getText().indexOf("#no-such-section")).line;
+      assert.deepStrictEqual(
+        diagnostics.map((d) => d.range.start.line),
+        [line],
+        JSON.stringify(diagnostics.map((d) => [d.range.start.line, d.message]))
+      );
+    } finally {
+      await config.update("enabled", undefined, vscode.ConfigurationTarget.Global);
+    }
+    await waitForCondition(
+      () => linkDiagnostics().length === 0,
+      { timeout: 20000, message: "link diagnostics cleared after disabling quarto.validate.links" }
     );
   });
 });

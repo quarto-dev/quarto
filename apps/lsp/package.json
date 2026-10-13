@@ -8,6 +8,7 @@
     "dev": "yarn run build dev",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "lint": "tsc --noEmit && eslint src",
+    "test": "node --import tsx --test test/*.test.ts",
     "start": "node dist/lsp.js"
   },
   "dependencies": {

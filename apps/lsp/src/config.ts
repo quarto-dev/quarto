@@ -40,6 +40,11 @@ export interface Settings {
       readonly exportToWorkspace: 'default' | 'all' | 'none';
       readonly showCodeCellsInOutline: boolean;
     };
+    readonly validate: {
+      readonly links: {
+        readonly enabled: boolean;
+      };
+    };
   };
   readonly markdown: {
     readonly preferredMdPathExtensionStyle: 'auto' | 'includeExtension' | 'removeExtension';
@@ -51,8 +56,11 @@ export interface Settings {
       };
     };
 
+    // The per-rule levels of VS Code's `markdown.validate.*` settings. Whether
+    // link diagnostics run at all is `quarto.validate.links.enabled`, not
+    // `markdown.validate.enabled`, so that enabling them for `.md` files
+    // doesn't also enable them for Quarto documents.
     readonly validate: {
-      readonly enabled: boolean;
       readonly referenceLinks: {
         readonly enabled: ValidateEnabled;
       };
@@ -90,6 +98,11 @@ function defaultSettings(): Settings {
       symbols: {
         exportToWorkspace: 'all',
         showCodeCellsInOutline: true
+      },
+      validate: {
+        links: {
+          enabled: false
+        }
       }
     },
     markdown: {
@@ -100,24 +113,26 @@ function defaultSettings(): Settings {
           includeWorkspaceHeaderCompletions: 'never'
         }
       },
+      // The defaults of VS Code's `markdown.validate.*` settings, used when the
+      // client doesn't send them (e.g. the built-in Markdown extension is
+      // disabled).
       validate: {
-        enabled: kDefaultDiagnosticOptions.enabled,
         referenceLinks: {
-          enabled: kDefaultDiagnosticOptions.validateReferences!,
+          enabled: 'warning',
         },
         fragmentLinks: {
-          enabled: kDefaultDiagnosticOptions.validateFragmentLinks!,
+          enabled: 'warning',
         },
         fileLinks: {
-          enabled: kDefaultDiagnosticOptions.validateFileLinks!,
+          enabled: 'warning',
           markdownFragmentLinks: 'inherit',
         },
         ignoredLinks: [],
         unusedLinkDefinitions: {
-          enabled: kDefaultDiagnosticOptions.validateUnusedLinkDefinitions!,
+          enabled: 'hint',
         },
         duplicateLinkDefinitions: {
-          enabled: kDefaultDiagnosticOptions.validateDuplicateLinkDefinitions!
+          enabled: 'warning'
         }
       }
     }
@@ -156,13 +171,19 @@ export class ConfigurationManager extends Disposable {
     this._logger.logTrace('Sending \'configuration\' request');
     // Request only the specific sections we need to avoid warnings about
     // language-scoped settings like [markdown], [python], etc.
-    const [workbench, quarto] = await this.connection_.workspace.getConfiguration([
+    const [workbench, quarto, validate] = await this.connection_.workspace.getConfiguration([
       { section: 'workbench' },
-      { section: 'quarto' }
+      { section: 'quarto' },
+      { section: 'markdown.validate' }
     ]);
 
+    const defaults = defaultSettings();
     this._settings = {
-      ...defaultSettings(),
+      ...defaults,
+      markdown: {
+        ...defaults.markdown,
+        validate: validateSettings(validate, defaults.markdown.validate)
+      },
       workbench: {
         colorTheme: workbench?.colorTheme ?? this._settings.workbench.colorTheme
       },
@@ -176,6 +197,13 @@ export class ConfigurationManager extends Disposable {
         symbols: {
           exportToWorkspace: quarto?.symbols?.exportToWorkspace ?? this._settings.quarto.symbols.exportToWorkspace,
           showCodeCellsInOutline: quarto?.symbols?.showCodeCellsInOutline ?? this._settings.quarto.symbols.showCodeCellsInOutline
+        },
+        validate: {
+          links: {
+            enabled: typeof quarto?.validate?.links?.enabled === 'boolean'
+              ? quarto.validate.links.enabled
+              : defaults.quarto.validate.links.enabled
+          }
         }
       }
     };
@@ -212,6 +240,38 @@ export class ConfigurationManager extends Disposable {
       this._onDidChangeConfiguration.fire(this._settings);
     }
   }
+}
+
+// Read the per-rule levels of the `markdown.validate.*` settings sent by the
+// client (the same settings that VS Code's built-in Markdown extension uses),
+// falling back to VS Code's defaults for anything missing or malformed.
+// `markdown.validate.enabled` is deliberately ignored: see Settings.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function validateSettings(validate: any, defaults: Settings['markdown']['validate']): Settings['markdown']['validate'] {
+  const level = <T extends string>(value: unknown, fallback: T, allowed: readonly string[]): T =>
+    typeof value === 'string' && allowed.includes(value) ? value as T : fallback;
+  const levels = ['ignore', 'hint', 'warning', 'error'];
+  return {
+    referenceLinks: {
+      enabled: level(validate?.referenceLinks?.enabled, defaults.referenceLinks.enabled, levels),
+    },
+    fragmentLinks: {
+      enabled: level(validate?.fragmentLinks?.enabled, defaults.fragmentLinks.enabled, levels),
+    },
+    fileLinks: {
+      enabled: level(validate?.fileLinks?.enabled, defaults.fileLinks.enabled, levels),
+      markdownFragmentLinks: level(validate?.fileLinks?.markdownFragmentLinks, defaults.fileLinks.markdownFragmentLinks, [...levels, 'inherit']),
+    },
+    ignoredLinks: Array.isArray(validate?.ignoredLinks)
+      ? validate.ignoredLinks.filter((link: unknown) => typeof link === 'string')
+      : defaults.ignoredLinks,
+    unusedLinkDefinitions: {
+      enabled: level(validate?.unusedLinkDefinitions?.enabled, defaults.unusedLinkDefinitions.enabled, levels),
+    },
+    duplicateLinkDefinitions: {
+      enabled: level(validate?.duplicateLinkDefinitions?.enabled, defaults.duplicateLinkDefinitions.enabled, levels),
+    },
+  };
 }
 
 export function lsConfiguration(configManager: ConfigurationManager): LsConfiguration {
@@ -267,7 +327,7 @@ export function getDiagnosticsOptions(configManager: ConfigurationManager): Diag
 
   const validateFragmentLinks = convertDiagnosticLevel(settings.markdown.validate.fragmentLinks.enabled);
   return {
-    enabled: settings.markdown.validate.enabled,
+    enabled: settings.quarto.validate.links.enabled,
     validateFileLinks: convertDiagnosticLevel(settings.markdown.validate.fileLinks.enabled),
     validateReferences: convertDiagnosticLevel(settings.markdown.validate.referenceLinks.enabled),
     validateFragmentLinks: convertDiagnosticLevel(settings.markdown.validate.fragmentLinks.enabled),

@@ -13,6 +13,8 @@
 - Running a Stata or C# cell no longer drops leading `#|` lines. These languages write cell options as `*|` and `//|`, so `#|` lines are code, and they are now sent to the kernel just as `quarto render` sends them (<https://github.com/quarto-dev/quarto/pull/1183>).
 - Updated the Mermaid used to render diagrams in notebook Markdown cells from 9.4 to 11.17, so newer syntax such as `A@{ shape: ... }` works. The diagram preview moves from Mermaid 11.12 to 11.17 too. In both, class and C4 diagrams now use Mermaid's newer renderer, so they look slightly different (<https://github.com/quarto-dev/quarto/pull/1189>).
 - Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
+- Added an experimental `quarto.validate.links.enabled` setting, off by default, that reports link diagnostics in Quarto documents: undefined reference links, links to missing headers or files, and unused and duplicate link definitions. The level of each check comes from the `markdown.validate.*` settings, but `markdown.validate.enabled` itself doesn't affect Quarto documents (<https://github.com/quarto-dev/quarto/pull/1186>).
+- Links to a heading with an explicit identifier, such as `[see](#sec-intro)` for `## Introduction {#sec-intro}`, now resolve to that heading, as they do in Pandoc: go to definition, find references and `#` path completions use the explicit identifier instead of one generated from the heading text. Links to divs with an identifier (`::: {#fig-x}`) are also recognized as valid targets (<https://github.com/quarto-dev/quarto/pull/1186>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

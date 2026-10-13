@@ -153,6 +153,9 @@ export class MdDocumentSymbolProvider {
       case TocEntryType.CodeCell: {
         return lsp.SymbolKind.Function;
       }
+      case TocEntryType.Div: {
+        return lsp.SymbolKind.Object;
+      }
     }
   }
 

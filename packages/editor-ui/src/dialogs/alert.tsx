@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React, { useState } from 'react';
+import React, { useState, type JSX } from 'react';
 
 import { 
   Dialog,

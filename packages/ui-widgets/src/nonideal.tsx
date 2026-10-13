@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, type JSX } from 'react';
 
 import { Text, makeStyles, tokens } from "@fluentui/react-components"
 import { DocumentRegular, ErrorCircleFilled, ErrorCircleRegular } from "@fluentui/react-icons"

@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React from "react";
+import React, { type JSX } from "react";
 
 import { 
   Button, 

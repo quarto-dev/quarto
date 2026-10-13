@@ -76,7 +76,7 @@ const InsertCiteDialog: React.FC<{
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
   const [idFocused, setIdFocused] = useState(false);
-  const idEl = useRef<HTMLInputElement>();
+  const idEl = useRef<HTMLInputElement>(undefined);
   const focusId = () => idEl?.current?.focus();
   const idFocusRef = (el: HTMLInputElement | null) => {
     if (!idFocused && el) {

@@ -28,7 +28,7 @@ See our [`CONTRIBUTING`](https://github.com/quarto-dev/quarto/blob/main/apps/vsc
 
 ## Licenses
 
-This repository contains code under multiple open source licenses:
+This repository contains code under the following open source licenses:
 
 | Component | License |
 |-----------|---------|
@@ -37,7 +37,6 @@ This repository contains code under multiple open source licenses:
 | [Visual Editor](packages/editor/package.json) | MIT |
 | [Panmirror](apps/panmirror/package.json) (RStudio integration) | MIT |
 | @quarto/* npm packages | MIT (e.g. [mapped-string](packages/mapped-string/package.json)) |
-| OJS Runtime | ISC (e.g. [quarto-ojs-runtime](packages/ojs/quarto-ojs-runtime/package.json)) |
 
 Individual package licenses are specified in each package's `package.json` file.
 

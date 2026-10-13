@@ -1,1 +1,0 @@
-function() { return arguments.length; }

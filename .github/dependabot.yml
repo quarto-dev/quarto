@@ -29,9 +29,6 @@ updates:
       # Stays on the major of the oldest supported extension host's Node (22).
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
-      # which 7 needs Node >=22.22, newer than VS Code 1.101's extension host.
-      - dependency-name: "which"
-        versions: [">=7.0.0"]
       # @vscode/test-cli 0.0.15 doesn't support mocha 12.
       - dependency-name: "mocha"
         update-types: ["version-update:semver-major"]

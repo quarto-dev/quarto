@@ -2,6 +2,8 @@
 
 ## 1.139.0 (Unreleased)
 
+- Fixed "Quarto: Preview" (and render) stalling on Windows PowerShell when the document path contains parentheses but no spaces (e.g. `Article(md)`): the file path in the generated terminal command is now shell-quoted (<https://github.com/quarto-dev/quarto/issues/1194>).
+
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
 - In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).
 - The extension now reads YAML the way Quarto CLI does: merge keys (`<<`) in front matter and `_quarto.yml` are no longer resolved, and dates are read as strings (<https://github.com/quarto-dev/quarto/pull/1158>).

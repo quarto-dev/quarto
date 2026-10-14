@@ -12,7 +12,6 @@ import { Uri, extensions } from "vscode";
 import { activeWorkspaceFolder } from "./workspace";
 
 import which from "which";
-import { shQuote } from "core";
 
 export async function activePythonInterpreter(uri?: Uri) {
 
@@ -53,7 +52,10 @@ export function pythonIsCondaEnv(python: string) {
       "import sys, os; print(os.path.exists(os.path.join(sys.prefix, 'conda-meta')))",
     ];
     const output = (
-      child_process.execFileSync(shQuote(python), args, {
+      // Note: execFileSync does not spawn a shell, so the executable path must
+      // not be shell-quoted here (shQuote is only for command strings typed
+      // into a terminal).
+      child_process.execFileSync(python, args, {
         encoding: "utf-8",
       }) as unknown as string
     ).trim();

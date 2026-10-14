@@ -8,8 +8,7 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*",
-    "packages/ojs/*"
+    "packages/*"
   ],
   "scripts": {
     "build": "turbo run build",

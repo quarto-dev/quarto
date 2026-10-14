@@ -1,1 +1,0 @@
-See checklist for [publishing a new release](https://observablehq.com/@observablehq/publishing-new-open-source-releases).

@@ -32,7 +32,7 @@ export interface TextPopupDecoration<AttrsType = any> {
     view: EditorView,
     target: TextPopupTarget<AttrsType>,
     style: React.CSSProperties,
-  ) => Promise<JSX.Element | null>;
+  ) => Promise<React.JSX.Element | null>;
   dismissOnEdit?: boolean;
   makeLinksAccessible?: boolean;
   specKey?: (target: TextPopupTarget<AttrsType>) => string;

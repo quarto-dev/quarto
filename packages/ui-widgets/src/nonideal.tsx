@@ -11,7 +11,7 @@ import { DocumentRegular, ErrorCircleFilled, ErrorCircleRegular } from "@fluentu
 
 export interface NonIdealStateProps {
   title: string;
-  action?: JSX.Element,
+  action?: React.JSX.Element,
   icon?: "document" | "issue" | "error";
   className?: string;
 }

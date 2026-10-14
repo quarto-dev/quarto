@@ -98,7 +98,7 @@ export const InsertSymbolPopup: React.FC<InsertSymbolPopupProps> = props => {
   const handleKeyboardEvent = (event: React.KeyboardEvent<HTMLElement>) => {
     // The last element might be the preference panel, if a provider
     // provides one
-    function lastElement(): React.RefObject<HTMLElement> {
+    function lastElement(): React.RefObject<HTMLElement | null> {
       if (preferenceRef.current !== null) {
         return preferenceRef;
       }

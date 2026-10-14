@@ -8,7 +8,7 @@ import React, { PropsWithChildren, useContext } from 'react';
 
 import { SubMenuProps, SubMenu } from '../menu/Menu';
 
-import { CommandMenuItem } from './CommandMenuItem';
+import { CommandMenuItem, CommandMenuItemProps } from './CommandMenuItem';
 
 import { CommandManagerContext, Commands } from './CommandManager';
 
@@ -26,7 +26,7 @@ export const CommandSubMenu: React.FC<PropsWithChildren<CommandSubMenuProps>> = 
   for (const child of children) {
 
     if (
-      React.isValidElement(child) &&
+      React.isValidElement<CommandMenuItemProps>(child) &&
       child.type === CommandMenuItem 
     ) {
       // get command

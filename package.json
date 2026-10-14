@@ -28,6 +28,11 @@
     "turbo": "^2.11.5",
     "typescript": "~6.0.3"
   },
+  "overrides": {
+    "mermaid": {
+      "katex": "^0.18.2"
+    }
+  },
   "allowScripts": {
     "esbuild": true,
     "@vscode/vsce-sign": true,

@@ -1554,7 +1554,7 @@
     "vscode-languageclient": "^10.1.2",
     "vscode-languageserver-types": "^3.18.4",
     "vscode-uri": "^3.0.3",
-    "which": "^3.0.1"
+    "which": "^6.0.1"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",

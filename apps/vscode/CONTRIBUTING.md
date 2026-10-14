@@ -1,24 +1,24 @@
 # Building the extension
 
-Use the Node version in `.nvmrc` (for example, with `nvm use`), and run `corepack enable` to get Yarn 1.
+Use the Node version in `.nvmrc` (for example, with `nvm use`), and the npm that comes with it.
 
-To develop the Quarto VS Code extension, clone the quarto mono-repo, run `yarn` at top level, then run the `yarn dev-vscode` command:
+To develop the Quarto VS Code extension, clone the quarto mono-repo, run `npm install` at top level, then run the `npm run dev-vscode` command:
 
 ```sh
-yarn             # install dependencies
-yarn dev-vscode  # run development/debug version of extension
+npm install         # install dependencies
+npm run dev-vscode  # run development/debug version of extension
 ```
 
-Run the extension tests with:
+Run the extension tests with the command below. Pass `vscode-test` options after `--`, for example `npm run test-vscode -- --label main --grep pattern`.
 
 ```sh
-yarn test-vscode # compile the test files and run them with the vscode-test CLI
+npm run test-vscode # compile the test files and run them with the vscode-test CLI
 ```
 
 The Positron-specific integration tests (`src/test/positron/`) exercise Positron API code paths that vanilla VS Code can't reach. They run inside a downloaded Positron build rather than VS Code:
 
 ```sh
-yarn test-positron # build the tests and run them inside Positron
+npm run test-positron # build the tests and run them inside Positron
 ```
 
 Set `POSITRON_CHANNEL=daily` to test against a daily build (default: `stable`).
@@ -26,8 +26,8 @@ Set `POSITRON_CHANNEL=daily` to test against a daily build (default: `stable`).
 Install the dev version of the extension in VS Code or Positron with:
 
 ```sh
-yarn install-vscode
-yarn install-positron
+npm run install-vscode
+npm run install-positron
 ```
 
 # Debugging the extension
@@ -40,13 +40,13 @@ The extension must have been built in dev mode (see the build section). The `dev
 
 Here is the process:
 
-- Let `yarn dev-vscode` run in the background somewhere.
+- Let `npm run dev-vscode` run in the background somewhere.
 
 - Open the repository root in VS Code or Positron and go to the `Run and debug` pane.
 
 - Run the `Run VS Code Extension` to open the dev version of the extension in a new window.
 
-  Alternatively, open the `apps/vscode` folder and run `Run Extension`. Its pre-launch task starts `yarn dev-vscode` for you and waits for the first build.
+  Alternatively, open the `apps/vscode` folder and run `Run Extension`. Its pre-launch task starts `npm run dev-vscode` for you and waits for the first build.
 
 - If you need to set breakpoints in the LSP, you'll have to select the launch configuration `Attach to VS Code LSP server` and run that as well. You should see your LSP breakpoints bind (go from grayed out to red dots) as soon as the debugger is attached to the LSP.
 

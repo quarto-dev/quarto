@@ -6,7 +6,6 @@ test-out/**
 node_modules/**
 src/**
 .gitignore
-.yarnrc
 **/tsconfig.json
 eslint.config.mjs
 **/*.map

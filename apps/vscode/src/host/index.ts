@@ -25,6 +25,8 @@ export interface HostWebviewPanel extends vscode.Disposable {
   reveal(viewColumn?: vscode.ViewColumn, preserveFocus?: boolean): void;
   readonly onDidChangeViewState: vscode.Event<unknown>;
   readonly onDidDispose: vscode.Event<void>;
+  setStoppable?(stoppable: boolean): void;
+  readonly onDidRequestStop?: vscode.Event<void>;
 }
 
 export interface HostStatementRangeProvider {

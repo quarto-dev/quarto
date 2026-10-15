@@ -17,12 +17,12 @@
     "tmp": "^0.2.7",
     "tsconfig": "*",
     "vscode-languageserver-types": "^3.18.4",
-    "vscode-uri": "^3.0.3"
+    "vscode-uri": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "^22.20.4",
+    "@types/node": "^22.20.5",
     "@types/tmp": "^0.2.6",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15",
     "vscode-languageserver": "^10.1.2"

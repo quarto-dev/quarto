@@ -9,7 +9,7 @@ import fs from "node:fs";
 
 
 import { Uri, workspace, extensions, window } from "vscode";
-import { pathWithForwardSlashes, shQuote, sleep, winShEscape } from "core";
+import { pathWithForwardSlashes, shQuote, sleep, TerminalShell } from "core";
 import { Terminal } from "vscode";
 import { QuartoContext, fileCrossrefIndexStorage } from "quarto-core";
 import { TerminalOptions } from "vscode";
@@ -94,19 +94,29 @@ export function terminalOptions(name: string, target: Uri, env: TerminalEnv) {
 }
 
 export function terminalCommand(command: string, context: QuartoContext, target?: Uri) {
+  const shell = targetShell(context);
   const quarto = "quarto"; // binPath prepended to PATH so we don't need the full form
-  const cmd: string[] = [
-    context.useCmd ? winShEscape(quarto) : shQuote(quarto),
-    command
-  ];
+  const cmd: string[] = [shQuote(quarto, shell), command];
   if (target) {
-    cmd.push(shQuote(
-      context.useCmd
-        ? target.fsPath
-        : pathWithForwardSlashes(target.fsPath)
-    ));
+    cmd.push(
+      shQuote(
+        context.useCmd ? target.fsPath : pathWithForwardSlashes(target.fsPath),
+        shell
+      )
+    );
   }
   return cmd;
+}
+
+// The shell that will interpret a generated terminal command: `useCmd`
+// means the command targets cmd.exe (old Quarto on Windows shipped a .cmd
+// shim); otherwise the integrated terminal's default shell applies,
+// PowerShell on Windows and POSIX sh elsewhere.
+function targetShell(context: QuartoContext): TerminalShell {
+  if (context.useCmd) {
+    return "cmd";
+  }
+  return os.platform() === "win32" ? "powershell" : "posix";
 }
 
 export async function sendTerminalCommand(

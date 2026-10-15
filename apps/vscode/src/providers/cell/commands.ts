@@ -302,6 +302,11 @@ class RunCurrentCommand extends RunCommand implements Command {
         const metadata = cellMetadataForBlock(block);
         await executeInteractive(executor, [code], editor.document, undefined, metadata ? [metadata] : undefined);
       } else {
+        // check before execution so we don't depend on async cursor state
+        const lastCodeLine = block.range.end.line - 1;
+        const wasOnLastLine = editor.selection.isEmpty &&
+          editor.selection.start.line >= lastCodeLine;
+
         // submit
         const executed = await executeSelectionInteractive(executor);
 
@@ -330,6 +335,15 @@ class RunCurrentCommand extends RunCommand implements Command {
 
           // run code
           await executeInteractive(executor, [selection], editor.document);
+        }
+
+        // if on the last line, advance to the next code chunk instead of
+        // falling into prose (see https://github.com/quarto-dev/quarto/issues/704)
+        if (wasOnLastLine) {
+          const next = nextBlock(this.host_, block.range.end.line, _tokens, false, false);
+          if (next) {
+            navigateToBlock(editor, next);
+          }
         }
       }
     }
@@ -369,8 +383,17 @@ class RunCurrentCommand extends RunCommand implements Command {
             )
           );
 
+          // advance to the next code chunk if the next statement position
+          // is past the block, or if we're on the last line with no next statement
           if (nextStatementPos !== undefined) {
-            await editor.setBlockSelection(context, positionOutOfVdoc(nextStatementPos));
+            const adjustedPos = positionOutOfVdoc(nextStatementPos);
+            if (adjustedPos.line >= codeLines.length) {
+              await editor.setBlockSelection(context, "nextblock");
+            } else {
+              await editor.setBlockSelection(context, adjustedPos);
+            }
+          } else if (context.selection.start.line >= codeLines.length - 1) {
+            await editor.setBlockSelection(context, "nextblock");
           }
         }
       }
@@ -391,9 +414,17 @@ class RunCurrentCommand extends RunCommand implements Command {
           if (selection.length > 0) {
             await executeInteractive(executor, [selection], editor.document);
             await editor.setBlockSelection(context, "nextline");
-          } else if (activeBlock) { // if the selection is empty take the whole line as the selection
-            await executeInteractive(executor, [lines(activeBlock.code)[context.selection.start.line]], editor.document);
-            await editor.setBlockSelection(context, "nextline");
+          } else if (activeBlock) {
+            // if the selection is empty take the whole line as the selection
+            const codeLines = lines(activeBlock.code);
+            const isOnLastLine = context.selection.start.line >= codeLines.length - 1;
+            await executeInteractive(executor, [codeLines[context.selection.start.line]], editor.document);
+            // advance to the next code chunk instead of falling into prose
+            if (isOnLastLine) {
+              await editor.setBlockSelection(context, "nextblock");
+            } else {
+              await editor.setBlockSelection(context, "nextline");
+            }
           }
 
         }

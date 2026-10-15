@@ -24,7 +24,7 @@
 				"${workspaceFolder}/src/test/examples"
 			],
 			"outFiles": ["${workspaceFolder}/test-out/**/*.js"],
-      "preLaunchTask": "yarn: build-test"
+      "preLaunchTask": "npm: build-test"
 		}
   ]
 }

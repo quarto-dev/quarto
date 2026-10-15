@@ -5,7 +5,7 @@
  * cached) Positron build and runs the compiled Mocha entry point
  * (`test-out/positron/index.js`) inside it, via `@posit-dev/positron-test-electron`.
  *
- * Run with: `yarn test-positron` (which builds the tests first).
+ * Run with: `npm run test-positron` (which builds the tests first).
  *
  * Following the VS Code extension testing pattern, the tests run with
  * `--disable-extensions` (applied by the harness) so the Quarto extension is

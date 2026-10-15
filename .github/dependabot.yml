@@ -1,0 +1,47 @@
+version: 2
+updates:
+  # One entry covers every npm workspace through the root package-lock.json.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Wait a week after a release before proposing it, to limit supply-chain
+    # risk and let quick follow-up releases collapse into one bump.
+    cooldown:
+      default-days: 7
+    # Raise the floor in every workspace that declares the package, so the
+    # ranges stay unified.
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "build"
+    groups:
+      # All minor and patch updates in one PR. Majors get a PR each.
+      npm-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Must match engines.vscode (^1.101.0); bump them together by hand.
+      - dependency-name: "@types/vscode"
+      # Stays on the major of the oldest supported extension host's Node (22).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # @vscode/test-cli 0.0.15 doesn't support mocha 12.
+      - dependency-name: "mocha"
+        update-types: ["version-update:semver-major"]
+      # typescript-eslint caps its typescript peer range at <6.1, and TS 7 has
+      # no JS API yet.
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
+      # 5.x calls require('markdown-it'), which bundles a second markdown-it.
+      - dependency-name: "markdown-it-attrs"
+        update-types: ["version-update:semver-major"]
+      # Prettier 3 comes with a repo-wide reformat; do it by hand.
+      - dependency-name: "prettier"
+        update-types: ["version-update:semver-major"]
+      # Must be the exact version of the diagram preview's vendored
+      # mermaid.min.js (mermaidVersion.test.ts); update both by hand.
+      - dependency-name: "mermaid"

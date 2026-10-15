@@ -7,7 +7,7 @@
  * in the visual editor's code cells.
  *
  * The HTML snapshot is in test/snapshots/. To update it after an intended
- * change, run `UPDATE_SNAPSHOTS=1 yarn test` in this directory and review the diff.
+ * change, run `UPDATE_SNAPSHOTS=1 npm test` in this directory and review the diff.
  */
 
 import test from "node:test";

@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --noEmit && tsx build.ts",
-    "dev": "yarn run build dev",
+    "dev": "npm run build -- dev",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "lint": "tsc --noEmit && eslint src",
     "start": "node dist/lsp.js"

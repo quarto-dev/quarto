@@ -2,7 +2,7 @@
 
 ## 1.139.0 (Unreleased)
 
-- Fixed "Quarto: Preview" (and render) stalling on Windows PowerShell when the document path contains parentheses but no spaces (e.g. `Article(md)`): arguments in generated terminal commands are now serialized as single literal arguments for the target shell — PowerShell, cmd.exe, or POSIX sh — rather than one generic double-quote wrapper, so paths containing `$`, backticks, `%`, or quotes also survive intact (<https://github.com/quarto-dev/quarto/issues/1194>).
+- Fixed "Quarto: Preview" and render in the terminal when the document path contains shell special characters, such as parentheses, `;`, `@`, `$`, or quotes (<https://github.com/quarto-dev/quarto/pull/1197>).
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
 - In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).

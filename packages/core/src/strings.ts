@@ -28,22 +28,31 @@ export function shQuote(value: string, shell: TerminalShell): string {
       // is doubled.
       return `'${value.replace(/'/g, "''")}'`;
     case "cmd": {
-      // Double quotes group words, but %NAME% still expands inside them
-      // (and !NAME! when delayed expansion is on), where a caret escape
-      // would itself be literal. Emit each % and ! outside the quotes
-      // caret-escaped; a literal " is "" per CommandLineToArgvW.
+      // Double quotes group words for CommandLineToArgvW, but cmd.exe still
+      // expands %NAME% inside them (and !NAME! with delayed expansion).
+      // Note that cmd expands %NAME% before it processes carets, so ^%
+      // does not itself stop the expansion: the output is safe because the
+      // " and ^ characters break the variable name — cmd sees %"PATH"^%,
+      // no such variable is defined, and cmd keeps the text. Emit each %
+      // and ! outside the quotes, caret-escaped; a literal " is ""
+      // per CommandLineToArgvW. A part ending in a backslash needs its
+      // trailing backslashes doubled, otherwise CommandLineToArgvW reads
+      // \" as a literal quote instead of the closing quote.
       return value
         .split(/([%!])/)
         .map((part) =>
           part === "%" || part === "!"
             ? `^${part}`
-            : `"${part.replace(/"/g, `""`)}"`
+            : `"${part.replace(/"/g, `""`).replace(/(\\+)$/, "$1$1")}"`
         )
         .join("");
     }
   }
 }
 
-export function winShEscape(value: string): string {
-  return value.replace(" ", "^ ");
+// Quoting for when the terminal's shell cannot be determined: the
+// pre-shell-aware behavior (quote only on whitespace). Never worse than
+// main for paths that already worked there.
+export function shQuoteUnknownShell(value: string): string {
+  return /\s/.test(value) ? `"${value}"` : value;
 }

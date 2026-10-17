@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { shQuote } from "../src/strings";
+import { shQuote, shQuoteUnknownShell } from "../src/strings";
 
 test("shQuote serializes one literal argument for POSIX sh", () => {
   // Single quotes are fully literal in POSIX shells.
@@ -59,9 +59,13 @@ test("shQuote serializes one literal argument for PowerShell", () => {
 });
 
 test("shQuote serializes one literal argument for cmd.exe", () => {
-  // Double quotes group words, but %NAME% still expands inside them (and
-  // !NAME! with delayed expansion), so % and ! are emitted outside the
-  // quotes caret-escaped; a literal " is "" per CommandLineToArgvW.
+  // Double quotes group words, but cmd.exe still expands %NAME% inside them
+  // (and !NAME! with delayed expansion). cmd expands %NAME% before it
+  // processes carets, so the output is safe because the " and ^ break the
+  // variable name — cmd sees %"PATH"^%, no such variable is defined, and
+  // cmd keeps the text. A literal " is "" per CommandLineToArgvW, and
+  // trailing backslashes of each part are doubled so \" is not read as a
+  // literal quote.
   const cases: Array<[string, string]> = [
     ["quarto", '"quarto"'],
     ["C:\\dir(name)\\file.qmd", '"C:\\dir(name)\\file.qmd"'],
@@ -72,9 +76,24 @@ test("shQuote serializes one literal argument for cmd.exe", () => {
     ["%PATH%", '""^%"PATH"^%""'],
     ["a!b", '"a"^!"b"'],
     ['a"b', '"a""b"'],
+    // A trailing backslash must be doubled before the closing quote, or
+    // CommandLineToArgvW reads \" as a literal quote (quarto-dev/quarto#1197).
+    ["C:\\", '"C:\\\\"'],
   ];
   for (const [value, expected] of cases) {
     assert.equal(shQuote(value, "cmd"), expected, JSON.stringify(value));
+  }
+});
+
+test("shQuoteUnknownShell keeps the pre-shell-aware behavior", () => {
+  // Fallback for an unrecognized terminal shell: quote only on whitespace.
+  const cases: Array<[string, string]> = [
+    ["quarto", "quarto"],
+    ["C:/Users/me/Article(md)/01_introduction.md", "C:/Users/me/Article(md)/01_introduction.md"],
+    ["a b", '"a b"'],
+  ];
+  for (const [value, expected] of cases) {
+    assert.equal(shQuoteUnknownShell(value), expected, JSON.stringify(value));
   }
 });
 
@@ -119,3 +138,61 @@ test(
     }
   }
 );
+
+test(
+  "shQuote powershell output round-trips through pwsh to a native command",
+  { skip: !hasPwsh() && "pwsh is not installed" },
+  () => {
+    // Behavior-based check: pass each serialized value from pwsh to a native
+    // executable (node), the same way the generated terminal command passes
+    // the target path to quarto. The $(...) case is a canary: if the value
+    // were not literal, pwsh would run it and print "PWNED".
+    const node = shQuote(process.execPath, "powershell");
+    const script = shQuote(
+      "process.stdout.write(process.argv[1])",
+      "powershell"
+    );
+    const values = [
+      "C:/Users/me/Article(md)/01_introduction.md",
+      "a b",
+      "a$b",
+      "$HOME",
+      "$(echo PWNED)",
+      "a`b",
+      "a'b",
+      'a"b',
+      "a\\b",
+      "a\nb",
+      "a;b",
+      "a@b",
+      "a&b",
+      "a|b",
+      "a#b",
+      "%PATH%",
+      "",
+    ];
+    for (const value of values) {
+      const quoted = shQuote(value, "powershell");
+      const roundTripped = execFileSync(
+        "pwsh",
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          `& ${node} -e ${script} ${quoted}`,
+        ],
+        { encoding: "utf-8" }
+      );
+      assert.equal(roundTripped, value, JSON.stringify(value));
+    }
+  }
+);
+
+function hasPwsh(): boolean {
+  try {
+    execFileSync("pwsh", ["-NoProfile", "-Command", "exit 0"]);
+    return true;
+  } catch {
+    return false;
+  }
+}

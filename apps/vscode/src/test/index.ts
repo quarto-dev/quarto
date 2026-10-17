@@ -19,7 +19,7 @@ export async function run(): Promise<void> {
     timeout: 60000,
   });
 
-  const testFiles = glob.sync(path.join(__dirname, 'symbols.test.js'));
+  const testFiles = glob.sync(path.join(__dirname, '{symbols,terminal,python}.test.js'));
 
   for (const file of testFiles) {
     mocha.addFile(file);

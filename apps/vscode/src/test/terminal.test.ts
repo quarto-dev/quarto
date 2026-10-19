@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from "assert";
+import { execFileSync } from "node:child_process";
 import * as vscode from "vscode";
 import { QuartoContext } from "quarto-core";
 
@@ -19,21 +20,26 @@ suite("terminalCommand", function () {
     assert.ok(!/^['"]/.test(cmd[0]), "executable name must not be quoted");
   });
 
-  test("passes the document path as one literal argument", function () {
-    // The #1194 fix itself: a path with parentheses must survive as one
-    // literal argument. Quoting shape is shell-dependent (and the test
-    // host's default shell varies), so assert singularity and literal
-    // survival; exact serializer output is covered by the shQuote tests.
+  test("passes the document path to the terminal's shell as one literal argument", function () {
+    // Run the generated line through the shell the terminal starts, with a
+    // `quarto` function that prints the argument after the subcommand. The
+    // $(...) and backtick parts are canaries: if the path were not literal,
+    // the shell would run them.
+    const shellPath = vscode.env.shell;
+    if (terminalShellForPath(shellPath) !== "posix") {
+      this.skip();
+    }
     const context = { useCmd: false } as unknown as QuartoContext;
-    const target = vscode.Uri.file("C:/Users/me/Article(md)/01_introduction.md");
-    const cmd = terminalCommand("preview", context, target);
-    assert.strictEqual(cmd[0], "quarto");
-    assert.strictEqual(cmd[1], "preview");
-    assert.strictEqual(cmd.length, 3, "document path must be a single argument");
-    assert.ok(
-      cmd[2].includes("Article(md)"),
-      `document path must survive literally, got: ${cmd[2]}`
+    const target = vscode.Uri.file(
+      "/tmp/Article(md) $HOME $(echo PWNED) `echo PWNED`/it's;a@b&c.qmd"
     );
+    const line = terminalCommand("preview", context, target).join(" ");
+    const output = execFileSync(
+      shellPath,
+      ["-c", `quarto() { printf %s "$2"; }; ${line}`],
+      { encoding: "utf-8" }
+    );
+    assert.strictEqual(output, target.fsPath);
   });
 });
 

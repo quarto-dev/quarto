@@ -14,6 +14,7 @@
 - Updated the Mermaid used to render diagrams in notebook Markdown cells from 9.4 to 11.17, so newer syntax such as `A@{ shape: ... }` works. The diagram preview moves from Mermaid 11.12 to 11.17 too. In both, class and C4 diagrams now use Mermaid's newer renderer, so they look slightly different (<https://github.com/quarto-dev/quarto/pull/1189>).
 - Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
 - Fixed "Quarto: Preview" and render in the terminal when the document path contains shell special characters, such as parentheses, `;`, `@`, `$`, or quotes (<https://github.com/quarto-dev/quarto/pull/1197>).
+- In Positron, the Viewer now shows a stop button for Quarto previews. Clicking it stops `quarto preview` and closes the preview. The button goes away when the preview server stops (<https://github.com/quarto-dev/quarto/pull/1193>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

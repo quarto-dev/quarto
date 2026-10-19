@@ -50,9 +50,9 @@ export function shQuote(value: string, shell: TerminalShell): string {
   }
 }
 
-// Quoting for when the terminal's shell cannot be determined: the
-// pre-shell-aware behavior (quote only on whitespace). Never worse than
-// main for paths that already worked there.
+// Quoting for when the terminal's shell is not recognized. Without the
+// shell's literal-quoting rules, quote only on whitespace, using double
+// quotes, which most shells accept for grouping words.
 export function shQuoteUnknownShell(value: string): string {
   return /\s/.test(value) ? `"${value}"` : value;
 }

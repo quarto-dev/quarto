@@ -17,9 +17,9 @@ suite("pythonIsCondaEnv", function () {
       this.skip();
     }
     // execFileSync does not spawn a shell, so the interpreter path must be
-    // passed raw: with the old shell-quoted path the file does not exist and
-    // the function returns false (quarto-dev/quarto#1197). A shebang script
-    // named `python` stands in for a real interpreter without needing conda.
+    // passed raw: a shell-quoted path names a file that does not exist, and
+    // the function returns false. A shebang script named `python` stands in
+    // for a real interpreter without needing conda.
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "quarto-test-dir (x) $y-"));
     const script = path.join(dir, "python");
     try {

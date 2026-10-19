@@ -85,7 +85,7 @@ test("shQuote serializes one literal argument for cmd.exe", () => {
   }
 });
 
-test("shQuoteUnknownShell keeps the pre-shell-aware behavior", () => {
+test("shQuoteUnknownShell quotes only on whitespace", () => {
   // Fallback for an unrecognized terminal shell: quote only on whitespace.
   const cases: Array<[string, string]> = [
     ["quarto", "quarto"],

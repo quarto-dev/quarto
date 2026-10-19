@@ -12,8 +12,7 @@ import { terminalCommand, terminalShellForPath } from "../core/terminal";
 suite("terminalCommand", function () {
   test("does not quote the quarto executable name", function () {
     // PowerShell does not run a line that starts with a quoted string as a
-    // command (it needs `&`), so the executable must stay a bare word —
-    // quoting it broke every Windows preview (quarto-dev/quarto#1197).
+    // command (it needs `&`), so the executable must stay a bare word.
     const context = { useCmd: false } as unknown as QuartoContext;
     const cmd = terminalCommand("preview", context);
     assert.deepStrictEqual(cmd, ["quarto", "preview"]);

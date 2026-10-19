@@ -96,10 +96,8 @@ export function terminalOptions(name: string, target: Uri, env: TerminalEnv) {
 export function terminalCommand(command: string, context: QuartoContext, target?: Uri) {
   const shell = targetShell(context);
   const quarto = "quarto"; // binPath prepended to PATH so we don't need the full form
-  // Note: the executable name must NOT be shell-quoted. PowerShell does not
-  // run a line that starts with a quoted string as a command (it needs `&`),
-  // so quoting it broke every Windows preview. `quarto` is a fixed literal
-  // with no shell-special characters, so it is safe bare in all shells.
+  // Keep the executable name bare: PowerShell parses a line that starts with
+  // a quoted string as an expression, not a command (it would need `&`).
   const cmd: string[] = [quarto, command];
   if (target) {
     const targetPath =
@@ -140,11 +138,11 @@ export function terminalShellForPath(
 // means the command targets cmd.exe (old Quarto on Windows shipped a .cmd
 // shim); otherwise the quoting follows the shell the integrated terminal
 // will actually start, read from vscode.env.shell. The OS platform alone
-// cannot tell us — `terminalOptions()` does not set shellPath, so the
+// cannot tell us: `terminalOptions()` does not set shellPath, so the
 // terminal starts the user's default profile, which on Windows can be
 // PowerShell, cmd.exe, Git Bash, or WSL, and on macOS/Linux pwsh or fish.
-// Returns undefined when the shell is not recognized; the caller then falls
-// back to the pre-shell-aware quoting.
+// Returns undefined when the shell is not recognized; the caller then
+// quotes only on whitespace.
 function targetShell(context: QuartoContext): TerminalShell | undefined {
   if (context.useCmd) {
     return "cmd";

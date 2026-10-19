@@ -18,7 +18,7 @@ Each component has specific development guidelines. Refer to the corresponding C
 
 ## Repository Structure
 
-The repository is organized as a monorepo using Yarn workspaces and Turborepo for build orchestration:
+The repository is organized as a monorepo using npm workspaces and Turborepo for build orchestration:
 
 - `apps/`: Contains standalone applications
   - `vscode/`: VS Code extension for Quarto
@@ -36,10 +36,10 @@ Quarto uses [turborepo](https://turbo.build/) to manage the monorepo build proce
 
 - `turbo.json`: Defines the task configuration for common tasks
 - Common commands:
-  - `yarn build`: Builds all packages and applications
-  - `yarn dev-vscode`: Runs the VS Code extension in development mode
-  - `yarn lint`: Runs linters across all workspaces
-  - `yarn build-vscode`: Builds only the VS Code extension and its dependencies
+  - `npm run build`: Builds all packages and applications
+  - `npm run dev-vscode`: Runs the VS Code extension in development mode
+  - `npm run lint`: Runs linters across all workspaces
+  - `npm run build-vscode`: Builds only the VS Code extension and its dependencies
 
 Turborepo helps optimize build times by caching build artifacts and respecting the dependency graph between packages.
 
@@ -47,11 +47,11 @@ Turborepo helps optimize build times by caching build artifacts and respecting t
 
 Testing procedures vary by component:
 
-- VS Code extension: Run `yarn test-vscode [--label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
+- VS Code extension: Run `npm run test-vscode [-- --label 'label' --grep 'pattern']` to compile test files and run them with the vscode-test CLI
   - Test log output is suppressed automatically when run by Claude Code; set `VERBOSE=1` when debugging failures
   - The output is small enough to read directly — don't pipe through `tail` or `grep`
   - Read the [test configuration file](./apps/vscode/.vscode-test.mjs) for valid labels
-- Positron integration tests: Run `yarn test-positron` to run the tests in `apps/vscode/src/test/positron/` inside a downloaded Positron build (rather than vanilla VS Code), covering Positron API code paths. Set `POSITRON_CHANNEL=daily` for a daily build (default: `stable`)
+- Positron integration tests: Run `npm run test-positron` to run the tests in `apps/vscode/src/test/positron/` inside a downloaded Positron build (rather than vanilla VS Code), covering Positron API code paths. Set `POSITRON_CHANNEL=daily` for a daily build (default: `stable`)
 - Other components have specific test commands defined in their respective package.json files
 
 

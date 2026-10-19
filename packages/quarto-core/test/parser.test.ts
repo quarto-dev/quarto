@@ -11,7 +11,7 @@
  * - `tokens`: the Quarto tokens that markdownitParser() derives from it
  *
  * The snapshots are in test/snapshots/. To update them after an intended
- * change, run `UPDATE_SNAPSHOTS=1 yarn test` in this directory and review the diff.
+ * change, run `UPDATE_SNAPSHOTS=1 npm test` in this directory and review the diff.
  */
 
 import test from "node:test";

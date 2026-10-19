@@ -4,10 +4,10 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "yarn: dev-vscode",
+      "label": "npm: dev-vscode",
       "type": "shell",
-      "command": "yarn",
-      "args": ["dev-vscode"],
+      "command": "npm",
+      "args": ["run", "dev-vscode"],
       "options": {
         "cwd": "${workspaceFolder}/../.."
       },
@@ -32,10 +32,10 @@
       }
     },
     {
-      "label": "yarn: build-test",
+      "label": "npm: build-test",
       "type": "shell",
-      "command": "yarn",
-      "args": ["build-test"],
+      "command": "npm",
+      "args": ["run", "build-test"],
       "problemMatcher": []
     }
   ]

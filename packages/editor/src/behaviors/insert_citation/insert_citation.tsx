@@ -359,8 +359,8 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
   // 1) Capture the timer itself so only timer is created and it will be properly canceled
   // 2) Captures the up to date state in the callback that will be used to refresh the search results -
   //    If we don't refresh it each render, it will capture the state the time it was created
-  const streamTimerId = React.useRef<number>();
-  const refreshSearchCallback = React.useRef<VoidFunction>();
+  const streamTimerId = React.useRef<number>(undefined);
+  const refreshSearchCallback = React.useRef<VoidFunction>(undefined);
   React.useEffect(() => {
     refreshSearchCallback.current = async () => {
       if (selectedPanelProvider.typeAheadSearch) {

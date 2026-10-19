@@ -6,6 +6,7 @@
 import * as assert from "assert";
 import { execFileSync } from "node:child_process";
 import * as vscode from "vscode";
+import { pathWithForwardSlashes } from "core";
 import { QuartoContext } from "quarto-core";
 
 import { terminalCommand, terminalShellForPath } from "../core/terminal";
@@ -39,7 +40,7 @@ suite("terminalCommand", function () {
       ["-c", `quarto() { printf %s "$2"; }; ${line}`],
       { encoding: "utf-8" }
     );
-    assert.strictEqual(output, target.fsPath);
+    assert.strictEqual(output, pathWithForwardSlashes(target.fsPath));
   });
 });
 

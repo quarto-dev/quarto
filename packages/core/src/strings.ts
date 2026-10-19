@@ -25,8 +25,10 @@ export function shQuote(value: string, shell: TerminalShell): string {
       return `'${value.replace(/'/g, `'\\''`)}'`;
     case "powershell":
       // Single-quoted strings are fully literal; an embedded single quote
-      // is doubled.
-      return `'${value.replace(/'/g, "''")}'`;
+      // is doubled. PowerShell also reads the typographic quotes U+2018 to
+      // U+201B as single quotes, so a path like "Julia’s Notes" needs them
+      // doubled too.
+      return `'${value.replace(/['‘’‚‛]/g, "$&$&")}'`;
     case "cmd": {
       // Double quotes group words for CommandLineToArgvW, but cmd.exe still
       // expands %NAME% inside them (and !NAME! with delayed expansion).

@@ -52,6 +52,9 @@ test("shQuote serializes one literal argument for PowerShell", () => {
     ['a"b', `'a"b'`],
     ["a\nb", "'a\nb'"],
     ["a'b", "'a''b'"],
+    // PowerShell also reads typographic single quotes as quote characters.
+    ["Julia’s Notes", "'Julia’’s Notes'"],
+    ["a‘b‚c‛d", "'a‘‘b‚‚c‛‛d'"],
   ];
   for (const [value, expected] of cases) {
     assert.equal(shQuote(value, "powershell"), expected, JSON.stringify(value));
@@ -169,6 +172,9 @@ test(
       "a|b",
       "a#b",
       "%PATH%",
+      "Julia’s Notes",
+      "a‘b‚c‛d",
+      "’; echo PWNED; ’",
       "",
     ];
     for (const value of values) {

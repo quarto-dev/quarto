@@ -298,10 +298,15 @@ class PreviewManager {
       })
     );
 
-    // The user clicked the Viewer's stop button (Positron only).
+    // The user clicked the Viewer's stop button (Positron only). Stop the
+    // server but keep the terminal open so its output stays readable, the
+    // same as Ctrl+C in the terminal.
     context.subscriptions.push(
       this.webviewManager_.onDidRequestStop(async () => {
-        await this.killPreview();
+        this.webviewManager_.setStoppable(false);
+        await this.previewTerminateRequest();
+        this.progressDismiss();
+        this.progressCancellationToken_ = undefined;
         this.webviewManager_.closeWebview();
       })
     );

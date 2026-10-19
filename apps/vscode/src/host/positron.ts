@@ -241,7 +241,21 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
 }
 
 
-class PositronWebviewPanel implements HostWebviewPanel {
+// TODO: Use positron.PreviewPanel directly once @posit-dev/positron ships
+// `stoppable` and `onDidRequestStop`.
+type StoppablePreviewPanel = positron.PreviewPanel & {
+  stoppable: boolean;
+  readonly onDidRequestStop: vscode.Event<void>;
+};
+
+/**
+ * Whether this version of Positron shows a stop button for preview panels.
+ */
+function isStoppable(panel: positron.PreviewPanel): panel is StoppablePreviewPanel {
+  return "onDidRequestStop" in panel;
+}
+
+export class PositronWebviewPanel implements HostWebviewPanel {
   constructor(private readonly panel_: positron.PreviewPanel) { }
 
   get webview() { return this.panel_.webview; };
@@ -251,7 +265,13 @@ class PositronWebviewPanel implements HostWebviewPanel {
   }
   onDidChangeViewState = this.panel_.onDidChangeViewState;
   onDidDispose = this.panel_.onDidDispose;
+  onDidRequestStop = isStoppable(this.panel_) ? this.panel_.onDidRequestStop : undefined;
   dispose() { this.panel_.dispose(); };
+  setStoppable(stoppable: boolean) {
+    if (isStoppable(this.panel_)) {
+      this.panel_.stoppable = stoppable;
+    }
+  }
 }
 
 class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {

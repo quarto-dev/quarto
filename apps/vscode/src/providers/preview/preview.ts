@@ -281,8 +281,33 @@ class PreviewManager {
       vscode.window.onDidCloseTerminal(async (closedTerminal) => {
         if (closedTerminal === this.terminal_) {
           this.terminal_ = undefined;
+          this.webviewManager_.setStoppable(false);
           await this.previewTerminateRequest();
         }
+      })
+    );
+
+    // Hide the Viewer's stop button when the preview server stops by other
+    // means (e.g. Ctrl+C in the terminal). Needs shell integration. A
+    // restart is ignored because killPreview() clears this.terminal_ first.
+    context.subscriptions.push(
+      vscode.window.onDidEndTerminalShellExecution((e) => {
+        if (e.terminal === this.terminal_) {
+          this.webviewManager_.setStoppable(false);
+        }
+      })
+    );
+
+    // The user clicked the Viewer's stop button (Positron only). Stop the
+    // server but keep the terminal open so its output stays readable, the
+    // same as Ctrl+C in the terminal.
+    context.subscriptions.push(
+      this.webviewManager_.onDidRequestStop(async () => {
+        this.webviewManager_.setStoppable(false);
+        await this.previewTerminateRequest();
+        this.progressDismiss();
+        this.progressCancellationToken_ = undefined;
+        this.webviewManager_.closeWebview();
       })
     );
   }
@@ -418,7 +443,12 @@ class PreviewManager {
     return requestUri;
   }
 
-  private async killPreview() {
+  private async killPreview(options?: { restart?: boolean }) {
+    // Hide the Viewer's stop button (Positron only), unless a new server is
+    // about to start; keeping it through restarts avoids a toolbar flicker.
+    if (!options?.restart) {
+      this.webviewManager_.setStoppable(false);
+    }
     // Clear this.terminal_ before disposing so the onDidCloseTerminal listener
     // does not send a duplicate termination request.
     this.terminal_ = undefined;
@@ -435,7 +465,7 @@ class PreviewManager {
     slideIndex?: number
   ) {
     // dispose any existing preview terminals
-    await this.killPreview();
+    await this.killPreview({ restart: true });
 
     // cleanup output
     this.outputSink_.reset();
@@ -500,6 +530,8 @@ class PreviewManager {
           `Rendering requires Quarto version ${rPkgRequiredVersion} or greater`,
           { modal: true }
         );
+        // no server will start, so hide the Viewer's stop button
+        this.webviewManager_.setStoppable(false);
         return;
       }
     }
@@ -685,6 +717,9 @@ class PreviewManager {
         }
       );
       this.webviewManager_.setOnError(this.progressDismiss.bind(this));
+      // The server is up; show the Viewer's stop button (Positron only). This
+      // runs on every start, so the button stays through restarts.
+      this.webviewManager_.setStoppable(true);
     } else {
       this.showOuputFile();
     }

@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.140.0 (Unreleased)
+
 ## 1.139.0 (Release on 2026-10-20)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).

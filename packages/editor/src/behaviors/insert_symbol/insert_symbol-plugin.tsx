@@ -48,8 +48,14 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
     super({
       key: pluginKey,
       view: () => ({
-        update: () => {
-          this.closePopup();
+        update: (view: EditorView, prevState: EditorState) => {
+          // The realtime spelling plugin dispatches decoration-only
+          // transactions on a timer (100ms and 5s after the editor is first
+          // focused), so only treat a change to the document or selection as
+          // a reason to dismiss the popup.
+          if (!view.state.doc.eq(prevState.doc) || !view.state.selection.eq(prevState.selection)) {
+            this.closePopup();
+          }
         },
         destroy: () => {
           this.closePopup();

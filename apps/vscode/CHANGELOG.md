@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.139.0 (Unreleased)
+## 1.139.0 (Release on 2026-10-20)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
 - In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).

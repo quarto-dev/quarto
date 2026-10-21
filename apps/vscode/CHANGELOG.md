@@ -2,6 +2,8 @@
 
 ## 1.140.0 (Unreleased)
 
+- In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed (<https://github.com/quarto-dev/quarto/pull/1204>).
+
 ## 1.139.0 (Release on 2026-10-20)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
@@ -17,7 +19,6 @@
 - Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
 - Fixed "Quarto: Preview" and render in the terminal when the document path contains shell special characters, such as parentheses, `;`, `@`, `$`, or quotes (<https://github.com/quarto-dev/quarto/pull/1197>).
 - In Positron, the Viewer now shows a stop button for Quarto previews. Clicking it stops `quarto preview` and closes the preview. The button goes away when the preview server stops (<https://github.com/quarto-dev/quarto/pull/1193>).
-- In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed (<https://github.com/quarto-dev/quarto/pull/1204>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

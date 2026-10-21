@@ -41,6 +41,10 @@ function symbolOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Unicode symbol / special character'),
     group: OmniInsertGroup.Content,
     priority: 6,
+    // Opening the popup from the omni insert list with the mouse moves focus
+    // off the editor. Refocusing it afterwards fires focusin before the popup's
+    // search input mounts, and focusChanged would close the popup.
+    noFocus: true,
     image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.symbol_dark : ui.images.omni_insert?.symbol),
   };
 }

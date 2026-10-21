@@ -13,11 +13,11 @@
     "semver": "^7.8.5",
     "tsconfig": "*",
     "vscode-languageserver-types": "^3.18.4",
-    "vscode-uri": "^3.0.3"
+    "vscode-uri": "^3.2.0"
   },
   "devDependencies": {
     "@types/semver": "^7.8.0",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15"
   },

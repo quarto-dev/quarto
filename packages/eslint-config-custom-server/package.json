@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "eslint-config-custom": "*",
-    "globals": "^17.12.0"
+    "globals": "^17.13.0"
   },
   "peerDependencies": {
     "eslint": "^10.0.0"

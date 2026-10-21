@@ -47,22 +47,30 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
   constructor(pluginKey: PluginKey<boolean>, dataProvider: SymbolDataProvider, ui: EditorUI, events: EditorEvents) {
     super({
       key: pluginKey,
-      view: () => ({
-        update: (view: EditorView, prevState: EditorState) => {
-          // The realtime spelling plugin dispatches decoration-only
-          // transactions on a timer (100ms and 5s after the editor is first
-          // focused), so only treat a change to the document or selection as
-          // a reason to dismiss the popup.
-          if (!view.state.doc.eq(prevState.doc) || !view.state.selection.eq(prevState.selection)) {
+      view: () => {
+        // Register here rather than in the constructor: ProseMirror destroys
+        // and recreates plugin views whenever the state's plugin array
+        // changes identity (the initial setMarkdown does this), and destroy
+        // removes the listener. Pairing add with remove keeps it live.
+        window.document.addEventListener('focusin', this.focusChanged);
+
+        return {
+          update: (view: EditorView, prevState: EditorState) => {
+            // The realtime spelling plugin dispatches decoration-only
+            // transactions on a timer (100ms and 5s after the editor is first
+            // focused), so only treat a change to the document or selection as
+            // a reason to dismiss the popup.
+            if (!view.state.doc.eq(prevState.doc) || !view.state.selection.eq(prevState.selection)) {
+              this.closePopup();
+            }
+          },
+          destroy: () => {
             this.closePopup();
-          }
-        },
-        destroy: () => {
-          this.closePopup();
-          this.scrollUnsubscribe();
-          window.document.removeEventListener('focusin', this.focusChanged);
-        },
-      }),
+            this.scrollUnsubscribe();
+            window.document.removeEventListener('focusin', this.focusChanged);
+          },
+        };
+      },
     });
 
     this.dataProvider = dataProvider;
@@ -71,7 +79,6 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
     this.scrollUnsubscribe = events.subscribe(ScrollEvent, this.closePopup);
 
     this.focusChanged = this.focusChanged.bind(this);
-    window.document.addEventListener('focusin', this.focusChanged);
   }
 
   public showPopup(view: EditorView) {

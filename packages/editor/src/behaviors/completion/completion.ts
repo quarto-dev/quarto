@@ -145,27 +145,33 @@ class CompletionPlugin extends Plugin<CompletionState> {
         },
       },
 
-      view: () => ({
-        update: (view: EditorView) => {
-          // increment version
-          this.version++;
+      view: () => {
+        // hide completions when the focus changes. Registered per plugin view
+        // (see InsertSymbolPlugin) so that it survives plugin view recreation.
+        window.document.addEventListener('focusin', this.clearCompletions);
 
-          // set view
-          this.view = view;
+        return {
+          update: (view: EditorView) => {
+            // increment version
+            this.version++;
 
-          // update completions
-          this.updateCompletions(view, true);
-        },
+            // set view
+            this.view = view;
 
-        destroy: () => {
-          // unsubscribe from events
-          this.scrollUnsubscribe();
-          window.document.removeEventListener('focusin', this.clearCompletions);
+            // update completions
+            this.updateCompletions(view, true);
+          },
 
-          // tear down the popup
-          this.clearCompletions();
-        },
-      }),
+          destroy: () => {
+            // unsubscribe from events
+            this.scrollUnsubscribe();
+            window.document.removeEventListener('focusin', this.clearCompletions);
+
+            // tear down the popup
+            this.clearCompletions();
+          },
+        };
+      },
 
       props: {
         decorations: (state: EditorState) => {
@@ -246,10 +252,9 @@ class CompletionPlugin extends Plugin<CompletionState> {
     // capture reference to ui
     this.ui = ui;
 
-    // hide completions when we scroll or the focus changes
+    // hide completions when we scroll
     this.clearCompletions = this.clearCompletions.bind(this);
     this.scrollUnsubscribe = events.subscribe(ScrollEvent, this.clearCompletions);
-    window.document.addEventListener('focusin', this.clearCompletions);
   }
 
   private updateCompletions(view: EditorView, resetSelection: boolean) {

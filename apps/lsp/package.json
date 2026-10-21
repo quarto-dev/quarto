@@ -18,7 +18,7 @@
     "editor-types": "*",
     "file-url": "^4.0.0",
     "glob": "^13.0.6",
-    "js-yaml": "^5.4.2",
+    "js-yaml": "^5.4.3",
     "node-html-parser": "^9.0.4",
     "picomatch": "^4.0.7",
     "quarto-core": "*",
@@ -26,13 +26,13 @@
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
     "vscode-languageserver-types": "^3.18.4",
-    "vscode-uri": "^3.0.3"
+    "vscode-uri": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "^22.20.4",
+    "@types/node": "^22.20.5",
     "@types/picomatch": "^4.0.3",
     "build": "*",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "eslint-config-custom-server": "*",
     "tsconfig": "*",
     "tsx": "^4.23.15",

@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "js-yaml": "^5.4.2",
+    "js-yaml": "^5.4.3",
     "markdown-it": "^15.0.2",
     "markdown-it-attrs": "^4.5.0",
     "tsconfig": "*",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/wcwidth": "^1.0.2",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "eslint-config-custom": "*",
     "tsx": "^4.23.15"
   },

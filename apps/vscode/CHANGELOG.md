@@ -2,7 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
-- In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed (<https://github.com/quarto-dev/quarto/pull/1204>).
+- In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed. They now close when focus moves elsewhere in the window (<https://github.com/quarto-dev/quarto/pull/1204>).
 
 ## 1.139.0 (Release on 2026-10-20)
 

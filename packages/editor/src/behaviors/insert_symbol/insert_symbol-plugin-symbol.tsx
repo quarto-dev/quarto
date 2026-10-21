@@ -23,7 +23,10 @@ const extension = (context: ExtensionContext): Extension => {
   const { ui, events } = context;
   return {
     commands: () => {
-      return [new ProsemirrorCommand(EditorCommandId.Symbol, [], performInsertSymbol(key), symbolOmniInsert(ui))];
+      // The popup takes focus itself once it mounts, and focusChanged closes it
+      // when focus lands outside of it. Refocusing the editor after the command
+      // would fire that before the popup has rendered, so keepFocus is false.
+      return [new ProsemirrorCommand(EditorCommandId.Symbol, [], performInsertSymbol(key), symbolOmniInsert(ui), false)];
     },
     plugins: () => {
       return [new InsertSymbolPlugin(key, new UnicodeSymbolDataProvider(), ui, events)];

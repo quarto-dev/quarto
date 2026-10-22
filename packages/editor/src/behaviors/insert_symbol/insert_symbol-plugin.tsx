@@ -39,7 +39,6 @@ function isEnabled(state: EditorState) {
 }
 
 export class InsertSymbolPlugin extends Plugin<boolean> {
-  private readonly scrollUnsubscribe: VoidFunction;
   private readonly ui: EditorUI;
   private popup: { popup: HTMLElement, root: Root } | null = null;
   private dataProvider: SymbolDataProvider;
@@ -48,11 +47,12 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
     super({
       key: pluginKey,
       view: () => {
-        // Register here rather than in the constructor: ProseMirror destroys
+        // Subscribe here rather than in the constructor: ProseMirror destroys
         // and recreates plugin views whenever the state's plugin array
         // changes identity (the initial setMarkdown does this), and destroy
-        // removes the listener. Pairing add with remove keeps it live.
+        // removes the listeners. Pairing add with remove keeps them live.
         window.document.addEventListener('focusin', this.focusChanged);
+        const scrollUnsubscribe = events.subscribe(ScrollEvent, this.closePopup);
 
         return {
           update: (view: EditorView, prevState: EditorState) => {
@@ -66,7 +66,7 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
           },
           destroy: () => {
             this.closePopup();
-            this.scrollUnsubscribe();
+            scrollUnsubscribe();
             window.document.removeEventListener('focusin', this.focusChanged);
           },
         };
@@ -76,8 +76,6 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
     this.dataProvider = dataProvider;
     this.ui = ui;
     this.closePopup = this.closePopup.bind(this);
-    this.scrollUnsubscribe = events.subscribe(ScrollEvent, this.closePopup);
-
     this.focusChanged = this.focusChanged.bind(this);
   }
 

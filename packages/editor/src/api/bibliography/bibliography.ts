@@ -4,8 +4,6 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { Node as ProsemirrorNode } from 'prosemirror-model';
-
 import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 import { PandocServer } from '../pandoc';
 

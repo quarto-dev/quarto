@@ -1,16 +1,7 @@
 /*
  * source.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 
@@ -31,7 +22,6 @@ import { withZoteroDb } from "./db";
 import { equalsIgnoreCase } from "core";
 import { resolveCslJsonCheaterKeys } from "../util";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollectionSource {
  
   // resolve data dir
@@ -121,7 +111,6 @@ export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollection
       
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getActiveCollectionSpecs(collections: string[]): Promise<ZoteroResult> {
       if (dataDir) {
 
@@ -379,16 +368,14 @@ function transformValue(cslFieldName: string, value: string) {
     const date : CSLDate = {};
     const spacePos = value.indexOf(' ');
     const parts = value.substring(0, spacePos !== -1 ? spacePos : undefined);
-    let raw = "";
-    
+
     // If the left 'dateParts' doesn't represent the whole string, then there
     // is also a raw value. Split the string and capture the right side value
     // and save that as the raw value
     if (parts.length < value.length) {
       const rawPosition = value.indexOf(' ');
       if (rawPosition !== -1) {
-        raw = value.substring(rawPosition+1);
-        date.raw = raw;
+        date.raw = value.substring(rawPosition+1);
       }
     }
 

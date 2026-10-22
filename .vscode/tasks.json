@@ -3,9 +3,19 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "watch",
-      "problemMatcher": "$tsc-watch",
+      "script": "dev-vscode",
       "isBackground": true,
+      "problemMatcher": {
+        "owner": "esbuild",
+        "pattern": {
+          "regexp": "^\\b$"
+        },
+        "background": {
+          "activeBegin": true,
+          "beginsPattern": "Packages in scope",
+          "endsPattern": "quarto:dev: \\[watch\\] build finished"
+        }
+      },
       "presentation": {
         "reveal": "always",
         "revealProblems": "onProblem"

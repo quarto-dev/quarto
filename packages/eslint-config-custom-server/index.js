@@ -1,20 +1,11 @@
-// eslint-disable-next-line no-undef
-module.exports = {
-  extends: ["../eslint-config-custom/index.js"],
-  env: {
-    node: true,
-    es6: true
-  },
-  parserOptions: {
+import custom from "eslint-config-custom";
+import globals from "globals";
+import { defineConfig } from "eslint/config";
+
+export default defineConfig(custom, {
+  files: ["**/*.{ts,tsx,mts,cts}"],
+  languageOptions: {
     ecmaVersion: "latest",
-    sourceType: "module",
+    globals: { ...globals.node },
   },
-  overrides: [
-    {
-      files: ["**/__tests__/**/*"],
-      env: {
-        jest: true,
-      },
-    },
-  ],
-};
+});

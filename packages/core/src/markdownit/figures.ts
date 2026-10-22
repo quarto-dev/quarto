@@ -5,8 +5,7 @@
  *
  */
 
-import MarkdownIt from "markdown-it";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt, Token } from "markdown-it";
 import { kTokParaClose, kTokParaOpen } from "./utils/tok";
 
 export interface FigureOptions {

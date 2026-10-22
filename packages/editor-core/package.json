@@ -2,13 +2,19 @@
   "name": "editor-core",
   "version": "0.1.0",
   "private": true,
-  "license": "agpl-3.0",
+  "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
     "core": "*",
     "editor-types": "*",
-    "tsconfig": "*",
-    "typescript": "^4.5.2"
+    "tsconfig": "*"
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0",
+    "eslint-config-custom": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

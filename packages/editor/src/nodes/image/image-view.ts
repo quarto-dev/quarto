@@ -1,20 +1,11 @@
 /*
  * image-view.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
-import { NodeView, EditorView } from 'prosemirror-view';
+import { NodeView, EditorView, ViewMutationRecord } from 'prosemirror-view';
 import { NodeSelection, PluginKey, Plugin } from 'prosemirror-state';
 
 import { EditorUI } from '../../api/ui-types';
@@ -50,7 +41,7 @@ export function imageNodeViewPlugins(
       key: new PluginKey(`${type}-node-view`),
       props: {
         nodeViews: {
-          [type]: (node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) => {
+          [type]: (node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) => {
             return new ImageNodeView(node, view, getPos as () => number, ui, format, events, pandocExtensions);
           },
         },
@@ -272,7 +263,7 @@ class ImageNodeView implements NodeView {
   }
 
   // ignore mutations outside of the content dom so sizing actions don't cause PM re-render
-  public ignoreMutation(mutation: MutationRecord | { type: 'selection'; target: Element }) {
+  public ignoreMutation(mutation: ViewMutationRecord) {
     return !this.contentDOM || !this.contentDOM.contains(mutation.target);
   }
 

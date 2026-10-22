@@ -1,16 +1,7 @@
 /*
  * doc.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import path from "node:path";
@@ -199,8 +190,7 @@ export interface QuartoEditor {
 export function findQuartoEditor(
   engine: MarkdownEngine,
   context: QuartoContext,
-  filter: (doc: vscode.TextDocument) => boolean,
-  includeVisible = true
+  filter: (doc: vscode.TextDocument) => boolean
 ): QuartoEditor | undefined {
   // first check for an active visual editor
   const activeVisualEditor = VisualEditorProvider.activeEditor();
@@ -209,11 +199,9 @@ export function findQuartoEditor(
   }
 
   // then check for active notebook editor
-  const notebookEditor = (vscode.window as any).activeNotebookEditor as
-    | vscode.NotebookEditor
-    | undefined;
+  const notebookEditor = vscode.window.activeNotebookEditor;
   if (notebookEditor) {
-    const notebookDocument = (notebookEditor as any).notebook as
+    const notebookDocument = notebookEditor.notebook as
       | vscode.NotebookDocument
       | undefined;
     if (notebookDocument) {

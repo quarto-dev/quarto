@@ -2,16 +2,7 @@
 /*
  * diagnostics.ts
  *
- * Copyright (C) 2025 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2025-2026 by Posit Software, PBC
  */
 import { EditorView } from "@codemirror/view";
 import { Behavior, BehaviorContext } from ".";
@@ -146,7 +137,7 @@ const underlinedErrorHoverTooltip = hoverTooltip((view, pos) => {
 const addUnderline = StateEffect.define<{ from: number, to: number, message: string; }>({
   map: ({ from, to, message }, change) => ({ from: change.mapPos(from), to: change.mapPos(to), message })
 });
-const removeUnderlines = StateEffect.define({
+const removeUnderlines = StateEffect.define<void>({
   map: () => { }
 });
 const underlineField = StateField.define<DecorationSet>({
@@ -155,7 +146,7 @@ const underlineField = StateField.define<DecorationSet>({
   },
   update(underlines, tr) {
     underlines = underlines.map(tr.changes);
-    for (let e of tr.effects) {
+    for (const e of tr.effects) {
       if (e.is(addUnderline)) {
         underlines = underlines.update({
           add: [Decoration.mark({ class: "cm-underline", message: e.value.message }).range(e.value.from, e.value.to)]
@@ -185,7 +176,7 @@ const underline = (cmView: EditorView, from: number, to: number, message: string
 };
 
 const clearUnderlines = (cmView: EditorView) => {
-  if (!!cmView.state.field(underlineField, false)) {
+  if (cmView.state.field(underlineField, false)) {
     cmView.dispatch({ effects: [removeUnderlines.of()] });
   }
 };
@@ -196,7 +187,8 @@ const clearUnderlines = (cmView: EditorView) => {
 
 // helper function for positionally picking data from a DecorationSet
 const rangeAndSpecOfDecorationAtPos = (pos: number, d: DecorationSet) => {
-  let spec: any | undefined;
+  // the spec of the marks created by `underline` (see `underlineField`)
+  let spec: { message: string } | undefined;
   let from: number | undefined;
   let to: number | undefined;
   d.between(pos, pos, (decoFrom, decoTo, deco) => {

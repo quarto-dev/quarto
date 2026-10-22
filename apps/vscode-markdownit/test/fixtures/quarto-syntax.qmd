@@ -1,0 +1,130 @@
+---
+title: "Fixture"
+format: html
+---
+
+# Heading One {#sec-one .unnumbered}
+
+Some *emphasis*, **strong**, `code`, H~2~O and x^2^, a [span]{.mark #sp key="val"},
+a citation @knuth84 and [see @doe99, p. 33; @roe2000], and a shortcode {{< var foo "<b>" >}}.
+Links: <https://quarto.org>, https://example.com/path, www.example.com, example.com and foo@bar.com.
+Unicode punctuation link: https://example.com/a。next and (https://example.com/b).
+
+Setext heading
+--------------
+
+::: {.callout-note}
+## Callout title
+
+Callout body with a footnote.[^1]
+:::
+
+::: {.callout-warning title="Attr title" collapse="true"}
+Warning body.
+:::
+
+::: callout-tip
+Tip without braces.
+:::
+
+:::: {#fig-panel layout-ncol=2}
+::: {#fig-a}
+![Caption A](a.png){width=50%}
+:::
+Panel caption
+::::
+
+![A figure caption](img.png){#fig-img fig-alt="alt text"}
+
+::: {.column-margin}
+Margin content
+:::
+
+$$
+E = mc^2
+$$ {#eq-mass}
+
+Inline math $a < b$ and $\ce{A <=> B}$.
+
+```{python}
+#| label: fig-plot
+#| echo: false
+print("hi")
+```
+
+```r
+x <- 1
+```
+
+```mermaid
+flowchart LR
+  A --> B
+```
+
+```{mermaid}
+flowchart LR
+  C --> D
+```
+
+```{=html}
+<div>raw</div>
+```
+
+```{.python filename="a.py"}
+print(1)
+```
+
+<!-- A comment
+
+```{r}
+hidden_chunk()
+```
+
+still comment -->
+
+<details>
+<summary>Summary</summary>
+
+Details body
+
+</details>
+
+<!doctype html>
+
+| Col A | Col B |
+|-------|-------|
+| 1     | 2     |
+
+: Table caption {#tbl-one}
+
++-------+-------+
+| Grid  | Table |
++=======+=======+
+| a     | b     |
++-------+-------+
+
+Term
+: Definition one
+
+- [ ] todo
+- [x] done
+- plain
+
+1. one
+2. two
+
+> quote with **bold**
+
+---
+
+Text[^2] with a footnote.
+
+[^1]: First footnote.
+[^2]: Second footnote.
+
+## Heading with `code` and [link](https://x.org) {.foo}
+
+### Heading three
+
+Final paragraph ::: not a div
+:::

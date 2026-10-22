@@ -1,0 +1,59 @@
+<h1>Testing equals signs in attribute values</h1>
+<p>This test document validates that equals signs in attribute values are handled correctly.</p>
+<p>This prose contains some equals signs, just in case. A=B=C. D=E=F. =</p>
+<h2>Basic examples</h2>
+<ul>
+<li>
+<p>Basic link with equals in value: <a href="https://example.com" key="value=with=equals">Link text</a></p>
+</li>
+<li>
+<p>Link with URL parameter: <a href="https://example.com?param=value" class="class" key="query=param">Query link</a></p>
+</li>
+<li>
+<p>Span with complex value: <span id="id" class="class" key="complex=value">Span text</span></p>
+</li>
+<li>
+<p>Other weird examples: <a href="key=">Span text</a> <a href="===">Span</a></p>
+</li>
+</ul>
+<h2>More complex examples</h2>
+<ul>
+<li>
+<p>CSS style with equals: <span style="color:red;font-size=12px">Styled text</span></p>
+</li>
+<li>
+<p>Math expression value: <span formula="E=mc^2">Math formula</span></p>
+</li>
+<li>
+<p>Code with equals: <code lang="c++" key="value=val">code sample</code></p>
+</li>
+</ul>
+<h2>Code blocks</h2>
+<pre><code python="" key="value=equals">print(&quot;Testing equals in attribute values&quot;)
+</code></pre>
+<pre><code r="" eval="1+1=2">print(&quot;R code with equals in attributes&quot;)
+</code></pre>
+<h2>Div with attributes</h2>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#div-id</span><span class="quarto-attribute-decorator-content">key="value=with=multiple=equals"</span></div><div  id="div-id" key="value=with=multiple=equals" class="quarto-div"><p>This is a div with multiple equals signs in attribute values.</p>
+</div><h2>Image with equals signs</h2>
+<figure><img src="image.png" alt="Image caption" width="50%" height="30%" key="value=equals"></figure>
+<h2>Table with equals signs</h2>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#tbl-id</span><span class="quarto-attribute-decorator-content">tbl-colwidths="[50,50]" key="value=with=equals"</span></div><table id="tbl-id" tbl-colwidths="[50,50]" key="value=with=equals">
+<caption>Table caption</caption>
+<thead>
+<tr>
+<th>Col1</th>
+<th>Col2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>B</td>
+</tr>
+<tr>
+<td>C</td>
+<td>D</td>
+</tr>
+</tbody>
+</table>

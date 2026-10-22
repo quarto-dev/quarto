@@ -1,7 +1,34 @@
 # Changelog
 
-## 1.137.0 (Unreleased)
+## 1.140.0 (Unreleased)
 
+## 1.139.0 (Release on 2026-10-20)
+
+- The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
+- In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).
+- The extension now reads YAML the way Quarto CLI does: merge keys (`<<`) in front matter and `_quarto.yml` are no longer resolved, and dates are read as strings (<https://github.com/quarto-dev/quarto/pull/1158>).
+- Math hovers and visual editor equation previews are now rendered with MathJax 4, using the same TeX font as before. Output is nearly identical; `numcases` now works, and a few extensible arrows from the `extpfeil` extension (such as `\xtwoheadrightarrow`) render slightly differently (<https://github.com/quarto-dev/quarto/pull/1171>).
+- Updated markdown-it to version 15. In the Quarto help panel, bare domains such as `www.example.com` are no longer turned into links (`https://` URLs still are), and a link now ends at Unicode punctuation. In notebook markdown cells, definition lists with a blank line between the term and the definition now wrap each definition in a paragraph, as Pandoc does (<https://github.com/quarto-dev/quarto/pull/1174>).
+- Updated the visual editor to current ProseMirror releases. The ProseMirror developer tools (Ctrl+Alt+P) are now only included in development builds of the extension (<https://github.com/quarto-dev/quarto/pull/1179>).
+- In the visual editor, once 100 pasted or inserted images share a name, new images are still saved in the `images/` folder with their file extension. Previously they went into the document's folder with no extension (<https://github.com/quarto-dev/quarto/pull/1181>).
+- On Windows, image paths the visual editor inserts that contain more than one folder separator (e.g. `../images/plot.png`) now use forward slashes throughout. Previously only the first backslash was converted (<https://github.com/quarto-dev/quarto/pull/1181>).
+- Running a Stata or C# cell no longer drops leading `#|` lines. These languages write cell options as `*|` and `//|`, so `#|` lines are code, and they are now sent to the kernel just as `quarto render` sends them (<https://github.com/quarto-dev/quarto/pull/1183>).
+- Updated the Mermaid used to render diagrams in notebook Markdown cells from 9.4 to 11.17, so newer syntax such as `A@{ shape: ... }` works. The diagram preview moves from Mermaid 11.12 to 11.17 too. In both, class and C4 diagrams now use Mermaid's newer renderer, so they look slightly different (<https://github.com/quarto-dev/quarto/pull/1189>).
+- Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
+- Fixed "Quarto: Preview" and render in the terminal when the document path contains shell special characters, such as parentheses, `;`, `@`, `$`, or quotes (<https://github.com/quarto-dev/quarto/pull/1197>).
+- In Positron, the Viewer now shows a stop button for Quarto previews. Clicking it stops `quarto preview` and closes the preview. The button goes away when the preview server stops (<https://github.com/quarto-dev/quarto/pull/1193>).
+
+## 1.138.0 (Release on 2026-09-11)
+
+- In Positron, running a Python cell in a knitr document now respects the `quarto.cells.useReticulate` setting, instead of always routing it through reticulate on the R console (<https://github.com/quarto-dev/quarto/pull/1116>).
+- In Positron, when Positron serves language features for code cells itself (the `quarto.embeddedLanguageFeatures.native` setting), the extension no longer serves them from virtual document temp files (<https://github.com/quarto-dev/quarto/pull/1115>).
+- In Positron, fixed how the "Render on Save" checkbox works in the visual editor (<https://github.com/quarto-dev/quarto/pull/1121>).
+- Fixed a crash of the Quarto language server on save when a code cell contained unparseable YAML options (e.g. an unquoted `fig-cap` value containing a colon) (<https://github.com/quarto-dev/quarto/pull/1123>).
+- Fixed several bugs where Zotero could fail to appear as a citation source in the visual editor. The initial Zotero library configuration push to the language server was attempted only once and failures were swallowed (a regression in 1.136.0); it is now retried, failures are logged to the Quarto output channel, and a warning with a retry option is shown if the sync ultimately fails. Requests to the language server also now wait for the server to signal that it has finished starting up, fixing "Unhandled method" errors when requests raced with server startup. Concurrent citation lookups could also race on the same cached copy of the local Zotero database, and that database could not be read at all when Zotero stored it in WAL mode, the default in current Zotero versions; both are now fixed (<https://github.com/quarto-dev/quarto/pull/1120>).
+
+## 1.137.0 (Release on 2026-09-04)
+
+- Relicensed the extension to MIT (<https://github.com/quarto-dev/quarto/pull/1032>).
 
 ## 1.136.0 (Release on 2026-08-25)
 

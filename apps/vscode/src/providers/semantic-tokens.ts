@@ -1,16 +1,7 @@
 /*
  * semantic-tokens.ts
  *
- * Copyright (C) 2025 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2025-2026 by Posit Software, PBC
  */
 
 import {
@@ -18,12 +9,14 @@ import {
   commands,
   Position,
   SemanticTokens,
+  SemanticTokensLegend,
   SemanticTokensBuilder,
   TextDocument,
   Uri,
   window,
 } from "vscode";
-import { DocumentSemanticsTokensSignature } from "vscode-languageclient";
+import { DocumentSemanticsTokensSignature } from "vscode-languageclient/node";
+import { Token } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 import { isQuartoDoc } from "../core/doc";
 import {
@@ -33,7 +26,7 @@ import {
   languageAtPosition,
   mainLanguage
 } from "../vdoc/vdoc";
-import { EmbeddedLanguage } from "../vdoc/languages";
+import { hostOwnsLanguage, hostOwnsCellFeatures } from "../host/cell-features";
 import { QUARTO_SEMANTIC_TOKEN_LEGEND } from "quarto-utils";
 
 /**
@@ -181,6 +174,17 @@ export function remapTokenIndices(
   return encodeSemanticTokens(remapped, tokens.resultId);
 }
 
+/**
+ * Whether the host owns any of a document's cells.
+ *
+ * Pure, so it can be tested without an extension host: the setting and
+ * capability half of the decision is `hostOwnsCellFeatures()`, which the
+ * caller checks separately.
+ */
+export function hostOwnsAnyCell(tokens: Token[]): boolean {
+  return mainLanguage(tokens, hostOwnsLanguage) !== undefined;
+}
+
 export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
   return async (
     document: TextDocument,
@@ -192,6 +196,14 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
       return await next(document, token);
     }
 
+    // Parse the document to get all tokens
+    const tokens = engine.parse(document);
+
+    // Stand down when the host owns any of this document's cells.
+    if (hostOwnsCellFeatures() && hostOwnsAnyCell(tokens)) {
+      return undefined;
+    }
+
     // Ensure we are dealing with the active document
     const editor = window.activeTextEditor;
     const activeDocument = editor?.document;
@@ -199,9 +211,6 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
       // Not the active document, delegate to default
       return await next(document, token);
     }
-
-    // Parse the document to get all tokens
-    const tokens = engine.parse(document);
 
     // Try to find language at cursor position, otherwise use main language
     const line = editor.selection.active.line;
@@ -222,29 +231,32 @@ export function embeddedSemanticTokensProvider(engine: MarkdownEngine) {
     return await withVirtualDocUri(vdoc, document.uri, "semanticTokens", async (uri: Uri) => {
       try {
         // Get the legend from the embedded language provider
-        const legend = await commands.executeCommand<any>(
+        const legend = await commands.executeCommand<SemanticTokensLegend | undefined>(
           "vscode.provideDocumentSemanticTokensLegend",
           uri
         );
 
-        const tokens = await commands.executeCommand<SemanticTokens>(
+        const semanticTokens = await commands.executeCommand<SemanticTokens>(
           "vscode.provideDocumentSemanticTokens",
           uri
         );
 
-        if (!tokens || tokens.data.length === 0) {
-          return tokens;
+        if (!semanticTokens || semanticTokens.data.length === 0) {
+          return semanticTokens;
         }
 
         // Remap token indices from embedded provider's legend to our universal legend
-        let remappedTokens = tokens;
+        let remappedTokens = semanticTokens;
         if (legend) {
-          remappedTokens = remapTokenIndices(tokens, legend, QUARTO_SEMANTIC_TOKEN_LEGEND);
+          remappedTokens = remapTokenIndices(semanticTokens, legend, QUARTO_SEMANTIC_TOKEN_LEGEND);
         }
 
-        // Adjust token positions from virtual doc to real doc coordinates
-        return unadjustedSemanticTokens(vdoc.language, remappedTokens);
-      } catch (error) {
+        // Adjust token positions from virtual doc to real doc coordinates,
+        // keeping only tokens on code lines. The virtual doc fills all other
+        // lines with placeholder content (e.g. `#` comments), whose tokens must
+        // not be applied to the real document.
+        return unadjustedSemanticTokens(vdoc.language, remappedTokens, vdoc.codeLines);
+      } catch {
         return undefined;
       }
     });

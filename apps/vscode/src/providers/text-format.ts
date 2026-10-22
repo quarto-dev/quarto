@@ -1,17 +1,8 @@
 /*
  * text-format.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  * Copyright (c) 张宇. All rights reserved (https://github.com/yzhang-gh/vscode-markdown/blob/master/src/formatting.ts)
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 // ported from: https://github.com/yzhang-gh/vscode-markdown/blob/432e134f3cab8e18823fcb2e677fef4dbf3f1140/src/formatting.ts#
@@ -52,14 +43,14 @@ class ToggleCommand implements Command {
       return;
     }
 
-    let selections = editor.selections;
+    const selections = editor.selections;
 
-    let batchEdit = new WorkspaceEdit();
-    let shifts: [Position, number][] = [];
-    let newSelections: Selection[] = selections.slice();
+    const batchEdit = new WorkspaceEdit();
+    const shifts: [Position, number][] = [];
+    const newSelections: Selection[] = selections.slice();
 
     for (const [i, selection] of selections.entries()) {
-      let cursorPos = selection.active;
+      const cursorPos = selection.active;
       const shift = shifts
         .map(([pos, s]) =>
           selection.start.line === pos.line &&
@@ -84,17 +75,17 @@ class ToggleCommand implements Command {
           context === `${this.startPattern_}text|${this.endPattern_}`
         ) {
           // `**text|**` to `**text**|`
-          let newCursorPos = cursorPos.with({
+          const newCursorPos = cursorPos.with({
             character: cursorPos.character + shift + this.endPattern_.length,
           });
           newSelections[i] = new Selection(newCursorPos, newCursorPos);
           continue;
         } else if (context === `${this.startPattern_}|${this.endPattern_}`) {
           // `**|**` to `|`
-          let start = cursorPos.with({
+          const start = cursorPos.with({
             character: cursorPos.character - this.startPattern_.length,
           });
-          let end = cursorPos.with({
+          const end = cursorPos.with({
             character: cursorPos.character + this.endPattern_.length,
           });
           wrapRange(
@@ -120,13 +111,13 @@ class ToggleCommand implements Command {
           const currentTextLine = editor.document.lineAt(cursorPos.line);
           if (
             this.startPattern_ === "~~" &&
-            /^\s*[\*\+\-] (\[[ x]\] )? */g.test(currentTextLine.text)
+            /^\s*[*+-] (\[[ x]\] )? */g.test(currentTextLine.text)
           ) {
             wordRange = currentTextLine.range.with(
               new Position(
                 cursorPos.line,
                 currentTextLine.text.match(
-                  /^\s*[\*\+\-] (\[[ x]\] )? */g
+                  /^\s*[*+-] (\[[ x]\] )? */g
                 )![0].length
               )
             );
@@ -200,11 +191,11 @@ function wrapRange(
   startPtn: string,
   endPtn: string
 ) {
-  let text = editor.document.getText(range);
+  const text = editor.document.getText(range);
   const prevSelection = newSelections[i];
   const ptnLength = (startPtn + endPtn).length;
 
-  let newCursorPos = cursor.with({ character: cursor.character + shift });
+  let newCursorPos: Position;
   let newSelection: Selection;
   if (isWrapped(text, startPtn, endPtn)) {
     // remove start/end patterns from range
@@ -302,13 +293,13 @@ function getContext(
   endPattern: string
 ): string {
   let startPositionCharacter = cursorPos.character - startPattern.length;
-  let endPositionCharacter = cursorPos.character + endPattern.length;
+  const endPositionCharacter = cursorPos.character + endPattern.length;
 
   if (startPositionCharacter < 0) {
     startPositionCharacter = 0;
   }
 
-  let leftText = editor.document.getText(
+  const leftText = editor.document.getText(
     new Range(
       cursorPos.line,
       startPositionCharacter,
@@ -316,7 +307,7 @@ function getContext(
       cursorPos.character
     )
   );
-  let rightText = editor.document.getText(
+  const rightText = editor.document.getText(
     new Range(
       cursorPos.line,
       cursorPos.character,

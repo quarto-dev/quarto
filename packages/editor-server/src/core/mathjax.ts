@@ -1,34 +1,64 @@
 /*
  * mathjax.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  * 
  * Copyright (c) 2016 James Yu
  * Licensed under the MIT License. See LICENSE in the project root for license information.
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 // based on https://github.com/James-Yu/LaTeX-Workshop/tree/master/src/providers/preview
 
-import { mathjax } from "mathjax-full/js/mathjax.js";
-import { TeX } from "mathjax-full/js/input/tex.js";
-import { SVG } from "mathjax-full/js/output/svg.js";
-import { liteAdaptor } from "mathjax-full/js/adaptors/liteAdaptor.js";
-import { RegisterHTMLHandler } from "mathjax-full/js/handlers/html.js";
-import type { LiteElement } from "mathjax-full/js/adaptors/lite/Element.js";
-import type { MathDocument } from "mathjax-full/js/core/MathDocument.js";
-import type { LiteDocument } from "mathjax-full/js/adaptors/lite/Document.js";
-import type { LiteText } from "mathjax-full/js/adaptors/lite/Text.js";
-import TexError from "mathjax-full/js/input/tex/TexError";
-import "mathjax-full/js/input/tex/AllPackages.js";
+// These import the physical `mjs/` paths rather than the `js/*` export, which
+// `moduleResolution: node` doesn't understand
+import { mathjax } from "@mathjax/src/mjs/mathjax.js";
+import { TeX } from "@mathjax/src/mjs/input/tex.js";
+import { SVG } from "@mathjax/src/mjs/output/svg.js";
+import { liteAdaptor } from "@mathjax/src/mjs/adaptors/liteAdaptor.js";
+import { RegisterHTMLHandler } from "@mathjax/src/mjs/handlers/html.js";
+import type { LiteElement } from "@mathjax/src/mjs/adaptors/lite/Element.js";
+import type { MathDocument } from "@mathjax/src/mjs/core/MathDocument.js";
+import type { LiteDocument } from "@mathjax/src/mjs/adaptors/lite/Document.js";
+import type { LiteText } from "@mathjax/src/mjs/adaptors/lite/Text.js";
+import type TexError from "@mathjax/src/mjs/input/tex/TexError.js";
+
+// MathJax 4's default font (mathjax-newcm) loads glyph ranges on demand, which
+// makes the synchronous convert() throw a retry error, and can't find its files
+// once bundled. The MathJax TeX font (MathJax 3's font) is entirely static.
+import { MathJaxTexFont } from "@mathjax/mathjax-tex-font/mjs/svg.js";
+// The glyphs mhchem uses for its arrows are in a font extension
+import { MathJaxMhchemFontExtension } from "@mathjax/mathjax-mhchem-font-extension/mjs/svg.js";
+
+// TeX packages: baseExtensions and supportedExtensionList below
+// (MathJax 4 has no AllPackages)
+import "@mathjax/src/mjs/input/tex/base/BaseConfiguration.js";
+import "@mathjax/src/mjs/input/tex/ams/AmsConfiguration.js";
+import "@mathjax/src/mjs/input/tex/color/ColorConfiguration.js";
+import "@mathjax/src/mjs/input/tex/newcommand/NewcommandConfiguration.js";
+import "@mathjax/src/mjs/input/tex/noerrors/NoErrorsConfiguration.js";
+import "@mathjax/src/mjs/input/tex/noundefined/NoUndefinedConfiguration.js";
+import "@mathjax/src/mjs/input/tex/amscd/AmsCdConfiguration.js";
+import "@mathjax/src/mjs/input/tex/bbox/BboxConfiguration.js";
+import "@mathjax/src/mjs/input/tex/boldsymbol/BoldsymbolConfiguration.js";
+import "@mathjax/src/mjs/input/tex/braket/BraketConfiguration.js";
+import "@mathjax/src/mjs/input/tex/bussproofs/BussproofsConfiguration.js";
+import "@mathjax/src/mjs/input/tex/cancel/CancelConfiguration.js";
+import "@mathjax/src/mjs/input/tex/cases/CasesConfiguration.js";
+import "@mathjax/src/mjs/input/tex/centernot/CenternotConfiguration.js";
+import "@mathjax/src/mjs/input/tex/colortbl/ColortblConfiguration.js";
+import "@mathjax/src/mjs/input/tex/empheq/EmpheqConfiguration.js";
+import "@mathjax/src/mjs/input/tex/enclose/EncloseConfiguration.js";
+import "@mathjax/src/mjs/input/tex/extpfeil/ExtpfeilConfiguration.js";
+import "@mathjax/src/mjs/input/tex/gensymb/GensymbConfiguration.js";
+import "@mathjax/src/mjs/input/tex/html/HtmlConfiguration.js";
+import "@mathjax/src/mjs/input/tex/mathtools/MathtoolsConfiguration.js";
+import "@mathjax/src/mjs/input/tex/mhchem/MhchemConfiguration.js";
+import "@mathjax/src/mjs/input/tex/physics/PhysicsConfiguration.js";
+import "@mathjax/src/mjs/input/tex/textcomp/TextcompConfiguration.js";
+import "@mathjax/src/mjs/input/tex/textmacros/TextMacrosConfiguration.js";
+import "@mathjax/src/mjs/input/tex/unicode/UnicodeConfiguration.js";
+import "@mathjax/src/mjs/input/tex/upgreek/UpgreekConfiguration.js";
+import "@mathjax/src/mjs/input/tex/verb/VerbConfiguration.js";
 
 import { MathjaxSupportedExtension, MathjaxTypesetOptions, MathjaxTypesetResult } from "editor-types";
 
@@ -39,7 +69,6 @@ type TexOption = {
   processEscapes?: boolean;
   processEnvironments?: boolean;
   processRefs?: boolean;
-  digits?: RegExp;
   tags?: "all" | "ams" | "none";
   tagSide?: "right" | "left";
   tagIndent?: string;
@@ -64,6 +93,7 @@ type SvgOption = {
   displayAlign?: "left" | "center" | "right";
   displayIndent?: number;
   fontCache?: "local" | "global" | "none";
+  fontData?: typeof MathJaxTexFont;
   internalSpeechTitles?: boolean;
 };
 
@@ -129,8 +159,13 @@ function typesetToSvg(
   const css = `svg {font-size: ${100 * opts.scale}%;} * { color: ${
     opts.color
   } }`;
-  let svgHtml = adaptor.innerHTML(node);
-  svgHtml = svgHtml.replace(/<defs>/, `<defs><style>${css}</style>`);
+  // Serialize as XML: MathJax 4 records the source TeX in data-latex attributes,
+  // and HTML serialization leaves any `<` in them unescaped, which makes the SVG
+  // invalid as an image
+  let svgHtml = adaptor.serializeXML(adaptor.firstChild(node) as LiteElement);
+  svgHtml = svgHtml
+    .replace(/<defs\/>/, "<defs></defs>")
+    .replace(/<defs>/, `<defs><style>${css}</style>`);
   return svgHtml;
 }
 
@@ -191,6 +226,7 @@ const supportedExtensionList = [
 
 
 // some globals
+MathJaxTexFont.addExtension(MathJaxMhchemFontExtension);
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
 let loadedExtensions = baseExtensions;
@@ -216,7 +252,7 @@ function createHtmlConverter(extensions: MathjaxSupportedExtension[]) {
     },
   };
   const texInput = new TeX<LiteElement, LiteText, LiteDocument>(baseTexOption);
-  const svgOption: SvgOption = { fontCache: "local" };
+  const svgOption: SvgOption = { fontCache: "local", fontData: MathJaxTexFont };
   const svgOutput = new SVG<LiteElement, LiteText, LiteDocument>(svgOption);
   return mathjax.document("", {
     InputJax: texInput,

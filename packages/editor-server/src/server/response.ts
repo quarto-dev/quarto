@@ -1,19 +1,12 @@
 /*
  * response.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { kStatusError, kStatusNoHost, kStatusNotFound, kStatusOK } from "editor-types";
+
+import { fetchErrorMessage, isNoHostError } from "../core/fetch";
 
 // datacite, doi, and pubmed all share a common response type pattern that includes
 // status and optional message and error payloads -- this function provides a common
@@ -48,11 +41,10 @@ export async function handleResponseWithStatus<T>(request: () => Promise<Respons
       }
     }
   } catch(error) {
-    const message = error instanceof Error ? error.message : JSON.stringify(error);
     return {
-      status: message.includes("ENOTFOUND") ? kStatusNoHost : kStatusError,
+      status: isNoHostError(error) ? kStatusNoHost : kStatusError,
       message: null,
-      error: message
+      error: fetchErrorMessage(error)
     }
   }
 }

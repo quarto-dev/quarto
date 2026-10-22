@@ -7,7 +7,7 @@
  *
  */
 
-import * as regexpp from "regexpp";
+import * as regexpp from "@eslint-community/regexpp";
 
 function prefixesFromParse(parse) {
   if (parse.type === "Pattern" || parse.type === "CapturingGroup") {

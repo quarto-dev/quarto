@@ -1,16 +1,7 @@
 /*
  * insert_citation-panel-packages.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React from 'react';
@@ -29,9 +20,9 @@ import {
 } from './insert_citation-source-panel';
 import { CitationSourceTypeheadSearchPanel } from './insert_citation-source-panel-typeahead-search';
 
-import Fuse from 'fuse.js';
+import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 import uniqBy from 'lodash.uniqby';
-import orderBy from 'lodash.orderby';
+import { sortPackagesByName } from './insert_citation-source-panel-packages-sort';
 import { EnvironmentServer, RPackageCitation, RPackageCitationPerson, RPackageInfo } from 'editor-types';
 
 const kPackageType = 'Packages';
@@ -50,12 +41,8 @@ export function packageSourcePanel(
       // Read the package state
       const pkgState = await server.getRPackageState();
 
-      // Sorting in this way ensures that the packages are in alpha order and that in.project.library packages appear first
-      // uniqby will always select the first uniq entry, so this ensures that in.project.library packages are preferred
-      // (in.project.library represents a package provided as a part of packrat or renv)
-      const sorted = orderBy(pkgState.package_list, [pkg => pkg.name.toLowerCase(), 'in.project.library'], ['asc', 'desc']);
-
-      // Create the list of info and index
+      // Create the list of info (in alpha order, first entry wins for duplicates) and index
+      const sorted = sortPackagesByName(pkgState.package_list);
       pkgInfos = uniqBy(sorted, pkg => pkg.name);
       pkgIndex = packageIndex(pkgInfos);
     }
@@ -253,7 +240,7 @@ interface PackageSearch {
   search(searchTerm: string): RPackageInfo[];
 }
 
-const searchFields: Fuse.FuseOptionKeyObject<RPackageInfo>[] = [
+const searchFields: FuseOptionKeyObject<RPackageInfo>[] = [
   { name: 'name', weight: 30 },
   { name: 'desc', weight: 15 },
   { name: 'version', weight: 5 },

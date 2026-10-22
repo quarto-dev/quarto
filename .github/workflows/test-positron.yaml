@@ -20,15 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     name: Test Positron API
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: latest
+          node-version-file: .nvmrc
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Build vscode extension
         run: |
-          yarn install
-          yarn run build-vscode
+          npm ci
+          npm run build-vscode
       - name: Run Positron API tests
         uses: posit-dev/setup-positron@v1
         with:

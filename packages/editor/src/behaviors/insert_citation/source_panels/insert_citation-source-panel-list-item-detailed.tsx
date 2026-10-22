@@ -1,20 +1,11 @@
 /*
  * insert_citation-source-panel-list-item.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React from 'react';
-import { ListChildComponentProps } from 'react-window';
+import { RowComponentProps } from 'react-window';
 
 import { OutlineButton } from '../../../api/widgets/button';
 
@@ -22,8 +13,8 @@ import { CitationSourcePanelListItemData } from './insert_citation-source-panel-
 
 import './insert_citation-source-panel-list-item-detailed.css';
 
-export const CitationSourcePanelListItemDetailed = (props: ListChildComponentProps) => {
-  const citationListData: CitationSourcePanelListItemData = props.data;
+export const CitationSourcePanelListItemDetailed = (props: RowComponentProps<CitationSourcePanelListItemData>) => {
+  const citationListData: CitationSourcePanelListItemData = props;
 
   const citationEntry = citationListData.citations[props.index];
 
@@ -63,6 +54,7 @@ export const CitationSourcePanelListItemDetailed = (props: ListChildComponentPro
       onDoubleClick={onDoubleClick}
       className="pm-insert-citation-source-panel-item-detailed"
       style={props.style}
+      {...props.ariaAttributes}
     >
       <div
         className={`pm-insert-citation-source-panel-item-detailed-border ${selected ? 'pm-list-item-selected' : ''}`}

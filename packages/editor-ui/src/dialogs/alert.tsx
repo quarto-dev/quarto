@@ -1,16 +1,7 @@
 /*
  * alert.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from RStudio pursuant
- * to the terms of a commercial license agreement with RStudio, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React, { useState } from 'react';
@@ -47,15 +38,15 @@ import { fluentTheme } from '../theme';
 import { t } from './translate';
 
 
-export function alert(title: string, message: string | JSX.Element, type: number): Promise<boolean> {
+export function alert(title: string, message: string | React.JSX.Element, type: number): Promise<boolean> {
   return alertDialog(title, message, type, true);
 }
 
-export async function yesNoMessage(title: string, message: string | JSX.Element, type: number, yesLabel: string, noLabel: string): Promise<boolean> {
+export async function yesNoMessage(title: string, message: string | React.JSX.Element, type: number, yesLabel: string, noLabel: string): Promise<boolean> {
   return alertDialog(title, message, type, false, yesLabel, noLabel);
 }
 
-async function alertDialog(title: string, message: string | JSX.Element, type: number, noCancelButton?: boolean, okLabel?: string, cancelLabel?: string) {
+async function alertDialog(title: string, message: string | React.JSX.Element, type: number, noCancelButton?: boolean, okLabel?: string, cancelLabel?: string) {
   const result = await showValueEditorDialog(AlertDialog, { ok: false }, { title, message, type, noCancelButton, okLabel, cancelLabel });
   return !!result?.ok;
 }
@@ -63,7 +54,7 @@ async function alertDialog(title: string, message: string | JSX.Element, type: n
 interface AlertDialogOptions {
   type: number;
   title?: string;
-  message?: string | JSX.Element;
+  message?: string | React.JSX.Element;
   noCancelButton?: boolean;
   okLabel?: string;
   cancelLabel?: string;

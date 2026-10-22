@@ -1,16 +1,7 @@
 /*
  * editor.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { inputRules } from 'prosemirror-inputrules';
@@ -19,8 +10,6 @@ import { Node as ProsemirrorNode, Schema, DOMParser, ParseOptions, Slice, Fragme
 import { EditorState, Plugin, PluginKey, TextSelection, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import 'prosemirror-view/style/prosemirror.css';
-
-import applyDevTools from "prosemirror-dev-tools";
 
 import { setTextSelection } from 'prosemirror-utils';
 
@@ -637,7 +626,7 @@ export class Editor  {
         // eat exceptions that might result from an invalid position
         try {
           setTextSelection(loc.pos)(tr);
-        } catch (e) {
+        } catch {
           // do-nothing, this error can happen and shouldn't result in 
           // a failure to setMarkdown
         }
@@ -908,8 +897,22 @@ export class Editor  {
     this.emitEvent(ResizeEvent);
   }
 
+  // prosemirror-dev-tools is a devDependency, and only development builds
+  // (`vite build --mode development`) bundle it
+  public devToolsAvailable() {
+    return import.meta.env.MODE === 'development';
+  }
+
   public enableDevTools() {
-    applyDevTools(this.view);
+    // test MODE inline (not via devToolsAvailable) so production builds
+    // can drop the import
+    if (import.meta.env.MODE !== 'development') {
+      console.warn('ProseMirror dev tools are only available in development builds');
+      return;
+    }
+    import('prosemirror-dev-tools')
+      .then(({ default: applyDevTools }) => applyDevTools(this.view))
+      .catch((error) => console.error('Unable to load ProseMirror dev tools', error));
   }
 
   public getMenus(): EditorMenus {
@@ -1194,20 +1197,24 @@ export class Editor  {
 
     // create the defautl inputRules plugin
     const plugin = inputRules({ rules: this.extensions.inputRules(this.schema) });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleTextInput = plugin.props.handleTextInput!.bind(plugin);
 
     // override to disable input rules as requested
     // https://github.com/ProseMirror/prosemirror-inputrules/commit/b4bf67623aa4c4c1e096c20aa649c0e63751f337
-    const customHandleTextInput = (view: EditorView, from: number, to: number, text: string) => {
+    const customHandleTextInput = (
+      view: EditorView,
+      from: number,
+      to: number,
+      text: string,
+      deflt: () => Transaction,
+    ) => {
       if (!markFilter(view.state)) {
         return false;
       }
-      return handleTextInput(view, from, to, text);
+      return handleTextInput(view, from, to, text, deflt);
     };
 
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugin.props.handleTextInput = customHandleTextInput;
     return plugin;
   }

@@ -1,22 +1,13 @@
 /*
  * commands.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as path from "path";
 import * as fs from "fs";
 
-import { TextDocument, window, Uri, workspace, commands, QuickPickItem } from "vscode";
+import { TextDocument, window, Uri, workspace, commands } from "vscode";
 import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 
 import { Command } from "../../core/command";

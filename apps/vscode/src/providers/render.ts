@@ -1,16 +1,7 @@
 /*
  * render.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { workspace, window } from "vscode";
@@ -271,50 +262,47 @@ class RenderProjectCommand extends RenderCommand implements Command {
   }
 
   private async resolveFormat(projectDir: Uri): Promise<string | undefined> {
-    return new Promise(async (resolve) => {
-      const config = await quartoProjectConfig(this.quartoContext().runQuarto, projectDir.fsPath);
-      if (config?.config.project.type === "book" && typeof (config?.config.format) === "object") {
-        const formats = Object.keys(config?.config.format);
-        if (formats.length > 1) {
-          const quickPick = window.createQuickPick<FormatQuickPickItem>();
-          quickPick.canSelectMany = false;
-          quickPick.items = [
-            {
-              format: "all",
-              label: `$(run-all) Render All Formats`,
-              alwaysShow: true,
-            },
-            {
-              format: "default",
-              label: "",
-              kind: QuickPickItemKind.Separator,
-            },
-            ...formats.map(format => ({
-              format: format,
-              label: `$(play) Render ${format} book`,
-              alwaysShow: true
-            }))
-          ];
-          let accepted = false;
-          quickPick.onDidAccept(async () => {
-            accepted = true;
-            quickPick.hide();
-            const chosenFormat = quickPick.selectedItems[0].format;
-            resolve(chosenFormat);
-          });
-          quickPick.onDidHide(() => {
-            if (!accepted) {
-              resolve(undefined);
-            }
-          });
-          quickPick.show();
-        } else {
-          resolve("default");
+    const config = await quartoProjectConfig(this.quartoContext().runQuarto, projectDir.fsPath);
+    if (config?.config.project.type !== "book" || typeof (config?.config.format) !== "object") {
+      return "default";
+    }
+    const formats = Object.keys(config.config.format);
+    if (formats.length <= 1) {
+      return "default";
+    }
+    return new Promise((resolve) => {
+      const quickPick = window.createQuickPick<FormatQuickPickItem>();
+      quickPick.canSelectMany = false;
+      quickPick.items = [
+        {
+          format: "all",
+          label: `$(run-all) Render All Formats`,
+          alwaysShow: true,
+        },
+        {
+          format: "default",
+          label: "",
+          kind: QuickPickItemKind.Separator,
+        },
+        ...formats.map(format => ({
+          format: format,
+          label: `$(play) Render ${format} book`,
+          alwaysShow: true
+        }))
+      ];
+      let accepted = false;
+      quickPick.onDidAccept(async () => {
+        accepted = true;
+        quickPick.hide();
+        const chosenFormat = quickPick.selectedItems[0].format;
+        resolve(chosenFormat);
+      });
+      quickPick.onDidHide(() => {
+        if (!accepted) {
+          resolve(undefined);
         }
-      } else {
-        resolve("default");
-      }
+      });
+      quickPick.show();
     });
-
   }
 }

@@ -1,16 +1,7 @@
 /*
  * yaml.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Node as ProsemirrorNode } from 'prosemirror-model';
@@ -18,7 +9,9 @@ import { NodeWithPos } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
 import { EditorState, Transaction } from 'prosemirror-state';
 
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
+
+import { loadYaml } from 'core';
 
 import { findTopLevelBodyNodes } from './node';
 import { logException } from './log';
@@ -122,11 +115,7 @@ export function firstYamlBlock(code: string): Record<string,any> | null {
 
 export function parseYaml(yamlCode: string) : unknown {
   try {
-    
-    const yamlParsed = yaml.load(yamlCode, {
-      onWarning: logException,
-    });
-    return yamlParsed;
+    return loadYaml(yamlCode);
   } catch (e) {
     logException(e);
     return null;

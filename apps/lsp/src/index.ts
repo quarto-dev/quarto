@@ -1,16 +1,7 @@
 /*
  * index.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import path from "path";
@@ -132,9 +123,11 @@ connection.onInitialize((params: InitializeParams) => {
     return mdLs?.getDocumentLinks(document, token) || [];
   });
 
-  connection.onDocumentLinkResolve(async (link, token): Promise<DocumentLink | undefined> => {
+  connection.onDocumentLinkResolve(async (link, token): Promise<DocumentLink> => {
     logger.logRequest('documentLinksResolve');
-    return mdLs?.resolveDocumentLink(link, token);
+    // documentLink/resolve must return a link (the client can't convert null),
+    // so hand back the unresolved link when there's nothing to resolve
+    return (await mdLs?.resolveDocumentLink(link, token)) ?? link;
   });
 
   connection.onDocumentSymbol(async (params, token): Promise<DocumentSymbol[]> => {
@@ -332,6 +325,11 @@ connection.onInitialized(async () => {
   // signal that `mdLs` is now ready to serve requests:
   // handlers like document symbols, folding ranges, etc will now proceed
   resolveMdLsReady();
+
+  // signal to the client that startup is complete and all request handlers
+  // (including the custom methods registered above) are ready to serve
+  // requests
+  connection.sendNotification("quarto/serverReady");
 });
 
 

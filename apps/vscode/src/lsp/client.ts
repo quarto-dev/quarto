@@ -1,16 +1,7 @@
 /*
  * client.ts
  *
- * Copyright (C) 2022-2025 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as path from "path";
@@ -35,7 +26,14 @@ import {
 import {
   LanguageClient,
   LanguageClientOptions,
+  Middleware,
+  ProvideCompletionItemsSignature,
+  ProvideDefinitionSignature,
+  ProvideHoverSignature,
+  ProvideSignatureHelpSignature,
+  ProvideDocumentSymbolsSignature,
   ServerOptions,
+  State,
   TransportKind,
 } from "vscode-languageclient/node";
 
@@ -46,15 +44,6 @@ import {
   Position,
   TextDocument,
 } from "vscode";
-import {
-  Middleware,
-  ProvideCompletionItemsSignature,
-  ProvideDefinitionSignature,
-  ProvideHoverSignature,
-  ProvideSignatureHelpSignature,
-  ProvideDocumentSymbolsSignature,
-  State,
-} from "vscode-languageclient";
 import { MarkdownEngine } from "../markdown/engine";
 import {
   adjustedPosition,
@@ -75,8 +64,10 @@ import { getHover, getSignatureHelpHover } from "../core/hover";
 import { imageHover } from "../providers/hover-image";
 import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { lspClientTransport } from "core-node";
-import { JsonRpcRequestTransport } from "core";
+import { JsonRpcRequestTransport, sleep } from "core";
 import { extensionHost } from "../host";
+import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
+import { hasChunkSymbols, nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
 import semver from "semver";
 import { EmbeddedLanguage } from "../vdoc/languages";
 import { SymbolInformation } from "vscode";
@@ -96,7 +87,8 @@ let client: LanguageClient | undefined;
 export interface QuartoLspClient {
   /**
    * JSON-RPC transport that lazily starts the language server on first use and
-   * waits for it to be running before issuing the request.
+   * waits for it to be running and fully initialized (all request handlers
+   * registered) before issuing the request.
    */
   lspRequest: JsonRpcRequestTransport;
 
@@ -166,8 +158,36 @@ export function activateLsp(
   if (config.get("cells.signatureHelp.enabled", true)) {
     middleware.provideSignatureHelp = embeddedSignatureHelpProvider(engine);
   }
-  extensionHost().registerStatementRangeProvider(engine);
-  extensionHost().registerHelpTopicProvider(engine);
+  // Statement range and help topic are single-answer features: whichever
+  // provider registered last owns Cmd+Enter and F1. When the host owns the
+  // cells we must not compete with it, so these registrations follow the
+  // setting live rather than being made once. Disposing on enable hands the
+  // features to the host; re-registering on disable wins the race because this
+  // registration is then the most recent.
+  let hostProviders: Disposable[] = [];
+  const registerHostProviders = () => {
+    hostProviders = [
+      extensionHost().registerStatementRangeProvider(engine),
+      extensionHost().registerHelpTopicProvider(engine),
+    ];
+  };
+  if (!hostOwnsCellFeatures()) {
+    registerHostProviders();
+  }
+  context.subscriptions.push(
+    new Disposable(() => hostProviders.forEach((d) => d.dispose())),
+    workspace.onDidChangeConfiguration((e) => {
+      if (!e.affectsConfiguration(kHostCellFeaturesSetting)) {
+        return;
+      }
+      if (hostOwnsCellFeatures()) {
+        hostProviders.forEach((d) => d.dispose());
+        hostProviders = [];
+      } else if (hostProviders.length === 0) {
+        registerHostProviders();
+      }
+    })
+  );
 
   // create client options
   const initializationOptions: LspInitializationOptions = {
@@ -206,6 +226,13 @@ export function activateLsp(
   );
   client = languageClient;
 
+  // Resolves when the server signals that it has finished its async startup
+  // and registered all of its request handlers, including the custom JSON-RPC
+  // methods served via `lspRequest`.
+  let resolveServerReady!: () => void;
+  const serverReady = new Promise<void>(resolve => { resolveServerReady = resolve; });
+  languageClient.onNotification("quarto/serverReady", () => resolveServerReady());
+
   // callbacks to invoke each time the server reaches the running state
   const readyCallbacks = new Set<(client: LanguageClient) => void>();
   const onReady = (callback: (client: LanguageClient) => void): Disposable => {
@@ -237,6 +264,7 @@ export function activateLsp(
 
   // Start the server on first use. Idempotent: the promise is memoized so
   // repeated calls (and multiple triggers) only launch the server once.
+  // Cleared on failure below so a later call can retry.
   let startPromise: Promise<LanguageClient> | undefined;
   const ensureStarted = (): Promise<LanguageClient> => {
     if (!startPromise) {
@@ -250,6 +278,8 @@ export function activateLsp(
             resolve(languageClient);
           } else if (e.newState === State.Stopped) {
             handler.dispose();
+            // clear the memo so a later call retries instead of replaying this rejection
+            startPromise = undefined;
             reject(new Error("Failed to start Quarto LSP Server"));
           }
         });
@@ -260,10 +290,21 @@ export function activateLsp(
     return startPromise;
   };
 
-  // Lazy JSON-RPC transport: starts the server on first use, then forwards.
+  // Lazy JSON-RPC transport: starts the server on first use, waits for it to
+  // finish initializing, then forwards.
   let transport: JsonRpcRequestTransport | undefined;
+  let readinessWarningShown = false;
   const lspRequest: JsonRpcRequestTransport = async (method, params) => {
     const started = await ensureStarted();
+    // Wait for the server to register its request handlers.
+    const timedOut = await Promise.race([
+      serverReady.then(() => false as const),
+      sleep(60_000).then(() => true as const)
+    ]);
+    if (timedOut && !readinessWarningShown) {
+      readinessWarningShown = true;
+      outputChannel.warn("Timed out waiting for the Quarto LSP server to finish starting up; requests to it may fail.");
+    }
     if (!transport) {
       transport = lspClientTransport(started);
     }
@@ -337,6 +378,11 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
     const vdoc = await virtualDoc(document, position, engine);
 
     if (vdoc && !isWithinYamlComment(document, position)) {
+      // when the host is Positron, it may own the language's cells and the extension should stand down (not try to provide them)
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       // if there is a trigger character make sure the language supports it
       const language = vdoc.language;
       if (context.triggerCharacter) {
@@ -356,7 +402,7 @@ function embeddedCodeCompletionProvider(engine: MarkdownEngine) {
           language,
           document.uri
         );
-      } catch (error) {
+      } catch {
         return undefined;
       }
     } else {
@@ -381,6 +427,10 @@ function embeddedHoverProvider(engine: MarkdownEngine) {
 
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       return await withVirtualDocUri(vdoc, document.uri, "hover", async (uri: Uri) => {
         try {
           return await getHover(uri, vdoc.language, position);
@@ -405,10 +455,14 @@ function embeddedSignatureHelpProvider(engine: MarkdownEngine) {
   ) => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       return await withVirtualDocUri(vdoc, document.uri, "signature", async (uri: Uri) => {
         try {
           return await getSignatureHelpHover(uri, vdoc.language, position, context.triggerCharacter);
-        } catch (error) {
+        } catch {
           return undefined;
         }
       });
@@ -427,6 +481,10 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
   ): Promise<Definition | LocationLink[] | null | undefined> => {
     const vdoc = await virtualDoc(document, position, engine);
     if (vdoc) {
+      if (hostOwnsCellFeatures(vdoc.language)) {
+        return undefined;
+      }
+
       return await withVirtualDocUri(vdoc, document.uri, "definition", async (uri: Uri) => {
         try {
           const definitions = await commands.executeCommand<
@@ -478,7 +536,7 @@ function embeddedGoToDefinitionProvider(engine: MarkdownEngine) {
           } else {
             return definitions;
           }
-        } catch (error) {
+        } catch {
           return undefined;
         }
       });
@@ -493,7 +551,7 @@ function isWithinYamlComment(doc: TextDocument, pos: Position) {
   return !!line.match(/^\s*#\s*\| /);
 }
 
-const isDocumentSymbol = (a: Object): a is DocumentSymbol => {
+const isDocumentSymbol = (a: object): a is DocumentSymbol => {
   return ('range' in a && 'selectionRange' in a);
 };
 
@@ -517,6 +575,22 @@ function embeddedDocumentSymbolProvider(engine: MarkdownEngine) {
     // I don't think we actually ever get SymbolInformation[] here, but I'm not certain
     // so this is defensively coded.
     if (baseSymbols.length > 0 && isDocumentSymbol(baseSymbols[0])) {
+      // When the host owns the cells, one command answers for the whole
+      // document, so it is fetched once per request and the chunks are matched
+      // to it by range.
+      if (hostOwnsCellFeatures()) {
+        const symbols = baseSymbols as DocumentSymbol[];
+        // Nothing to ask the host about when the outline carries no chunk
+        // symbol to nest under, which is every request for a `_quarto.yml` and
+        // every request at all while `showCodeCellsInOutline` is off.
+        if (!hasChunkSymbols(symbols)) {
+          return baseSymbols;
+        }
+        const cells = await quartoCellSymbols(document.uri);
+        if (token.isCancellationRequested) return baseSymbols;
+        return nestCellSymbols(symbols, cells);
+      }
+
       const enhanced = await enhanceSymbolsWithCodeCellContent(
         document,
         baseSymbols as DocumentSymbol[],
@@ -582,8 +656,7 @@ async function enhanceSymbolsWithCodeCellContent(
         token
       );
       if (childResult === 'HadUndefined') {
-        hadUndefined = true;
-        symbol.children = symbol.children; // Keep existing children
+        hadUndefined = true; // keep the existing children
       } else {
         symbol.children = childResult;
       }
@@ -641,9 +714,13 @@ async function getCodeCellSymbols(
           (result as SymbolInformation[]).map<DocumentSymbol>(symbolInformationToDocumentSymbol);
 
         return unadjustSymbolRanges(documentSymbols, vdoc.language, cellRange.start.line);
-      } catch (error) { }
+      } catch {
+        // no symbols for this cell
+      }
     });
-  } catch (error) { }
+  } catch {
+    // no symbols for this document
+  }
 }
 
 /**

@@ -1,1 +1,0 @@
-dogName = adventurer.dog?.name

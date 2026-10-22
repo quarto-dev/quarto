@@ -1,7 +1,7 @@
 import { Schema, NodeSpec, Node as ProsemirrorNode, MarkSpec } from "prosemirror-model";
 import { PandocNode } from "editor/src/api/node";
 import { PandocMark } from "editor/src/api/mark";
-import { initExtensions, ExtensionManager } from "editor/src/editor/editor-extensions";
+import { ExtensionManager } from "editor/src/editor/editor-extensions";
 
 export function initSchema(extensions: ExtensionManager): Schema {
   // build in doc node + nodes from extensions

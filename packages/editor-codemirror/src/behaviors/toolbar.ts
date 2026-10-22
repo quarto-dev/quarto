@@ -1,21 +1,12 @@
 /*
  * toolbar.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 
 import { StateEffect, StateField } from "@codemirror/state";
-import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { Decoration, DecorationSet, EditorView, WidgetType } from "@codemirror/view";
 import { Transaction } from "prosemirror-state";
 
 import { languageDiagramEngine } from "editor-core";
@@ -31,17 +22,16 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
 
   const toggleToolbar = StateEffect.define<boolean>();
 
+  // WidgetType's defaults cover the rest: eq and updateDOM return false,
+  // estimatedHeight is -1, and ignoreEvent returns true
+  class ToolbarWidget extends WidgetType {
+    toDOM() {
+      return createToolbarPanel();
+    }
+  }
+
   const toolbarDecoration = Decoration.widget({
-    widget: {
-      toDOM() {
-        return createToolbarPanel();
-      },
-      eq: () => false,
-      updateDOM: () => false,
-      estimatedHeight: -1,
-      ignoreEvent: () => true,
-      destroy: () => { /* */ }
-    },
+    widget: new ToolbarWidget(),
     side: 0
   });
   

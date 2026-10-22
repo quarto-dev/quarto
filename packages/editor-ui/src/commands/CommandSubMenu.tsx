@@ -1,23 +1,14 @@
 /*
  * CommandSubMenu2.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from RStudio pursuant
- * to the terms of a commercial license agreement with RStudio, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React, { PropsWithChildren, useContext } from 'react';
 
 import { SubMenuProps, SubMenu } from '../menu/Menu';
 
-import { CommandMenuItem } from './CommandMenuItem';
+import { CommandMenuItem, CommandMenuItemProps } from './CommandMenuItem';
 
 import { CommandManagerContext, Commands } from './CommandManager';
 
@@ -35,7 +26,7 @@ export const CommandSubMenu: React.FC<PropsWithChildren<CommandSubMenuProps>> = 
   for (const child of children) {
 
     if (
-      React.isValidElement(child) &&
+      React.isValidElement<CommandMenuItemProps>(child) &&
       child.type === CommandMenuItem 
     ) {
       // get command

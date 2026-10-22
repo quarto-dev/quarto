@@ -4,9 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import type MarkdownIt from "markdown-it/lib"
-import Token from "markdown-it/lib/token"
-import Renderer from "markdown-it/lib/renderer";
+import type { Env, MarkdownIt, MarkdownItOptions, Renderer, Token } from "markdown-it";
 import { addClass } from "./utils/markdownit";
 
 export const kDivRuleName = "pandocDiv";
@@ -14,10 +12,16 @@ export const kDivRuleName = "pandocDiv";
 export const kTokDivOpen = 'pandoc_div_open';
 export const kTokDivClose = 'pandoc_div_close';
 
+// Div-tracking state kept in the markdown-it env across block rule calls
+interface DivEnv extends Env {
+  quartoOpenDivs?: Record<string, number>;
+  quartoDivLevel?: number;
+}
+
 export const divPlugin = (md: MarkdownIt) => {
   
   // Render pandoc-style divs
-  function renderStartDiv(tokens: Token[], idx: number, _options: MarkdownIt.Options, _env: unknown, self: Renderer): string {
+  function renderStartDiv(tokens: Token[], idx: number, _options: MarkdownItOptions, _env: unknown, self: Renderer): string {
 
     // Add a class to designate that this is a quarto dev
     const token = tokens[idx];
@@ -42,25 +46,26 @@ export const divPlugin = (md: MarkdownIt) => {
       const lineStart = state.bMarks[start] + state.tShift[start];
       const lineEnd = state.eMarks[start];
       const line = state.src.slice(lineStart, lineEnd)
+      const env = state.env as DivEnv;
       
       // The current state of the divs (e.g. is there an open)
       // div. Data structure holds key that is the number of colons
-      const divState = state.env.quartoOpenDivs || {};
+      const divState = env.quartoOpenDivs || {};
 
 
 
       const incrementDivCount = (fence: string) => {
-        state.env.quartoDivLevel = (state.env.quartoDivLevel ?? 0) + 1;
-        state.env.quartoOpenDivs = state.env.quartoOpenDivs || {};
-        const current = state.env.quartoOpenDivs[fence] || 0;
-        state.env.quartoOpenDivs[fence] = Math.max(0, current + 1);
+        env.quartoDivLevel = (env.quartoDivLevel ?? 0) + 1;
+        env.quartoOpenDivs = env.quartoOpenDivs || {};
+        const current = env.quartoOpenDivs[fence] || 0;
+        env.quartoOpenDivs[fence] = Math.max(0, current + 1);
       }
 
       const decrementDivCount = (fence: string) => {
-        state.env.quartoDivLevel--;
-        state.env.quartoOpenDivs = state.env.quartoOpenDivs || {};
-        const current = state.env.quartoOpenDivs[fence] || 0;
-        state.env.quartoOpenDivs[fence] = Math.max(0, current - 1);
+        env.quartoDivLevel = (env.quartoDivLevel ?? 0) - 1;
+        env.quartoOpenDivs = env.quartoOpenDivs || {};
+        const current = env.quartoOpenDivs[fence] || 0;
+        env.quartoOpenDivs[fence] = Math.max(0, current - 1);
       }
 
       // Three or more colons followed by a an optional brace with attributes
@@ -118,11 +123,11 @@ export const divPlugin = (md: MarkdownIt) => {
           token.block = true;
           token.meta = {
             line: state.line,
-            level: state.env.quartoDivLevel 
+            level: env.quartoDivLevel 
           }
         } else {
           // Subtract from the open count (min zero)
-          const level = state.env.quartoDivLevel;
+          const level = env.quartoDivLevel;
           decrementDivCount(divFence);
 
           // Make a close token

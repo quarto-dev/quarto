@@ -2,21 +2,24 @@
   "name": "core",
   "version": "0.1.0",
   "private": true,
-  "license": "agpl-3.0",
+  "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "markdown-it": "^13.0.1",
-    "markdown-it-attrs": "^4.1.6",
+    "js-yaml": "^5.4.3",
+    "markdown-it": "^15.0.2",
+    "markdown-it-attrs": "^4.5.0",
     "tsconfig": "*",
-    "typescript": "^4.5.2"
+    "wcwidth": "^1.0.1"
   },
   "devDependencies": {
-    "@types/markdown-it": "^12.2.3",
-    "@types/markdown-it-attrs": "^4.1.0",
-    "tsx": "^4.7.1"
+    "@types/wcwidth": "^1.0.2",
+    "eslint": "^10.12.0",
+    "eslint-config-custom": "*",
+    "tsx": "^4.23.15"
   },
   "scripts": {
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "lint": "eslint src test"
   }
 }

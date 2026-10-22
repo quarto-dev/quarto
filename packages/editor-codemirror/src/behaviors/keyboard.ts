@@ -1,16 +1,7 @@
 /*
  * keyboard.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { EditorView as PMEditorView } from "prosemirror-view";
@@ -121,8 +112,9 @@ const maybeEscape = (
   dir: -1 | 1,
   cm: EditorView,
   view: PMEditorView,
-  getPos: boolean | (() => number)
+  getPos: () => number | undefined
 ) => {
+  const pos = getPos();
   const sel = cm.state.selection.main;
   const line = cm.state.doc.lineAt(sel.from);
   const lastLine = cm.state.doc.lines;
@@ -130,13 +122,13 @@ const maybeEscape = (
     sel.to !== sel.from ||
     line.number !== (dir < 0 ? 1 : lastLine) ||
     (unit === "char" && sel.from !== (dir < 0 ? 0 : line.to)) ||
-    typeof getPos !== "function"
+    pos === undefined
   ) {
     return false;
   }
 
   view.focus();
-  handleArrowToAdjacentNode(getPos(), dir, view.state, view.dispatch);
+  handleArrowToAdjacentNode(pos, dir, view.state, view.dispatch);
   view.focus();
   return true;
 };

@@ -4,15 +4,6 @@
  * Positron-specific functionality.
  *
  * Copyright (C) 2022-2026 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 import * as vscode from 'vscode';
@@ -104,8 +95,13 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                 return;
               }
 
-              if (language === "python" && isKnitrDocument(document, engine)) {
-                language = "r";
+              let executionLanguage = language;
+              if (
+                language === "python" &&
+                isKnitrDocument(document, engine) &&
+                vscode.workspace.getConfiguration("quarto").get("cells.useReticulate", true)
+              ) {
+                executionLanguage = "r";
                 blocks = blocks.map(pythonWithReticulate);
               }
 
@@ -128,7 +124,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
 
                   try {
                     await runtime.executeCode(
-                      language,   // The language ID
+                      executionLanguage, // The language ID
                       blocks[i],  // The code string to execute
                       false,      // Whether to focus the console
                       true,       // Whether to allow incomplete code to run
@@ -145,7 +141,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                     if (!runtimeFailure) {
                       // The code couldn't be submitted to the runtime. Log it
                       // and let it propagate so the user finds out.
-                      outputChannel?.error(`Failed to execute ${language} cell: ${message}`);
+                      outputChannel?.error(`Failed to execute ${executionLanguage} cell: ${message}`);
                       throw err;
                     }
 
@@ -154,7 +150,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                     // record but don't let it propagate to the command handler,
                     // which would surface it again as a notification popup.
                     // https://github.com/posit-dev/positron/issues/9845
-                    outputChannel?.debug(`Error executing ${language} cell: ${message}`);
+                    outputChannel?.debug(`Error executing ${executionLanguage} cell: ${message}`);
 
                     // Stop executing any subsequent blocks since one failed.
                     break;
@@ -162,7 +158,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                 }
               };
 
-              await ExecuteQueue.instance.add(language, callback);
+              await ExecuteQueue.instance.add(executionLanguage, callback);
             },
             executeSelection: async (): Promise<void> => {
               await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
@@ -175,7 +171,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
                   uri,
                   position
                 ) as Position;
-              } catch (e) {
+              } catch {
                 // an error can happen, we think, if the statementRangeProvider errors
                 console.error('error when using `positron.executeCodeFromPosition`');
               }
@@ -225,7 +221,8 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
     ): HostWebviewPanel => {
 
       // create preview panel
-      const panel = tryAcquirePositronApi()?.window.createPreviewPanel(
+      // (this host is only used when the Positron API is available)
+      const panel = tryAcquirePositronApi()!.window.createPreviewPanel(
         viewType,
         title,
         preserveFocus,
@@ -235,7 +232,7 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
           localResourceRoots: options?.localResourceRoots,
           portMapping: options?.portMapping
         }
-      )!;
+      );
 
       // adapt to host interface
       return new PositronWebviewPanel(panel);
@@ -244,7 +241,21 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
 }
 
 
-class PositronWebviewPanel implements HostWebviewPanel {
+// TODO: Use positron.PreviewPanel directly once @posit-dev/positron ships
+// `stoppable` and `onDidRequestStop`.
+type StoppablePreviewPanel = positron.PreviewPanel & {
+  stoppable: boolean;
+  readonly onDidRequestStop: vscode.Event<void>;
+};
+
+/**
+ * Whether this version of Positron shows a stop button for preview panels.
+ */
+function isStoppable(panel: positron.PreviewPanel): panel is StoppablePreviewPanel {
+  return "onDidRequestStop" in panel;
+}
+
+export class PositronWebviewPanel implements HostWebviewPanel {
   constructor(private readonly panel_: positron.PreviewPanel) { }
 
   get webview() { return this.panel_.webview; };
@@ -254,7 +265,13 @@ class PositronWebviewPanel implements HostWebviewPanel {
   }
   onDidChangeViewState = this.panel_.onDidChangeViewState;
   onDidDispose = this.panel_.onDidDispose;
+  onDidRequestStop = isStoppable(this.panel_) ? this.panel_.onDidRequestStop : undefined;
   dispose() { this.panel_.dispose(); };
+  setStoppable(stoppable: boolean) {
+    if (isStoppable(this.panel_)) {
+      this.panel_.stoppable = stoppable;
+    }
+  }
 }
 
 class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
@@ -269,7 +286,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
   async provideStatementRange(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken): Promise<positron.StatementRange | undefined> {
+    _token: vscode.CancellationToken): Promise<positron.StatementRange | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine, VirtualDocStyle.Block);
 
     if (!vdoc) {
@@ -285,7 +302,7 @@ class EmbeddedStatementRangeProvider implements HostStatementRangeProvider {
         );
         return { range: unadjustedRange(vdoc.language, result.range), code: result.code };
       } catch (err) {
-        let positronApi = tryAcquirePositronApi();
+        const positronApi = tryAcquirePositronApi();
 
         if (!positronApi) {
           throw err;
@@ -325,7 +342,7 @@ class EmbeddedHelpTopicProvider implements HostHelpTopicProvider {
   async provideHelpTopic(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken): Promise<string | undefined> {
+    _token: vscode.CancellationToken): Promise<string | undefined> {
     const vdoc = await virtualDoc(document, position, this._engine);
 
     if (vdoc) {

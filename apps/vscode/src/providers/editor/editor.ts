@@ -1,19 +1,10 @@
 /*
  * editor.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import path, { extname, win32 } from "path";
+import path, { extname } from "path";
 import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
@@ -35,7 +26,9 @@ import {
   Selection,
   TextEditorRevealType,
   GlobPattern,
-  TabInputText
+  TabInputText,
+  Event,
+  EventEmitter
 } from "vscode";
 
 import { projectDirForDocument, QuartoContext } from "quarto-core";
@@ -97,6 +90,14 @@ export function activateEditor(
         return VisualEditorProvider.activeEditor() !== undefined;
       }
     },
+    {
+      // lets tests wait for a visual editor to finish loading, instead of
+      // sleeping for a guessed duration
+      id: 'quarto.test_isVisualEditorSynced',
+      execute(uri: string) {
+        return VisualEditorProvider.isSynced(Uri.parse(uri));
+      }
+    },
     editInVisualModeCommand(),
     editInSourceModeCommand(),
     toggleRenderOnSaveCommand()
@@ -127,6 +128,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   // track visual editors
   private static visualEditors = visualEditorTracker();
+
+  // visual editors whose initial sync has completed: the webview has loaded the
+  // document and any markdown canonicalization has been applied back to it
+  private static syncedEditors = new Set<WebviewPanel>();
 
   public static register(
     context: ExtensionContext,
@@ -172,7 +177,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             const fileData = await workspace.fs.readFile(uri);
             const fileContent = Buffer.from(fileData).toString('utf8');
             const editorMode = determineMode(fileContent, uri);
-            let isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
+            const isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
             if (this.editorPendingSwitchToVisual.has(uri.toString())) {
               this.editorPendingSwitchToVisual.delete(uri.toString());
             }
@@ -277,6 +282,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     this.editorPendingSwitchToVisual.add(document.uri.toString());
   }
 
+  // fires when a visual editor's webview panel becomes active
+  public static readonly onDidChangeActiveEditor: Event<TrackedEditor> =
+    VisualEditorProvider.visualEditors.onDidChangeActiveEditor;
+
   public static activeEditor(includeVisible?: boolean): QuartoVisualEditor | undefined {
     const editor = this.visualEditors.activeEditor(includeVisible);
     if (editor) {
@@ -306,6 +315,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   public static editorForUri(uri: Uri): TrackedEditor | undefined {
     return this.visualEditors.editorForUri(uri);
+  }
+
+  public static isSynced(uri: Uri): boolean {
+    const editor = this.visualEditors.editorForUri(uri);
+    return !!editor && this.syncedEditors.has(editor.webviewPanel);
   }
 
   public static visualEditorPendingXRefNavigation(uri: string, xref: XRef) {
@@ -436,6 +450,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
         // initialize sync manager
         await syncManager.init();
+        VisualEditorProvider.syncedEditors.add(webviewPanel);
 
         // notify for document changes
         disposables.push(workspace.onDidChangeTextDocument(
@@ -562,6 +577,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
+      VisualEditorProvider.syncedEditors.delete(webviewPanel);
       for (const disposable of disposables) {
         disposable.dispose();
       }
@@ -686,17 +702,27 @@ interface VisualEditorTracker {
   track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor) => Disposable;
   editorForUri: (uri: Uri) => TrackedEditor | undefined;
   activeEditor: (includeVisible?: boolean) => TrackedEditor | undefined;
+  onDidChangeActiveEditor: Event<TrackedEditor>;
 }
 
 function visualEditorTracker(): VisualEditorTracker {
 
   const activeEditors = new Array<TrackedEditor>();
+  const onDidChangeActiveEditorEmitter = new EventEmitter<TrackedEditor>();
 
   return {
     track: (document: TextDocument, webviewPanel: WebviewPanel, editor: VSCodeVisualEditor): Disposable => {
-      activeEditors.push({ document, webviewPanel, editor });
+      const trackedEditor = { document, webviewPanel, editor };
+      activeEditors.push(trackedEditor);
+      // notify when this editor's webview panel becomes active
+      const viewStateDisposable = webviewPanel.onDidChangeViewState(e => {
+        if (e.webviewPanel.active) {
+          onDidChangeActiveEditorEmitter.fire(trackedEditor);
+        }
+      });
       return {
         dispose: () => {
+          viewStateDisposable.dispose();
           const idx = activeEditors.findIndex(editor => editor.webviewPanel === webviewPanel);
           if (idx !== -1) {
             activeEditors.splice(idx, 1);
@@ -711,7 +737,7 @@ function visualEditorTracker(): VisualEditorTracker {
       return activeEditors.find(editor => {
         try {
           return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
-        } catch (err) {
+        } catch {
           // we've seen activeEditors hold on to references to disposed editors (can't on the
           // surface see how this would occur as we subscribe to dispose, but as an insurance
           // policy let's eat any exception that occurs, since a single zombie webviewPanel
@@ -720,7 +746,8 @@ function visualEditorTracker(): VisualEditorTracker {
         }
 
       });
-    }
+    },
+    onDidChangeActiveEditor: onDidChangeActiveEditorEmitter.event
   };
 }
 

@@ -3,15 +3,6 @@
  *
  * Copyright (C) 2026 by Posit Software, PBC
  * Copyright (c) [2021] [Chris Bain] (https://github.com/baincd/vscode-markdown-color-plus/)
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 
@@ -310,7 +301,7 @@ const cellOptionsSeparatorDecoration = vscode.window.createTextEditorDecorationT
 
 // document lines of the leading run of cell option comments in a cell
 // (#| for python/r, //| for js, etc. -- the same pattern used by the
-// tmLanguage rules generated in ../../syntaxes/build-lang.js, with
+// tmLanguage rules generated in ../../syntaxes/build-lang.mjs, with
 // optional leading indentation allowed)
 //
 // note: block-comment languages (e.g. /*| ... */ for c and css) are not

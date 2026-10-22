@@ -1,16 +1,7 @@
 /*
  * quarto.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as path from "node:path";
@@ -59,7 +50,9 @@ export async function initializeQuarto(context: QuartoContext): Promise<Quarto> 
     getAttrCompletions: initializeAttrCompletionProvider(
       context.resourcePath
     ),
-    getYamlDiagnostics: quartoModule.getLint,
+    // the external getLint() resolves to null when linting fails
+    getYamlDiagnostics: async (context) =>
+      (await quartoModule.getLint(context)) ?? [],
     getHover: quartoModule.getHover
   };
 
@@ -177,7 +170,7 @@ function normalizedValue(value: string, simpleDiv: boolean) {
 
 interface QuartoYamlModule {
   getCompletions(context: EditorContext): Promise<CompletionResult>;
-  getLint(context: EditorContext): Promise<Array<LintItem>>;
+  getLint(context: EditorContext): Promise<Array<LintItem> | null>;
   getHover?: (context: EditorContext) => Promise<HoverResult | null>;
 }
 

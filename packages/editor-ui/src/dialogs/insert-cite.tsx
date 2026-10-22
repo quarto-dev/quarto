@@ -1,21 +1,12 @@
 /*
  * insert-cite.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
 
-import { Card, Input, makeStyles, Select, shorthands, tokens } from "@fluentui/react-components"
+import { Card, Input, makeStyles, Select, tokens } from "@fluentui/react-components"
 
 import { Field, ProgressBar } from "@fluentui/react-components"
 
@@ -85,7 +76,7 @@ const InsertCiteDialog: React.FC<{
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
   const [idFocused, setIdFocused] = useState(false);
-  const idEl = useRef<HTMLInputElement>();
+  const idEl = useRef<HTMLInputElement | null>(null);
   const focusId = () => idEl?.current?.focus();
   const idFocusRef = (el: HTMLInputElement | null) => {
     if (!idFocused && el) {
@@ -328,10 +319,10 @@ const useStyles = makeStyles({
     overflowY: 'scroll',
     width: '100%',
     height: '200px',
-    ...shorthands.padding('4px'),
+    padding: '4px',
     marginBottom: '5px',
     "& td": {
-      ...shorthands.padding(0,0,'4px'),
+      padding: '0 0 4px',
     },
     "& tr td:first-child": {
       fontWeight: tokens.fontWeightSemibold,

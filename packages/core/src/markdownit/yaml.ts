@@ -1,23 +1,13 @@
 /*
  * markdownit-yaml.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  * Copyright (c) 2016-2020 ParkSB.
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
-import MarkdownIt from "markdown-it";
-import StateBlock from "markdown-it/lib/rules_block/state_block";
-import Token from "markdown-it/lib/token";
+import type { MarkdownIt, StateBlock, Token } from "markdown-it";
 import * as yaml from "js-yaml";
+import { loadYaml } from "../yaml";
 import { decorator } from "./utils/html";
 
 // Typescript version of https://github.com/parksb/markdown-it-front-matter
@@ -143,10 +133,10 @@ export function yamlPlugin(md: MarkdownIt, cb?: (yaml: unknown) => void) {
       token.markup = markup;
       token.block = true;
       token.map = [startLine, pos];
-      token.meta = state.src.slice(start_content, start - 1);
+      token.content = state.src.slice(start_content, start - 1);
   
       if (cb) {
-        cb(token.meta);
+        cb(token.content);
       }    
       state.parentType = old_parent;
       state.lineMax = old_line_max;  
@@ -273,8 +263,8 @@ type DocMetaValue = {
 function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
-    return yaml.load(str, { schema: yaml.FAILSAFE_SCHEMA});
-  } catch (error) {
+    return loadYaml(str, { schema: yaml.FAILSAFE_SCHEMA });
+  } catch {
     return undefined;
   }
 }

@@ -1,21 +1,12 @@
 /*
  * preview.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as path from "path";
 import * as fs from "fs";
-import * as uuid from "uuid";
+import { randomUUID } from "node:crypto";
 import axios from "axios";
 import * as semver from "semver";
 
@@ -94,7 +85,7 @@ tmp.setGracefulCleanup();
 const kPreviewWindowTitle = "Quarto Preview";
 
 const kLocalPreviewRegex =
-  /(http:\/\/(?:localhost|127\.0\.0\.1)\:\d+\/?[^\s]*)/;
+  /(http:\/\/(?:localhost|127\.0\.0\.1):\d+\/?[^\s]*)/;
 
 let previewManager: PreviewManager;
 
@@ -136,7 +127,7 @@ export function activatePreview(
   // onDidSaveNotebookDocument was introduced in 1.67
   if (haveNotebookSaveEvents()) {
     context.subscriptions.push(
-      (vscode.workspace as any).onDidSaveNotebookDocument(
+      vscode.workspace.onDidSaveNotebookDocument(
         async (notebook: NotebookDocument) => {
           await onSave(notebook.uri);
         }
@@ -266,7 +257,7 @@ class PreviewManager {
     private readonly quartoContext_: QuartoContext,
     private readonly engine_: MarkdownEngine
   ) {
-    this.renderToken_ = uuid.v4();
+    this.renderToken_ = randomUUID();
     this.webviewManager_ = new QuartoPreviewWebviewManager(
       context,
       host,
@@ -290,8 +281,33 @@ class PreviewManager {
       vscode.window.onDidCloseTerminal(async (closedTerminal) => {
         if (closedTerminal === this.terminal_) {
           this.terminal_ = undefined;
+          this.webviewManager_.setStoppable(false);
           await this.previewTerminateRequest();
         }
+      })
+    );
+
+    // Hide the Viewer's stop button when the preview server stops by other
+    // means (e.g. Ctrl+C in the terminal). Needs shell integration. A
+    // restart is ignored because killPreview() clears this.terminal_ first.
+    context.subscriptions.push(
+      vscode.window.onDidEndTerminalShellExecution((e) => {
+        if (e.terminal === this.terminal_) {
+          this.webviewManager_.setStoppable(false);
+        }
+      })
+    );
+
+    // The user clicked the Viewer's stop button (Positron only). Stop the
+    // server but keep the terminal open so its output stays readable, the
+    // same as Ctrl+C in the terminal.
+    context.subscriptions.push(
+      this.webviewManager_.onDidRequestStop(async () => {
+        this.webviewManager_.setStoppable(false);
+        await this.previewTerminateRequest();
+        this.progressDismiss();
+        this.progressCancellationToken_ = undefined;
+        this.webviewManager_.closeWebview();
       })
     );
   }
@@ -327,7 +343,7 @@ class PreviewManager {
         } else {
           await this.startPreview(previewEnv, uri, format, doc, slideIndex);
         }
-      } catch (e) {
+      } catch {
         await this.startPreview(previewEnv, uri, format, doc, slideIndex);
       }
     } else {
@@ -363,7 +379,7 @@ class PreviewManager {
         validateStatus: () => true,
       });
       return response.status === 200 || response.status === 404;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -413,7 +429,7 @@ class PreviewManager {
       await axios.get(this.previewServerRequestUri("/" + kTerminateToken), {
         timeout: 1000,
       });
-    } catch (error) {
+    } catch {
       /*
       console.log("Error requesting preview server termination");
       console.log(error);
@@ -427,7 +443,12 @@ class PreviewManager {
     return requestUri;
   }
 
-  private async killPreview() {
+  private async killPreview(options?: { restart?: boolean }) {
+    // Hide the Viewer's stop button (Positron only), unless a new server is
+    // about to start; keeping it through restarts avoids a toolbar flicker.
+    if (!options?.restart) {
+      this.webviewManager_.setStoppable(false);
+    }
     // Clear this.terminal_ before disposing so the onDidCloseTerminal listener
     // does not send a duplicate termination request.
     this.terminal_ = undefined;
@@ -444,7 +465,7 @@ class PreviewManager {
     slideIndex?: number
   ) {
     // dispose any existing preview terminals
-    await this.killPreview();
+    await this.killPreview({ restart: true });
 
     // cleanup output
     this.outputSink_.reset();
@@ -509,6 +530,8 @@ class PreviewManager {
           `Rendering requires Quarto version ${rPkgRequiredVersion} or greater`,
           { modal: true }
         );
+        // no server will start, so hide the Viewer's stop button
+        this.webviewManager_.setStoppable(false);
         return;
       }
     }
@@ -528,7 +551,7 @@ class PreviewManager {
 
   private async onPreviewOutput(output: string) {
     this.detectErrorNavigation(output);
-    const kOutputCreatedPattern = /Output created\: (.*?)\n/;
+    const kOutputCreatedPattern = /Output created: (.*?)\n/;
     this.previewOutput_ += output;
     if (!this.previewUrl_) {
       // detect new preview and show in browser
@@ -694,6 +717,9 @@ class PreviewManager {
         }
       );
       this.webviewManager_.setOnError(this.progressDismiss.bind(this));
+      // The server is up; show the Viewer's stop button (Positron only). This
+      // runs on every start, so the button stays through restarts.
+      this.webviewManager_.setStoppable(true);
     } else {
       this.showOuputFile();
     }

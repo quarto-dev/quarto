@@ -1,17 +1,8 @@
 /*
  * references.ts
  *
- * Copyright (C) 2023 by Posit Software, PBC
+ * Copyright (C) 2023-2026 by Posit Software, PBC
  * Copyright (c) Microsoft Corporation. All rights reserved.
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 import { CancellationToken } from 'vscode-languageserver';
@@ -20,7 +11,7 @@ import { URI } from 'vscode-uri';
 import { Disposable } from 'core';
 import { translatePosition, areRangesEqual, modifyRange, rangeContains, getDocUri, Document, Parser } from 'quarto-core';
 import { LsConfiguration } from '../config';
-import { ILogger, LogLevel } from '../logging';
+import { ILogger } from '../logging';
 import { MdTableOfContentsProvider, TocHeaderEntry, isTocHeaderEntry } from '../toc';
 import { looksLikeMarkdownUri } from '../util/file';
 import { IWorkspace, statLinkToMarkdownFile } from '../workspace';
@@ -84,7 +75,6 @@ export type MdReference = MdLinkReference | MdHeaderReference;
 export class MdReferencesProvider extends Disposable {
 
   readonly #configuration: LsConfiguration;
-  readonly #parser: Parser;
   readonly #workspace: IWorkspace;
   readonly #tocProvider: MdTableOfContentsProvider;
   readonly #linkCache: MdWorkspaceInfoCache<readonly MdLink[]>;
@@ -101,7 +91,6 @@ export class MdReferencesProvider extends Disposable {
     super();
 
     this.#configuration = configuration;
-    this.#parser = parser;
     this.#workspace = workspace;
     this.#tocProvider = tocProvider;
     this.#linkCache = linkCache;

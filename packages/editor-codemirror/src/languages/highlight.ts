@@ -4,16 +4,7 @@
  * Copyright (C) 2022 by Emergence Engineering (ISC License)
  * https://gitlab.com/emergence-engineering/prosemirror-codemirror-block
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { highlightTree, Highlighter } from "@lezer/highlight";
@@ -34,11 +25,15 @@ export function highlightCode(
   let pos = 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   highlightTree(tree as any, style, (from, to, classes) => {
-    from > pos && callback(code.slice(pos, from), null, pos, from);
+    if (from > pos) {
+      callback(code.slice(pos, from), null, pos, from);
+    }
     callback(code.slice(from, to), classes, from, to);
     pos = to;
   });
-  pos != tree.length && callback(code.slice(pos, tree.length), null, pos, tree.length);
+  if (pos != tree.length) {
+    callback(code.slice(pos, tree.length), null, pos, tree.length);
+  }
 }
 
 

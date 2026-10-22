@@ -1,33 +1,35 @@
 /*
  * vdoc-tempfile.ts
  *
- * Copyright (C) 2022-2024 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  * Copyright (c) 2019 Takashi Tamura
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import * as tmp from "tmp";
-import * as uuid from "uuid";
+import { randomUUID } from "node:crypto";
 import {
   commands,
   Hover,
   languages,
+  LogOutputChannel,
   Position,
   TextDocument,
   Uri,
   workspace,
 } from "vscode";
 import { VirtualDoc, VirtualDocUri } from "./vdoc";
+
+/**
+ * Where vdoc temp file creation and deletion are logged. Wired to the Quarto
+ * output channel at activation; a no-op before that. Debug level, because a
+ * vdoc is created per language-feature request.
+ */
+let logChannel: LogOutputChannel | undefined;
+export function setVdocTempFileLogger(channel: LogOutputChannel): void {
+  logChannel = channel;
+}
 
 interface VirtualDocTempFileOptions {
   /** Fire a "dummy" hover request to cause the language server to start  */
@@ -47,6 +49,7 @@ export async function virtualDocUriFromTempFile(
 ): Promise<VirtualDocUri> {
   const filepath = generateVirtualDocFilepath(directory, virtualDoc.language.extension);
   createVirtualDoc(filepath, virtualDoc.content);
+  logChannel?.debug(`[vdoc] Created ${filepath}`);
 
   const virtualDocUri = Uri.file(filepath);
   const virtualDocTextDocument = await workspace.openTextDocument(virtualDocUri);
@@ -98,6 +101,7 @@ export async function deleteDocument(doc: TextDocument) {
     await workspace.fs.delete(doc.uri, {
       useTrash: false
     });
+    logChannel?.debug(`[vdoc] Deleted ${doc.fileName}`);
   } catch (error) {
     // It's okay if the file is already deleted.
     if (error instanceof Error && error.message.includes("ENOENT")) {
@@ -149,5 +153,5 @@ function createVirtualDoc(filepath: string, content: string): void {
  * language server request is running (#683).
  */
 function generateVirtualDocFilepath(directory: string, extension: string): string {
-  return path.join(directory, ".vdoc." + uuid.v4() + "." + extension);
+  return path.join(directory, ".vdoc." + randomUUID() + "." + extension);
 }

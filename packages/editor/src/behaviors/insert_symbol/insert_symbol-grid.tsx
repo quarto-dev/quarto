@@ -1,20 +1,11 @@
 /*
  * insert_symbol-grid.tsx
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React from 'react';
-import { FixedSizeGrid } from 'react-window';
+import { Grid, useGridCallbackRef } from 'react-window';
 
 import debounce from 'lodash.debounce';
 
@@ -50,12 +41,19 @@ const SymbolCharacterGrid = React.forwardRef<HTMLDivElement, CharacterGridProps>
     selectedItemClassName,
   };
 
-  const gridRef = React.useRef<FixedSizeGrid>(null);
+  // The grid's API is held in state so that the scroll effect below runs
+  // again once the grid has mounted
+  const [grid, setGrid] = useGridCallbackRef(null);
+  const rowCount = Math.ceil(props.symbolCharacters.length / props.numberOfColumns);
   const handleScroll = debounce(() => {
-    gridRef.current?.scrollToItem({ rowIndex: Math.floor(props.selectedIndex / props.numberOfColumns) });
+    // scrollToRow throws on an out-of-range index, where react-window 1 clamped it
+    const index = Math.floor(props.selectedIndex / props.numberOfColumns);
+    if (grid && index >= 0 && index < rowCount) {
+      grid.scrollToRow({ index, align: 'auto' });
+    }
   }, 5);
 
-  React.useEffect(handleScroll, [props.selectedIndex]);
+  React.useEffect(handleScroll, [grid, props.selectedIndex]);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const newIndex = newIndexForKeyboardEvent(
@@ -72,19 +70,17 @@ const SymbolCharacterGrid = React.forwardRef<HTMLDivElement, CharacterGridProps>
 
   return (
     <div onKeyDown={handleKeyDown} tabIndex={0} ref={ref}>
-      <FixedSizeGrid
+      <Grid
         columnCount={props.numberOfColumns}
-        rowCount={Math.ceil(props.symbolCharacters.length / props.numberOfColumns)}
-        height={props.height}
-        width={props.width + 1}
+        rowCount={rowCount}
+        style={{ height: props.height, width: props.width + 1 }}
         rowHeight={columnWidth}
         columnWidth={columnWidth}
-        itemData={characterCellData}
+        cellComponent={SymbolCharacterCell}
+        cellProps={characterCellData}
         className="pm-symbol-grid"
-        ref={gridRef}
-      >
-        {SymbolCharacterCell}
-      </FixedSizeGrid>
+        gridRef={setGrid}
+      />
     </div>
   );
 });

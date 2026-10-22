@@ -1,16 +1,7 @@
 /*
  * table.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { Schema } from 'prosemirror-model';
@@ -130,6 +121,9 @@ const extension = (context: ExtensionContext): Extension | null => {
       return [
         columnResizing({
           handleWidth: 5,
+          // prosemirror-tables 1.6 raised the default to 100px, which makes
+          // tables without column widths overflow narrow editor panes
+          defaultCellMinWidth: 25,
         }),
         tableEditing(),
         tablePaste(),

@@ -1,24 +1,15 @@
 /*
  * terminal.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as os from "node:os";
 import fs from "node:fs";
 
 
-import { Uri, workspace, extensions, window } from "vscode";
-import { pathWithForwardSlashes, shQuote, sleep, winShEscape } from "core";
+import { Uri, workspace, extensions, window, env } from "vscode";
+import { pathWithForwardSlashes, shQuote, shQuoteUnknownShell, sleep, TerminalShell } from "core";
 import { Terminal } from "vscode";
 import { QuartoContext, fileCrossrefIndexStorage } from "quarto-core";
 import { TerminalOptions } from "vscode";
@@ -103,19 +94,60 @@ export function terminalOptions(name: string, target: Uri, env: TerminalEnv) {
 }
 
 export function terminalCommand(command: string, context: QuartoContext, target?: Uri) {
+  const shell = targetShell(context);
   const quarto = "quarto"; // binPath prepended to PATH so we don't need the full form
-  const cmd: string[] = [
-    context.useCmd ? winShEscape(quarto) : shQuote(quarto),
-    command
-  ];
+  // Keep the executable name bare: PowerShell parses a line that starts with
+  // a quoted string as an expression, not a command (it would need `&`).
+  const cmd: string[] = [quarto, command];
   if (target) {
-    cmd.push(shQuote(
-      context.useCmd
-        ? target.fsPath
-        : pathWithForwardSlashes(target.fsPath)
-    ));
+    const targetPath =
+      context.useCmd ? target.fsPath : pathWithForwardSlashes(target.fsPath);
+    cmd.push(
+      shell === undefined ? shQuoteUnknownShell(targetPath) : shQuote(targetPath, shell)
+    );
   }
   return cmd;
+}
+
+// Map a shell executable path to the quoting rules it needs. Exported for
+// unit testing.
+export function terminalShellForPath(
+  shellPath: string | undefined
+): TerminalShell | undefined {
+  if (!shellPath) {
+    return undefined;
+  }
+  const base = shellPath
+    .split(/[\\/]/)
+    .pop()!
+    .toLowerCase()
+    .replace(/\.(exe|cmd|bat)$/, "");
+  if (base === "pwsh" || base === "powershell") {
+    return "powershell";
+  }
+  if (base === "cmd") {
+    return "cmd";
+  }
+  if (base === "bash" || base === "zsh" || base === "sh") {
+    return "posix";
+  }
+  return undefined;
+}
+
+// The shell that will interpret a generated terminal command: `useCmd`
+// means the command targets cmd.exe (old Quarto on Windows shipped a .cmd
+// shim); otherwise the quoting follows the shell the integrated terminal
+// will actually start, read from vscode.env.shell. The OS platform alone
+// cannot tell us: `terminalOptions()` does not set shellPath, so the
+// terminal starts the user's default profile, which on Windows can be
+// PowerShell, cmd.exe, Git Bash, or WSL, and on macOS/Linux pwsh or fish.
+// Returns undefined when the shell is not recognized; the caller then
+// quotes only on whitespace.
+function targetShell(context: QuartoContext): TerminalShell | undefined {
+  if (context.useCmd) {
+    return "cmd";
+  }
+  return terminalShellForPath(env.shell);
 }
 
 export async function sendTerminalCommand(

@@ -1,16 +1,7 @@
 /*
  * insert_citation_picker.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import React from 'react';
@@ -361,15 +352,15 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
   ];
 
   // The initial setting of focus and loading of data for the panel.
-  const panelRef = React.useRef<HTMLElement>();
+  const panelRef = React.useRef<HTMLDivElement>(null);
 
   // When the stream of configuration changes is actually loaded, we need to refresh the search
   // results to reflect the new configuration. The below refs basically:
   // 1) Capture the timer itself so only timer is created and it will be properly canceled
   // 2) Captures the up to date state in the callback that will be used to refresh the search results -
   //    If we don't refresh it each render, it will capture the state the time it was created
-  const streamTimerId = React.useRef<number>();
-  const refreshSearchCallback = React.useRef<VoidFunction>();
+  const streamTimerId = React.useRef<number>(undefined);
+  const refreshSearchCallback = React.useRef<VoidFunction>(undefined);
   React.useEffect(() => {
     refreshSearchCallback.current = async () => {
       if (selectedPanelProvider.typeAheadSearch) {
@@ -545,7 +536,6 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
     status: insertCitationPanelState.status,
     statusMessage: insertCitationPanelState.statusMessage,
     warningMessage: selectedPanelProvider.warningMessage || '',
-    ref: panelRef,
   };
 
   // Tracks whether a long running search has been canceled
@@ -664,7 +654,7 @@ export const InsertCitationPanel: React.FC<InsertCitationPanelProps> = props => 
 
   // Create the panel that should be displayed for the selected node of the tree
   const panelToDisplay = selectedPanelProvider
-    ? React.createElement(selectedPanelProvider.panel, citationProps)
+    ? React.createElement(selectedPanelProvider.panel, { ...citationProps, ref: panelRef })
     : undefined;
   return (
     <div className={classes.join(' ')} style={style} onKeyPress={onKeyPress} onKeyDown={onKeyDown}>

@@ -1,16 +1,7 @@
 /*
  * main.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import * as vscode from "vscode";
@@ -35,6 +26,8 @@ import { activateEditor } from "./providers/editor/editor";
 import { activateCopyFiles } from "./providers/copyfiles";
 import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
+import { detectCellFeatureOwnership } from "./host/cell-features";
+import { setVdocTempFileLogger } from "./vdoc/vdoc-tempfile";
 import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
@@ -64,11 +57,15 @@ let notebookExportService: NotebookExportService | undefined;
 export async function activate(context: vscode.ExtensionContext): Promise<QuartoExtensionApi> {
   // create output channel for extension logs and lsp client logs
   const outputChannel = vscode.window.createOutputChannel("Quarto", { log: true });
+  setVdocTempFileLogger(outputChannel);
 
   outputChannel.info("Activating Quarto extension.");
 
   // create extension host
   const host = extensionHost(outputChannel);
+
+  // does the host own language features for code cells?
+  await detectCellFeatureOwnership(outputChannel);
 
   // create markdown engine
   const engine = new MarkdownEngine();
@@ -140,7 +137,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
     commands.push(...editorCommands);
 
     // zotero
-    const zoteroCommands = await activateZotero(context, lspClient);
+    const zoteroCommands = await activateZotero(context, lspClient, outputChannel);
     commands.push(...zoteroCommands);
 
     // assist panel

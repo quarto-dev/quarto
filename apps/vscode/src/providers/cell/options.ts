@@ -1,22 +1,12 @@
 /*
  * options.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 
-import * as yaml from "js-yaml";
 
-import { lines } from "core";
+import { lines, loadYaml } from "core";
 import { Token, isCodeBlock, languageNameFromBlock } from "quarto-core";
 
 import { langCommentChars, optionCommentPattern } from "./comment-chars";
@@ -68,7 +58,7 @@ export function cellOptions(language: string, source: string[]): Record<string, 
   // parse the yaml
   if (yamlLines.length > 0) {
     try {
-      const options = yaml.load(yamlLines.join("\n"));
+      const options = loadYaml(yamlLines.join("\n"));
       if (
         typeof options === "object" &&
         !Array.isArray(options) &&

@@ -1,16 +1,7 @@
 /*
  * completion.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 
@@ -38,7 +29,7 @@ import {
   TextEdit
 } from "vscode-languageserver-types";
 
-import md from "markdown-it";
+import { renderCompletionMarkdown } from "./completion-markdown";
 
 import { editorLanguage } from "editor-core";
 
@@ -194,7 +185,7 @@ const defaultBoostScore = (context: CompletionContext, items: CompletionItem[], 
   const replaceTextInItemLabel = item.label.slice(i, replaceText.length);
 
   // mostly counts how many upper/lowercase differences there are
-  let diff = simpleStringDiff(replaceTextInItemLabel, replaceText);
+  const diff = simpleStringDiff(replaceTextInItemLabel, replaceText);
 
   // `-i` scores completions better if what you typed is earlier in the completion
   // `-diff/10` mostly tie breaks that score by capitalization differences.
@@ -327,8 +318,7 @@ function infoNodeForItem(item: CompletionItem) {
     }
     if (MarkupContent.is(item.documentation)) {
       if (item.documentation.kind === MarkupKind.Markdown) {
-        const commonmark = md('commonmark');
-        const html = commonmark.render(item.documentation.value);
+        const html = renderCompletionMarkdown(item.documentation.value);
         const mdDiv = document.createElement("div");
         mdDiv.innerHTML = html;
         // remove mdn links

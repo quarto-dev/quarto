@@ -15,11 +15,11 @@ Here is where you can find the source code for various parts of the Quarto syste
 
 ### VS Code Extension
 
-To develop the Quarto VS Code extension, clone this repo, run `yarn`, then run the `yarn dev-vscode` command:
+To develop the Quarto VS Code extension, clone this repo, run `npm install`, then run the `npm run dev-vscode` command:
 
 ```bash
-yarn             # install dependencies
-yarn dev-vscode  # run development/debug version of extension
+npm install         # install dependencies
+npm run dev-vscode  # run development/debug version of extension
 ```
 
 Use the VS Code **Run and Debug** pane in the activity bar to run a version of VS Code with the development build of the extension.
@@ -28,16 +28,15 @@ See our [`CONTRIBUTING`](https://github.com/quarto-dev/quarto/blob/main/apps/vsc
 
 ## Licenses
 
-This repository contains code under multiple open source licenses:
+This repository contains code under the following open source licenses:
 
 | Component | License |
 |-----------|---------|
-| [VS Code Extension](apps/vscode/package.json) | AGPL-3.0 |
-| [Language Server](apps/lsp/package.json) | AGPL-3.0 |
-| [Visual Editor](packages/editor/package.json) | AGPL-3.0 |
-| [Panmirror](apps/panmirror/package.json) (RStudio integration) | AGPL-3.0 |
+| [VS Code Extension](apps/vscode/package.json) | MIT |
+| [Language Server](apps/lsp/package.json) | MIT |
+| [Visual Editor](packages/editor/package.json) | MIT |
+| [Panmirror](apps/panmirror/package.json) (RStudio integration) | MIT |
 | @quarto/* npm packages | MIT (e.g. [mapped-string](packages/mapped-string/package.json)) |
-| OJS Runtime | ISC (e.g. [quarto-ojs-runtime](packages/ojs/quarto-ojs-runtime/package.json)) |
 
 Individual package licenses are specified in each package's `package.json` file.
 

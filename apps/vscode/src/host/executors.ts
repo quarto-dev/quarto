@@ -1,19 +1,10 @@
 /*
  * vscode-executors.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { Uri, commands, window, extensions, Range } from "vscode";
+import { Uri, commands, window, extensions, Extension, Range } from "vscode";
 
 import semver from "semver";
 import { TextDocument } from "vscode";
@@ -137,7 +128,7 @@ const csharpCellExecutor: VSCodeCellExecutor = {
   requiredExtension: ["ms-dotnettools.dotnet-interactive-vscode"],
   requiredExtensionName: "Polyglot Notebooks",
   requiredVersion: "1.0.55", // Adjust minimum version as needed
-  execute: async (blocks: string[], editorUri?: Uri) => {
+  execute: async (blocks: string[], _editorUri?: Uri) => {
     const extension = extensions.getExtension("ms-dotnettools.dotnet-interactive-vscode");
     if (extension) {
       if (!extension.isActive) {
@@ -298,7 +289,7 @@ function validateRequiredExtension(
 ) {
   if (executor.requiredExtension) {
     const extensionName = executor.requiredExtensionName;
-    let extension: any;
+    let extension: Extension<unknown> | undefined;
     for (const reqExtension of executor.requiredExtension) {
       extension = extensions.getExtension(reqExtension);
       if (extension) {

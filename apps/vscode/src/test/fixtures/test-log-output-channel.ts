@@ -22,7 +22,7 @@ export class TestLogOutputChannel implements LogOutputChannel {
   show() { }
   hide() { }
   dispose() { }
-  replace(_value: any) { }
+  replace(_value: string) { }
   trace(value: string) { if (this.logLevel <= LogLevel.Trace) { this.append(value); } }
   debug(value: string) { if (this.logLevel <= LogLevel.Debug) { this.append(value); } }
   info(value: string) { if (this.logLevel <= LogLevel.Info) { this.append(value); } }

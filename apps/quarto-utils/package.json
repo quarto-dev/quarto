@@ -2,15 +2,14 @@
   "name": "quarto-utils",
   "version": "0.0.0",
   "private": true,
-  "license": "agpl-3.0",
+  "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
     "tsconfig": "*",
-    "typescript": "^4.5.2",
-    "vscode-uri": "^3.0.3"
+    "vscode-uri": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6"
+    "@types/node": "^22.20.5"
   }
 }

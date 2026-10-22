@@ -5,7 +5,7 @@
 *
 */
 
-import Token from "markdown-it/lib/token";
+import type { Token } from "markdown-it";
 import { readAttrValue } from "./markdownit";
 
 export interface DecoratorOptions {

@@ -10,17 +10,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - name: Run linters
+        run: npm run lint
+
   test-packages:
     runs-on: ubuntu-latest
     name: Test packages
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: latest
-      - run: yarn install --immutable --immutable-cache --check-cache
+          node-version-file: .nvmrc
+      - run: npm ci
       - name: Run package tests
-        run: yarn test-packages
+        run: npm run test-packages
 
   test-extension:
     runs-on: ubuntu-latest
@@ -30,10 +42,10 @@ jobs:
         quarto: [release, pre-release]
     name: Test (Quarto ${{ matrix.quarto }})
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: latest
+          node-version-file: .nvmrc
       - name: Update build environment and install XVFB
         run: |
           sudo apt-get -y update
@@ -43,11 +55,9 @@ jobs:
           version: ${{ matrix.quarto }}
       - name: Build vscode extension
         run: |
-          yarn install
-          yarn run build-vscode
+          npm ci
+          npm run build-vscode
       - name: Compile and run tests
         env:
           QUARTO_CHANNEL: ${{ matrix.quarto }}
-        run: |
-          yarn install --immutable --immutable-cache --check-cache
-          xvfb-run yarn test-vscode
+        run: xvfb-run npm run test-vscode

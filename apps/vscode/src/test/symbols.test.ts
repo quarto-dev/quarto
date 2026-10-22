@@ -1,7 +1,9 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import * as assert from "assert";
-import { WORKSPACE_PATH, waitForWorkspaceSymbol } from "./test-utils";
+import { WORKSPACE_PATH, setExportToWorkspaceAndWait, waitForWorkspaceSymbol } from "./test-utils";
+
+const HEADERS = ["Symbols-Header-1", "Symbols-Header-2"];
 
 suite("Workspace Symbols", function () {
   suiteSetup(async function () {
@@ -17,49 +19,22 @@ suite("Workspace Symbols", function () {
       .update("symbols.exportToWorkspace", "default");
   });
 
+  // Each test first switches to a setting with the opposite result, so that
+  // the final wait observes the LSP actually applying the setting under test.
+
   test("provides all symbols by default when not in R projects", async function () {
-    await vscode.workspace
-      .getConfiguration("quarto")
-      .update("symbols.exportToWorkspace", "default");
-
-    const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
-      "vscode.executeWorkspaceSymbolProvider",
-      ""
-    );
-
-    // All symbols are provided
-    assert.ok(symbols.find((s) => s.name === "Symbols-Header-1"));
-    assert.ok(symbols.find((s) => s.name === "Symbols-Header-2"));
+    await setExportToWorkspaceAndWait("none", HEADERS, false);
+    await setExportToWorkspaceAndWait("default", HEADERS, true);
   });
 
   test("provides all symbols when set to 'all'", async function () {
-    await vscode.workspace
-      .getConfiguration("quarto")
-      .update("symbols.exportToWorkspace", "all");
-
-    const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
-      "vscode.executeWorkspaceSymbolProvider",
-      ""
-    );
-
-    // All symbols are provided
-    assert.ok(symbols.find((s) => s.name === "Symbols-Header-1"));
-    assert.ok(symbols.find((s) => s.name === "Symbols-Header-2"));
+    await setExportToWorkspaceAndWait("none", HEADERS, false);
+    await setExportToWorkspaceAndWait("all", HEADERS, true);
   });
 
   test("provides no symbols when set to 'none'", async function () {
-    await vscode.workspace
-      .getConfiguration("quarto")
-      .update("symbols.exportToWorkspace", "none");
-
-    const symbols = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
-      "vscode.executeWorkspaceSymbolProvider",
-      ""
-    );
-
-    // No symbols are provided
-    assert.ok(!symbols.find((s) => s.name === "Regular-Project Header 1"));
-    assert.ok(!symbols.find((s) => s.name === "Regular-Project Header 2"));
+    await setExportToWorkspaceAndWait("all", HEADERS, true);
+    await setExportToWorkspaceAndWait("none", HEADERS, false);
   });
 });
 

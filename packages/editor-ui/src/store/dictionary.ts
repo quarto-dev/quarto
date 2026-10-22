@@ -1,23 +1,14 @@
 /*
  * dictionary.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from RStudio pursuant
- * to the terms of a commercial license agreement with RStudio, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
 import { Dictionary, DictionaryInfo, DictionaryServer, IgnoredWord } from "editor";
 
-import { rtkFakeBaseQuery, rtkHandleQuery } from "./rtk";
+import { rtkHandleQuery } from "./rtk";
 
 const kUserDictionaryTag = "UserDictionary";
 const kIgnoredWordsTag = "IgnoredWords";
@@ -31,7 +22,7 @@ export function initDictionaryApi(server: DictionaryServer) {
 // define api
 export const dictionaryApi = createApi({
   reducerPath: "dictionary",
-  baseQuery: rtkFakeBaseQuery<JsonRpcError>(),
+  baseQuery: fakeBaseQuery<JsonRpcError>(),
   tagTypes: [kUserDictionaryTag, kIgnoredWordsTag],
   endpoints(build) {
     return {

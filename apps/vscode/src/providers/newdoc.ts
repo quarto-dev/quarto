@@ -1,16 +1,7 @@
 /*
  * newdoc.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import {
@@ -51,7 +42,7 @@ class NewNotebookCommand implements Command {
     );
     cells.push(new NotebookCellData(NotebookCellKind.Code, "1 + 1", "python"));
     const nbData = new NotebookData(cells);
-    let notebook = await workspace.openNotebookDocument(
+    const notebook = await workspace.openNotebookDocument(
       "jupyter-notebook",
       nbData
     );

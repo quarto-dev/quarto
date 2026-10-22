@@ -1,21 +1,9 @@
 /*
  * render-assist.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  * Copyright (c) 2020 Matt Bierner
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
-
-import MarkdownIt from "markdown-it";
-import markdownItHljs from "markdown-it-highlightjs";
 
 import {
   Uri,
@@ -37,8 +25,8 @@ import { CodeViewCellContext, kCodeViewAssist } from "editor-types";
 import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode, withVirtualDocUri } from "../../vdoc/vdoc";
 import { getHover, getSignatureHelpHover } from "../../core/hover";
-import { Hover as LspHover, MarkupKind } from "vscode-languageserver-types";
-import { MarkupContent } from "vscode-languageclient";
+import { Hover as LspHover, MarkupContent } from "vscode-languageserver-types";
+import { renderAssistMarkdown } from "./markdown";
 
 const kAssistHelp = "Quarto: Help";
 const kAssistEquation = "Quarto: Equation";
@@ -347,24 +335,7 @@ function renderAssist(
   markdown: string,
   asWebviewUri?: (uri: Uri) => Uri
 ) {
-  const md = MarkdownIt("default", {
-    html: true,
-    linkify: true,
-  });
-  const validateLink = md.validateLink;
-  md.validateLink = (link: string) => {
-    return (
-      validateLink(link) ||
-      link.startsWith("vscode-resource:") ||
-      link.startsWith("file:") ||
-      /^data:image\/.*?;/.test(link)
-    );
-  };
-  md.use(markdownItHljs, {
-    auto: true,
-    code: true,
-  });
-  let html = md.render(markdown).trim();
+  let html = renderAssistMarkdown(markdown).trim();
 
   // replace image paths with webview safe ones
   if (asWebviewUri) {

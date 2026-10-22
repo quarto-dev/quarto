@@ -2,15 +2,6 @@
  * convert.ts
  *
  * Copyright (C) 2026 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
  */
 
 import * as fs from "node:fs";
@@ -110,6 +101,7 @@ export async function convertDocument(
     // 2. Extract just the first non-empty line — the rest is source context
     //    and stack traces that belong in the output channel, not a dialog.
     const message = stderr
+      // eslint-disable-next-line no-control-regex -- matching ANSI escapes is the point
       ? stderr.replace(/\x1B\[[0-9;]*m/g, "").split("\n").find(l => l.trim()) ?? stderr
       : e.message;
 

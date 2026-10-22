@@ -1,16 +1,7 @@
 /*
  * image-resize.ts
  *
- * Copyright (C) 2022 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
 import { EditorView } from 'prosemirror-view';
@@ -657,7 +648,7 @@ export function updateImageViewSize(
         const liftImgStyle = (attrib: string, val: string) => img.style.setProperty(attrib, val);
         value = removeStyleAttrib(value, 'border(?:[\\w\\-])*', liftImgStyle);
         value = removeStyleAttrib(value, 'margin(?:[\\w\\-])*', liftImgStyle);
-        value = removeStyleAttrib(value, 'display', liftImgStyle);
+        removeStyleAttrib(value, 'display', liftImgStyle);
       } else if (key === kWidthAttrib) {
         // see if this is a unit we can edit
         const widthProp = imageSizePropWithUnit(value);
@@ -711,7 +702,7 @@ export function updateImageViewSize(
     if (figure) {
       const align = pandocAttrGetKeyvalue(node.attrs, kFigAlignAttrib);
       if (align && (align !== "default")) {
-        let width: number | null = null;
+        let width: number | null;
         const widthProp = imageSizePropWithUnit(img.style.width);
         if (widthProp) {
           width = widthProp.size;

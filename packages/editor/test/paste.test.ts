@@ -1,31 +1,20 @@
 /*
- * editor-paste.test.ts
+ * paste.test.ts
  *
- * Copyright (C) 2025 by Posit Software, PBC
- *
- * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
- * GNU Affero General Public License. This program is distributed WITHOUT
- * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
- * AGPL (http://www.gnu.org/licenses/agpl-3.0.txt) for more details.
- *
+ * Copyright (C) 2026 by Posit Software, PBC
  */
 
-// unit tests for the editor's generic paste handlers. these live in the
-// vscode extension test suite because it is the only test harness that
-// runs in CI; the tests exercise the editor package directly and do not
-// use the vscode API.
+// unit tests for the editor's generic paste handlers
 
-import * as assert from "assert";
+import { test, suite, after } from "node:test";
+import assert from "node:assert/strict";
 
 import { Schema, Slice } from "prosemirror-model";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 
-import pasteExtension from "editor/src/behaviors/paste";
-import { ExtensionContext } from "editor/src/api/extension";
+import pasteExtension from "../src/behaviors/paste";
+import { ExtensionContext } from "../src/api/extension";
 
 const kWindowsUserAgent =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
@@ -107,7 +96,7 @@ const kDOIHtml = `<a href="${kDOIText}">${kDOIText}</a>`;
 const kWordHtml = '<html xmlns:w="urn:schemas-microsoft-com:office:word"><body><p>content</p></body></html>';
 
 suite("Editor Paste Handlers", function () {
-  suiteTeardown(function () {
+  after(function () {
     if (kNavigatorDescriptor) {
       Object.defineProperty(globalThis, "navigator", kNavigatorDescriptor);
     } else {
@@ -122,42 +111,42 @@ suite("Editor Paste Handlers", function () {
     // (https://github.com/rstudio/rstudio/issues/18295)
     setUserAgent(kWindowsUserAgent);
     const event = clipboardEvent({ "text/plain": kDOIText, "text/html": kDOIHtml });
-    assert.strictEqual(pasteHandler()(editorView(kInsideCiteIdPos), event), false);
+    assert.equal(pasteHandler()(editorView(kInsideCiteIdPos), event), false);
   });
 
   test("pass on pastes inside a citation id (text/plain)", function () {
     setUserAgent(kMacUserAgent);
     const event = clipboardEvent({ "text/plain": kDOIText });
-    assert.strictEqual(pasteHandler()(editorView(kInsideCiteIdPos), event), false);
+    assert.equal(pasteHandler()(editorView(kInsideCiteIdPos), event), false);
   });
 
   test("pass on pastes inside a citation id (office content)", function () {
     setUserAgent(kMacUserAgent);
     const event = clipboardEvent({ "text/plain": "content", "text/html": kWordHtml });
-    assert.strictEqual(pasteHandler()(editorView(kInsideCiteIdPos), event), false);
+    assert.equal(pasteHandler()(editorView(kInsideCiteIdPos), event), false);
   });
 
   test("handle text/html pastes outside of citation ids on windows", function () {
     setUserAgent(kWindowsUserAgent);
     const event = clipboardEvent({ "text/plain": kDOIText, "text/html": kDOIHtml });
-    assert.strictEqual(pasteHandler()(editorView(kOutsideCiteIdPos), event), true);
+    assert.equal(pasteHandler()(editorView(kOutsideCiteIdPos), event), true);
   });
 
   test("do not handle text/html pastes outside of citation ids on other platforms", function () {
     setUserAgent(kMacUserAgent);
     const event = clipboardEvent({ "text/plain": kDOIText, "text/html": kDOIHtml });
-    assert.strictEqual(pasteHandler()(editorView(kOutsideCiteIdPos), event), false);
+    assert.equal(pasteHandler()(editorView(kOutsideCiteIdPos), event), false);
   });
 
   test("handle office content pastes outside of citation ids", function () {
     setUserAgent(kMacUserAgent);
     const event = clipboardEvent({ "text/plain": "content", "text/html": kWordHtml });
-    assert.strictEqual(pasteHandler()(editorView(kOutsideCiteIdPos), event), true);
+    assert.equal(pasteHandler()(editorView(kOutsideCiteIdPos), event), true);
   });
 
   test("handle text/plain pastes outside of citation ids as markdown", function () {
     setUserAgent(kMacUserAgent);
     const event = clipboardEvent({ "text/plain": kDOIText });
-    assert.strictEqual(pasteHandler()(editorView(kOutsideCiteIdPos), event), true);
+    assert.equal(pasteHandler()(editorView(kOutsideCiteIdPos), event), true);
   });
 });

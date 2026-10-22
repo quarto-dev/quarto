@@ -10,7 +10,7 @@ import { DecorationSet } from 'prosemirror-view';
 
 import React from 'react';
 
-import Fuse from 'fuse.js';
+import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 import uniqby from 'lodash.uniqby';
 
 import { EditorUI } from '../../api/ui-types';
@@ -67,7 +67,7 @@ export function xrefCompletionHandler(ui: EditorUI, server: XRefServer): Complet
 class FuseIndex {
   private fuse: Fuse<XRef>;
 
-  private keys: Fuse.FuseOptionKeyObject<void>[] = [
+  private keys: FuseOptionKeyObject<void>[] = [
     { name: 'id', weight: 20 },
     { name: 'type', weight: 1 },
     { name: 'title', weight: 1 },

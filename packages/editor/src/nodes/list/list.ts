@@ -227,7 +227,7 @@ const extension = (context: ExtensionContext): Extension => {
             key: plugin,
             props: {
               nodeViews: {
-                list_item(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+                list_item(node: ProsemirrorNode, view: EditorView, getPos: () => number | undefined) {
                   return new CheckedListItemNodeView(node, view, getPos as () => number);
                 },
               },

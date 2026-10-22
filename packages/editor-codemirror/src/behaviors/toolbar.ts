@@ -6,7 +6,7 @@
 
 
 import { StateEffect, StateField } from "@codemirror/state";
-import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { Decoration, DecorationSet, EditorView, WidgetType } from "@codemirror/view";
 import { Transaction } from "prosemirror-state";
 
 import { languageDiagramEngine } from "editor-core";
@@ -22,17 +22,16 @@ export function toolbarBehavior(context: BehaviorContext) : Behavior {
 
   const toggleToolbar = StateEffect.define<boolean>();
 
+  // WidgetType's defaults cover the rest: eq and updateDOM return false,
+  // estimatedHeight is -1, and ignoreEvent returns true
+  class ToolbarWidget extends WidgetType {
+    toDOM() {
+      return createToolbarPanel();
+    }
+  }
+
   const toolbarDecoration = Decoration.widget({
-    widget: {
-      toDOM() {
-        return createToolbarPanel();
-      },
-      eq: () => false,
-      updateDOM: () => false,
-      estimatedHeight: -1,
-      ignoreEvent: () => true,
-      destroy: () => { /* */ }
-    },
+    widget: new ToolbarWidget(),
     side: 0
   });
   

@@ -7,7 +7,7 @@
 import React, { CSSProperties } from 'react';
 
 import { WidgetProps } from './react';
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { List, RowComponentProps, useListCallbackRef } from 'react-window';
 
 import './navigation-tree.css';
 
@@ -28,14 +28,12 @@ interface NavigationTreeProps extends WidgetProps {
   onSelectedNodeChanged: (node: NavigationTreeNode) => void;
 }
 
-interface NavigationTreeItemProps extends ListChildComponentProps {
-  data: {
-    nodes: NavigationTreeNode[];
-    selectedNode: NavigationTreeNode;
-    onSelectedNodeChanged: (node: NavigationTreeNode) => void;
-    showSelection: boolean;
-    preventFocus: boolean;
-  };
+interface NavigationTreeItemData {
+  nodes: NavigationTreeNode[];
+  selectedNode: NavigationTreeNode;
+  onSelectedNodeChanged: (node: NavigationTreeNode) => void;
+  showSelection: boolean;
+  preventFocus: boolean;
 }
 
 // Indent level for each level
@@ -64,18 +62,15 @@ export const NavigationTree: React.FC<NavigationTreeProps> = props => {
   }
   const vizNodes = visibleNodes(props.nodes, props.selectedNode);
 
-  // Ensure the item is scrolled into view
-  const fixedList = React.useRef<FixedSizeList>(null);
+  // Ensure the item is scrolled into view. The list's API is held in state
+  // so that this runs again once the list has mounted.
+  const [list, setList] = useListCallbackRef(null);
   React.useEffect(() => {
-    if (props.selectedNode) {
-      vizNodes.find((value, index) => {
-        if (value.key === selectedNode.key) {
-          fixedList.current?.scrollToItem(index);
-          return true;
-        } else {
-          return false;
-        }
-      });
+    if (list && props.selectedNode) {
+      const index = vizNodes.findIndex(value => value.key === selectedNode.key);
+      if (index >= 0) {
+        list.scrollToRow({ index, align: 'auto' });
+      }
     }
   });
 
@@ -115,31 +110,29 @@ export const NavigationTree: React.FC<NavigationTreeProps> = props => {
 
   return (
     <div style={style} tabIndex={0} onKeyDown={processKey}>
-      <FixedSizeList
+      <List
         className="pm-navigation-tree"
-        height={props.height}
-        width="100%"
-        itemCount={vizNodes.length}
-        itemSize={28}
-        itemData={{
+        style={{ height: props.height, width: '100%' }}
+        rowCount={vizNodes.length}
+        rowHeight={28}
+        rowComponent={NavigationTreeItem}
+        rowProps={{
           nodes: vizNodes,
           selectedNode: props.selectedNode,
           onSelectedNodeChanged: props.onSelectedNodeChanged,
           showSelection: true,
           preventFocus: true,
         }}
-        ref={fixedList}
-      >
-        {NavigationTreeItem}
-      </FixedSizeList>
+        listRef={setList}
+      />
     </div>
   );
 };
 
 // Renders each item
-const NavigationTreeItem = (props: NavigationTreeItemProps) => {
-  const data = props.data;
-  const node: NavigationTreeNode = props.data.nodes[props.index];
+const NavigationTreeItem = (props: RowComponentProps<NavigationTreeItemData>) => {
+  const data = props;
+  const node: NavigationTreeNode = props.nodes[props.index];
   const path = pathToNode(node, data.nodes);
   const depth = path.length - 1;
 
@@ -162,7 +155,7 @@ const NavigationTreeItem = (props: NavigationTreeItemProps) => {
     selected ? 'pm-selected-navigation-tree-item' : 'pm-navigation-tree-item'
   } pm-navigation-tree-node`;
   return (
-    <div key={node.key} onClick={onClick} style={props.style}>
+    <div key={node.key} onClick={onClick} style={props.style} {...props.ariaAttributes}>
       <div className={selectedClassName} style={indentLevel > 0 ? indentStyle : undefined}>
         {node.image ? (
           <div className="pm-navigation-tree-node-image-div">

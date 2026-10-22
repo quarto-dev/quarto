@@ -5,11 +5,11 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 import { XRef } from 'editor-types';
-import Fuse from 'fuse.js';
+import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 import { xrefKey } from '../../api/xref';
 
 
-const searchFields: Fuse.FuseOptionKeyObject<XRef>[] = [
+const searchFields: FuseOptionKeyObject<XRef>[] = [
   { name: 'key', weight: 50 },
   { name: 'title', weight: 30 },
 ];

@@ -123,9 +123,11 @@ connection.onInitialize((params: InitializeParams) => {
     return mdLs?.getDocumentLinks(document, token) || [];
   });
 
-  connection.onDocumentLinkResolve(async (link, token): Promise<DocumentLink | undefined> => {
+  connection.onDocumentLinkResolve(async (link, token): Promise<DocumentLink> => {
     logger.logRequest('documentLinksResolve');
-    return mdLs?.resolveDocumentLink(link, token);
+    // documentLink/resolve must return a link (the client can't convert null),
+    // so hand back the unresolved link when there's nothing to resolve
+    return (await mdLs?.resolveDocumentLink(link, token)) ?? link;
   });
 
   connection.onDocumentSymbol(async (params, token): Promise<DocumentSymbol[]> => {

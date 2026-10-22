@@ -1,22 +1,24 @@
 # Building the extension
 
-To develop the Quarto VS Code extension, clone the quarto mono-repo, run `yarn` at top level, then run the `yarn dev-vscode` command:
+Use the Node version in `.nvmrc` (for example, with `nvm use`), and the npm that comes with it.
+
+To develop the Quarto VS Code extension, clone the quarto mono-repo, run `npm install` at top level, then run the `npm run dev-vscode` command:
 
 ```sh
-yarn             # install dependencies
-yarn dev-vscode  # run development/debug version of extension
+npm install         # install dependencies
+npm run dev-vscode  # run development/debug version of extension
 ```
 
-Run the extension tests with:
+Run the extension tests with the command below. Pass `vscode-test` options after `--`, for example `npm run test-vscode -- --label main --grep pattern`.
 
 ```sh
-yarn test-vscode # compile the test files and run them with the vscode-test CLI
+npm run test-vscode # compile the test files and run them with the vscode-test CLI
 ```
 
 The Positron-specific integration tests (`src/test/positron/`) exercise Positron API code paths that vanilla VS Code can't reach. They run inside a downloaded Positron build rather than VS Code:
 
 ```sh
-yarn test-positron # build the tests and run them inside Positron
+npm run test-positron # build the tests and run them inside Positron
 ```
 
 Set `POSITRON_CHANNEL=daily` to test against a daily build (default: `stable`).
@@ -24,8 +26,8 @@ Set `POSITRON_CHANNEL=daily` to test against a daily build (default: `stable`).
 Install the dev version of the extension in VS Code or Positron with:
 
 ```sh
-yarn install-vscode
-yarn install-positron
+npm run install-vscode
+npm run install-positron
 ```
 
 # Debugging the extension
@@ -38,11 +40,13 @@ The extension must have been built in dev mode (see the build section). The `dev
 
 Here is the process:
 
-- Let `yarn dev-vscode` run in the background somewhere.
+- Let `npm run dev-vscode` run in the background somewhere.
 
-- Open the `apps/vscode` folder in VS Code or Positron and go to the `Run and debug` pane.
+- Open the repository root in VS Code or Positron and go to the `Run and debug` pane.
 
 - Run the `Run VS Code Extension` to open the dev version of the extension in a new window.
+
+  Alternatively, open the `apps/vscode` folder and run `Run Extension`. Its pre-launch task starts `npm run dev-vscode` for you and waits for the first build.
 
 - If you need to set breakpoints in the LSP, you'll have to select the launch configuration `Attach to VS Code LSP server` and run that as well. You should see your LSP breakpoints bind (go from grayed out to red dots) as soon as the debugger is attached to the LSP.
 
@@ -59,6 +63,7 @@ Here are the steps for making a release and publishing:
 1. Note the version in `apps/vscode/package.json`.
 2. Check that the topmost version in `apps/vscode/CHANGELOG.md` matches the version you saw in `apps/vscode/package.json`. Next to that version number, it should say "(Unreleased)". Replace "(Unreleased)" with "(Release on YYYY-MM-DD)" with the current date filled in. Please also ensure that the changelog includes descriptions of all the changes in the release. [example PR](https://github.com/quarto-dev/quarto/pull/794/files).
 3. Open the ["Publish VSCode Extension to Marketplaces" workflow page](https://github.com/quarto-dev/quarto/actions/workflows/publish.yaml) and run the workflow, after checking the box to confirm that the version and changelog are up-to-date. [example workflow run](https://github.com/quarto-dev/quarto/actions/runs/17108094709/job/48522198389).
+   The workflow packages the extension once (with the `build.yaml` workflow and the repo's own `@vscode/vsce`), publishes that VSIX to each marketplace in a separate job (`vsce publish` and `ovsx publish`), and then creates a GitHub release with the VSIX attached.
 4. If the action was successful, then it will have published the extension to both marketplaces and also created a new release. Navigate to the [releases page](https://github.com/quarto-dev/quarto/releases) and edit the description of your release to contain the same bullet points as the changelog for that version.
 5. To prepare for next release, please now bump the minor version in `apps/vscode/package.json` and add a new heading in `apps/vscode/CHANGELOG.md` with that bumped version number next to "(Unreleased)". [example PR](https://github.com/quarto-dev/quarto/pull/795/files).
 
@@ -68,3 +73,5 @@ The circle of life, er, I mean, releasing and publishing is now complete.
 
 ### The "Publish VSCode Extension to Marketplaces" workflow failed
 Check the logs of the action run. If publishing to Visual Studio Marketplace failed, it is likely because the key for this marketplace and the key has expired. [Julia](https://github.com/juliasilge) owns this key. Please message her in this case.
+
+Once the problem is fixed, use "Re-run failed jobs" on the workflow run. Both publish jobs pass `--skip-duplicate`, so a marketplace that already has this version is skipped rather than failing the run, and the GitHub release is created only after both publish jobs succeed.

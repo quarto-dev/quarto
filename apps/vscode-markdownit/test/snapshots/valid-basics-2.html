@@ -1,0 +1,75 @@
+
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">Options</span></div>
+<pre class="quarto-frontmatter-container"><code class="cm-s-jupyter language-yaml quarto-frontmatter">bibliography: references.bib
+</code></pre><p>Welcome to valid basics 2.</p>
+<pre><code>&lt;div&gt;hi&lt;/div&gt;
+</code></pre>
+<p><code>hi</code></p>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">{{r}}</span></div><pre><code class="language-{{r}}">1 + 1
+</code></pre>
+<blockquote>
+<p>This is a block quote
+this is the same block quote</p>
+</blockquote>
+<p>| this is a line block
+| this is another line block</p>
+<p>This is <em>emphasized</em> text</p>
+<p>This is also <em>emphasized</em> text</p>
+<p>hello <span class="underline">underline</span> <s>strikethrough</s> <sup>super</sup> <sub>sub</sub> <span class="smallcaps">smallcaps</span></p>
+<!--# this is an html comment -->
+<dl>
+<dt>definition term</dt>
+<dd>
+<p>definition content</p>
+</dd>
+<dt>definition term 2</dt>
+<dd>
+<p>definition content 2</p>
+</dd>
+</dl>
+<hr>
+<div class="quarto-attribute-decorator"><span class="quarto-attribute-decorator-content">#thm-pythagoras</span></div><div  id="thm-pythagoras" class="quarto-div"><h4>Pythagoras's Theorem</h4>
+<p>In a right triangle, the lengths of the two shorter sides $a$, $b$ and the longer side $c$ stand in the relation
+$$
+a^2 + b^2 = c^2.
+$$</p>
+</div><p>See <code  class="cite in-text">@thm-pythagoras</code> for details.</p>
+<p><span class="shortcode">{{&lt; meta title &gt;}}</span></p>
+<table>
+<caption>table caption</caption>
+<thead>
+<tr>
+<th>Col1</th>
+<th>Col2</th>
+<th style="text-align:right">Col3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11</td>
+<td>21</td>
+<td style="text-align:right">31</td>
+</tr>
+<tr>
+<td>12</td>
+<td>22</td>
+<td style="text-align:right">32</td>
+</tr>
+<tr>
+<td>13</td>
+<td>23</td>
+<td style="text-align:right">33</td>
+</tr>
+</tbody>
+</table>
+<p><code  class="cite in-text">@riehl2023</code></p>
+<p>[@riehl2023]</p>
+<p>hey footnote<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+<p>be careful of newline at end of file, roundtripping removes it:</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>hello I'm a foot node <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>

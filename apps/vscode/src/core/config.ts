@@ -9,7 +9,7 @@
 export async function safeUpdateConfig(updateFn: () => Promise<void>) {
   try {
     await updateFn();
-  } catch (error) {
+  } catch {
     // if the user's settings.json file is corrupt/invalid this
     // will throw an exception and prevent loading of the extension
     console.log("Unexpected error writing config (settings.json may be corrupt)");

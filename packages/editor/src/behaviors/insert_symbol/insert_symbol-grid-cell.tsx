@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { GridChildComponentProps } from 'react-window';
+import { CellComponentProps } from 'react-window';
 
 import { SymbolCharacter } from './insert_symbol-dataprovider';
 
@@ -18,8 +18,8 @@ export interface CharacterGridCellItemData {
   onSelectionCommitted: VoidFunction;
 }
 
-export const SymbolCharacterCell = (props: GridChildComponentProps) => {
-  const characterGridCellItemData = props.data as CharacterGridCellItemData;
+export const SymbolCharacterCell = (props: CellComponentProps<CharacterGridCellItemData>) => {
+  const characterGridCellItemData: CharacterGridCellItemData = props;
   const symbolCharacters = characterGridCellItemData.symbolCharacters;
   const itemIndex = props.rowIndex * characterGridCellItemData.numberOfColumns + props.columnIndex;
 
@@ -46,6 +46,7 @@ export const SymbolCharacterCell = (props: GridChildComponentProps) => {
       <div
         tabIndex={-1}
         style={props.style}
+        {...props.ariaAttributes}
         className="pm-symbol-grid-container"
         onClick={handleMouseClick}
         onMouseDown={handleMouseDown}

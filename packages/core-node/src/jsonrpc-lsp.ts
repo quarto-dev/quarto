@@ -7,7 +7,7 @@
 
 import { asJsonRpcError, JsonRpcRequestTransport, JsonRpcServerMethod } from "core";
 
-import { LanguageClient} from "vscode-languageclient/node";
+import type { LanguageClient } from "vscode-languageclient/node";
 
 
 export interface LspConnection {

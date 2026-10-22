@@ -7,8 +7,13 @@
   "types": "./src/index.ts",
   "dependencies": {
     "core": "*",
-    "jayson": "^4.0.0",
-    "tsconfig": "*",
-    "typescript": "^4.5.2"
+    "tsconfig": "*"
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0",
+    "eslint-config-custom": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

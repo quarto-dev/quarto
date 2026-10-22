@@ -190,8 +190,7 @@ export interface QuartoEditor {
 export function findQuartoEditor(
   engine: MarkdownEngine,
   context: QuartoContext,
-  filter: (doc: vscode.TextDocument) => boolean,
-  includeVisible = true
+  filter: (doc: vscode.TextDocument) => boolean
 ): QuartoEditor | undefined {
   // first check for an active visual editor
   const activeVisualEditor = VisualEditorProvider.activeEditor();
@@ -200,11 +199,9 @@ export function findQuartoEditor(
   }
 
   // then check for active notebook editor
-  const notebookEditor = (vscode.window as any).activeNotebookEditor as
-    | vscode.NotebookEditor
-    | undefined;
+  const notebookEditor = vscode.window.activeNotebookEditor;
   if (notebookEditor) {
-    const notebookDocument = (notebookEditor as any).notebook as
+    const notebookDocument = notebookEditor.notebook as
       | vscode.NotebookDocument
       | undefined;
     if (notebookDocument) {

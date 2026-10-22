@@ -62,7 +62,7 @@ function imagePreviewDecorations(state: EditorState, uiContext: EditorUIContext)
   const decorations: Decoration[] = [];
   findChildrenByType(state.doc, state.schema.nodes.rmd_chunk).forEach(rmdChunk => {
     // look for a line with knitr::include_graphics
-    const match = rmdChunk.node.textContent.match(/^(knitr::)?include_graphics\((['"])([^\2]+)\2/m);
+    const match = rmdChunk.node.textContent.match(/^(knitr::)?include_graphics\((['"])(.+?)\2/m);
     if (match) {
       // see if we can also find an out.width on the first line
       let width = '';

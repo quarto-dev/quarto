@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import path, { extname, win32 } from "path";
+import path, { extname } from "path";
 import { determineMode } from "./toggle";
 import debounce from "lodash.debounce";
 
@@ -90,6 +90,14 @@ export function activateEditor(
         return VisualEditorProvider.activeEditor() !== undefined;
       }
     },
+    {
+      // lets tests wait for a visual editor to finish loading, instead of
+      // sleeping for a guessed duration
+      id: 'quarto.test_isVisualEditorSynced',
+      execute(uri: string) {
+        return VisualEditorProvider.isSynced(Uri.parse(uri));
+      }
+    },
     editInVisualModeCommand(),
     editInSourceModeCommand(),
     toggleRenderOnSaveCommand()
@@ -120,6 +128,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
   // track visual editors
   private static visualEditors = visualEditorTracker();
+
+  // visual editors whose initial sync has completed: the webview has loaded the
+  // document and any markdown canonicalization has been applied back to it
+  private static syncedEditors = new Set<WebviewPanel>();
 
   public static register(
     context: ExtensionContext,
@@ -165,7 +177,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             const fileData = await workspace.fs.readFile(uri);
             const fileContent = Buffer.from(fileData).toString('utf8');
             const editorMode = determineMode(fileContent, uri);
-            let isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
+            const isSwitch = this.visualEditorPendingSwitchToSource.has(uri.toString()) || this.editorPendingSwitchToVisual.has(uri.toString());
             if (this.editorPendingSwitchToVisual.has(uri.toString())) {
               this.editorPendingSwitchToVisual.delete(uri.toString());
             }
@@ -305,6 +317,11 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     return this.visualEditors.editorForUri(uri);
   }
 
+  public static isSynced(uri: Uri): boolean {
+    const editor = this.visualEditors.editorForUri(uri);
+    return !!editor && this.syncedEditors.has(editor.webviewPanel);
+  }
+
   public static visualEditorPendingXRefNavigation(uri: string, xref: XRef) {
     this.visualEditorPendingXRefNavigations.set(uri, xref);
   }
@@ -433,6 +450,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
         // initialize sync manager
         await syncManager.init();
+        VisualEditorProvider.syncedEditors.add(webviewPanel);
 
         // notify for document changes
         disposables.push(workspace.onDidChangeTextDocument(
@@ -559,6 +577,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
 
     // handle disposables when editor is closed
     webviewPanel.onDidDispose(() => {
+      VisualEditorProvider.syncedEditors.delete(webviewPanel);
       for (const disposable of disposables) {
         disposable.dispose();
       }
@@ -718,7 +737,7 @@ function visualEditorTracker(): VisualEditorTracker {
       return activeEditors.find(editor => {
         try {
           return editor.webviewPanel.active || (includeVisible && editor.webviewPanel.visible);
-        } catch (err) {
+        } catch {
           // we've seen activeEditors hold on to references to disposed editors (can't on the
           // surface see how this would occur as we subscribe to dispose, but as an insurance
           // policy let's eat any exception that occurs, since a single zombie webviewPanel

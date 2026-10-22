@@ -330,7 +330,6 @@ export function escapedRmdChunkBlockCapsuleFilter(): PandocBlockCapsuleFilter {
   return {
     type: kEscapedRmdChunkBlockCapsuleType,
 
-    // eslint-disable-next-line no-useless-escape
     match: /^([\t >]*)((```+)\s*\{{2,}[a-zA-Z0-9_-]+(?: *[ ,].*?)?\}{2,}[ \t]*\n(?:[\t >]*\3|[\W\w]*?\n[\t >]*\3))([ \t]*)$/gm,
 
     extract: (_match: string, p1: string, p2: string, _p3: string, p4: string) => {

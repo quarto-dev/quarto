@@ -50,12 +50,10 @@ export class ProsemirrorCommand {
     return this.execute(state);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public isActive(_state: EditorState): boolean {
     return false;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public plural(_state: EditorState): number {
     return 1;
   }

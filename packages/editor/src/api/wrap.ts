@@ -68,9 +68,10 @@ function wrapSentencesTransform(tr: Transform) {
     const sentences: typeof parts = [];
     for (let i = 0; i < parts.length; i++) {
       if (parts[i].type === 'Sentence') {
-        if (i === parts.length - 1 || 
-            parts[i + 1].type !== 'WhiteSpace' || 
-            parts[i + 1].value !== '\n') {
+        const next = parts[i + 1];
+        if (next === undefined ||
+            next.type !== 'WhiteSpace' ||
+            next.value !== '\n') {
           sentences.push(parts[i]);
         }
       }

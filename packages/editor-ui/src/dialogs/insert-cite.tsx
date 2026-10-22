@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
 
-import { Card, Input, makeStyles, Select, shorthands, tokens } from "@fluentui/react-components"
+import { Card, Input, makeStyles, Select, tokens } from "@fluentui/react-components"
 
 import { Field, ProgressBar } from "@fluentui/react-components"
 
@@ -76,7 +76,7 @@ const InsertCiteDialog: React.FC<{
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
   const [idFocused, setIdFocused] = useState(false);
-  const idEl = useRef<HTMLInputElement>();
+  const idEl = useRef<HTMLInputElement | null>(null);
   const focusId = () => idEl?.current?.focus();
   const idFocusRef = (el: HTMLInputElement | null) => {
     if (!idFocused && el) {
@@ -319,10 +319,10 @@ const useStyles = makeStyles({
     overflowY: 'scroll',
     width: '100%',
     height: '200px',
-    ...shorthands.padding('4px'),
+    padding: '4px',
     marginBottom: '5px',
     "& td": {
-      ...shorthands.padding(0,0,'4px'),
+      padding: '0 0 4px',
     },
     "& tr td:first-child": {
       fontWeight: tokens.fontWeightSemibold,

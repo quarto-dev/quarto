@@ -5,8 +5,7 @@
  *
  */
 
-import MarkdownIt from "markdown-it";
-import StateInline from "markdown-it/lib/rules_inline/state_inline";
+import type { MarkdownIt, StateInline } from "markdown-it";
 
 
 export function spansPlugin(md: MarkdownIt) {

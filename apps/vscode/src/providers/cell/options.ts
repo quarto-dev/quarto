@@ -5,9 +5,8 @@
  */
 
 
-import * as yaml from "js-yaml";
 
-import { lines } from "core";
+import { lines, loadYaml } from "core";
 import { Token, isCodeBlock, languageNameFromBlock } from "quarto-core";
 
 import { langCommentChars, optionCommentPattern } from "./comment-chars";
@@ -59,7 +58,7 @@ export function cellOptions(language: string, source: string[]): Record<string, 
   // parse the yaml
   if (yamlLines.length > 0) {
     try {
-      const options = yaml.load(yamlLines.join("\n"));
+      const options = loadYaml(yamlLines.join("\n"));
       if (
         typeof options === "object" &&
         !Array.isArray(options) &&

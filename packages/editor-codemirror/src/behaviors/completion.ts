@@ -29,7 +29,7 @@ import {
   TextEdit
 } from "vscode-languageserver-types";
 
-import md from "markdown-it";
+import { renderCompletionMarkdown } from "./completion-markdown";
 
 import { editorLanguage } from "editor-core";
 
@@ -185,7 +185,7 @@ const defaultBoostScore = (context: CompletionContext, items: CompletionItem[], 
   const replaceTextInItemLabel = item.label.slice(i, replaceText.length);
 
   // mostly counts how many upper/lowercase differences there are
-  let diff = simpleStringDiff(replaceTextInItemLabel, replaceText);
+  const diff = simpleStringDiff(replaceTextInItemLabel, replaceText);
 
   // `-i` scores completions better if what you typed is earlier in the completion
   // `-diff/10` mostly tie breaks that score by capitalization differences.
@@ -318,8 +318,7 @@ function infoNodeForItem(item: CompletionItem) {
     }
     if (MarkupContent.is(item.documentation)) {
       if (item.documentation.kind === MarkupKind.Markdown) {
-        const commonmark = md('commonmark');
-        const html = commonmark.render(item.documentation.value);
+        const html = renderCompletionMarkdown(item.documentation.value);
         const mdDiv = document.createElement("div");
         mdDiv.innerHTML = html;
         // remove mdn links

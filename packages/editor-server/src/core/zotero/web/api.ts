@@ -5,7 +5,7 @@
  */
 
 import { sleep } from "core";
-import fetch from "cross-fetch";
+import { fetchErrorMessage, isNoHostError } from "../../fetch";
 
 import { CSL } from "editor-types";
 import { zoteroTraceProgress } from "./trace";
@@ -289,10 +289,9 @@ const zoteroFetch = async <T>(
     }
 
   } catch(error) {
-    const message = error instanceof Error ? error.message : JSON.stringify(error);
     return {
-      status: message.includes("ENOTFOUND") ? 503 : 500,
-      statusText: `Error: ${message}`,
+      status: isNoHostError(error) ? 503 : 500,
+      statusText: `Error: ${fetchErrorMessage(error)}`,
       headers: null,
       message: null,
     }

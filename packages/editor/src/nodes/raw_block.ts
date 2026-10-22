@@ -176,7 +176,7 @@ const extension = (context: ExtensionContext): Extension | null => {
               const matches: RegExpExecArray[] = [];
               const embeddedTickRegEx = /\n(`{3,})\s*?\n/g;
               embeddedTickRegEx.lastIndex = 0;
-              let match: RegExpExecArray | null = null;
+              let match: RegExpExecArray | null;
                // tslint:disable-next-line no-conditional-assignment
               while ((match = embeddedTickRegEx.exec(node.textContent))) {
                 matches.push(match);

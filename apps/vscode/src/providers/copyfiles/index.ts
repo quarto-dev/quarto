@@ -20,6 +20,6 @@ export function activateCopyFiles(context: vscode.ExtensionContext) {
 function haveDocumentDropEdit() {
   return (
     semver.gte(vscode.version, "1.74.0") &&
-    !!(vscode.languages as any).registerDocumentDropEditProvider
+    !!vscode.languages.registerDocumentDropEditProvider
   );
 }

@@ -25,11 +25,15 @@ export function highlightCode(
   let pos = 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   highlightTree(tree as any, style, (from, to, classes) => {
-    from > pos && callback(code.slice(pos, from), null, pos, from);
+    if (from > pos) {
+      callback(code.slice(pos, from), null, pos, from);
+    }
     callback(code.slice(from, to), classes, from, to);
     pos = to;
   });
-  pos != tree.length && callback(code.slice(pos, tree.length), null, pos, tree.length);
+  if (pos != tree.length) {
+    callback(code.slice(pos, tree.length), null, pos, tree.length);
+  }
 }
 
 

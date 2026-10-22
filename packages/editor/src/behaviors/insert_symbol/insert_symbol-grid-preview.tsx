@@ -20,7 +20,7 @@ interface SymbolPreviewProps extends WidgetProps {
   children: ReactNode;
 }
 
-export const SymbolPreview = React.forwardRef<any, SymbolPreviewProps>((props, ref) => {
+export const SymbolPreview = React.forwardRef<HTMLDivElement, SymbolPreviewProps>((props, ref) => {
   return (
     <div style={{ height: '54px' }} className="pm-popup-insert-symbol-preview-container" ref={ref}>
       <div className="pm-popup-insert-symbol-preview-thumbnail">

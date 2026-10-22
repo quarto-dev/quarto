@@ -6,6 +6,8 @@
 
 import { kStatusError, kStatusNoHost, kStatusNotFound, kStatusOK } from "editor-types";
 
+import { fetchErrorMessage, isNoHostError } from "../core/fetch";
+
 // datacite, doi, and pubmed all share a common response type pattern that includes
 // status and optional message and error payloads -- this function provides a common
 // implementation for handling these requests
@@ -39,11 +41,10 @@ export async function handleResponseWithStatus<T>(request: () => Promise<Respons
       }
     }
   } catch(error) {
-    const message = error instanceof Error ? error.message : JSON.stringify(error);
     return {
-      status: message.includes("ENOTFOUND") ? kStatusNoHost : kStatusError,
+      status: isNoHostError(error) ? kStatusNoHost : kStatusError,
       message: null,
-      error: message
+      error: fetchErrorMessage(error)
     }
   }
 }

@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-@import 'editor-ui/src/variables.scss';
+@use 'editor-ui/src/variables' as *;
  
 $editorToolbarHeight: 32px;
 

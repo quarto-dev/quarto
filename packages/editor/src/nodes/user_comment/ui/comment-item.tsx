@@ -4,7 +4,7 @@
  * Copyright (C) 2019-2026 by Posit Software, PBC
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createCommentIdAttr } from './common';
 import { ContentPanel } from './comment-content';
 

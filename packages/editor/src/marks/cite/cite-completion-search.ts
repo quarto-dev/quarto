@@ -4,11 +4,11 @@
  *
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
-import Fuse from 'fuse.js';
+import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 
 import { CiteCompletionEntry } from "./cite-completion";
 
-const searchFields: Fuse.FuseOptionKeyObject<CiteCompletionEntry>[] = [
+const searchFields: FuseOptionKeyObject<CiteCompletionEntry>[] = [
   { name: 'id', weight: 30 },
   { name: 'index.secondary', weight: 30 },
   { name: 'index.tertiary', weight: 5 },

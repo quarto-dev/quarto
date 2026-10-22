@@ -9,7 +9,7 @@
 // (/*| ... */).
 //
 // note: this module must remain dependency-free: it is also imported by
-// syntaxes/build-lang.js to generate the cell option comment rules of the
+// syntaxes/build-lang.mjs to generate the cell option comment rules of the
 // quarto textmate grammar
 
 export const kLangCommentChars: Record<string, string | [string, string]> = {

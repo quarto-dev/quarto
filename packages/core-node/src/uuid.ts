@@ -4,8 +4,8 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import * as uuid from "uuid";
+import { randomUUID } from "node:crypto";
 
 export function shortUuid() {
-  return uuid.v4().replace(/-/g, "").slice(0, 8);
+  return randomUUID().replace(/-/g, "").slice(0, 8);
 }

@@ -4,10 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import React from "react";
 import { createRoot } from 'react-dom/client';
-
-import * as uuid from "uuid";
 
 import 'vscode-webview';
 
@@ -37,7 +34,7 @@ async function runEditor() {
     const store = await initializeStore(request);
 
     // create editor id
-    const editorId = uuid.v4();
+    const editorId = crypto.randomUUID();
     store.dispatch(addEditor(editorId));
 
     // render

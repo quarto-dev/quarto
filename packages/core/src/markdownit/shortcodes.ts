@@ -4,11 +4,7 @@
 * Copyright (C) 2020-2023 Posit Software, PBC
 *
 */
-import type MarkdownIt from "markdown-it/lib"
-import Token from "markdown-it/lib/token"
-
-import StateInline from "markdown-it/lib/rules_inline/state_inline";
-import { escapeHtml } from "markdown-it/lib/common/utils";
+import type { MarkdownIt, StateInline, Token } from "markdown-it";
 
 export const kShortcode = "shortcode";
 
@@ -41,7 +37,7 @@ export const shortcodePlugin = (md: MarkdownIt) => {
     const token = tokens[idx];
     const content = token.content;
     // insert shortcode braces and escape content's html entities
-    return `<span class="shortcode">${escapeHtml(`{{<${content}>}}`)}</span>`;
+    return `<span class="shortcode">${md.utils.escapeHtml(`{{<${content}>}}`)}</span>`;
   }
 
   md.renderer.rules[kShortcode] = renderShortcode;

@@ -7,8 +7,6 @@
 import debounce from "lodash.debounce";
 import {
   ExtensionContext,
-  Uri,
-  WebviewPanel,
   window,
   Position,
   ViewColumn,

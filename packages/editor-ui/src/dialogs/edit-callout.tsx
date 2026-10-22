@@ -129,8 +129,9 @@ const EditCalloutDialog: React.FC<{
           </Select>
         </Field>
       </div>
-      <Field label={t("Caption")} placeholder={t("(Optional)")}>
+      <Field label={t("Caption")}>
         <Textarea
+          placeholder={t("(Optional)")}
           value={caption}
           onChange={(_ev, data) => setCaption(data.value)}
           resize="vertical"

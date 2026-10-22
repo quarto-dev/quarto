@@ -5,7 +5,7 @@
  */
 
 import * as vscode from 'vscode';
-import { markdownitParser, Token } from 'quarto-core';
+import { Document, markdownitParser, Token } from 'quarto-core';
 import { createThrottle } from '../core/throttle';
 
 // Define decoration types for different nesting levels (rotating colors)
@@ -72,7 +72,7 @@ export function activateDivBracketDecorations(context: vscode.ExtensionContext) 
         lineCount: editor.document.lineCount,
       };
 
-      divTokens = parser(doc as any).filter(t => t.type === 'Div');
+      divTokens = parser(doc as unknown as Document).filter(t => t.type === 'Div');
       parseCache.set(docUri, { version: docVersion, divTokens });
     }
 

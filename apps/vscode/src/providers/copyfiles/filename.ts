@@ -105,7 +105,7 @@ function resolveCopyDestinationSetting(documentUri: vscode.Uri, fileName: string
     ['fileName', fileName],// Full file name
   ]);
 
-  return outDest.replaceAll(/\$\{(\w+)(?:\/([^\}]+?)\/([^\}]+?)\/)?\}/g, (_, name, pattern, replacement) => {
+  return outDest.replaceAll(/\$\{(\w+)(?:\/([^}]+?)\/([^}]+?)\/)?\}/g, (_, name, pattern, replacement) => {
     const entry = vars.get(name);
     if (!entry) {
       return '';

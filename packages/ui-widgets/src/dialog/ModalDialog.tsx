@@ -35,7 +35,7 @@ export interface ModalDialogProps {
   noCancelButton?: boolean;
   cancelCaption?: string;
   focusOKButton?: boolean;
-  leftButtons?: JSX.Element;
+  leftButtons?: React.JSX.Element;
 }
 
 export const ModalDialog: React.FC<ModalDialogProps> = props => {

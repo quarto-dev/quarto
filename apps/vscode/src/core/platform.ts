@@ -82,7 +82,7 @@ function rswPortToken(port: string) {
       }
     ) as unknown as string;
     return result;
-  } catch (e) {
+  } catch {
     throw new Error(`Failed to map RSW port token`);
   }
 }

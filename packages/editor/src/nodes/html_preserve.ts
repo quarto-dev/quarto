@@ -72,7 +72,6 @@ export function htmlPreserveBlockCapsuleFilter(): PandocBlockCapsuleFilter {
   return {
     type: kHtmlPreserveBlockCapsuleType,
 
-    // eslint-disable-next-line no-useless-escape
     match: /^([\t >]*)(<!--html_preserve-->[\W\w]*?<!--\/html_preserve-->)([ \t]*)$/gm,
 
     extract: (_match: string, p1: string, p2: string, p3: string) => {

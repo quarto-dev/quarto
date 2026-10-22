@@ -1,6 +1,25 @@
 # Changelog
 
-## 1.139.0 (Unreleased)
+## 1.140.0 (Unreleased)
+
+- Fixed a bug where pasting a DOI after `@` in the visual editor did not offer to insert a citation on Windows (or, for plain-text pastes, on any platform) (<https://github.com/quarto-dev/quarto/pull/1060>).
+- Improved the error message shown when inserting a citation from a DOI whose registration agency does not provide citation metadata (<https://github.com/quarto-dev/quarto/pull/1061>).
+
+## 1.139.0 (Release on 2026-10-20)
+
+- The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).
+- In the visual editor, citations inserted into a `.bib` bibliography for software, graphics, songs, films, legislation, legal cases, interviews, personal communications, hearings, maps, figures and classics are now written as `@misc` entries instead of `@article` (<https://github.com/quarto-dev/quarto/pull/1160>).
+- The extension now reads YAML the way Quarto CLI does: merge keys (`<<`) in front matter and `_quarto.yml` are no longer resolved, and dates are read as strings (<https://github.com/quarto-dev/quarto/pull/1158>).
+- Math hovers and visual editor equation previews are now rendered with MathJax 4, using the same TeX font as before. Output is nearly identical; `numcases` now works, and a few extensible arrows from the `extpfeil` extension (such as `\xtwoheadrightarrow`) render slightly differently (<https://github.com/quarto-dev/quarto/pull/1171>).
+- Updated markdown-it to version 15. In the Quarto help panel, bare domains such as `www.example.com` are no longer turned into links (`https://` URLs still are), and a link now ends at Unicode punctuation. In notebook markdown cells, definition lists with a blank line between the term and the definition now wrap each definition in a paragraph, as Pandoc does (<https://github.com/quarto-dev/quarto/pull/1174>).
+- Updated the visual editor to current ProseMirror releases. The ProseMirror developer tools (Ctrl+Alt+P) are now only included in development builds of the extension (<https://github.com/quarto-dev/quarto/pull/1179>).
+- In the visual editor, once 100 pasted or inserted images share a name, new images are still saved in the `images/` folder with their file extension. Previously they went into the document's folder with no extension (<https://github.com/quarto-dev/quarto/pull/1181>).
+- On Windows, image paths the visual editor inserts that contain more than one folder separator (e.g. `../images/plot.png`) now use forward slashes throughout. Previously only the first backslash was converted (<https://github.com/quarto-dev/quarto/pull/1181>).
+- Running a Stata or C# cell no longer drops leading `#|` lines. These languages write cell options as `*|` and `//|`, so `#|` lines are code, and they are now sent to the kernel just as `quarto render` sends them (<https://github.com/quarto-dev/quarto/pull/1183>).
+- Updated the Mermaid used to render diagrams in notebook Markdown cells from 9.4 to 11.17, so newer syntax such as `A@{ shape: ... }` works. The diagram preview moves from Mermaid 11.12 to 11.17 too. In both, class and C4 diagrams now use Mermaid's newer renderer, so they look slightly different (<https://github.com/quarto-dev/quarto/pull/1189>).
+- Fixed a bug where the first character of lines outside code cells (paragraphs, headings, YAML) and of IPython magic lines in Python cells (`%`, `!`) could be highlighted as a comment (<https://github.com/quarto-dev/quarto/issues/985>).
+- Fixed "Quarto: Preview" and render in the terminal when the document path contains shell special characters, such as parentheses, `;`, `@`, `$`, or quotes (<https://github.com/quarto-dev/quarto/pull/1197>).
+- In Positron, the Viewer now shows a stop button for Quarto previews. Clicking it stops `quarto preview` and closes the preview. The button goes away when the preview server stops (<https://github.com/quarto-dev/quarto/pull/1193>).
 
 ## 1.138.0 (Release on 2026-09-11)
 

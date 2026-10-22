@@ -1,0 +1,304 @@
+{
+  "markdownIt": [
+    "heading_open <h1> [0,1]",
+    "  inline [0,1]",
+    "heading_close <h1>",
+    "paragraph_open <p> [2,3]",
+    "  inline [2,3]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [4,5]",
+    "  inline [4,5]",
+    "paragraph_close <p>",
+    "heading_open <h2> [6,7]",
+    "  inline [6,7]",
+    "heading_close <h2>",
+    "bullet_list_open <ul> [8,16]",
+    "  list_item_open <li> [8,10] attrs=[[\"key\",\"value=with=equals\"]]",
+    "    paragraph_open <p> [8,9]",
+    "      inline [8,9]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [10,12] attrs=[[\"class\",\"class\"],[\"key\",\"query=param\"]]",
+    "    paragraph_open <p> [10,11]",
+    "      inline [10,11]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [12,14] attrs=[[\"id\",\"id\"],[\"class\",\"class\"],[\"key\",\"complex=value\"]]",
+    "    paragraph_open <p> [12,13]",
+    "      inline [12,13]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [14,16]",
+    "    paragraph_open <p> [14,15]",
+    "      inline [14,15]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "bullet_list_close <ul>",
+    "heading_open <h2> [16,17]",
+    "  inline [16,17]",
+    "heading_close <h2>",
+    "bullet_list_open <ul> [18,24]",
+    "  list_item_open <li> [18,20] attrs=[[\"style\",\"color:red;font-size=12px\"]]",
+    "    paragraph_open <p> [18,19]",
+    "      inline [18,19]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [20,22] attrs=[[\"formula\",\"E=mc^2\"]]",
+    "    paragraph_open <p> [20,21]",
+    "      inline [20,21]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [22,24] attrs=[[\"lang\",\"c++\"],[\"key\",\"value=val\"]]",
+    "    paragraph_open <p> [22,23]",
+    "      inline [22,23]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "bullet_list_close <ul>",
+    "heading_open <h2> [24,25]",
+    "  inline [24,25]",
+    "heading_close <h2>",
+    "fence <code> [26,29] attrs=[[\"python\",\"\"],[\"key\",\"value=equals\"]]",
+    "fence <code> [30,33] attrs=[[\"r\",\"\"],[\"eval\",\"1+1=2\"]]",
+    "heading_open <h2> [34,35]",
+    "  inline [34,35]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"id\",\"div-id\"],[\"key\",\"value=with=multiple=equals\"]] meta={\"line\":36,\"level\":1}",
+    "  paragraph_open <p> [37,38]",
+    "    inline [37,38]",
+    "  paragraph_close <p>",
+    "pandoc_div_close <div> meta={\"line\":38,\"level\":1}",
+    "heading_open <h2> [40,41]",
+    "  inline [40,41]",
+    "heading_close <h2>",
+    "paragraph_open <p> [42,43] attrs=[[\"width\",\"50%\"],[\"height\",\"30%\"],[\"key\",\"value=equals\"]]",
+    "  inline [42,43]",
+    "paragraph_close <p>",
+    "heading_open <h2> [44,45]",
+    "  inline [44,45]",
+    "heading_close <h2>",
+    "table_open <table> [46,50]",
+    "  thead_open <thead> [46,47] meta={\"colsnum\":2}",
+    "    tr_open <tr> [46,47]",
+    "      th_open <th>",
+    "        inline",
+    "      th_close <th>",
+    "      th_open <th>",
+    "        inline",
+    "      th_close <th>",
+    "    tr_close <tr>",
+    "  thead_close <thead>",
+    "  tbody_open <tbody> [48,50] meta={\"colsnum\":2}",
+    "    tr_open <tr> [48,49]",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "    tr_close <tr>",
+    "    tr_open <tr> [49,50]",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "    tr_close <tr>",
+    "  tbody_close <tbody>",
+    "table_close <table>",
+    "paragraph_open <p> [51,52] attrs=[[\"id\",\"tbl-id\"],[\"tbl-colwidths\",\"[50,50]\"],[\"key\",\"value=with=equals\"]]",
+    "  inline [51,52]",
+    "paragraph_close <p>"
+  ],
+  "tokens": [
+    {
+      "type": "Header",
+      "range": "0:0-0:42",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 1,
+        "text": "Testing equals signs in attribute values"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "2:0-2:89"
+    },
+    {
+      "type": "Para",
+      "range": "4:0-4:68"
+    },
+    {
+      "type": "Header",
+      "range": "6:0-6:17",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Basic examples"
+      }
+    },
+    {
+      "type": "BulletList",
+      "range": "8:0-14:53"
+    },
+    {
+      "type": "Para",
+      "range": "8:0-8:90"
+    },
+    {
+      "type": "Para",
+      "range": "10:0-10:96"
+    },
+    {
+      "type": "Para",
+      "range": "12:0-12:68"
+    },
+    {
+      "type": "Para",
+      "range": "14:0-14:53"
+    },
+    {
+      "type": "Header",
+      "range": "16:0-16:24",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "More complex examples"
+      }
+    },
+    {
+      "type": "BulletList",
+      "range": "18:0-22:57"
+    },
+    {
+      "type": "Para",
+      "range": "18:0-18:70"
+    },
+    {
+      "type": "Para",
+      "range": "20:0-20:55"
+    },
+    {
+      "type": "Para",
+      "range": "22:0-22:57"
+    },
+    {
+      "type": "Header",
+      "range": "24:0-24:14",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Code blocks"
+      }
+    },
+    {
+      "type": "CodeBlock",
+      "range": "26:0-28:3",
+      "attr": [
+        "",
+        [
+          "{python"
+        ],
+        []
+      ],
+      "data": "print(\"Testing equals in attribute values\")"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "30:0-32:3",
+      "attr": [
+        "",
+        [
+          "{r"
+        ],
+        []
+      ],
+      "data": "print(\"R code with equals in attributes\")"
+    },
+    {
+      "type": "Header",
+      "range": "34:0-34:22",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Div with attributes"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "36:0-38:3",
+      "attr": [
+        "div-id",
+        [],
+        [
+          [
+            "key",
+            "value=with=multiple=equals"
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "Para",
+      "range": "37:0-38:3"
+    },
+    {
+      "type": "Header",
+      "range": "40:0-40:26",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Image with equals signs"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "42:0-42:66"
+    },
+    {
+      "type": "Header",
+      "range": "44:0-44:26",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Table with equals signs"
+      }
+    },
+    {
+      "type": "Table",
+      "range": "46:0-49:15"
+    },
+    {
+      "type": "Para",
+      "range": "51:0-51:71"
+    }
+  ]
+}

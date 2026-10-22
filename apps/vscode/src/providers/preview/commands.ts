@@ -7,7 +7,7 @@
 import * as path from "path";
 import * as fs from "fs";
 
-import { TextDocument, window, Uri, workspace, commands, QuickPickItem } from "vscode";
+import { TextDocument, window, Uri, workspace, commands } from "vscode";
 import { QuartoContext, QuartoFormatInfo, quartoDocumentFormats } from "quarto-core";
 
 import { Command } from "../../core/command";

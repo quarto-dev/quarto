@@ -116,6 +116,7 @@ async function revealEditorLocation(
 
 function revealConfigFromYaml(str: string) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- arbitrary YAML
     const meta = parseFrontMatterStr(str) as any;
     if (meta) {
       return {
@@ -128,7 +129,7 @@ function revealConfigFromYaml(str: string) {
     } else {
       return null;
     }
-  } catch (error) {
+  } catch {
     return null;
   }
 }

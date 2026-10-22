@@ -72,7 +72,7 @@ async function executeCellFormattingProvider(
       uri
     );
     return result ?? kNoCellFormattingEdits;
-  } catch (error) {
+  } catch {
     return kNoCellFormattingEdits;
   }
 }
@@ -88,7 +88,7 @@ async function executeCellRangeFormattingProvider(
       range
     );
     return result ?? kNoCellFormattingEdits;
-  } catch (error) {
+  } catch {
     return kNoCellFormattingEdits;
   }
 }

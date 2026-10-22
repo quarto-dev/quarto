@@ -46,7 +46,7 @@ export async function quartoCellSymbols(
       uri
     );
     return cells ?? [];
-  } catch (error) {
+  } catch {
     return [];
   }
 }

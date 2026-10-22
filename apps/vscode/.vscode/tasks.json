@@ -4,10 +4,25 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "watch",
-      "problemMatcher": "$tsc-watch",
+      "label": "npm: dev-vscode",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev-vscode"],
+      "options": {
+        "cwd": "${workspaceFolder}/../.."
+      },
       "isBackground": true,
+      "problemMatcher": {
+        "owner": "esbuild",
+        "pattern": {
+          "regexp": "^\\b$"
+        },
+        "background": {
+          "activeBegin": true,
+          "beginsPattern": "Packages in scope",
+          "endsPattern": "quarto:dev: \\[watch\\] build finished"
+        }
+      },
       "presentation": {
         "reveal": "never"
       },
@@ -17,10 +32,10 @@
       }
     },
     {
-      "label": "yarn: build-test",
+      "label": "npm: build-test",
       "type": "shell",
-      "command": "yarn",
-      "args": ["build-test"],
+      "command": "npm",
+      "args": ["run", "build-test"],
       "problemMatcher": []
     }
   ]

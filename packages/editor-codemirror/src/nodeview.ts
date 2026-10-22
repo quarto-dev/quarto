@@ -39,7 +39,7 @@ export const codeMirrorNodeView: (
 ) => (
   pmNode: Node,
   view: PMEditorView,
-  getPos: (() => number) | boolean
+  getPos: () => number | undefined
 ) => NodeView = (context, codeViewOptions, nodeViews) => (pmNode, view, getPos) => {
 
   // track node
@@ -131,7 +131,7 @@ export const codeMirrorNodeView: (
   // detection between views for gap cursor handling)
   const cmNodeView : CodeEditorNodeView = {
     isFocused: () => codeMirrorView.hasFocus,
-    getPos: typeof(getPos) === "function" ? getPos : (() => 0),
+    getPos: () => getPos() ?? 0,
     dom,
     setGapCursorPending
   }; 
@@ -240,9 +240,9 @@ const computeChange = (oldVal: string, newVal: string) => {
 const asProseMirrorSelection = (
   pmDoc: Node,
   cmView: EditorView,
-  getPos: (() => number) | boolean
+  getPos: () => number | undefined
 ) => {
-  const offset = (typeof getPos === "function" ? getPos() || 0 : 0) + 1;
+  const offset = (getPos() ?? 0) + 1;
   const anchor = cmView.state.selection.main.from + offset;
   const head = cmView.state.selection.main.to + offset;
   return TextSelection.create(pmDoc, anchor, head);
@@ -252,7 +252,7 @@ const asProseMirrorSelection = (
 const forwardSelection = (
   cmView: EditorView,
   pmView: PMEditorView,
-  getPos: (() => number) | boolean
+  getPos: () => number | undefined
 ) => {
   if (!cmView.hasFocus) return;
   const selection = asProseMirrorSelection(pmView.state.doc, cmView, getPos);
@@ -263,12 +263,13 @@ const forwardSelection = (
 const valueChanged = (
   textUpdate: string,
   node: Node,
-  getPos: (() => number) | boolean,
+  getPos: () => number | undefined,
   view: PMEditorView
 ) => {
   const change = computeChange(node.textContent, textUpdate);
-  if (change && typeof getPos === "function") {
-    const start = getPos() + 1;
+  const pos = getPos();
+  if (change && pos !== undefined) {
+    const start = pos + 1;
 
     const pmTr = view.state.tr;
     if (change.text) {

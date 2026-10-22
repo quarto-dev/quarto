@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * pandoc.ts
  *
@@ -8,7 +7,7 @@
 
 import path from 'node:path';
 import * as fs from "node:fs";
-import * as uuid from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { JsonRpcServerMethod } from 'core';
 
@@ -120,7 +119,7 @@ export function pandocServer(options: EditorServerOptions) : PandocServer {
     ): Promise<BibliographyResult> {
       const cslBiblio = cslBibliography(options.quartoContext, file, bibliography, refBlock);
       return {
-        etag: uuid.v4(),
+        etag: randomUUID(),
         bibliography: cslBiblio
       }
     },

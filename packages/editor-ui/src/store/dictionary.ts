@@ -4,11 +4,11 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { JsonRpcError } from "core";
 import { Dictionary, DictionaryInfo, DictionaryServer, IgnoredWord } from "editor";
 
-import { rtkFakeBaseQuery, rtkHandleQuery } from "./rtk";
+import { rtkHandleQuery } from "./rtk";
 
 const kUserDictionaryTag = "UserDictionary";
 const kIgnoredWordsTag = "IgnoredWords";
@@ -22,7 +22,7 @@ export function initDictionaryApi(server: DictionaryServer) {
 // define api
 export const dictionaryApi = createApi({
   reducerPath: "dictionary",
-  baseQuery: rtkFakeBaseQuery<JsonRpcError>(),
+  baseQuery: fakeBaseQuery<JsonRpcError>(),
   tagTypes: [kUserDictionaryTag, kIgnoredWordsTag],
   endpoints(build) {
     return {

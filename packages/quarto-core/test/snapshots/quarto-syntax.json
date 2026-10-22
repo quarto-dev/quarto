@@ -1,0 +1,531 @@
+{
+  "markdownIt": [
+    "front_matter [0,37]",
+    "heading_open <h1> [5,6] attrs=[[\"id\",\"sec-one\"],[\"class\",\"unnumbered\"]]",
+    "  inline [5,6]",
+    "heading_close <h1>",
+    "paragraph_open <p> [7,11]",
+    "  inline [7,11]",
+    "paragraph_close <p>",
+    "heading_open <h2> [12,14]",
+    "  inline [12,13]",
+    "heading_close <h2>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"callout-note\"]] meta={\"line\":15,\"level\":1}",
+    "  heading_open <h2> [16,17]",
+    "    inline [16,17]",
+    "  heading_close <h2>",
+    "  paragraph_open <p> [18,19]",
+    "    inline [18,19]",
+    "  paragraph_close <p>",
+    "pandoc_div_close <div> meta={\"line\":19,\"level\":1}",
+    "pandoc_div_open <div> attrs=[[\"class\",\"callout-warning\"],[\"title\",\"Attr title\"],[\"collapse\",\"true\"]] meta={\"line\":21,\"level\":1}",
+    "  paragraph_open <p> [22,23]",
+    "    inline [22,23]",
+    "  paragraph_close <p>",
+    "pandoc_div_close <div> meta={\"line\":23,\"level\":1}",
+    "pandoc_div_open <div> attrs=[[\"class\",\"callout-tip\"]] meta={\"line\":25,\"level\":1}",
+    "  paragraph_open <p> [26,27]",
+    "    inline [26,27]",
+    "  paragraph_close <p>",
+    "pandoc_div_close <div> meta={\"line\":27,\"level\":1}",
+    "pandoc_div_open <div> attrs=[[\"id\",\"fig-panel\"],[\"layout-ncol\",\"2\"]] meta={\"line\":29,\"level\":1}",
+    "  pandoc_div_open <div> attrs=[[\"id\",\"fig-a\"]] meta={\"line\":30,\"level\":2}",
+    "    paragraph_open <p> [31,32] attrs=[[\"width\",\"50%\"]]",
+    "      inline [31,32]",
+    "    paragraph_close <p>",
+    "  pandoc_div_close <div> meta={\"line\":32,\"level\":2}",
+    "  paragraph_open <p> [33,34]",
+    "    inline [33,34]",
+    "  paragraph_close <p>",
+    "pandoc_div_close <div> meta={\"line\":34,\"level\":1}",
+    "paragraph_open <p> [36,37] attrs=[[\"id\",\"fig-img\"],[\"fig-alt\",\"alt text\"]]",
+    "  inline [36,37]",
+    "paragraph_close <p>",
+    "pandoc_div_open <div> attrs=[[\"class\",\"column-margin\"]] meta={\"line\":38,\"level\":1}",
+    "  paragraph_open <p> [39,40]",
+    "    inline [39,40]",
+    "  paragraph_close <p>",
+    "pandoc_div_close <div> meta={\"line\":40,\"level\":1}",
+    "math_block <math> [42,45] attrs=[[\"id\",\"eq-mass\"]]",
+    "paragraph_open <p> [46,47]",
+    "  inline [46,47]",
+    "paragraph_close <p>",
+    "fence <code> [48,53] attrs=[[\"python\",\"\"]]",
+    "fence <code> [54,57] info=\"r\"",
+    "fence <code> [58,61]",
+    "fence <code> [62,65] attrs=[[\"class\",\"python\"],[\"filename\",\"a.py\"]]",
+    "paragraph_open <p> [66,67]",
+    "  inline [66,67]",
+    "paragraph_close <p>",
+    "fence <code> [68,71] attrs=[[\"r\",\"\"]]",
+    "paragraph_open <p> [72,73]",
+    "  inline [72,73]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [74,76]",
+    "  inline [74,76]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [77,78]",
+    "  inline [77,78]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [79,80]",
+    "  inline [79,80]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [81,82]",
+    "  inline [81,82]",
+    "paragraph_close <p>",
+    "table_open <table> [83,86]",
+    "  thead_open <thead> [83,84] meta={\"colsnum\":2}",
+    "    tr_open <tr> [83,84]",
+    "      th_open <th>",
+    "        inline",
+    "      th_close <th>",
+    "      th_open <th>",
+    "        inline",
+    "      th_close <th>",
+    "    tr_close <tr>",
+    "  thead_close <thead>",
+    "  tbody_open <tbody> [85,86] meta={\"colsnum\":2}",
+    "    tr_open <tr> [85,86]",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "      td_open <td>",
+    "        inline",
+    "      td_close <td>",
+    "    tr_close <tr>",
+    "  tbody_close <tbody>",
+    "table_close <table>",
+    "paragraph_open <p> [87,88] attrs=[[\"id\",\"tbl-one\"]]",
+    "  inline [87,88]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [89,94]",
+    "  inline [89,94]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [95,97]",
+    "  inline [95,97]",
+    "paragraph_close <p>",
+    "bullet_list_open <ul> [98,102]",
+    "  list_item_open <li> [98,99]",
+    "    paragraph_open <p> [98,99]",
+    "      inline [98,99]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [99,100]",
+    "    paragraph_open <p> [99,100]",
+    "      inline [99,100]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [100,102]",
+    "    paragraph_open <p> [100,101]",
+    "      inline [100,101]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "bullet_list_close <ul>",
+    "ordered_list_open <ol> [102,105]",
+    "  list_item_open <li> [102,103] info=\"1\"",
+    "    paragraph_open <p> [102,103]",
+    "      inline [102,103]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "  list_item_open <li> [103,105] info=\"2\"",
+    "    paragraph_open <p> [103,104]",
+    "      inline [103,104]",
+    "    paragraph_close <p>",
+    "  list_item_close <li>",
+    "ordered_list_close <ol>",
+    "blockquote_open <blockquote> [105,106]",
+    "  paragraph_open <p> [105,106]",
+    "    inline [105,106]",
+    "  paragraph_close <p>",
+    "blockquote_close <blockquote>",
+    "hr <hr> [107,108]",
+    "paragraph_open <p> [109,110]",
+    "  inline [109,110]",
+    "paragraph_close <p>",
+    "paragraph_open <p> [111,113]",
+    "  inline [111,113]",
+    "paragraph_close <p>",
+    "heading_open <h2> [114,115] attrs=[[\"class\",\"foo\"]]",
+    "  inline [114,115]",
+    "heading_close <h2>",
+    "heading_open <h3> [116,117]",
+    "  inline [116,117]",
+    "heading_close <h3>",
+    "paragraph_open <p> [118,119]",
+    "  inline [118,119]",
+    "paragraph_close <p>",
+    "pandoc_div_open <div> meta={\"line\":119,\"level\":1}",
+    "  heading_open <h2> [121,122]",
+    "    inline [121,122]",
+    "  heading_close <h2>",
+    "  paragraph_open <p> [123,125]",
+    "    inline [123,125]",
+    "  paragraph_close <p>"
+  ],
+  "tokens": [
+    {
+      "type": "FrontMatter",
+      "range": "0:0-4:0",
+      "data": "---\ntitle: \"Fixture\"\nformat: html\n---"
+    },
+    {
+      "type": "Header",
+      "range": "5:0-5:36",
+      "attr": [
+        "sec-one",
+        [
+          "unnumbered"
+        ],
+        []
+      ],
+      "data": {
+        "level": 1,
+        "text": "Heading One"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "7:0-10:81"
+    },
+    {
+      "type": "Header",
+      "range": "12:0-13:14",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Setext heading"
+      }
+    },
+    {
+      "type": "Div",
+      "range": "15:0-19:3",
+      "attr": [
+        "",
+        [
+          "callout-note"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "Header",
+      "range": "16:0-16:16",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Callout title"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "18:0-19:3"
+    },
+    {
+      "type": "Div",
+      "range": "21:0-23:3",
+      "attr": [
+        "",
+        [
+          "callout-warning"
+        ],
+        [
+          [
+            "title",
+            "Attr title"
+          ],
+          [
+            "collapse",
+            "true"
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "Para",
+      "range": "22:0-23:3"
+    },
+    {
+      "type": "Div",
+      "range": "25:0-27:3",
+      "attr": [
+        "",
+        [
+          "callout-tip"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "Para",
+      "range": "26:0-27:3"
+    },
+    {
+      "type": "Div",
+      "range": "29:0-34:4",
+      "attr": [
+        "fig-panel",
+        [],
+        [
+          [
+            "layout-ncol",
+            "2"
+          ]
+        ]
+      ]
+    },
+    {
+      "type": "Div",
+      "range": "30:0-32:3",
+      "attr": [
+        "fig-a",
+        [],
+        []
+      ]
+    },
+    {
+      "type": "Para",
+      "range": "31:0-32:3"
+    },
+    {
+      "type": "Para",
+      "range": "33:0-34:4"
+    },
+    {
+      "type": "Para",
+      "range": "36:0-36:57"
+    },
+    {
+      "type": "Div",
+      "range": "38:0-40:3",
+      "attr": [
+        "",
+        [
+          "column-margin"
+        ],
+        []
+      ]
+    },
+    {
+      "type": "Para",
+      "range": "39:0-40:3"
+    },
+    {
+      "type": "Math",
+      "range": "42:0-44:13",
+      "data": {
+        "type": "DisplayMath",
+        "text": "\nE = mc^2\n"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "46:0-46:39"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "48:0-52:3",
+      "attr": [
+        "",
+        [
+          "{python"
+        ],
+        []
+      ],
+      "data": "#| label: fig-plot\n#| echo: false\nprint(\"hi\")"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "54:0-56:3",
+      "attr": [
+        "",
+        [
+          "r"
+        ],
+        []
+      ],
+      "data": "x <- 1"
+    },
+    {
+      "type": "RawBlock",
+      "range": "58:0-60:3",
+      "data": {
+        "format": "html",
+        "text": "<div>raw</div>\n"
+      }
+    },
+    {
+      "type": "CodeBlock",
+      "range": "62:0-64:3",
+      "attr": [
+        "",
+        [
+          "python"
+        ],
+        [
+          [
+            "filename",
+            "a.py"
+          ]
+        ]
+      ],
+      "data": "print(1)"
+    },
+    {
+      "type": "Para",
+      "range": "66:0-66:14"
+    },
+    {
+      "type": "CodeBlock",
+      "range": "68:0-70:3",
+      "attr": [
+        "",
+        [
+          "{r"
+        ],
+        []
+      ],
+      "data": "hidden_chunk()"
+    },
+    {
+      "type": "Para",
+      "range": "72:0-72:17"
+    },
+    {
+      "type": "Para",
+      "range": "74:0-75:26"
+    },
+    {
+      "type": "Para",
+      "range": "77:0-77:12"
+    },
+    {
+      "type": "Para",
+      "range": "79:0-79:10"
+    },
+    {
+      "type": "Para",
+      "range": "81:0-81:15"
+    },
+    {
+      "type": "Table",
+      "range": "83:0-85:17"
+    },
+    {
+      "type": "Para",
+      "range": "87:0-87:26"
+    },
+    {
+      "type": "Para",
+      "range": "89:0-93:17"
+    },
+    {
+      "type": "Para",
+      "range": "95:0-96:16"
+    },
+    {
+      "type": "BulletList",
+      "range": "98:0-100:7"
+    },
+    {
+      "type": "Para",
+      "range": "98:0-99:10"
+    },
+    {
+      "type": "Para",
+      "range": "99:0-100:7"
+    },
+    {
+      "type": "Para",
+      "range": "100:0-100:7"
+    },
+    {
+      "type": "OrderedList",
+      "range": "102:0-103:6"
+    },
+    {
+      "type": "Para",
+      "range": "102:0-103:6"
+    },
+    {
+      "type": "Para",
+      "range": "103:0-103:6"
+    },
+    {
+      "type": "BlockQuote",
+      "range": "105:0-105:21"
+    },
+    {
+      "type": "Para",
+      "range": "105:0-105:21"
+    },
+    {
+      "type": "HorizontalRule",
+      "range": "107:0-107:3"
+    },
+    {
+      "type": "Para",
+      "range": "109:0-109:25"
+    },
+    {
+      "type": "Para",
+      "range": "111:0-112:22"
+    },
+    {
+      "type": "Header",
+      "range": "114:0-114:55",
+      "attr": [
+        "",
+        [
+          "foo"
+        ],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Heading with code and link"
+      }
+    },
+    {
+      "type": "Header",
+      "range": "116:0-116:17",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 3,
+        "text": "Heading three"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "118:0-119:3"
+    },
+    {
+      "type": "Header",
+      "range": "121:0-121:27",
+      "attr": [
+        "",
+        [],
+        []
+      ],
+      "data": {
+        "level": 2,
+        "text": "Unclosed math at the end"
+      }
+    },
+    {
+      "type": "Para",
+      "range": "123:0-124:5"
+    }
+  ]
+}

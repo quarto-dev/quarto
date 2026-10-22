@@ -39,7 +39,7 @@ const expandOutline = async (uri: vscode.Uri) => {
 /**
  * Executes `listener(editor)` ONCE, the next time the user switches their active text editor to a qmd.
  */
-const onNextChangeActiveTextEditorToQmd = (listener: (editor: vscode.TextEditor) => any) => {
+const onNextChangeActiveTextEditorToQmd = (listener: (editor: vscode.TextEditor) => unknown) => {
   const listenForNextChangeToQmdDisposable =
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor?.document.languageId === "quarto") {

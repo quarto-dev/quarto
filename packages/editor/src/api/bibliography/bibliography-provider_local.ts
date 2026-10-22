@@ -75,7 +75,7 @@ export class BibliographyDataProviderLocal implements BibliographyDataProvider {
 
         // record the etag for future queries
         this.etag = result.etag;
-      } catch (e) {
+      } catch {
         // ignore error
       }
     }

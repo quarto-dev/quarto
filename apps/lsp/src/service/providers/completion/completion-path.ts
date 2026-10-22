@@ -7,7 +7,7 @@
 
 import * as l10n from '@vscode/l10n';
 import { dirname, extname, resolve } from 'path';
-import type { CancellationToken, CompletionContext } from 'vscode-languageserver-protocol';
+import type { CancellationToken, CompletionContext } from 'vscode-languageserver';
 import * as lsp from 'vscode-languageserver-types';
 import { URI, Utils } from 'vscode-uri';
 import { isExcludedPath, LsConfiguration } from '../../config';

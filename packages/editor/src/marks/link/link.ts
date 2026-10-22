@@ -79,15 +79,12 @@ const extension = (context: ExtensionContext): Extension => {
           toDOM(mark: Mark) {
             const linkClasses = 'pm-link pm-link-text-color';
 
-            let extraAttr: Record<string,unknown> = {};
-            if (linkAttr) {
-              extraAttr = pandocAttrToDomAttr({
-                ...mark.attrs,
-                classes: [...mark.attrs.classes, linkClasses],
-              });
-            } else {
-              extraAttr = { class: linkClasses };
-            }
+            const extraAttr: Record<string,unknown> = linkAttr
+              ? pandocAttrToDomAttr({
+                  ...mark.attrs,
+                  classes: [...mark.attrs.classes, linkClasses],
+                })
+              : { class: linkClasses };
 
             return [
               'a',

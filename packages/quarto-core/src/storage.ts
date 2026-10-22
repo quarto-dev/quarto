@@ -8,7 +8,7 @@
 import * as path from "node:path";
 import * as fs from "node:fs";
 
-import * as uuid from "uuid";
+import { randomUUID } from "node:crypto";
 
 import { quartoCacheDir } from './appdirs';
 
@@ -27,7 +27,7 @@ export function fileScratchStorage(file: string, scope: string, dir?: boolean) {
   const index = readFileScratchStorageIndex();
   let fileStorage = index[file];
   if (!fileStorage) {
-    fileStorage = uuid.v4();
+    fileStorage = randomUUID();
     index[file] = fileStorage;
     writeFileScratchStorageIndex(index);
   }

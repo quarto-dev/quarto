@@ -301,7 +301,7 @@ const cellOptionsSeparatorDecoration = vscode.window.createTextEditorDecorationT
 
 // document lines of the leading run of cell option comments in a cell
 // (#| for python/r, //| for js, etc. -- the same pattern used by the
-// tmLanguage rules generated in ../../syntaxes/build-lang.js, with
+// tmLanguage rules generated in ../../syntaxes/build-lang.mjs, with
 // optional leading indentation allowed)
 //
 // note: block-comment languages (e.g. /*| ... */ for c and css) are not

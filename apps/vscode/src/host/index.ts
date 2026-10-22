@@ -23,8 +23,10 @@ export interface HostWebviewPanel extends vscode.Disposable {
   readonly webview: vscode.Webview;
   readonly visible: boolean;
   reveal(viewColumn?: vscode.ViewColumn, preserveFocus?: boolean): void;
-  readonly onDidChangeViewState: vscode.Event<any>;
+  readonly onDidChangeViewState: vscode.Event<unknown>;
   readonly onDidDispose: vscode.Event<void>;
+  setStoppable?(stoppable: boolean): void;
+  readonly onDidRequestStop?: vscode.Event<void>;
 }
 
 export interface HostStatementRangeProvider {
@@ -125,5 +127,5 @@ function defaultExtensionHost(): ExtensionHost {
   };
 }
 
-const doNothing = (engine: MarkdownEngine): vscode.Disposable =>
+const doNothing = (_engine: MarkdownEngine): vscode.Disposable =>
   new vscode.Disposable(() => { });

@@ -202,7 +202,7 @@ function endOfDescriptionEnter(state: EditorState, dispatch: (tr: Transaction) =
   const tr = state.tr;
 
   // if the parent description is empty then delete it
-  let start = null;
+  let start: number;
   const descriptionNode = $head.node($head.depth - 1);
   if (descriptionNode.textContent.trim().length === 0) {
     start = $head.start($head.depth - 1) - 1;

@@ -125,7 +125,6 @@ export function userCommentAppendTransaction(schema: Schema, getId: () => string
           continue;
         }
 
-        // eslint-disable-next-line
         step.getMap().forEach((fromA, toA, fromB, toB) => {
 
           const removedBeginNodes: {[key: string]: NodeWithPos} = {};

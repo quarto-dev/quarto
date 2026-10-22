@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import { List, RowComponentProps, useListCallbackRef } from 'react-window';
 
 import { EditorUI } from '../../../api/ui-types';
 import { WidgetProps } from '../../../api/widgets/react';
@@ -39,7 +39,7 @@ export interface CitationSourceListProps extends WidgetProps {
   onConfirm: VoidFunction;
   focusPrevious?: () => void;
 
-  itemProvider: (props: ListChildComponentProps) => JSX.Element;
+  itemProvider: (props: RowComponentProps<CitationSourcePanelListItemData>) => React.ReactElement;
   itemHeight: number;
 
   status: CitationSourceListStatus;
@@ -49,7 +49,9 @@ export interface CitationSourceListProps extends WidgetProps {
 
 export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourceListProps>(
   (props: CitationSourceListProps, ref) => {
-    const fixedList = React.useRef<FixedSizeList>(null);
+    // The list's API is held in state so that the scroll effect below runs
+    // again once the list has mounted
+    const [list, setList] = useListCallbackRef(null);
 
     // Item height and consequently page height
     const itemsPerPage = Math.floor(props.height / props.itemHeight);
@@ -108,10 +110,11 @@ export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourc
       }
     };
 
-    // Ensure the item is scrolled into view
+    // Ensure the item is scrolled into view (scrollToRow throws on an
+    // out-of-range index, where react-window 1 clamped it)
     React.useEffect(() => {
-      if (props.selectedIndex > -1) {
-        fixedList.current?.scrollToItem(props.selectedIndex);
+      if (list && props.selectedIndex > -1 && props.selectedIndex < props.citations.length) {
+        list.scrollToRow({ index: props.selectedIndex, align: 'auto' });
       }
     });
 
@@ -131,50 +134,6 @@ export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourc
 
     const classes = ['pm-insert-citation-source-panel-list-container'].concat(props.classes || []).join(' ');
     switch (props.status) {
-      case CitationSourceListStatus.default:
-        if (props.citations.length > 0) {
-          return (
-            <div
-              tabIndex={0}
-              onKeyDown={handleListKeyDown}
-              onFocus={onFocus}
-              onBlur={onBlur}
-              ref={ref}
-              className={classes}
-            >
-              <FixedSizeList
-                className="pm-insert-citation-source-panel-list"
-                height={props.height}
-                width="100%"
-                itemCount={props.citations.length}
-                itemSize={props.itemHeight}
-                itemData={{
-                  selectedIndex: props.selectedIndex,
-                  onSelectedIndexChanged: props.onSelectedIndexChanged,
-                  citations: props.citations,
-                  citationsToAdd: props.citationsToAdd,
-                  onAddCitation: props.onAddCitation,
-                  onRemoveCitation: props.onRemoveCitation,
-                  onConfirm: props.onConfirm,
-                  showSeparator: true,
-                  showSelection: true,
-                  preventFocus: true,
-                  ui: props.ui,
-                }}
-                ref={fixedList}
-              >
-                {props.itemProvider}
-              </FixedSizeList>
-            </div>
-          );
-        } else {
-          return (
-            <div className={classes} style={{ height: props.height + 'px' }} ref={ref}>
-              <div className="pm-insert-citation-source-panel-list-noresults-text">{props.statusMessage}</div>
-            </div>
-          );
-        }
-
       case CitationSourceListStatus.inProgress:
         return (
           <div className={classes} style={{ height: props.height + 'px' }} ref={ref}>
@@ -216,13 +175,13 @@ export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourc
               ref={ref}
               className={classes}
             >
-              <FixedSizeList
+              <List
                 className="pm-insert-citation-source-panel-list"
-                height={props.height}
-                width="100%"
-                itemCount={props.citations.length}
-                itemSize={props.itemHeight}
-                itemData={{
+                style={{ height: props.height, width: '100%' }}
+                rowCount={props.citations.length}
+                rowHeight={props.itemHeight}
+                rowComponent={props.itemProvider}
+                rowProps={{
                   selectedIndex: props.selectedIndex,
                   onSelectedIndexChanged: props.onSelectedIndexChanged,
                   citations: props.citations,
@@ -235,10 +194,8 @@ export const CitationSourceList = React.forwardRef<HTMLDivElement, CitationSourc
                   preventFocus: true,
                   ui: props.ui,
                 }}
-                ref={fixedList}
-              >
-                {props.itemProvider}
-              </FixedSizeList>
+                listRef={setList}
+              />
             </div>
           );
         } else {

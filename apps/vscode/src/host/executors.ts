@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { Uri, commands, window, extensions, Range } from "vscode";
+import { Uri, commands, window, extensions, Extension, Range } from "vscode";
 
 import semver from "semver";
 import { TextDocument } from "vscode";
@@ -128,7 +128,7 @@ const csharpCellExecutor: VSCodeCellExecutor = {
   requiredExtension: ["ms-dotnettools.dotnet-interactive-vscode"],
   requiredExtensionName: "Polyglot Notebooks",
   requiredVersion: "1.0.55", // Adjust minimum version as needed
-  execute: async (blocks: string[], editorUri?: Uri) => {
+  execute: async (blocks: string[], _editorUri?: Uri) => {
     const extension = extensions.getExtension("ms-dotnettools.dotnet-interactive-vscode");
     if (extension) {
       if (!extension.isActive) {
@@ -289,7 +289,7 @@ function validateRequiredExtension(
 ) {
   if (executor.requiredExtension) {
     const extensionName = executor.requiredExtensionName;
-    let extension: any;
+    let extension: Extension<unknown> | undefined;
     for (const reqExtension of executor.requiredExtension) {
       extension = extensions.getExtension(reqExtension);
       if (extension) {

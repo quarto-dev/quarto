@@ -145,12 +145,12 @@ function editorHostMethods(host: VSCodeVisualEditorHost): Record<string, JsonRpc
     [VSC_VEH_NavigateToFile]: args => voidPromise(host.navigateToFile(args[0])),
     [VSC_VEH_ResolveImageUris]: args => host.resolveImageUris(args[0]),
     [VSC_VEH_ResolveBase64Images]: args => host.resolveBase64Images!(args[0]),
-    [VSC_VEH_SelectImage]: args => host.selectImage!()
+    [VSC_VEH_SelectImage]: () => host.selectImage!()
   };
   return methods;
 }
 
-const voidPromise = (ret: void) => Promise.resolve();
+const voidPromise = (_ret: void) => Promise.resolve();
 
 
 function webviewPanelPostMessageTarget(webviewPanel: WebviewPanel): JsonRpcPostMessageTarget {

@@ -3,7 +3,6 @@ import * as assert from "assert";
 import { readOrCreateSnapshot, openAndShowExamplesTextDocument } from "./test-utils";
 import { MarkdownEngine } from "../markdown/engine";
 import { virtualDoc, VirtualDocStyle } from "../vdoc/vdoc";
-import path from "path";
 
 suite("Virtual documents", function () {
   const engine = new MarkdownEngine();

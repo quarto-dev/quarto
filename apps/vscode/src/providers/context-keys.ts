@@ -63,7 +63,7 @@ export function activateContextKeySetter(
   );
 
   // set context keys on changes to the document (if it's active)
-  vscode.workspace.onDidChangeTextDocument(event => {
+  vscode.workspace.onDidChangeTextDocument(() => {
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {
       // TODO: this debounce is being created and called immediately, which is not correct.

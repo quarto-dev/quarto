@@ -24,7 +24,7 @@ const ui: EditorUI = {
   dialogs: {
   } as unknown as EditorDialogs,
   display: {
-    openURL: (url: string) => {
+    openURL: (_url: string) => {
       // intentionally left blank
     }
   },
@@ -33,10 +33,10 @@ const ui: EditorUI = {
 };
 
 const events: EditorEvents = {
-  subscribe: (event, handler) => {
+  subscribe: (_event, _handler) => {
     return () => undefined;
   },
-  emit: (event: EditorEvent) => {
+  emit: (_event: EditorEvent) => {
     // do nothing
   }
 };

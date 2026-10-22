@@ -111,7 +111,7 @@ function imageDrop(ui: EditorUI) {
 
 function handleImageDataTransfer(event: Event, dataTransfer: DataTransfer, view: EditorView, pos: number, ui: EditorUI) {
   // array of uris
-  let uris: string[] | null = null;
+  let uris: string[] | null;
 
   // check for files w/ path (vscode provides full path in undocumented 'path' property)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

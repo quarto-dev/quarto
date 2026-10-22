@@ -4,14 +4,13 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import vscode, {
+import {
   Uri,
   WebviewPanel,
   window,
   ViewColumn,
   EventEmitter,
   ExtensionContext,
-  WebviewPanelOnDidChangeViewStateEvent,
 } from "vscode";
 
 import { Disposable } from "../core/dispose";
@@ -68,6 +67,22 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     }
   }
 
+  /**
+   * Shows or hides the stop button for the preview, including on panels
+   * created later. Only Positron's Viewer has a stop button.
+   */
+  public setStoppable(stoppable: boolean) {
+    this.stoppable_ = stoppable;
+    this.activeView_?.webviewPanel().setStoppable?.(stoppable);
+  }
+
+  /**
+   * Closes the preview, if one is showing.
+   */
+  public closeWebview() {
+    this.activeView_?.dispose();
+  }
+
   public revealWebview() {
     if (this.activeView_) {
       this.activeView_.reveal();
@@ -116,6 +131,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
       }
     );
 
+    webview.setStoppable?.(this.stoppable_);
     const quartoWebview = new this.webviewType_(context, state, webview);
 
     return quartoWebview;
@@ -130,6 +146,9 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
     view.webviewPanel().onDidChangeViewState(() => {
       this.onViewStateChanged();
     });
+    view.webviewPanel().onDidRequestStop?.(() => {
+      this.onDidRequestStop_.fire();
+    });
   }
 
   public dispose() {
@@ -137,6 +156,7 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
       this.activeView_.dispose();
       this.activeView_ = undefined;
     }
+    this.onDidRequestStop_.dispose();
     let item: Disposable | undefined;
     while ((item = this.disposables_.pop())) {
       item.dispose();
@@ -146,6 +166,12 @@ export class QuartoWebviewManager<T extends QuartoWebview<S>, S> {
   protected readonly disposables_: Disposable[] = [];
 
   private onShow_?: () => void;
+  private stoppable_ = false;
+
+  private readonly onDidRequestStop_ = new EventEmitter<void>();
+
+  /** Fired when the user clicks the Viewer's stop button (Positron only). */
+  public readonly onDidRequestStop = this.onDidRequestStop_.event;
   private readonly extensionUri_: Uri;
 }
 

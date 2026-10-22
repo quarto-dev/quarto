@@ -1,0 +1,24 @@
+---
+title: "Semantic tokens only on code lines"
+---
+
+# Heading
+
+A paragraph.
+
+```{python}
+# first cell
+x = 1
+```
+
+Prose between cells.
+
+```{python}
+# second cell
+y = 2
+```
+
+```{r}
+# r cell
+z <- 3
+```

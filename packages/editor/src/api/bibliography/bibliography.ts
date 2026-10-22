@@ -4,7 +4,9 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import Fuse from 'fuse.js';
+import { Node as ProsemirrorNode } from 'prosemirror-model';
+
+import Fuse, { type FuseOptionKeyObject } from 'fuse.js';
 import { PandocServer } from '../pandoc';
 
 import { EditorUI } from '../ui-types';
@@ -101,7 +103,7 @@ export interface BibliographySourceWithCollections extends BibliographySource {
 
 // The fields and weights that will indexed and searched
 // when searching bibliographic sources
-const kFields: Fuse.FuseOptionKeyObject<void>[] = [
+const kFields: FuseOptionKeyObject<void>[] = [
   { name: 'id', weight: 30 },
   { name: 'author.family', weight: 15 },
   { name: 'author.literal', weight: 15 },
@@ -336,7 +338,7 @@ export class BibliographyManager {
       // grow to 270ms to search for 20 character string
       // grow to 1060ms to search for 40 character string
       const searchResults = this.searchIndex.search(query, { ...kSearchOptions, limit });
-      const items = searchResults.map((result: { item: BibliographySourceWithCollections }) => result.item);
+      const items = searchResults.map((result: { item: BibliographySourceWithCollections; }) => result.item);
 
       // Filter out any non local items if this isn't a writable bibliography
       const filteredItems = this.allowsWrites()
@@ -358,7 +360,7 @@ export class BibliographyManager {
           [field.name as string]: query,
         };
       }
-      
+
     });
     const q = {
       $and: [
@@ -371,7 +373,7 @@ export class BibliographyManager {
 
     if (this.searchIndex) {
       const searchResults = this.searchIndex.search(q, { limit });
-      return searchResults.map((result: { item: BibliographySourceWithCollections }) => result.item);
+      return searchResults.map((result: { item: BibliographySourceWithCollections; }) => result.item);
     } else {
       return [];
     }
@@ -386,13 +388,13 @@ export class BibliographyManager {
   ): BibliographySourceWithCollections[] {
     const orFields = kFields.flatMap(field => {
       if (Array.isArray(field.name)) {
-        return field.name.map(name => ( { [name]: query }));
+        return field.name.map(name => ({ [name]: query }));
       } else {
         return {
           [field.name as string]: query,
         };
       }
-      
+
     });
     const q = {
       $and: [
@@ -410,7 +412,7 @@ export class BibliographyManager {
 
     if (this.searchIndex) {
       const searchResults = this.searchIndex.search(q, { limit });
-      return searchResults.map((result: { item: BibliographySourceWithCollections }) => result.item);
+      return searchResults.map((result: { item: BibliographySourceWithCollections; }) => result.item);
     } else {
       return [];
     }

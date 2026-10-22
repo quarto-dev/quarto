@@ -22,7 +22,6 @@ import { withZoteroDb } from "./db";
 import { equalsIgnoreCase } from "core";
 import { resolveCslJsonCheaterKeys } from "../util";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollectionSource {
  
   // resolve data dir
@@ -112,7 +111,6 @@ export function zoteroLocalCollectionSource(dataDir?: string) : ZoteroCollection
       
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getActiveCollectionSpecs(collections: string[]): Promise<ZoteroResult> {
       if (dataDir) {
 
@@ -370,16 +368,14 @@ function transformValue(cslFieldName: string, value: string) {
     const date : CSLDate = {};
     const spacePos = value.indexOf(' ');
     const parts = value.substring(0, spacePos !== -1 ? spacePos : undefined);
-    let raw = "";
-    
+
     // If the left 'dateParts' doesn't represent the whole string, then there
     // is also a raw value. Split the string and capture the right side value
     // and save that as the raw value
     if (parts.length < value.length) {
       const rawPosition = value.indexOf(' ');
       if (rawPosition !== -1) {
-        raw = value.substring(rawPosition+1);
-        date.raw = raw;
+        date.raw = value.substring(rawPosition+1);
       }
     }
 

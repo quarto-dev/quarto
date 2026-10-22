@@ -64,7 +64,7 @@ export function languageServiceWorkspace(
       documentCache.set(resource, doc);
       return doc;
 
-    } catch (e) {
+    } catch {
       return undefined;
     }
   }

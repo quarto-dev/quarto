@@ -22,7 +22,6 @@ import {
 
 import debounce from "lodash.debounce";
 
-import { MarkdownEngine } from "../../markdown/engine";
 import {
   createRenderCacheKey,
   RenderCacheKey,

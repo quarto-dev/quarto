@@ -8,8 +8,6 @@ import React, { useContext } from 'react';
 
 import { MenuDivider } from '@fluentui/react-components';
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { CommandManagerContext } from './CommandManager';
 import { Command } from './commands';
 import { Menu } from '../menu/Menu';
@@ -47,7 +45,7 @@ export const CommandToolbarMenu: React.FC<CommandToolbarMenuProps> = (props) => 
     let selected = '';
     const menuItems = commands.map(command => {
       if (command === kSeparator) {
-        return <MenuDivider key={uuidv4()}/>;
+        return <MenuDivider key={crypto.randomUUID()}/>;
       } else {
         if (command.isActive()) {
           selected = command.menuText;

@@ -119,8 +119,12 @@ export async function executeSelectionInteractive(executor: CellExecutor) {
   }
 }
 
+// languages whose cell options are written as `#|` comments (other languages
+// use their own comment characters, e.g. `//|` for csharp or `*|` for stata)
+const kYamlHashOptionLanguages = ["python", "r", "julia", "bash", "sh", "shell"];
+
 function hasYamlHashOptions(language: string) {
-  return ["python", "r", "julia", "bash", "sh", "shell"];
+  return kYamlHashOptionLanguages.includes(language);
 }
 
 function isYamlHashOption(line: string) {

@@ -7,10 +7,14 @@
   "types": "./src/index.ts",
   "dependencies": {
     "core": "*",
-    "jayson": "^4.0.0",
     "tsconfig": "*",
-    "typescript": "^4.5.2",
-    "vscode-languageclient": "^8.1.0",
-    "vscode-languageserver": "^8.1.0"
+    "vscode-languageclient": "^10.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0",
+    "eslint-config-custom-server": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
   }
 }

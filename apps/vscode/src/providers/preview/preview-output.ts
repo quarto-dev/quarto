@@ -48,7 +48,8 @@ export class PreviewOutputSink {
       if (fs.existsSync(this.outputFile_)) {
         fs.unlinkSync(this.outputFile_);
       }
-    } catch (e) {
+    } catch {
+      // best-effort cleanup
     } finally {
       this.lastModified_ = 0;
     }

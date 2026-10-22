@@ -4,7 +4,7 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-import { NodeArray, RangeArray, NameDictObject, TextNodeObject, NodeObject, MarkObject } from 'biblatex-csl-converter';
+import { NodeArray, RangeArray, NameDictObject, TextNodeObject, NodeObject, MarkObject } from '../bibliography/bibliojson-types';
 import { FieldMap } from './fields';
 import { typeMapping } from './types';
 import { FormattingTags } from './formatting';
@@ -184,7 +184,7 @@ const sortedKeys = (fields: { [key: string]: string }) => {
   keySortOrder.doi = pos++;
   keySortOrder.url = pos++;
   keySortOrder.abstract = pos++;
-  keySortOrder.note = pos++;
+  keySortOrder.note = pos;
 
   const keys = Object.keys(fields);
   const sorted = keys.sort((a, b) => {

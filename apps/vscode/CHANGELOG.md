@@ -3,6 +3,7 @@
 ## 1.140.0 (Unreleased)
 
 - In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed. They now close when focus moves elsewhere in the window or the editor is scrolled, as do the completion popups for citations, cross references and the `/` insert menu (<https://github.com/quarto-dev/quarto/pull/1204>).
+- In the visual editor, the equation preview popup now follows its equation again after the window or editor pane is resized. Previously it stayed in place until the next edit or cursor move (<https://github.com/quarto-dev/quarto/pull/1204>).
 
 ## 1.139.0 (Release on 2026-10-20)
 

@@ -2,6 +2,8 @@
 
 ## 1.140.0 (Unreleased)
 
+- Fixed a bug where pasting a DOI after `@` in the visual editor did not offer to insert a citation on Windows (or, for plain-text pastes, on any platform) (<https://github.com/quarto-dev/quarto/pull/1060>).
+
 ## 1.139.0 (Release on 2026-10-20)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).

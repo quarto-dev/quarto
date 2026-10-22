@@ -5,6 +5,7 @@
  */
 
 import { EditorUIImages } from '../api/ui-images';
+import { EditorUI } from '../api/ui-types';
 
 import copyImage from './images/copy.png';
 import propertiesImage from './images/properties.png';
@@ -307,6 +308,26 @@ export function defaultEditorUIImages(): EditorUIImages {
     widgets: {
       tag_delete: tagDelete,
       tag_edit: tagEdit,
+    },
+  };
+}
+
+// Merge the default images into the images provided by the host
+export function editorUIWithDefaultImages(ui: EditorUI): EditorUI {
+  const defaultImages = defaultEditorUIImages();
+  return {
+    ...ui,
+    images: {
+      ...defaultImages,
+      ...ui.images,
+      omni_insert: {
+        ...defaultImages.omni_insert,
+        ...ui.images?.omni_insert,
+      },
+      citations: {
+        ...defaultImages.citations,
+        ...ui.images?.citations,
+      },
     },
   };
 }

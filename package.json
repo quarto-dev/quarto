@@ -16,7 +16,7 @@
     "build-vscode": "turbo run build --filter quarto...",
     "test-vscode": "cd apps/vscode && npm test --",
     "test-positron": "cd apps/vscode && npm run test-positron --",
-    "test-packages": "turbo run test --filter='./packages/*' --filter=quarto-vscode-markdownit",
+    "test-packages": "turbo run test --filter='./packages/*' --filter=quarto-vscode-markdownit --filter=quarto-lsp",
     "install-vscode": "cd apps/vscode && npm run install-vscode",
     "install-positron": "cd apps/vscode && npm run install-positron",
     "lint": "turbo run lint",

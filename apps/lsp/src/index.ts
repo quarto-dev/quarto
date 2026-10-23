@@ -9,7 +9,6 @@ import path from "path";
 import {
   ClientCapabilities,
   Definition,
-  Disposable,
   DocumentLink,
   DocumentSymbol,
   DocumentSymbolRequest,
@@ -39,6 +38,7 @@ import { middlewareCapabilities, middlewareRegister } from "./middleware";
 import { createLanguageService, IMdLanguageService } from "./service";
 import { initializeQuarto } from "./quarto";
 import { registerDiagnostics } from "./diagnostics";
+import { documentSymbolRegistrar } from "./symbol-registration";
 
 
 
@@ -306,21 +306,25 @@ connection.onInitialized(async () => {
   // dynamically register the document symbol provider now that `mdLs` exists
   // so the client only learns about the capability once we can actually serve
   // it (avoids the cold-start race where the client requests symbols, caches
-  // an empty response, and never re-queries on its own). Re-register on every
-  // config change so the client re-queries symbols with the new shape; the
-  // VS Code extension restores outline expansion state after the re-query.
-  let documentSymbolRegistration: Disposable | undefined;
-  const registerDocumentSymbolProvider = async () => {
-    documentSymbolRegistration?.dispose();
-    documentSymbolRegistration = await connection.client.register(
+  // an empty response, and never re-queries on its own). Re-register when
+  // `showCodeCellsInOutline` changes so the client re-queries symbols with the
+  // new shape; the VS Code extension restores outline expansion state after
+  // the re-query.
+  const symbolRegistrar = documentSymbolRegistrar(
+    () => connection.client.register(
       DocumentSymbolRequest.type,
       { documentSelector: null }
-    );
-  };
-  await registerDocumentSymbolProvider();
-  configManager.onDidChangeConfiguration(() => {
-    registerDocumentSymbolProvider();
+    ),
+    error => logger.logError(`Document symbol registration failed: ${error}`)
+  );
+  // Listen before the first update so a change that arrives while it is in
+  // flight is queued behind it rather than missed.
+  configManager.onDidChangeConfiguration(settings => {
+    symbolRegistrar.update(settings.quarto.symbols.showCodeCellsInOutline);
   });
+  await symbolRegistrar.update(
+    configManager.getSettings().quarto.symbols.showCodeCellsInOutline
+  );
 
   // signal that `mdLs` is now ready to serve requests:
   // handlers like document symbols, folding ranges, etc will now proceed

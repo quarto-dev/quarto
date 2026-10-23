@@ -73,9 +73,6 @@ class CompletionPlugin extends Plugin<CompletionState> {
   // serialize async completion requests
   private completionQueue = new PromiseQueue();
 
-  // events we need to unsubscribe from
-  private readonly scrollUnsubscribe: VoidFunction;
-
   constructor(
     handlers: readonly CompletionHandler[],
     inputRuleFilter: MarkInputRuleFilter,
@@ -145,27 +142,35 @@ class CompletionPlugin extends Plugin<CompletionState> {
         },
       },
 
-      view: () => ({
-        update: (view: EditorView) => {
-          // increment version
-          this.version++;
+      view: () => {
+        // hide completions when we scroll or the focus changes. Subscribed per
+        // plugin view (see InsertSymbolPlugin) so that the subscriptions survive
+        // plugin view recreation.
+        window.document.addEventListener('focusin', this.clearCompletions);
+        const scrollUnsubscribe = events.subscribe(ScrollEvent, this.clearCompletions);
 
-          // set view
-          this.view = view;
+        return {
+          update: (view: EditorView) => {
+            // increment version
+            this.version++;
 
-          // update completions
-          this.updateCompletions(view, true);
-        },
+            // set view
+            this.view = view;
 
-        destroy: () => {
-          // unsubscribe from events
-          this.scrollUnsubscribe();
-          window.document.removeEventListener('focusin', this.clearCompletions);
+            // update completions
+            this.updateCompletions(view, true);
+          },
 
-          // tear down the popup
-          this.clearCompletions();
-        },
-      }),
+          destroy: () => {
+            // unsubscribe from events
+            scrollUnsubscribe();
+            window.document.removeEventListener('focusin', this.clearCompletions);
+
+            // tear down the popup
+            this.clearCompletions();
+          },
+        };
+      },
 
       props: {
         decorations: (state: EditorState) => {
@@ -246,10 +251,8 @@ class CompletionPlugin extends Plugin<CompletionState> {
     // capture reference to ui
     this.ui = ui;
 
-    // hide completions when we scroll or the focus changes
+    // bind once so the listeners registered in view() can be removed again
     this.clearCompletions = this.clearCompletions.bind(this);
-    this.scrollUnsubscribe = events.subscribe(ScrollEvent, this.clearCompletions);
-    window.document.addEventListener('focusin', this.clearCompletions);
   }
 
   private updateCompletions(view: EditorView, resetSelection: boolean) {

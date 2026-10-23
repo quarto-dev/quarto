@@ -35,15 +35,19 @@ export class MathPopupPlugin extends Plugin {
   private popup: HTMLElement | null = null;
   private lastRenderedMath: string | null = null;
 
-  private readonly updatePopupTimer: number;
-
-  private scrollUnsubscribe: VoidFunction;
-  private resizeUnsubscribe: VoidFunction;
-
   constructor(ui: EditorUI, math: EditorMath, events: EditorEvents, onHover: boolean) {
     super({
       key,
       view: () => {
+        // update popup for resize, scrolling, as well as every 100ms to cover reflowing
+        // of the document as a result of latex math being shown/hidden (will effectively
+        // be a no-op if the math text and document layout / scroll position hasn't changed).
+        // Set up per plugin view (see InsertSymbolPlugin) so that they survive plugin
+        // view recreation, which would otherwise tear them down for good in destroy.
+        const updatePopupTimer = window.setInterval(this.updatePopup, 100);
+        const scrollUnsubscribe = events.subscribe(ScrollEvent, () => this.updatePopup());
+        const resizeUnsubscribe = events.subscribe(ResizeEvent, () => this.updatePopup());
+
         return {
           update: debounce(
             (view: EditorView) => {
@@ -54,9 +58,9 @@ export class MathPopupPlugin extends Plugin {
             { leading: true, trailing: true },
           ),
           destroy: () => {
-            clearInterval(this.updatePopupTimer);
-            this.scrollUnsubscribe();
-            this.resizeUnsubscribe();
+            clearInterval(updatePopupTimer);
+            scrollUnsubscribe();
+            resizeUnsubscribe();
             this.closePopup();
           },
         };
@@ -83,13 +87,8 @@ export class MathPopupPlugin extends Plugin {
     this.ui = ui;
     this.math = math;
 
-    // update popup for resize, scrolling, as well as every 100ms to cover reflowing
-    // of the document as a result of latex math being shown/hidden (will effectively
-    // be a no-op if the math text and  document layout / scroll position hasn't changed)
+    // bind once so the timer registered in view() calls with the right this
     this.updatePopup = this.updatePopup.bind(this);
-    this.updatePopupTimer = window.setInterval(this.updatePopup, 100);
-    this.scrollUnsubscribe = events.subscribe(ScrollEvent, () => this.updatePopup());
-    this.resizeUnsubscribe = events.subscribe(ResizeEvent, () => this.updatePopup());
   }
 
   private updatePopup($mousePos?: ResolvedPos) {

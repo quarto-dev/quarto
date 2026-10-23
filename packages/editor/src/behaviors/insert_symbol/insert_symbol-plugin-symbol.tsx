@@ -23,7 +23,9 @@ const extension = (context: ExtensionContext): Extension => {
   const { ui, events } = context;
   return {
     commands: () => {
-      return [new ProsemirrorCommand(EditorCommandId.Symbol, [], performInsertSymbol(key), symbolOmniInsert(ui))];
+      // The popup takes focus itself once it mounts, so don't refocus the
+      // editor after the command (keepFocus is false).
+      return [new ProsemirrorCommand(EditorCommandId.Symbol, [], performInsertSymbol(key), symbolOmniInsert(ui), false)];
     },
     plugins: () => {
       return [new InsertSymbolPlugin(key, new UnicodeSymbolDataProvider(), ui, events)];
@@ -38,6 +40,10 @@ function symbolOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Unicode symbol / special character'),
     group: OmniInsertGroup.Content,
     priority: 6,
+    // The popup takes focus itself once it mounts, so skip the editor refocus
+    // that otherwise follows an omni insert; focus would only bounce through
+    // the editor before landing in the popup's search input.
+    noFocus: true,
     image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.symbol_dark : ui.images.omni_insert?.symbol),
   };
 }

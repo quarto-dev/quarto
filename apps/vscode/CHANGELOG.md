@@ -2,6 +2,8 @@
 
 ## 1.140.0 (Unreleased)
 
+- The outline no longer shows duplicate "Quarto" groups for a document after settings change quickly, for example while VS Code starts (<https://github.com/quarto-dev/quarto/pull/1210>).
+
 ## 1.139.0 (Release on 2026-10-20)
 
 - The extension now requires VS Code 1.101 or later. Positron is unaffected (<https://github.com/quarto-dev/quarto/pull/1157>).

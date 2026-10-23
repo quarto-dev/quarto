@@ -34,25 +34,31 @@ export function documentSymbolRegistrar(
 
   return {
     async update(showCodeCellsInOutline: boolean) {
-      const previous = current;
-      current = (async () => {
-        const registration = await previous;
-        if (registration?.showCodeCellsInOutline === showCodeCellsInOutline) {
-          return registration;
-        }
-        try {
-          registration?.disposable.dispose();
-          return {
-            disposable: await register(showCodeCellsInOutline),
-            showCodeCellsInOutline
-          };
-        } catch (error) {
-          // Leave nothing registered so the next update retries.
-          onError(error);
-          return undefined;
-        }
-      })();
+      current = updateRegistration(current, showCodeCellsInOutline, register, onError);
       await current;
     }
   };
+}
+
+async function updateRegistration(
+  previous: Promise<Registration | undefined>,
+  showCodeCellsInOutline: boolean,
+  register: (showCodeCellsInOutline: boolean) => Promise<Disposable>,
+  onError: (error: unknown) => void
+): Promise<Registration | undefined> {
+  const registration = await previous;
+  if (registration?.showCodeCellsInOutline === showCodeCellsInOutline) {
+    return registration;
+  }
+  try {
+    registration?.disposable.dispose();
+    return {
+      disposable: await register(showCodeCellsInOutline),
+      showCodeCellsInOutline
+    };
+  } catch (error) {
+    // Leave nothing registered so the next update retries.
+    onError(error);
+    return undefined;
+  }
 }

@@ -40,7 +40,7 @@ function isEnabled(state: EditorState) {
 
 export class InsertSymbolPlugin extends Plugin<boolean> {
   private readonly ui: EditorUI;
-  private popup: { popup: HTMLElement, root: Root } | null = null;
+  private popup: { popup: HTMLElement, root: Root, hadFocus: boolean } | null = null;
   private dataProvider: SymbolDataProvider;
 
   constructor(pluginKey: PluginKey<boolean>, dataProvider: SymbolDataProvider, ui: EditorUI, events: EditorEvents) {
@@ -91,7 +91,7 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
       const root = createRoot(popup);
       root.render(this.insertSymbolPopup(view, [kHeight, kWidth]));
       window.document.body.appendChild(popup);
-      this.popup = { popup, root };
+      this.popup = { popup, root, hadFocus: false };
     }
   }
 
@@ -125,7 +125,17 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
   }
 
   private focusChanged() {
-    if (window.document.activeElement !== this.popup?.popup && !this.popup?.popup.contains(window.document.activeElement)) {
+    if (!this.popup) {
+      return;
+    }
+
+    // The host's menu may move focus as it closes (the Fluent menu used by
+    // VS Code and Positron refocuses its trigger button after the item's
+    // command runs), which lands before the popup focuses its search input.
+    // Ignore focus changes until the popup has held focus once.
+    if (this.popup.popup.contains(window.document.activeElement)) {
+      this.popup.hadFocus = true;
+    } else if (this.popup.hadFocus) {
       this.closePopup();
     }
   }

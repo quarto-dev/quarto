@@ -25,9 +25,8 @@ const extension = (context: ExtensionContext): Extension => {
   const { ui, events } = context;
   return {
     commands: () => {
-      // The popup takes focus itself once it mounts, and focusChanged closes it
-      // when focus lands outside of it. Refocusing the editor after the command
-      // would fire that before the popup has rendered, so keepFocus is false.
+      // The popup takes focus itself once it mounts, so don't refocus the
+      // editor after the command (keepFocus is false).
       return [new ProsemirrorCommand(EditorCommandId.Emoji, [], performInsertSymbol(key), emojiOmniInsert(ui), false)];
     },
     plugins: () => {

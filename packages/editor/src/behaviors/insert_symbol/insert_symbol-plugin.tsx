@@ -39,33 +39,44 @@ function isEnabled(state: EditorState) {
 }
 
 export class InsertSymbolPlugin extends Plugin<boolean> {
-  private readonly scrollUnsubscribe: VoidFunction;
   private readonly ui: EditorUI;
-  private popup: { popup: HTMLElement, root: Root } | null = null;
+  private popup: { popup: HTMLElement, root: Root, hadFocus: boolean } | null = null;
   private dataProvider: SymbolDataProvider;
 
   constructor(pluginKey: PluginKey<boolean>, dataProvider: SymbolDataProvider, ui: EditorUI, events: EditorEvents) {
     super({
       key: pluginKey,
-      view: () => ({
-        update: () => {
-          this.closePopup();
-        },
-        destroy: () => {
-          this.closePopup();
-          this.scrollUnsubscribe();
-          window.document.removeEventListener('onfocus', this.focusChanged);
-        },
-      }),
+      view: () => {
+        // Subscribe here rather than in the constructor: ProseMirror destroys
+        // and recreates plugin views whenever the state's plugin array
+        // changes identity (the initial setMarkdown does this), and destroy
+        // removes the listeners. Pairing add with remove keeps them live.
+        window.document.addEventListener('focusin', this.focusChanged);
+        const scrollUnsubscribe = events.subscribe(ScrollEvent, this.closePopup);
+
+        return {
+          update: (view: EditorView, prevState: EditorState) => {
+            // The realtime spelling plugin dispatches decoration-only
+            // transactions on a timer (100ms and 5s after the editor is first
+            // focused), so only treat a change to the document or selection as
+            // a reason to dismiss the popup.
+            if (!view.state.doc.eq(prevState.doc) || !view.state.selection.eq(prevState.selection)) {
+              this.closePopup();
+            }
+          },
+          destroy: () => {
+            this.closePopup();
+            scrollUnsubscribe();
+            window.document.removeEventListener('focusin', this.focusChanged);
+          },
+        };
+      },
     });
 
     this.dataProvider = dataProvider;
     this.ui = ui;
     this.closePopup = this.closePopup.bind(this);
-    this.scrollUnsubscribe = events.subscribe(ScrollEvent, this.closePopup);
-
     this.focusChanged = this.focusChanged.bind(this);
-    window.document.addEventListener('onfocus', this.focusChanged);
   }
 
   public showPopup(view: EditorView) {
@@ -80,7 +91,7 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
       const root = createRoot(popup);
       root.render(this.insertSymbolPopup(view, [kHeight, kWidth]));
       window.document.body.appendChild(popup);
-      this.popup = { popup, root };
+      this.popup = { popup, root, hadFocus: false };
     }
   }
 
@@ -114,7 +125,17 @@ export class InsertSymbolPlugin extends Plugin<boolean> {
   }
 
   private focusChanged() {
-    if (window.document.activeElement !== this.popup?.popup && !this.popup?.popup.contains(window.document.activeElement)) {
+    if (!this.popup) {
+      return;
+    }
+
+    // The host's menu may move focus as it closes (the Fluent menu used by
+    // VS Code and Positron refocuses its trigger button after the item's
+    // command runs), which lands before the popup focuses its search input.
+    // Ignore focus changes until the popup has held focus once.
+    if (this.popup.popup.contains(window.document.activeElement)) {
+      this.popup.hadFocus = true;
+    } else if (this.popup.hadFocus) {
       this.closePopup();
     }
   }

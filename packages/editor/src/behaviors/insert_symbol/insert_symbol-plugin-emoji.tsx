@@ -25,7 +25,9 @@ const extension = (context: ExtensionContext): Extension => {
   const { ui, events } = context;
   return {
     commands: () => {
-      return [new ProsemirrorCommand(EditorCommandId.Emoji, [], performInsertSymbol(key), emojiOmniInsert(ui))];
+      // The popup takes focus itself once it mounts, so don't refocus the
+      // editor after the command (keepFocus is false).
+      return [new ProsemirrorCommand(EditorCommandId.Emoji, [], performInsertSymbol(key), emojiOmniInsert(ui), false)];
     },
     plugins: () => {
       return [new InsertSymbolPlugin(key, new EmojiSymbolDataProvider(ui), ui, events)];
@@ -39,6 +41,10 @@ function emojiOmniInsert(ui: EditorUI) {
     description: ui.context.translateText('Image expressing idea, emotion, etc.'),
     group: OmniInsertGroup.Content,
     priority: 6,
+    // The popup takes focus itself once it mounts, so skip the editor refocus
+    // that otherwise follows an omni insert; focus would only bounce through
+    // the editor before landing in the popup's search input.
+    noFocus: true,
     image: () => (ui.prefs.darkMode() ? ui.images.omni_insert.emoji_dark : ui.images.omni_insert.emoji),
   };
 }

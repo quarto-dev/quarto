@@ -87,7 +87,7 @@ function isLatexCodeBlock(token: Token) {
 }
 
 const kInlineMathPattern = /\$([^ ].*?[^ ]?)\$/g;
-const kSingleLineDisplayMathPattern = /\$\$([^\n]+?)\$\$/;
+const kSingleLineDisplayMathPattern = /\$\$([^\n]+?)\$\$/g;
 
 function inlineMathRange(pos: Position, line: string, pattern: RegExp) {
   pattern.lastIndex = 0;

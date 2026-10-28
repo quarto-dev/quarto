@@ -8,7 +8,7 @@
   "dependencies": {
     "core": "*",
     "core-node": "*",
-    "markdown-it": "^15.0.2",
+    "markdown-it": "^15.0.3",
     "markdown-it-attrs": "^4.5.0",
     "semver": "^7.8.5",
     "tsconfig": "*",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@types/semver": "^7.8.0",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15"
   },

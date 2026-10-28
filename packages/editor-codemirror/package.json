@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/autocomplete": "^6.20.4",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-css": "^6.3.1",
@@ -27,7 +27,7 @@
     "@codemirror/lint": "^6.9.7",
     "@codemirror/search": "^6.7.2",
     "@codemirror/state": "^6.7.6",
-    "@codemirror/view": "^6.43.14",
+    "@codemirror/view": "^6.43.15",
     "@replit/codemirror-vscode-keymap": "^6.0.2",
     "codemirror": "^6.0.2",
     "core": "*",
@@ -37,7 +37,7 @@
     "@quarto/_tidyverse-errors": "*",
     "@quarto/_mapped-string": "*",
     "@quarto/_annotated-json": "*",
-    "markdown-it": "^15.0.2",
+    "markdown-it": "^15.0.3",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-gapcursor": "^1.4.1",
     "prosemirror-model": "^1.25.12",
@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-config-custom": "*",
     "tsx": "^4.23.15"
   },

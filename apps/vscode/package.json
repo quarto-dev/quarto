@@ -1541,7 +1541,7 @@
     "lodash.throttle": "^4.1.1",
     "markdown-it": "^15.0.2",
     "markdown-it-highlightjs": "^4.3.0",
-    "p-queue": "^9.3.3",
+    "p-queue": "^10.0.0",
     "picomatch": "^4.0.7",
     "@posit-dev/positron": "^0.2.11",
     "quarto-core": "*",

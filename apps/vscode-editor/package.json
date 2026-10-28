@@ -19,7 +19,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@fluentui/react-components": "^9.74.9",
+    "@fluentui/react-components": "^9.74.10",
     "core": "*",
     "core-browser": "*",
     "editor": "*",
@@ -29,8 +29,8 @@
     "editor-ui": "*",
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-redux": "^9.3.0",
     "ui-widgets": "*"
   },
@@ -40,9 +40,9 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/vscode-webview": "^1.57.5",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-config-custom": "*",
-    "sass": "^1.105.1",
+    "sass": "^1.106.0",
     "tsconfig": "*",
     "typescript": "~6.0.3",
     "vite": "^8.3.4",

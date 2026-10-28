@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "core": "*",
-    "markdown-it": "^15.0.2",
+    "markdown-it": "^15.0.3",
     "markdown-it-attrs": "^4.5.0",
     "markdown-it-deflist": "^4.0.0",
     "markdown-it-footnote": "^4.0.0",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@types/vscode-notebook-renderer": "^1.72.4",
     "@types/wcwidth": "^1.0.2",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-config-custom": "*",
     "tsconfig": "*",
     "tsx": "^4.23.15",

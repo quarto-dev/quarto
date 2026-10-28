@@ -11,7 +11,7 @@
     "tsconfig": "*"
   },
   "devDependencies": {
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-config-custom": "*"
   },
   "scripts": {

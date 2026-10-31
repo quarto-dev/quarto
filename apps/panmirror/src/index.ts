@@ -5,5 +5,5 @@
  */
 
 
-import { Editor, UITools } from 'editor';
-export default { Editor, UITools };
+import { Editor, UITools, InsertCitationDialog } from 'editor';
+export default { Editor, UITools, InsertCitationDialog };

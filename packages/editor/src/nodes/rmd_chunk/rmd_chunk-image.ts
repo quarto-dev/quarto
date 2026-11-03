@@ -84,7 +84,7 @@ function imagePreviewDecorations(state: EditorState, uiContext: EditorUIContext)
         rmdChunk.pos + rmdChunk.node.nodeSize,
         (view: EditorView, getPos: () => number | undefined) => {
           const container = window.document.createElement('div');
-          container.style.marginTop = '-1.5em'; // to bridge back to the codemirror block
+          container.style.marginTop = '-1.5em'; // to bridge back to the code block
           // which has a margin-block-end of 1em
           container.classList.add('pm-image-preview');
           container.classList.add('pm-block-border-color');

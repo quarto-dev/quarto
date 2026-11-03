@@ -43,6 +43,11 @@ const kQuartoEditorMarkdownReferences = "quarto.visualEditor.markdownReferences"
 const kQuartoEditorMarkdownReferenceLinks = "quarto.visualEditor.markdownReferenceLinks";
 
 const kMonitoredConfigurations = [
+  "editor.fontFamily",
+  "editor.fontWeight",
+  "editor.fontLigatures",
+  "editor.lineHeight",
+  "editor.letterSpacing",
   kEditorAutoClosingBrackets,
   kEditorRenderWhitespace,
   kEditorInsertSpaces,

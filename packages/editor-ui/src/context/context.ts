@@ -6,7 +6,7 @@
 
 import { JsonRpcRequestTransport, PromiseQueue } from 'core';
 
-import { codeMirrorExtension } from "editor-codemirror";
+import { monacoExtension } from "editor-monaco";
 
 import { 
   EditorDialogs, 
@@ -70,7 +70,7 @@ export function editorContext(providers: EditorProviders) : EditorContext {
     server: providers.server, 
     ui, 
     extensions: providers.extensions,
-    codeViewExtension: codeMirrorExtension 
+    codeViewExtension: monacoExtension 
   };
 
   return context;

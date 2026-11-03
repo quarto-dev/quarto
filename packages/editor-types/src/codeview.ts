@@ -15,6 +15,67 @@ export const kCodeViewPreviewDiagram = 'code_view_preview_diagram';
  * for calling [`codeViewDiagnostics` in custom.ts](../../../apps/lsp/src/custom.ts)
  */
 export const kCodeViewGetDiagnostics = 'code_view_get_diagnostics';
+export const kCodeViewGetColorTheme = 'code_view_get_color_theme';
+export const kCodeViewGetLanguages = 'code_view_get_languages';
+export const kCodeViewGetGrammar = 'code_view_get_grammar';
+export const kCodeViewGetEditorFont = 'code_view_get_editor_font';
+
+/**
+ * The font settings of the vscode source editor (editor.fontFamily etc.)
+ */
+export interface CodeViewEditorFont {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: string;
+  fontLigatures: boolean | string;
+  lineHeight: number;
+  letterSpacing: number;
+}
+
+/**
+ * A TextMate token color rule from a VS Code color theme
+ */
+export interface CodeViewTokenColor {
+  name?: string;
+  scope?: string | string[];
+  settings: {
+    foreground?: string;
+    background?: string;
+    fontStyle?: string;
+  };
+}
+
+/**
+ * The active VS Code color theme (resolved from the theme's json, including
+ * any themes it includes). `colors` are workbench color ids (e.g. "editor.background").
+ */
+export interface CodeViewColorTheme {
+  name: string;
+  type: "light" | "dark" | "hcDark" | "hcLight";
+  colors: Record<string, string>;
+  tokenColors: CodeViewTokenColor[];
+}
+
+/**
+ * A language contributed by a VS Code extension, along with the TextMate
+ * scope of its grammar (if it has one) and its language configuration
+ */
+export interface CodeViewLanguage {
+  id: string;
+  aliases: string[];
+  extensions: string[];
+  scopeName?: string;
+  configuration?: unknown;
+}
+
+/**
+ * The raw contents of a TextMate grammar (json or plist, see `path`)
+ */
+export interface CodeViewGrammar {
+  scopeName: string;
+  path: string;
+  content: string;
+}
 
 export type CodeViewExecute = "selection" | "cell" | "cell+advance" | "above" | "below";
 
@@ -63,4 +124,8 @@ export interface CodeViewServer {
   codeViewDiagnostics: (context: CodeViewCellContext) => Promise<LintItem[] | undefined>;
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
+  codeViewColorTheme: (themeId?: string) => Promise<CodeViewColorTheme | undefined>;
+  codeViewLanguages: () => Promise<CodeViewLanguage[]>;
+  codeViewGrammar: (scopeName: string) => Promise<CodeViewGrammar | undefined>;
+  codeViewEditorFont: () => Promise<CodeViewEditorFont>;
 }

@@ -1,0 +1,63 @@
+/*
+ * styles.css
+ *
+ * Copyright (C) 2026 by Posit Software, PBC
+ */
+
+.pm-monaco-editor {
+  position: relative;
+}
+
+.pm-monaco-editor .pm-monaco-editor-container {
+  width: 100%;
+}
+
+/* per-editor background (monaco's theme background is global) */
+.pm-monaco-editor.pm-monaco-editor-background .monaco-editor,
+.pm-monaco-editor.pm-monaco-editor-background .monaco-editor .monaco-editor-background,
+.pm-monaco-editor.pm-monaco-editor-background .monaco-editor .margin {
+  background-color: var(--pm-code-background);
+}
+
+/* the first line of a chunk is metadata (e.g. {r}) and is rendered lighter */
+.pm-monaco-editor .pm-monaco-first-line-meta {
+  opacity: 0.6;
+}
+
+/* no extraneous monaco ui: the find widget is pulled in by the multicursor
+   feature (cmd+d) and would otherwise appear inside the cell */
+.pm-monaco-editor .monaco-editor .find-widget,
+.pm-monaco-editor .monaco-editor .quick-input-widget {
+  display: none !important;
+}
+
+/* the editor never scrolls itself; the outer document does */
+.pm-monaco-editor .monaco-editor,
+.pm-monaco-editor .monaco-editor .overflow-guard {
+  overflow: visible;
+}
+
+.pm-monaco-editor .pm-monaco-toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9;
+  margin-top: 3px;
+  margin-right: 3px;
+}
+
+.pm-monaco-editor .pm-monaco-toolbar .codicon {
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pm-codeview-run-button {
+  margin-left: 9px;
+  font-weight: 500 !important;
+}
+
+.pm-codeview-run-other-button {
+  margin-left: 6px;
+  opacity: 0.7;
+}

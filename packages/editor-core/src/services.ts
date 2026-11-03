@@ -39,7 +39,11 @@ import {
   CodeViewActiveBlockContext,
   DiagramState,
   CodeViewCellContext,
-  kCodeViewGetDiagnostics
+  kCodeViewGetDiagnostics,
+  kCodeViewGetColorTheme,
+  kCodeViewGetLanguages,
+  kCodeViewGetGrammar,
+  kCodeViewGetEditorFont
 } from "editor-types";
 
 
@@ -86,6 +90,18 @@ export function editorCodeViewJsonRpcServer(request: JsonRpcRequestTransport): C
     },
     codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
       return request(kCodeViewPreviewDiagram, [state, activate]);
+    },
+    codeViewColorTheme(themeId?: string) {
+      return request(kCodeViewGetColorTheme, [themeId]);
+    },
+    codeViewLanguages() {
+      return request(kCodeViewGetLanguages, []);
+    },
+    codeViewGrammar(scopeName: string) {
+      return request(kCodeViewGetGrammar, [scopeName]);
+    },
+    codeViewEditorFont() {
+      return request(kCodeViewGetEditorFont, []);
     },
   };
 }

@@ -34,7 +34,7 @@ export function selectAll(state: EditorState, dispatch?: (tr: Transaction) => vo
       }
       dispatch(tr);
       if (view) {
-        // we do this to escape from embedded editors e.g. codemirror
+        // we do this to escape from embedded editors e.g. monaco
         view.focus();
       }
     }

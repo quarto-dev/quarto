@@ -1,0 +1,33 @@
+{
+  "name": "editor-monaco",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "core": "*",
+    "editor": "*",
+    "editor-core": "*",
+    "editor-types": "*",
+    "lodash.debounce": "^4.0.8",
+    "monaco-editor": "^0.57.0",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2",
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-history": "^1.5.1",
+    "prosemirror-model": "^1.25.12",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.42.6",
+    "tsconfig": "*",
+    "vscode-languageserver-types": "^3.18.4"
+  },
+  "devDependencies": {
+    "@types/lodash.debounce": "^4.0.9",
+    "eslint": "^10.13.0",
+    "eslint-config-custom": "*"
+  },
+  "scripts": {
+    "lint": "eslint src"
+  }
+}

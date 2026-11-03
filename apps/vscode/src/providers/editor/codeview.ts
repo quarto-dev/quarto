@@ -42,6 +42,7 @@ import { embeddedLanguage } from "../../vdoc/languages";
 import { virtualDocForCode } from "../../vdoc/vdoc";
 import { vdocCompletions } from "../../vdoc/vdoc-completion";
 import { MarkdownEngine } from "../../markdown/engine";
+import { activeColorTheme, contributedGrammar, contributedLanguages, editorFont } from "./theme";
 
 /**
  * In the host, this initializes functions that can be called by the client (the visual editor) for doing code cell things.
@@ -116,6 +117,18 @@ export function vscodeCodeViewServer(_engine: MarkdownEngine, document: TextDocu
         items: completions.map(vsCompletionItemToLsCompletionItem),
         isIncomplete: false
       };
+    },
+    async codeViewColorTheme(themeId?: string) {
+      return activeColorTheme(themeId);
+    },
+    async codeViewLanguages() {
+      return contributedLanguages();
+    },
+    async codeViewGrammar(scopeName: string) {
+      return contributedGrammar(scopeName);
+    },
+    async codeViewEditorFont() {
+      return editorFont(document);
     },
     async codeViewPreviewDiagram(state: DiagramState, activate: boolean) {
       commands.executeCommand("quarto.previewDiagram", { state, activate });

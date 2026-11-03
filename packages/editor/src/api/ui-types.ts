@@ -18,8 +18,12 @@ import {
   CodeViewActiveBlockContext,
   DiagramState,
   CodeViewCellContext,
-  LintItem
-} from 'editor-types';
+  LintItem,
+  CodeViewColorTheme,
+  CodeViewLanguage,
+  CodeViewGrammar,
+  CodeViewEditorFont
+} from "editor-types";
 
 export * from './spelling';
 export { SkinTone } from './emoji';
@@ -127,6 +131,10 @@ export interface EditorUICodeView {
   codeViewCompletions: (context: CodeViewCompletionContext) => Promise<CompletionList>;
   codeViewDiagnostics: (context: CodeViewCellContext) => Promise<LintItem[] | undefined>;
   codeViewPreviewDiagram: (state: DiagramState, activate: boolean) => Promise<void>;
+  codeViewColorTheme: (themeId?: string) => Promise<CodeViewColorTheme | undefined>;
+  codeViewLanguages: () => Promise<CodeViewLanguage[]>;
+  codeViewGrammar: (scopeName: string) => Promise<CodeViewGrammar | undefined>;
+  codeViewEditorFont: () => Promise<CodeViewEditorFont>;
 }
 
 export const kListSpacingTight = 'tight';

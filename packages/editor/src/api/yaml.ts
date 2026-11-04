@@ -157,21 +157,18 @@ export function yamlBlocksFromSource(source: YamlBlockSource): YamlBlock[] {
 
 // parse yaml blocks from their code (with or w/o enclosing ---)
 export function parseYamlBlocks(yamlBlocks: string[]): YamlBlock[] {
-  return yamlBlocks.map(yamlText => {
-    const yamlCode = stripYamlDelimeters(yamlText);
-    return { yamlCode, yaml: parseYaml(yamlCode) };
-  });
+  return yamlBlocks.map(parseYamlText);
 }
 
 export function parseYamlNodes(doc: ProsemirrorNode): ParsedYaml[] {
   const yamlNodes = yamlMetadataNodes(doc);
+  return yamlNodes.map<ParsedYaml>(node => ({ ...parseYamlText(node.node.textContent), node }));
+}
 
-  const parsedYamlNodes = yamlNodes.map<ParsedYaml>(node => {
-    const yamlText = node.node.textContent;
-    const yamlCode = stripYamlDelimeters(yamlText);
-    return { yamlCode, yaml: parseYaml(yamlCode), node };
-  });
-  return parsedYamlNodes;
+// parse a yaml block from its code (with or w/o enclosing ---)
+function parseYamlText(yamlText: string): YamlBlock {
+  const yamlCode = stripYamlDelimeters(yamlText);
+  return { yamlCode, yaml: parseYaml(yamlCode) };
 }
 
 function firstYamlNode(doc: ProsemirrorNode) {

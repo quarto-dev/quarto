@@ -41,7 +41,7 @@
     "thenby": "^1.4.1",
     "tlite": "^0.1.9",
     "transliteration": "^2.6.2",
-    "vscode-languageserver-types": "^3.18.4",
+    "vscode-languageserver-types": "^3.18.5",
     "zenscroll": "^4.0.2"
   },
   "devDependencies": {

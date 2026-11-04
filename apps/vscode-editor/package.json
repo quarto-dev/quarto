@@ -19,7 +19,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@fluentui/react-components": "^9.74.10",
+    "@fluentui/react-components": "^9.75.0",
     "core": "*",
     "core-browser": "*",
     "editor": "*",
@@ -31,7 +31,7 @@
     "lodash.throttle": "^4.1.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-redux": "^9.3.0",
+    "react-redux": "^9.3.1",
     "ui-widgets": "*"
   },
   "devDependencies": {
@@ -42,7 +42,7 @@
     "@types/vscode-webview": "^1.57.5",
     "eslint": "^10.13.0",
     "eslint-config-custom": "*",
-    "sass": "^1.106.0",
+    "sass": "^1.106.1",
     "tsconfig": "*",
     "typescript": "~6.0.3",
     "vite": "^8.3.5",

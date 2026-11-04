@@ -16,7 +16,7 @@
     "quarto-core": "*",
     "tmp": "^0.2.7",
     "tsconfig": "*",
-    "vscode-languageserver-types": "^3.18.4",
+    "vscode-languageserver-types": "^3.18.5",
     "vscode-uri": "^3.2.0"
   },
   "devDependencies": {

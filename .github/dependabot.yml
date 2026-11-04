@@ -16,7 +16,17 @@ updates:
     commit-message:
       prefix: "build"
     groups:
-      # All minor and patch updates in one PR. Majors get a PR each.
+      # The vscode-languageserver-node packages release together and share
+      # protocol, jsonrpc, and types dependencies. Bump them in one PR for all
+      # update types, so the lockfile keeps a single copy of each. This group
+      # must come before npm-minor-and-patch: Dependabot puts a dependency in
+      # the first group that matches it.
+      vscode-languageserver-node:
+        patterns:
+          - "vscode-languageclient"
+          - "vscode-languageserver*"
+          - "vscode-jsonrpc"
+      # All other minor and patch updates in one PR. Majors get a PR each.
       npm-minor-and-patch:
         patterns:
           - "*"

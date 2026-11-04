@@ -625,7 +625,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             <meta charset="UTF-8">
 
             <!-- Use a content security policy to only allow scripts that have a specific nonce. -->
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource} 'unsafe-inline'; img-src https: data: ${webview.cspSource}; font-src data: ${webview.cspSource};">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}' 'wasm-unsafe-eval'; worker-src blob:; style-src ${webview.cspSource} 'unsafe-inline'; img-src https: data: ${webview.cspSource}; font-src data: ${webview.cspSource};">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
             <link href="${stylesUri}" rel="stylesheet" />

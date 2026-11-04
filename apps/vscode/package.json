@@ -1528,6 +1528,7 @@
     "test-positron": "npm run build-test && node ./scripts/run-positron-tests.mjs"
   },
   "dependencies": {
+    "jsonc-parser": "^3.3.1",
     "axios": "^1.20.0",
     "core": "*",
     "core-node": "*",

@@ -13,6 +13,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
+    "editor-monaco": "*",
     "editor-core": "*",
     "editor-types": "*",
     "i18next": "^26.5.4",

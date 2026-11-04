@@ -44,11 +44,11 @@
   - see [package.json](./vscode/package.json) for declaration of commands
   - see [main.ts](./vscode/src/main.ts) for registration of command
 
-- Look for "behaviors" in ProseMirror, CodeMirror
+- Look for "behaviors" in ProseMirror, Monaco (`packages/editor-monaco`; the previous CodeMirror implementation is kept in `packages/editor-codemirror`)
   - arrow keys, ctrl+z, mouse click, etc.
 
 - [commands in Ace](packages/editor/src/optional/ace/ace.ts)
-  - used instead of CodeMirror for code cells in the Visual Editor in RStudio
+  - used instead of Monaco for code cells in the Visual Editor in RStudio
 
 ## Communication boundaries
 
@@ -129,20 +129,15 @@ which passes through `VisualEditorPovider`, `visualEditorClient`,
 ### Example: Getting diagnostics for YAML front matter
 
 For example in
-[diagnostics.ts](../packages/editor-codemirror/src/behaviors/diagnostics.ts)
+[diagnostics.ts](../packages/editor-monaco/src/behaviors/diagnostics.ts)
 
 ```ts
 const diagnostics = await getDiagnostics(cellContext, behaviorContext);
-if (!diagnostics) return;
-
-for (const error of diagnostics) {
-  underline(
-    cmView,
-    rowColumnToIndex(code, [error[kStartColumn], error[kStartRow]]),
-    rowColumnToIndex(code, [error[kEndColumn], error[kEndRow]]),
-    error.text,
-  );
+const model = editor.getModel();
+if (id !== requestId || !model || model.isDisposed()) {
+  return;
 }
+setMarkers(model, diagnostics || []);
 ```
 
 which passes through

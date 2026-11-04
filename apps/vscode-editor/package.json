@@ -24,6 +24,7 @@
     "core-browser": "*",
     "editor": "*",
     "editor-codemirror": "*",
+    "editor-monaco": "*",
     "editor-core": "*",
     "editor-types": "*",
     "editor-ui": "*",

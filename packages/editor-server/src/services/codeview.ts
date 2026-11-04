@@ -12,7 +12,11 @@ import {
   kCodeViewExecute,
   kCodeViewPreviewDiagram,
   kCodeViewAssist,
-  kCodeViewGetDiagnostics
+  kCodeViewGetDiagnostics,
+  kCodeViewGetColorTheme,
+  kCodeViewGetLanguages,
+  kCodeViewGetGrammar,
+  kCodeViewGetEditorFont
 } from "editor-types";
 
 
@@ -23,7 +27,11 @@ export function codeViewServerMethods(server: CodeViewServer): Record<string, Js
     [kCodeViewExecute]: args => server.codeViewExecute(args[0], args[1]),
     [kCodeViewGetCompletions]: args => server.codeViewCompletions(args[0]),
     [kCodeViewGetDiagnostics]: args => server.codeViewDiagnostics(args[0]),
-    [kCodeViewPreviewDiagram]: args => server.codeViewPreviewDiagram(args[0], args[1])
+    [kCodeViewPreviewDiagram]: args => server.codeViewPreviewDiagram(args[0], args[1]),
+    [kCodeViewGetColorTheme]: args => server.codeViewColorTheme(args[0]),
+    [kCodeViewGetLanguages]: () => server.codeViewLanguages(),
+    [kCodeViewGetGrammar]: args => server.codeViewGrammar(args[0]),
+    [kCodeViewGetEditorFont]: () => server.codeViewEditorFont()
   };
   return methods;
 }

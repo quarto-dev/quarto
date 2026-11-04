@@ -25,7 +25,7 @@
     "eslint": "^10.13.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15",
-    "vscode-languageserver": "^10.1.2"
+    "vscode-languageserver": "^11.0.0"
   },
   "scripts": {
     "test": "node --import tsx --test test/*.test.ts",

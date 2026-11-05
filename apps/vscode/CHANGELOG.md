@@ -2,7 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
-- In the visual editor, fix completions to count as enabled when the `editor.quickSuggestions` is `offWhenInlineCompletions`, which is the new default as of VS Code 1.121.
+- In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).
 - Fixed a bug where the language server could hang when hovering over text on a line that contains single-line display math such as `$$x$$` (<https://github.com/quarto-dev/quarto/pull/1212>).
 - In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed. They now close when the editor is scrolled or focus moves elsewhere within the editor, as do the completion popups for citations, cross references and the `/` insert menu (<https://github.com/quarto-dev/quarto/pull/1204>).
 - In the visual editor, the equation preview popup now follows its equation again after the window or editor pane is resized. Previously it stayed in place until the next edit or cursor move (<https://github.com/quarto-dev/quarto/pull/1204>).

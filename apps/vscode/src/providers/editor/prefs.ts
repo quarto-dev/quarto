@@ -110,7 +110,7 @@ export async function vscodePrefsServer(
       highlightSelectedWord: configuration.get<boolean>(kEditorSelectionHighlight, true),
       showWhitespace: configuration.get(kEditorRenderWhitespace) === "all",
       blinkingCursor: configuration.get(kEditorCursorBlinking, "solid") !== "solid",
-      quickSuggestions: configuration.get(kEditorQuickSuggestions + ".other", "on") === "on",
+      quickSuggestions: isQuickSuggestionsSettingEnabled(configuration.get(kEditorQuickSuggestions)),
 
       // quarto code editor settings
       lineNumbers: configuration.get<boolean>(kQuartoEditorLineNumbers, defaults.lineNumbers),
@@ -231,6 +231,23 @@ async function readMarkdownPrefs(
 
   // return prefs
   return prefs;
+}
+
+const isQuickSuggestionsValueEnabled = (value: unknown) => {
+  if (typeof value === "boolean") {
+    return value;
+  } else if (typeof value === "string") {
+    return value === "on" || value === "offWhenInlineCompletions";
+  } else {
+    return true;
+  }
+};
+export function isQuickSuggestionsSettingEnabled(setting: unknown): boolean {
+  if (setting && typeof setting === "object") {
+    return isQuickSuggestionsValueEnabled((setting as Record<string, unknown>).other);
+  } else {
+    return isQuickSuggestionsValueEnabled(setting);
+  }
 }
 
 function resolveMarkdownPrefs(frontMatter: Record<string, unknown>, prefs: MarkdownPrefs) {

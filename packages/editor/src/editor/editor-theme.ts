@@ -168,6 +168,18 @@ export function defaultTheme(): EditorTheme {
   };
 }
 
+const kThemeStylesId = 'pm-editor-theme-styles-id';
+
+// Apply the theme if one is provided, otherwise ensure that at least the
+// default theme has been applied (e.g. for dialogs shown w/o an editor instance)
+export function ensureTheme(theme?: EditorTheme) {
+  if (theme) {
+    applyTheme(theme);
+  } else if (!window.document.getElementById(kThemeStylesId)) {
+    applyTheme(defaultTheme());
+  }
+}
+
 export function applyTheme(theme: EditorTheme) {
   // merge w/ defaults
   const defaults = defaultTheme();
@@ -418,7 +430,7 @@ export function applyTheme(theme: EditorTheme) {
   `;
 
   // set style
-  setStyleElement('pm-editor-theme-styles-id', themeCss);
+  setStyleElement(kThemeStylesId, themeCss);
 }
 
 export function applyPadding(padding: string) {

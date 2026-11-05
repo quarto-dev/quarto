@@ -136,22 +136,39 @@ export function stripYamlDelimeters(yamlCode: string) {
   return yamlCode.replace(/^[ \t-]+\n/, '').replace(/\n[ \t-.]+$/, '');
 }
 
-export interface ParsedYaml {
+// A yaml metadata block (e.g. front matter provided by a host w/o an editor instance)
+export interface YamlBlock {
   yamlCode: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   yaml: any;
+}
+
+// A yaml metadata block read from a document node
+export interface ParsedYaml extends YamlBlock {
   node: NodeWithPos;
+}
+
+// Yaml blocks can be read from a document or provided directly by the host
+export type YamlBlockSource = ProsemirrorNode | YamlBlock[];
+
+export function yamlBlocksFromSource(source: YamlBlockSource): YamlBlock[] {
+  return Array.isArray(source) ? source : parseYamlNodes(source);
+}
+
+// parse yaml blocks from their code (with or w/o enclosing ---)
+export function parseYamlBlocks(yamlBlocks: string[]): YamlBlock[] {
+  return yamlBlocks.map(parseYamlText);
 }
 
 export function parseYamlNodes(doc: ProsemirrorNode): ParsedYaml[] {
   const yamlNodes = yamlMetadataNodes(doc);
+  return yamlNodes.map<ParsedYaml>(node => ({ ...parseYamlText(node.node.textContent), node }));
+}
 
-  const parsedYamlNodes = yamlNodes.map<ParsedYaml>(node => {
-    const yamlText = node.node.textContent;
-    const yamlCode = stripYamlDelimeters(yamlText);
-    return { yamlCode, yaml: parseYaml(yamlCode), node };
-  });
-  return parsedYamlNodes;
+// parse a yaml block from its code (with or w/o enclosing ---)
+function parseYamlText(yamlText: string): YamlBlock {
+  const yamlCode = stripYamlDelimeters(yamlText);
+  return { yamlCode, yaml: parseYaml(yamlCode) };
 }
 
 function firstYamlNode(doc: ProsemirrorNode) {

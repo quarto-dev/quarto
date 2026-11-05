@@ -128,7 +128,7 @@ import { realtimeSpellingPlugin, invalidateAllWords, invalidateWord, spellingCon
 
 import { PandocConverter, PandocLineWrapping } from '../pandoc/pandoc_converter';
 
-import { defaultEditorUIImages } from './editor-images';
+import { defaultEditorUIImages, editorUIWithDefaultImages } from './editor-images';
 import { editorMenus } from './editor-menus';
 import { editorSchema } from './editor-schema';
 
@@ -408,24 +408,9 @@ export class Editor  {
   
 
     // provide context defaults
-    const defaultImages = defaultEditorUIImages();
     context = {
       ...context,
-      ui: {
-        ...context.ui,
-        images: {
-          ...defaultImages,
-          ...context.ui.images,
-          omni_insert: {
-            ...defaultImages.omni_insert,
-            ...context.ui.images,
-          },
-          citations: {
-            ...defaultImages.citations,
-            ...context.ui.images,
-          },
-        },
-      },
+      ui: editorUIWithDefaultImages(context.ui),
     };
 
     // resolve the format

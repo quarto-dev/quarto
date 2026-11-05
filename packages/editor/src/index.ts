@@ -29,6 +29,7 @@ export * from './api/codeview';
 
 // main editor module
 export * from './editor/editor';
+export * from './editor/editor-citation';
 
 
 

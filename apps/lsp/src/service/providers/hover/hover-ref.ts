@@ -7,7 +7,7 @@
 import { Hover, Position, Range } from "vscode-languageserver";
 import { cslRefs, CslRef } from "editor-server";
 
-import { bypassRefIntelligence } from "../../util/refs";
+import { bypassRefIntelligence, citeAtPosition } from "../../util/refs";
 
 import { Document, Parser, filePathForDoc, documentFrontMatter } from "quarto-core";
 import { Quarto } from "../../../quarto";
@@ -27,30 +27,20 @@ export async function refHover(quarto: Quarto, parser: Parser, doc: Document, po
     return null;
   }
 
-  // scan back from the cursor for an '@'
-  const text = line.slice(0, pos.character);
-  const atPos = text.lastIndexOf("@");
-  if (atPos !== -1) {
-    const citeText = line.slice(atPos);
-    const citeMatch = citeText.match(/^@[^@;[\]\s!,]+/);
-    if (citeMatch) {
-      const citeId = citeMatch[0].replace(/\.$/, "").slice(1);
-      const range = Range.create(
-        pos.line,
-        atPos,
-        pos.line,
-        atPos + citeId.length + 1
-      );
-      if (citeId === lastRef?.id && lastRef.cite) {
-        return hoverFromCslRef(lastRef.cite, range);
-      } else {
-        const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(parser, doc));
-        if (refs) {
-          const ref = refs.find((x) => x.id === citeId);
-          if (ref?.cite) {
-            lastRef = ref;
-            return hoverFromCslRef(ref.cite, range);
-          }
+  // find the citation under the cursor
+  const cite = citeAtPosition(line, pos.character);
+  if (cite) {
+    const citeId = cite.id;
+    const range = Range.create(pos.line, cite.start, pos.line, cite.end);
+    if (citeId === lastRef?.id && lastRef.cite) {
+      return hoverFromCslRef(lastRef.cite, range);
+    } else {
+      const refs = cslRefs(quarto, filePathForDoc(doc), documentFrontMatter(parser, doc));
+      if (refs) {
+        const ref = refs.find((x) => x.id === citeId);
+        if (ref?.cite) {
+          lastRef = ref;
+          return hoverFromCslRef(ref.cite, range);
         }
       }
     }

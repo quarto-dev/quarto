@@ -22,7 +22,7 @@
   "devDependencies": {
     "@types/node": "^22.20.5",
     "@types/tmp": "^0.2.6",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-custom-server": "*",
     "tsx": "^4.23.15",
     "vscode-languageserver": "^11.0.0"

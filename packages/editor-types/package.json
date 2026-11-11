@@ -10,7 +10,7 @@
     "vscode-languageserver-types": "^3.18.5"
   },
   "devDependencies": {
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-custom": "*"
   },
   "scripts": {

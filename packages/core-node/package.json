@@ -11,7 +11,7 @@
     "vscode-languageclient": "^11.0.0"
   },
   "devDependencies": {
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-custom-server": "*"
   },
   "scripts": {

@@ -47,12 +47,12 @@
     "@lezer/highlight": "^1.2.5",
     "lodash.debounce": "^4.0.8",
     "prosemirror-history": "^1.5.1",
-    "prosemirror-view": "^1.42.8",
+    "prosemirror-view": "^1.42.9",
     "style-mod": "^4.1.4"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-custom": "*",
     "tsx": "^4.23.15"
   },

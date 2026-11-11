@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/wcwidth": "^1.0.2",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-custom": "*",
     "tsx": "^4.23.15"
   },

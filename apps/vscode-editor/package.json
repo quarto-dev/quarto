@@ -19,7 +19,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@fluentui/react-components": "^9.75.0",
+    "@fluentui/react-components": "^9.75.1",
     "core": "*",
     "core-browser": "*",
     "editor": "*",
@@ -40,9 +40,9 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/vscode-webview": "^1.57.5",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-custom": "*",
-    "sass": "^1.106.1",
+    "sass": "^1.107.1",
     "tsconfig": "*",
     "typescript": "~6.0.3",
     "vite": "^8.3.5",

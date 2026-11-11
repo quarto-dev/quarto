@@ -2,6 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
+- Fixed a bug where hovering over any text after a citation on the same line showed that citation's reference. The hover now shows only over the `@` and the citation key (<https://github.com/quarto-dev/quarto/pull/1225>).
 - In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).
 - Fixed a bug where the language server could hang when hovering over text on a line that contains single-line display math such as `$$x$$` (<https://github.com/quarto-dev/quarto/pull/1212>).
 - In the visual editor, the Insert Emoji and Insert Unicode popups no longer close on their own about five seconds after the editor is first focused, which could happen while a search term was still being typed. They now close when the editor is scrolled or focus moves elsewhere within the editor, as do the completion popups for citations, cross references and the `/` insert menu (<https://github.com/quarto-dev/quarto/pull/1204>).

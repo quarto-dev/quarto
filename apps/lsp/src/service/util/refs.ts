@@ -34,3 +34,25 @@ export function bypassRefIntelligence(
 
   return false;
 }
+
+// find the citation (`@key`) under the cursor, from the '@' to the end of the key
+export function citeAtPosition(
+  line: string,
+  character: number
+): { id: string; start: number; end: number } | undefined {
+  // include the character under the cursor so hovering the '@' finds its own citation
+  const start = line.slice(0, character + 1).lastIndexOf("@");
+  if (start === -1) {
+    return undefined;
+  }
+  const citeMatch = line.slice(start).match(/^@[^@;[\]\s!,]+/);
+  if (!citeMatch) {
+    return undefined;
+  }
+  const id = citeMatch[0].replace(/\.$/, "").slice(1);
+  const end = start + id.length + 1;
+  if (!id || character >= end) {
+    return undefined;
+  }
+  return { id, start, end };
+}

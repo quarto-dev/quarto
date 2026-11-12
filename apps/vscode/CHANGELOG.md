@@ -2,6 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
+- Fixed a bug where the visual editor could fail to load a document with `RangeError: Position N out of range` when the document contained an image wrapped in a link and ended with a link (<https://github.com/quarto-dev/quarto/pull/1228>).
 - Fixed a bug where hovering over any text after a citation on the same line showed that citation's reference. The hover now shows only over the `@` and the citation key (<https://github.com/quarto-dev/quarto/pull/1225>).
 - In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).
 - Fixed a bug where the language server could hang when hovering over text on a line that contains single-line display math such as `$$x$$` (<https://github.com/quarto-dev/quarto/pull/1212>).

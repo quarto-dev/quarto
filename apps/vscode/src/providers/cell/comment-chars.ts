@@ -26,6 +26,7 @@ export const kLangCommentChars: Record<string, string | [string, string]> = {
   powershell: "#",
   bash: "#",
   sql: "--",
+  ggsql: "--",
   mysql: "--",
   psql: "--",
   lua: "--",

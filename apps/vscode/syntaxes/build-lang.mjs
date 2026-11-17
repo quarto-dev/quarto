@@ -145,6 +145,14 @@ const languages = [
     identifiers: ["sql", "ddl", "dml"],
     source: "source.sql",
   },
+  // source.ggsql is contributed by the separate ggsql extension; without it
+  // the include finds nothing and the cell body stays plain
+  {
+    name: "ggsql",
+    language: "ggsql",
+    identifiers: ["ggsql"],
+    source: "source.ggsql",
+  },
   {
     name: "vs_net",
     language: "vs_net",

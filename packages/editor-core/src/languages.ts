@@ -48,6 +48,11 @@ const kEditorLanguages = [
     trigger: ["."]
   },
   {
+    ids: ["ggsql"],
+    comment: "--",
+    trigger: ["."]
+  },
+  {
     ids: ["prql"],
     comment: "#",
     trigger: ["."]

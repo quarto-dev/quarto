@@ -62,19 +62,24 @@ export function editorSyncManager(
   // visual editor instructs us to do so (e.g. when it loses focus)
   let pendingVisualEdit: unknown | undefined;
 
-  // state: the markdown the visual editor last wrote to or received from the document
-  // (document changes to this markdown are not propagated to the visual editor)
-  let syncedMarkdown: string | undefined;
+  // state: markdown the visual editor wrote to or received from the document, oldest first,
+  // starting with the document's current text. its writes can land out of order, and vscode
+  // discards a save's edits that take too long, so we keep each one until the document shows
+  // a newer one (document changes to any of them are not propagated to the visual editor)
+  let syncedMarkdown: string[] = [];
 
-  // collect a pending edit, converting it to markdown and recording it as synced
+  // collect a pending edit, converting it to markdown and recording it as synced. a save keeps
+  // the pending edit, so that the next poll applies it if vscode discards the save's edits.
   // if we fail get the markdown then we neither clear the pending edit nor record it
-  const collectPendingVisualEdit = async (): Promise<string | undefined> => {
+  const collectPendingVisualEdit = async (keepPending = false): Promise<string | undefined> => {
     if (pendingVisualEdit) {
       const state = pendingVisualEdit;
       try {
-        pendingVisualEdit = undefined;
+        if (!keepPending) {
+          pendingVisualEdit = undefined;
+        }
         const markdown = await visualEditor.getMarkdownFromState(state);
-        syncedMarkdown = markdown;
+        syncedMarkdown.push(markdown);
         return markdown;
       } catch (error) {
         if (pendingVisualEdit === undefined) {
@@ -92,7 +97,7 @@ export function editorSyncManager(
   // collect and apply any pending edit by updating the document
   const collectAndApplyPendingVisualEdit = async () => {
     const markdown = await collectPendingVisualEdit();
-    if (markdown) {
+    if (markdown && markdown !== document.getText()) {
       await updateWorkspaceDocument(document, markdown);
     }
   };
@@ -121,7 +126,7 @@ export function editorSyncManager(
       }
 
       const editorMarkdown = await visualEditor.init(markdown, initialNav);
-      syncedMarkdown = editorMarkdown || markdown;
+      syncedMarkdown = [editorMarkdown || markdown];
       if (editorMarkdown && (editorMarkdown !== document.getText())) {
         await updateWorkspaceDocument(document, editorMarkdown);
       }
@@ -136,13 +141,16 @@ export function editorSyncManager(
     flushPendingUpdates: collectAndApplyPendingVisualEdit,
 
     // notification that the document changed, let the visual editor know
-    // about the change unless it already has this markdown. note that the
+    // about the change unless the markdown is synced already. note that the
     // visual editor will throttle these changes internally. a pending visual
     // edit predates the change, so drop it rather than write it back over it
     onDocumentChanged: async () => {
       const markdown = document.getText();
-      if (markdown !== syncedMarkdown) {
-        syncedMarkdown = markdown;
+      const synced = syncedMarkdown.lastIndexOf(markdown);
+      if (synced >= 0) {
+        syncedMarkdown.splice(0, synced);
+      } else {
+        syncedMarkdown = [markdown];
         pendingVisualEdit = undefined;
         await visualEditor.applyExternalEdit(markdown);
       }
@@ -151,7 +159,7 @@ export function editorSyncManager(
     // notification that we are saving (allow flusing of visual editor changes)
     onDocumentSaving: async (): Promise<TextEdit[]> => {
       // attempt to collect pending edit
-      const markdown = await collectPendingVisualEdit();
+      const markdown = await collectPendingVisualEdit(true);
       if (markdown) {
         const edits: TextEdit[] = [];
         const editor = documentEditor(edits);

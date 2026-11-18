@@ -241,17 +241,12 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
 }
 
 
-// TODO: Use positron.PreviewPanel directly once @posit-dev/positron ships
-// `stoppable` and `onDidRequestStop`.
-type StoppablePreviewPanel = positron.PreviewPanel & {
-  stoppable: boolean;
-  readonly onDidRequestStop: vscode.Event<void>;
-};
-
 /**
  * Whether this version of Positron shows a stop button for preview panels.
+ * Older Positron versions return panels without `stoppable` and
+ * `onDidRequestStop`, even though the API types declare them.
  */
-function isStoppable(panel: positron.PreviewPanel): panel is StoppablePreviewPanel {
+function isStoppable(panel: positron.PreviewPanel): boolean {
   return "onDidRequestStop" in panel;
 }
 

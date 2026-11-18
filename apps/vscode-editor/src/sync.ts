@@ -222,10 +222,8 @@ export async function syncEditorToHost(
     },
 
     async applyExternalEdit(markdown: string) {
-      // only receive external text edits if we don't have focus (prevents circular updates)
-      if (!editor.hasFocus() && !window.document.hasFocus()) {
-        receiveEdit(markdown);
-      }
+      // the host only sends edits made outside the visual editor
+      receiveEdit(markdown);
     },
 
     async getMarkdownFromState(state: unknown): Promise<string> {

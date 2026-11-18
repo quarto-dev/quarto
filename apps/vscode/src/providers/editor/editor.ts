@@ -452,10 +452,10 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
         await syncManager.init();
         VisualEditorProvider.syncedEditors.add(webviewPanel);
 
-        // notify for document changes
+        // notify for document changes (ignoring dirty state changes, which have no content changes)
         disposables.push(workspace.onDidChangeTextDocument(
           async (e) => {
-            if (e.document.uri.toString() === document.uri.toString()) {
+            if (e.document.uri.toString() === document.uri.toString() && e.contentChanges.length > 0) {
               await syncManager.onDocumentChanged();
             }
           }

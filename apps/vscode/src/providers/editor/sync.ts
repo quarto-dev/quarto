@@ -21,8 +21,8 @@ pending edits on save)
 
 For the visual editor syncing to external changes:
 
-1) Only accept external edits when NOT focused (once the visual editor is focused it
-   is the definitive source of changes to the document)
+1) Only send document changes that bring markdown the visual editor doesn't already
+   have (the visual editor's own edits come back to us as document changes)
 
 2) These external edits are throttled by 1 second so we don't get constant (expensive)
    refreshing of the visual editor when users type in the text editor.
@@ -62,19 +62,19 @@ export function editorSyncManager(
   // visual editor instructs us to do so (e.g. when it loses focus)
   let pendingVisualEdit: unknown | undefined;
 
-  // state: don't propagate the next model change we get to the visual editor
-  // (as the change actually resulted from a visual editor sync)
-  let supressNextUpdate = false;
+  // state: the markdown the visual editor last wrote to or received from the document
+  // (document changes to this markdown are not propagated to the visual editor)
+  let syncedMarkdown: string | undefined;
 
-  // collect a pending edit, converting it to markdown and setting the supressNextUpdate bit
-  // if we fail get the markdown then we neither clear the pending edit nor supress the update
+  // collect a pending edit, converting it to markdown and recording it as synced
+  // if we fail get the markdown then we neither clear the pending edit nor record it
   const collectPendingVisualEdit = async (): Promise<string | undefined> => {
     if (pendingVisualEdit) {
       const state = pendingVisualEdit;
       try {
         pendingVisualEdit = undefined;
         const markdown = await visualEditor.getMarkdownFromState(state);
-        supressNextUpdate = true;
+        syncedMarkdown = markdown;
         return markdown;
       } catch (error) {
         if (pendingVisualEdit === undefined) {
@@ -121,6 +121,7 @@ export function editorSyncManager(
       }
 
       const editorMarkdown = await visualEditor.init(markdown, initialNav);
+      syncedMarkdown = editorMarkdown || markdown;
       if (editorMarkdown && (editorMarkdown !== document.getText())) {
         await updateWorkspaceDocument(document, editorMarkdown);
       }
@@ -134,15 +135,16 @@ export function editorSyncManager(
     // flush
     flushPendingUpdates: collectAndApplyPendingVisualEdit,
 
-    // notification that the document changed, let the visual editor
-    // know about the change unless the next update is supressed. note that
-    // the visual editor will throttle these changes internally (and
-    // apply them immediately when it receives focus)
+    // notification that the document changed, let the visual editor know
+    // about the change unless it already has this markdown. note that the
+    // visual editor will throttle these changes internally. a pending visual
+    // edit predates the change, so drop it rather than write it back over it
     onDocumentChanged: async () => {
-      if (supressNextUpdate) {
-        supressNextUpdate = false;
-      } else {
-        await visualEditor.applyExternalEdit(document.getText());
+      const markdown = document.getText();
+      if (markdown !== syncedMarkdown) {
+        syncedMarkdown = markdown;
+        pendingVisualEdit = undefined;
+        await visualEditor.applyExternalEdit(markdown);
       }
     },
 

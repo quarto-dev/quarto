@@ -145,13 +145,20 @@ export async function syncEditorToHost(
     editor.setMaxContentWidth(prefs.maxContentWidth, 22);
   }
 
-  // sync from text editor (throttled)
+  // count editor updates, and the updates the host had when it last collected markdown
+  let updates = 0;
+  let collectedUpdates = 0;
+
+  // sync from text editor (throttled). skip the edit if the user edited since it
+  // was received (the host then writes the user's edits over it)
   const kThrottleDelayMs = 1000;
-  const receiveEdit = throttle((markdown) => {
-    editor.setMarkdown(markdown, writerOptions(), false)
-      .finally(() => {
-        // done
-      });
+  const receiveEdit = throttle((markdown: string, receivedUpdates: number) => {
+    if (updates === receivedUpdates) {
+      editor.setMarkdown(markdown, writerOptions(), false)
+        .finally(() => {
+          // done
+        });
+    }
   }, kThrottleDelayMs, { leading: false, trailing: true});
 
   // setup communication channel for host
@@ -170,7 +177,10 @@ export async function syncEditorToHost(
           editor.focus(navigation);
             
           // visual editor => text editor (just send the state, host will call back for markdown)
-          editor.subscribe(UpdateEvent, () => host.onEditorUpdated(editor.getStateJson()));
+          editor.subscribe(UpdateEvent, () => {
+            updates++;
+            host.onEditorUpdated(editor.getStateJson());
+          });
           editor.subscribe(StateChangeEvent, () => host.onEditorStateChanged(editor.getEditorSourcePos())); 
             
 
@@ -222,13 +232,15 @@ export async function syncEditorToHost(
     },
 
     async applyExternalEdit(markdown: string) {
-      // only receive external text edits if we don't have focus (prevents circular updates)
-      if (!editor.hasFocus() && !window.document.hasFocus()) {
-        receiveEdit(markdown);
+      // only receive external text edits if the host has all of our updates
+      // (otherwise it writes them over the external edit)
+      if (updates === collectedUpdates) {
+        receiveEdit(markdown, updates);
       }
     },
 
     async getMarkdownFromState(state: unknown): Promise<string> {
+      collectedUpdates = updates;
       const markdown = await editor.getMarkdownFromStateJson(state, writerOptions());
       return markdown;
     },

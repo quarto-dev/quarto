@@ -571,13 +571,17 @@ export class Editor  {
     markdown: string,
     options: PandocWriterOptions,
     emitUpdate: boolean,
-  ): Promise<EditorSetMarkdownResult> {
+  ): Promise<EditorSetMarkdownResult | null> {
 
     // provide option defaults
     options = pandocWriterOptions(options);
    
-    // get the result
+    // get the result (but don't replace edits made to the doc meanwhile)
+    const previousDoc = this.isInitialDoc() ? undefined : this.state.doc;
     const result = await this.pandocConverter.toProsemirror(markdown, this.pandocFormat);
+    if (previousDoc && previousDoc !== this.state.doc) {
+      return null;
+    }
     const { doc, line_wrapping, unrecognized, example_lists, unparsed_meta } = result;
 
     // if we are preserving history but the existing doc is empty then create a new state

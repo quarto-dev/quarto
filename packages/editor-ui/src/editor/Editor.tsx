@@ -266,6 +266,9 @@ export const Editor : React.FC<EditorProps> = (props) => {
       // attempt to set markdown
       const editor = editorRef.current!;
       const result = await editor.setMarkdown(markdown, options, emitUpdate);
+      if (!result) {
+        return null;
+      }
 
       // check for load error
       const kUnableToActivateVisualMode =  t('Unable to Activate Visual Mode');

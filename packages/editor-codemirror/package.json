@@ -40,7 +40,7 @@
     "markdown-it": "^15.0.3",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-gapcursor": "^1.4.1",
-    "prosemirror-model": "^1.25.12",
+    "prosemirror-model": "^1.25.13",
     "prosemirror-state": "^1.4.4",
     "tsconfig": "*",
     "vscode-languageserver-types": "^3.18.5",

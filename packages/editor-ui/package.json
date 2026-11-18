@@ -6,7 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "@fluentui/react-components": "^9.75.1",
+    "@fluentui/react-components": "^9.75.2",
     "@fluentui/react-icons": "^2.0.345",
     "@reduxjs/toolkit": "^2.14.0",
     "core": "*",

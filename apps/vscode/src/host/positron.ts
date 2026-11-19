@@ -73,11 +73,49 @@ function isConfigurationSet<T>(
 }
 
 /**
- * Languages with a registered Positron runtime, such as SAS from the SAS
- * extension. Cached because the checks for whether a cell can run are
- * synchronous; kept current as extensions register runtimes.
+ * The languages that extensions declare runtimes for in the `languageRuntimes`
+ * contribution of their `package.json`, e.g. `sas` from the SAS extension or
+ * `ggsql` from the ggsql extension.
  */
-const runtimeLanguages = new Set<string>();
+export function contributedRuntimeLanguages(
+  extensions: readonly { packageJSON: unknown }[]
+): Set<string> {
+  const languages = new Set<string>();
+  for (const extension of extensions) {
+    const packageJSON = extension.packageJSON as
+      { contributes?: { languageRuntimes?: unknown } } | undefined;
+    const contributions = packageJSON?.contributes?.languageRuntimes;
+    if (!Array.isArray(contributions)) {
+      continue;
+    }
+    for (const contribution of contributions) {
+      const languageId = (contribution as { languageId?: unknown } | undefined)?.languageId;
+      if (typeof languageId === "string" && languageId.length > 0) {
+        languages.add(languageId);
+      }
+    }
+  }
+  return languages;
+}
+
+/**
+ * Languages whose cells can run in a Positron console. They come from two
+ * sources, as in Positron's own check for inline output
+ * (`hasLanguageRuntimeProvider`):
+ *
+ * - the `languageRuntimes` contributions of the installed extensions, which
+ *   are known before those extensions activate or discover any runtime, and
+ * - the registered runtimes, for an extension that registers a runtime
+ *   without declaring the contribution.
+ *
+ * Both are cached because the checks for whether a cell can run are
+ * synchronous. They are tracked only in Positron, so nothing changes in
+ * VS Code even when such extensions are installed.
+ *
+ * See also https://github.com/posit-dev/positron/issues/17432
+ */
+let contributedLanguages = new Set<string>();
+const registeredLanguages = new Set<string>();
 let trackingRuntimes = false;
 
 function trackRuntimeLanguages() {
@@ -86,12 +124,19 @@ function trackRuntimeLanguages() {
     return;
   }
   trackingRuntimes = true;
+
+  // the contributions are read synchronously, so they are known right away;
+  // the subscriptions below live as long as the extension host
+  contributedLanguages = contributedRuntimeLanguages(vscode.extensions.all);
+  vscode.extensions.onDidChange(() => {
+    contributedLanguages = contributedRuntimeLanguages(vscode.extensions.all);
+  });
+
   runtime.getRegisteredRuntimes().then(
-    (runtimes) => runtimes.forEach((metadata) => runtimeLanguages.add(metadata.languageId)),
+    (runtimes) => runtimes.forEach((metadata) => registeredLanguages.add(metadata.languageId)),
     () => { }
   );
-  // lives as long as the extension host
-  runtime.onDidRegisterRuntime((metadata) => runtimeLanguages.add(metadata.languageId));
+  runtime.onDidRegisterRuntime((metadata) => registeredLanguages.add(metadata.languageId));
 }
 
 /**
@@ -99,7 +144,11 @@ function trackRuntimeLanguages() {
  * the console.
  */
 export function hasPositronRuntime(language: string): boolean {
-  return runtimeLanguages.has(language);
+  return contributedLanguages.has(language) || registeredLanguages.has(language);
+}
+
+function positronRuntimeLanguages(): string[] {
+  return [...new Set([...contributedLanguages, ...registeredLanguages])];
 }
 
 /**
@@ -220,8 +269,8 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
   return {
     // supported executable languages (we delegate to the default for langugaes
     // w/o runtimes so we support all languages), plus any language with a
-    // registered Positron runtime
-    executableLanguages: () => [...new Set([...executableLanguages(), ...runtimeLanguages])],
+    // Positron runtime
+    executableLanguages: () => [...new Set([...executableLanguages(), ...positronRuntimeLanguages()])],
 
     cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
       : Promise<CellExecutor | undefined> => {
@@ -233,8 +282,8 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
         case "r":
           return positronRuntimeExecutor(language, document, engine, outputChannel);
 
-        // use positron api for any other language with a registered runtime
-        // (e.g. SAS from an extension), and delegate the rest
+        // use positron api for any other language with a Positron runtime
+        // (e.g. SAS or ggsql from an extension), and delegate the rest
         default:
           if (hasPositronRuntime(language)) {
             return positronRuntimeExecutor(language, document, engine, outputChannel);

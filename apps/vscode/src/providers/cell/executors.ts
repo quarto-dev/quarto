@@ -21,7 +21,7 @@ import {
 
 import { lines } from "core";
 
-import { cellOptionsForToken, kExecuteEval } from "./options";
+import { cellOptionsForToken, kExecuteEval, leadingOptionYaml } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
 import { executableLanguages } from "../../host/executors";
@@ -60,7 +60,10 @@ export function cellMetadataForBlock(token: TokenMath | TokenCodeBlock): Record<
 }
 
 // skip yaml options for execution
-export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
+export function codeWithoutOptionsFromBlock(
+  token: TokenMath | TokenCodeBlock,
+  hasRuntime: (language: string) => boolean = hasPositronRuntime
+) {
   if (isExecutableLanguageBlock(token)) {
     const language = languageNameFromBlock(token);
     if (hasYamlHashOptions(language)) {
@@ -73,6 +76,14 @@ export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
       } else {
         return "";
       }
+    } else if (hasRuntime(language)) {
+      // a language that a Positron runtime runs in the console (e.g. sas or
+      // ggsql): skip its option lines, written with its own comment
+      // characters (`*| ... ;` for sas, `#|` for languages without an entry
+      // in kLangCommentChars, such as ggsql, where `#` isn't a comment)
+      const blockLines = lines(codeForExecutableLanguageBlock(token));
+      const optionLines = leadingOptionYaml(language, blockLines).length;
+      return blockLines.slice(optionLines).join("\n");
     } else {
       return codeForExecutableLanguageBlock(token);
     }

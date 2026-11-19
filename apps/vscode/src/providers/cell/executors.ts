@@ -25,13 +25,13 @@ import { cellOptionsForToken, kExecuteEval } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
 import { executableLanguages } from "../../host/executors";
-import { isInlineOutputEnabled } from "../../host/positron";
+import { hasPositronRuntime, isInlineOutputEnabled } from "../../host/positron";
 import { Position } from "vscode";
 import { Uri } from "vscode";
 
 
 export function hasExecutor(_host: ExtensionHost, language: string) {
-  return executableLanguages().includes(language);
+  return executableLanguages().includes(language) || hasPositronRuntime(language);
 }
 
 export function blockHasExecutor(host: ExtensionHost, token?: Token): token is TokenMath | TokenCodeBlock {

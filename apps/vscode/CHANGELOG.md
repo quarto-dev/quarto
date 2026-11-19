@@ -2,6 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
+- In Positron, cells in any language that has a Positron runtime now run in its console, with **Run Cell**, **Run Above**, **Run Next Cell** and the usual shortcuts. Before, only R, Python, Julia and C# cells could run, so cells for runtimes that extensions add, such as `{sas}` with the SAS extension, could not (<https://github.com/quarto-dev/quarto/pull/XXXX>).
 - Fixed a bug where hovering over any text after a citation on the same line showed that citation's reference. The hover now shows only over the `@` and the citation key (<https://github.com/quarto-dev/quarto/pull/1225>).
 - In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).
 - Fixed a bug where the language server could hang when hovering over text on a line that contains single-line display math such as `$$x$$` (<https://github.com/quarto-dev/quarto/pull/1212>).

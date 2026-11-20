@@ -10,7 +10,7 @@ import { build } from "plist";
 import {
   kLangCommentChars,
   langCommentChars,
-  optionCommentPattern,
+  langOptionCommentPattern,
 } from "../src/providers/cell/comment-chars";
 
 const languages = [
@@ -503,16 +503,15 @@ const fencedCodeBlockDefinition = (
   // markers in the body of a cell stay ordinary comments. block-comment
   // languages (e.g. /*| ... */ for c and css) are not supported: their
   // closing delimiter would end up inside the yaml
-  const commentChars = langCommentChars(
-    name in kLangCommentChars ? name : language
-  );
+  const commentLanguage = name in kLangCommentChars ? name : language;
+  const commentChars = langCommentChars(commentLanguage);
   let contentPatterns;
   if (commentChars.length > 1) {
     contentPatterns = indent(4, scopes);
   } else {
     // the runtime option pattern, sans its ^ anchor (the grammar allows
     // leading indentation, and also reuses the marker inside a lookahead)
-    const marker = optionCommentPattern(commentChars[0]).source.replace(
+    const marker = langOptionCommentPattern(commentLanguage).source.replace(
       /^\^/,
       ""
     );

@@ -1676,9 +1676,9 @@
             <array>
               <dict>
                 <key>begin</key>
-                <string>^(\s*)(--\s*\| ?)</string>
+                <string>^(\s*)((?:--|#)\s*\| ?)</string>
                 <key>while</key>
-                <string>^(\s*)(--\s*\| ?)</string>
+                <string>^(\s*)((?:--|#)\s*\| ?)</string>
                 <key>captures</key>
                 <dict>
                   <key>2</key>
@@ -1699,7 +1699,7 @@
               </dict>
               <dict>
                 <key>begin</key>
-                <string>^(?!\s*--\s*\| ?)</string>
+                <string>^(?!\s*(?:--|#)\s*\| ?)</string>
                 <key>while</key>
                 <string>(^|\G)</string>
                 <key>patterns</key>

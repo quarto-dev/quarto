@@ -9,7 +9,7 @@
 import { lines, loadYaml } from "core";
 import { Token, isCodeBlock, languageNameFromBlock } from "quarto-core";
 
-import { langCommentChars, optionCommentPattern } from "./comment-chars";
+import { langCommentChars, langOptionCommentPattern } from "./comment-chars";
 
 export { optionCommentPattern } from "./comment-chars";
 
@@ -61,7 +61,7 @@ export function cellOptions(language: string, source: string[]): Record<string, 
  */
 export function leadingOptionYaml(language: string, source: string[]): string[] {
   const commentChars = langCommentChars(language);
-  const optionPattern = optionCommentPattern(commentChars[0]);
+  const optionPattern = langOptionCommentPattern(language);
   const optionSuffix = commentChars[1] || "";
 
   const yamlLines: string[] = [];

@@ -2,7 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
-- `{Rcpp}` cells in knitr documents can now be run interactively. Like knitr, Quarto compiles a cell with `Rcpp::sourceCpp()` in the R console, so its exported functions become available to R cells. Run Line runs the whole cell, since C++ can't run line by line. `//|` cell options such as `eval: false` are now recognized for these cells (<https://github.com/quarto-dev/quarto/issues/438>).
+- `{Rcpp}` cells in knitr documents can now be run interactively. Like knitr, Quarto compiles a cell with `Rcpp::sourceCpp()` in the R console, so its exported functions become available to R cells. Run Line runs the whole cell, since C++ can't run line by line. `//|` cell options such as `eval: false` are now recognized for these cells (<https://github.com/quarto-dev/quarto/pull/1240>).
 - Fixed a bug where hovering over any text after a citation on the same line showed that citation's reference. The hover now shows only over the `@` and the citation key (<https://github.com/quarto-dev/quarto/pull/1225>).
 - In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).
 - Fixed a bug where the language server could hang when hovering over text on a line that contains single-line display math such as `$$x$$` (<https://github.com/quarto-dev/quarto/pull/1212>).

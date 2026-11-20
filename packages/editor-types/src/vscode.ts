@@ -20,6 +20,7 @@ export const VSC_VE_GetSlideIndex = 'vsc_ve_get_slide_index';
 export const VSC_VE_ApplyExternalEdit = 'vsc_ve_apply_external_edit';
 export const VSC_VE_PrefsChanged = 'vsc_ve_prefs_changed';
 export const VSC_VE_ImageChanged = 'vsc_ve_image_changed';
+export const VSC_VE_ExecutableLanguagesChanged = 'vsc_ve_executable_languages_changed';
 export const VSC_VE_GetActiveBlockContext = 'vsc_ve_get_active_block_context';
 export const VSC_VE_SetBlockSelection = 'vsc_ve_set_block_selection';
 
@@ -54,6 +55,8 @@ export interface VSCodeVisualEditor {
   applyExternalEdit: (markdown: string) => Promise<void>;
   prefsChanged: (prefs: Prefs) => Promise<void>;
   imageChanged: (file: string) => Promise<void>;
+  // replaces the executableLanguages of the HostContext
+  executableLanguagesChanged: (languages: string[]) => Promise<void>;
 }
 
 export interface HostContext {

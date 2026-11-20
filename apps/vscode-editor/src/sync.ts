@@ -22,6 +22,7 @@ import {
   VSC_VE_ApplyExternalEdit, 
   VSC_VE_PrefsChanged,
   VSC_VE_ImageChanged,
+  VSC_VE_ExecutableLanguagesChanged,
   VSC_VE_GetMarkdownFromState,
   VSC_VE_GetSlideIndex,
   VSC_VE_GetActiveBlockContext,
@@ -103,9 +104,13 @@ export interface ImageChangeSink {
   notifyImageChanged(file: string): void;
 }
 
+export interface ExecutableLanguagesSink {
+  setExecutableLanguages(languages: string[]): void;
+}
+
 export async function syncEditorToHost(
   editor: EditorOperations, 
-  imageChange: ImageChangeSink,
+  uiContext: ImageChangeSink & ExecutableLanguagesSink,
   host: VisualEditorHostClient,
   store: EditorUIStore,
   applyTheme: (theme: EditorTheme) => void
@@ -210,7 +215,11 @@ export async function syncEditorToHost(
     },
 
     async imageChanged(file: string) {
-      imageChange.notifyImageChanged(file);
+      uiContext.notifyImageChanged(file);
+    },
+
+    async executableLanguagesChanged(languages: string[]) {
+      uiContext.setExecutableLanguages(languages);
     },
 
     async focus(navigation?: NavLocation) {
@@ -325,7 +334,8 @@ function visualEditorHostServer(vscode: WebviewApi<unknown>, editor: VSCodeVisua
     [VSC_VE_GetActiveBlockContext]: () => editor.getActiveBlockContext(),
     [VSC_VE_SetBlockSelection]: args => editor.setBlockSelection(args[0], args[1]),
     [VSC_VE_PrefsChanged]: args => editor.prefsChanged(args[0]),
-    [VSC_VE_ImageChanged]: args => editor.imageChanged(args[0])
+    [VSC_VE_ImageChanged]: args => editor.imageChanged(args[0]),
+    [VSC_VE_ExecutableLanguagesChanged]: args => editor.executableLanguagesChanged(args[0])
   })
 }
 

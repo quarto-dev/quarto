@@ -34,10 +34,20 @@
  *
  * The host owns a feature when it has the cell commands (probed at activation
  * by {@link detectCellFeatureOwnership}), the setting is on, and, for a
- * per-language gate, the language is one of `kHostOwnedLanguages`.
+ * per-language gate, the language is one the host advertises through
+ * {@link kHostOwnedLanguagesCommand} (or `kFallbackHostOwnedLanguages` when
+ * the host predates that command).
  */
 
-import { commands, LogOutputChannel, workspace } from "vscode";
+import {
+  commands,
+  Disposable,
+  Event,
+  EventEmitter,
+  extensions,
+  LogOutputChannel,
+  workspace,
+} from "vscode";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 
 import { EmbeddedLanguage } from "../vdoc/languages";
@@ -69,16 +79,80 @@ const kCellOwnershipCommands = [
 ];
 
 /**
- * Languages whose cells the host is verified to own. Matched against
- * {@link EmbeddedLanguage.ids}, so an alias of a listed language counts too.
+ * The command through which the host advertises which cell languages it serves
+ * embedded language features for, right now. Takes no arguments and answers
+ * lowercase language ids, e.g. `["r", "python", "sql", "ggsql"]`. The host
+ * folds {@link kHostCellFeaturesSetting} and its own feature flags into the
+ * answer, which can change at runtime, so it is queried again whenever the
+ * configuration or the set of installed extensions changes.
  *
- * Add one language at a time, once its cell providers have been verified end to
- * end: a document that is not covered here keeps its virtual document, which is
- * the safe direction.
+ * Registered unconditionally by hosts that have it, like the cell commands, so
+ * its presence is probed the same way.
  */
-const kHostOwnedLanguages = new Set(["r", "python"]);
+export const kHostOwnedLanguagesCommand = "_quartoHostOwnedCellLanguages";
+
+/**
+ * The command through which the host says which runtime runs the cells of a
+ * document. Takes `(documentUri: Uri, cellLanguages: string[])` and answers a
+ * record from each cell language it runs in that document to the language id
+ * of its runtime (e.g. `{ sql: "ggsql", ggsql: "ggsql" }` for a Jupyter
+ * document); a language it does not run is absent. The answer depends only on
+ * settings, installed extensions and the document's front matter. Called from
+ * `host/positron.ts`, which drops its cached answers on
+ * {@link onDidRefreshHostCellLanguages}.
+ */
+export const kHostCellRuntimeLanguagesCommand = "_quartoHostCellRuntimeLanguages";
+
+/**
+ * Languages whose cells a host that has the cell commands but not
+ * {@link kHostOwnedLanguagesCommand} owns. Those are the hosts that shipped
+ * before the command existed, and these are the languages they were verified
+ * to own.
+ */
+const kFallbackHostOwnedLanguages: ReadonlySet<string> = new Set(["r", "python"]);
+
+/**
+ * The command through which the host explains why a cell cannot be run, e.g.
+ * that a `{sql}` cell in a knitr document runs at render time. Takes
+ * `(documentUri: Uri, cellLanguage: string)`, shows the host's own message,
+ * and answers whether it had anything to say. Called from `host/positron.ts`.
+ */
+export const kHostExplainUnrunnableCellCommand = "_quartoHostExplainUnrunnableCell";
 
 let cellCommandsAvailable = false;
+
+/**
+ * The languages the host owns, cached so that the gates stay synchronous.
+ * Matched against {@link EmbeddedLanguage.ids}, so an alias of a listed
+ * language counts too.
+ */
+let hostOwnedLanguages: ReadonlySet<string> = kFallbackHostOwnedLanguages;
+
+const kRefreshDebounceMs = 250;
+
+/** Counts queries, so that a slow one cannot overwrite a later answer. */
+let hostOwnedLanguagesQuery = 0;
+
+const onDidChangeHostOwnedLanguagesEmitter = new EventEmitter<void>();
+
+/**
+ * Fires when the cached set of host owned languages changes, after an
+ * asynchronous re-query. Consumers that cache a per-language decision (e.g.
+ * diagnostics) recompute on it.
+ */
+export const onDidChangeHostOwnedLanguages: Event<void> =
+  onDidChangeHostOwnedLanguagesEmitter.event;
+
+const onDidRefreshHostCellLanguagesEmitter = new EventEmitter<void>();
+
+/**
+ * Fires after every re-query of the host (any configuration change, any change
+ * to the installed extensions), whether or not the owned languages changed.
+ * The host's answers about which runtime runs a cell can change on the same
+ * triggers, so anything that caches those answers drops them on this event.
+ */
+export const onDidRefreshHostCellLanguages: Event<void> =
+  onDidRefreshHostCellLanguagesEmitter.event;
 
 /**
  * Whether this host carries the virtual notebook.
@@ -101,20 +175,111 @@ async function hostHasCellCommands(): Promise<boolean> {
 }
 
 /**
+ * Ask the host which languages it owns, or `undefined` when it has no
+ * {@link kHostOwnedLanguagesCommand} (vanilla VS Code, older Positron) or the
+ * command fails.
+ */
+async function queryHostOwnedLanguages(
+  all: string[],
+  outputChannel?: LogOutputChannel
+): Promise<ReadonlySet<string> | undefined> {
+  if (!all.includes(kHostOwnedLanguagesCommand)) {
+    return undefined;
+  }
+  try {
+    const languages = await commands.executeCommand<unknown>(kHostOwnedLanguagesCommand);
+    if (!Array.isArray(languages)) {
+      outputChannel?.warn(
+        `[CellFeatures] ${kHostOwnedLanguagesCommand} answered ${JSON.stringify(languages)}, ` +
+        `not a list, so the host is assumed to own ${[...kFallbackHostOwnedLanguages].join(", ")}.`
+      );
+      return undefined;
+    }
+    return new Set(
+      languages
+        .filter((language): language is string => typeof language === "string")
+        .map((language) => language.toLowerCase())
+    );
+  } catch (err) {
+    outputChannel?.warn(
+      `[CellFeatures] ${kHostOwnedLanguagesCommand} failed, so the host is ` +
+      `assumed to own ${[...kFallbackHostOwnedLanguages].join(", ")}: ${err}`
+    );
+    return undefined;
+  }
+}
+
+/**
+ * Query the host for the languages it owns and cache the answer, falling back
+ * to {@link kFallbackHostOwnedLanguages} when it cannot say. Fires
+ * {@link onDidChangeHostOwnedLanguages} when the owned languages changed, then
+ * {@link onDidRefreshHostCellLanguages}.
+ */
+export async function refreshHostCellLanguages(
+  outputChannel?: LogOutputChannel
+): Promise<void> {
+  const query = ++hostOwnedLanguagesQuery;
+  // `false` keeps the underscore-prefixed ids we are looking for
+  const all = await commands.getCommands(false);
+  const languages =
+    (await queryHostOwnedLanguages(all, outputChannel)) ?? kFallbackHostOwnedLanguages;
+  if (query !== hostOwnedLanguagesQuery) {
+    return;
+  }
+
+  const changed =
+    languages.size !== hostOwnedLanguages.size ||
+    [...languages].some((language) => !hostOwnedLanguages.has(language));
+  hostOwnedLanguages = languages;
+
+  if (changed) {
+    if (cellCommandsAvailable) {
+      outputChannel?.info(
+        `[CellFeatures] Host owned cell languages: ${[...languages].join(", ") || "(none)"}.`
+      );
+    }
+    onDidChangeHostOwnedLanguagesEmitter.fire();
+  }
+  onDidRefreshHostCellLanguagesEmitter.fire();
+}
+
+/**
  * Determine whether the host owns language features for code cells, and
- * record the answer where the gates can read it.
+ * record the answer where the gates can read it. The returned disposable stops
+ * re-querying the host's cell languages (see {@link refreshHostCellLanguages})
+ * when the configuration or the installed extensions change.
  *
  * Must be awaited during activation, before any gate can be consulted.
  */
 export async function detectCellFeatureOwnership(
   outputChannel?: LogOutputChannel
-): Promise<void> {
+): Promise<Disposable> {
   cellCommandsAvailable = await hostHasCellCommands();
+  await refreshHostCellLanguages(outputChannel);
+
+  // Only Positron can change its answers; elsewhere there is nothing to watch.
+  if (!tryAcquirePositronApi()) {
+    return Disposable.from();
+  }
+
+  // Any configuration change, not only the native setting: the host also
+  // folds its own feature flags into the answer. Debounced, because settings
+  // tend to change in bursts and every re-query reaches the visual editors.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const refresh = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { void refreshHostCellLanguages(outputChannel); }, kRefreshDebounceMs);
+  };
+  const listeners = Disposable.from(
+    workspace.onDidChangeConfiguration(refresh),
+    extensions.onDidChange(refresh),
+    new Disposable(() => clearTimeout(timer))
+  );
 
   if (cellCommandsAvailable) {
     outputChannel?.info(
       "[CellFeatures] Host owns Quarto cell language features. " +
-      `The extension stands down for ${[...kHostOwnedLanguages].join(", ")} ` +
+      `The extension stands down for ${[...hostOwnedLanguages].join(", ") || "no languages"} ` +
       `while ${kHostCellFeaturesSetting} is on.`
     );
   } else if (
@@ -126,14 +291,18 @@ export async function detectCellFeatureOwnership(
       "documents, which can duplicate what the host provides."
     );
   }
+
+  return listeners;
 }
 
 /**
- * Whether the host owns the cells of a language. Pure, so the language set
- * can be tested without an extension host.
+ * Whether the host owns the cells of a language, per the cached answer of
+ * {@link kHostOwnedLanguagesCommand}. Synchronous and independent of the
+ * setting and capability half of the decision, so the language set can be
+ * tested without Positron.
  */
 export function hostOwnsLanguage(language: EmbeddedLanguage): boolean {
-  return language.ids.some((id) => kHostOwnedLanguages.has(id));
+  return language.ids.some((id) => hostOwnedLanguages.has(id));
 }
 
 /**
@@ -160,6 +329,11 @@ export function hostOwnsCellFeatures(language?: EmbeddedLanguage): boolean {
     return false;
   }
   if (workspace.getConfiguration().get<boolean>(kHostCellFeaturesSetting) !== true) {
+    return false;
+  }
+  // A host that says it owns no language (e.g. its own feature flags are off)
+  // owns no cells, so the whole-document features stay here too.
+  if (hostOwnedLanguages.size === 0) {
     return false;
   }
   return language === undefined || hostOwnsLanguage(language);

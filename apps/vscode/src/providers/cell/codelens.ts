@@ -10,27 +10,31 @@ import {
   CancellationToken,
   CodeLens,
   CodeLensProvider,
-  ProviderResult,
   TextDocument,
   Range,
 } from "vscode";
 import { MarkdownEngine } from "../../markdown/engine";
-import { blockHasExecutor, hasExecutor } from "./executors";
+import { blockHasExecutor, documentExecutableLanguages, hasExecutor } from "./executors";
 import { Token, languageNameFromBlock } from "quarto-core";
 import { ExtensionHost } from "../../host";
+import { onDidRefreshHostCellLanguages } from "../../host/cell-features";
 
 export function quartoCellExecuteCodeLensProvider(
   host: ExtensionHost,
   engine: MarkdownEngine
 ): CodeLensProvider {
   return {
-    provideCodeLenses(
+    // the host's answer about which cell languages it runs can change on any
+    // configuration or extension change
+    onDidChangeCodeLenses: onDidRefreshHostCellLanguages,
+    async provideCodeLenses(
       document: TextDocument,
       token: CancellationToken
-    ): ProviderResult<CodeLens[]> {
+    ): Promise<CodeLens[]> {
       const lenses: CodeLens[] = [];
       const tokens = engine.parse(document);
-      const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(host, token));
+      const languages = await documentExecutableLanguages(host, document, tokens);
+      const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(languages, token));
       for (let i = 0; i < executableBlocks.length; i++) {
         // respect cancellation request
         if (token.isCancellationRequested) {
@@ -41,7 +45,7 @@ export function quartoCellExecuteCodeLensProvider(
 
         // detect the language and see if it has a cell executor
         const language = languageNameFromBlock(block);
-        if (!hasExecutor(host, language)) {
+        if (!hasExecutor(languages, language)) {
           continue;
         }
 

@@ -108,6 +108,9 @@ const kLangCommentChars: Record<string, string> = {
   psql: "--",
   lua: "--",
   cpp: "//",
+  // knitr's engine name
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Rcpp: "//",
   cc: "//",
   stan: "#",
   octave: "#",

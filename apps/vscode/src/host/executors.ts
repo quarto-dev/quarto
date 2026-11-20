@@ -20,6 +20,9 @@ export interface CellExecutor {
   executeSelection?: () => Promise<void>;
   executeAtPosition?: (uri: Uri, pos: Position) => Promise<Position>;
   executeInlineCells?: (documentUri: Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]) => Promise<void>;
+  // the cell can only run as a whole (e.g. C++ in an Rcpp cell), so running
+  // the current line or statement runs the whole cell instead
+  runsWholeCell?: boolean;
 }
 
 export function executableLanguages() {
@@ -103,6 +106,19 @@ const reticulateCellExecutor: VSCodeCellExecutor = {
   },
 };
 
+const rcppCellExecutor: VSCodeCellExecutor = {
+  language: "Rcpp",
+  requiredExtension: ["REditorSupport.r", "Ikuyadeu.r"],
+  requiredExtensionName: "R",
+  requiredVersion: "2.4.0",
+  runsWholeCell: true,
+  execute: async (blocks: string[]) => {
+    for (const block of blocks) {
+      await commands.executeCommand("r.runSelection", rcppWithSourceCpp(block));
+    }
+  },
+};
+
 const juliaCellExecutor: VSCodeCellExecutor = {
   language: "julia",
   requiredExtension: ["julialang.language-julia", "ntluong95.positron-julia"],
@@ -163,6 +179,7 @@ const kCellExecutors = [
   pythonCellExecutor,
   stataCellExecutor,
   rCellExecutor,
+  rcppCellExecutor,
   juliaCellExecutor,
   bashCellExecutor,
   shCellExecutor,
@@ -252,6 +269,18 @@ export function isKnitrDocument(
 
 export function pythonWithReticulate(code: string) {
   return `reticulate::repl_python(quiet = TRUE, input = r"--(${code})--")`;
+}
+
+// knitr's Rcpp engine compiles a cell with `Rcpp::sourceCpp(code = ...)`, so
+// running the cell interactively does the same in R. The code goes in an R
+// raw string; C++ raw strings use the same `)--"` syntax, so the delimiter
+// gets as many dashes as it takes not to occur in the code.
+export function rcppWithSourceCpp(code: string) {
+  let dashes = "--";
+  while (code.includes(`)${dashes}"`)) {
+    dashes += "-";
+  }
+  return `Rcpp::sourceCpp(code = r"${dashes}(${code})${dashes}")`;
 }
 
 // ensure language extension is loaded (if required)

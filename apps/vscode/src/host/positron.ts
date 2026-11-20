@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as positron from 'positron';
 
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
-import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
+import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate, rcppWithSourceCpp } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle, unadjustedLine } from "../vdoc/vdoc";
@@ -228,6 +228,9 @@ function positronRuntimeExecutor(
       ) {
         executionLanguage = "r";
         blocks = blocks.map(pythonWithReticulate);
+      } else if (language === "Rcpp") {
+        executionLanguage = "r";
+        blocks = blocks.map(rcppWithSourceCpp);
       }
 
       // Our callback executes each block sequentially
@@ -331,6 +334,14 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
         case "csharp":
         case "r":
           return positronRuntimeExecutor(language, document, engine, outputChannel);
+
+        // C++ can't run by line or statement, and Positron has no runtime for
+        // Rcpp to run inline cells in, so Rcpp cells run as a whole in the R
+        // console
+        case "Rcpp": {
+          const executor = positronRuntimeExecutor(language, document, engine, outputChannel);
+          return { execute: executor.execute, runsWholeCell: true };
+        }
 
         // use positron api for any other language with a Positron runtime
         // (e.g. SAS or ggsql from an extension), and delegate the rest

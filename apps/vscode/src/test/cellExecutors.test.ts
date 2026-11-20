@@ -12,6 +12,8 @@ import {
   trackRuntimeLanguagesWith,
 } from "../host/positron";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
+import { cellOptions } from "../providers/cell/options";
+import { rcppWithSourceCpp } from "../host/executors";
 
 suite("Code sent for execution", function () {
   const engine = new MarkdownEngine();
@@ -218,5 +220,30 @@ suite("Languages with a Positron runtime", function () {
     assert.ok(!hasPositronRuntime("sas"));
     assert.ok(!hasPositronRuntime("ggsql"));
     assert.strictEqual(fakes.changes, 0);
+  });
+});
+
+suite("Rcpp cells", function () {
+  test("are compiled with Rcpp::sourceCpp() in R", function () {
+    assert.strictEqual(
+      rcppWithSourceCpp("// [[Rcpp::export]]\nint one() { return 1; }"),
+      'Rcpp::sourceCpp(code = r"--(// [[Rcpp::export]]\nint one() { return 1; })--")'
+    );
+  });
+
+  test("use a raw string delimiter that doesn't occur in the code", function () {
+    // a C++ raw string with the same delimiter as the R raw string
+    const code = 'std::string s = R"--(a)--";\nstd::string t = R"---(b)---";';
+    assert.strictEqual(
+      rcppWithSourceCpp(code),
+      `Rcpp::sourceCpp(code = r"----(${code})----")`
+    );
+  });
+
+  test("read //| option lines, as knitr does", function () {
+    assert.deepStrictEqual(
+      cellOptions("Rcpp", ["//| eval: false", "int x;"]),
+      { eval: false }
+    );
   });
 });

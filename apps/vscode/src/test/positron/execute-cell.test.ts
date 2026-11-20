@@ -50,12 +50,13 @@ suite("Positron: cell execution", function () {
 
   /**
    * Activate Quarto, install a spy over the Positron runtime, open `qmd` as a
-   * Quarto document, put the cursor on `codeLine`, run the current cell, and
-   * return the runtime calls the extension made.
+   * Quarto document, put the cursor on `codeLine`, run the current cell (or
+   * `command`), and return the runtime calls the extension made.
    */
   async function runCellAndCaptureCalls(
     qmd: string,
-    codeLine: number
+    codeLine: number,
+    command = "quarto.runCurrentCell"
   ): Promise<RuntimeCall[]> {
     const positron = tryAcquirePositronApi();
     assert.ok(
@@ -72,7 +73,8 @@ suite("Positron: cell execution", function () {
     // Spy over the runtime: forward everything except the execution methods,
     // which we record instead of dispatching to a kernel.
     const calls: RuntimeCall[] = [];
-    originalAcquire = globalWithApi.acquirePositronApi;
+    // keep the real one when this runs more than once in a test
+    originalAcquire ??= globalWithApi.acquirePositronApi;
     const realApi = originalAcquire!() as { runtime: Record<string, unknown>; };
     const fakeRuntime = new Proxy(realApi.runtime, {
       get(target, prop, receiver) {
@@ -108,7 +110,7 @@ suite("Positron: cell execution", function () {
     const editor = await vscode.window.showTextDocument(doc);
     editor.selection = new vscode.Selection(codeLine, 0, codeLine, 0);
 
-    await vscode.commands.executeCommand("quarto.runCurrentCell");
+    await vscode.commands.executeCommand(command);
     return calls;
   }
 
@@ -235,6 +237,138 @@ suite("Positron: cell execution", function () {
         previous,
         vscode.ConfigurationTarget.Global
       );
+    }
+  });
+
+  test("submits a {sql} cell to ggsql when an extension provides a ggsql runtime", async function () {
+    const quarto = extension();
+    if (!quarto.isActive) {
+      await quarto.activate();
+    }
+
+    // Needs the ggsql extension, which the test Positron may not have.
+    const hasGgsql = vscode.extensions.all.some((ext) => {
+      const runtimes = (ext.packageJSON as { contributes?: { languageRuntimes?: { languageId?: unknown }[] } })
+        ?.contributes?.languageRuntimes;
+      return Array.isArray(runtimes) && runtimes.some((r) => r?.languageId === "ggsql");
+    });
+    if (!hasGgsql) {
+      this.skip();
+    }
+
+    const qmd = [
+      "---",
+      "title: test",
+      "jupyter: python3",
+      "---",
+      "",
+      "```{sql}",
+      "--| label: q",
+      "select 1 as x",
+      "```",
+      "",
+    ].join("\n");
+
+    const calls = await runCellAndCaptureCalls(qmd, 7);
+    const call = calls.find((c) => c.method === "executeCode" && c.args[0] === "ggsql");
+    assert.ok(
+      call,
+      "Running a {sql} cell should call positron.runtime.executeCode('ggsql', ...). " +
+      `Observed: ${describe(calls)}`
+    );
+    assert.ok(String(call!.args[1]).includes("select 1 as x"));
+    assert.ok(!String(call!.args[1]).includes("--|"), "cell options should be stripped");
+  });
+
+  for (const command of ["quarto.runCurrentCell", "quarto.runCurrent"]) {
+    test(`${command} asks Positron to explain a sql cell it cannot run`, async function () {
+      const quarto = extension();
+      if (!quarto.isActive) {
+        await quarto.activate();
+      }
+
+      // A Positron that has the command explains for real (with a
+      // notification); stand in for it, so the test neither depends on nor
+      // shows one.
+      const kCommand = "_quartoHostExplainUnrunnableCell";
+      const all = await vscode.commands.getCommands(false);
+      if (all.includes(kCommand)) {
+        this.skip();
+      }
+
+      // Registered after the extension activated and probed the host, with
+      // nothing to make it probe again: the explanation must still be asked.
+      const explained: unknown[][] = [];
+      const stub = vscode.commands.registerCommand(kCommand, (...args: unknown[]) => {
+        explained.push(args);
+        return true;
+      });
+      try {
+        // no ggsql runtime in the test build, so nothing runs this sql cell
+        const qmd = [
+          "---",
+          "title: test",
+          "---",
+          "",
+          "```{python}",
+          "x = 1",
+          "```",
+          "",
+          "```{sql}",
+          "select 1",
+          "```",
+          "",
+        ].join("\n");
+        const calls = await runCellAndCaptureCalls(qmd, 9, command);
+
+        assert.strictEqual(explained.length, 1, "Running a sql cell nothing runs should ask Positron to explain");
+        assert.ok(explained[0][0] instanceof vscode.Uri);
+        assert.strictEqual(explained[0][1], "sql");
+        assert.deepStrictEqual(calls, [], `Nothing should run. Observed: ${describe(calls)}`);
+      } finally {
+        stub.dispose();
+      }
+    });
+  }
+
+  test("quarto.runNextCell from a sql cell runs the next python cell, without asking", async function () {
+    const quarto = extension();
+    if (!quarto.isActive) {
+      await quarto.activate();
+    }
+    const kCommand = "_quartoHostExplainUnrunnableCell";
+    const all = await vscode.commands.getCommands(false);
+    const explained: unknown[][] = [];
+    const stub = all.includes(kCommand)
+      ? undefined
+      : vscode.commands.registerCommand(kCommand, (...args: unknown[]) => {
+        explained.push(args);
+        return true;
+      });
+    try {
+      const marker = `qmd_marker_${Date.now()}`;
+      const qmd = [
+        "---",
+        "title: test",
+        "---",
+        "",
+        "```{sql}",
+        "select 1",
+        "```",
+        "",
+        "```{python}",
+        `${marker} = 42`,
+        "```",
+        "",
+      ].join("\n");
+      const calls = await runCellAndCaptureCalls(qmd, 5, "quarto.runNextCell");
+
+      assert.deepStrictEqual(explained, []);
+      const call = calls.find((c) => c.method === "executeCode" && c.args[0] === "python");
+      assert.ok(call, `The next python cell should run. Observed: ${describe(calls)}`);
+      assert.ok(String(call!.args[1]).includes(`${marker} = 42`));
+    } finally {
+      stub?.dispose();
     }
   });
 });

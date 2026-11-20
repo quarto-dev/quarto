@@ -26,6 +26,7 @@ export const kLangCommentChars: Record<string, string | [string, string]> = {
   powershell: "#",
   bash: "#",
   sql: "--",
+  ggsql: "--",
   mysql: "--",
   psql: "--",
   lua: "--",
@@ -67,8 +68,27 @@ export function langCommentChars(lang: string): string[] {
   }
 }
 
+// other comment characters that also start a language's cell option lines.
+// ggsql's options are written `--|`, as for sql, since `#` is not a comment in
+// ggsql. But quarto-cli does not know ggsql yet and reads `#|` options, which
+// the ggsql docs use, so those are honored too until quarto-cli decides
+export const kLangAltOptionCommentChars: Record<string, string[]> = {
+  ggsql: ["#"],
+};
+
 export function optionCommentPattern(comment: string) {
   return new RegExp("^" + escapeRegExp(comment) + "\\s*\\| ?");
+}
+
+// the pattern for the cell option lines of `lang`: its own comment characters
+// (the opening ones, for block comments), or any alternative ones in
+// kLangAltOptionCommentChars
+export function langOptionCommentPattern(lang: string) {
+  const comments = [langCommentChars(lang)[0], ...(kLangAltOptionCommentChars[lang] ?? [])];
+  if (comments.length === 1) {
+    return optionCommentPattern(comments[0]);
+  }
+  return new RegExp("^(?:" + comments.map(escapeRegExp).join("|") + ")\\s*\\| ?");
 }
 
 export function escapeRegExp(str: string) {

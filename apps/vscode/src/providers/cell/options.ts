@@ -9,7 +9,7 @@
 import { lines, loadYaml } from "core";
 import { Token, isCodeBlock, languageNameFromBlock } from "quarto-core";
 
-import { langCommentChars, optionCommentPattern } from "./comment-chars";
+import { langCommentChars, langOptionCommentPattern } from "./comment-chars";
 
 export { optionCommentPattern } from "./comment-chars";
 
@@ -28,32 +28,8 @@ export function cellOptionsForToken(token: Token): Record<string, unknown> {
 
 export function cellOptions(language: string, source: string[]): Record<string, unknown> {
 
-  const commentChars = langCommentChars(language);
-  const optionPattern = optionCommentPattern(commentChars[0]);
-  const optionSuffix = commentChars[1] || "";
-
   // find the yaml lines
-  const optionsSource: string[] = [];
-  const yamlLines: string[] = [];
-  for (const line of source) {
-    const optionMatch = line.match(optionPattern);
-    if (optionMatch) {
-      if (!optionSuffix || line.trimRight().endsWith(optionSuffix)) {
-        let yamlOption = line.substring(optionMatch[0].length);
-        if (optionSuffix) {
-          yamlOption = yamlOption.trimRight();
-          yamlOption = yamlOption.substring(
-            0,
-            yamlOption.length - optionSuffix.length
-          );
-        }
-        yamlLines.push(yamlOption);
-        optionsSource.push(line);
-        continue;
-      }
-    }
-    break;
-  }
+  const yamlLines = leadingOptionYaml(language, source);
 
   // parse the yaml
   if (yamlLines.length > 0) {
@@ -75,4 +51,37 @@ export function cellOptions(language: string, source: string[]): Record<string, 
   } else {
     return {};
   }
+}
+
+/**
+ * The YAML of the option lines at the start of a cell's source, with their
+ * comment characters removed (e.g. `#| echo: false` gives `echo: false`, and
+ * `*| echo: false;` for sas gives the same). The number of entries is the
+ * number of option lines.
+ */
+export function leadingOptionYaml(language: string, source: string[]): string[] {
+  const commentChars = langCommentChars(language);
+  const optionPattern = langOptionCommentPattern(language);
+  const optionSuffix = commentChars[1] || "";
+
+  const yamlLines: string[] = [];
+  for (const line of source) {
+    const optionMatch = line.match(optionPattern);
+    if (optionMatch) {
+      if (!optionSuffix || line.trimRight().endsWith(optionSuffix)) {
+        let yamlOption = line.substring(optionMatch[0].length);
+        if (optionSuffix) {
+          yamlOption = yamlOption.trimRight();
+          yamlOption = yamlOption.substring(
+            0,
+            yamlOption.length - optionSuffix.length
+          );
+        }
+        yamlLines.push(yamlOption);
+        continue;
+      }
+    }
+    break;
+  }
+  return yamlLines;
 }

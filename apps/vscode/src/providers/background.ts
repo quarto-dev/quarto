@@ -13,7 +13,7 @@ import { MarkdownEngine } from "../markdown/engine";
 import { isExecutableLanguageBlock, languageNameFromBlock } from "quarto-core";
 import { vscRange } from "../core/range";
 import { createThrottle } from "../core/throttle";
-import { langCommentChars, optionCommentPattern } from "./cell/comment-chars";
+import { langCommentChars, langOptionCommentPattern } from "./cell/comment-chars";
 
 export function activateBackgroundHighlighter(
   context: vscode.ExtensionContext,
@@ -316,7 +316,7 @@ function cellOptionLines(
     return [];
   }
   const pattern = new RegExp(
-    "^\\s*" + optionCommentPattern(commentChars[0]).source.replace(/^\^/, "")
+    "^\\s*" + langOptionCommentPattern(language).source.replace(/^\^/, "")
   );
   const lines: number[] = [];
   const lastLine = Math.min(blockRange.end.line, document.lineCount - 1);

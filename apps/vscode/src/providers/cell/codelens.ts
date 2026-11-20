@@ -15,22 +15,27 @@ import {
   Range,
 } from "vscode";
 import { MarkdownEngine } from "../../markdown/engine";
-import { blockHasExecutor, hasExecutor } from "./executors";
+import { blockHasExecutor, documentExecutableLanguages, hasExecutor } from "./executors";
 import { Token, languageNameFromBlock } from "quarto-core";
 import { ExtensionHost } from "../../host";
+import { onDidRefreshHostCellLanguages } from "../../host/cell-features";
 
 export function quartoCellExecuteCodeLensProvider(
   host: ExtensionHost,
   engine: MarkdownEngine
 ): CodeLensProvider {
   return {
+    // which cell languages the host runs can change on any configuration or
+    // extension change (e.g. installing an extension with a runtime)
+    onDidChangeCodeLenses: onDidRefreshHostCellLanguages,
     provideCodeLenses(
       document: TextDocument,
       token: CancellationToken
     ): ProviderResult<CodeLens[]> {
       const lenses: CodeLens[] = [];
       const tokens = engine.parse(document);
-      const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(host, token));
+      const languages = documentExecutableLanguages(host, document, engine);
+      const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(languages, token));
       for (let i = 0; i < executableBlocks.length; i++) {
         // respect cancellation request
         if (token.isCancellationRequested) {
@@ -41,7 +46,7 @@ export function quartoCellExecuteCodeLensProvider(
 
         // detect the language and see if it has a cell executor
         const language = languageNameFromBlock(block);
-        if (!hasExecutor(host, language)) {
+        if (!hasExecutor(languages, language)) {
           continue;
         }
 

@@ -172,6 +172,21 @@ interface CellRuntimeLanguagesAnswer {
   cacheable: boolean;
 }
 
+/**
+ * How long to trust that Positron lacks {@link kHostCellRuntimeLanguagesCommand}
+ * before trying it again, in case Positron registers it after this extension
+ * activates. Any configuration or extension change also tries again (see
+ * {@link ensureCellRuntimeLanguagesCache}).
+ */
+const kCommandMissingRetryMs = 30_000;
+
+/**
+ * When {@link kHostCellRuntimeLanguagesCommand} was last found missing, so that
+ * a Positron without it (e.g. stable) is not sent a failing command plus a
+ * `getCommands` on every document version.
+ */
+let cellRuntimeLanguagesCommandMissingAt: number | undefined;
+
 async function queryCellRuntimeLanguages(
   document: vscode.TextDocument,
   languages: string[],
@@ -182,6 +197,13 @@ async function queryCellRuntimeLanguages(
   if (languages.length === 0) {
     return { runtimes, cacheable: true };
   }
+  if (
+    cellRuntimeLanguagesCommandMissingAt !== undefined &&
+    Date.now() - cellRuntimeLanguagesCommandMissingAt < kCommandMissingRetryMs
+  ) {
+    return { runtimes, cacheable: true };
+  }
+  cellRuntimeLanguagesCommandMissingAt = undefined;
   try {
     const answer = await vscode.commands.executeCommand<unknown>(
       kHostCellRuntimeLanguagesCommand,
@@ -207,6 +229,9 @@ async function queryCellRuntimeLanguages(
     // `false` keeps the underscore-prefixed id we are looking for
     const all = await vscode.commands.getCommands(false);
     if (!all.includes(kHostCellRuntimeLanguagesCommand)) {
+      // the cache's listeners also forget this on the next refresh
+      ensureCellRuntimeLanguagesCache();
+      cellRuntimeLanguagesCommandMissingAt = Date.now();
       return { runtimes, cacheable: true };
     }
     outputChannel?.warn(`${kHostCellRuntimeLanguagesCommand} failed: ${err}`);
@@ -240,6 +265,28 @@ interface CellRuntimeLanguagesEntry {
 let cellRuntimeLanguagesCache: Map<string, CellRuntimeLanguagesEntry> | undefined;
 
 /**
+ * The cache of {@link cellRuntimeLanguages}, created with its listeners on
+ * first use: one cache, and one pair of listeners, for the life of the
+ * extension. {@link positronExtensionHost} calls this so that the listener
+ * that drops the cache on {@link onDidRefreshHostCellLanguages} is registered
+ * before any visual editor's listener for the same event. Listeners run in
+ * the order they were added, so a visual editor that re-asks on that event
+ * then gets a fresh answer rather than the stale cached one.
+ */
+function ensureCellRuntimeLanguagesCache(): Map<string, CellRuntimeLanguagesEntry> {
+  if (!cellRuntimeLanguagesCache) {
+    const cache = new Map<string, CellRuntimeLanguagesEntry>();
+    onDidRefreshHostCellLanguages(() => {
+      cache.clear();
+      cellRuntimeLanguagesCommandMissingAt = undefined;
+    });
+    vscode.workspace.onDidCloseTextDocument((closed) => cache.delete(closed.uri.toString()));
+    cellRuntimeLanguagesCache = cache;
+  }
+  return cellRuntimeLanguagesCache;
+}
+
+/**
  * {@link hostCellRuntimeLanguages}, cached per document version so that one run,
  * code lens pass or visual editor init makes one call per document: callers ask
  * about every cell language in the document, and a later question about a
@@ -259,14 +306,7 @@ function cellRuntimeLanguages(
     return Promise.resolve(Object.create(null));
   }
 
-  // one cache, and one pair of listeners, for the life of the extension
-  if (!cellRuntimeLanguagesCache) {
-    const cache = new Map<string, CellRuntimeLanguagesEntry>();
-    onDidRefreshHostCellLanguages(() => cache.clear());
-    vscode.workspace.onDidCloseTextDocument((closed) => cache.delete(closed.uri.toString()));
-    cellRuntimeLanguagesCache = cache;
-  }
-  const cache = cellRuntimeLanguagesCache;
+  const cache = ensureCellRuntimeLanguagesCache();
 
   const key = document.uri.toString();
   const cached = cache.get(key);
@@ -338,6 +378,7 @@ function documentCellLanguages(document: vscode.TextDocument, engine: MarkdownEn
 
 export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
   trackRuntimeLanguages();
+  ensureCellRuntimeLanguagesCache();
   return {
     // supported executable languages (we delegate to the default for langugaes
     // w/o runtimes so we support all languages), plus any language with a

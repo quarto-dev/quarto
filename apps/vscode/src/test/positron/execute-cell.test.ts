@@ -256,6 +256,9 @@ suite("Positron: cell execution", function () {
 
     // Registered after the extension activated, with nothing to make it
     // re-query the host: the command is called, not probed for up front.
+    // (The earlier tests here run only cells in Positron's own runtimes, so
+    // the extension has not just found the command missing; it would not
+    // try it again for a while if it had.)
     const stub = vscode.commands.registerCommand(
       kCommand,
       (_uri: vscode.Uri, languages: string[]) =>

@@ -19,8 +19,10 @@ import {
 import {
   kHostCellRuntimeLanguagesCommand,
   kHostExplainUnrunnableCellCommand,
+  onDidRefreshHostCellLanguages,
   refreshHostCellLanguages,
 } from "../host/cell-features";
+import { cellOptions } from "../providers/cell/options";
 
 suite("Code sent for execution", function () {
   const engine = new MarkdownEngine();
@@ -45,6 +47,22 @@ suite("Code sent for execution", function () {
       await executedCode("```{sas}\n*| label: a;\n*| echo: false;\nproc print data=sashelp.class; run;\n```"),
       "proc print data=sashelp.class; run;"
     );
+  });
+
+  test("strips #| options from a ggsql cell, as quarto-cli and the ggsql docs write them", async function () {
+    // ggsql's options are `--|`, but quarto-cli reads `#|` for ggsql, and `#`
+    // isn't a comment in ggsql, so these lines must not reach the console
+    assert.strictEqual(
+      await executedCode("```{ggsql}\n#| label: a\n#| error: true\nVISUALISE x, y FROM df DRAW point\n```"),
+      "VISUALISE x, y FROM df DRAW point"
+    );
+  });
+
+  test("reads ggsql cell options written with #| or --|", function () {
+    assert.deepStrictEqual(cellOptions("ggsql", ["#| eval: false", "select 1"]), { eval: false });
+    assert.deepStrictEqual(cellOptions("ggsql", ["--| eval: false", "select 1"]), { eval: false });
+    // sql has no such alternative: a `#|` line there is code
+    assert.deepStrictEqual(cellOptions("sql", ["#| eval: false", "select 1"]), {});
   });
 
   test("strips #| options from a Python cell", async function () {
@@ -311,6 +329,57 @@ suite("Cells the host runs", function () {
     } finally {
       command.dispose();
       await refreshHostCellLanguages();
+    }
+  });
+
+  test("Positron remembers that it has no runtime languages command until the next re-query", async function () {
+    const { doc } = await parse(kQmd);
+    await refreshHostCellLanguages();
+    assert.deepStrictEqual({ ...await hostCellRuntimeLanguages(doc, ["sql"]) }, {});
+
+    const calls: unknown[][] = [];
+    const command = vscode.commands.registerCommand(
+      kHostCellRuntimeLanguagesCommand,
+      (...args: unknown[]) => {
+        calls.push(args);
+        return runsSqlAndGgsql(args[1] as string[]);
+      }
+    );
+    try {
+      // the command was just found missing, so it isn't tried again yet
+      assert.deepStrictEqual({ ...await hostCellRuntimeLanguages(doc, ["sql"]) }, {});
+      assert.strictEqual(calls.length, 0);
+
+      // a re-query of the host (any configuration or extension change) tries again
+      await refreshHostCellLanguages();
+      assert.deepStrictEqual({ ...await hostCellRuntimeLanguages(doc, ["sql"]) }, { sql: "ggsql" });
+      assert.strictEqual(calls.length, 1);
+    } finally {
+      command.dispose();
+      await refreshHostCellLanguages();
+    }
+  });
+
+  test("a listener for the host re-query, added after the host, gets a fresh answer", async function () {
+    // a visual editor listens for the re-query, and asks again from the cache
+    // right away: the cache must be dropped before that listener runs
+    const { doc, tokens } = await parse(kQmd);
+    let runs = true;
+    const stub = await stubRuntimeLanguages((languages) => runs ? runsSqlAndGgsql(languages) : {});
+    const host = positronExtensionHost();
+    let reasked: Promise<ReadonlySet<string>> | undefined;
+    const listener = onDidRefreshHostCellLanguages(() => {
+      reasked = documentExecutableLanguages(host, doc, tokens);
+    });
+    try {
+      assert.ok((await documentExecutableLanguages(host, doc, tokens)).has("sql"));
+      runs = false;
+      await refreshHostCellLanguages();
+      assert.ok(reasked, "the listener should have run");
+      assert.ok(!(await reasked!).has("sql"), "the listener should see the new answer");
+    } finally {
+      listener.dispose();
+      await stub.dispose();
     }
   });
 

@@ -292,10 +292,13 @@ class RunCurrentCommand extends RunCommand implements Command {
       // - the selection is empty
       // - this is not a knitr document
       // - this is not a Python or R document being used in Positron
-      const resolveToRunCell = editor.selection.isEmpty &&
-        !this.runSelection_ &&
-        !isKnitrDocument(editor.document, this.engine_) &&
-        (!isPositron && (language === "python" || language === "r"));
+      // or when the selection is empty and the cell can only run as a whole
+      const resolveToRunCell = editor.selection.isEmpty && (
+        executor.runsWholeCell || (
+          !this.runSelection_ &&
+          !isKnitrDocument(editor.document, this.engine_) &&
+          (!isPositron && (language === "python" || language === "r"))
+        ));
 
       if (resolveToRunCell) {
         const code = codeWithoutOptionsFromBlock(block);
@@ -342,6 +345,16 @@ class RunCurrentCommand extends RunCommand implements Command {
     // get selection and active block
     const selection = context.selectedText;
     const activeBlock = context.blocks.find(block => block.active);
+
+    // without a selection, a cell that can only run as a whole runs as a whole
+    if (activeBlock && selection.length <= 0) {
+      const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
+      if (executor?.runsWholeCell) {
+        await executeInteractive(executor, [activeBlock.code], editor.document);
+        await activateIfRequired(editor);
+        return;
+      }
+    }
 
     // if in Positron
     if (isPositron) {

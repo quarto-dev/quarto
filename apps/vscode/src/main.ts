@@ -68,7 +68,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   context.subscriptions.push(trackRuntimeLanguages(outputChannel));
 
   // does the host own language features for code cells?
-  await detectCellFeatureOwnership(outputChannel);
+  context.subscriptions.push(await detectCellFeatureOwnership(outputChannel));
 
   // create markdown engine
   const engine = new MarkdownEngine();

@@ -17,6 +17,12 @@ import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, Virtu
 import { Position, Range } from 'vscode';
 import { Uri } from 'vscode';
 import { tryAcquirePositronApi } from '@posit-dev/positron';
+import { isExecutableLanguageBlock, languageNameFromBlock } from 'quarto-core';
+import {
+  kHostCellRuntimeLanguagesCommand,
+  kHostExplainUnrunnableCellCommand,
+  onDidRefreshHostCellLanguages,
+} from './cell-features';
 
 /**
  * The canonical Positron setting for enabling Quarto inline output.
@@ -99,8 +105,8 @@ export function contributedRuntimeLanguages(
 }
 
 /**
- * Languages whose cells can run in a Positron console. They come from two
- * sources, as in Positron's own check for inline output
+ * Languages whose cells can run in a Positron console of the same language.
+ * They come from two sources, as in Positron's own check for inline output
  * (`hasLanguageRuntimeProvider`):
  *
  * - the `languageRuntimes` contributions of the installed extensions, which
@@ -110,7 +116,9 @@ export function contributedRuntimeLanguages(
  *
  * Both are cached because the checks for whether a cell can run are
  * synchronous. They are tracked only in Positron, so nothing changes in
- * VS Code even when such extensions are installed.
+ * VS Code even when such extensions are installed. Positron can also run
+ * cells of other languages in another language's runtime (e.g. `{sql}` cells
+ * in ggsql); see {@link cellRuntimeLanguages}.
  *
  * See also https://github.com/posit-dev/positron/issues/17432
  */
@@ -203,10 +211,292 @@ function positronRuntimeLanguages(): string[] {
 }
 
 /**
- * Cell executor that runs code in the Positron console of the language.
+ * Cell languages this host hands to a Positron runtime of the same language
+ * without asking (see `cellExecutorForLanguage` below), so they are left out
+ * of the question to {@link kHostCellRuntimeLanguagesCommand}.
  */
-function positronRuntimeExecutor(
+const kPositronRuntimeLanguages: ReadonlySet<string> = new Set(["julia", "python", "csharp", "r"]);
+
+/** Positron's answer, and whether it may be cached (a failure may not). */
+interface CellRuntimeLanguagesAnswer {
+  runtimes: Record<string, string>;
+  cacheable: boolean;
+}
+
+async function queryCellRuntimeLanguages(
+  document: vscode.TextDocument,
+  languages: string[],
+  outputChannel?: vscode.LogOutputChannel
+): Promise<CellRuntimeLanguagesAnswer> {
+  // no prototype, so that looking up e.g. a `{constructor}` cell finds nothing
+  const runtimes: Record<string, string> = Object.create(null);
+  if (languages.length === 0) {
+    return { runtimes, cacheable: true };
+  }
+  try {
+    const answer = await vscode.commands.executeCommand<unknown>(
+      kHostCellRuntimeLanguagesCommand,
+      document.uri,
+      languages
+    );
+    if (answer && typeof answer === "object" && !Array.isArray(answer)) {
+      for (const language of languages) {
+        // own keys only, for the same reason
+        const runtime = Object.prototype.hasOwnProperty.call(answer, language)
+          ? (answer as Record<string, unknown>)[language]
+          : undefined;
+        if (typeof runtime === "string" && runtime.length > 0) {
+          runtimes[language] = runtime;
+        }
+      }
+    }
+    return { runtimes, cacheable: true };
+  } catch (err) {
+    // A Positron without the command runs nothing extra, which is an answer.
+    // The command is called rather than probed for up front because Positron
+    // can register it after this extension activates.
+    // `false` keeps the underscore-prefixed id we are looking for
+    const all = await vscode.commands.getCommands(false);
+    if (!all.includes(kHostCellRuntimeLanguagesCommand)) {
+      return { runtimes, cacheable: true };
+    }
+    outputChannel?.warn(`${kHostCellRuntimeLanguagesCommand} failed: ${err}`);
+    return { runtimes, cacheable: false };
+  }
+}
+
+/**
+ * Ask Positron, in one call, which runtime runs each of `languages` in
+ * `document`. Answers a record from each language Positron runs there to the
+ * language id of its runtime (e.g. `{ sql: "ggsql" }`); a language it does not
+ * run is absent. Answers `{}` when Positron lacks
+ * {@link kHostCellRuntimeLanguagesCommand} or the command fails. Uncached: see
+ * {@link cellRuntimeLanguages}.
+ */
+export async function hostCellRuntimeLanguages(
+  document: vscode.TextDocument,
+  languages: string[],
+  outputChannel?: vscode.LogOutputChannel
+): Promise<Record<string, string>> {
+  return (await queryCellRuntimeLanguages(document, languages, outputChannel)).runtimes;
+}
+
+interface CellRuntimeLanguagesEntry {
+  version: number;
+  asked: ReadonlySet<string>;
+  answer: Promise<Record<string, string>>;
+}
+
+/** Shared by every {@link positronExtensionHost}; see {@link cellRuntimeLanguages}. */
+let cellRuntimeLanguagesCache: Map<string, CellRuntimeLanguagesEntry> | undefined;
+
+/**
+ * {@link hostCellRuntimeLanguages}, cached per document version so that one run,
+ * code lens pass or visual editor init makes one call per document: callers ask
+ * about every cell language in the document, and a later question about a
+ * subset of those is answered from the cache. Positron's answer depends only on
+ * settings, installed extensions and the document's front matter, so the cache
+ * is dropped on {@link onDidRefreshHostCellLanguages} (any configuration or
+ * extension change), and an edit (which is how front matter changes) moves the
+ * document to a new version. A failed call is not cached.
+ */
+function cellRuntimeLanguages(
+  document: vscode.TextDocument,
+  languages: string[],
+  outputChannel?: vscode.LogOutputChannel
+): Promise<Record<string, string>> {
+  const wanted = languages.filter((language) => !kPositronRuntimeLanguages.has(language));
+  if (wanted.length === 0) {
+    return Promise.resolve(Object.create(null));
+  }
+
+  // one cache, and one pair of listeners, for the life of the extension
+  if (!cellRuntimeLanguagesCache) {
+    const cache = new Map<string, CellRuntimeLanguagesEntry>();
+    onDidRefreshHostCellLanguages(() => cache.clear());
+    vscode.workspace.onDidCloseTextDocument((closed) => cache.delete(closed.uri.toString()));
+    cellRuntimeLanguagesCache = cache;
+  }
+  const cache = cellRuntimeLanguagesCache;
+
+  const key = document.uri.toString();
+  const cached = cache.get(key);
+  const current = cached?.version === document.version ? cached : undefined;
+  if (current && wanted.every((language) => current.asked.has(language))) {
+    return current.answer;
+  }
+  const asked = new Set([...(current?.asked ?? []), ...wanted]);
+  const entry: CellRuntimeLanguagesEntry = {
+    version: document.version,
+    asked,
+    answer: queryCellRuntimeLanguages(document, [...asked], outputChannel).then((answer) => {
+      if (!answer.cacheable && cache.get(key) === entry) {
+        cache.delete(key);
+      }
+      return answer.runtimes;
+    }),
+  };
+  cache.set(key, entry);
+  return entry.answer;
+}
+
+/**
+ * Have Positron explain why a `language` cell in `document` cannot be run,
+ * through {@link kHostExplainUnrunnableCellCommand}. Answers whether it
+ * explained: `false` when Positron lacks the command, had nothing to say, or
+ * the command failed.
+ *
+ * Probed for each time rather than once at activation, because Positron can
+ * register it later; this runs only when the user runs a cell that cannot run.
+ */
+export async function hostExplainUnrunnableCell(
   language: string,
+  document: vscode.TextDocument,
+  outputChannel?: vscode.LogOutputChannel
+): Promise<boolean> {
+  // `false` keeps the underscore-prefixed id we are looking for
+  const all = await vscode.commands.getCommands(false);
+  if (!all.includes(kHostExplainUnrunnableCellCommand)) {
+    return false;
+  }
+  try {
+    const explained = await vscode.commands.executeCommand<unknown>(
+      kHostExplainUnrunnableCellCommand,
+      document.uri,
+      language
+    );
+    outputChannel?.debug(
+      `[CellFeatures] The host ${explained === true ? "explained" : "had nothing to say about"} ` +
+      `the unrunnable ${language} cell.`
+    );
+    return explained === true;
+  } catch (err) {
+    outputChannel?.warn(`${kHostExplainUnrunnableCellCommand} failed for ${language}: ${err}`);
+    return false;
+  }
+}
+
+/** The languages of the executable cells in `document`. */
+function documentCellLanguages(document: vscode.TextDocument, engine: MarkdownEngine): string[] {
+  const languages = new Set<string>();
+  for (const token of engine.parse(document)) {
+    if (isExecutableLanguageBlock(token)) {
+      languages.add(languageNameFromBlock(token));
+    }
+  }
+  return [...languages];
+}
+
+export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
+  return {
+    // supported executable languages (we delegate to the default for langugaes
+    // w/o runtimes so we support all languages), plus any language with a
+    // Positron runtime
+    executableLanguages: () => [...new Set([...executableLanguages(), ...positronRuntimeLanguages()])],
+
+    // let Positron say why a cell cannot be run (e.g. that it runs at render)
+    explainNoExecutor: (language: string, document: vscode.TextDocument): Promise<boolean> =>
+      hostExplainUnrunnableCell(language, document, outputChannel),
+
+    // the cell languages Positron says it runs in this document, or that
+    // have a Positron runtime of their own
+    hostExecutableLanguages: async (document: vscode.TextDocument, languages: string[]): Promise<string[]> => {
+      const runtimes = await cellRuntimeLanguages(document, languages, outputChannel);
+      return languages.filter((language) => language in runtimes || hasPositronRuntime(language));
+    },
+
+    cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
+      : Promise<CellExecutor | undefined> => {
+      // use positron api for known runtimes
+      if (kPositronRuntimeLanguages.has(language)) {
+        return positronCellExecutor(language, language, document, engine, outputChannel);
+      }
+
+      // ask Positron whether it runs any other language, otherwise delegate.
+      // Ask about every cell language in the document, which is the question
+      // the run filters and code lenses ask too, so the answer for this
+      // document version is shared rather than asked again
+      const runtimes = await cellRuntimeLanguages(
+        document,
+        [language, ...documentCellLanguages(document, engine)],
+        outputChannel
+      );
+      const runtimeLanguage = runtimes[language];
+      if (runtimeLanguage !== undefined) {
+        return positronCellExecutor(language, runtimeLanguage, document, engine, outputChannel);
+      }
+
+      // any other language with a Positron runtime (e.g. SAS or ggsql from an
+      // extension) runs in that runtime
+      if (hasPositronRuntime(language)) {
+        return positronCellExecutor(language, language, document, engine, outputChannel);
+      }
+      return cellExecutorForLanguage(language, document, engine, silent);
+    },
+
+    registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
+      const positronApi = tryAcquirePositronApi();
+      if (positronApi) {
+        return positronApi.languages.registerStatementRangeProvider('quarto',
+          new EmbeddedStatementRangeProvider(engine));
+      }
+      return new vscode.Disposable(() => { });
+    },
+
+    registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
+      const positronApi = tryAcquirePositronApi();
+      if (positronApi) {
+        return positronApi.languages.registerHelpTopicProvider('quarto',
+          new EmbeddedHelpTopicProvider(engine));
+      }
+      return new vscode.Disposable(() => { });
+    },
+
+    createPreviewPanel: (
+      viewType: string,
+      title: string,
+      preserveFocus?: boolean,
+      options?: vscode.WebviewPanelOptions & vscode.WebviewOptions
+    ): HostWebviewPanel => {
+
+      // create preview panel
+      // (this host is only used when the Positron API is available)
+      const panel = tryAcquirePositronApi()!.window.createPreviewPanel(
+        viewType,
+        title,
+        preserveFocus,
+        {
+          enableScripts: options?.enableScripts,
+          enableForms: options?.enableForms,
+          localResourceRoots: options?.localResourceRoots,
+          portMapping: options?.portMapping
+        }
+      );
+
+      // adapt to host interface
+      return new PositronWebviewPanel(panel);
+    }
+  };
+}
+
+
+/**
+ * A cell executor that hands `language` cells to Positron.
+ *
+ * `language` is the cell's language and `runtimeLanguage` the language id of
+ * the runtime that runs it; they differ for e.g. a `{sql}` cell that Positron
+ * runs in its ggsql runtime, or Python in a knitr document run through
+ * reticulate. Everything here addresses a runtime, so it all uses the runtime
+ * language: `executeCode`, the execute queue, and the `languageId` of
+ * `executeSelection` / `executeAtPosition`, which picks the console session
+ * to run in rather than describing the document (the code itself comes from
+ * the Quarto document and its statement range provider). There is no "sql"
+ * runtime for a `{sql}` cell to find. Positron maps inline execution itself,
+ * from the document and cell ranges, so that takes neither.
+ */
+function positronCellExecutor(
+  language: string,
+  runtimeLanguage: string,
   document: vscode.TextDocument,
   engine: MarkdownEngine,
   outputChannel?: vscode.LogOutputChannel
@@ -220,7 +510,7 @@ function positronRuntimeExecutor(
         return;
       }
 
-      let executionLanguage = language;
+      let executionLanguage = runtimeLanguage;
       if (
         language === "python" &&
         isKnitrDocument(document, engine) &&
@@ -286,13 +576,13 @@ function positronRuntimeExecutor(
       await ExecuteQueue.instance.add(executionLanguage, callback);
     },
     executeSelection: async (): Promise<void> => {
-      await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
+      await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: runtimeLanguage });
     },
     executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
       try {
         return await vscode.commands.executeCommand(
           'positron.executeCodeFromPosition',
-          language,
+          runtimeLanguage,
           uri,
           position
         ) as Position;
@@ -314,79 +604,6 @@ function positronRuntimeExecutor(
     }
   };
 }
-
-export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
-  return {
-    // supported executable languages (we delegate to the default for langugaes
-    // w/o runtimes so we support all languages), plus any language with a
-    // Positron runtime
-    executableLanguages: () => [...new Set([...executableLanguages(), ...positronRuntimeLanguages()])],
-
-    cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
-      : Promise<CellExecutor | undefined> => {
-      switch (language) {
-        // use positron api for known runtimes
-        case "julia":
-        case "python":
-        case "csharp":
-        case "r":
-          return positronRuntimeExecutor(language, document, engine, outputChannel);
-
-        // use positron api for any other language with a Positron runtime
-        // (e.g. SAS or ggsql from an extension), and delegate the rest
-        default:
-          if (hasPositronRuntime(language)) {
-            return positronRuntimeExecutor(language, document, engine, outputChannel);
-          }
-          return cellExecutorForLanguage(language, document, engine, silent);
-      }
-    },
-
-    registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      const positronApi = tryAcquirePositronApi();
-      if (positronApi) {
-        return positronApi.languages.registerStatementRangeProvider('quarto',
-          new EmbeddedStatementRangeProvider(engine));
-      }
-      return new vscode.Disposable(() => { });
-    },
-
-    registerHelpTopicProvider: (engine: MarkdownEngine): vscode.Disposable => {
-      const positronApi = tryAcquirePositronApi();
-      if (positronApi) {
-        return positronApi.languages.registerHelpTopicProvider('quarto',
-          new EmbeddedHelpTopicProvider(engine));
-      }
-      return new vscode.Disposable(() => { });
-    },
-
-    createPreviewPanel: (
-      viewType: string,
-      title: string,
-      preserveFocus?: boolean,
-      options?: vscode.WebviewPanelOptions & vscode.WebviewOptions
-    ): HostWebviewPanel => {
-
-      // create preview panel
-      // (this host is only used when the Positron API is available)
-      const panel = tryAcquirePositronApi()!.window.createPreviewPanel(
-        viewType,
-        title,
-        preserveFocus,
-        {
-          enableScripts: options?.enableScripts,
-          enableForms: options?.enableForms,
-          localResourceRoots: options?.localResourceRoots,
-          portMapping: options?.portMapping
-        }
-      );
-
-      // adapt to host interface
-      return new PositronWebviewPanel(panel);
-    }
-  };
-}
-
 
 /**
  * Whether this version of Positron shows a stop button for preview panels.

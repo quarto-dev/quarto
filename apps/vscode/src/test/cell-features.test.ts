@@ -5,6 +5,10 @@ import {
   detectCellFeatureOwnership,
   hostOwnsLanguage,
   hostOwnsCellFeatures,
+  kHostOwnedLanguagesCommand,
+  onDidChangeHostOwnedLanguages,
+  onDidRefreshHostCellLanguages,
+  refreshHostCellLanguages,
 } from "../host/cell-features";
 import { hostOwnsAnyCell } from "../providers/semantic-tokens";
 import { embeddedLanguage } from "../vdoc/languages";
@@ -60,11 +64,104 @@ suite("Cell Feature Ownership", function () {
   test("stays off when the host has no cell commands", async function () {
     // Vanilla VS Code, which is what these tests run in: the Positron commands
     // are absent, so the gate is off no matter what the setting says.
-    await detectCellFeatureOwnership();
+    const listeners = await detectCellFeatureOwnership();
+    listeners.dispose();
 
     assert.strictEqual(hostOwnsCellFeatures(), false);
     assert.strictEqual(hostOwnsCellFeatures(language("r")), false);
     assert.strictEqual(hostOwnsCellFeatures(language("python")), false);
+  });
+});
+
+suite("Host Advertised Cell Languages", function () {
+  /**
+   * Registers a stand in for the host's command that answers `answer`, runs
+   * `body`, then unregisters it and restores the cached set.
+   */
+  async function withHostOwnedLanguages(
+    answer: () => unknown,
+    body: () => Promise<void>
+  ): Promise<void> {
+    const command = vscode.commands.registerCommand(kHostOwnedLanguagesCommand, answer);
+    try {
+      await refreshHostCellLanguages();
+      await body();
+    } finally {
+      command.dispose();
+      await refreshHostCellLanguages();
+    }
+  }
+
+  test("uses the languages the host advertises", async function () {
+    await withHostOwnedLanguages(() => ["r", "python", "SQL", "ggsql"], async () => {
+      assert.strictEqual(hostOwnsLanguage(language("r")), true);
+      assert.strictEqual(hostOwnsLanguage(language("python")), true);
+      assert.strictEqual(hostOwnsLanguage(language("sql")), true);
+      assert.strictEqual(hostOwnsLanguage(language("julia")), false);
+    });
+  });
+
+  test("owns nothing when the host advertises nothing", async function () {
+    await withHostOwnedLanguages(() => [], async () => {
+      assert.strictEqual(hostOwnsLanguage(language("r")), false);
+      assert.strictEqual(hostOwnsLanguage(language("python")), false);
+    });
+  });
+
+  test("falls back to r and python when the host has no such command", async function () {
+    await refreshHostCellLanguages();
+    assert.strictEqual(hostOwnsLanguage(language("r")), true);
+    assert.strictEqual(hostOwnsLanguage(language("python")), true);
+    assert.strictEqual(hostOwnsLanguage(language("sql")), false);
+  });
+
+  test("falls back to r and python when the command fails or answers nonsense", async function () {
+    await withHostOwnedLanguages(() => { throw new Error("boom"); }, async () => {
+      assert.strictEqual(hostOwnsLanguage(language("r")), true);
+      assert.strictEqual(hostOwnsLanguage(language("sql")), false);
+    });
+    await withHostOwnedLanguages(() => "sql", async () => {
+      assert.strictEqual(hostOwnsLanguage(language("r")), true);
+      assert.strictEqual(hostOwnsLanguage(language("sql")), false);
+    });
+  });
+
+  test("announces a change in the advertised languages", async function () {
+    let changes = 0;
+    const listener = onDidChangeHostOwnedLanguages(() => changes++);
+    try {
+      await withHostOwnedLanguages(() => ["sql"], async () => {
+        assert.strictEqual(changes, 1);
+        // asking again with the same answer is not a change
+        await refreshHostCellLanguages();
+        assert.strictEqual(changes, 1);
+      });
+      // and back to the fallback when the command goes away
+      assert.strictEqual(changes, 2);
+    } finally {
+      listener.dispose();
+    }
+  });
+
+  test("announces every re-query, even when the owned languages are the same", async function () {
+    let refreshes = 0;
+    const listener = onDidRefreshHostCellLanguages(() => refreshes++);
+    try {
+      await refreshHostCellLanguages();
+      await refreshHostCellLanguages();
+    } finally {
+      listener.dispose();
+    }
+    assert.strictEqual(refreshes, 2);
+  });
+
+  test("still stays off without the cell commands", async function () {
+    // the advertised set decides which languages, never whether: that still
+    // takes the cell commands and the setting
+    await withHostOwnedLanguages(() => ["sql"], async () => {
+      assert.strictEqual(hostOwnsCellFeatures(), false);
+      assert.strictEqual(hostOwnsCellFeatures(language("sql")), false);
+    });
   });
 });
 
@@ -122,6 +219,24 @@ suite("Host Owned Cells In A Document", function () {
       await hostOwnsAnyCellIn("# Heading\n\nJust prose, no cells.\n"),
       false
     );
+  });
+
+  test("follows the languages the host advertises", async function () {
+    const kSql = "```{sql}\nselect 1\n```";
+    assert.strictEqual(await hostOwnsAnyCellIn(kSql), false);
+
+    const command = vscode.commands.registerCommand(
+      kHostOwnedLanguagesCommand,
+      () => ["r", "python", "sql"]
+    );
+    try {
+      await refreshHostCellLanguages();
+      assert.strictEqual(await hostOwnsAnyCellIn(kSql), true);
+      assert.strictEqual(await hostOwnsAnyCellIn(`${kJulia}\n\n${kSql}`), true);
+    } finally {
+      command.dispose();
+      await refreshHostCellLanguages();
+    }
   });
 
   test("ignores a non-executable block that names a host owned language", async function () {

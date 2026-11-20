@@ -3,14 +3,28 @@ import * as assert from "assert";
 
 import { isExecutableLanguageBlock, TokenCodeBlock, TokenMath } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
-import { codeWithoutOptionsFromBlock } from "../providers/cell/executors";
+import {
+  blockIsExecutable,
+  codeWithoutOptions,
+  codeWithoutOptionsFromBlock,
+  documentExecutableLanguages,
+} from "../providers/cell/executors";
+import { ExtensionHost } from "../host";
 import type * as positron from "positron";
 import {
   contributedRuntimeLanguages,
   hasPositronRuntime,
+  hostCellRuntimeLanguages,
+  hostExplainUnrunnableCell,
   onDidChangeRuntimeLanguages,
+  positronExtensionHost,
   trackRuntimeLanguagesWith,
 } from "../host/positron";
+import {
+  kHostCellRuntimeLanguagesCommand,
+  kHostExplainUnrunnableCellCommand,
+  refreshHostCellLanguages,
+} from "../host/cell-features";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 
 suite("Code sent for execution", function () {
@@ -19,49 +33,22 @@ suite("Code sent for execution", function () {
   /**
    * Parses `content` as an in-memory Quarto document and returns the code of
    * its single executable cell, as it would be sent to an executor (without
-   * the trailing newline, which isn't what's under test here). `runtimes` are
-   * the languages that count as having a Positron runtime.
+   * the trailing newline, which isn't what's under test here).
    */
-  async function executedCode(content: string, runtimes: string[] = []): Promise<string> {
+  async function executedCode(content: string): Promise<string> {
     const doc = await vscode.workspace.openTextDocument({
       language: "quarto",
       content,
     });
     const blocks = engine.parse(doc).filter(isExecutableLanguageBlock);
     assert.strictEqual(blocks.length, 1, "expected exactly one executable cell");
-    return codeWithoutOptionsFromBlock(
-      blocks[0] as TokenMath | TokenCodeBlock,
-      (language) => runtimes.includes(language)
-    ).trimEnd();
+    return codeWithoutOptionsFromBlock(blocks[0] as TokenMath | TokenCodeBlock).trimEnd();
   }
 
-  test("strips *| options from a sas cell that a Positron runtime runs", async function () {
+  test("strips *| options from a sas cell", async function () {
     assert.strictEqual(
-      await executedCode("```{sas}\n*| label: a;\n*| echo: false;\nproc print data=sashelp.class; run;\n```", ["sas"]),
+      await executedCode("```{sas}\n*| label: a;\n*| echo: false;\nproc print data=sashelp.class; run;\n```"),
       "proc print data=sashelp.class; run;"
-    );
-  });
-
-  test("strips #| options from a ggsql cell that a Positron runtime runs", async function () {
-    // ggsql has no entry in kLangCommentChars, so its options are `#|`
-    // lines, and `#` isn't a comment in ggsql
-    assert.strictEqual(
-      await executedCode("```{ggsql}\n#| label: a\n#| error: true\nVISUALISE x, y FROM df DRAW point\n```", ["ggsql"]),
-      "VISUALISE x, y FROM df DRAW point"
-    );
-  });
-
-  test("keeps the options of a language without a Positron runtime", async function () {
-    assert.strictEqual(
-      await executedCode("```{sas}\n*| label: a;\nproc print; run;\n```"),
-      "*| label: a;\nproc print; run;"
-    );
-  });
-
-  test("keeps option-like lines after the code of a runtime cell", async function () {
-    assert.strictEqual(
-      await executedCode("```{ggsql}\n#| label: a\nSELECT 1\n#| not an option\n```", ["ggsql"]),
-      "SELECT 1\n#| not an option"
     );
   });
 
@@ -77,6 +64,48 @@ suite("Code sent for execution", function () {
       await executedCode("```{bash}\n#| label: a\necho hi\n```"),
       "echo hi"
     );
+  });
+
+  test("strips --| options from a ggsql cell, uncovering a -- @connect line", async function () {
+    // the ggsql kernel only honors `-- @connect:` among a cell's leading lines
+    assert.strictEqual(
+      await executedCode("```{ggsql}\n--| label: plot\n--| echo: false\n-- @connect: duckdb://memory\nvisualise x from t draw point\n```"),
+      "-- @connect: duckdb://memory\nvisualise x from t draw point"
+    );
+  });
+
+  test("strips --| options from a sql cell, and only the leading ones", async function () {
+    assert.strictEqual(
+      await executedCode("```{sql}\n--|label: q\nselect 1\n--| not an option\n```"),
+      "select 1\n--| not an option"
+    );
+  });
+
+  test("keeps #| lines in a sql cell, whose options are written --|", async function () {
+    assert.strictEqual(
+      await executedCode("```{sql}\n#| label: q\nselect 1\n```"),
+      "#| label: q\nselect 1"
+    );
+  });
+
+  test("leaves a cell without options as it is", async function () {
+    assert.strictEqual(await executedCode("```{sql}\nselect 1\n```"), "select 1");
+    assert.strictEqual(await executedCode("```{python}\nx = 1\n```"), "x = 1");
+  });
+
+  test("sends nothing for a cell of only options", async function () {
+    assert.strictEqual(await executedCode("```{python}\n#| label: a\n```"), "");
+    assert.strictEqual(await executedCode("```{ggsql}\n--| label: a\n```"), "");
+  });
+
+  test("strips options from a visual editor block's code by its language", function () {
+    // a visual editor block's code is the cell's body, options included
+    assert.strictEqual(
+      codeWithoutOptions("ggsql", "--| label: plot\n-- @connect: duckdb://memory\nselect 1"),
+      "-- @connect: duckdb://memory\nselect 1"
+    );
+    assert.strictEqual(codeWithoutOptions("python", "#| echo: false\nx = 1"), "x = 1");
+    assert.strictEqual(codeWithoutOptions("python", "x = 1"), "x = 1");
   });
 
   test("keeps #| lines in a language whose options use other comment characters", async function () {
@@ -218,5 +247,295 @@ suite("Languages with a Positron runtime", function () {
     assert.ok(!hasPositronRuntime("sas"));
     assert.ok(!hasPositronRuntime("ggsql"));
     assert.strictEqual(fakes.changes, 0);
+  });
+});
+
+suite("Cells the host runs", function () {
+  const engine = new MarkdownEngine();
+
+  const kQmd = [
+    "```{python}",
+    "x = 1",
+    "```",
+    "",
+    "```{sql}",
+    "select 1",
+    "```",
+    "",
+    "```{ggsql}",
+    "--| label: plot",
+    "visualise x from t draw point",
+    "```",
+    "",
+    "```{mermaid}",
+    "graph LR",
+    "```",
+  ].join("\n");
+
+  async function parse(content: string) {
+    const doc = await vscode.workspace.openTextDocument({ language: "quarto", content });
+    return { doc, tokens: engine.parse(doc) };
+  }
+
+  /**
+   * Registers a stand in for Positron's runtime languages command that answers
+   * `answer(languages)`, recording each call, and refreshes the cached probe so
+   * that the extension sees it. `dispose` unregisters it and refreshes again.
+   */
+  async function stubRuntimeLanguages(answer: (languages: string[]) => unknown) {
+    const calls: unknown[][] = [];
+    const command = vscode.commands.registerCommand(
+      kHostCellRuntimeLanguagesCommand,
+      (...args: unknown[]) => {
+        calls.push(args);
+        return answer(args[1] as string[]);
+      }
+    );
+    await refreshHostCellLanguages();
+    return {
+      calls,
+      dispose: async () => {
+        command.dispose();
+        await refreshHostCellLanguages();
+      },
+    };
+  }
+
+  /** Answers like Positron in a Jupyter document: it runs sql and ggsql. */
+  const runsSqlAndGgsql = (languages: string[]) => Object.fromEntries(
+    languages
+      .filter((l) => l === "sql" || l === "ggsql")
+      .map((l) => [l, "ggsql"])
+  );
+
+  test("a host without hostExecutableLanguages adds nothing", async function () {
+    const { doc, tokens } = await parse(kQmd);
+    const host = {} as ExtensionHost;
+    const languages = await documentExecutableLanguages(host, doc, tokens);
+    assert.ok(languages.has("python"));
+    assert.ok(!languages.has("sql"));
+    assert.ok(!languages.has("ggsql"));
+  });
+
+  test("adds the languages the host runs, asking once about every cell language", async function () {
+    const { doc, tokens } = await parse(kQmd);
+    const asked: string[][] = [];
+    const host = {
+      hostExecutableLanguages: async (_doc: vscode.TextDocument, languages: string[]) => {
+        asked.push(languages);
+        return languages.filter((l) => l === "sql" || l === "ggsql");
+      },
+    } as unknown as ExtensionHost;
+    const languages = await documentExecutableLanguages(host, doc, tokens);
+    assert.ok(languages.has("python"));
+    assert.ok(languages.has("sql"));
+    assert.ok(languages.has("ggsql"));
+    assert.ok(!languages.has("mermaid"));
+    assert.deepStrictEqual(asked, [["python", "sql", "ggsql", "mermaid"]]);
+
+    const executable = tokens.filter((t) => blockIsExecutable(languages, t));
+    assert.strictEqual(executable.length, 3);
+  });
+
+  test("asks Positron's batch command and keeps only the languages it runs", async function () {
+    const { doc } = await parse(kQmd);
+    const stub = await stubRuntimeLanguages((languages) => ({
+      ...runsSqlAndGgsql(languages),
+      notAsked: "ggsql",
+      mermaid: 42,
+    }));
+    try {
+      const runtimes = await hostCellRuntimeLanguages(doc, ["sql", "ggsql", "mermaid", "constructor"]);
+      assert.deepStrictEqual({ ...runtimes }, { sql: "ggsql", ggsql: "ggsql" });
+      assert.strictEqual(runtimes["constructor"], undefined);
+      assert.strictEqual(stub.calls.length, 1);
+      assert.strictEqual(String(stub.calls[0][0]), doc.uri.toString());
+      assert.deepStrictEqual(stub.calls[0][1], ["sql", "ggsql", "mermaid", "constructor"]);
+    } finally {
+      await stub.dispose();
+    }
+  });
+
+  test("Positron asks once per document version, leaving out its own runtimes", async function () {
+    const { doc, tokens } = await parse(kQmd);
+    const stub = await stubRuntimeLanguages(runsSqlAndGgsql);
+    try {
+      const host = positronExtensionHost();
+      const languages = await documentExecutableLanguages(host, doc, tokens);
+      assert.ok(languages.has("sql") && languages.has("ggsql") && !languages.has("mermaid"));
+
+      // a run of a cell, a second pass, and a question about a subset are
+      // all answered from the first call
+      assert.ok(await host.cellExecutorForLanguage("sql", doc, engine, true));
+      assert.ok(await host.cellExecutorForLanguage("ggsql", doc, engine, true));
+      await documentExecutableLanguages(host, doc, tokens);
+      assert.strictEqual(stub.calls.length, 1);
+      assert.deepStrictEqual(stub.calls[0][1], ["sql", "ggsql", "mermaid"]);
+
+      // a re-query of the host (any configuration or extension change) drops
+      // the cached answer
+      await refreshHostCellLanguages();
+      await documentExecutableLanguages(host, doc, tokens);
+      assert.strictEqual(stub.calls.length, 2);
+
+      // and so does an edit, which is how the front matter changes
+      const edit = new vscode.WorkspaceEdit();
+      edit.insert(doc.uri, new vscode.Position(0, 0), "\n");
+      assert.ok(await vscode.workspace.applyEdit(edit));
+      await documentExecutableLanguages(host, doc, engine.parse(doc));
+      assert.strictEqual(stub.calls.length, 3);
+    } finally {
+      await stub.dispose();
+    }
+  });
+
+  test("Positron does not ask when every cell runs in its own runtimes", async function () {
+    const { doc, tokens } = await parse("```{python}\nx = 1\n```\n\n```{r}\nx <- 1\n```");
+    const stub = await stubRuntimeLanguages(runsSqlAndGgsql);
+    try {
+      const host = positronExtensionHost();
+      await documentExecutableLanguages(host, doc, tokens);
+      assert.ok(await host.cellExecutorForLanguage("python", doc, engine, true));
+      assert.strictEqual(stub.calls.length, 0);
+    } finally {
+      await stub.dispose();
+    }
+  });
+
+  test("Positron runs nothing extra when it has no such command", async function () {
+    const { doc, tokens } = await parse(kQmd);
+    await refreshHostCellLanguages();
+    const host = positronExtensionHost();
+    assert.deepStrictEqual({ ...await hostCellRuntimeLanguages(doc, ["sql"]) }, {});
+    const languages = await documentExecutableLanguages(host, doc, tokens);
+    assert.ok(!languages.has("sql") && !languages.has("ggsql"));
+    // and falls back to this extension's own executors, which have none for sql
+    assert.strictEqual(await host.cellExecutorForLanguage("sql", doc, engine, true), undefined);
+  });
+
+  test("Positron sees a runtime languages command registered after the last re-query", async function () {
+    const { doc, tokens } = await parse(kQmd);
+    await refreshHostCellLanguages();
+    const command = vscode.commands.registerCommand(
+      kHostCellRuntimeLanguagesCommand,
+      (_uri: unknown, languages: string[]) => runsSqlAndGgsql(languages)
+    );
+    try {
+      // no re-query in between: the command is called, not probed for
+      const languages = await documentExecutableLanguages(positronExtensionHost(), doc, tokens);
+      assert.ok(languages.has("sql") && languages.has("ggsql"));
+    } finally {
+      command.dispose();
+      await refreshHostCellLanguages();
+    }
+  });
+
+  test("Positron asks again after a failed answer", async function () {
+    const { doc, tokens } = await parse(kQmd);
+    let fail = true;
+    const stub = await stubRuntimeLanguages((languages) => {
+      if (fail) {
+        throw new Error("boom");
+      }
+      return runsSqlAndGgsql(languages);
+    });
+    try {
+      const host = positronExtensionHost();
+      assert.ok(!(await documentExecutableLanguages(host, doc, tokens)).has("sql"));
+      fail = false;
+      // same document version, but the failure was not cached
+      assert.ok((await documentExecutableLanguages(host, doc, tokens)).has("sql"));
+      assert.strictEqual(stub.calls.length, 2);
+    } finally {
+      await stub.dispose();
+    }
+  });
+
+  test("Positron hands a cell it runs to a Positron executor", async function () {
+    const { doc } = await parse(kQmd);
+    const stub = await stubRuntimeLanguages(runsSqlAndGgsql);
+    try {
+      const executor = await positronExtensionHost().cellExecutorForLanguage("sql", doc, engine, true);
+      assert.ok(executor, "expected an executor for a cell Positron runs");
+      assert.ok(executor!.executeInlineCells, "expected a Positron executor");
+    } finally {
+      await stub.dispose();
+    }
+  });
+});
+
+suite("Cells the host explains it cannot run", function () {
+  async function quartoDoc() {
+    return await vscode.workspace.openTextDocument({
+      language: "quarto",
+      content: "---\nengine: knitr\n---\n\n```{sql}\nselect 1\n```\n",
+    });
+  }
+
+  /** Registers a stand in for Positron's explain command answering `answer`. */
+  async function stubExplain(answer: () => unknown) {
+    const calls: unknown[][] = [];
+    const command = vscode.commands.registerCommand(
+      kHostExplainUnrunnableCellCommand,
+      (...args: unknown[]) => {
+        calls.push(args);
+        return answer();
+      }
+    );
+    await refreshHostCellLanguages();
+    return {
+      calls,
+      dispose: async () => {
+        command.dispose();
+        await refreshHostCellLanguages();
+      },
+    };
+  }
+
+  test("explains nothing when Positron has no such command", async function () {
+    await refreshHostCellLanguages();
+    const doc = await quartoDoc();
+    assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
+    assert.strictEqual(await positronExtensionHost().explainNoExecutor!("sql", doc), false);
+  });
+
+  test("asks Positron to explain, and reports whether it did", async function () {
+    const doc = await quartoDoc();
+    let explained: unknown = true;
+    const stub = await stubExplain(() => explained);
+    try {
+      assert.strictEqual(await positronExtensionHost().explainNoExecutor!("sql", doc), true);
+      assert.strictEqual(String(stub.calls[0][0]), doc.uri.toString());
+      assert.strictEqual(stub.calls[0][1], "sql");
+
+      explained = false;
+      assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
+      explained = "yes";
+      assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
+    } finally {
+      await stub.dispose();
+    }
+  });
+
+  test("sees a command registered after the host was last probed", async function () {
+    await refreshHostCellLanguages();
+    const doc = await quartoDoc();
+    const command = vscode.commands.registerCommand(kHostExplainUnrunnableCellCommand, () => true);
+    try {
+      // no re-query in between: the probe is made when the explanation is needed
+      assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), true);
+    } finally {
+      command.dispose();
+    }
+  });
+
+  test("treats a failing command as no explanation", async function () {
+    const doc = await quartoDoc();
+    const stub = await stubExplain(() => { throw new Error("boom"); });
+    try {
+      assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
+    } finally {
+      await stub.dispose();
+    }
   });
 });

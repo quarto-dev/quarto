@@ -3,6 +3,9 @@
 ## 1.140.0 (Unreleased)
 
 - In Positron with inline output off, cells in languages whose runtimes come from extensions, such as `{ggsql}` and `{sas}`, now run in the console with **Run Cell**, **Run Above**, **Run Next Cell** and the usual shortcuts (<https://github.com/quarto-dev/quarto/pull/1237>).
+- `{ggsql}` cells are now highlighted, and `--|` cell option lines in them are recognized, as in `{sql}` cells (<https://github.com/quarto-dev/quarto/pull/1239>).
+- Running a cell now strips its cell option lines whatever comment characters its language uses, for example `--|` in `{sql}` cells and `//|` in `{csharp}` cells, and also when the cell is run from the visual editor. Previously only `#|` lines were stripped, and only in the source editor (<https://github.com/quarto-dev/quarto/pull/1239>).
+- In Positron builds that support it, the extension asks Positron which cell languages it can run in a document, so cells such as `{sql}` and `{ggsql}` can be run. Running a cell that can't be run shows Positron's explanation, for example that a `{sql}` cell needs an extension that is not installed (<https://github.com/quarto-dev/quarto/pull/1239>).
 - Fixed a bug where hovering over any text after a citation on the same line showed that citation's reference. The hover now shows only over the `@` and the citation key (<https://github.com/quarto-dev/quarto/pull/1225>).
 - In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).
 - Fixed a bug where the language server could hang when hovering over text on a line that contains single-line display math such as `$$x$$` (<https://github.com/quarto-dev/quarto/pull/1212>).

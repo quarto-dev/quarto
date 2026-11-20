@@ -153,9 +153,7 @@ suite("Run commands on several cells, one of which the host alone runs", functio
       execute: async (blocks: string[]) => { (ran[language] ??= []).push(...blocks); },
     });
     const host = {
-      executableLanguages: () => ["python"],
-      hostExecutableLanguages: async (_doc: vscode.TextDocument, languages: string[]) =>
-        languages.filter((l) => l === "sql"),
+      executableLanguages: () => ["python", "sql"],
       cellExecutorForLanguage: async (language: string) =>
         language === "python" || language === "sql" ? executorFor(language) : undefined,
     } as unknown as ExtensionHost;

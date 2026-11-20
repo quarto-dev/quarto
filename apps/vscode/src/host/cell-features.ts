@@ -92,18 +92,6 @@ const kCellOwnershipCommands = [
 export const kHostOwnedLanguagesCommand = "_quartoHostOwnedCellLanguages";
 
 /**
- * The command through which the host says which runtime runs the cells of a
- * document. Takes `(documentUri: Uri, cellLanguages: string[])` and answers a
- * record from each cell language it runs in that document to the language id
- * of its runtime (e.g. `{ sql: "ggsql", ggsql: "ggsql" }` for a Jupyter
- * document); a language it does not run is absent. The answer depends only on
- * settings, installed extensions and the document's front matter. Called from
- * `host/positron.ts`, which drops its cached answers on
- * {@link onDidRefreshHostCellLanguages}.
- */
-export const kHostCellRuntimeLanguagesCommand = "_quartoHostCellRuntimeLanguages";
-
-/**
  * Languages whose cells a host that has the cell commands but not
  * {@link kHostOwnedLanguagesCommand} owns. Those are the hosts that shipped
  * before the command existed, and these are the languages they were verified
@@ -148,8 +136,9 @@ const onDidRefreshHostCellLanguagesEmitter = new EventEmitter<void>();
 /**
  * Fires after every re-query of the host (any configuration change, any change
  * to the installed extensions), whether or not the owned languages changed.
- * The host's answers about which runtime runs a cell can change on the same
- * triggers, so anything that caches those answers drops them on this event.
+ * Which cell languages can run can change on the same triggers (e.g. an
+ * extension that provides a runtime is installed), so the code lenses are
+ * recomputed on this event.
  */
 export const onDidRefreshHostCellLanguages: Event<void> =
   onDidRefreshHostCellLanguagesEmitter.event;

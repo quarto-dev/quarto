@@ -10,8 +10,7 @@ import {
   CancellationToken,
   CodeLens,
   CodeLensProvider,
-  Disposable,
-  Event,
+  ProviderResult,
   TextDocument,
   Range,
 } from "vscode";
@@ -20,36 +19,21 @@ import { blockHasExecutor, documentExecutableLanguages, hasExecutor } from "./ex
 import { Token, languageNameFromBlock } from "quarto-core";
 import { ExtensionHost } from "../../host";
 import { onDidChangeRuntimeLanguages } from "../../host/positron";
-import { onDidRefreshHostCellLanguages } from "../../host/cell-features";
-
-/**
- * Fires when the cells that can run may have changed: a language gained or
- * lost a Positron runtime, or the host's answer about which cell languages it
- * runs may have changed (any configuration or extension change).
- */
-const onDidChangeExecutableLanguages: Event<void> = (listener, thisArgs, disposables) => {
-  const fire = () => listener.call(thisArgs);
-  const subscription = Disposable.from(
-    onDidChangeRuntimeLanguages(fire),
-    onDidRefreshHostCellLanguages(fire)
-  );
-  disposables?.push(subscription);
-  return subscription;
-};
 
 export function quartoCellExecuteCodeLensProvider(
   host: ExtensionHost,
   engine: MarkdownEngine
 ): CodeLensProvider {
   return {
-    onDidChangeCodeLenses: onDidChangeExecutableLanguages,
-    async provideCodeLenses(
+    // a language can gain a Positron runtime after the lenses are computed
+    onDidChangeCodeLenses: onDidChangeRuntimeLanguages,
+    provideCodeLenses(
       document: TextDocument,
       token: CancellationToken
-    ): Promise<CodeLens[]> {
+    ): ProviderResult<CodeLens[]> {
       const lenses: CodeLens[] = [];
       const tokens = engine.parse(document);
-      const languages = await documentExecutableLanguages(host, document, engine, tokens);
+      const languages = documentExecutableLanguages(host, document, engine);
       const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(languages, token));
       for (let i = 0; i < executableBlocks.length; i++) {
         // respect cancellation request

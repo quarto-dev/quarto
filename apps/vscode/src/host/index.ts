@@ -67,13 +67,6 @@ export interface ExtensionHost {
   ): Promise<CellExecutor | undefined>;
 
   /**
-   * Which of `languages` (the cell languages of `document`) the host itself
-   * runs there, on top of `executableLanguages`. Optional: a host without it
-   * runs none.
-   */
-  hostExecutableLanguages?(document: TextDocument, languages: string[]): Promise<string[]>;
-
-  /**
    * Explain to the user why a `language` cell in `document` cannot be run
    * (there is no executor for it). Answers whether it explained; when it did
    * not, the caller falls back to its own message, if any. Optional: a host

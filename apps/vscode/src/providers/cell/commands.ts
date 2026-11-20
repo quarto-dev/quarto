@@ -157,8 +157,8 @@ abstract class RunCommand {
     return await this.host_.cellExecutorForLanguage(language, document, engine);
   }
 
-  protected async executableLanguages(document: TextDocument, tokens: Token[]) {
-    return await documentExecutableLanguages(this.host_, document, this.engine_, tokens);
+  protected executableLanguages(document: TextDocument) {
+    return documentExecutableLanguages(this.host_, document, this.engine_);
   }
 
   private async explainNoExecutor(language: string, document: TextDocument): Promise<boolean> {
@@ -223,7 +223,7 @@ class RunNextCellCommand extends RunCommand implements Command {
   }
 
   override async doExecute(editor: TextEditor, tokens: Token[], line: number) {
-    const languages = await this.executableLanguages(editor.document, tokens);
+    const languages = this.executableLanguages(editor.document);
     const block = nextBlock(languages, line, tokens, true);
     if (block) {
       await runAdjacentBlock(this.host_, editor, this.engine_, block);
@@ -261,7 +261,7 @@ class RunPreviousCellCommand extends RunCommand implements Command {
   }
 
   override async doExecute(editor: TextEditor, tokens: Token[], line: number) {
-    const languages = await this.executableLanguages(editor.document, tokens);
+    const languages = this.executableLanguages(editor.document);
     const block = previousBlock(languages, line, tokens, true);
     if (block) {
       await runAdjacentBlock(this.host_, editor, this.engine_, block);
@@ -513,7 +513,7 @@ class RunCellsAboveCommand extends RunCommand implements Command {
   ) {
     // collect up blocks prior to the active one
     const blocks: Array<TokenMath | TokenCodeBlock> = [];
-    const languages = await this.executableLanguages(editor.document, tokens);
+    const languages = this.executableLanguages(editor.document);
     for (const blk of tokens.filter((token?: Token) => blockIsExecutable(languages, token)) as Array<TokenMath | TokenCodeBlock>) {
       // if the end of this block is past the line then bail
       if (blk.range.end.line > line) {
@@ -592,7 +592,7 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     block?: Token
   ) {
     // see if we can get the language from the current block
-    const languages = await this.executableLanguages(editor.document, tokens);
+    const languages = this.executableLanguages(editor.document);
     // skip the cells above or at the cursor
     const below = tokens.filter((token?: Token) =>
       blockIsExecutable(languages, token) && line < token.range.start.line
@@ -663,7 +663,7 @@ class RunAllCellsCommand extends RunCommand implements Command {
     const blocks: string[] = [];
     const ranges: Range[] = [];
     const metadata: (Record<string, unknown> | undefined)[] = [];
-    const languages = await this.executableLanguages(editor.document, tokens);
+    const languages = this.executableLanguages(editor.document);
     const executable = tokens.filter((token?: Token) => blockIsExecutable(languages, token)) as Array<TokenMath | TokenCodeBlock>;
     const language = runLanguage(executable);
     for (const blk of executable.filter((blk) => languageNameFromBlock(blk) === language)) {

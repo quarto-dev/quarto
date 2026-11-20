@@ -406,8 +406,9 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     const executableLanguages = async () => [...await documentExecutableLanguages(
       this.extensionHost,
       document,
+      this.engine,
       this.engine.parse(document),
-      this.extensionHost.executableLanguages(true, document, this.engine)
+      true
     )];
 
     // send the editor the executable languages when they change: the host's

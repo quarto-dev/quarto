@@ -212,28 +212,30 @@ suite("Cells the host runs", function () {
 
   test("a host without hostExecutableLanguages adds nothing", async function () {
     const { doc, tokens } = await parse(kQmd);
-    const host = {} as ExtensionHost;
-    const languages = await documentExecutableLanguages(host, doc, tokens);
+    const host = { executableLanguages: () => ["python"] } as unknown as ExtensionHost;
+    const languages = await documentExecutableLanguages(host, doc, engine, tokens);
     assert.ok(languages.has("python"));
     assert.ok(!languages.has("sql"));
     assert.ok(!languages.has("ggsql"));
   });
 
-  test("adds the languages the host runs, asking once about every cell language", async function () {
+  test("adds the languages the host runs, asking once about the other cell languages", async function () {
     const { doc, tokens } = await parse(kQmd);
     const asked: string[][] = [];
     const host = {
+      executableLanguages: () => ["python"],
       hostExecutableLanguages: async (_doc: vscode.TextDocument, languages: string[]) => {
         asked.push(languages);
         return languages.filter((l) => l === "sql" || l === "ggsql");
       },
     } as unknown as ExtensionHost;
-    const languages = await documentExecutableLanguages(host, doc, tokens);
+    const languages = await documentExecutableLanguages(host, doc, engine, tokens);
     assert.ok(languages.has("python"));
     assert.ok(languages.has("sql"));
     assert.ok(languages.has("ggsql"));
     assert.ok(!languages.has("mermaid"));
-    assert.deepStrictEqual(asked, [["python", "sql", "ggsql", "mermaid"]]);
+    // not about python, which the host's executableLanguages already has
+    assert.deepStrictEqual(asked, [["sql", "ggsql", "mermaid"]]);
 
     const executable = tokens.filter((t) => blockIsExecutable(languages, t));
     assert.strictEqual(executable.length, 3);
@@ -263,41 +265,44 @@ suite("Cells the host runs", function () {
     const stub = await stubRuntimeLanguages(runsSqlAndGgsql);
     try {
       const host = positronExtensionHost();
-      const languages = await documentExecutableLanguages(host, doc, tokens);
+      const languages = await documentExecutableLanguages(host, doc, engine, tokens);
       assert.ok(languages.has("sql") && languages.has("ggsql") && !languages.has("mermaid"));
 
       // a run of a cell, a second pass, and a question about a subset are
       // all answered from the first call
       assert.ok(await host.cellExecutorForLanguage("sql", doc, engine, true));
       assert.ok(await host.cellExecutorForLanguage("ggsql", doc, engine, true));
-      await documentExecutableLanguages(host, doc, tokens);
+      await documentExecutableLanguages(host, doc, engine, tokens);
       assert.strictEqual(stub.calls.length, 1);
       assert.deepStrictEqual(stub.calls[0][1], ["sql", "ggsql", "mermaid"]);
 
       // a re-query of the host (any configuration or extension change) drops
       // the cached answer
       await refreshHostCellLanguages();
-      await documentExecutableLanguages(host, doc, tokens);
+      await documentExecutableLanguages(host, doc, engine, tokens);
       assert.strictEqual(stub.calls.length, 2);
 
       // and so does an edit, which is how the front matter changes
       const edit = new vscode.WorkspaceEdit();
       edit.insert(doc.uri, new vscode.Position(0, 0), "\n");
       assert.ok(await vscode.workspace.applyEdit(edit));
-      await documentExecutableLanguages(host, doc, engine.parse(doc));
+      await documentExecutableLanguages(host, doc, engine, engine.parse(doc));
       assert.strictEqual(stub.calls.length, 3);
     } finally {
       await stub.dispose();
     }
   });
 
-  test("Positron does not ask when every cell runs in its own runtimes", async function () {
-    const { doc, tokens } = await parse("```{python}\nx = 1\n```\n\n```{r}\nx <- 1\n```");
-    const stub = await stubRuntimeLanguages(runsSqlAndGgsql);
+  test("Positron does not ask about cells it or this extension already runs", async function () {
+    // python and r run in Positron's own runtimes; bash has an executor here
+    const { doc, tokens } = await parse("```{python}\nx = 1\n```\n\n```{r}\nx <- 1\n```\n\n```{bash}\necho hi\n```");
+    const stub = await stubRuntimeLanguages((languages) => Object.fromEntries(languages.map((l) => [l, l])));
     try {
       const host = positronExtensionHost();
-      await documentExecutableLanguages(host, doc, tokens);
+      const languages = await documentExecutableLanguages(host, doc, engine, tokens);
+      assert.ok(languages.has("python") && languages.has("r") && languages.has("bash"));
       assert.ok(await host.cellExecutorForLanguage("python", doc, engine, true));
+      assert.ok(await host.cellExecutorForLanguage("bash", doc, engine, true));
       assert.strictEqual(stub.calls.length, 0);
     } finally {
       await stub.dispose();
@@ -309,7 +314,7 @@ suite("Cells the host runs", function () {
     await refreshHostCellLanguages();
     const host = positronExtensionHost();
     assert.deepStrictEqual({ ...await hostCellRuntimeLanguages(doc, ["sql"]) }, {});
-    const languages = await documentExecutableLanguages(host, doc, tokens);
+    const languages = await documentExecutableLanguages(host, doc, engine, tokens);
     assert.ok(!languages.has("sql") && !languages.has("ggsql"));
     // and falls back to this extension's own executors, which have none for sql
     assert.strictEqual(await host.cellExecutorForLanguage("sql", doc, engine, true), undefined);
@@ -324,7 +329,7 @@ suite("Cells the host runs", function () {
     );
     try {
       // no re-query in between: the command is called, not probed for
-      const languages = await documentExecutableLanguages(positronExtensionHost(), doc, tokens);
+      const languages = await documentExecutableLanguages(positronExtensionHost(), doc, engine, tokens);
       assert.ok(languages.has("sql") && languages.has("ggsql"));
     } finally {
       command.dispose();
@@ -369,10 +374,10 @@ suite("Cells the host runs", function () {
     const host = positronExtensionHost();
     let reasked: Promise<ReadonlySet<string>> | undefined;
     const listener = onDidRefreshHostCellLanguages(() => {
-      reasked = documentExecutableLanguages(host, doc, tokens);
+      reasked = documentExecutableLanguages(host, doc, engine, tokens);
     });
     try {
-      assert.ok((await documentExecutableLanguages(host, doc, tokens)).has("sql"));
+      assert.ok((await documentExecutableLanguages(host, doc, engine, tokens)).has("sql"));
       runs = false;
       await refreshHostCellLanguages();
       assert.ok(reasked, "the listener should have run");
@@ -394,10 +399,10 @@ suite("Cells the host runs", function () {
     });
     try {
       const host = positronExtensionHost();
-      assert.ok(!(await documentExecutableLanguages(host, doc, tokens)).has("sql"));
+      assert.ok(!(await documentExecutableLanguages(host, doc, engine, tokens)).has("sql"));
       fail = false;
       // same document version, but the failure was not cached
-      assert.ok((await documentExecutableLanguages(host, doc, tokens)).has("sql"));
+      assert.ok((await documentExecutableLanguages(host, doc, engine, tokens)).has("sql"));
       assert.strictEqual(stub.calls.length, 2);
     } finally {
       await stub.dispose();

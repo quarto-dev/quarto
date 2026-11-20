@@ -161,10 +161,24 @@ function positronRuntimeLanguages(): string[] {
 
 /**
  * Cell languages this host hands to a Positron runtime of the same language
- * without asking (see `cellExecutorForLanguage` below), so they are left out
- * of the question to {@link kHostCellRuntimeLanguagesCommand}.
+ * without asking (see `cellExecutorForLanguage` below).
  */
 const kPositronRuntimeLanguages: ReadonlySet<string> = new Set(["julia", "python", "csharp", "r"]);
+
+/**
+ * Whether to ask Positron, through {@link kHostCellRuntimeLanguagesCommand},
+ * whether and where it runs `language` cells. Not for a language this host
+ * already knows how to run: one of {@link kPositronRuntimeLanguages}, one with
+ * a Positron runtime of its own (which Positron decides the same way), or one
+ * this extension has an executor for. In practice that leaves `{sql}`, which
+ * Positron runs in ggsql except in a knitr document, and languages nothing
+ * runs, which Positron may explain.
+ */
+function asksPositron(language: string): boolean {
+  return !kPositronRuntimeLanguages.has(language)
+    && !hasPositronRuntime(language)
+    && !executableLanguages().includes(language);
+}
 
 /** Positron's answer, and whether it may be cached (a failure may not). */
 interface CellRuntimeLanguagesAnswer {
@@ -287,10 +301,11 @@ function ensureCellRuntimeLanguagesCache(): Map<string, CellRuntimeLanguagesEntr
 }
 
 /**
- * {@link hostCellRuntimeLanguages}, cached per document version so that one run,
- * code lens pass or visual editor init makes one call per document: callers ask
- * about every cell language in the document, and a later question about a
- * subset of those is answered from the cache. Positron's answer depends only on
+ * {@link hostCellRuntimeLanguages}, for the `languages` that {@link asksPositron},
+ * cached per document version so that one run, code lens pass or visual editor
+ * init makes one call per document: callers ask about every cell language in
+ * the document, and a later question about a subset of those is answered from
+ * the cache. Positron's answer depends only on
  * settings, installed extensions and the document's front matter, so the cache
  * is dropped on {@link onDidRefreshHostCellLanguages} (any configuration or
  * extension change), and an edit (which is how front matter changes) moves the
@@ -301,7 +316,7 @@ function cellRuntimeLanguages(
   languages: string[],
   outputChannel?: vscode.LogOutputChannel
 ): Promise<Record<string, string>> {
-  const wanted = languages.filter((language) => !kPositronRuntimeLanguages.has(language));
+  const wanted = languages.filter(asksPositron);
   if (wanted.length === 0) {
     return Promise.resolve(Object.create(null));
   }
@@ -389,38 +404,36 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
     explainNoExecutor: (language: string, document: vscode.TextDocument): Promise<boolean> =>
       hostExplainUnrunnableCell(language, document, outputChannel),
 
-    // the cell languages Positron says it runs in this document, or that
-    // have a Positron runtime of their own
+    // the cell languages, beyond executableLanguages above, that Positron
+    // says it runs in this document
     hostExecutableLanguages: async (document: vscode.TextDocument, languages: string[]): Promise<string[]> => {
       const runtimes = await cellRuntimeLanguages(document, languages, outputChannel);
-      return languages.filter((language) => language in runtimes || hasPositronRuntime(language));
+      return languages.filter((language) => language in runtimes);
     },
 
     cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
       : Promise<CellExecutor | undefined> => {
-      // use positron api for known runtimes
-      if (kPositronRuntimeLanguages.has(language)) {
+      // use positron api for known runtimes, and for any other language with
+      // a Positron runtime (e.g. SAS or ggsql from an extension)
+      if (kPositronRuntimeLanguages.has(language) || hasPositronRuntime(language)) {
         return positronCellExecutor(language, language, document, engine, outputChannel);
       }
 
-      // ask Positron whether it runs any other language, otherwise delegate.
-      // Ask about every cell language in the document, which is the question
-      // the run filters and code lenses ask too, so the answer for this
-      // document version is shared rather than asked again
-      const runtimes = await cellRuntimeLanguages(
-        document,
-        [language, ...documentCellLanguages(document, engine)],
-        outputChannel
-      );
-      const runtimeLanguage = runtimes[language];
-      if (runtimeLanguage !== undefined) {
-        return positronCellExecutor(language, runtimeLanguage, document, engine, outputChannel);
-      }
-
-      // any other language with a Positron runtime (e.g. SAS or ggsql from an
-      // extension) runs in that runtime
-      if (hasPositronRuntime(language)) {
-        return positronCellExecutor(language, language, document, engine, outputChannel);
+      // ask Positron whether it runs any other language it may run (e.g. sql
+      // in ggsql), otherwise delegate. Ask about every such cell language in
+      // the document, which is the question the run filters and code lenses
+      // ask too, so the answer for this document version is shared rather
+      // than asked again
+      if (asksPositron(language)) {
+        const runtimes = await cellRuntimeLanguages(
+          document,
+          [language, ...documentCellLanguages(document, engine)],
+          outputChannel
+        );
+        const runtimeLanguage = runtimes[language];
+        if (runtimeLanguage !== undefined) {
+          return positronCellExecutor(language, runtimeLanguage, document, engine, outputChannel);
+        }
       }
       return cellExecutorForLanguage(language, document, engine, silent);
     },

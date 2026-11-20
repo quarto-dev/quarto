@@ -33,7 +33,7 @@ export function quartoCellExecuteCodeLensProvider(
     ): Promise<CodeLens[]> {
       const lenses: CodeLens[] = [];
       const tokens = engine.parse(document);
-      const languages = await documentExecutableLanguages(host, document, tokens);
+      const languages = await documentExecutableLanguages(host, document, engine, tokens);
       const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(languages, token));
       for (let i = 0; i < executableBlocks.length; i++) {
         // respect cancellation request

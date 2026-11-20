@@ -24,37 +24,42 @@ import { lines } from "core";
 import { cellOptionsForToken, kExecuteEval, leadingOptionYaml } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
-import { executableLanguages } from "../../host/executors";
+import { MarkdownEngine } from "../../markdown/engine";
 import { isInlineOutputEnabled } from "../../host/positron";
 import { Position } from "vscode";
 import { Uri } from "vscode";
 
 
 /**
- * The cell languages that can be run in one document: the ones this extension
- * has executors for, plus the ones the host says it runs there (see
+ * The cell languages that can be run in one document: the host's
+ * `executableLanguages`, plus the ones it says it runs there (see
  * {@link documentExecutableLanguages}).
  */
 export type ExecutableLanguages = ReadonlySet<string>;
 
 /**
  * The languages that can be run in `document`, whose parsed `tokens` are
- * passed. Asks the host, in one question, about every cell language in the
- * document (the host leaves out the ones it needs not ask about), so it is
- * async; the result feeds the synchronous filters below.
+ * passed: the host's `executableLanguages` (in the visual editor, when
+ * `visualMode`), plus the ones it says it runs in this document. The host is
+ * asked, in one question, about the document's other cell languages, so this
+ * is async; the result feeds the synchronous filters below.
  */
 export async function documentExecutableLanguages(
   host: ExtensionHost,
   document: TextDocument,
+  engine: MarkdownEngine,
   tokens: Token[],
-  base: string[] = executableLanguages()
+  visualMode = false
 ): Promise<ExecutableLanguages> {
-  const languages = new Set(base);
+  const languages = new Set(host.executableLanguages(visualMode, document, engine));
   if (host.hostExecutableLanguages) {
     const cellLanguages = new Set<string>();
     for (const token of tokens) {
       if (isExecutableLanguageBlock(token)) {
-        cellLanguages.add(languageNameFromBlock(token));
+        const language = languageNameFromBlock(token);
+        if (!languages.has(language)) {
+          cellLanguages.add(language);
+        }
       }
     }
     if (cellLanguages.size > 0) {

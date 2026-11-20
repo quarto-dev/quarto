@@ -158,7 +158,7 @@ abstract class RunCommand {
   }
 
   protected async executableLanguages(document: TextDocument, tokens: Token[]) {
-    return await documentExecutableLanguages(this.host_, document, tokens);
+    return await documentExecutableLanguages(this.host_, document, this.engine_, tokens);
   }
 
   private async explainNoExecutor(language: string, document: TextDocument): Promise<boolean> {

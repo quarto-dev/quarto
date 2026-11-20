@@ -119,11 +119,10 @@ suite("Run commands on a cell that cannot run", function () {
 });
 
 /**
- * Drives the multi-cell run commands against a fake host that runs python
- * itself and sql only because the host says so (like Positron's ggsql runtime),
- * in a document whose first cell is sql.
+ * Drives the multi-cell run commands against a fake host that runs python, and
+ * sql and ggsql cells in one runtime (as Positron runs both in ggsql).
  */
-suite("Run commands on several cells, one of which the host alone runs", function () {
+suite("Run commands on several cells group them by runtime", function () {
   const engine = new MarkdownEngine();
 
   const kQmd = [
@@ -136,26 +135,30 @@ suite("Run commands on several cells, one of which the host alone runs", functio
     "x = 1",
     "```",
     "",
+    "```{ggsql}",
+    "visualise x from t draw point",
+    "```",
+    "",
     "```{python}",
     "y = 2",
     "```",
     "",
-    "```{sql}",
-    "select 2",
-    "```",
-    "",
   ].join("\n");
+  const kAfterGgsql = 12;
   const kLastLine = 16;
 
-  async function run(commandId: string, line: number): Promise<Record<string, string[]>> {
+  /** Runs `commandId` from `line`, answering which executor ran which code. */
+  async function run(commandId: string, line: number, runtimes = true): Promise<Record<string, string[]>> {
     const ran: Record<string, string[]> = {};
     const executorFor = (language: string): CellExecutor => ({
-      execute: async (blocks: string[]) => { (ran[language] ??= []).push(...blocks); },
+      execute: async (blocks: string[]) => { (ran[language] ??= []).push(...blocks.map((b) => b.trim())); },
     });
     const host = {
-      executableLanguages: () => ["python", "sql"],
-      cellExecutorForLanguage: async (language: string) =>
-        language === "python" || language === "sql" ? executorFor(language) : undefined,
+      executableLanguages: () => ["python", "sql", "ggsql"],
+      cellRuntimeLanguage: runtimes
+        ? (language: string) => language === "sql" || language === "ggsql" ? "ggsql" : undefined
+        : undefined,
+      cellExecutorForLanguage: async (language: string) => executorFor(language),
     } as unknown as ExtensionHost;
     const command = cellCommands(host, engine).find((c) => c.id === commandId);
     assert.ok(command, `expected a ${commandId} command`);
@@ -172,21 +175,25 @@ suite("Run commands on several cells, one of which the host alone runs", functio
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
   });
 
-  test("Run All Cells runs the python cells, not the sql cell that comes first", async function () {
-    const ran = await run("quarto.runAllCells", 0);
-    assert.deepStrictEqual(Object.keys(ran), ["python"]);
-    assert.deepStrictEqual(ran.python.map((code) => code.trim()), ["x = 1", "y = 2"]);
+  test("Run All Cells runs the cells that share the first cell's runtime", async function () {
+    // the sql and ggsql cells, through the first one's executor; not python
+    assert.deepStrictEqual(await run("quarto.runAllCells", 0), {
+      sql: ["select 1", "visualise x from t draw point"],
+    });
   });
 
-  test("Run Cells Below runs the python cells below", async function () {
-    const ran = await run("quarto.runCellsBelow", 0);
-    assert.deepStrictEqual(Object.keys(ran), ["python"]);
-    assert.strictEqual(ran.python.length, 2);
+  test("Run Cells Below runs the cells below that share the first one's runtime", async function () {
+    assert.deepStrictEqual(await run("quarto.runCellsBelow", 4), { python: ["x = 1", "y = 2"] });
   });
 
-  test("Run Cells Above runs the python cells above, not the nearest sql cell", async function () {
-    const ran = await run("quarto.runCellsAbove", kLastLine);
-    assert.deepStrictEqual(Object.keys(ran), ["python"]);
-    assert.strictEqual(ran.python.length, 2);
+  test("Run Cells Above runs the cells above that share the nearest one's runtime", async function () {
+    assert.deepStrictEqual(await run("quarto.runCellsAbove", kLastLine), { python: ["x = 1", "y = 2"] });
+    assert.deepStrictEqual(await run("quarto.runCellsAbove", kAfterGgsql), {
+      ggsql: ["select 1", "visualise x from t draw point"],
+    });
+  });
+
+  test("without runtimes from the host, each cell language runs on its own", async function () {
+    assert.deepStrictEqual(await run("quarto.runAllCells", 0, false), { sql: ["select 1"] });
   });
 });

@@ -240,6 +240,11 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
       return [...languages];
     },
 
+    // the runtime that runs a cell language, so that e.g. {sql} and {ggsql}
+    // cells run together
+    cellRuntimeLanguage: (language: string, document: vscode.TextDocument, engine: MarkdownEngine) =>
+      positronRuntimeLanguage(language, isKnitrDocument(document, engine)),
+
     // let Positron say why a cell cannot be run (e.g. that it runs at render)
     explainNoExecutor: (language: string, document: vscode.TextDocument): Promise<boolean> =>
       hostExplainUnrunnableCell(language, document, outputChannel),

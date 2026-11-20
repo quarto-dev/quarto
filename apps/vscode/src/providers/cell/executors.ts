@@ -31,44 +31,22 @@ import { Uri } from "vscode";
 
 
 /**
- * The cell languages that can be run in one document: the host's
- * `executableLanguages`, plus the ones it says it runs there (see
+ * The cell languages that can be run in one document (see
  * {@link documentExecutableLanguages}).
  */
 export type ExecutableLanguages = ReadonlySet<string>;
 
 /**
- * The languages that can be run in `document`, whose parsed `tokens` are
- * passed: the host's `executableLanguages` (in the visual editor, when
- * `visualMode`), plus the ones it says it runs in this document. The host is
- * asked, in one question, about the document's other cell languages, so this
- * is async; the result feeds the synchronous filters below.
+ * The languages whose cells can be run in `document`: the host's
+ * `executableLanguages`, which can depend on the document (e.g. in Positron,
+ * `{sql}` cells run in ggsql except in a knitr document).
  */
-export async function documentExecutableLanguages(
+export function documentExecutableLanguages(
   host: ExtensionHost,
   document: TextDocument,
-  engine: MarkdownEngine,
-  tokens: Token[],
-  visualMode = false
-): Promise<ExecutableLanguages> {
-  const languages = new Set(host.executableLanguages(visualMode, document, engine));
-  if (host.hostExecutableLanguages) {
-    const cellLanguages = new Set<string>();
-    for (const token of tokens) {
-      if (isExecutableLanguageBlock(token)) {
-        const language = languageNameFromBlock(token);
-        if (!languages.has(language)) {
-          cellLanguages.add(language);
-        }
-      }
-    }
-    if (cellLanguages.size > 0) {
-      for (const language of await host.hostExecutableLanguages(document, [...cellLanguages])) {
-        languages.add(language);
-      }
-    }
-  }
-  return languages;
+  engine: MarkdownEngine
+): ExecutableLanguages {
+  return new Set(host.executableLanguages(false, document, engine));
 }
 
 export function hasExecutor(languages: ExecutableLanguages, language: string) {

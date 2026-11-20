@@ -240,55 +240,44 @@ suite("Positron: cell execution", function () {
     }
   });
 
-  test("submits a cell Positron says it runs to that runtime", async function () {
+  test("submits a {sql} cell to ggsql when an extension provides a ggsql runtime", async function () {
     const quarto = extension();
     if (!quarto.isActive) {
       await quarto.activate();
     }
 
-    // A Positron that has the command answers from its own runtimes, which
-    // this test cannot control; stand in for it in one that does not.
-    const kCommand = "_quartoHostCellRuntimeLanguages";
-    const all = await vscode.commands.getCommands(false);
-    if (all.includes(kCommand)) {
+    // Needs the ggsql extension, which the test Positron may not have.
+    const hasGgsql = vscode.extensions.all.some((ext) => {
+      const runtimes = (ext.packageJSON as { contributes?: { languageRuntimes?: { languageId?: unknown }[] } })
+        ?.contributes?.languageRuntimes;
+      return Array.isArray(runtimes) && runtimes.some((r) => r?.languageId === "ggsql");
+    });
+    if (!hasGgsql) {
       this.skip();
     }
 
-    // Registered after the extension activated, with nothing to make it
-    // re-query the host: the command is called, not probed for up front.
-    // (The earlier tests here run only cells in Positron's own runtimes, so
-    // the extension has not just found the command missing; it would not
-    // try it again for a while if it had.)
-    const stub = vscode.commands.registerCommand(
-      kCommand,
-      (_uri: vscode.Uri, languages: string[]) =>
-        Object.fromEntries(languages.filter((l) => l === "ggsql").map((l) => [l, "ggsql"]))
-    );
-    try {
-      const qmd = [
-        "---",
-        "title: test",
-        "---",
-        "",
-        "```{ggsql}",
-        "--| label: plot",
-        "visualise x, y from t draw point",
-        "```",
-        "",
-      ].join("\n");
+    const qmd = [
+      "---",
+      "title: test",
+      "jupyter: python3",
+      "---",
+      "",
+      "```{sql}",
+      "--| label: q",
+      "select 1 as x",
+      "```",
+      "",
+    ].join("\n");
 
-      const calls = await runCellAndCaptureCalls(qmd, 6);
-      const call = calls.find((c) => c.method === "executeCode" && c.args[0] === "ggsql");
-      assert.ok(
-        call,
-        "Running a {ggsql} cell should call positron.runtime.executeCode('ggsql', ...). " +
-        `Observed: ${describe(calls)}`
-      );
-      assert.ok(String(call!.args[1]).includes("visualise x, y from t draw point"));
-      assert.ok(!String(call!.args[1]).includes("--|"), "cell options should be stripped");
-    } finally {
-      stub.dispose();
-    }
+    const calls = await runCellAndCaptureCalls(qmd, 7);
+    const call = calls.find((c) => c.method === "executeCode" && c.args[0] === "ggsql");
+    assert.ok(
+      call,
+      "Running a {sql} cell should call positron.runtime.executeCode('ggsql', ...). " +
+      `Observed: ${describe(calls)}`
+    );
+    assert.ok(String(call!.args[1]).includes("select 1 as x"));
+    assert.ok(!String(call!.args[1]).includes("--|"), "cell options should be stripped");
   });
 
   for (const command of ["quarto.runCurrentCell", "quarto.runCurrent"]) {

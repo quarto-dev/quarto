@@ -56,8 +56,6 @@ import {
   reopenEditorInSourceMode
 } from "./toggle";
 import { ExtensionHost } from "../../host";
-import { documentExecutableLanguages } from "../cell/executors";
-import { onDidRefreshHostCellLanguages } from "../../host/cell-features";
 import { TabInputCustom } from "vscode";
 
 const kVisualModeConfirmed = "visualModeConfirmed";
@@ -401,46 +399,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     // track disposables
     const disposables: Disposable[] = [];
 
-    // the languages whose cells can be run from the visual editor, including
-    // the ones the host says it runs in this document
-    const executableLanguages = async () => [...await documentExecutableLanguages(
-      this.extensionHost,
-      document,
-      this.engine,
-      this.engine.parse(document),
-      true
-    )];
-
-    // send the editor the executable languages when they change: the host's
-    // answer can change on any configuration or extension change, and an edit
-    // can add a cell in a language the host was not yet asked about
-    let sentExecutableLanguages: string[] = [];
-    let executableLanguagesQuery = 0;
-    const pushExecutableLanguages = async () => {
-      const query = ++executableLanguagesQuery;
-      const languages = await executableLanguages();
-      if (query !== executableLanguagesQuery || !client.connected()) {
-        return;
-      }
-      if (
-        languages.length === sentExecutableLanguages.length &&
-        languages.every((language) => sentExecutableLanguages.includes(language))
-      ) {
-        return;
-      }
-      sentExecutableLanguages = languages;
-      client.editor.executableLanguagesChanged(languages).catch(() => {
-        // the webview is going away
-      });
-    };
-    const pushExecutableLanguagesAfterEdit = debounce(pushExecutableLanguages, 500);
-    if (this.extensionHost.hostExecutableLanguages) {
-      disposables.push(
-        onDidRefreshHostCellLanguages(pushExecutableLanguages),
-        new Disposable(() => pushExecutableLanguagesAfterEdit.cancel())
-      );
-    }
-
     // get visual editor client
     const client = visualEditorClient(webviewPanel);
     disposables.push(client);
@@ -474,7 +432,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
             ? (workspaceDir || process.cwd())
             : path.dirname(document.fileName),
           isWindowsDesktop: isWindows(),
-          executableLanguages: sentExecutableLanguages = await executableLanguages()
+          executableLanguages: this.extensionHost.executableLanguages(true, document, this.engine)
         };
       },
 
@@ -499,9 +457,6 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
           async (e) => {
             if (e.document.uri.toString() === document.uri.toString()) {
               await syncManager.onDocumentChanged();
-              if (this.extensionHost.hostExecutableLanguages) {
-                pushExecutableLanguagesAfterEdit();
-              }
             }
           }
         ));

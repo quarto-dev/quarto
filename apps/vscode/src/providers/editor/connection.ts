@@ -36,7 +36,6 @@ import {
   VSC_VEH_RenderDocument,
   VSC_VE_PrefsChanged,
   VSC_VE_ImageChanged,
-  VSC_VE_ExecutableLanguagesChanged,
   Prefs,
   PrefsServer,
   NavLocation,
@@ -82,9 +81,7 @@ export function visualEditorClient(webviewPanel: WebviewPanel)
       ) => request(VSC_VE_SetBlockSelection, [context, action]),
       applyExternalEdit: (markdown: string) => request(VSC_VE_ApplyExternalEdit, [markdown]),
       prefsChanged: (prefs: Prefs) => request(VSC_VE_PrefsChanged, [prefs]),
-      imageChanged: (file: string) => request(VSC_VE_ImageChanged, [file]),
-      executableLanguagesChanged: (languages: string[]) =>
-        request(VSC_VE_ExecutableLanguagesChanged, [languages])
+      imageChanged: (file: string) => request(VSC_VE_ImageChanged, [file])
     },
     connected: () => isConnected,
     dispose: () => {

@@ -10,6 +10,7 @@ import {
   CancellationToken,
   CodeLens,
   CodeLensProvider,
+  ProviderResult,
   TextDocument,
   Range,
 } from "vscode";
@@ -24,16 +25,16 @@ export function quartoCellExecuteCodeLensProvider(
   engine: MarkdownEngine
 ): CodeLensProvider {
   return {
-    // the host's answer about which cell languages it runs can change on any
-    // configuration or extension change
+    // which cell languages the host runs can change on any configuration or
+    // extension change (e.g. installing an extension with a runtime)
     onDidChangeCodeLenses: onDidRefreshHostCellLanguages,
-    async provideCodeLenses(
+    provideCodeLenses(
       document: TextDocument,
       token: CancellationToken
-    ): Promise<CodeLens[]> {
+    ): ProviderResult<CodeLens[]> {
       const lenses: CodeLens[] = [];
       const tokens = engine.parse(document);
-      const languages = await documentExecutableLanguages(host, document, engine, tokens);
+      const languages = documentExecutableLanguages(host, document, engine);
       const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(languages, token));
       for (let i = 0; i < executableBlocks.length; i++) {
         // respect cancellation request

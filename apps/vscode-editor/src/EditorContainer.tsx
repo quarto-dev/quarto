@@ -25,7 +25,7 @@ import {
 
 import { EditorMenuItem, EditorOperations, EditorTheme, EditorUIContext, HostContext, XRef } from 'editor';
 
-import { editorHostCommands, ExecutableLanguagesSink, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
+import { editorHostCommands, ImageChangeSink, syncEditorToHost, VisualEditorHostClient } from './sync';
 import { EditorToolbar } from './EditorToolbar';
 import { editorThemeFromVSCode } from './theme';
 
@@ -140,7 +140,7 @@ function editorDisplay(host: VisualEditorHostClient)  {
 }
 
 
-class HostEditorUIContext implements EditorUIContext, ImageChangeSink, ExecutableLanguagesSink {
+class HostEditorUIContext implements EditorUIContext, ImageChangeSink {
   
   constructor(
     private readonly context: HostContext, 
@@ -172,11 +172,6 @@ class HostEditorUIContext implements EditorUIContext, ImageChangeSink, Executabl
 
   public executableLanguges(): string[] {
     return this.context.executableLanguages;
-  }
-
-  // the host's answer changed (read live by executableLanguages above)
-  public setExecutableLanguages(languages: string[]) {
-    this.context.executableLanguages = languages;
   }
 
   // get the default directory for resources (e.g. where relative links point to)

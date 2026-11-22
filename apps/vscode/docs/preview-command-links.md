@@ -103,10 +103,21 @@ Commands may execute code, modify files or open connections. Users must trust
 both the document and the commands they enable. Link arguments remain visible
 in source and generated HTML and must not contain credentials.
 
-Composite commands such as `runCommands` need an explicit policy before their
-dispatch is implemented. The recommendation is to require permission for the
-outer command and every nested command ID; no implicit permission for nested
-actions should be assumed from the examples in the issue.
+Authorization applies only to the command ID requested by the link. Composite
+commands such as `runCommands` use the same policy as any other command: they
+must be explicitly allowed, but Quarto does not inspect their arguments for
+nested commands or require separate allowlist entries for those commands.
+
+Allowing `runCommands` therefore permits document-provided sequences that invoke
+commands absent from the allowlist. Other allowed extension commands can also
+invoke commands internally. The allowlist controls entry points into VS Code,
+not every downstream action. Users must understand the capabilities they grant
+when enabling a composite command; nested-command validation is out of scope.
+
+Before finalizing the PR, user documentation must explain this behavior and its
+security implications, including the broad permissions granted by `runCommands`,
+unrestricted arguments, and the need to trust the document. This is part of the
+documentation step, not a separate composite-permission implementation step.
 
 ## Acceptance cases for later implementation steps
 
@@ -117,5 +128,8 @@ actions should be assumed from the examples in the issue.
 - URI conversion is shallow and rejects invalid component types before dispatch.
 - Empty permissions, untrusted workspaces and workspace-only grants deny execution.
 - User/Remote permission changes apply to the next click.
+- Composite commands require their own requested ID to be allowed; their nested
+  commands do not require additional entries and their argument arrays are not
+  recursively rewritten or authorized.
 - Blocked, malformed or failed commands do not expose argument contents.
 - Ordinary navigation, external links and preview refresh retain existing behavior.

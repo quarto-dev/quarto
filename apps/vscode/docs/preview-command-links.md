@@ -1,8 +1,8 @@
 # Integrated preview command-link contract
 
 Implementation contract for [issue #1242](https://github.com/quarto-dev/quarto/issues/1242).
-This describes the intended behavior; command-link dispatch and the permission
-setting are not implemented yet.
+This describes the intended behavior. The permission setting and extension-host
+permission checks are implemented; command-link dispatch is not implemented yet.
 
 ## Link syntax
 
@@ -72,11 +72,20 @@ the environment where that command runs.
 
 ## Authorization and failure behavior
 
-The planned setting is `quarto.preview.allowedCommands`, an array of exact
+The setting is `quarto.preview.allowedCommands`, an array of exact
 command IDs with an empty default. Only User Settings and Remote User Settings
 may grant permission. Workspace, folder, document and project configuration must
 not grant or expand permission. A configured list replaces the default; an empty
 list disables command-link execution. Wildcard matching is not supported.
+
+The setting uses VS Code's `window` scope so it is configurable in both User and
+Remote User settings, including code-server. Machine scope hides it from the
+User Settings tab in remote sessions. Window scope also exposes it in Workspace
+Settings, but entries there are ignored. Permission checks read only the
+configuration inspection's `globalValue`, which represents User/Remote User
+settings, rather than the effective value that could contain workspace overrides.
+Invalid lists (including non-string, empty or whitespace-containing entries)
+deny execution for the entire list.
 
 The extension host must validate each invocation and require a trusted workspace
 and explicit permission for its command ID immediately before execution. Invalid

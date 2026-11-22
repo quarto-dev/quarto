@@ -1203,6 +1203,17 @@
           "default": true,
           "markdownDescription": "Reveal the preview panel after document render."
         },
+        "quarto.preview.allowedCommands": {
+          "scope": "window",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^\\S+$"
+          },
+          "default": [],
+          "markdownDescription": "Exact VS Code command IDs allowed in integrated Quarto preview links. Disabled by default. Configure in User or Remote User Settings. Values in Workspace or Workspace Folder settings are ignored and cannot grant permission. Requires a trusted workspace. Only enable commands for documents you trust: allowed commands can execute code, modify files, or open connections. This list does not restrict command arguments."
+        },
         "quarto.render.rPackageOutputDirectory": {
           "order": 15,
           "scope": "window",

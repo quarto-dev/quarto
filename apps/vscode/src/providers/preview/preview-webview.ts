@@ -11,9 +11,11 @@ import {
   window,
   ColorThemeKind,
   ExtensionContext,
+  workspace,
 } from "vscode";
 import { QuartoWebview, QuartoWebviewManager } from "../webview";
 import { HostWebviewPanel } from "../../host";
+import { previewCommandPermission } from "./command-permissions";
 
 const kQuarotPreviewZoomLevel = "quartoPreviewZoomLevel";
 
@@ -61,6 +63,32 @@ export class QuartoPreviewWebview extends QuartoWebview<QuartoPreviewState> {
           case "openExternal":
             try {
               const url = Uri.parse(e.url);
+              // A command URL requests work in the editor, not ordinary browser
+              // navigation. Intercept it in the extension host before reaching
+              // openExternal. URI schemes are case-insensitive; command IDs are
+              // not, so normalize only the scheme used for this comparison.
+              if (url.scheme.toLowerCase() === "command") {
+                // Check workspace trust and the current User/Remote command allowlist.
+                const permission = previewCommandPermission(
+                  url.path,
+                  workspace.isTrusted,
+                  workspace.getConfiguration("quarto.preview").inspect("allowedCommands")
+                );
+                // Report permission failures without exposing arguments.
+                switch (permission) {
+                  case "untrusted-workspace":
+                    void window.showErrorMessage("Quarto preview command links require a trusted workspace.");
+                    break;
+                  case "invalid-configuration":
+                    void window.showErrorMessage("Quarto Preview: Allowed Commands must be an array of nonempty command IDs without whitespace in User or Remote User Settings.");
+                    break;
+                  case "not-allowed":
+                    void window.showErrorMessage("This preview command is blocked. Only allow it in Quarto Preview: Allowed Commands in User or Remote User Settings if you trust the document.");
+                    break;
+                }
+                // Stop here so command URLs never reach env.openExternal().
+                break;
+              }
               env.openExternal(url);
             } catch {
               // Noop

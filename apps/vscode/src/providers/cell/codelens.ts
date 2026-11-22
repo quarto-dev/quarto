@@ -18,12 +18,15 @@ import { MarkdownEngine } from "../../markdown/engine";
 import { blockHasExecutor, hasExecutor } from "./executors";
 import { Token, languageNameFromBlock } from "quarto-core";
 import { ExtensionHost } from "../../host";
+import { onDidChangeRuntimeLanguages } from "../../host/positron";
 
 export function quartoCellExecuteCodeLensProvider(
   host: ExtensionHost,
   engine: MarkdownEngine
 ): CodeLensProvider {
   return {
+    // a language can gain a Positron runtime after the lenses are computed
+    onDidChangeCodeLenses: onDidChangeRuntimeLanguages,
     provideCodeLenses(
       document: TextDocument,
       token: CancellationToken

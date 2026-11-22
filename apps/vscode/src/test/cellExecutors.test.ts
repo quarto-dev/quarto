@@ -4,7 +4,14 @@ import * as assert from "assert";
 import { isExecutableLanguageBlock, TokenCodeBlock, TokenMath } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
 import { codeWithoutOptionsFromBlock } from "../providers/cell/executors";
-import { contributedRuntimeLanguages } from "../host/positron";
+import type * as positron from "positron";
+import {
+  contributedRuntimeLanguages,
+  hasPositronRuntime,
+  onDidChangeRuntimeLanguages,
+  trackRuntimeLanguagesWith,
+} from "../host/positron";
+import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 
 suite("Code sent for execution", function () {
   const engine = new MarkdownEngine();
@@ -100,5 +107,116 @@ suite("Languages with a Positron runtime", function () {
       { packageJSON: { contributes: { languageRuntimes: [null, {}, { languageId: 1 }, { languageId: "" }] } } },
     ]);
     assert.deepStrictEqual([...languages], []);
+  });
+
+  /**
+   * Fake runtime and extensions APIs for `trackRuntimeLanguagesWith`, and a
+   * counter of how often `onDidChangeRuntimeLanguages` fires.
+   */
+  function fakeApis(registered: Thenable<string[]> = Promise.resolve([])) {
+    const onDidRegisterRuntime = new vscode.EventEmitter<positron.LanguageRuntimeMetadata>();
+    const onDidChangeExtensions = new vscode.EventEmitter<void>();
+    const metadata = (languageId: string) => ({ languageId }) as positron.LanguageRuntimeMetadata;
+    const fakes = {
+      runtime: {
+        getRegisteredRuntimes: () => registered.then((ids) => ids.map(metadata)),
+        onDidRegisterRuntime: onDidRegisterRuntime.event,
+      },
+      contributions: [] as string[],
+      extensions: {
+        get all() {
+          return fakes.contributions.map((languageId) => ({
+            packageJSON: { contributes: { languageRuntimes: [{ languageId }] } },
+          })) as unknown as readonly vscode.Extension<unknown>[];
+        },
+        onDidChange: onDidChangeExtensions.event,
+      },
+      registerRuntime: (languageId: string) => onDidRegisterRuntime.fire(metadata(languageId)),
+      changeExtensions: (languageIds: string[]) => {
+        fakes.contributions = languageIds;
+        onDidChangeExtensions.fire();
+      },
+      changes: 0,
+    };
+    return fakes;
+  }
+
+  let tracking: vscode.Disposable | undefined;
+  let listener: vscode.Disposable | undefined;
+
+  function track(fakes: ReturnType<typeof fakeApis>, outputChannel?: vscode.LogOutputChannel) {
+    listener = onDidChangeRuntimeLanguages(() => fakes.changes++);
+    tracking = trackRuntimeLanguagesWith(fakes.runtime, fakes.extensions, outputChannel);
+  }
+
+  teardown(function () {
+    tracking?.dispose();
+    listener?.dispose();
+    tracking = listener = undefined;
+  });
+
+  test("fires once when a runtime registers a new language", async function () {
+    const fakes = fakeApis(Promise.resolve(["ggsql"]));
+    track(fakes);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.ok(hasPositronRuntime("ggsql"));
+    assert.strictEqual(fakes.changes, 1);
+
+    fakes.registerRuntime("sas");
+    assert.ok(hasPositronRuntime("sas"));
+    assert.strictEqual(fakes.changes, 2);
+
+    // a second runtime for a known language changes nothing
+    fakes.registerRuntime("sas");
+    assert.strictEqual(fakes.changes, 2);
+  });
+
+  test("fires when an extension change adds or removes a contributed language", function () {
+    const fakes = fakeApis();
+    track(fakes);
+    assert.ok(!hasPositronRuntime("sas"));
+
+    fakes.changeExtensions(["sas"]);
+    assert.ok(hasPositronRuntime("sas"));
+    assert.strictEqual(fakes.changes, 1);
+
+    // an unrelated extension change doesn't fire
+    fakes.changeExtensions(["sas"]);
+    assert.strictEqual(fakes.changes, 1);
+
+    fakes.changeExtensions([]);
+    assert.ok(!hasPositronRuntime("sas"));
+    assert.strictEqual(fakes.changes, 2);
+  });
+
+  test("doesn't fire when a contributed language registers its runtime", function () {
+    const fakes = fakeApis();
+    fakes.contributions = ["sas"];
+    track(fakes);
+    assert.ok(hasPositronRuntime("sas"));
+
+    fakes.registerRuntime("sas");
+    assert.strictEqual(fakes.changes, 0);
+  });
+
+  test("logs a failure to get the registered runtimes", async function () {
+    const errors: string[] = [];
+    const outputChannel = new TestLogOutputChannel();
+    outputChannel.error = (value: string) => { errors.push(value); };
+    track(fakeApis(Promise.reject(new Error("no runtimes"))), outputChannel);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.deepStrictEqual(errors, ["Failed to get registered runtimes: Error: no runtimes"]);
+  });
+
+  test("stops tracking when disposed", function () {
+    const fakes = fakeApis();
+    track(fakes);
+    tracking?.dispose();
+
+    fakes.registerRuntime("sas");
+    fakes.changeExtensions(["ggsql"]);
+    assert.ok(!hasPositronRuntime("sas"));
+    assert.ok(!hasPositronRuntime("ggsql"));
+    assert.strictEqual(fakes.changes, 0);
   });
 });

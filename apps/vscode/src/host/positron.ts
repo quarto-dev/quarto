@@ -116,27 +116,78 @@ export function contributedRuntimeLanguages(
  */
 let contributedLanguages = new Set<string>();
 const registeredLanguages = new Set<string>();
-let trackingRuntimes = false;
 
-function trackRuntimeLanguages() {
+const runtimeLanguagesEmitter = new vscode.EventEmitter<void>();
+
+/**
+ * Fires when a language gains or loses a Positron runtime, so that providers
+ * such as the cell code lenses can refresh.
+ */
+export const onDidChangeRuntimeLanguages = runtimeLanguagesEmitter.event;
+
+/**
+ * Track the languages with a Positron runtime. Returns a no-op outside
+ * Positron. The caller disposes the result on deactivation.
+ */
+export function trackRuntimeLanguages(outputChannel?: vscode.LogOutputChannel): vscode.Disposable {
   const runtime = tryAcquirePositronApi()?.runtime;
-  if (trackingRuntimes || runtime === undefined) {
-    return;
+  if (runtime === undefined) {
+    return new vscode.Disposable(() => { });
   }
-  trackingRuntimes = true;
+  return trackRuntimeLanguagesWith(runtime, vscode.extensions, outputChannel);
+}
 
-  // the contributions are read synchronously, so they are known right away;
-  // the subscriptions below live as long as the extension host
-  contributedLanguages = contributedRuntimeLanguages(vscode.extensions.all);
-  vscode.extensions.onDidChange(() => {
-    contributedLanguages = contributedRuntimeLanguages(vscode.extensions.all);
+/**
+ * {@link trackRuntimeLanguages} with the runtime and extensions APIs passed
+ * in, for tests.
+ */
+export function trackRuntimeLanguagesWith(
+  runtime: Pick<typeof positron.runtime, "getRegisteredRuntimes" | "onDidRegisterRuntime">,
+  extensions: Pick<typeof vscode.extensions, "all" | "onDidChange">,
+  outputChannel?: vscode.LogOutputChannel
+): vscode.Disposable {
+  let disposed = false;
+  registeredLanguages.clear();
+
+  const register = (languageId: string) => {
+    if (disposed) {
+      return;
+    }
+    const isNew = !hasPositronRuntime(languageId);
+    registeredLanguages.add(languageId);
+    if (isNew) {
+      runtimeLanguagesEmitter.fire();
+    }
+  };
+
+  // the contributions are read synchronously, so they are known right away
+  contributedLanguages = contributedRuntimeLanguages(extensions.all);
+  const extensionsListener = extensions.onDidChange(() => {
+    const before = positronRuntimeLanguages();
+    contributedLanguages = contributedRuntimeLanguages(extensions.all);
+    if (!sameLanguages(before, positronRuntimeLanguages())) {
+      runtimeLanguagesEmitter.fire();
+    }
   });
 
   runtime.getRegisteredRuntimes().then(
-    (runtimes) => runtimes.forEach((metadata) => registeredLanguages.add(metadata.languageId)),
-    () => { }
+    (runtimes) => runtimes.forEach((metadata) => register(metadata.languageId)),
+    (error) => outputChannel?.error(`Failed to get registered runtimes: ${error}`)
   );
-  runtime.onDidRegisterRuntime((metadata) => registeredLanguages.add(metadata.languageId));
+  const runtimeListener = runtime.onDidRegisterRuntime((metadata) => register(metadata.languageId));
+
+  return new vscode.Disposable(() => {
+    disposed = true;
+    extensionsListener.dispose();
+    runtimeListener.dispose();
+    contributedLanguages = new Set<string>();
+    registeredLanguages.clear();
+  });
+}
+
+function sameLanguages(a: string[], b: string[]): boolean {
+  const set = new Set(a);
+  return a.length === b.length && b.every((language) => set.has(language));
 }
 
 /**
@@ -265,7 +316,6 @@ function positronRuntimeExecutor(
 }
 
 export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
-  trackRuntimeLanguages();
   return {
     // supported executable languages (we delegate to the default for langugaes
     // w/o runtimes so we support all languages), plus any language with a

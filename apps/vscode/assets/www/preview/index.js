@@ -70,7 +70,7 @@ if (settings.zoomLevel) {
       updateScaleFactor();
       throttled = true;
       setTimeout(() => {
-        throttled = false; 
+        throttled = false;
       }, 200);
     }
   });
@@ -81,6 +81,39 @@ if (settings.zoomLevel) {
 
 window.addEventListener("message", (e) => {
   switch (e.data.type || e.data.message) {
+    case "quarto.preview.command": {
+      const message = e.data;
+      let previewOrigin;
+      try {
+        // Derive the expected origin from extension-provided settings.
+        previewOrigin = new URL(settings.url).origin;
+      } catch {
+        break;
+      }
+      // Require the document iframe itself, its expected origin and this session.
+      // A session token also distinguishes preview ports sharing one proxy origin.
+      if (!settings.commandToken || message.token !== settings.commandToken ||
+          e.source !== iframe.contentWindow || e.origin !== previewOrigin) {
+        break;
+      }
+      const link = message.link;
+      // Check shape here but leave argument parsing to the extension host.
+      // In particular, keep an empty dataArgs attribute present for validation.
+      if (!link || typeof link !== "object" || Array.isArray(link) ||
+          typeof link.href !== "string" ||
+          (Object.prototype.hasOwnProperty.call(link, "dataArgs") && typeof link.dataArgs !== "string")) {
+        break;
+      }
+      // Pass the browser-observed origin alongside the unchanged link. The host
+      // rechecks it and the token before consulting permissions and dispatching.
+      vscode.postMessage({
+        type: "quarto.preview.command",
+        token: settings.commandToken,
+        origin: e.origin,
+        link,
+      });
+      break;
+    }
     // forward keydown events so shortcuts can work in vscode, see:
     // https://github.com/microsoft/vscode/issues/65452#issuecomment-586485815
     case "keydown": {
@@ -149,7 +182,7 @@ window.addEventListener("message", (e) => {
       updateAddressBar(e.data.data.href);
       break;
     }
-   
+
     case "didChangeActiveColorTheme": {
       navigateTo(input.value, e.data.theme);
       break;
@@ -244,4 +277,3 @@ function navigateTo(rawUrl, theme) {
 
   vscode.setState({ url: rawUrl });
 }
-

@@ -69,7 +69,8 @@ import {
 } from "./preview-util";
 
 import { vsCodeWebUrl } from "../../core/platform";
-import { killTerminal, sendTerminalCommand, terminalCommand, terminalOptions } from "../../core/terminal";
+import { killTerminal, sendTerminalCommand, terminalCommand, terminalOptions, terminalPathArgument } from "../../core/terminal";
+import { createPreviewCommandBridge, PreviewCommandBridge } from "./command-bridge";
 
 import {
   jupyterErrorLocation,
@@ -252,7 +253,8 @@ export async function previewProject(target: Uri, format?: string) {
 
 class PreviewManager {
   constructor(
-    context: ExtensionContext,
+    // Retain the installed extension location for loading the bundled bridge.
+    private readonly context: ExtensionContext,
     host: ExtensionHost,
     private readonly quartoContext_: QuartoContext,
     private readonly engine_: MarkdownEngine
@@ -283,6 +285,8 @@ class PreviewManager {
           this.terminal_ = undefined;
           this.webviewManager_.setStoppable(false);
           await this.previewTerminateRequest();
+          // Closing the preview terminal also ends its command-link session.
+          this.disposeCommandBridge();
         }
       })
     );
@@ -305,6 +309,8 @@ class PreviewManager {
       this.webviewManager_.onDidRequestStop(async () => {
         this.webviewManager_.setStoppable(false);
         await this.previewTerminateRequest();
+        // The stop button must revoke commands as well as stop the server.
+        this.disposeCommandBridge();
         this.progressDismiss();
         this.progressCancellationToken_ = undefined;
         this.webviewManager_.closeWebview();
@@ -313,6 +319,8 @@ class PreviewManager {
   }
 
   dispose() {
+    // Extension shutdown must remove the invocation's temporary render files.
+    this.disposeCommandBridge();
     this.webviewManager_.dispose();
     this.outputSink_.dispose();
   }
@@ -453,8 +461,17 @@ class PreviewManager {
     // does not send a duplicate termination request.
     this.terminal_ = undefined;
     await killTerminal(kPreviewWindowTitle, async () => await this.previewTerminateRequest());
+    this.disposeCommandBridge();
     this.progressDismiss();
     this.progressCancellationToken_ = undefined;
+  }
+
+  private disposeCommandBridge() {
+    // Revoke messages first, then remove render inputs. All stop/restart paths
+    // share this cleanup so an old iframe cannot retain an executable session.
+    this.webviewManager_.disableCommands();
+    this.commandBridge_?.dispose();
+    this.commandBridge_ = undefined;
   }
 
   private async startPreview(
@@ -494,6 +511,15 @@ class PreviewManager {
     const isShiny = isQuartoShinyDoc(this.engine_, doc);
     const useServeCommand = this.usesQuartoServeCommand(doc);
 
+    // Legacy Shiny uses `quarto serve`, which has no metadata-file option.
+    // Keep that workflow unchanged; the bridge accompanies `quarto preview`.
+    if (this.previewType_ === "internal" && !useServeCommand) {
+      this.commandBridge_ = createPreviewCommandBridge(this.context.extensionUri.fsPath);
+      // Let Quarto report the real document URL; asExternalUri maps it once.
+      // Clone the environment so preview reuse still compares the original values.
+      options.env = { ...options.env, VSCODE_PROXY_URI: null };
+    }
+
     // clear if a shiny doc
     if (isShiny && this.webviewManager_) {
       this.webviewManager_.clear();
@@ -517,6 +543,11 @@ class PreviewManager {
 
       cmd.push("--no-browser");
       cmd.push("--no-watch-inputs");
+      if (this.commandBridge_) {
+        // Supply a separate metadata file instead of replacing authored includes.
+        // Quote its temporary path for the shell running the preview terminal.
+        cmd.push("--metadata-file", terminalPathArgument(this.commandBridge_.metadataFile, this.quartoContext_));
+      }
     }
 
     // use temp output-dir for R package
@@ -612,7 +643,7 @@ class PreviewManager {
         }
       }
     }
-    this.progressDismiss()
+    this.progressDismiss();
   }
 
   private progressShow(uri: Uri) {
@@ -710,6 +741,8 @@ class PreviewManager {
           url: previewUrl,
           zoomLevel: this.zoomLevel(this.previewOutputFile_),
           slideIndex: this.previewSlideIndex_,
+          // Pair the loaded page with this invocation's injected script token.
+          commandToken: this.commandBridge_?.token,
         },
         {
           preserveFocus: true,
@@ -820,6 +853,8 @@ class PreviewManager {
   private previewType_: "internal" | "external" | "none" | undefined;
 
   private terminal_: Terminal | undefined;
+  // Own the temporary filter for as long as this server may render documents.
+  private commandBridge_: PreviewCommandBridge | undefined;
 
   // progress management
   private progressDismiss_: ((value?: unknown) => void) | undefined;

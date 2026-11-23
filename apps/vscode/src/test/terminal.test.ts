@@ -9,9 +9,22 @@ import * as vscode from "vscode";
 import { pathWithForwardSlashes } from "core";
 import { QuartoContext } from "quarto-core";
 
-import { terminalCommand, terminalShellForPath } from "../core/terminal";
+import { terminalCommand, terminalShellForPath, terminalPathArgument } from "../core/terminal";
 
 suite("terminalCommand", function () {
+  test("quotes metadata paths for the terminal shell", function () {
+    // This fixture uses POSIX syntax; other shells have separate quoting rules.
+    if (terminalShellForPath(vscode.env.shell) !== "posix") {
+      this.skip();
+    }
+    const filePath = "/tmp/bridge with spaces ' $(echo PWNED) `echo PWNED`/metadata.json";
+    // Execute a harmless printing function through the actual terminal shell. The
+    // result must preserve spaces, quotes and substitution syntax as literal text.
+    const argument = terminalPathArgument(filePath, { useCmd: false } as unknown as QuartoContext);
+    const output = execFileSync(vscode.env.shell, ["-c", `read_path() { printf %s "$1"; }; read_path ${argument}`], { encoding: "utf8" });
+    assert.strictEqual(output, filePath);
+  });
+
   test("does not quote the quarto executable name", function () {
     // PowerShell does not run a line that starts with a quoted string as a
     // command (it needs `&`), so the executable must stay a bare word.

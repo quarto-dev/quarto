@@ -1,8 +1,25 @@
 # Integrated preview command-link contract
 
 Implementation contract for [issue #1242](https://github.com/quarto-dev/quarto/issues/1242).
-This describes the intended behavior. The permission setting and extension-host
-permission checks are implemented; command-link dispatch is not implemented yet.
+
+## Preview bridge
+
+An invocation-specific Lua filter appends the click bridge to HTML and Reveal.js
+output without editing source files, replacing authored includes or overriding
+the document/project format. The filter and metadata stay available for live
+renders and book navigation, and are removed when the preview stops or restarts.
+The script is inactive outside an iframe and grants no permission itself.
+
+The document sends the original link target and optional readable arguments to
+the preview webview. The webview checks the sending iframe, preview origin and
+session token before relaying the message. The extension host checks the token,
+origin and payload again, then parses arguments and checks current permissions.
+Restarting or stopping the preview revokes the previous session.
+
+The bridge accompanies integrated `quarto preview` invocations. Legacy Shiny
+workflows using `quarto serve` are unchanged and do not support command links:
+that CLI command has no `--metadata-file` option. Non-HTML formats and external
+previews do not gain command execution.
 
 ## Link syntax
 

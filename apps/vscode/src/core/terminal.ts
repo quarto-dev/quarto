@@ -94,19 +94,30 @@ export function terminalOptions(name: string, target: Uri, env: TerminalEnv) {
 }
 
 export function terminalCommand(command: string, context: QuartoContext, target?: Uri) {
-  const shell = targetShell(context);
   const quarto = "quarto"; // binPath prepended to PATH so we don't need the full form
   // Keep the executable name bare: PowerShell parses a line that starts with
   // a quoted string as an expression, not a command (it would need `&`).
   const cmd: string[] = [quarto, command];
   if (target) {
-    const targetPath =
-      context.useCmd ? target.fsPath : pathWithForwardSlashes(target.fsPath);
-    cmd.push(
-      shell === undefined ? shQuoteUnknownShell(targetPath) : shQuote(targetPath, shell)
-    );
+    // Share the existing document-path quoting with paths appended later by
+    // callers, such as preview.ts's --metadata-file argument.
+    cmd.push(terminalPathArgument(target.fsPath, context));
   }
   return cmd;
+}
+
+// Extracted from terminalCommand so document paths and additional file arguments
+// use the same shell quoting. The preview bridge adds --metadata-file pointing
+// to a temporary configuration that loads its document-side click handler:
+// the CLI's existing relay forwards only the URL and loses data-args.
+// Keep metadata-specific command construction in preview.ts; this helper only
+// formats a path as one shell argument, including spaces and special characters.
+export function terminalPathArgument(filePath: string, context: QuartoContext) {
+  const shell = targetShell(context);
+  // Preserve native paths for the legacy cmd shim; other terminals use forward
+  // slashes as before. Reuse the existing fallback for unrecognized shells.
+  const normalizedPath = context.useCmd ? filePath : pathWithForwardSlashes(filePath);
+  return shell === undefined ? shQuoteUnknownShell(normalizedPath) : shQuote(normalizedPath, shell);
 }
 
 // Map a shell executable path to the quoting rules it needs. Exported for

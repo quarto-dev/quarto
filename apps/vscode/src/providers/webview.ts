@@ -296,7 +296,11 @@ export abstract class QuartoWebview<T> extends Disposable {
   }
 
   protected escapeAttribute(value: string | Uri): string {
-    return value.toString().replace(/"/g, "&quot;");
+    // Escape ampersands first so URL text cannot become an HTML entity.
+    // Then escape the attribute delimiters; the browser must recover the exact
+    // JSON settings value, including URLs containing entity-looking query text.
+    // Example: chapter&copy;.html
+    return value.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
 }

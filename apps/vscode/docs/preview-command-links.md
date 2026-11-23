@@ -1,152 +1,227 @@
-# Integrated preview command-link contract
+# Command links in the integrated preview
 
-Implementation contract for [issue #1242](https://github.com/quarto-dev/quarto/issues/1242).
+Quarto documents can include `command:` links that invoke commands registered
+by VS Code or an installed extension. They work in the integrated HTML preview,
+including book pages and Reveal.js presentations, after you grant permission.
+Command links are disabled by default.
 
-## Preview bridge
+## Enable commands
 
-An invocation-specific Lua filter appends the click bridge to HTML and Reveal.js
-output without editing source files, replacing authored includes or overriding
-the document/project format. The filter and metadata stay available for live
-renders and book navigation, and are removed when the preview stops or restarts.
-The script is inactive outside an iframe and grants no permission itself.
+1. Open a workspace you trust. Command execution requires VS Code Workspace
+   Trust; Quarto does not change the workspace's trust status.
+2. Add the exact command IDs you want to allow to **User Settings** or
+   **Remote User Settings**, including when using code-server:
 
-The document sends the original link target and optional readable arguments to
-the preview webview. The webview checks the sending iframe, preview origin and
-session token before relaying the message. The extension host checks the token,
-origin and payload again, then parses arguments and checks current permissions.
-Restarting or stopping the preview revokes the previous session.
+   ```json
+   {
+     "quarto.preview.allowedCommands": [
+       "vscode.open",
+       "workbench.action.terminal.new"
+     ]
+   }
+   ```
 
-The bridge accompanies integrated `quarto preview` invocations. Legacy Shiny
-workflows using `quarto serve` are unchanged and do not support command links:
-that CLI command has no `--metadata-file` option. Non-HTML formats and external
-previews do not gain command execution.
+3. Open an HTML document with **Quarto: Preview** and click a command link.
+   The preview must be integrated into the editor. If necessary, set
+   `quarto.render.previewType` to `"internal"` (the default).
 
-## Link syntax
+**Only enable commands for documents and commands you trust.** An allowed
+command can execute code, modify files or open connections. The allowlist does
+not restrict arguments or sandbox a command's downstream effects. Arguments
+remain visible in document source and generated HTML; do not put credentials
+in them.
 
-Support links with a `command:` URI in the integrated Quarto preview. Dispatch
-the command through `vscode.commands.executeCommand(commandId, ...args)`.
-Commands continue to be implemented by VS Code or the extension registering them.
+Workspace and Workspace Folder settings cannot grant permission. This includes
+`.vscode/settings.json` and workspace files supplied by a document's repository.
+The setting appears in the Workspace Settings UI because it uses window scope,
+but the extension ignores those workspace values when authorizing commands.
+Document front matter and `_quarto.yml` cannot grant permission either.
+
+Command IDs match exactly and case-sensitively; wildcards such as `*` or
+`vscode.*` do not grant permission. An empty list disables execution. A malformed
+list, including a non-string, empty or whitespace-containing entry, blocks all
+command links until corrected. The configured User/Remote User list replaces
+the empty default; workspace values are never added to it. VS Code resolves
+which User/Remote User value applies in the current environment.
+
+Changes to permission take effect on the next click without restarting the
+preview. Trust and permission are checked immediately before dispatch.
+
+## Write command links
+
+A link without arguments invokes the command with no positional arguments:
 
 ```markdown
-[Open terminal](command:workbench.action.terminal.new)
-
-[Open this document](command:vscode.open?%5B%7B%22scheme%22%3A%22file%22%2C%22path%22%3A%22%2Fworkspace%2Fhello.qmd%22%7D%5D)
-
-[Open this document](command:vscode.open){data-args='[{"scheme":"file","path":"/workspace/hello.qmd"}]'}
-
-[Open terminal](command:workbench.action.terminal.new){.btn .btn-primary data-args='[{"location":1,"cwd":"/workspace"}]'}
-
-[Open terminal][terminal]
-
-[terminal]: command:workbench.action.terminal.new {data-args='[{"location":1,"cwd":"/workspace"}]'}
+[New terminal](command:workbench.action.terminal.new)
 ```
 
-Inline and reference links have the same behavior. CSS classes and nested link
-content do not change argument parsing or authorization. Ordinary document,
-anchor, external and email links retain their existing behavior. This feature
-does not enable command execution in published HTML or an external browser.
+For readable arguments, add a `data-args` attribute containing a JSON array:
 
-The URI must identify a nonempty command ID, without a URI authority or fragment.
-Match command IDs exactly and case-sensitively; do not infer aliases or patterns.
+```markdown
+[Open a document](command:vscode.open){data-args='[{"scheme":"file","path":"/absolute/path/hello.qmd"}]'}
+```
 
-## Arguments
+Replace `/absolute/path/hello.qmd` with the path in the environment where the
+command runs. Paths are not expanded or translated between your computer and a
+remote host or container. This example converts the first argument into a
+`vscode.Uri`, as described below.
 
-Preserve the raw link target and whether `data-args` is present until validation
-is complete. Do not normalize one argument source into the other in the browser
-bridge, because doing so would hide conflicting input from the extension host.
+The equivalent encoded form puts percent-encoded JSON after `?`:
 
-| Argument source | Interpretation |
+```markdown
+[Open a document](command:vscode.open?%5B%7B%22scheme%22%3A%22file%22%2C%22path%22%3A%22%2Fabsolute%2Fpath%2Fhello.qmd%22%7D%5D)
+```
+
+You can generate the query value with JavaScript:
+
+```js
+const args = [{ scheme: "file", path: "/absolute/path/hello.qmd" }];
+const href = "command:vscode.open?" + encodeURIComponent(JSON.stringify(args));
+```
+
+CSS classes and reference links work too:
+
+```markdown
+[Styled terminal](command:workbench.action.terminal.new){.btn .btn-primary}
+
+[New terminal][terminal]
+
+[terminal]: command:workbench.action.terminal.new {.btn .btn-primary}
+```
+
+The target command defines its argument signature and behavior. For example,
+`vscode.open` accepts an optional second argument with editor options:
+
+```markdown
+[Open in editor group 1](command:vscode.open){data-args='[{"scheme":"file","path":"/absolute/path/hello.qmd"},{"viewColumn":1,"preview":false}]'}
+```
+
+That example opens the file in editor group 1 with a persistent tab, which can
+help keep the preview visible. Quarto passes these options to VS Code; it does
+not redefine the command's editor placement or other behavior.
+
+## Argument rules
+
+Arguments are passed as `executeCommand(commandId, ...args)`, so the outer JSON
+value must be an array. Its elements may be any JSON values.
+
+| Link arguments | Behavior |
 | --- | --- |
-| No query and no `data-args` attribute | An empty positional argument array, `[]`. |
-| URI query only | Percent-decode the entire query exactly once, then parse JSON. |
-| `data-args` only | Parse the DOM attribute value directly as JSON. HTML entities have already been decoded by the browser; do not percent-decode it. |
-| Both query and `data-args` | Reject, even if they contain identical arguments. |
+| Neither a query nor `data-args` | Use an empty argument array. |
+| Query only | Percent-decode the entire query once, then parse JSON. |
+| `data-args` only | Parse the DOM attribute value as JSON without percent-decoding. |
+| Both a query and `data-args` | Reject, even when they contain identical arguments. |
 
-An argument source counts as present even when empty: a trailing `?` supplies a
-query, and `data-args=''` supplies an attribute. Either alone is invalid JSON;
-together they conflict. A supplied value must be a JSON array. Reject malformed
-percent escapes, malformed JSON, objects, strings, numbers, booleans and `null`
-as the outer argument value. Array elements may be any JSON value.
+An empty source still counts as present: `command:example?` and `data-args=''`
+are invalid JSON, and supplying both is a conflict. Malformed percent escapes,
+invalid JSON and non-array outer values are rejected before execution.
 
-Treat the query as one encoded JSON value, not as form data or key/value pairs.
-Do not turn `+` into a space or decode a second time. For example, an argument
-containing a literal `%20` must remain `%20`, rather than becoming a space.
-Readable arguments containing `100%` do not need percent encoding.
+The query is one encoded JSON value, not form data or a list of key/value pairs.
+A literal `+` stays `+`. Decoding happens once, so an argument containing the
+literal text `%20` stays `%20`. Readable arguments containing `100%` do not need
+percent encoding. HTML attribute escaping still applies to `data-args`; the
+browser has decoded HTML entities before the extension receives its value.
 
-Convert each top-level array element to `vscode.Uri` only when it is a JSON
-object with a string `scheme` field and an absent `$mid` or `$mid: 1`. Construct
-the URI from its `scheme`, `authority`, `path`, `query` and `fragment` components
-using `vscode.Uri.from`; supplied components must be strings. An invalid URI
-argument rejects the whole invocation. Additional object fields are not URI
-components and are not preserved in the constructed URI.
+A command URI needs a nonempty command ID and must not have an authority
+(`command://...`) or a fragment (`#...`). Only the URI scheme is matched
+case-insensitively; command IDs retain their case.
 
-Do not recursively convert nested arrays or objects. Objects without a string
-`scheme`, or with another explicit `$mid`, remain ordinary JSON values. This
-conversion does not reconstruct other VS Code types, resolve relative paths,
-expand environment variables or translate host paths into container paths.
-Authors must follow the target command's argument signature and use paths in
-the environment where that command runs.
+### URI arguments
 
-## Authorization and failure behavior
+A top-level array element with a string `scheme` field and an absent `$mid` or
+`$mid: 1` is converted using `vscode.Uri.from`. The URI components `scheme`,
+`authority`, `path`, `query` and `fragment` must be strings when supplied, and
+`scheme` must be a valid nonempty URI scheme. Invalid components reject the
+whole invocation. Additional object fields are not retained in the URI.
 
-The setting is `quarto.preview.allowedCommands`, an array of exact
-command IDs with an empty default. Only User Settings and Remote User Settings
-may grant permission. Workspace, folder, document and project configuration must
-not grant or expand permission. A configured list replaces the default; an empty
-list disables command-link execution. Wildcard matching is not supported.
+Other JSON values remain unchanged, including objects without a string `scheme`
+and objects with another explicit `$mid`. Conversion is shallow: URI-shaped
+objects inside nested objects or arrays are not converted. Other VS Code types
+are not reconstructed. Authors must supply the types and paths the requested
+command expects.
 
-The setting uses VS Code's `window` scope so it is configurable in both User and
-Remote User settings, including code-server. Machine scope hides it from the
-User Settings tab in remote sessions. Window scope also exposes it in Workspace
-Settings, but entries there are ignored. Permission checks read only the
-configuration inspection's `globalValue`, which represents User/Remote User
-settings, rather than the effective value that could contain workspace overrides.
-Invalid lists (including non-string, empty or whitespace-containing entries)
-deny execution for the entire list.
+## Composite commands and downstream effects
 
-The extension host must validate each invocation and require a trusted workspace
-and explicit permission for its command ID immediately before execution. Invalid
-permission configuration fails closed. Browser-side checks are not authorization.
-Changing or removing permission takes effect on the next invocation without
-requiring a preview restart.
+Permission applies **only to the command ID requested by the link**. For
+example, adding `runCommands` to `quarto.preview.allowedCommands` permits that
+command to execute document-provided sequences. Nested commands do not need
+separate allowlist entries:
 
-Reject invalid input before dispatch; a rejected link must not execute a command
-or fall through to an external command-URI opener. Report a concise reason for
-denial or failure without echoing argument values, a full command URL or raw
-exception details. Do not automatically enable commands or change trust settings.
+```json
+{
+  "quarto.preview.allowedCommands": ["runCommands"]
+}
+```
 
-Allowing a command does not restrict its arguments or sandbox its effects.
-Commands may execute code, modify files or open connections. Users must trust
-both the document and the commands they enable. Link arguments remain visible
-in source and generated HTML and must not contain credentials.
+```markdown
+[Run a sequence](command:runCommands){data-args='[{"commands":["workbench.action.terminal.new"]}]'}
+```
 
-Authorization applies only to the command ID requested by the link. Composite
-commands such as `runCommands` use the same policy as any other command: they
-must be explicitly allowed, but Quarto does not inspect their arguments for
-nested commands or require separate allowlist entries for those commands.
+Here, the terminal command can run even though it is absent from the allowlist.
+Quarto does not inspect, rewrite or separately authorize the nested command
+sequence. Conversely, allowing a nested command does not automatically allow
+`runCommands` itself.
 
-Allowing `runCommands` therefore permits document-provided sequences that invoke
-commands absent from the allowlist. Other allowed extension commands can also
-invoke commands internally. The allowlist controls entry points into VS Code,
-not every downstream action. Users must understand the capabilities they grant
-when enabling a composite command; nested-command validation is out of scope.
+**Allowing `runCommands` grants broad access to arbitrary document-provided
+command sequences.** Other allowed extension commands may also invoke commands
+internally. The list controls which command a link may request, not every
+subsequent action. Arguments and downstream effects remain unrestricted by the
+allowlist, so trust both the document and the capabilities of every allowed
+command. Quarto does not block composite commands or validate their nested IDs.
 
-Before finalizing the PR, user documentation must explain this behavior and its
-security implications, including the broad permissions granted by `runCommands`,
-unrestricted arguments, and the need to trust the document. This is part of the
-documentation step, not a separate composite-permission implementation step.
+## Compatibility and failures
 
-## Acceptance cases for later implementation steps
+- Command links require the integrated preview started with `quarto preview`.
+  They do not gain editor-command execution in an external browser, published
+  HTML, or non-HTML output such as PDF.
+- Shiny knitr/R documents use `quarto serve`. Other Shiny documents also use it
+  with Quarto 1.4.414 or earlier. That command has no `--metadata-file` option,
+  so these workflows retain their prior behavior and do not support command
+  links. This includes the knitr/R workflow with current CLI versions; it is not
+  limited to old documents or installations.
+- Validation used Quarto CLI 1.11.9 and code-server 4.146.0 on Linux ARM64, with
+  automated HTML, book and Reveal.js checks. Windows/macOS execution, other CLI
+  versions and live Shiny/language-runtime behavior were not validated by this
+  change. Newer Shiny workflows using `quarto preview` are eligible for bridge
+  injection, but that does not establish live Shiny compatibility.
 
-- Encoded and readable links produce equivalent positional arguments.
-- Inline, reference and button-styled links use the same dispatch path.
-- Missing arguments produce `[]`; malformed or conflicting arguments are rejected.
-- Query decoding happens once; literal plus and percent characters survive.
-- URI conversion is shallow and rejects invalid component types before dispatch.
-- Empty permissions, untrusted workspaces and workspace-only grants deny execution.
-- User/Remote permission changes apply to the next click.
-- Composite commands require their own requested ID to be allowed; their nested
-  commands do not require additional entries and their argument arrays are not
-  recursively rewritten or authorized.
-- Blocked, malformed or failed commands do not expose argument contents.
-- Ordinary navigation, external links and preview refresh retain existing behavior.
+A blocked or malformed link does not execute or fall through to an external
+command-URI opener. Notifications explain validation, permission or execution
+failures without echoing arguments, full command URLs or raw exceptions. An
+allowed command can still fail if it is unavailable or its arguments are not
+supported. Such a failure does not disable subsequent valid links.
+
+If a link is blocked, check workspace trust and the exact command ID in the
+applicable User/Remote User setting. If it fails during execution, check that
+the command is registered and that its arguments match the command's API.
+A preview created without the bridge cannot execute links through Quarto's
+older URL-only relay. Ordinary document, anchor, external and email links keep
+their existing behavior.
+
+## Why the preview adds a script
+
+Quarto CLI's existing document-side click relay sends only the URL; it omits
+`data-args`. The extension receives the forwarded message, not the original DOM
+click. Clicks do not bubble out of an iframe, and the different origins prevent
+the outer webview from reading the document's anchor directly.
+
+To preserve readable arguments with an unmodified CLI, the extension supplies a
+temporary `--metadata-file` configuration that loads a Lua filter. The filter
+appends a small script to HTML/Reveal.js output without editing the user's
+source or project configuration, replacing authored includes, or forcing an
+HTML format over an authored presentation/project format. The script captures
+command clicks before the CLI's bare-URL handler and sends the original `href`
+and optional `data-args` separately, allowing the host to detect conflicts.
+
+The webview checks the sender iframe, preview origin and session token. The
+extension host rechecks the message, validates arguments, checks current trust
+and permission, and dispatches the command. Temporary render inputs remain
+available for save-triggered renders and book navigation, then are removed
+when the extension stops or restarts the preview, or its terminal closes.
+Those actions revoke the command session, so the old page can no longer
+request commands. The script grants no command permission itself.
+
+A cleaner long-term solution would extend the CLI's existing relay to forward
+link attributes alongside the URL. Replacing this workaround would require a
+compatible CLI version and corresponding extension protocol changes. The
+current bridge avoids requiring users to install a modified CLI.

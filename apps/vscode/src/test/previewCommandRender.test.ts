@@ -34,7 +34,9 @@ suite("Preview command render", function () {
           ? "project:\n  type: book\nbook:\n  title: Test book\n  chapters: [index.qmd, chapter.qmd]\nformat: html\n"
           : `project:\n  type: default\nformat:\n  ${format}:\n    theme: ${format === "revealjs" ? "simple" : "cosmo"}\n`;
         fs.writeFileSync(path.join(project, "_quarto.yml"), configuration + "filters: [authored.lua]\ninclude-after-body: footer.html\n");
-        const source = '# Preview\n\n[Run](command:example){data-args=\'["100%"]\'}\n\n## Next\n\nMore content.\n';
+        // Compare actual rendered inline/reference anchors, including a styled
+        // reference. Percent and ampersand arguments must survive in both links.
+        const source = '# Preview\n\n[Inline](command:example){#inline-command data-args=\'["100%","a&b"]\'}\n\n[Reference][action]\n\n[action]: command:example {#reference-command .btn .btn-primary data-args=\'["100%","a&b"]\'}\n\n## Next\n\nMore content.\n';
         fs.writeFileSync(path.join(project, "index.qmd"), source);
         if (book) {
           // A second page checks injection beyond the initially opened document.
@@ -51,6 +53,21 @@ suite("Preview command render", function () {
         assert.ok(html.includes("Authored footer"), `${format}: include lost`);
         assert.ok(html.includes("AuthoredFilter"), `${format}: filter lost`);
         assert.ok(html.includes("data-args="), `${format}: arguments lost`);
+        // Only inspect the generated anchors in this controlled fixture. Their
+        // serialized arguments must agree before the browser decodes attributes.
+        const anchors = [...html.matchAll(/<a\b[^>]*>/g)].map(match => match[0]);
+        const argumentsByLink = ["inline-command", "reference-command"].map(id => {
+          const anchor = anchors.find(tag => tag.includes(`id="${id}"`));
+          assert.ok(anchor, `${format}: ${id} missing`);
+          assert.match(anchor!, /href="command:example"/);
+          const args = /data-args="([^"]*)"/.exec(anchor!);
+          assert.ok(args, `${format}: ${id} arguments missing`);
+          return args![1];
+        });
+        assert.strictEqual(argumentsByLink[0], argumentsByLink[1]);
+        assert.ok(argumentsByLink[0].includes("100%"));
+        assert.ok(argumentsByLink[0].includes("a&amp;b"));
+        assert.match(anchors.find(tag => tag.includes('id="reference-command"'))!, /class="[^"]*btn-primary/);
         assert.strictEqual(fs.readFileSync(path.join(project, "index.qmd"), "utf8"), source);
         if (book) {
           // Preserve both chapter injection and Quarto's normal project outputs.
@@ -69,6 +86,36 @@ suite("Preview command render", function () {
       }
     } finally {
       // Release the filter and generated project even when a render assertion fails.
+      bridge.dispose();
+      fs.rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  test("leaves non-HTML output unchanged", function () {
+    this.timeout(30000);
+    if (spawnSync("quarto", ["--version"]).status !== 0) {
+      this.skip();
+    }
+    // GFM needs no TeX/browser runtime and proves the HTML-only filter does not
+    // insert raw script blocks or force a different output format.
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "quarto-command-nonhtml-"));
+    const bridge = createPreviewCommandBridge(path.join(__dirname, ".."));
+    try {
+      const sourceFile = path.join(directory, "document.qmd");
+      fs.writeFileSync(sourceFile, '# Heading\n\n[Run](command:example){data-args=\'["100%"]\'}\n');
+      for (const bridged of [false, true]) {
+        const args = ["render", sourceFile, "--to", "gfm", "--output", bridged ? "bridged.md" : "baseline.md"];
+        if (bridged) {
+          args.push("--metadata-file", bridge.metadataFile);
+        }
+        const result = spawnSync("quarto", args, { cwd: directory, encoding: "utf8" });
+        assert.strictEqual(result.status, 0, result.stdout + result.stderr);
+      }
+      assert.strictEqual(
+        fs.readFileSync(path.join(directory, "bridged.md"), "utf8"),
+        fs.readFileSync(path.join(directory, "baseline.md"), "utf8")
+      );
+    } finally {
       bridge.dispose();
       fs.rmSync(directory, { recursive: true, force: true });
     }

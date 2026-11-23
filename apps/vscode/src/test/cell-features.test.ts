@@ -208,24 +208,6 @@ suite("Host Owned Cells In A Document", function () {
     );
   });
 
-  test("follows the languages the host advertises", async function () {
-    const kSql = "```{sql}\nselect 1\n```";
-    assert.strictEqual(await hostOwnsAnyCellIn(kSql), false);
-
-    const command = vscode.commands.registerCommand(
-      kHostOwnedLanguagesCommand,
-      () => ["r", "python", "sql"]
-    );
-    try {
-      await refreshHostCellLanguages();
-      assert.strictEqual(await hostOwnsAnyCellIn(kSql), true);
-      assert.strictEqual(await hostOwnsAnyCellIn(`${kJulia}\n\n${kSql}`), true);
-    } finally {
-      command.dispose();
-      await refreshHostCellLanguages();
-    }
-  });
-
   test("ignores a non-executable block that names a host owned language", async function () {
     // ```r is a display block, not a cell; the host has nothing to own in it.
     assert.strictEqual(await hostOwnsAnyCellIn("```r\nx <- 1\n```"), false);

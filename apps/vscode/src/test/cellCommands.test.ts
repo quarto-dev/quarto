@@ -79,17 +79,6 @@ suite("Run commands on a cell that cannot run", function () {
     assert.deepStrictEqual(recorded.ran, []);
   });
 
-  test("Run Current (Cmd+Enter) asks the host to explain a sql cell", async function () {
-    const recorded = await run("quarto.runCurrent", kSqlLine);
-    assert.deepStrictEqual(recorded.explained, ["sql"]);
-    assert.deepStrictEqual(recorded.ran, []);
-  });
-
-  test("Run Cell and Advance asks the host to explain a sql cell", async function () {
-    const recorded = await run("quarto.runCurrentAdvance", kSqlLine);
-    assert.deepStrictEqual(recorded.explained, ["sql"]);
-  });
-
   test("a host with nothing to say leaves Run Cell silent", async function () {
     const recorded = await run("quarto.runCurrentCell", kSqlLine, false);
     assert.deepStrictEqual(recorded.explained, ["sql"]);

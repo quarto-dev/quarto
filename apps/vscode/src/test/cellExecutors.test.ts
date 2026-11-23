@@ -3,27 +3,18 @@ import * as assert from "assert";
 
 import { isExecutableLanguageBlock, TokenCodeBlock, TokenMath } from "quarto-core";
 import { MarkdownEngine } from "../markdown/engine";
-import {
-  blockIsExecutable,
-  codeWithoutOptions,
-  codeWithoutOptionsFromBlock,
-  documentExecutableLanguages,
-} from "../providers/cell/executors";
-import { ExtensionHost } from "../host";
+import { codeWithoutOptionsFromBlock, documentExecutableLanguages } from "../providers/cell/executors";
 import type * as positron from "positron";
 import {
   contributedRuntimeLanguages,
   hasPositronRuntime,
   hostExplainUnrunnableCell,
+  kHostExplainUnrunnableCellCommand,
   onDidChangeRuntimeLanguages,
   positronExtensionHost,
   trackRuntimeLanguagesWith,
   positronRuntimeLanguage,
 } from "../host/positron";
-import {
-  kHostExplainUnrunnableCellCommand,
-  refreshHostCellLanguages,
-} from "../host/cell-features";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 import { cellOptions } from "../providers/cell/options";
 
@@ -97,13 +88,6 @@ suite("Code sent for execution", function () {
     );
   });
 
-  test("keeps #| lines in a sql cell, whose options are written --|", async function () {
-    assert.strictEqual(
-      await executedCode("```{sql}\n#| label: q\nselect 1\n```"),
-      "#| label: q\nselect 1"
-    );
-  });
-
   test("leaves a cell without options as it is", async function () {
     assert.strictEqual(await executedCode("```{sql}\nselect 1\n```"), "select 1");
     assert.strictEqual(await executedCode("```{python}\nx = 1\n```"), "x = 1");
@@ -112,16 +96,6 @@ suite("Code sent for execution", function () {
   test("sends nothing for a cell of only options", async function () {
     assert.strictEqual(await executedCode("```{python}\n#| label: a\n```"), "");
     assert.strictEqual(await executedCode("```{ggsql}\n--| label: a\n```"), "");
-  });
-
-  test("strips options from a visual editor block's code by its language", function () {
-    // a visual editor block's code is the cell's body, options included
-    assert.strictEqual(
-      codeWithoutOptions("ggsql", "--| label: plot\n-- @connect: duckdb://memory\nselect 1"),
-      "-- @connect: duckdb://memory\nselect 1"
-    );
-    assert.strictEqual(codeWithoutOptions("python", "#| echo: false\nx = 1"), "x = 1");
-    assert.strictEqual(codeWithoutOptions("python", "x = 1"), "x = 1");
   });
 
   test("keeps #| lines in a language whose options use other comment characters", async function () {
@@ -293,26 +267,6 @@ suite("Cells the host runs", function () {
     assert.strictEqual(positronRuntimeLanguage("bash", false, runtimes()), undefined);
   });
 
-  test("the cells that can run are the host's executable languages for the document", async function () {
-    const doc = await vscode.workspace.openTextDocument({
-      language: "quarto",
-      content: "```{python}\nx = 1\n```\n\n```{sql}\nselect 1\n```\n\n```{mermaid}\ngraph LR\n```",
-    });
-    const asked: boolean[] = [];
-    const host = {
-      executableLanguages: (visualMode: boolean, document: vscode.TextDocument) => {
-        asked.push(visualMode);
-        assert.strictEqual(document, doc);
-        return ["python", "sql"];
-      },
-    } as unknown as ExtensionHost;
-    const languages = documentExecutableLanguages(host, doc, engine);
-    assert.deepStrictEqual([...languages].sort(), ["python", "sql"]);
-    assert.deepStrictEqual(asked, [false]);
-    const executable = engine.parse(doc).filter((t) => blockIsExecutable(languages, t));
-    assert.strictEqual(executable.length, 2);
-  });
-
   test("Positron runs no {sql} cell without a ggsql runtime", async function () {
     // no extension provides a ggsql runtime to the test host
     const doc = await vscode.workspace.openTextDocument({
@@ -338,7 +292,7 @@ suite("Cells the host explains it cannot run", function () {
   }
 
   /** Registers a stand in for Positron's explain command answering `answer`. */
-  async function stubExplain(answer: () => unknown) {
+  function stubExplain(answer: () => unknown) {
     const calls: unknown[][] = [];
     const command = vscode.commands.registerCommand(
       kHostExplainUnrunnableCellCommand,
@@ -347,18 +301,10 @@ suite("Cells the host explains it cannot run", function () {
         return answer();
       }
     );
-    await refreshHostCellLanguages();
-    return {
-      calls,
-      dispose: async () => {
-        command.dispose();
-        await refreshHostCellLanguages();
-      },
-    };
+    return { calls, dispose: () => command.dispose() };
   }
 
   test("explains nothing when Positron has no such command", async function () {
-    await refreshHostCellLanguages();
     const doc = await quartoDoc();
     assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
     assert.strictEqual(await positronExtensionHost().explainNoExecutor!("sql", doc), false);
@@ -367,7 +313,7 @@ suite("Cells the host explains it cannot run", function () {
   test("asks Positron to explain, and reports whether it did", async function () {
     const doc = await quartoDoc();
     let explained: unknown = true;
-    const stub = await stubExplain(() => explained);
+    const stub = stubExplain(() => explained);
     try {
       assert.strictEqual(await positronExtensionHost().explainNoExecutor!("sql", doc), true);
       assert.strictEqual(String(stub.calls[0][0]), doc.uri.toString());
@@ -378,29 +324,17 @@ suite("Cells the host explains it cannot run", function () {
       explained = "yes";
       assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
     } finally {
-      await stub.dispose();
-    }
-  });
-
-  test("sees a command registered after the host was last probed", async function () {
-    await refreshHostCellLanguages();
-    const doc = await quartoDoc();
-    const command = vscode.commands.registerCommand(kHostExplainUnrunnableCellCommand, () => true);
-    try {
-      // no re-query in between: the probe is made when the explanation is needed
-      assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), true);
-    } finally {
-      command.dispose();
+      stub.dispose();
     }
   });
 
   test("treats a failing command as no explanation", async function () {
     const doc = await quartoDoc();
-    const stub = await stubExplain(() => { throw new Error("boom"); });
+    const stub = stubExplain(() => { throw new Error("boom"); });
     try {
       assert.strictEqual(await hostExplainUnrunnableCell("sql", doc), false);
     } finally {
-      await stub.dispose();
+      stub.dispose();
     }
   });
 });

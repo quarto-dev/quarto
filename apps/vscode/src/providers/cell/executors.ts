@@ -31,38 +31,27 @@ import { Uri } from "vscode";
 
 
 /**
- * The cell languages that can be run in one document (see
- * {@link documentExecutableLanguages}).
- */
-export type ExecutableLanguages = ReadonlySet<string>;
-
-/**
- * The languages whose cells can be run in `document`: the host's
- * `executableLanguages`, which can depend on the document (e.g. in Positron,
- * `{sql}` cells run in ggsql except in a knitr document).
+ * The languages whose cells can be run in `document`, which the host decides
+ * per document (e.g. in Positron, `{sql}` cells run except in a knitr one).
  */
 export function documentExecutableLanguages(
   host: ExtensionHost,
   document: TextDocument,
   engine: MarkdownEngine
-): ExecutableLanguages {
+): ReadonlySet<string> {
   return new Set(host.executableLanguages(false, document, engine));
 }
 
-export function hasExecutor(languages: ExecutableLanguages, language: string) {
-  return languages.has(language);
-}
-
-export function blockHasExecutor(languages: ExecutableLanguages, token?: Token): token is TokenMath | TokenCodeBlock {
+export function blockHasExecutor(languages: ReadonlySet<string>, token?: Token): token is TokenMath | TokenCodeBlock {
   if (token) {
     const language = languageNameFromBlock(token);
-    return isExecutableLanguageBlock(token) && hasExecutor(languages, language);
+    return isExecutableLanguageBlock(token) && languages.has(language);
   } else {
     return false;
   }
 }
 
-export function blockIsExecutable(languages: ExecutableLanguages, token?: Token): token is TokenMath | TokenCodeBlock {
+export function blockIsExecutable(languages: ReadonlySet<string>, token?: Token): token is TokenMath | TokenCodeBlock {
   if (token) {
     return (
       blockHasExecutor(languages, token) && cellOptionsForToken(token)[kExecuteEval] !== false
@@ -79,10 +68,8 @@ export function cellMetadataForBlock(token: TokenMath | TokenCodeBlock): Record<
 }
 
 /**
- * `code` without its leading cell option lines, which are written with the
- * language's own comment characters (`#|` for python, `--|` for sql, ...).
- * Runtimes need not see them, and some read the cell's leading comments
- * themselves.
+ * `code` without its leading cell option lines, written with the language's
+ * own comment characters (`#|` for python, `--|` for sql, ...).
  */
 export function codeWithoutOptions(language: string, code: string): string {
   const codeLines = lines(code);

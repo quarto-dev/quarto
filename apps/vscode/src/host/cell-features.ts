@@ -79,33 +79,18 @@ const kCellOwnershipCommands = [
 ];
 
 /**
- * The command through which the host advertises which cell languages it serves
- * embedded language features for, right now. Takes no arguments and answers
- * lowercase language ids, e.g. `["r", "python", "sql", "ggsql"]`. The host
- * folds {@link kHostCellFeaturesSetting} and its own feature flags into the
- * answer, which can change at runtime, so it is queried again whenever the
+ * The command through which the host says which cell languages it serves
+ * embedded language features for, e.g. `["r", "python", "sql", "ggsql"]`. The
+ * answer folds in the host's settings, so it is queried again whenever the
  * configuration or the set of installed extensions changes.
- *
- * Registered unconditionally by hosts that have it, like the cell commands, so
- * its presence is probed the same way.
  */
 export const kHostOwnedLanguagesCommand = "_quartoHostOwnedCellLanguages";
 
 /**
- * Languages whose cells a host that has the cell commands but not
- * {@link kHostOwnedLanguagesCommand} owns. Those are the hosts that shipped
- * before the command existed, and these are the languages they were verified
- * to own.
+ * Languages owned by a host that has the cell commands but predates
+ * {@link kHostOwnedLanguagesCommand}.
  */
 const kFallbackHostOwnedLanguages: ReadonlySet<string> = new Set(["r", "python"]);
-
-/**
- * The command through which the host explains why a cell cannot be run, e.g.
- * that a `{sql}` cell in a knitr document runs at render time. Takes
- * `(documentUri: Uri, cellLanguage: string)`, shows the host's own message,
- * and answers whether it had anything to say. Called from `host/positron.ts`.
- */
-export const kHostExplainUnrunnableCellCommand = "_quartoHostExplainUnrunnableCell";
 
 let cellCommandsAvailable = false;
 
@@ -124,9 +109,8 @@ let hostOwnedLanguagesQuery = 0;
 const onDidChangeHostOwnedLanguagesEmitter = new EventEmitter<void>();
 
 /**
- * Fires when the cached set of host owned languages changes, after an
- * asynchronous re-query. Consumers that cache a per-language decision (e.g.
- * diagnostics) recompute on it.
+ * Fires when the host owned languages change, so that consumers that cache a
+ * per-language decision (e.g. diagnostics) can recompute it.
  */
 export const onDidChangeHostOwnedLanguages: Event<void> =
   onDidChangeHostOwnedLanguagesEmitter.event;
@@ -152,9 +136,8 @@ async function hostHasCellCommands(): Promise<boolean> {
 }
 
 /**
- * Ask the host which languages it owns, or `undefined` when it has no
- * {@link kHostOwnedLanguagesCommand} (vanilla VS Code, older Positron) or the
- * command fails.
+ * Ask the host which languages it owns. Answers `undefined` when it lacks the
+ * command (vanilla VS Code, older Positron) or the command fails.
  */
 async function queryHostOwnedLanguages(
   all: string[],
@@ -238,8 +221,8 @@ export async function detectCellFeatureOwnership(
   }
 
   // Any configuration change, not only the native setting: the host also
-  // folds its own feature flags into the answer. Debounced, because settings
-  // tend to change in bursts and every re-query reaches the visual editors.
+  // folds its own settings into the answer. Debounced, because settings tend
+  // to change in bursts.
   let timer: ReturnType<typeof setTimeout> | undefined;
   const refresh = () => {
     clearTimeout(timer);
@@ -271,10 +254,9 @@ export async function detectCellFeatureOwnership(
 }
 
 /**
- * Whether the host owns the cells of a language, per the cached answer of
- * {@link kHostOwnedLanguagesCommand}. Synchronous and independent of the
- * setting and capability half of the decision, so the language set can be
- * tested without Positron.
+ * Whether the host owns the cells of a language, per its cached answer.
+ * Independent of the setting and of the cell commands, so the language set
+ * can be tested without Positron.
  */
 export function hostOwnsLanguage(language: EmbeddedLanguage): boolean {
   return language.ids.some((id) => hostOwnedLanguages.has(id));

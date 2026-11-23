@@ -67,19 +67,16 @@ export interface ExtensionHost {
   ): Promise<CellExecutor | undefined>;
 
   /**
-   * The language of the runtime that runs `language` cells in `document`, when
-   * the host knows it: cells that share a runtime run together in Run All,
-   * Run Above and Run Below (e.g. `{sql}` and `{ggsql}` cells, which Positron
-   * runs in ggsql). Optional: without it, or when it answers undefined, each
-   * cell language is its own runtime.
+   * The language of the runtime that runs `language` cells in `document`.
+   * Cells that share a runtime run together in Run All, Run Above and Run
+   * Below (e.g. `{sql}` and `{ggsql}` cells in Positron). Without it, or when
+   * it answers undefined, each cell language is its own runtime.
    */
   cellRuntimeLanguage?(language: string, document: TextDocument, engine: MarkdownEngine): string | undefined;
 
   /**
-   * Explain to the user why a `language` cell in `document` cannot be run
-   * (there is no executor for it). Answers whether it explained; when it did
-   * not, the caller falls back to its own message, if any. Optional: a host
-   * without it explains nothing.
+   * Explain to the user why a `language` cell in `document` has no executor.
+   * Answers whether it explained.
    */
   explainNoExecutor?(language: string, document: TextDocument): Promise<boolean>;
 

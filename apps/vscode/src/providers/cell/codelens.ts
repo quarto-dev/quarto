@@ -15,8 +15,8 @@ import {
   Range,
 } from "vscode";
 import { MarkdownEngine } from "../../markdown/engine";
-import { blockHasExecutor, documentExecutableLanguages, hasExecutor } from "./executors";
-import { Token, languageNameFromBlock } from "quarto-core";
+import { blockHasExecutor, documentExecutableLanguages } from "./executors";
+import { Token } from "quarto-core";
 import { ExtensionHost } from "../../host";
 import { onDidChangeRuntimeLanguages } from "../../host/positron";
 
@@ -42,12 +42,6 @@ export function quartoCellExecuteCodeLensProvider(
         }
 
         const block = executableBlocks[i];
-
-        // detect the language and see if it has a cell executor
-        const language = languageNameFromBlock(block);
-        if (!hasExecutor(languages, language)) {
-          continue;
-        }
 
         // push code lens
         const line = block.range.start.line;

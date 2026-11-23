@@ -38,7 +38,6 @@ import {
   codeWithoutOptions,
   codeWithoutOptionsFromBlock,
   documentExecutableLanguages,
-  ExecutableLanguages,
   executeInteractive,
   executeSelectionInteractive,
   executeAtPositionInteractive,
@@ -166,6 +165,15 @@ abstract class RunCommand {
     return (language) => this.host_.cellRuntimeLanguage?.(language, document, this.engine_) ?? language;
   }
 
+  // run the whole of a visual editor block, without its cell options
+  protected async runVisualBlock(editor: QuartoVisualEditor, block: { language: string; code: string; }) {
+    const executor = await this.cellExecutorForLanguage(block.language, editor.document, this.engine_);
+    if (executor) {
+      await executeInteractive(executor, [codeWithoutOptions(block.language, block.code)], editor.document);
+      await activateIfRequired(editor);
+    }
+  }
+
   private async explainNoExecutor(language: string, document: TextDocument): Promise<boolean> {
     return (await this.host_.explainNoExecutor?.(language, document)) ?? false;
   }
@@ -207,11 +215,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ): Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
-      const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [codeWithoutOptions(activeBlock.language, activeBlock.code)], editor.document);
-        await activateIfRequired(editor);
-      }
+      await this.runVisualBlock(editor, activeBlock);
     }
   }
 }
@@ -243,11 +247,7 @@ class RunNextCellCommand extends RunCommand implements Command {
     const nextBlock = context.blocks[activeBlockIndex + 1];
     if (nextBlock) {
       await editor.setBlockSelection(context, "nextblock");
-      const executor = await this.cellExecutorForLanguage(nextBlock.language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [codeWithoutOptions(nextBlock.language, nextBlock.code)], editor.document);
-        await activateIfRequired(editor);
-      }
+      await this.runVisualBlock(editor, nextBlock);
     } else {
       window.showInformationMessage("No more cells available to execute");
     }
@@ -281,11 +281,7 @@ class RunPreviousCellCommand extends RunCommand implements Command {
     const prevBlock = context.blocks[activeBlockIndex - 1];
     if (prevBlock) {
       await editor.setBlockSelection(context, "prevblock");
-      const executor = await this.cellExecutorForLanguage(prevBlock.language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [codeWithoutOptions(prevBlock.language, prevBlock.code)], editor.document);
-        await activateIfRequired(editor);
-      }
+      await this.runVisualBlock(editor, prevBlock);
     } else {
       window.showInformationMessage("No more cells available to execute");
     }
@@ -384,11 +380,7 @@ class RunCurrentCommand extends RunCommand implements Command {
         // A language Positron runs but this extension has no virtual document
         // for (e.g. `ggsql`) has no statement ranges here to step through, so
         // run the whole cell.
-        const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-        if (executor) {
-          await executeInteractive(executor, [codeWithoutOptions(activeBlock.language, activeBlock.code)], editor.document);
-          await activateIfRequired(editor);
-        }
+        await this.runVisualBlock(editor, activeBlock);
       } else if (activeBlock && selection.length <= 0 && activeEmbeddedLanguage) {
         const codeLines = lines(activeBlock.code);
         const vdoc = virtualDocForCode(codeLines, activeEmbeddedLanguage);
@@ -423,11 +415,7 @@ class RunCurrentCommand extends RunCommand implements Command {
       // if the selection is empty and this isn't a knitr document then it resolves to run cell
       if (selection.length <= 0 && !isKnitrDocument(editor.document, this.engine_)) {
         if (activeBlock) {
-          const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-          if (executor) {
-            await executeInteractive(executor, [codeWithoutOptions(activeBlock.language, activeBlock.code)], editor.document);
-            await activateIfRequired(editor);
-          }
+          await this.runVisualBlock(editor, activeBlock);
         }
       } else {
         const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
@@ -531,7 +519,9 @@ class RunCellsAboveCommand extends RunCommand implements Command {
       // we need to figure out which language to execute. this is either the language
       // of the passed block (if any) or the language of the block immediately preceding
       // the line this is executed from
-      const language = languageNameFromBlock(block || blocks[blocks.length - 1]);
+      const language = languageNameFromBlock(
+        block || blocks[blocks.length - 1]
+      );
 
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
@@ -801,7 +791,7 @@ function navigateToBlock(editor: TextEditor, block: Token) {
 }
 
 function nextBlock(
-  languages: ExecutableLanguages,
+  languages: ReadonlySet<string>,
   line: number,
   tokens: Token[],
   requireEvaluated = false,
@@ -822,7 +812,7 @@ function nextBlock(
 }
 
 function previousBlock(
-  languages: ExecutableLanguages,
+  languages: ReadonlySet<string>,
   line: number,
   tokens: Token[],
   requireEvaluated = false,

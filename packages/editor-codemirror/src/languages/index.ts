@@ -83,6 +83,9 @@ export function createLanguageMode(lang: string) : Language  | null {
     case 'ojs':
       lang = 'javascript';
       break;
+    case 'Rcpp':
+      lang = 'cpp';
+      break;
   }
 
   switch(lang) {

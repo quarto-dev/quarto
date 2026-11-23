@@ -201,7 +201,7 @@ const languages = [
   {
     name: "cpp",
     language: "cpp",
-    identifiers: ["cpp", "c\\+\\+", "cxx"],
+    identifiers: ["cpp", "c\\+\\+", "cxx", "rcpp"],
     source: "source.cpp",
     additionalContentName: ["source.cpp"],
   },

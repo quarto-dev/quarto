@@ -2280,7 +2280,7 @@
       <key>fenced_code_block_cpp</key>
       <dict>
         <key>begin</key>
-        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(cpp|c\+\+|cxx)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(cpp|c\+\+|cxx|rcpp)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
         <key>name</key>
         <string>markup.fenced_code.block.markdown</string>
         <key>end</key>

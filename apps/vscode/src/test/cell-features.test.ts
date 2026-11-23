@@ -7,7 +7,6 @@ import {
   hostOwnsCellFeatures,
   kHostOwnedLanguagesCommand,
   onDidChangeHostOwnedLanguages,
-  onDidRefreshHostCellLanguages,
   refreshHostCellLanguages,
 } from "../host/cell-features";
 import { hostOwnsAnyCell } from "../providers/semantic-tokens";
@@ -141,18 +140,6 @@ suite("Host Advertised Cell Languages", function () {
     } finally {
       listener.dispose();
     }
-  });
-
-  test("announces every re-query, even when the owned languages are the same", async function () {
-    let refreshes = 0;
-    const listener = onDidRefreshHostCellLanguages(() => refreshes++);
-    try {
-      await refreshHostCellLanguages();
-      await refreshHostCellLanguages();
-    } finally {
-      listener.dispose();
-    }
-    assert.strictEqual(refreshes, 2);
   });
 
   test("still stays off without the cell commands", async function () {

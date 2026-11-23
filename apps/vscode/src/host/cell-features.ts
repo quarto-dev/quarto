@@ -131,18 +131,6 @@ const onDidChangeHostOwnedLanguagesEmitter = new EventEmitter<void>();
 export const onDidChangeHostOwnedLanguages: Event<void> =
   onDidChangeHostOwnedLanguagesEmitter.event;
 
-const onDidRefreshHostCellLanguagesEmitter = new EventEmitter<void>();
-
-/**
- * Fires after every re-query of the host (any configuration change, any change
- * to the installed extensions), whether or not the owned languages changed.
- * Which cell languages can run can change on the same triggers (e.g. an
- * extension that provides a runtime is installed), so the code lenses are
- * recomputed on this event.
- */
-export const onDidRefreshHostCellLanguages: Event<void> =
-  onDidRefreshHostCellLanguagesEmitter.event;
-
 /**
  * Whether this host carries the virtual notebook.
  *
@@ -201,8 +189,7 @@ async function queryHostOwnedLanguages(
 /**
  * Query the host for the languages it owns and cache the answer, falling back
  * to {@link kFallbackHostOwnedLanguages} when it cannot say. Fires
- * {@link onDidChangeHostOwnedLanguages} when the owned languages changed, then
- * {@link onDidRefreshHostCellLanguages}.
+ * {@link onDidChangeHostOwnedLanguages} when the owned languages changed.
  */
 export async function refreshHostCellLanguages(
   outputChannel?: LogOutputChannel
@@ -229,7 +216,6 @@ export async function refreshHostCellLanguages(
     }
     onDidChangeHostOwnedLanguagesEmitter.fire();
   }
-  onDidRefreshHostCellLanguagesEmitter.fire();
 }
 
 /**

@@ -128,17 +128,10 @@ case-insensitively; command IDs retain their case.
 
 ### URI arguments
 
-A top-level array element with a string `scheme` field and an absent `$mid` or
-`$mid: 1` is converted using `vscode.Uri.from`. The URI components `scheme`,
-`authority`, `path`, `query` and `fragment` must be strings when supplied, and
-`scheme` must be a valid nonempty URI scheme. Invalid components reject the
-whole invocation. Additional object fields are not retained in the URI.
-
-Other JSON values remain unchanged, including objects without a string `scheme`
-and objects with another explicit `$mid`. Conversion is shallow: URI-shaped
-objects inside nested objects or arrays are not converted. Other VS Code types
-are not reconstructed. Authors must supply the types and paths the requested
-command expects.
+Commands such as `vscode.open` expect a URI argument. Quarto converts top-level
+argument objects containing a string `scheme` field into VS Code URIs. Use
+standard URI fields such as `scheme` and `path`; nested objects are left
+unchanged, and invalid URI components prevent execution.
 
 ## Composite commands and downstream effects
 
@@ -185,6 +178,12 @@ command. Quarto does not block composite commands or validate their nested IDs.
   change. Newer Shiny workflows using `quarto preview` are eligible for bridge
   injection, but that does not establish live Shiny compatibility.
 
+> The CLI's existing click relay omits `data-args`, and the extension cannot read
+> the preview iframe's DOM directly. A temporary `--metadata-file` and Lua filter
+> add a script that forwards both the URL and `data-args` before the existing
+> handler. Extending the CLI relay could replace this workaround once a
+> compatible CLI version and extension protocol are available.
+
 A blocked or malformed link does not execute or fall through to an external
 command-URI opener. Notifications explain validation, permission or execution
 failures without echoing arguments, full command URLs or raw exceptions. An
@@ -197,31 +196,3 @@ the command is registered and that its arguments match the command's API.
 A preview created without the bridge cannot execute links through Quarto's
 older URL-only relay. Ordinary document, anchor, external and email links keep
 their existing behavior.
-
-## Why the preview adds a script
-
-Quarto CLI's existing document-side click relay sends only the URL; it omits
-`data-args`. The extension receives the forwarded message, not the original DOM
-click. Clicks do not bubble out of an iframe, and the different origins prevent
-the outer webview from reading the document's anchor directly.
-
-To preserve readable arguments with an unmodified CLI, the extension supplies a
-temporary `--metadata-file` configuration that loads a Lua filter. The filter
-appends a small script to HTML/Reveal.js output without editing the user's
-source or project configuration, replacing authored includes, or forcing an
-HTML format over an authored presentation/project format. The script captures
-command clicks before the CLI's bare-URL handler and sends the original `href`
-and optional `data-args` separately, allowing the host to detect conflicts.
-
-The webview checks the sender iframe, preview origin and session token. The
-extension host rechecks the message, validates arguments, checks current trust
-and permission, and dispatches the command. Temporary render inputs remain
-available for save-triggered renders and book navigation, then are removed
-when the extension stops or restarts the preview, or its terminal closes.
-Those actions revoke the command session, so the old page can no longer
-request commands. The script grants no command permission itself.
-
-A cleaner long-term solution would extend the CLI's existing relay to forward
-link attributes alongside the URL. Replacing this workaround would require a
-compatible CLI version and corresponding extension protocol changes. The
-current bridge avoids requiring users to install a modified CLI.

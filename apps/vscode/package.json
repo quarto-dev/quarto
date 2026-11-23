@@ -117,6 +117,7 @@
           "meta.embedded.block.ruby": "ruby",
           "meta.embedded.block.php": "php",
           "meta.embedded.block.sql": "sql",
+          "meta.embedded.block.ggsql": "ggsql",
           "meta.embedded.block.vs_net": "vs_net",
           "meta.embedded.block.xml": "xml",
           "meta.embedded.block.xsl": "xsl",

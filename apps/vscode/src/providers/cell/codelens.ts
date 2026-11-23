@@ -15,8 +15,8 @@ import {
   Range,
 } from "vscode";
 import { MarkdownEngine } from "../../markdown/engine";
-import { blockHasExecutor, hasExecutor } from "./executors";
-import { Token, languageNameFromBlock } from "quarto-core";
+import { blockHasExecutor, documentExecutableLanguages } from "./executors";
+import { Token } from "quarto-core";
 import { ExtensionHost } from "../../host";
 import { onDidChangeRuntimeLanguages } from "../../host/positron";
 
@@ -33,7 +33,8 @@ export function quartoCellExecuteCodeLensProvider(
     ): ProviderResult<CodeLens[]> {
       const lenses: CodeLens[] = [];
       const tokens = engine.parse(document);
-      const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(host, token));
+      const languages = documentExecutableLanguages(host, document, engine);
+      const executableBlocks = tokens.filter((token?: Token) => blockHasExecutor(languages, token));
       for (let i = 0; i < executableBlocks.length; i++) {
         // respect cancellation request
         if (token.isCancellationRequested) {
@@ -41,12 +42,6 @@ export function quartoCellExecuteCodeLensProvider(
         }
 
         const block = executableBlocks[i];
-
-        // detect the language and see if it has a cell executor
-        const language = languageNameFromBlock(block);
-        if (!hasExecutor(host, language)) {
-          continue;
-        }
 
         // push code lens
         const line = block.range.start.line;

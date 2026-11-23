@@ -24,29 +24,37 @@ import { lines } from "core";
 import { cellOptionsForToken, kExecuteEval, leadingOptionYaml } from "./options";
 
 import { CellExecutor, ExtensionHost } from "../../host";
-import { executableLanguages } from "../../host/executors";
-import { hasPositronRuntime, isInlineOutputEnabled } from "../../host/positron";
+import { MarkdownEngine } from "../../markdown/engine";
+import { isInlineOutputEnabled } from "../../host/positron";
 import { Position } from "vscode";
 import { Uri } from "vscode";
 
 
-export function hasExecutor(_host: ExtensionHost, language: string) {
-  return executableLanguages().includes(language) || hasPositronRuntime(language);
+/**
+ * The languages whose cells can be run in `document`, which the host decides
+ * per document (e.g. in Positron, `{sql}` cells run except in a knitr one).
+ */
+export function documentExecutableLanguages(
+  host: ExtensionHost,
+  document: TextDocument,
+  engine: MarkdownEngine
+): ReadonlySet<string> {
+  return new Set(host.executableLanguages(false, document, engine));
 }
 
-export function blockHasExecutor(host: ExtensionHost, token?: Token): token is TokenMath | TokenCodeBlock {
+export function blockHasExecutor(languages: ReadonlySet<string>, token?: Token): token is TokenMath | TokenCodeBlock {
   if (token) {
     const language = languageNameFromBlock(token);
-    return isExecutableLanguageBlock(token) && hasExecutor(host, language);
+    return isExecutableLanguageBlock(token) && languages.has(language);
   } else {
     return false;
   }
 }
 
-export function blockIsExecutable(host: ExtensionHost, token?: Token): token is TokenMath | TokenCodeBlock {
+export function blockIsExecutable(languages: ReadonlySet<string>, token?: Token): token is TokenMath | TokenCodeBlock {
   if (token) {
     return (
-      blockHasExecutor(host, token) && cellOptionsForToken(token)[kExecuteEval] !== false
+      blockHasExecutor(languages, token) && cellOptionsForToken(token)[kExecuteEval] !== false
     );
   } else {
     return false;
@@ -59,38 +67,23 @@ export function cellMetadataForBlock(token: TokenMath | TokenCodeBlock): Record<
   return Object.keys(options).length > 0 ? options : undefined;
 }
 
+/**
+ * `code` without its leading cell option lines, written with the language's
+ * own comment characters (`#|` for python, `--|` for sql, ...).
+ */
+export function codeWithoutOptions(language: string, code: string): string {
+  const codeLines = lines(code);
+  const optionLineCount = leadingOptionYaml(language, codeLines).length;
+  return optionLineCount === 0 ? code : codeLines.slice(optionLineCount).join("\n");
+}
+
 // skip yaml options for execution
-export function codeWithoutOptionsFromBlock(
-  token: TokenMath | TokenCodeBlock,
-  hasRuntime: (language: string) => boolean = hasPositronRuntime
-) {
+export function codeWithoutOptionsFromBlock(token: TokenMath | TokenCodeBlock) {
   if (isExecutableLanguageBlock(token)) {
-    const language = languageNameFromBlock(token);
-    if (hasYamlHashOptions(language)) {
-      const blockLines = lines(codeForExecutableLanguageBlock(token));
-      const startCodePos = blockLines.findIndex(
-        (line) => !isYamlHashOption(line)
-      );
-      if (startCodePos !== -1) {
-        return blockLines.slice(startCodePos).join("\n");
-      } else {
-        return "";
-      }
-    } else if (hasRuntime(language)) {
-      // a language that a Positron runtime runs in the console (e.g. sas or
-      // ggsql): skip its option lines, written with its own comment
-      // characters (`*| ... ;` for sas, `#|` for languages without an entry
-      // in kLangCommentChars, such as ggsql, where `#` isn't a comment)
-      const blockLines = lines(codeForExecutableLanguageBlock(token));
-      const optionLines = leadingOptionYaml(language, blockLines).length;
-      return blockLines.slice(optionLines).join("\n");
-    } else {
-      return codeForExecutableLanguageBlock(token);
-    }
+    return codeWithoutOptions(languageNameFromBlock(token), codeForExecutableLanguageBlock(token));
   } else {
     return "";
   }
-
 }
 
 export async function executeInteractive(
@@ -130,14 +123,3 @@ export async function executeSelectionInteractive(executor: CellExecutor) {
   }
 }
 
-// languages whose cell options are written as `#|` comments (other languages
-// use their own comment characters, e.g. `//|` for csharp or `*|` for stata)
-const kYamlHashOptionLanguages = ["python", "r", "julia", "bash", "sh", "shell"];
-
-function hasYamlHashOptions(language: string) {
-  return kYamlHashOptionLanguages.includes(language);
-}
-
-function isYamlHashOption(line: string) {
-  return !!line.match(/^#\s*\| ?/);
-}

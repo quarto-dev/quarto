@@ -237,6 +237,46 @@ suite("Positron: cell execution", function () {
       );
     }
   });
+
+  test("submits a {sql} cell to ggsql when an extension provides a ggsql runtime", async function () {
+    const quarto = extension();
+    if (!quarto.isActive) {
+      await quarto.activate();
+    }
+
+    // Needs the ggsql extension, which the test Positron may not have.
+    const hasGgsql = vscode.extensions.all.some((ext) => {
+      const runtimes = (ext.packageJSON as { contributes?: { languageRuntimes?: { languageId?: unknown }[] } })
+        ?.contributes?.languageRuntimes;
+      return Array.isArray(runtimes) && runtimes.some((r) => r?.languageId === "ggsql");
+    });
+    if (!hasGgsql) {
+      this.skip();
+    }
+
+    const qmd = [
+      "---",
+      "title: test",
+      "jupyter: python3",
+      "---",
+      "",
+      "```{sql}",
+      "--| label: q",
+      "select 1 as x",
+      "```",
+      "",
+    ].join("\n");
+
+    const calls = await runCellAndCaptureCalls(qmd, 7);
+    const call = calls.find((c) => c.method === "executeCode" && c.args[0] === "ggsql");
+    assert.ok(
+      call,
+      "Running a {sql} cell should call positron.runtime.executeCode('ggsql', ...). " +
+      `Observed: ${describe(calls)}`
+    );
+    assert.ok(String(call!.args[1]).includes("select 1 as x"));
+    assert.ok(!String(call!.args[1]).includes("--|"), "cell options should be stripped");
+  });
 });
 
 /** Compact summary of observed runtime calls for assertion messages. */

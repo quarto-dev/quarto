@@ -204,6 +204,18 @@ const languages = [
     identifiers: ["cpp", "c\\+\\+", "cxx", "rcpp"],
     source: "source.cpp",
     additionalContentName: ["source.cpp"],
+    // R code in a /*** R ... */ comment, which Rcpp::sourceCpp() runs after
+    // compiling the code (knitr compiles Rcpp and cpp cells with it). The
+    // delimiters are the ones sourceCpp() looks for
+    bodyPatterns: String.raw`- begin: ^\s*(/\*{3,}\s*[rR])\s*$
+  end: ^\s*(\*+/)
+  beginCaptures:
+    '1': {name: 'comment.block.cpp punctuation.definition.comment.begin.cpp'}
+  endCaptures:
+    '1': {name: 'comment.block.cpp punctuation.definition.comment.end.cpp'}
+  contentName: meta.embedded.block.r source.r
+  patterns:
+    - {include: 'source.r'}`,
   },
   {
     name: "diff",
@@ -472,7 +484,8 @@ const fencedCodeBlockDefinition = (
   identifiers,
   sourceScope,
   language,
-  additionalContentName
+  additionalContentName,
+  bodyPatterns
 ) => {
   if (!Array.isArray(sourceScope)) {
     sourceScope = [sourceScope];
@@ -480,9 +493,12 @@ const fencedCodeBlockDefinition = (
 
   language = language || name;
 
-  const scopes = sourceScope
-    .map((scope) => `- { include: '${scope}' }`)
-    .join("\n");
+  // patterns that take precedence over the language grammar in the cell
+  // body, followed by the language grammar itself
+  const scopes = [
+    ...(bodyPatterns ? [bodyPatterns] : []),
+    ...sourceScope.map((scope) => `- { include: '${scope}' }`),
+  ].join("\n");
 
   let contentName = `meta.embedded.block.${language}`;
   if (additionalContentName) {
@@ -567,7 +583,8 @@ const fencedCodeBlockDefinitions = () =>
         language.identifiers,
         language.source,
         language.language,
-        language.additionalContentName
+        language.additionalContentName,
+        language.bodyPatterns
       )
     )
     .join("\n");

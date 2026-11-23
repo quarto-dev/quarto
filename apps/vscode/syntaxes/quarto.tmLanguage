@@ -2353,6 +2353,37 @@
                 <key>patterns</key>
                 <array>
                   <dict>
+                    <key>begin</key>
+                    <string>^\s*(/\*{3,}\s*[rR])\s*$</string>
+                    <key>end</key>
+                    <string>^\s*(\*+/)</string>
+                    <key>beginCaptures</key>
+                    <dict>
+                      <key>1</key>
+                      <dict>
+                        <key>name</key>
+                        <string>comment.block.cpp punctuation.definition.comment.begin.cpp</string>
+                      </dict>
+                    </dict>
+                    <key>endCaptures</key>
+                    <dict>
+                      <key>1</key>
+                      <dict>
+                        <key>name</key>
+                        <string>comment.block.cpp punctuation.definition.comment.end.cpp</string>
+                      </dict>
+                    </dict>
+                    <key>contentName</key>
+                    <string>meta.embedded.block.r source.r</string>
+                    <key>patterns</key>
+                    <array>
+                      <dict>
+                        <key>include</key>
+                        <string>source.r</string>
+                      </dict>
+                    </array>
+                  </dict>
+                  <dict>
                     <key>include</key>
                     <string>source.cpp</string>
                   </dict>

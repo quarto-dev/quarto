@@ -2,7 +2,7 @@
 
 ## 1.140.0 (Unreleased)
 
-- `{Rcpp}` cells are now highlighted as C++ in both the source and visual editors. In the source editor, R code in a `/*** R` block, which `Rcpp::sourceCpp()` runs after compiling, is highlighted as R.
+- `{Rcpp}` cells are now highlighted as C++ in both the source and visual editors. In the source editor, R code in a `/*** R` block, which `Rcpp::sourceCpp()` runs after compiling, is highlighted as R (<https://github.com/quarto-dev/quarto/pull/1243>).
 - In Positron with inline output off, cells in languages whose runtimes come from extensions, such as `{ggsql}` and `{sas}`, now run in the console with **Run Cell**, **Run Above**, **Run Next Cell** and the usual shortcuts (<https://github.com/quarto-dev/quarto/pull/1237>).
 - Fixed a bug where hovering over any text after a citation on the same line showed that citation's reference. The hover now shows only over the `@` and the citation key (<https://github.com/quarto-dev/quarto/pull/1225>).
 - In the visual editor, code cells show completions and snippets automatically again while you type. Previously, they did not show when `editor.quickSuggestions` used its new default value, `offWhenInlineCompletions` (<https://github.com/quarto-dev/quarto/pull/1216>).

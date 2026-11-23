@@ -515,11 +515,6 @@ class PreviewManager {
     // Keep that workflow unchanged; the bridge accompanies `quarto preview`.
     if (this.previewType_ === "internal" && !useServeCommand) {
       this.commandBridge_ = createPreviewCommandBridge(this.context.extensionUri.fsPath);
-      // Let Quarto report the real document URL; asExternalUri maps it once.
-      // Clone the environment so preview reuse still compares the original values.
-      options.env = { ...options.env };
-      // ESLint expects camelCase, but environment variable names must retain their exact spelling
-      options.env["VSCODE_PROXY_URI"] = null;
     }
 
     // clear if a shiny doc

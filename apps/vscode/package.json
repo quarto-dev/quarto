@@ -1099,6 +1099,13 @@
           "default": true,
           "markdownDescription": "Use reticulate to execute Python cells within Knitr engine documents."
         },
+        "quarto.cells.autoLoadParameters": {
+          "order": 28,
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "In Jupyter engine documents, run the cell tagged `parameters` (`#| tags: [parameters]`) before running other cells, when it has not been run yet or has changed since it was run."
+        },
         "quarto.mathjax.scale": {
           "order": 15,
           "scope": "window",

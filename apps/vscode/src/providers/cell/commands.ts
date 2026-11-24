@@ -42,6 +42,7 @@ import {
   executeSelectionInteractive,
   executeAtPositionInteractive,
 } from "./executors";
+import { cellExecutorWithParameters } from "./parameters";
 import { ExtensionHost } from "../../host";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 import { isKnitrDocument } from "../../host/executors";
@@ -152,7 +153,7 @@ abstract class RunCommand {
   ): Promise<void>;
 
   protected async cellExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
-    return await this.host_.cellExecutorForLanguage(language, document, engine);
+    return await cellExecutorWithParameters(this.host_, language, document, engine);
   }
 
   protected executableLanguages(document: TextDocument) {
@@ -179,7 +180,7 @@ abstract class RunCommand {
   }
 
   private async hasExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
-    return undefined !== (await this.cellExecutorForLanguage(language, document, engine));
+    return undefined !== (await this.host_.cellExecutorForLanguage(language, document, engine));
   }
 
 }
@@ -773,7 +774,7 @@ class GoToPreviousCellCommand extends GoToCellCommand implements Command {
 async function runAdjacentBlock(host: ExtensionHost, editor: TextEditor, engine: MarkdownEngine, block: TokenMath | TokenCodeBlock) {
   navigateToBlock(editor, block);
   const language = languageNameFromBlock(block);
-  const executor = await host.cellExecutorForLanguage(language, editor.document, engine);
+  const executor = await cellExecutorWithParameters(host, language, editor.document, engine);
   if (executor) {
     const ranges = [toVscodeRange(block.range)];
     const metadata = cellMetadataForBlock(block);

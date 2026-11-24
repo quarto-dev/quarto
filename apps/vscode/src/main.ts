@@ -12,6 +12,7 @@ import { kQuartoDocSelector } from "./core/doc";
 import { activateLsp, deactivate as deactivateLsp } from "./lsp/client";
 import { activateEmbeddedDiagnostics, type EmbeddedDiagnosticsService } from "./providers/diagnostics";
 import { cellCommands } from "./providers/cell/commands";
+import { forgetLoadedParameters } from "./providers/cell/parameters";
 import { reflowCommands } from "./providers/cell/reflow";
 import { quartoCellExecuteCodeLensProvider } from "./providers/cell/codelens";
 import { activateQuartoAssistPanel } from "./providers/assist/panel";
@@ -75,6 +76,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
 
   // commands
   const commands = cellCommands(host, engine);
+  // a document's parameters cell runs again once the document is reopened
+  context.subscriptions.push(
+    vscode.workspace.onDidCloseTextDocument((document) => forgetLoadedParameters(document.uri))
+  );
 
   // get quarto context (some features conditional on it)
   // Create a logger function for verbose discovery output

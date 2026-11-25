@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@fluentui/react-components": "^9.75.2",
-    "@fluentui/react-icons": "^2.0.345",
+    "@fluentui/react-icons": "^2.0.346",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsconfig": "*"
@@ -15,7 +15,7 @@
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "eslint-config-custom": "*"
   },
   "scripts": {

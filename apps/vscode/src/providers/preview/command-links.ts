@@ -100,22 +100,36 @@ export interface PreviewUriComponents {
   fragment?: string;
 }
 
+const uriComponentFields = ["authority", "path", "query", "fragment"] as const;
+const uriComponentKeys = new Set<string>(["scheme", ...uriComponentFields]);
+
 /** Revive only top-level URI arguments; leave nested command arguments alone. */
 export function revivePreviewCommandArguments(
   args: unknown[],
   createUri: (components: PreviewUriComponents) => unknown
 ): unknown[] {
   return args.map(arg => {
-    if (!isRecord(arg) || typeof arg.scheme !== "string" || (arg.$mid !== undefined && arg.$mid !== 1)) {
+    if (!isRecord(arg)) {
+      return arg;
+    }
+
+    // A marker explicitly identifies a URI. Otherwise require the documented
+    // scheme/path shape and no extra fields, preserving ordinary command data.
+    const hasMarker = Object.prototype.hasOwnProperty.call(arg, "$mid");
+    const isMarkedUri = hasMarker && arg.$mid === 1;
+    const isUnmarkedUri = !hasMarker && typeof arg.scheme === "string" &&
+      Object.prototype.hasOwnProperty.call(arg, "path") &&
+      Object.keys(arg).every(key => uriComponentKeys.has(key));
+    if (!isMarkedUri && !isUnmarkedUri) {
       return arg;
     }
 
     // Require a real URI scheme rather than letting an empty scheme default to file.
-    if (!/^[a-z][a-z0-9+.-]*$/i.test(arg.scheme)) {
+    if (typeof arg.scheme !== "string" || !/^[a-z][a-z0-9+.-]*$/i.test(arg.scheme)) {
       throw new PreviewCommandError("invalid-uri");
     }
     const components: PreviewUriComponents = { scheme: arg.scheme };
-    for (const field of ["authority", "path", "query", "fragment"] as const) {
+    for (const field of uriComponentFields) {
       if (arg[field] !== undefined) {
         if (typeof arg[field] !== "string") {
           throw new PreviewCommandError("invalid-uri");

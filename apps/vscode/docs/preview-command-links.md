@@ -129,9 +129,15 @@ case-insensitively; command IDs retain their case.
 ### URI arguments
 
 Commands such as `vscode.open` expect a URI argument. Quarto converts top-level
-argument objects containing a string `scheme` field into VS Code URIs. Use
-standard URI fields such as `scheme` and `path`; nested objects are left
-unchanged, and invalid URI components prevent execution.
+objects marked with `"$mid": 1` into VS Code URIs. Without that marker, an object
+must contain a string `scheme` and a `path`, with only standard URI fields
+(`scheme`, `authority`, `path`, `query`, `fragment`). For example, `{ "scheme": "file",
+"path": "/example.qmd" }` is converted, while `{ "scheme": "dark", "marker": true }`
+stays an ordinary object. Objects matching the unmarked URI shape are always
+converted; Quarto cannot distinguish them from ordinary data with the same shape.
+URIs without a path require `"$mid": 1`; unmarked objects such as
+`{ "scheme": "dark", "query": "compact" }` remain ordinary data. Nested objects
+are left unchanged, and invalid URI components in a URI argument prevent execution.
 
 ## Composite commands and downstream effects
 

@@ -90,20 +90,38 @@ suite("Preview command links", function () {
   test("revives URI components with and without the URI marker", function () {
     const components = { scheme: "file", authority: "", path: "/workspace/a b.qmd", query: "x=1", fragment: "title" };
     const seen: unknown[] = [];
-    revivePreviewCommandArguments([components, { ...components, $mid: 1, extra: "ignored" }], uri => {
+    revivePreviewCommandArguments([
+      components, { scheme: "file", path: "/example" }, { scheme: "file", $mid: 1 },
+      { scheme: "custom", authority: "server", $mid: 1 },
+      { ...components, $mid: 1, extra: "ignored" },
+    ], uri => {
       seen.push(uri);
       return uri;
     });
-    assert.deepStrictEqual(seen, [components, components]);
+    assert.deepStrictEqual(seen, [
+      components, { scheme: "file", path: "/example" }, { scheme: "file" },
+      { scheme: "custom", authority: "server" }, components,
+    ]);
   });
 
   test("leaves ordinary objects, other markers and nested URIs untouched", function () {
-    const args = [{ path: "/workspace/hello.qmd" }, { scheme: 1 }, { scheme: "file", $mid: 2 }, [{ scheme: "file" }], { nested: { scheme: "file" } }];
-    assert.deepStrictEqual(revivePreviewCommandArguments(args, () => assert.fail("Unexpected URI conversion")), args);
+    const args = [
+      { path: "/workspace/hello.qmd" }, { scheme: 1 }, { scheme: "file", path: "/example", $mid: 2 },
+      { scheme: "dark", marker: true }, { scheme: "dark" },
+      // URI-like fields alone do not opt ordinary data into URI conversion.
+      { scheme: "dark", query: "compact" }, { scheme: "custom", authority: "server" },
+      { scheme: "dark", fragment: "section" },
+      { scheme: "file", path: "/example", $mid: undefined },
+      { scheme: "file", path: "/example", marker: true },
+      [{ scheme: "file", path: "/nested" }], { nested: { scheme: "file" } },
+    ];
+    const result = revivePreviewCommandArguments(args, () => assert.fail("Unexpected URI conversion"));
+    // Preserve the original objects, including fields unrelated to URI handling.
+    result.forEach((value, index) => assert.strictEqual(value, args[index]));
   });
 
   test("rejects invalid URI schemes and component types", function () {
-    for (const arg of [{ scheme: "" }, { scheme: "1invalid" }, { scheme: "bad scheme" }, { scheme: "file", path: 1 }, { scheme: "file", authority: null }, { scheme: "file", query: false }, { scheme: "file", fragment: [] }]) {
+    for (const arg of [{ scheme: "", path: "" }, { scheme: "1invalid", path: "" }, { scheme: "bad scheme", path: "" }, { $mid: 1 }, { scheme: 1, $mid: 1 }, { scheme: "file", path: 1 }, { scheme: "file", path: "", authority: null }, { scheme: "file", $mid: 1, query: false }, { scheme: "file", path: "", fragment: [] }]) {
       assert.throws(() => revivePreviewCommandArguments([arg], uri => uri), error =>
         error instanceof PreviewCommandError && error.code === "invalid-uri"
       );
@@ -111,7 +129,7 @@ suite("Preview command links", function () {
   });
 
   test("replaces raw URI errors with a fixed message", function () {
-    assert.throws(() => revivePreviewCommandArguments([{ scheme: "file" }], () => {
+    assert.throws(() => revivePreviewCommandArguments([{ scheme: "file", $mid: 1 }], () => {
       throw new Error("secret-uri-value");
     }), error => error instanceof PreviewCommandError && error.message === "Invalid URI argument in preview command link.");
   });
@@ -127,6 +145,24 @@ suite("Preview command dispatch", function () {
     });
     assert.deepStrictEqual(calls, [["example", "text", 42, true, null]]);
     assert.deepStrictEqual(result, { status: "executed" });
+  });
+
+  test("preserves ordinary scheme objects through both argument forms", async function () {
+    const args = ["lab.actions", { scheme: "dark", marker: true }];
+    const json = JSON.stringify(args);
+    for (const link of [
+      { href: `command:setContext?${encodeURIComponent(json)}` },
+      { href: "command:setContext", dataArgs: json },
+    ]) {
+      const calls: unknown[][] = [];
+      const result = await dispatchPreviewCommand(link, {
+        createUri: () => assert.fail("Ordinary command data was converted to a URI"),
+        permission: () => "allowed",
+        executeCommand: async (...received) => { calls.push(received); },
+      });
+      assert.deepStrictEqual(result, { status: "executed" });
+      assert.deepStrictEqual(calls, [["setContext", ...args]]);
+    }
   });
 
   test("denies execution for every permission failure", async function () {
@@ -158,7 +194,7 @@ suite("Preview command dispatch", function () {
   test("checks current permission after URI conversion", async function () {
     // A change during validation must be visible to the final permission check.
     let allowed = true;
-    const result = await dispatchPreviewCommand({ href: "command:example", dataArgs: '[{"scheme":"file"}]' }, {
+    const result = await dispatchPreviewCommand({ href: "command:example", dataArgs: '[{"scheme":"file","path":"/example"}]' }, {
       createUri: uri => { allowed = false; return uri; },
       permission: () => allowed ? "allowed" : "not-allowed",
       executeCommand: async () => assert.fail("Revoked command executed"),

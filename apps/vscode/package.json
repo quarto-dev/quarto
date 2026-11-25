@@ -1565,7 +1565,7 @@
     "@types/tmp": "^0.2.6",
     "@types/vscode": "1.101.0",
     "@posit-dev/positron-test-electron": "^0.0.3",
-    "@stylistic/eslint-plugin": "^5.10.0",
+    "@stylistic/eslint-plugin": "^6.0.1",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^4.1.0",

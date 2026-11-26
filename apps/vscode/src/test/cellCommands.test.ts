@@ -186,3 +186,86 @@ suite("Run commands on several cells group them by runtime", function () {
     assert.deepStrictEqual(await run("quarto.runAllCells", 0, false), { sql: ["select 1"] });
   });
 });
+
+/**
+ * Drives the run commands against a fake host that runs {Rcpp} cells in R, as
+ * Positron does: they share the r runtime, and an {Rcpp} cell runs in R as a
+ * `sourceCpp()` call.
+ */
+suite("Run commands on {Rcpp} cells", function () {
+  const kQmd = [
+    "```{Rcpp}",
+    "//| label: cpp",
+    "int one() { return 1; }",
+    "```",
+    "",
+    "```{r}",
+    "one()",
+    "```",
+    "",
+  ].join("\n");
+  const kCppLine = 2;
+  const kLastLine = 8;
+
+  const wrap = (code: string) => `sourceCpp(${code.trim()})`;
+
+  /** Runs `commandId` from `line` in `qmd`, answering which executor ran which code. */
+  async function run(commandId: string, line: number, qmd = kQmd): Promise<Record<string, string[]>> {
+    const ran: Record<string, string[]> = {};
+    const executorFor = (language: string): CellExecutor => ({
+      // like Positron's, the Rcpp executor runs its cells as sourceCpp() calls
+      execute: async (blocks: string[]) => {
+        (ran[language] ??= []).push(...blocks.map((b) => language === "Rcpp" ? wrap(b) : b.trim()));
+      },
+      runsWholeCell: language === "Rcpp" || undefined,
+    });
+    const host = {
+      executableLanguages: () => ["r", "Rcpp"],
+      cellRuntimeLanguage: (language: string) => language === "Rcpp" ? "r" : language,
+      cellCodeForRuntime: (language: string, code: string) => language === "Rcpp" ? wrap(code) : code,
+      cellExecutorForLanguage: async (language: string) => executorFor(language),
+    } as unknown as ExtensionHost;
+    // a new engine each run: the parser caches by document URI and version,
+    // and untitled documents reuse their URIs
+    const command = cellCommands(host, new MarkdownEngine()).find((c) => c.id === commandId);
+    assert.ok(command, `expected a ${commandId} command`);
+
+    const doc = await vscode.workspace.openTextDocument({ language: "quarto", content: qmd });
+    const editor = await vscode.window.showTextDocument(doc);
+    editor.selection = new vscode.Selection(line, 0, line, 0);
+
+    await command!.execute();
+    return ran;
+  }
+
+  teardown(async function () {
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  });
+
+  test("Run All Cells runs {Rcpp} and {r} cells together, in R", async function () {
+    assert.deepStrictEqual(await run("quarto.runAllCells", 0), {
+      r: ["sourceCpp(int one() { return 1; })", "one()"],
+    });
+  });
+
+  test("Run Cells Above runs {Rcpp} cells above an {r} cell in R", async function () {
+    assert.deepStrictEqual(await run("quarto.runCellsAbove", kLastLine), {
+      r: ["sourceCpp(int one() { return 1; })", "one()"],
+    });
+  });
+
+  test("Run All Cells in a document of only {Rcpp} cells runs them through their own executor", async function () {
+    const qmd = "```{Rcpp}\nint one() { return 1; }\n```\n\n```{Rcpp}\nint two() { return 2; }\n```\n";
+    assert.deepStrictEqual(await run("quarto.runAllCells", 0, qmd), {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Rcpp: ["sourceCpp(int one() { return 1; })", "sourceCpp(int two() { return 2; })"],
+    });
+  });
+
+  test("Run Current on a line of an {Rcpp} cell runs the whole cell, without its options", async function () {
+    assert.deepStrictEqual(await run("quarto.runCurrent", kCppLine), {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Rcpp: ["sourceCpp(int one() { return 1; })"],
+    });
+  });
+});

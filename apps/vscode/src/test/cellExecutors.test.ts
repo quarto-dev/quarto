@@ -14,6 +14,9 @@ import {
   positronExtensionHost,
   trackRuntimeLanguagesWith,
   positronRuntimeLanguage,
+  positronCellCodeForRuntime,
+  hostRunsHostedCellsInline,
+  kHostHostedCellLanguagesCommand,
 } from "../host/positron";
 import { TestLogOutputChannel } from "./fixtures/test-log-output-channel";
 import { cellOptions } from "../providers/cell/options";
@@ -362,5 +365,67 @@ suite("Rcpp cells", function () {
       cellOptions("Rcpp", ["//| eval: false", "int x;"]),
       { eval: false }
     );
+  });
+});
+
+suite("Rcpp cells in Positron", function () {
+  const engine = new MarkdownEngine();
+
+  async function rcppDoc() {
+    return await vscode.workspace.openTextDocument({
+      language: "quarto",
+      content: "```{Rcpp}\nint one() { return 1; }\n```\n",
+    });
+  }
+
+  /** Registers a stand in for Positron's hosted cell languages command. */
+  function stubHostedLanguages(answer: () => unknown): vscode.Disposable {
+    return vscode.commands.registerCommand(kHostHostedCellLanguagesCommand, answer);
+  }
+
+  test("run in the r runtime, so they run together with {r} cells", function () {
+    assert.strictEqual(positronRuntimeLanguage("Rcpp", true, () => false), "r");
+    assert.strictEqual(positronRuntimeLanguage("Rcpp", false, () => false), "r");
+  });
+
+  test("run in R as Rcpp::sourceCpp() calls, and other cells as they are", function () {
+    assert.strictEqual(positronCellCodeForRuntime("Rcpp", "int x;"), rcppWithSourceCpp("int x;"));
+    assert.strictEqual(positronCellCodeForRuntime("r", "x <- 1"), "x <- 1");
+  });
+
+  test("don't run inline when Positron doesn't list them", async function () {
+    assert.strictEqual(await hostRunsHostedCellsInline("Rcpp"), false);
+    const executor = await positronExtensionHost().cellExecutorForLanguage("Rcpp", await rcppDoc(), engine);
+    assert.ok(executor?.runsWholeCell);
+    assert.strictEqual(executor?.executeInlineCells, undefined);
+    assert.strictEqual(executor?.executeSelection, undefined);
+    assert.strictEqual(executor?.executeAtPosition, undefined);
+  });
+
+  test("run inline when Positron lists them", async function () {
+    const stub = stubHostedLanguages(() => ["rcpp"]);
+    try {
+      assert.strictEqual(await hostRunsHostedCellsInline("Rcpp"), true);
+      const executor = await positronExtensionHost().cellExecutorForLanguage("Rcpp", await rcppDoc(), engine);
+      assert.ok(executor?.runsWholeCell);
+      assert.ok(executor?.executeInlineCells);
+    } finally {
+      stub.dispose();
+    }
+  });
+
+  test("don't run inline when Positron lists other languages or its command fails", async function () {
+    let stub = stubHostedLanguages(() => ["other"]);
+    try {
+      assert.strictEqual(await hostRunsHostedCellsInline("Rcpp"), false);
+    } finally {
+      stub.dispose();
+    }
+    stub = stubHostedLanguages(() => { throw new Error("boom"); });
+    try {
+      assert.strictEqual(await hostRunsHostedCellsInline("Rcpp", new TestLogOutputChannel()), false);
+    } finally {
+      stub.dispose();
+    }
   });
 });

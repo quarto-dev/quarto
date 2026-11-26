@@ -68,6 +68,24 @@ export function cellCommands(host: ExtensionHost, engine: MarkdownEngine): Comma
   ];
 }
 
+/** A cell to run with other cells, see {@link RunCommand.runCells}. */
+interface CellToRun {
+  language: string;
+  code: string;
+  range?: Range;
+  metadata?: Record<string, unknown>;
+}
+
+/** A source editor cell to run with other cells. */
+function cellToRun(block: TokenMath | TokenCodeBlock): CellToRun {
+  return {
+    language: languageNameFromBlock(block),
+    code: codeWithoutOptionsFromBlock(block),
+    range: toVscodeRange(block.range),
+    metadata: cellMetadataForBlock(block),
+  };
+}
+
 abstract class RunCommand {
   constructor(
     protected readonly host_: ExtensionHost,
@@ -172,6 +190,47 @@ abstract class RunCommand {
       await executeInteractive(executor, [codeWithoutOptions(block.language, block.code)], editor.document);
       await activateIfRequired(editor);
     }
+  }
+
+  // Run cells that share a runtime, through the executor of `language` (e.g.
+  // the first cell's). When some of them run as code of another language
+  // (e.g. {Rcpp} cells, compiled in R, with {r} cells), that executor would
+  // run them all as its own language's cells, so they run through the
+  // runtime's executor as that code instead, and inline only when every
+  // cell's language can run inline. Answers whether anything ran.
+  protected async runCells(document: TextDocument, language: string, cells: CellToRun[]): Promise<boolean> {
+    if (cells.length === 0) {
+      return false;
+    }
+    let executor = await this.cellExecutorForLanguage(language, document, this.engine_);
+    if (!executor) {
+      return false;
+    }
+
+    let code = cells.map((cell) => cell.code);
+    const hostCode = cells.map((cell) =>
+      this.host_.cellCodeForRuntime?.(cell.language, cell.code, document, this.engine_) ?? cell.code);
+    if (cells.some((cell) => cell.language !== language) && hostCode.some((c, i) => c !== code[i])) {
+      const runtimeExecutor = await this.cellExecutorForLanguage(this.runtimeOf(document)(language), document, this.engine_);
+      if (!runtimeExecutor) {
+        return false;
+      }
+      const languages = [...new Set(cells.map((cell) => cell.language))];
+      const executors = await Promise.all(languages.map((l) => this.cellExecutorForLanguage(l, document, this.engine_)));
+      executor = {
+        ...runtimeExecutor,
+        executeInlineCells: executors.every((e) => e?.executeInlineCells) ? runtimeExecutor.executeInlineCells : undefined,
+      };
+      code = hostCode;
+    }
+
+    // only pass ranges if every cell has one
+    const ranges = cells.flatMap((cell) => cell.range ? [cell.range] : []);
+    const validRanges = ranges.length === code.length ? ranges : undefined;
+    const metadata = cells.map((cell) => cell.metadata);
+    const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
+    await executeInteractive(executor, code, document, validRanges, validMetadata);
+    return true;
   }
 
   private async explainNoExecutor(language: string, document: TextDocument): Promise<boolean> {
@@ -333,7 +392,10 @@ class RunCurrentCommand extends RunCommand implements Command {
       if (resolveToRunCell) {
         const code = codeWithoutOptionsFromBlock(block);
         const metadata = cellMetadataForBlock(block);
-        await executeInteractive(executor, [code], editor.document, undefined, metadata ? [metadata] : undefined);
+        // a cell that runs as a whole runs as the cell it is, inline if it
+        // can be (e.g. an {Rcpp} cell in the document's R session)
+        const ranges = executor.runsWholeCell ? [toVscodeRange(block.range)] : undefined;
+        await executeInteractive(executor, [code], editor.document, ranges, metadata ? [metadata] : undefined);
       } else {
         // submit
         const executed = await executeSelectionInteractive(executor);
@@ -380,8 +442,7 @@ class RunCurrentCommand extends RunCommand implements Command {
     if (activeBlock && selection.length <= 0) {
       const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
       if (executor?.runsWholeCell) {
-        await executeInteractive(executor, [activeBlock.code], editor.document);
-        await activateIfRequired(editor);
+        await this.runVisualBlock(editor, activeBlock);
         return;
       }
     }
@@ -536,25 +597,13 @@ class RunCellsAboveCommand extends RunCommand implements Command {
         block || blocks[blocks.length - 1]
       );
 
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-      if (executor) {
-        // accumulate code, ranges, and metadata of the cells that share its runtime
-        const runtimeOf = this.runtimeOf(editor.document);
-        const runtime = runtimeOf(language);
-        const code: string[] = [];
-        const ranges: Range[] = [];
-        const metadata: (Record<string, unknown> | undefined)[] = [];
-        for (const blk of blocks.filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)) {
-          code.push(codeWithoutOptionsFromBlock(blk));
-          metadata.push(cellMetadataForBlock(blk));
-          ranges.push(toVscodeRange(blk.range));
-        }
-
-        // execute (only pass ranges if we collected the same number as code blocks)
-        const validRanges = ranges.length === code.length ? ranges : undefined;
-        const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
-        await executeInteractive(executor, code, editor.document, validRanges, validMetadata);
-      }
+      // run the cells that share its runtime
+      const runtimeOf = this.runtimeOf(editor.document);
+      const runtime = runtimeOf(language);
+      const cells = blocks
+        .filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)
+        .map(cellToRun);
+      await this.runCells(editor.document, language, cells);
     }
   }
 
@@ -562,22 +611,18 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ): Promise<void> {
-    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-    if (executor) {
-      const runtimeOf = this.runtimeOf(editor.document);
-      const runtime = runtimeOf(context.activeLanguage);
-      const code: string[] = [];
-      for (const block of context.blocks) {
-        if (block.active) {
-          break;
-        } else if (runtimeOf(block.language) === runtime) {
-          code.push(codeWithoutOptions(block.language, block.code));
-        }
+    const runtimeOf = this.runtimeOf(editor.document);
+    const runtime = runtimeOf(context.activeLanguage);
+    const cells: CellToRun[] = [];
+    for (const block of context.blocks) {
+      if (block.active) {
+        break;
+      } else if (runtimeOf(block.language) === runtime) {
+        cells.push({ language: block.language, code: codeWithoutOptions(block.language, block.code) });
       }
-      if (code.length > 0) {
-        await executeInteractive(executor, code, editor.document);
-        await activateIfRequired(editor);
-      }
+    }
+    if (await this.runCells(editor.document, context.activeLanguage, cells)) {
+      await activateIfRequired(editor);
     }
   }
 }
@@ -609,25 +654,14 @@ class RunCellsBelowCommand extends RunCommand implements Command {
       ? languageNameFromBlock(block!)
       : below[0] && languageNameFromBlock(below[0]);
 
-    const blocks: string[] = [];
-    const ranges: Range[] = [];
-    const metadata: (Record<string, unknown> | undefined)[] = [];
-    // include blocks that share this language's runtime
-    const runtimeOf = this.runtimeOf(editor.document);
-    const runtime = language && runtimeOf(language);
-    for (const blk of below.filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)) {
-      blocks.push(codeWithoutOptionsFromBlock(blk));
-      ranges.push(toVscodeRange(blk.range));
-      metadata.push(cellMetadataForBlock(blk));
-    }
-    // execute (only pass ranges if we collected the same number as code blocks)
-    if (language && blocks.length > 0) {
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-      if (executor) {
-        const validRanges = ranges.length === blocks.length ? ranges : undefined;
-        const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
-        await executeInteractive(executor, blocks, editor.document, validRanges, validMetadata);
-      }
+    // run the blocks that share this language's runtime
+    if (language) {
+      const runtimeOf = this.runtimeOf(editor.document);
+      const runtime = runtimeOf(language);
+      const cells = below
+        .filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)
+        .map(cellToRun);
+      await this.runCells(editor.document, language, cells);
     }
   }
 
@@ -635,22 +669,18 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ): Promise<void> {
-    const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-    if (executor) {
-      const runtimeOf = this.runtimeOf(editor.document);
-      const runtime = runtimeOf(context.activeLanguage);
-      let code: string[] | undefined;
-      for (const block of context.blocks) {
-        if (block.active) {
-          code = [];
-        } else if (code && runtimeOf(block.language) === runtime) {
-          code.push(codeWithoutOptions(block.language, block.code));
-        }
+    const runtimeOf = this.runtimeOf(editor.document);
+    const runtime = runtimeOf(context.activeLanguage);
+    let cells: CellToRun[] | undefined;
+    for (const block of context.blocks) {
+      if (block.active) {
+        cells = [];
+      } else if (cells && runtimeOf(block.language) === runtime) {
+        cells.push({ language: block.language, code: codeWithoutOptions(block.language, block.code) });
       }
-      if (code && code.length > 0) {
-        await executeInteractive(executor, code, editor.document);
-        await activateIfRequired(editor);
-      }
+    }
+    if (cells && await this.runCells(editor.document, context.activeLanguage, cells)) {
+      await activateIfRequired(editor);
     }
   }
 }
@@ -672,28 +702,17 @@ class RunAllCellsCommand extends RunCommand implements Command {
     _line: number,
     _block?: Token
   ) {
-    const blocks: string[] = [];
-    const ranges: Range[] = [];
-    const metadata: (Record<string, unknown> | undefined)[] = [];
     const languages = this.executableLanguages(editor.document);
     const executable = tokens.filter((token?: Token) => blockIsExecutable(languages, token)) as Array<TokenMath | TokenCodeBlock>;
     // the first cell's language, and the cells that share its runtime
     const language = executable[0] && languageNameFromBlock(executable[0]);
-    const runtimeOf = this.runtimeOf(editor.document);
-    const runtime = language && runtimeOf(language);
-    for (const blk of executable.filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)) {
-      blocks.push(codeWithoutOptionsFromBlock(blk));
-      metadata.push(cellMetadataForBlock(blk));
-      ranges.push(toVscodeRange(blk.range));
-    }
-    if (language && blocks.length > 0) {
-      const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
-      if (executor) {
-        // only pass ranges if we collected the same number as code blocks
-        const validRanges = ranges.length === blocks.length ? ranges : undefined;
-        const validMetadata = metadata.some(m => m !== undefined) ? metadata.map(m => m ?? {}) : undefined;
-        await executeInteractive(executor, blocks, editor.document, validRanges, validMetadata);
-      }
+    if (language) {
+      const runtimeOf = this.runtimeOf(editor.document);
+      const runtime = runtimeOf(language);
+      const cells = executable
+        .filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)
+        .map(cellToRun);
+      await this.runCells(editor.document, language, cells);
     }
   }
 
@@ -703,18 +722,11 @@ class RunAllCellsCommand extends RunCommand implements Command {
   ): Promise<void> {
     const runtimeOf = this.runtimeOf(editor.document);
     const runtime = runtimeOf(context.activeLanguage);
-    const code: string[] = [];
-    for (const block of context.blocks) {
-      if (runtimeOf(block.language) === runtime) {
-        code.push(codeWithoutOptions(block.language, block.code));
-      }
-    }
-    if (code.length > 0) {
-      const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, code, editor.document);
-        await activateIfRequired(editor);
-      }
+    const cells = context.blocks
+      .filter((block) => runtimeOf(block.language) === runtime)
+      .map((block) => ({ language: block.language, code: codeWithoutOptions(block.language, block.code) }));
+    if (await this.runCells(editor.document, context.activeLanguage, cells)) {
+      await activateIfRequired(editor);
     }
   }
 }

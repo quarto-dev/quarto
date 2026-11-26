@@ -2365,7 +2365,7 @@
       <key>fenced_code_block_cpp</key>
       <dict>
         <key>begin</key>
-        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(cpp|c\+\+|cxx)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
+        <string>(^|\G)(\s*)(`{3,}|~{3,})\s*(?:\{(?:#[\w-]+\s+)?[\{\.=]?)?(?i:(cpp|c\+\+|cxx|rcpp)(?:\}{1,2})?((\s+|:|,|\{|\?)[^`~]*)?$)</string>
         <key>name</key>
         <string>markup.fenced_code.block.markdown</string>
         <key>end</key>
@@ -2437,6 +2437,37 @@
                 <string>(^|\G)</string>
                 <key>patterns</key>
                 <array>
+                  <dict>
+                    <key>begin</key>
+                    <string>^\s*(/\*{3,}\s*[rR])\s*$</string>
+                    <key>end</key>
+                    <string>^\s*(\*+/)</string>
+                    <key>beginCaptures</key>
+                    <dict>
+                      <key>1</key>
+                      <dict>
+                        <key>name</key>
+                        <string>comment.block.cpp punctuation.definition.comment.begin.cpp</string>
+                      </dict>
+                    </dict>
+                    <key>endCaptures</key>
+                    <dict>
+                      <key>1</key>
+                      <dict>
+                        <key>name</key>
+                        <string>comment.block.cpp punctuation.definition.comment.end.cpp</string>
+                      </dict>
+                    </dict>
+                    <key>contentName</key>
+                    <string>meta.embedded.block.r source.r</string>
+                    <key>patterns</key>
+                    <array>
+                      <dict>
+                        <key>include</key>
+                        <string>source.r</string>
+                      </dict>
+                    </array>
+                  </dict>
                   <dict>
                     <key>include</key>
                     <string>source.cpp</string>

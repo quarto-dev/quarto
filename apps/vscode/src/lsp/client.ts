@@ -66,7 +66,7 @@ import { LspInitializationOptions, QuartoContext } from "quarto-core";
 import { lspClientTransport } from "core-node";
 import { JsonRpcRequestTransport, sleep } from "core";
 import { extensionHost } from "../host";
-import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
+import { kHostCellFeaturesSetting, hostOwnsCellFeatures, onDidChangeHostOwnedLanguages } from "../host/cell-features";
 import { hasChunkSymbols, nestCellSymbols, quartoCellSymbols } from "./cell-symbols";
 import semver from "semver";
 import { EmbeddedLanguage } from "../vdoc/languages";
@@ -171,22 +171,27 @@ export function activateLsp(
       extensionHost().registerHelpTopicProvider(engine),
     ];
   };
+  const reconcileHostProviders = () => {
+    if (hostOwnsCellFeatures()) {
+      hostProviders.forEach((d) => d.dispose());
+      hostProviders = [];
+    } else if (hostProviders.length === 0) {
+      registerHostProviders();
+    }
+  };
   if (!hostOwnsCellFeatures()) {
     registerHostProviders();
   }
   context.subscriptions.push(
     new Disposable(() => hostProviders.forEach((d) => d.dispose())),
     workspace.onDidChangeConfiguration((e) => {
-      if (!e.affectsConfiguration(kHostCellFeaturesSetting)) {
-        return;
+      if (e.affectsConfiguration(kHostCellFeaturesSetting)) {
+        reconcileHostProviders();
       }
-      if (hostOwnsCellFeatures()) {
-        hostProviders.forEach((d) => d.dispose());
-        hostProviders = [];
-      } else if (hostProviders.length === 0) {
-        registerHostProviders();
-      }
-    })
+    }),
+    // the host can stop (or start) owning any language without the setting
+    // changing, e.g. when its own feature flags change
+    onDidChangeHostOwnedLanguages(reconcileHostProviders)
   );
 
   // create client options

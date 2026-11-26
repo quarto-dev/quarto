@@ -24,7 +24,6 @@ import {
   TokenMath,
   isDisplayMath,
   isExecutableLanguageBlock,
-  isExecutableLanguageBlockOf,
   languageBlockAtPosition,
   languageNameFromBlock
 } from "quarto-core";
@@ -36,7 +35,9 @@ import {
   blockHasExecutor,
   blockIsExecutable,
   cellMetadataForBlock,
+  codeWithoutOptions,
   codeWithoutOptionsFromBlock,
+  documentExecutableLanguages,
   executeInteractive,
   executeSelectionInteractive,
   executeAtPositionInteractive,
@@ -79,9 +80,9 @@ abstract class RunCommand {
     if (visualEditor) {
       const blockContext = await visualEditor.getActiveBlockContext();
       if (blockContext) {
-        if (await this.hasExecutorForLanguage(blockContext.activeLanguage, visualEditor.document, this.engine_)) {
+        if (!this.requiresActiveExecutor() || await this.hasExecutorForLanguage(blockContext.activeLanguage, visualEditor.document, this.engine_)) {
           await this.doExecuteVisualMode(visualEditor, blockContext);
-        } else {
+        } else if (!(await this.explainNoExecutor(blockContext.activeLanguage, visualEditor.document))) {
           window.showWarningMessage(`Execution of ${blockContext.activeLanguage} cells is not supported`);
         }
       } else {
@@ -101,8 +102,12 @@ abstract class RunCommand {
           );
           if (block) {
             const language = languageNameFromBlock(block);
-            if (await this.hasExecutorForLanguage(language, doc, this.engine_)) {
+            if (!this.requiresActiveExecutor() || await this.hasExecutorForLanguage(language, doc, this.engine_)) {
               await this.doExecute(editor, tokens, line, block);
+            } else if (isExecutableLanguageBlock(block)) {
+              // a cell, not a display block: let the host say why it cannot
+              // run, if it can (otherwise stay silent, as always)
+              await this.explainNoExecutor(language, doc);
             }
           } else {
             window.showWarningMessage(
@@ -128,6 +133,12 @@ abstract class RunCommand {
     return true;
   }
 
+  // whether the cell at the cursor must be one that can run: true for the
+  // commands that run it, false for the ones that run a cell next to it
+  protected requiresActiveExecutor() {
+    return true;
+  }
+
   protected abstract doExecuteVisualMode(
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
@@ -142,6 +153,29 @@ abstract class RunCommand {
 
   protected async cellExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
     return await this.host_.cellExecutorForLanguage(language, document, engine);
+  }
+
+  protected executableLanguages(document: TextDocument) {
+    return documentExecutableLanguages(this.host_, document, this.engine_);
+  }
+
+  // the runtime that runs a cell language in `document`: a run of several
+  // cells runs the cells that share one
+  protected runtimeOf(document: TextDocument): (language: string) => string {
+    return (language) => this.host_.cellRuntimeLanguage?.(language, document, this.engine_) ?? language;
+  }
+
+  // run the whole of a visual editor block, without its cell options
+  protected async runVisualBlock(editor: QuartoVisualEditor, block: { language: string; code: string; }) {
+    const executor = await this.cellExecutorForLanguage(block.language, editor.document, this.engine_);
+    if (executor) {
+      await executeInteractive(executor, [codeWithoutOptions(block.language, block.code)], editor.document);
+      await activateIfRequired(editor);
+    }
+  }
+
+  private async explainNoExecutor(language: string, document: TextDocument): Promise<boolean> {
+    return (await this.host_.explainNoExecutor?.(language, document)) ?? false;
   }
 
   private async hasExecutorForLanguage(language: string, document: TextDocument, engine: MarkdownEngine) {
@@ -181,11 +215,7 @@ class RunCurrentCellCommand extends RunCommand implements Command {
   ): Promise<void> {
     const activeBlock = context.blocks.find(block => block.active);
     if (activeBlock) {
-      const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [activeBlock.code], editor.document);
-        await activateIfRequired(editor);
-      }
+      await this.runVisualBlock(editor, activeBlock);
     }
   }
 }
@@ -197,8 +227,13 @@ class RunNextCellCommand extends RunCommand implements Command {
   private static readonly id = "quarto.runNextCell";
   public readonly id = RunNextCellCommand.id;
 
+  override requiresActiveExecutor() {
+    return false;
+  }
+
   override async doExecute(editor: TextEditor, tokens: Token[], line: number) {
-    const block = nextBlock(this.host_, line, tokens, true);
+    const languages = this.executableLanguages(editor.document);
+    const block = nextBlock(languages, line, tokens, true);
     if (block) {
       await runAdjacentBlock(this.host_, editor, this.engine_, block);
     }
@@ -212,11 +247,7 @@ class RunNextCellCommand extends RunCommand implements Command {
     const nextBlock = context.blocks[activeBlockIndex + 1];
     if (nextBlock) {
       await editor.setBlockSelection(context, "nextblock");
-      const executor = await this.cellExecutorForLanguage(nextBlock.language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [nextBlock.code], editor.document);
-        await activateIfRequired(editor);
-      }
+      await this.runVisualBlock(editor, nextBlock);
     } else {
       window.showInformationMessage("No more cells available to execute");
     }
@@ -230,12 +261,15 @@ class RunPreviousCellCommand extends RunCommand implements Command {
   private static readonly id = "quarto.runPreviousCell";
   public readonly id = RunPreviousCellCommand.id;
 
+  override requiresActiveExecutor() {
+    return false;
+  }
+
   override async doExecute(editor: TextEditor, tokens: Token[], line: number) {
-    const block = previousBlock(this.host_, line, tokens, true);
+    const languages = this.executableLanguages(editor.document);
+    const block = previousBlock(languages, line, tokens, true);
     if (block) {
-      if (block) {
-        await runAdjacentBlock(this.host_, editor, this.engine_, block);
-      }
+      await runAdjacentBlock(this.host_, editor, this.engine_, block);
     }
   }
 
@@ -247,11 +281,7 @@ class RunPreviousCellCommand extends RunCommand implements Command {
     const prevBlock = context.blocks[activeBlockIndex - 1];
     if (prevBlock) {
       await editor.setBlockSelection(context, "prevblock");
-      const executor = await this.cellExecutorForLanguage(prevBlock.language, editor.document, this.engine_);
-      if (executor) {
-        await executeInteractive(executor, [prevBlock.code], editor.document);
-        await activateIfRequired(editor);
-      }
+      await this.runVisualBlock(editor, prevBlock);
     } else {
       window.showInformationMessage("No more cells available to execute");
     }
@@ -358,9 +388,15 @@ class RunCurrentCommand extends RunCommand implements Command {
 
     // if in Positron
     if (isPositron) {
-      if (activeBlock && selection.length <= 0) {
+      const activeEmbeddedLanguage = activeBlock && embeddedLanguage(activeBlock.language);
+      if (activeBlock && selection.length <= 0 && !activeEmbeddedLanguage) {
+        // A language Positron runs but this extension has no virtual document
+        // for (e.g. `ggsql`) has no statement ranges here to step through, so
+        // run the whole cell.
+        await this.runVisualBlock(editor, activeBlock);
+      } else if (activeBlock && selection.length <= 0 && activeEmbeddedLanguage) {
         const codeLines = lines(activeBlock.code);
-        const vdoc = virtualDocForCode(codeLines, embeddedLanguage(activeBlock.language)!);
+        const vdoc = virtualDocForCode(codeLines, activeEmbeddedLanguage);
         const parentUri = Uri.file(editor.document.fileName);
         const injectedLines = (vdoc.language?.inject?.length ?? 0);
 
@@ -392,11 +428,7 @@ class RunCurrentCommand extends RunCommand implements Command {
       // if the selection is empty and this isn't a knitr document then it resolves to run cell
       if (selection.length <= 0 && !isKnitrDocument(editor.document, this.engine_)) {
         if (activeBlock) {
-          const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
-          if (executor) {
-            await executeInteractive(executor, [activeBlock.code], editor.document);
-            await activateIfRequired(editor);
-          }
+          await this.runVisualBlock(editor, activeBlock);
         }
       } else {
         const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
@@ -457,7 +489,7 @@ class RunCurrentAdvanceCommand extends RunCommand implements Command {
     if (activeBlock) {
       const executor = await this.cellExecutorForLanguage(activeBlock.language, editor.document, this.engine_);
       if (executor) {
-        await executeInteractive(executor, [activeBlock.code], editor.document);
+        await executeInteractive(executor, [codeWithoutOptions(activeBlock.language, activeBlock.code)], editor.document);
         const blockContext = await editor.getActiveBlockContext();
         if (blockContext) {
           await editor.setBlockSelection(blockContext, "nextblock");
@@ -486,8 +518,9 @@ class RunCellsAboveCommand extends RunCommand implements Command {
     block?: Token
   ) {
     // collect up blocks prior to the active one
-    const blocks: Token[] = [];
-    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token))) {
+    const blocks: Array<TokenMath | TokenCodeBlock> = [];
+    const languages = this.executableLanguages(editor.document);
+    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(languages, token)) as Array<TokenMath | TokenCodeBlock>) {
       // if the end of this block is past the line then bail
       if (blk.range.end.line > line) {
         break;
@@ -505,13 +538,13 @@ class RunCellsAboveCommand extends RunCommand implements Command {
 
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
       if (executor) {
-        // accumulate code, ranges, and metadata
+        // accumulate code, ranges, and metadata of the cells that share its runtime
+        const runtimeOf = this.runtimeOf(editor.document);
+        const runtime = runtimeOf(language);
         const code: string[] = [];
         const ranges: Range[] = [];
         const metadata: (Record<string, unknown> | undefined)[] = [];
-        for (const blk of blocks.filter(
-          isExecutableLanguageBlockOf(language)
-        ) as Array<TokenMath | TokenCodeBlock>) {
+        for (const blk of blocks.filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)) {
           code.push(codeWithoutOptionsFromBlock(blk));
           metadata.push(cellMetadataForBlock(blk));
           ranges.push(toVscodeRange(blk.range));
@@ -531,12 +564,14 @@ class RunCellsAboveCommand extends RunCommand implements Command {
   ): Promise<void> {
     const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
     if (executor) {
+      const runtimeOf = this.runtimeOf(editor.document);
+      const runtime = runtimeOf(context.activeLanguage);
       const code: string[] = [];
       for (const block of context.blocks) {
         if (block.active) {
           break;
-        } else if (block.language === context.activeLanguage) {
-          code.push(block.code);
+        } else if (runtimeOf(block.language) === runtime) {
+          code.push(codeWithoutOptions(block.language, block.code));
         }
       }
       if (code.length > 0) {
@@ -565,28 +600,25 @@ class RunCellsBelowCommand extends RunCommand implements Command {
     block?: Token
   ) {
     // see if we can get the language from the current block
-    let language = blockHasExecutor(this.host_, block)
+    const languages = this.executableLanguages(editor.document);
+    // skip the cells above or at the cursor
+    const below = tokens.filter((token?: Token) =>
+      blockIsExecutable(languages, token) && line < token.range.start.line
+    ) as Array<TokenMath | TokenCodeBlock>;
+    const language = blockHasExecutor(languages, block)
       ? languageNameFromBlock(block!)
-      : undefined;
+      : below[0] && languageNameFromBlock(below[0]);
 
     const blocks: string[] = [];
     const ranges: Range[] = [];
     const metadata: (Record<string, unknown> | undefined)[] = [];
-    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
-      // skip if the cell is above or at the cursor
-      if (blk.range && line < blk.range.start.line) {
-        // set language if needed
-        const blockLanguage = languageNameFromBlock(blk);
-        if (!language) {
-          language = blockLanguage;
-        }
-        // include blocks of this language
-        if (blockLanguage === language) {
-          blocks.push(codeWithoutOptionsFromBlock(blk));
-          ranges.push(toVscodeRange(blk.range));
-          metadata.push(cellMetadataForBlock(blk));
-        }
-      }
+    // include blocks that share this language's runtime
+    const runtimeOf = this.runtimeOf(editor.document);
+    const runtime = language && runtimeOf(language);
+    for (const blk of below.filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)) {
+      blocks.push(codeWithoutOptionsFromBlock(blk));
+      ranges.push(toVscodeRange(blk.range));
+      metadata.push(cellMetadataForBlock(blk));
     }
     // execute (only pass ranges if we collected the same number as code blocks)
     if (language && blocks.length > 0) {
@@ -605,12 +637,14 @@ class RunCellsBelowCommand extends RunCommand implements Command {
   ): Promise<void> {
     const executor = await this.cellExecutorForLanguage(context.activeLanguage, editor.document, this.engine_);
     if (executor) {
+      const runtimeOf = this.runtimeOf(editor.document);
+      const runtime = runtimeOf(context.activeLanguage);
       let code: string[] | undefined;
       for (const block of context.blocks) {
         if (block.active) {
           code = [];
-        } else if (code && (block.language === context.activeLanguage)) {
-          code.push(block.code);
+        } else if (code && runtimeOf(block.language) === runtime) {
+          code.push(codeWithoutOptions(block.language, block.code));
         }
       }
       if (code && code.length > 0) {
@@ -638,20 +672,19 @@ class RunAllCellsCommand extends RunCommand implements Command {
     _line: number,
     _block?: Token
   ) {
-    let language: string | undefined;
     const blocks: string[] = [];
     const ranges: Range[] = [];
     const metadata: (Record<string, unknown> | undefined)[] = [];
-    for (const blk of tokens.filter((token?: Token) => blockIsExecutable(this.host_, token)) as Array<TokenMath | TokenCodeBlock>) {
-      const blockLanguage = languageNameFromBlock(blk);
-      if (!language) {
-        language = blockLanguage;
-      }
-      if (blockLanguage === language) {
-        blocks.push(codeWithoutOptionsFromBlock(blk));
-        metadata.push(cellMetadataForBlock(blk));
-        ranges.push(toVscodeRange(blk.range));
-      }
+    const languages = this.executableLanguages(editor.document);
+    const executable = tokens.filter((token?: Token) => blockIsExecutable(languages, token)) as Array<TokenMath | TokenCodeBlock>;
+    // the first cell's language, and the cells that share its runtime
+    const language = executable[0] && languageNameFromBlock(executable[0]);
+    const runtimeOf = this.runtimeOf(editor.document);
+    const runtime = language && runtimeOf(language);
+    for (const blk of executable.filter((blk) => runtimeOf(languageNameFromBlock(blk)) === runtime)) {
+      blocks.push(codeWithoutOptionsFromBlock(blk));
+      metadata.push(cellMetadataForBlock(blk));
+      ranges.push(toVscodeRange(blk.range));
     }
     if (language && blocks.length > 0) {
       const executor = await this.cellExecutorForLanguage(language, editor.document, this.engine_);
@@ -668,10 +701,12 @@ class RunAllCellsCommand extends RunCommand implements Command {
     editor: QuartoVisualEditor,
     context: CodeViewActiveBlockContext
   ): Promise<void> {
+    const runtimeOf = this.runtimeOf(editor.document);
+    const runtime = runtimeOf(context.activeLanguage);
     const code: string[] = [];
     for (const block of context.blocks) {
-      if (block.language === context.activeLanguage) {
-        code.push(block.code);
+      if (runtimeOf(block.language) === runtime) {
+        code.push(codeWithoutOptions(block.language, block.code));
       }
     }
     if (code.length > 0) {
@@ -716,7 +751,8 @@ class GoToCellCommand {
         const tokens = this.engine_.parse(doc);
         const line = editor.selection.start.line;
         const selector = this.dir_ === "next" ? nextBlock : previousBlock;
-        const cell = selector(this.host_, line, tokens, false, false);
+        // no executor required, so no executable languages to look up
+        const cell = selector(new Set(), line, tokens, false, false);
         if (cell) {
           navigateToBlock(editor, cell);
         }
@@ -768,7 +804,7 @@ function navigateToBlock(editor: TextEditor, block: Token) {
 }
 
 function nextBlock(
-  host: ExtensionHost,
+  languages: ReadonlySet<string>,
   line: number,
   tokens: Token[],
   requireEvaluated = false,
@@ -777,8 +813,8 @@ function nextBlock(
   for (const block of tokens.filter(
     requireExecutor
       ? requireEvaluated
-        ? (token?: Token) => blockIsExecutable(host, token)
-        : (token?: Token) => blockHasExecutor(host, token)
+        ? (token?: Token) => blockIsExecutable(languages, token)
+        : (token?: Token) => blockHasExecutor(languages, token)
       : (token?: Token) => token && isExecutableLanguageBlock(token) && !isDisplayMath(token)
   )) {
     if (block.range.start.line > line) {
@@ -789,7 +825,7 @@ function nextBlock(
 }
 
 function previousBlock(
-  host: ExtensionHost,
+  languages: ReadonlySet<string>,
   line: number,
   tokens: Token[],
   requireEvaluated = false,
@@ -799,8 +835,8 @@ function previousBlock(
     .filter(
       requireExecutor
         ? requireEvaluated
-          ? (token?: Token) => blockIsExecutable(host, token)
-          : (token?: Token) => blockHasExecutor(host, token)
+          ? (token?: Token) => blockIsExecutable(languages, token)
+          : (token?: Token) => blockHasExecutor(languages, token)
         : (token?: Token) => token && isExecutableLanguageBlock(token) && !isDisplayMath(token))
     .reverse()) {
     if (block.range.end.line < line) {

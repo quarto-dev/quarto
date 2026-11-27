@@ -61,10 +61,19 @@ export function syncHeadingLinksAppendTransaction() {
       // alias schema
       const schema = tr.doc.type.schema;
 
+      // appendTransactionsPlugin calls the append() of every registered handler
+      // in turn on one shared transaction, so tr may already contain steps from
+      // handlers that ran before this one, and tr.doc reflects them. the positions
+      // returned by each findChildrenBy*(tr.doc) call below are therefore current
+      // as of that call; mapping them through all of tr.mapping would apply the
+      // earlier steps a second time. so record the step count before each call,
+      // and map the positions it returned only through the steps added since
+
       // fix links to be in sync with their text
+      const linksMapFrom = tr.mapping.maps.length;
       const links = findChildrenByMark(tr.doc, schema.marks.link);
       links.forEach(link => {
-        const linkPos = tr.mapping.map(link.pos);
+        const linkPos = tr.mapping.slice(linksMapFrom).map(link.pos);
         const range = getMarkRange(tr.doc.resolve(linkPos), schema.marks.link);
         if (range) {
           const attrs = getMarkAttrs(tr.doc, range, schema.marks.link);
@@ -77,8 +86,9 @@ export function syncHeadingLinksAppendTransaction() {
       });
 
       // if a heading has deviated from it's link, then update the link
+      const headingsMapFrom = tr.mapping.maps.length;
       findChildrenByType(tr.doc, schema.nodes.heading).forEach(heading => {
-        const headingPos = tr.mapping.map(heading.pos);
+        const headingPos = tr.mapping.slice(headingsMapFrom).map(heading.pos);
         const headingText = heading.node.textContent;
         const headingLink = heading.node.attrs.link;
 
@@ -90,8 +100,9 @@ export function syncHeadingLinksAppendTransaction() {
           });
 
           // find links that don't match and update them
+          const headingLinksMapFrom = tr.mapping.maps.length;
           findChildrenByMark(tr.doc, schema.marks.link).forEach(link => {
-            const linkPos = tr.mapping.map(link.pos);
+            const linkPos = tr.mapping.slice(headingLinksMapFrom).map(link.pos);
             const range = getMarkRange(tr.doc.resolve(linkPos), schema.marks.link);
             if (range) {
               const attrs = getMarkAttrs(tr.doc, range, schema.marks.link);

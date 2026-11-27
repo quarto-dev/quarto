@@ -3,6 +3,7 @@
 ## 1.140.0 (Unreleased)
 
 - In Jupyter and knitr qmds, running a cell now first loads parameters if they have not been loaded yet, or if they were edited since last execution. Turn this off with the `quarto.cells.autoLoadParameters` setting (<https://github.com/quarto-dev/quarto/pull/1246>).
+- Front matter and cell options are now read with the same YAML parser and schema as `quarto render` (<https://github.com/quarto-dev/quarto/pull/1252>).
 - Fixed a bug where the visual editor could fail to load a document with `RangeError: Position N out of range` when the document contained an image wrapped in a link and ended with a link (<https://github.com/quarto-dev/quarto/pull/1228>).
 - In Positron with inline output off, cells in languages whose runtimes come from extensions, such as `{ggsql}` and `{sas}`, now run in the console with **Run Cell**, **Run Above**, **Run Next Cell** and the usual shortcuts (<https://github.com/quarto-dev/quarto/pull/1237>).
 - `{ggsql}` cells are now highlighted. Their cell options can be written with `--|`, as in `{sql}` cells, or with `#|`, which is what `quarto render` currently reads for `{ggsql}` cells (<https://github.com/quarto-dev/quarto/pull/1239>).

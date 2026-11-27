@@ -49,8 +49,8 @@ function heading(value: string, linkText: string | null = null) {
 }
 
 // a transaction that already carries a step growing the document before every
-// link, standing in for an append handler that ran earlier in the same pass
-// (e.g. figure-convert turning a linked image into a figure)
+// link, standing in for another handler's append() that ran earlier on the same
+// transaction (e.g. figure-convert turning a linked image into a figure)
 function trWithPriorStep(doc: ProsemirrorNode): Transaction {
   const tr = EditorState.create({ schema, doc }).tr;
   tr.insert(0, para(text('A paragraph inserted by an earlier append handler.')));

@@ -61,9 +61,13 @@ export function syncHeadingLinksAppendTransaction() {
       // alias schema
       const schema = tr.doc.type.schema;
 
-      // positions scanned from tr.doc already reflect every step on tr (including
-      // those of append handlers that ran before this one), so map each position
-      // only through the steps added after its scan
+      // appendTransactionsPlugin calls the append() of every registered handler
+      // in turn on one shared transaction, so tr may already contain steps from
+      // handlers that ran before this one, and tr.doc reflects them. the positions
+      // returned by each findChildrenBy*(tr.doc) call below are therefore current
+      // as of that call; mapping them through all of tr.mapping would apply the
+      // earlier steps a second time. so record the step count before each call,
+      // and map the positions it returned only through the steps added since
 
       // fix links to be in sync with their text
       const linksMapFrom = tr.mapping.maps.length;

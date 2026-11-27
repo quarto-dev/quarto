@@ -72,127 +72,355 @@ function isConfigurationSet<T>(
   );
 }
 
+/**
+ * The languages that extensions declare runtimes for in the `languageRuntimes`
+ * contribution of their `package.json`, e.g. `sas` from the SAS extension or
+ * `ggsql` from the ggsql extension.
+ */
+export function contributedRuntimeLanguages(
+  extensions: readonly { packageJSON: unknown }[]
+): Set<string> {
+  const languages = new Set<string>();
+  for (const extension of extensions) {
+    const packageJSON = extension.packageJSON as
+      { contributes?: { languageRuntimes?: unknown } } | undefined;
+    const contributions = packageJSON?.contributes?.languageRuntimes;
+    if (!Array.isArray(contributions)) {
+      continue;
+    }
+    for (const contribution of contributions) {
+      const languageId = (contribution as { languageId?: unknown } | undefined)?.languageId;
+      if (typeof languageId === "string" && languageId.length > 0) {
+        languages.add(languageId);
+      }
+    }
+  }
+  return languages;
+}
+
+/**
+ * Languages whose cells can run in a Positron console of the same language.
+ * They come from two sources, as in Positron's own check for inline output
+ * (`hasLanguageRuntimeProvider`):
+ *
+ * - the `languageRuntimes` contributions of the installed extensions, which
+ *   are known before those extensions activate or discover any runtime, and
+ * - the registered runtimes, for an extension that registers a runtime
+ *   without declaring the contribution.
+ *
+ * Both are cached because the checks for whether a cell can run are
+ * synchronous. They are tracked only in Positron, so nothing changes in
+ * VS Code even when such extensions are installed. Positron can also run
+ * cells of other languages in another language's runtime (e.g. `{sql}` cells
+ * in ggsql); see {@link positronRuntimeLanguage}.
+ *
+ * See also https://github.com/posit-dev/positron/issues/17432
+ */
+let contributedLanguages = new Set<string>();
+const registeredLanguages = new Set<string>();
+
+const runtimeLanguagesEmitter = new vscode.EventEmitter<void>();
+
+/**
+ * Fires when a language gains or loses a Positron runtime, so that providers
+ * such as the cell code lenses can refresh.
+ */
+export const onDidChangeRuntimeLanguages = runtimeLanguagesEmitter.event;
+
+/**
+ * Track the languages with a Positron runtime. Returns a no-op outside
+ * Positron. The caller disposes the result on deactivation.
+ */
+export function trackRuntimeLanguages(outputChannel?: vscode.LogOutputChannel): vscode.Disposable {
+  const runtime = tryAcquirePositronApi()?.runtime;
+  if (runtime === undefined) {
+    return new vscode.Disposable(() => { });
+  }
+  return trackRuntimeLanguagesWith(runtime, vscode.extensions, outputChannel);
+}
+
+/**
+ * {@link trackRuntimeLanguages} with the runtime and extensions APIs passed
+ * in, for tests.
+ */
+export function trackRuntimeLanguagesWith(
+  runtime: Pick<typeof positron.runtime, "getRegisteredRuntimes" | "onDidRegisterRuntime">,
+  extensions: Pick<typeof vscode.extensions, "all" | "onDidChange">,
+  outputChannel?: vscode.LogOutputChannel
+): vscode.Disposable {
+  let disposed = false;
+  registeredLanguages.clear();
+
+  const register = (languageId: string) => {
+    if (disposed) {
+      return;
+    }
+    const isNew = !hasPositronRuntime(languageId);
+    registeredLanguages.add(languageId);
+    if (isNew) {
+      runtimeLanguagesEmitter.fire();
+    }
+  };
+
+  // the contributions are read synchronously, so they are known right away
+  contributedLanguages = contributedRuntimeLanguages(extensions.all);
+  const extensionsListener = extensions.onDidChange(() => {
+    const before = positronRuntimeLanguages();
+    contributedLanguages = contributedRuntimeLanguages(extensions.all);
+    if (!sameLanguages(before, positronRuntimeLanguages())) {
+      runtimeLanguagesEmitter.fire();
+    }
+  });
+
+  runtime.getRegisteredRuntimes().then(
+    (runtimes) => runtimes.forEach((metadata) => register(metadata.languageId)),
+    (error) => outputChannel?.error(`Failed to get registered runtimes: ${error}`)
+  );
+  const runtimeListener = runtime.onDidRegisterRuntime((metadata) => register(metadata.languageId));
+
+  return new vscode.Disposable(() => {
+    disposed = true;
+    extensionsListener.dispose();
+    runtimeListener.dispose();
+    contributedLanguages = new Set<string>();
+    registeredLanguages.clear();
+  });
+}
+
+function sameLanguages(a: string[], b: string[]): boolean {
+  const set = new Set(a);
+  return a.length === b.length && b.every((language) => set.has(language));
+}
+
+/**
+ * Whether Positron has a runtime for the language, so its cells can run in
+ * the console.
+ */
+export function hasPositronRuntime(language: string): boolean {
+  return contributedLanguages.has(language) || registeredLanguages.has(language);
+}
+
+function positronRuntimeLanguages(): string[] {
+  return [...new Set([...contributedLanguages, ...registeredLanguages])];
+}
+
+/** Cell languages always handed to a Positron runtime of the same language. */
+const kPositronRuntimeLanguages: ReadonlySet<string> = new Set(["julia", "python", "csharp", "r"]);
+
+/** The language ggsql registers its runtime under. */
+const kGgsqlLanguage = "ggsql";
+
+/**
+ * The language of the Positron runtime that runs `language` cells, or
+ * undefined when Positron runs none.
+ *
+ * A `{sql}` cell runs in ggsql, as Positron does with inline output. Not in a
+ * document rendered with knitr, which runs `{sql}` cells with DBI against the
+ * R connection the chunk names: ggsql would query another database than the
+ * one the document renders from.
+ */
+export function positronRuntimeLanguage(
+  language: string,
+  knitr: boolean,
+  hasRuntime: (language: string) => boolean = hasPositronRuntime
+): string | undefined {
+  if (language === "sql" && !knitr && hasRuntime(kGgsqlLanguage)) {
+    return kGgsqlLanguage;
+  }
+  if (kPositronRuntimeLanguages.has(language) || hasRuntime(language)) {
+    return language;
+  }
+  return undefined;
+}
+
+/**
+ * The command through which Positron explains why a cell cannot be run, e.g.
+ * that a `{sql}` cell in a knitr document runs at render time. Takes
+ * `(documentUri: Uri, cellLanguage: string)`, shows Positron's own message,
+ * and answers whether it had anything to say.
+ */
+export const kHostExplainUnrunnableCellCommand = "_quartoHostExplainUnrunnableCell";
+
+/**
+ * Have Positron explain why a `language` cell in `document` cannot be run.
+ * Answers whether it did. The command is probed for on each call, because
+ * Positron can register it after this extension activates.
+ */
+export async function hostExplainUnrunnableCell(
+  language: string,
+  document: vscode.TextDocument,
+  outputChannel?: vscode.LogOutputChannel
+): Promise<boolean> {
+  // `false` keeps the underscore-prefixed id we are looking for
+  const all = await vscode.commands.getCommands(false);
+  if (!all.includes(kHostExplainUnrunnableCellCommand)) {
+    return false;
+  }
+  try {
+    const explained = await vscode.commands.executeCommand<unknown>(
+      kHostExplainUnrunnableCellCommand,
+      document.uri,
+      language
+    );
+    outputChannel?.debug(
+      `[CellFeatures] The host ${explained === true ? "explained" : "had nothing to say about"} ` +
+      `the unrunnable ${language} cell.`
+    );
+    return explained === true;
+  } catch (err) {
+    outputChannel?.warn(`${kHostExplainUnrunnableCellCommand} failed for ${language}: ${err}`);
+    return false;
+  }
+}
+
+/**
+ * Cell executor that runs `language` cells in the Positron console of
+ * `runtimeLanguage`. The two differ for e.g. a `{sql}` cell run in ggsql;
+ * everything that addresses a console uses the runtime language.
+ */
+function positronRuntimeExecutor(
+  language: string,
+  runtimeLanguage: string,
+  document: vscode.TextDocument,
+  engine: MarkdownEngine,
+  outputChannel?: vscode.LogOutputChannel
+): CellExecutor {
+  return {
+    execute: async (blocks: string[], editorUri?: vscode.Uri, executionMetadata?: Record<string, unknown>[]): Promise<void> => {
+      const runtime = tryAcquirePositronApi()?.runtime;
+
+      if (runtime === undefined) {
+        // Can't do anything without a runtime
+        return;
+      }
+
+      let executionLanguage = runtimeLanguage;
+      if (
+        language === "python" &&
+        isKnitrDocument(document, engine) &&
+        vscode.workspace.getConfiguration("quarto").get("cells.useReticulate", true)
+      ) {
+        executionLanguage = "r";
+        blocks = blocks.map(pythonWithReticulate);
+      }
+
+      // Our callback executes each block sequentially
+      const callback = async () => {
+        for (let i = 0; i < blocks.length; i++) {
+          const metadata = executionMetadata?.[i];
+
+          // Track whether the runtime itself reported the failure. A
+          // failure of the running code (a runtime error or syntax
+          // error in the cell), an interrupt, or the session exiting are
+          // all delivered through the execution observer's `onFailed`
+          // callback before `executeCode` rejects. These are already
+          // surfaced in the console, so we don't want to surface them
+          // again. A rejection *without* `onFailed` having fired means
+          // the code couldn't be submitted to the runtime at all (e.g.
+          // no runtime is registered for the language), which is a
+          // genuine problem worth reporting.
+          let runtimeFailure = false;
+
+          try {
+            await runtime.executeCode(
+              executionLanguage, // The language ID
+              blocks[i],  // The code string to execute
+              false,      // Whether to focus the console
+              true,       // Whether to allow incomplete code to run
+              undefined,  // The execution mode
+              undefined,  // The error behavior
+              { onFailed: () => { runtimeFailure = true; } }, // An execution observer
+              undefined,  // The specific session ID in which to execute
+              editorUri,  // The document URI
+              metadata
+            );
+          } catch (err) {
+            const message = err instanceof Error ? err.message : JSON.stringify(err);
+
+            if (!runtimeFailure) {
+              // The code couldn't be submitted to the runtime. Log it
+              // and let it propagate so the user finds out.
+              outputChannel?.error(`Failed to execute ${executionLanguage} cell: ${message}`);
+              throw err;
+            }
+
+            // The executed code raised an error (or was interrupted).
+            // It's already reported in the console, so log it for the
+            // record but don't let it propagate to the command handler,
+            // which would surface it again as a notification popup.
+            // https://github.com/posit-dev/positron/issues/9845
+            outputChannel?.debug(`Error executing ${executionLanguage} cell: ${message}`);
+
+            // Stop executing any subsequent blocks since one failed.
+            break;
+          }
+        }
+      };
+
+      await ExecuteQueue.instance.add(executionLanguage, callback);
+    },
+    executeSelection: async (): Promise<void> => {
+      await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: runtimeLanguage });
+    },
+    executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
+      try {
+        return await vscode.commands.executeCommand(
+          'positron.executeCodeFromPosition',
+          runtimeLanguage,
+          uri,
+          position
+        ) as Position;
+      } catch {
+        // an error can happen, we think, if the statementRangeProvider errors
+        console.error('error when using `positron.executeCodeFromPosition`');
+      }
+      return position;
+    },
+    executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]): Promise<void> => {
+      const runtime = tryAcquirePositronApi()?.runtime;
+
+      if (runtime === undefined) {
+        // Can't do anything without a runtime
+        return;
+      }
+
+      await runtime.executeInlineCell(documentUri, cellRanges, executionMetadata);
+    }
+  };
+}
+
 export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): ExtensionHost {
   return {
     // supported executable languages (we delegate to the default for langugaes
-    // w/o runtimes so we support all languages)
-    executableLanguages,
+    // w/o runtimes so we support all languages), plus any language with a
+    // Positron runtime, and sql when ggsql runs it in this document
+    executableLanguages: (_visualMode: boolean, document: vscode.TextDocument, engine: MarkdownEngine) => {
+      const languages = new Set([...executableLanguages(), ...positronRuntimeLanguages()]);
+      if (positronRuntimeLanguage("sql", isKnitrDocument(document, engine))) {
+        languages.add("sql");
+      }
+      return [...languages];
+    },
+
+    // the runtime that runs a cell language, so that e.g. {sql} and {ggsql}
+    // cells run together
+    cellRuntimeLanguage: (language: string, document: vscode.TextDocument, engine: MarkdownEngine) =>
+      positronRuntimeLanguage(language, isKnitrDocument(document, engine)),
+
+    // let Positron say why a cell cannot be run (e.g. that it runs at render)
+    explainNoExecutor: (language: string, document: vscode.TextDocument): Promise<boolean> =>
+      hostExplainUnrunnableCell(language, document, outputChannel),
 
     cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
       : Promise<CellExecutor | undefined> => {
-      switch (language) {
-        // use positron api for known runtimes
-        case "julia":
-        case "python":
-        case "csharp":
-        case "r":
-          return {
-            execute: async (blocks: string[], editorUri?: vscode.Uri, executionMetadata?: Record<string, unknown>[]): Promise<void> => {
-              const runtime = tryAcquirePositronApi()?.runtime;
-
-              if (runtime === undefined) {
-                // Can't do anything without a runtime
-                return;
-              }
-
-              let executionLanguage = language;
-              if (
-                language === "python" &&
-                isKnitrDocument(document, engine) &&
-                vscode.workspace.getConfiguration("quarto").get("cells.useReticulate", true)
-              ) {
-                executionLanguage = "r";
-                blocks = blocks.map(pythonWithReticulate);
-              }
-
-              // Our callback executes each block sequentially
-              const callback = async () => {
-                for (let i = 0; i < blocks.length; i++) {
-                  const metadata = executionMetadata?.[i];
-
-                  // Track whether the runtime itself reported the failure. A
-                  // failure of the running code (a runtime error or syntax
-                  // error in the cell), an interrupt, or the session exiting are
-                  // all delivered through the execution observer's `onFailed`
-                  // callback before `executeCode` rejects. These are already
-                  // surfaced in the console, so we don't want to surface them
-                  // again. A rejection *without* `onFailed` having fired means
-                  // the code couldn't be submitted to the runtime at all (e.g.
-                  // no runtime is registered for the language), which is a
-                  // genuine problem worth reporting.
-                  let runtimeFailure = false;
-
-                  try {
-                    await runtime.executeCode(
-                      executionLanguage, // The language ID
-                      blocks[i],  // The code string to execute
-                      false,      // Whether to focus the console
-                      true,       // Whether to allow incomplete code to run
-                      undefined,  // The execution mode
-                      undefined,  // The error behavior
-                      { onFailed: () => { runtimeFailure = true; } }, // An execution observer
-                      undefined,  // The specific session ID in which to execute
-                      editorUri,  // The document URI
-                      metadata
-                    );
-                  } catch (err) {
-                    const message = err instanceof Error ? err.message : JSON.stringify(err);
-
-                    if (!runtimeFailure) {
-                      // The code couldn't be submitted to the runtime. Log it
-                      // and let it propagate so the user finds out.
-                      outputChannel?.error(`Failed to execute ${executionLanguage} cell: ${message}`);
-                      throw err;
-                    }
-
-                    // The executed code raised an error (or was interrupted).
-                    // It's already reported in the console, so log it for the
-                    // record but don't let it propagate to the command handler,
-                    // which would surface it again as a notification popup.
-                    // https://github.com/posit-dev/positron/issues/9845
-                    outputChannel?.debug(`Error executing ${executionLanguage} cell: ${message}`);
-
-                    // Stop executing any subsequent blocks since one failed.
-                    break;
-                  }
-                }
-              };
-
-              await ExecuteQueue.instance.add(executionLanguage, callback);
-            },
-            executeSelection: async (): Promise<void> => {
-              await vscode.commands.executeCommand('workbench.action.positronConsole.executeCode', { languageId: language });
-            },
-            executeAtPosition: async (uri: Uri, position: Position): Promise<Position> => {
-              try {
-                return await vscode.commands.executeCommand(
-                  'positron.executeCodeFromPosition',
-                  language,
-                  uri,
-                  position
-                ) as Position;
-              } catch {
-                // an error can happen, we think, if the statementRangeProvider errors
-                console.error('error when using `positron.executeCodeFromPosition`');
-              }
-              return position;
-            },
-            executeInlineCells: async (documentUri: vscode.Uri, cellRanges: Range[], executionMetadata?: Record<string, unknown>[]): Promise<void> => {
-              const runtime = tryAcquirePositronApi()?.runtime;
-
-              if (runtime === undefined) {
-                // Can't do anything without a runtime
-                return;
-              }
-
-              await runtime.executeInlineCell(documentUri, cellRanges, executionMetadata);
-            }
-          };
-
-        // delegate for other languages
-        default:
-          return cellExecutorForLanguage(language, document, engine, silent);
+      // use positron api for known runtimes, any other language with a
+      // Positron runtime (e.g. SAS or ggsql from an extension), and sql in
+      // ggsql; delegate the rest
+      const runtimeLanguage = positronRuntimeLanguage(language, isKnitrDocument(document, engine));
+      if (runtimeLanguage !== undefined) {
+        return positronRuntimeExecutor(language, runtimeLanguage, document, engine, outputChannel);
       }
+      return cellExecutorForLanguage(language, document, engine, silent);
     },
 
     registerStatementRangeProvider: (engine: MarkdownEngine): vscode.Disposable => {
@@ -241,17 +469,12 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
 }
 
 
-// TODO: Use positron.PreviewPanel directly once @posit-dev/positron ships
-// `stoppable` and `onDidRequestStop`.
-type StoppablePreviewPanel = positron.PreviewPanel & {
-  stoppable: boolean;
-  readonly onDidRequestStop: vscode.Event<void>;
-};
-
 /**
  * Whether this version of Positron shows a stop button for preview panels.
+ * Older Positron versions return panels without `stoppable` and
+ * `onDidRequestStop`, even though the API types declare them.
  */
-function isStoppable(panel: positron.PreviewPanel): panel is StoppablePreviewPanel {
+function isStoppable(panel: positron.PreviewPanel): boolean {
   return "onDidRequestStop" in panel;
 }
 

@@ -28,7 +28,7 @@ import {
 
 import { MarkdownEngine } from "../markdown/engine";
 import { EmbeddedLanguage, embeddedLanguage } from "../vdoc/languages";
-import { kHostCellFeaturesSetting, hostOwnsCellFeatures } from "../host/cell-features";
+import { kHostCellFeaturesSetting, hostOwnsCellFeatures, onDidChangeHostOwnedLanguages } from "../host/cell-features";
 import { virtualDocForLanguage } from "../vdoc/vdoc";
 import { virtualDocUriFromTempFile, quartoVdocDir, VIRTUAL_DOC_TEMP_DIRECTORY } from "../vdoc/vdoc-tempfile";
 import { isQuartoDoc } from "../core/doc";
@@ -589,6 +589,13 @@ export function activateEmbeddedDiagnostics(
     }
   }
 
+  function recreateManager(): void {
+    disposeManager();
+    if (isEnabled()) {
+      createManager();
+    }
+  }
+
   if (isEnabled()) {
     createManager();
   }
@@ -603,16 +610,19 @@ export function activateEmbeddedDiagnostics(
     }
 
     if (e.affectsConfiguration(kHostCellFeaturesSetting)) {
-      disposeManager();
-      if (isEnabled()) {
-        createManager();
-      }
+      recreateManager();
     }
   });
+
+  // The host can take over (or hand back) a language without the setting
+  // changing, and the re-query behind this event finishes after the setting
+  // listener above has already run.
+  const hostLanguagesListener = onDidChangeHostOwnedLanguages(recreateManager);
 
   return {
     dispose() {
       configListener.dispose();
+      hostLanguagesListener.dispose();
       disposeManager();
     },
     async deactivate() {

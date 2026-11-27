@@ -10,8 +10,10 @@ import type * as positron from "positron";
 
 import { PositronWebviewPanel } from "../host/positron";
 
+type OlderPreviewPanel = Omit<positron.PreviewPanel, "stoppable" | "onDidRequestStop">;
+
 /** A Positron preview panel from a version without the Viewer stop button. */
-function olderPanel(): positron.PreviewPanel {
+function olderPanel(): OlderPreviewPanel {
   return {
     viewType: "quarto.test",
     title: "Test",
@@ -44,7 +46,7 @@ suite("Positron webview panel stop button", function () {
 
   test("does nothing on older Positron without the stop button", function () {
     const panel = olderPanel();
-    const hostPanel = new PositronWebviewPanel(panel);
+    const hostPanel = new PositronWebviewPanel(panel as positron.PreviewPanel);
 
     hostPanel.setStoppable(true);
 

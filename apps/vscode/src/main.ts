@@ -28,7 +28,7 @@ import { activateZotero } from "./providers/zotero/zotero";
 import { extensionHost } from "./host";
 import { detectCellFeatureOwnership } from "./host/cell-features";
 import { setVdocTempFileLogger } from "./vdoc/vdoc-tempfile";
-import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated } from "./host/positron";
+import { isInlineOutputEnabled, kInlineOutputEnabledSetting, kInlineOutputEnabledSettingDeprecated, trackRuntimeLanguages } from "./host/positron";
 import { initQuartoContext, getSourceDescription } from "quarto-core";
 import { configuredQuartoPath } from "./core/quarto";
 import { activateDenoConfig } from "./providers/deno-config";
@@ -64,8 +64,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<Quarto
   // create extension host
   const host = extensionHost(outputChannel);
 
+  // track the languages with a Positron runtime (a no-op elsewhere)
+  context.subscriptions.push(trackRuntimeLanguages(outputChannel));
+
   // does the host own language features for code cells?
-  await detectCellFeatureOwnership(outputChannel);
+  context.subscriptions.push(await detectCellFeatureOwnership(outputChannel));
 
   // create markdown engine
   const engine = new MarkdownEngine();

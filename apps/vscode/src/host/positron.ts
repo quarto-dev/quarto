@@ -273,6 +273,50 @@ export async function hostExplainUnrunnableCell(
   }
 }
 
+// how many times each session has restarted or exited, by session id
+const sessionGenerations = new Map<string, number>();
+
+/**
+ * Identifies the console session that `runtimeLanguage` code runs in, and
+ * changes when that session restarts. Undefined when there is no such session
+ * yet, or when several could be the one.
+ */
+async function consoleSessionKey(runtimeLanguage: string): Promise<string | undefined> {
+  const runtime = tryAcquirePositronApi()?.runtime;
+  if (runtime === undefined) {
+    return undefined;
+  }
+  try {
+    const isConsoleFor = (session?: positron.BaseLanguageRuntimeSession) =>
+      session?.runtimeMetadata.languageId === runtimeLanguage &&
+      String(session.metadata.sessionMode) === "console";
+
+    let session = await runtime.getForegroundSession();
+    if (!isConsoleFor(session)) {
+      const candidates = (await runtime.getActiveSessions()).filter(isConsoleFor);
+      session = candidates.length === 1 ? candidates[0] : undefined;
+    }
+    if (session === undefined) {
+      return undefined;
+    }
+
+    const sessionId = session.metadata.sessionId;
+    if (!sessionGenerations.has(sessionId)) {
+      sessionGenerations.set(sessionId, 0);
+      // not disposed: it lives as long as the session does
+      session.onDidChangeRuntimeState?.((state) => {
+        // compared as strings: the `positron` module is types only
+        if (["restarting", "exited"].includes(String(state))) {
+          sessionGenerations.set(sessionId, (sessionGenerations.get(sessionId) ?? 0) + 1);
+        }
+      });
+    }
+    return `${sessionId}#${sessionGenerations.get(sessionId)}`;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Cell executor that runs `language` cells in the Positron console of
  * `runtimeLanguage`. The two differ for e.g. a `{sql}` cell run in ggsql;
@@ -406,6 +450,9 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
     // cells run together
     cellRuntimeLanguage: (language: string, document: vscode.TextDocument, engine: MarkdownEngine) =>
       positronRuntimeLanguage(language, isKnitrDocument(document, engine)),
+
+    cellSessionKey: (runtimeLanguage: string, _document: vscode.TextDocument, inline: boolean) =>
+      inline ? Promise.resolve(undefined) : consoleSessionKey(runtimeLanguage),
 
     // let Positron say why a cell cannot be run (e.g. that it runs at render)
     explainNoExecutor: (language: string, document: vscode.TextDocument): Promise<boolean> =>

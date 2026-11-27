@@ -75,6 +75,14 @@ export interface ExtensionHost {
   cellRuntimeLanguage?(language: string, document: TextDocument, engine: MarkdownEngine): string | undefined;
 
   /**
+   * Identifies the session that runs `runtimeLanguage` cells of `document`
+   * (the ones with inline output when `inline`), and changes when that session
+   * restarts. Used to run a document's parameters cell again in a new
+   * session. Undefined when the host cannot tell.
+   */
+  cellSessionKey?(runtimeLanguage: string, document: TextDocument, inline: boolean): Promise<string | undefined>;
+
+  /**
    * Explain to the user why a `language` cell in `document` has no executor.
    * Answers whether it explained.
    */

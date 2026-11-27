@@ -15,7 +15,7 @@
   "devDependencies": {
     "@types/js-yaml-4": "npm:@types/js-yaml@^4.0.9",
     "@types/wcwidth": "^1.0.2",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "eslint-config-custom": "*",
     "tsx": "^4.23.15"
   },

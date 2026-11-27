@@ -6,13 +6,14 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
-    "@quarto/_annotated-json": "*",
+    "js-yaml-4": "npm:js-yaml@4.1.1",
     "markdown-it": "^15.0.3",
     "markdown-it-attrs": "^4.5.0",
     "tsconfig": "*",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
+    "@types/js-yaml-4": "npm:@types/js-yaml@^4.0.9",
     "@types/wcwidth": "^1.0.2",
     "eslint": "^10.14.0",
     "eslint-config-custom": "*",

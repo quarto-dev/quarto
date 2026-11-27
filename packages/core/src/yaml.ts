@@ -4,19 +4,9 @@
  * Copyright (C) 2022-2026 by Posit Software, PBC
  */
 
-// YAML is read and written with the parser and schema of Quarto CLI (a copy
-// of js-yaml 4, see `loadYaml`). Imported from their files, as the package
-// doesn't export them (and is a copy that is kept in sync with another, see
-// packages/README.md)
-import {
-  FAILSAFE_SCHEMA as kCliFailsafeSchema,
-  Type as CliType,
-  dump as cliDump,
-  loadAll as cliLoadAll,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-} from "@quarto/_annotated-json/src/external/js-yaml.js";
-import { QuartoJSONSchema as kCliQuartoSchema } from "@quarto/_annotated-json/src/js-yaml-quarto-schema";
+// YAML is read and written with js-yaml 4.1.1, the version that Quarto CLI
+// reads YAML with: later versions read some YAML differently (see `loadYaml`)
+import * as jsYaml4 from "js-yaml-4";
 
 import { Metadata } from "./metadata";
 
@@ -49,15 +39,22 @@ export function isYamlExpr(data: unknown): data is YamlExpr {
 }
 
 /**
- * The schema of Quarto CLI, in which `!expr` values are also written back as
- * scalars tagged `!expr` (the schema of the CLI only reads them).
+ * The schema that Quarto CLI reads YAML with (`QuartoJSONSchema` there): the
+ * null, boolean, integer and float scalars of JSON, with everything else a
+ * string, and scalars tagged `!expr`.
+ *
+ * It differs from the one of the CLI in that:
+ * - the explicit tags `!!str`, `!!seq` and `!!map` are read, where the CLI
+ *   fails on them
+ * - `!expr` values are also written back as scalars tagged `!expr` (the CLI
+ *   only reads them)
  */
-const kQuartoDumpSchema = kCliQuartoSchema.extend(
-  new CliType("!expr", {
+const kQuartoSchema = jsYaml4.JSON_SCHEMA.extend(
+  new jsYaml4.Type("!expr", {
     kind: "scalar",
     construct: (source: string | null): YamlExpr => ({ value: source ?? "", tag: "!expr" }),
     predicate: isYamlExpr,
-    represent: (data: YamlExpr) => data.value,
+    represent: (data: object) => (data as YamlExpr).value,
   })
 );
 
@@ -70,14 +67,14 @@ export interface LoadYamlOptions {
 }
 
 /**
- * Parse a single YAML document, as Quarto CLI does: with the copy of its
- * parser (js-yaml 4) and schema that is in `@quarto/_annotated-json`. YAML
- * that renders is then YAML that is read here, with the same values. Unlike
- * the current js-yaml (5), this:
- * - reads scalars tagged `!expr` (see `YamlExpr`)
- * - reads flow collections and quoted strings that continue on lines that
- *   are indented no more than their key, as in `a: [\n  1\n]`
- * - reads numbers such as `0b101`, `-0x1F` and `1_000` as numbers
+ * Parse a single YAML document, as Quarto CLI does: with the same version of
+ * js-yaml (4.1.1) and the same schema. YAML that renders is then YAML that is
+ * read here, with the same values. Later versions of js-yaml differ:
+ * - js-yaml 5 does not read flow collections and quoted strings that
+ *   continue on lines that are indented no more than their key, as in
+ *   `a: [\n  1\n]`
+ * - js-yaml 4.3 and 5 read numbers with underscores, such as `1_000`, as
+ *   strings, and js-yaml 5 also numbers such as `0b101` and `-0x1F`
  *
  * Empty input (empty, whitespace-only or comment-only) returns `undefined`.
  * Invalid YAML and multi-document input throw.
@@ -88,8 +85,8 @@ export function loadYaml(src: string, options?: LoadYamlOptions): unknown {
   if (src.split(/\r?\n/).every(isBlankOrComment)) {
     return undefined;
   }
-  const schema = options?.schema === "failsafe" ? kCliFailsafeSchema : kCliQuartoSchema;
-  const docs: unknown[] = cliLoadAll(src, { schema });
+  const schema = options?.schema === "failsafe" ? jsYaml4.FAILSAFE_SCHEMA : kQuartoSchema;
+  const docs = jsYaml4.loadAll(src, null, { schema });
   if (docs.length > 1) {
     throw new Error("expected a single document in the stream, but found more");
   }
@@ -99,10 +96,12 @@ export function loadYaml(src: string, options?: LoadYamlOptions): unknown {
 /**
  * Write `yaml` as YAML that `loadYaml`, and so Quarto CLI, reads back as the
  * same values: strings are quoted when they would be read as another type.
+ * Strings that only other versions of YAML read as another type, such as a
+ * date, are not quoted.
  */
 export function asYamlText(yaml: Metadata): string {
-  return cliDump(yaml, {
-    schema: kQuartoDumpSchema,
+  return jsYaml4.dump(yaml, {
+    schema: kQuartoSchema,
     indent: 2,
     lineWidth: -1,
     skipInvalid: true,

@@ -1104,7 +1104,7 @@
           "scope": "window",
           "type": "boolean",
           "default": true,
-          "markdownDescription": "In Jupyter engine documents, run the cell tagged `parameters` (`#| tags: [parameters]`) before running other cells, when it has not been run yet or has changed since it was run."
+          "markdownDescription": "Load a document's parameters before running its cells, when they have not been loaded yet or have changed since. In Jupyter engine documents, this runs the cell tagged `parameters` (`#| tags: [parameters]`). In Knitr engine documents, this defines `params` from the `params` in the front matter before running R cells."
         },
         "quarto.mathjax.scale": {
           "order": 15,

@@ -5,7 +5,13 @@ import { ExtensionHost } from "../host";
 import { CellExecutor } from "../host/executors";
 import { MarkdownEngine } from "../markdown/engine";
 import { cellCommands } from "../providers/cell/commands";
-import { cellExecutorWithParameters, forgetAllLoadedParameters, parametersCell } from "../providers/cell/parameters";
+import {
+  cellExecutorWithParameters,
+  forgetAllLoadedParameters,
+  frontMatterParametersLines,
+  knitrParametersCode,
+  parametersCell
+} from "../providers/cell/parameters";
 
 function qmd(frontMatter: string[], ...cells: string[][]): string {
   return ["---", ...frontMatter, "---", "", ...cells.flatMap((cell) => [...cell, ""])].join("\n");
@@ -32,6 +38,47 @@ suite("Finding the parameters cell", function () {
 
   test("finds none without the tag", async function () {
     assert.strictEqual(await parametersCode(qmd([], kUse, ["```{python}", "#| tags: [setup]", "a = 1", "```"])), undefined);
+  });
+});
+
+suite("Reading the params in a knitr document's front matter", function () {
+  test("takes the params key and what is nested under it, as written", function () {
+    assert.deepStrictEqual(
+      frontMatterParametersLines([
+        "title: Report",
+        "params:",
+        "  alpha: 0.1",
+        "",
+        "  # the day of the report",
+        "  day: !expr Sys.Date()",
+        "  region:",
+        "    value: west",
+        "",
+        "# rendered with knitr",
+        "engine: knitr"
+      ].join("\n")),
+      ["params:", "  alpha: 0.1", "", "  # the day of the report", "  day: !expr Sys.Date()", "  region:", "    value: west"]
+    );
+  });
+
+  test("takes params written on one line, or last in the front matter", function () {
+    assert.deepStrictEqual(frontMatterParametersLines("params: {alpha: 0.1}\nengine: knitr"), ["params: {alpha: 0.1}"]);
+    assert.deepStrictEqual(frontMatterParametersLines("engine: knitr\nparams:\n  alpha: 0.1\n"), ["params:", "  alpha: 0.1"]);
+  });
+
+  test("finds none when there are no params, or they are empty", function () {
+    assert.strictEqual(frontMatterParametersLines("title: Report\nengine: knitr"), undefined);
+    assert.strictEqual(frontMatterParametersLines("params: # none yet\nengine: knitr"), undefined);
+    assert.strictEqual(frontMatterParametersLines("format:\n  params: 1"), undefined);
+  });
+
+  test("hands the lines to knitr as R strings, when knitr is installed", function () {
+    assert.strictEqual(
+      knitrParametersCode(["params:", "  path: \"C:\\data\""]),
+      "if (requireNamespace(\"knitr\", quietly = TRUE)) " +
+      "params <- lapply(knitr::knit_params(c(\"---\", \"params:\", \"  path: \\\"C:\\\\data\\\"\", \"---\")), function(param) param$value)" +
+      " else message(\"Install the knitr package to load this document's params.\")\n"
+    );
   });
 });
 
@@ -235,6 +282,64 @@ suite("Running cells loads the parameters cell first", function () {
     assert.deepStrictEqual(host.ran, [["print(alpha)\n"]]);
   });
 
+  const kKnitrFrontMatter = ["engine: knitr", "params:", "  alpha: 0.1"];
+  const kKnitrParametersCode = knitrParametersCode(["params:", "  alpha: 0.1"]);
+  const kUseR = ["```{r}", "print(params$alpha)", "```"];
+
+  test("in a knitr document, defines params before an R cell, once", async function () {
+    const host = fake();
+    const editor = await open(qmd(kKnitrFrontMatter, kUseR, ["```{r}", "z <- 3", "```"]));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(params$alpha)"));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "z <- 3"));
+    assert.deepStrictEqual(host.ran, [[kKnitrParametersCode], ["print(params$alpha)\n"], ["z <- 3\n"]]);
+  });
+
+  test("in a knitr document, defines params again once they are edited", async function () {
+    const host = fake();
+    const editor = await open(qmd(kKnitrFrontMatter, kUseR));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(params$alpha)"));
+    const line = lineOf(editor, "  alpha: 0.1");
+    await editor.edit((edit) => edit.replace(new vscode.Range(line, 0, line, 12), "  alpha: 0.5"));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(params$alpha)"));
+    assert.deepStrictEqual(host.ran, [
+      [kKnitrParametersCode],
+      ["print(params$alpha)\n"],
+      [knitrParametersCode(["params:", "  alpha: 0.5"])],
+      ["print(params$alpha)\n"]
+    ]);
+  });
+
+  test("in a knitr document, defines params before a cell that only prints them", async function () {
+    const host = fake();
+    const editor = await open(qmd(kKnitrFrontMatter, ["```{r}", "params", "```"]));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "params"));
+    assert.deepStrictEqual(host.ran, [[kKnitrParametersCode], ["params\n"]]);
+  });
+
+  test("in a knitr document, does not define params before a cell in another language", async function () {
+    const host = fake();
+    const editor = await open(qmd(kKnitrFrontMatter, kUse));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(alpha)"));
+    assert.deepStrictEqual(host.ran, [["print(alpha)\n"]]);
+  });
+
+  test("in a knitr document with inline output, runs the cell alone", async function () {
+    const host = fake(true);
+    const editor = await open(qmd(kKnitrFrontMatter, kUseR));
+    const executor = await cellExecutorWithParameters(host.host, "r", editor.document, engine);
+    const useLine = lineOf(editor, "print(params$alpha)");
+    await executor!.executeInlineCells!(editor.document.uri, [new vscode.Range(useLine - 1, 0, useLine + 1, 3)]);
+    assert.deepStrictEqual(host.inline, [[useLine - 1]]);
+    assert.deepStrictEqual(host.ran, []);
+  });
+
+  test("does not read front matter params in a Jupyter document", async function () {
+    const host = fake();
+    const editor = await open(qmd(["jupyter: ir", "params:", "  alpha: 0.1"], kUseR));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(params$alpha)"));
+    assert.deepStrictEqual(host.ran, [["print(params$alpha)\n"]]);
+  });
+
   test("leaves a parameters cell with eval: false alone", async function () {
     const host = fake();
     const editor = await open(qmd(
@@ -259,5 +364,9 @@ suite("Running cells loads the parameters cell first", function () {
     const editor = await open(qmd(["jupyter: python3"], kParameters, kUse));
     await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(alpha)"));
     assert.deepStrictEqual(host.ran, [["print(alpha)\n"]]);
+
+    const knitrEditor = await open(qmd(kKnitrFrontMatter, kUseR));
+    await run(host, knitrEditor, "quarto.runCurrentCell", lineOf(knitrEditor, "print(params$alpha)"));
+    assert.deepStrictEqual(host.ran, [["print(alpha)\n"], ["print(params$alpha)\n"]]);
   });
 });

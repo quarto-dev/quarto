@@ -8,7 +8,6 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 
 import fileUrl from "file-url";
-import * as yaml from "js-yaml";
 
 import {
   CompletionItem,
@@ -19,6 +18,7 @@ import {
   TextEdit,
 } from "vscode-languageserver";
 
+import { loadYaml } from "core";
 import { QuartoContext } from "quarto-core";
 
 import {
@@ -87,7 +87,7 @@ function initializeAttrCompletionProvider(resourcesPath: string) {
   // read attr.yml from resources
   const attrYamlPath = path.join(resourcesPath, "editor", "tools", "attrs.yml");
   try {
-    const attrGroups = yaml.load(
+    const attrGroups = loadYaml(
       fs.readFileSync(attrYamlPath, "utf-8")
     ) as AttrGroup[];
     for (const group of attrGroups) {

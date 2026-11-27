@@ -9,9 +9,7 @@ import { NodeWithPos } from 'prosemirror-utils';
 import { EditorView } from 'prosemirror-view';
 import { EditorState, Transaction } from 'prosemirror-state';
 
-import * as yaml from 'js-yaml';
-
-import { loadYaml } from 'core';
+import { asYamlText, loadYaml, Metadata } from 'core';
 
 import { findTopLevelBodyNodes } from './node';
 import { logException } from './log';
@@ -124,7 +122,7 @@ export function parseYaml(yamlCode: string) : unknown {
 
 export function toYamlCode(obj: unknown): string | null {
   try {
-    const yamlCode = yaml.dump(obj);
+    const yamlCode = asYamlText(obj as Metadata);
     return yamlCode;
   } catch (e) {
     logException(e);

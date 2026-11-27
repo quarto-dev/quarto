@@ -340,6 +340,14 @@ suite("Running cells loads the parameters cell first", function () {
     assert.deepStrictEqual(host.ran, [["print(params$alpha)\n"]]);
   });
 
+  test("reads the engine of a document whose front matter has !expr values", async function () {
+    // an R cell, which without the front matter would make this a knitr document
+    const host = fake();
+    const editor = await open(qmd(["jupyter: ir", "params:", "  day: !expr Sys.Date()"], kUseR));
+    await run(host, editor, "quarto.runCurrentCell", lineOf(editor, "print(params$alpha)"));
+    assert.deepStrictEqual(host.ran, [["print(params$alpha)\n"]]);
+  });
+
   test("leaves a parameters cell with eval: false alone", async function () {
     const host = fake();
     const editor = await open(qmd(

@@ -6,7 +6,6 @@
  */
 
 import type { MarkdownIt, StateBlock, Token } from "markdown-it";
-import * as yaml from "js-yaml";
 import { loadYaml } from "../yaml";
 import { decorator } from "./utils/html";
 
@@ -263,7 +262,7 @@ type DocMetaValue = {
 function parseFrontMatterStr(str: string) {
   str = str.replace(/---\s*$/, "");
   try {
-    return loadYaml(str, { schema: yaml.FAILSAFE_SCHEMA });
+    return loadYaml(str, { schema: "failsafe" });
   } catch {
     return undefined;
   }

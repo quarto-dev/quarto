@@ -25,6 +25,7 @@
 
 import * as assert from "assert";
 import * as vscode from "vscode";
+import * as os from "os";
 import { extension } from "../extension";
 import { tryAcquirePositronApi } from "@posit-dev/positron";
 
@@ -276,6 +277,151 @@ suite("Positron: cell execution", function () {
     );
     assert.ok(String(call!.args[1]).includes("select 1 as x"));
     assert.ok(!String(call!.args[1]).includes("--|"), "cell options should be stripped");
+  });
+});
+
+/**
+ * {Rcpp} cells with inline output on, in a file-backed knitr document (inline
+ * output needs a file). Positron builds with posit-dev/positron#17468 list
+ * Rcpp through `_quartoHostedCellLanguages`; the test Positron may not, so the
+ * command is stubbed where a test needs it.
+ */
+suite("Positron: {Rcpp} cells with inline output", function () {
+  this.timeout(30000);
+
+  const globalWithApi = globalThis as { acquirePositronApi?: () => unknown; };
+  let originalAcquire: (() => unknown) | undefined;
+  const disposables: vscode.Disposable[] = [];
+  let previousInline: boolean | undefined;
+
+  const kQmd = [
+    "---",
+    "engine: knitr",
+    "---",
+    "",
+    "```{Rcpp}",
+    "//| label: cpp",
+    "// [[Rcpp::export]]",
+    "int one() { return 1; }",
+    "```",
+    "",
+    "```{r}",
+    "one()",
+    "```",
+    "",
+  ].join("\n");
+  const kCppLine = 7;
+
+  setup(async function () {
+    const config = vscode.workspace.getConfiguration();
+    previousInline = config.inspect<boolean>("quarto.inlineOutput.enabled")?.globalValue;
+    await config.update("quarto.inlineOutput.enabled", true, vscode.ConfigurationTarget.Global);
+  });
+
+  teardown(async function () {
+    disposables.splice(0).forEach((d) => d.dispose());
+    if (originalAcquire !== undefined) {
+      globalWithApi.acquirePositronApi = originalAcquire;
+      originalAcquire = undefined;
+    }
+    await vscode.workspace.getConfiguration().update(
+      "quarto.inlineOutput.enabled", previousInline, vscode.ConfigurationTarget.Global
+    );
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  });
+
+  /** Runs `commandId` from `line` of a saved copy of the document, answering the runtime calls. */
+  async function run(commandId: string, line: number): Promise<RuntimeCall[]> {
+    const quarto = extension();
+    if (!quarto.isActive) {
+      await quarto.activate();
+    }
+
+    const calls: RuntimeCall[] = [];
+    originalAcquire = globalWithApi.acquirePositronApi;
+    const realApi = originalAcquire!() as { runtime: Record<string, unknown>; };
+    const fakeRuntime = new Proxy(realApi.runtime, {
+      get(target, prop, receiver) {
+        if (prop === "executeCode" || prop === "executeInlineCell") {
+          return (...args: unknown[]) => {
+            calls.push({ method: prop, args });
+            return Promise.resolve();
+          };
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+    globalWithApi.acquirePositronApi = () => new Proxy(realApi, {
+      get(target, prop, receiver) {
+        return prop === "runtime" ? fakeRuntime : Reflect.get(target, prop, receiver);
+      },
+    });
+
+    const dir = vscode.Uri.joinPath(vscode.Uri.file(os.tmpdir()), `quarto-rcpp-${Date.now()}`);
+    const uri = vscode.Uri.joinPath(dir, "rcpp.qmd");
+    await vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(kQmd));
+    const doc = await vscode.workspace.openTextDocument(uri);
+    const editor = await vscode.window.showTextDocument(doc);
+    editor.selection = new vscode.Selection(line, 0, line, 0);
+
+    await vscode.commands.executeCommand(commandId);
+    return calls;
+  }
+
+  async function positronListsHostedLanguages(): Promise<boolean> {
+    return (await vscode.commands.getCommands(false)).includes("_quartoHostedCellLanguages");
+  }
+
+  /** Stands in for the command, unless this Positron has it. */
+  async function stubHostedLanguages() {
+    if (!(await positronListsHostedLanguages())) {
+      disposables.push(vscode.commands.registerCommand("_quartoHostedCellLanguages", () => ["rcpp"]));
+    }
+  }
+
+  /** Skips a test of Positron builds without the command. */
+  async function skipIfPositronListsHostedLanguages(context: Mocha.Context) {
+    if (await positronListsHostedLanguages()) {
+      context.skip();
+    }
+  }
+
+  test("Run Current on a line of an {Rcpp} cell runs the whole cell inline", async function () {
+    await stubHostedLanguages();
+    const calls = await run("quarto.runCurrent", kCppLine);
+    const call = calls.find((c) => c.method === "executeInlineCell");
+    assert.ok(call, `expected an inline run. Observed: ${describe(calls)}`);
+    const ranges = call!.args[1] as vscode.Range[];
+    assert.strictEqual(ranges.length, 1);
+    assert.ok(ranges[0].start.line <= 5 && ranges[0].end.line >= 7, "the range should cover the cell");
+  });
+
+  test("Run All Cells runs the {Rcpp} and {r} cells inline together", async function () {
+    await stubHostedLanguages();
+    const calls = await run("quarto.runAllCells", 0);
+    const call = calls.find((c) => c.method === "executeInlineCell");
+    assert.ok(call, `expected an inline run. Observed: ${describe(calls)}`);
+    assert.strictEqual((call!.args[1] as vscode.Range[]).length, 2);
+  });
+
+  test("without Positron support, an {Rcpp} cell compiles in the R console", async function () {
+    await skipIfPositronListsHostedLanguages(this);
+    const calls = await run("quarto.runCurrent", kCppLine);
+    assert.ok(!calls.some((c) => c.method === "executeInlineCell"), `expected no inline run. Observed: ${describe(calls)}`);
+    const call = calls.find((c) => c.method === "executeCode" && c.args[0] === "r");
+    assert.ok(call, `expected executeCode('r', ...). Observed: ${describe(calls)}`);
+    assert.ok(String(call!.args[1]).startsWith("Rcpp::sourceCpp(code = "));
+    assert.ok(!String(call!.args[1]).includes("//|"), "cell options should be stripped");
+  });
+
+  test("without Positron support, Run All Cells compiles the {Rcpp} cell and runs the {r} cell in the R console", async function () {
+    await skipIfPositronListsHostedLanguages(this);
+    const calls = await run("quarto.runAllCells", 0);
+    assert.ok(!calls.some((c) => c.method === "executeInlineCell"), `expected no inline run. Observed: ${describe(calls)}`);
+    const code = calls.filter((c) => c.method === "executeCode" && c.args[0] === "r").map((c) => String(c.args[1]));
+    assert.strictEqual(code.length, 2, `Observed: ${describe(calls)}`);
+    assert.ok(code[0].startsWith("Rcpp::sourceCpp(code = "));
+    assert.strictEqual(code[1].trim(), "one()");
   });
 });
 

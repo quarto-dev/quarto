@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as positron from 'positron';
 
 import { ExtensionHost, HostWebviewPanel, HostStatementRangeProvider, HostHelpTopicProvider } from '.';
-import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate } from './executors';
+import { CellExecutor, cellExecutorForLanguage, executableLanguages, isKnitrDocument, pythonWithReticulate, rcppWithSourceCpp } from './executors';
 import { ExecuteQueue } from './execute-queue';
 import { MarkdownEngine } from '../markdown/engine';
 import { virtualDoc, adjustedPosition, unadjustedRange, withVirtualDocUri, VirtualDocStyle, unadjustedLine } from "../vdoc/vdoc";
@@ -211,6 +211,15 @@ const kPositronRuntimeLanguages: ReadonlySet<string> = new Set(["julia", "python
 const kGgsqlLanguage = "ggsql";
 
 /**
+ * Cell languages that no runtime runs, but whose cells run as code in another
+ * language's runtime, as knitr's engines do: an `{Rcpp}` cell is compiled in R
+ * with `Rcpp::sourceCpp()`. Positron calls these hosted cell languages.
+ */
+const kHostedCellLanguages: ReadonlyMap<string, { hostLanguage: string; toHostCode: (code: string) => string; }> = new Map([
+  ["Rcpp", { hostLanguage: "r", toHostCode: rcppWithSourceCpp }],
+]);
+
+/**
  * The language of the Positron runtime that runs `language` cells, or
  * undefined when Positron runs none.
  *
@@ -226,6 +235,10 @@ export function positronRuntimeLanguage(
 ): string | undefined {
   if (language === "sql" && !knitr && hasRuntime(kGgsqlLanguage)) {
     return kGgsqlLanguage;
+  }
+  const hosted = kHostedCellLanguages.get(language);
+  if (hosted) {
+    return hosted.hostLanguage;
   }
   if (kPositronRuntimeLanguages.has(language) || hasRuntime(language)) {
     return language;
@@ -274,6 +287,48 @@ export async function hostExplainUnrunnableCell(
 }
 
 /**
+ * The code that runs a `language` cell in its runtime: for a hosted cell
+ * language such as Rcpp, the host language code that runs it; otherwise the
+ * cell's own code.
+ */
+export function positronCellCodeForRuntime(language: string, code: string): string {
+  return kHostedCellLanguages.get(language)?.toHostCode(code) ?? code;
+}
+
+/**
+ * The command through which Positron lists the hosted cell languages (e.g.
+ * `rcpp`) it runs with inline output: it runs such a cell as a whole, as host
+ * language code, in the host language's session. Takes no arguments and
+ * answers the lower-cased fence languages. Positron builds without it send a
+ * cell to a runtime of the cell's own language, and there is none for these.
+ */
+export const kHostHostedCellLanguagesCommand = "_quartoHostedCellLanguages";
+
+/**
+ * Whether Positron runs `language` cells with inline output, though no runtime
+ * of that language exists, because it runs them as code in a host language.
+ * The command is probed for on each call, because Positron can register it
+ * after this extension activates.
+ */
+export async function hostRunsHostedCellsInline(
+  language: string,
+  outputChannel?: vscode.LogOutputChannel
+): Promise<boolean> {
+  // `false` keeps the underscore-prefixed id we are looking for
+  const all = await vscode.commands.getCommands(false);
+  if (!all.includes(kHostHostedCellLanguagesCommand)) {
+    return false;
+  }
+  try {
+    const languages = await vscode.commands.executeCommand<unknown>(kHostHostedCellLanguagesCommand);
+    return Array.isArray(languages) && languages.includes(language.toLowerCase());
+  } catch (err) {
+    outputChannel?.warn(`${kHostHostedCellLanguagesCommand} failed: ${err}`);
+    return false;
+  }
+}
+
+/**
  * Cell executor that runs `language` cells in the Positron console of
  * `runtimeLanguage`. The two differ for e.g. a `{sql}` cell run in ggsql;
  * everything that addresses a console uses the runtime language.
@@ -302,6 +357,8 @@ function positronRuntimeExecutor(
       ) {
         executionLanguage = "r";
         blocks = blocks.map(pythonWithReticulate);
+      } else {
+        blocks = blocks.map((block) => positronCellCodeForRuntime(language, block));
       }
 
       // Our callback executes each block sequentially
@@ -407,6 +464,10 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
     cellRuntimeLanguage: (language: string, document: vscode.TextDocument, engine: MarkdownEngine) =>
       positronRuntimeLanguage(language, isKnitrDocument(document, engine)),
 
+    // e.g. an {Rcpp} cell run together with {r} cells is compiled in R
+    cellCodeForRuntime: (language: string, code: string) =>
+      positronCellCodeForRuntime(language, code),
+
     // let Positron say why a cell cannot be run (e.g. that it runs at render)
     explainNoExecutor: (language: string, document: vscode.TextDocument): Promise<boolean> =>
       hostExplainUnrunnableCell(language, document, outputChannel),
@@ -414,9 +475,24 @@ export function positronExtensionHost(outputChannel?: vscode.LogOutputChannel): 
     cellExecutorForLanguage: async (language: string, document: vscode.TextDocument, engine: MarkdownEngine, silent?: boolean)
       : Promise<CellExecutor | undefined> => {
       // use positron api for known runtimes, any other language with a
-      // Positron runtime (e.g. SAS or ggsql from an extension), and sql in
-      // ggsql; delegate the rest
+      // Positron runtime (e.g. SAS or ggsql from an extension), sql in
+      // ggsql, and hosted cell languages (Rcpp in R); delegate the rest
       const runtimeLanguage = positronRuntimeLanguage(language, isKnitrDocument(document, engine));
+      if (kHostedCellLanguages.has(language) && runtimeLanguage !== undefined) {
+        // The code of a hosted cell (e.g. C++ in an Rcpp cell) can't run by
+        // line or statement, so it runs as a whole. Positron builds that list
+        // the language run it with inline output, in the document's session
+        // of the host language, where the document's other cells (e.g. {r})
+        // run too; older builds have no runtime to run it in, so it runs in
+        // the host language's console.
+        const executor = positronRuntimeExecutor(language, runtimeLanguage, document, engine, outputChannel);
+        const inline = await hostRunsHostedCellsInline(language, outputChannel);
+        return {
+          execute: executor.execute,
+          executeInlineCells: inline ? executor.executeInlineCells : undefined,
+          runsWholeCell: true,
+        };
+      }
       if (runtimeLanguage !== undefined) {
         return positronRuntimeExecutor(language, runtimeLanguage, document, engine, outputChannel);
       }

@@ -75,6 +75,14 @@ export interface ExtensionHost {
   cellRuntimeLanguage?(language: string, document: TextDocument, engine: MarkdownEngine): string | undefined;
 
   /**
+   * The code that runs a `language` cell in its runtime, when cells of
+   * several languages run together through the runtime's executor: e.g. an
+   * `{Rcpp}` cell runs with `{r}` cells as an `Rcpp::sourceCpp()` call.
+   * Without it, each cell runs its own code.
+   */
+  cellCodeForRuntime?(language: string, code: string, document: TextDocument, engine: MarkdownEngine): string;
+
+  /**
    * Explain to the user why a `language` cell in `document` has no executor.
    * Answers whether it explained.
    */
